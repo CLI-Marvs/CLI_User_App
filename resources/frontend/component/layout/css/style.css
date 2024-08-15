@@ -1,0 +1,47 @@
+.bg-left-side{
+    background-image: url('./Images/PcBldg.jpeg');
+    background-size: cover;
+    background-position: center;
+}
+
+
+.gradient-btn {
+    background: linear-gradient(to right, #348017, #175D5F);
+  }
+
+  .gradient-btn2 {
+    background: linear-gradient(to right,#175D5F , #348017);
+  }
+  .gradient-btn:hover {
+    background: linear-gradient(to right, #70AD47, #3A7C81);
+  }
+
+  .gradient-border {
+    border: 4px solid black; 
+    border-image: linear-gradient(to right, #348017, #175D5F) 1; 
+    padding: 10px; 
+    background-color: white; 
+    border-radius: 10px;
+    display: inline-block; 
+  }
+
+  .gradient-border2 {
+    border: 4px solid black; 
+    border-image: linear-gradient(to right,#175D5F ,  #348017) 1; 
+    padding: 10px; 
+    background-color: white; 
+    border-radius: 10px;
+    display: inline-block; 
+  }
+
+  .gradient-background1 {
+    background: linear-gradient(to right, #70AD47 5%, #5B9BD5 130%);
+  }
+
+  .gradient-background2 {
+    background: linear-gradient(to right, #F7F7F7, #D6E4D1);
+  }
+
+  .gradient-background3 {
+    background: linear-gradient(to right, #175D5F 17%, #348017 70%, #70AD47 96%);
+}
