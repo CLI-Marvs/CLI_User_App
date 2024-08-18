@@ -9,6 +9,8 @@ import Sidebar from "./layout/mainComponent/Sidebar";
 import Navbar from "./layout/mainComponent/Navbar";
 import InquiryManagementLayout from "./views/layout/InquiryManagementLayout";
 import InquiryList from "./layout/inquirypage/InquiryList";
+import InquiryListView from "./views/pages/raiseaconcernViews/InquiryListView";
+import InquiryThreadView from "./views/pages/raiseaconcernViews/InquiryThreadView";
 const App = () => {
 
     const Layout = () => {
@@ -50,7 +52,11 @@ const App = () => {
                     children: [
                         {
                             path: "inquirylist",
-                            element: <InquiryList/>,
+                            element: <InquiryListView/>,
+                        },
+                        {
+                            path: "inquirylist/thread",
+                            element: <InquiryThreadView/>,
                         },
                     ],
                 },

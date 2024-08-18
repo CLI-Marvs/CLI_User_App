@@ -19,28 +19,28 @@ const TicketTable = () => {
                     {[...Array(10)].map((_, index) => (
                         <tr
                             key={index}
-                            className={`flex items-center h-7 cursor-pointer my-1 
+                            className={`flex items-center h-7 cursor-pointer mb-1
                                 ${checkedRows.includes(index) ? 'bg-custom-lightestgreen' : 'bg-white'} 
                                 ${!checkedRows.includes(index) ? 'hover:shadow-custom' : ''}`}
                         >
-                            <td className="w-12 flex justify-center">
+                           {/*  <td className="w-12 flex justify-center">
                                 <input
                                     type="checkbox"
                                     checked={checkedRows.includes(index)}
                                     onChange={() => handleCheckboxChange(index)}
                                 />
-                            </td>
+                            </td> */}
                             <td className='w-14 flex justify-center text-xl'>
                                 <TiPin />
                             </td>
-                            <td className="w-52 font-semibold text-custom-bluegreen">
-                                <p>To: Mister Admin</p>
+                            <td className="w-40 font-semibold text-custom-bluegreen">
+                                <p>Mister Admin</p>
                             </td>
                             <td className="flex flex-1 gap-1 text-custom-bluegreen">
                                 <div className="font-semibold whitespace-nowrap">
                                     <span>Casa Mira</span><span> (Property) </span><span> - </span><span>CM0000002</span>
                                 </div>
-                                <div className="flex-1 flex items-center w-10 pr-28">
+                                <div className="flex-1 flex items-center w-10 pr-12">
                                     <p className="text-sm-light truncate text-gray-400">
                                         Hello Sir Admin, I have an issue regarding my bank account
                                     </p>

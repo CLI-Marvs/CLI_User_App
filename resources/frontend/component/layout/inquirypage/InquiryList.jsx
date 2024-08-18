@@ -1,11 +1,12 @@
 import React from 'react'
 import TicketTable from './TicketTable'
+import { IoIosArrowUp , IoIosArrowDown } from "react-icons/io";
 
 const InquiryList = () => {
   return (
     <>
-    <div className='h-screen max-w-full bg-custombg'>
-        <div className='h-14 bg-custombg '>
+    <div className='h-screen max-w-full bg-custombg p-4'>
+        <div className=' bg-custombg '>
             <div className='relative flex justify-start gap-3'>
                 <div className='relative w-1/2'>
                     <svg
@@ -40,16 +41,19 @@ const InquiryList = () => {
                         d="M6 13.5V3.75m0 9.75a1.5 1.5 0 0 1 0 3m0-3a1.5 1.5 0 0 0 0 3m0 3.75V16.5m12-3V3.75m0 9.75a1.5 1.5 0 0 1 0 3m0-3a1.5 1.5 0 0 0 0 3m0 3.75V16.5m-6-9V3.75m0 3.75a1.5 1.5 0 0 1 0 3m0-3a1.5 1.5 0 0 0 0 3m0 9.75V10.5" />
                     </svg>
                 </div>
-                <div>
-                    <button className='flex justify-center items-center h-10 px-3 rounded-xl gradient-btn2 text-white'><span className='flex pr-1 text-xl'>+</span> Concern</button>
-                </div>
             </div>
         </div>
         <div className='max-w-5xl'>
-            <div className='flex items-center h-12 px-6 gap-2 bg-white rounded-t-lg'>
+            <div className='flex items-center h-12 mt-3 px-6 gap-2 bg-white rounded-t-lg'>
+                    <div className='mr-4'>
+                        <button className='flex items-center gap-3 text-custom-bluegreen font-semibold'>
+                        {/* <IoIosArrowUp /> */}<IoIosArrowDown />Unresolved
+                        </button>
+                    </div>
                     <div className='flex items-center bg-custom-lightgreen h-6 px-3 rounded-3xl '><p className='text-sm text-white montserrat-semibold'>All</p></div>
-                    <div className='flex items-center border-custom-lightgreen gradient-border text-custom-solidgreen border h-6 px-3 rounded-3xl '><p className='text-sm montserrat-semibold'>Resolve</p></div>
-                    <div className='flex items-center border-custom-lightgreen border text-custom-solidgreen h-6 px-3 rounded-3xl '><p className='text-sm montserrat-semibold'>Unresolve</p></div>
+                    <div className='flex items-center border-custom-lightgreen border text-custom-lightgreen h-6 px-3 rounded-3xl '><p className='text-sm montserrat-semibold'>3+ Days</p></div>
+                    <div className='flex items-center border-custom-lightgreen border text-custom-lightgreen h-6 px-3 rounded-3xl '><p className='text-sm montserrat-semibold'>2 Days</p></div>
+                    <div className='flex items-center border-custom-lightgreen border text-custom-lightgreen h-6 px-3 rounded-3xl '><p className='text-sm montserrat-semibold'>1 Day</p></div>
                     
             </div>
             <TicketTable/>
