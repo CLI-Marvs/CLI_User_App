@@ -4,7 +4,7 @@ import Kent from '../../../../../public/Images/kent.png'
 
 const UserMessages = () => {
   return (
-    <div className='w-3/5'>
+    <div className='w-full'>
         <div className='flex w-full mt-10 gap-2'>
             <div className='h-12 w-12'>
                 <img className='rounded-full' src={Kent} alt="" />

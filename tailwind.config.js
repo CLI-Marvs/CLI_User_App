@@ -24,6 +24,7 @@ export default {
         'custom-disable' : '#D6E4D1',
         'custom-tablebg' : '#F3F7F2',
         'custom-gray81' : '#818181',
+        'custom-gray71' : '#717171',
       },
       borderWidth: {
         '1': '1px',

@@ -3,7 +3,7 @@ import Sho from '../../../../../public/Images/rodfil.png'
 
 const AdminMessages = () => {
   return (
-    <div className='w-3/5'>
+    <div className='w-full'>
         <div className='flex justify-end w-full mt-10 gap-2 '>
             
             <div className='flex flex-col'>
