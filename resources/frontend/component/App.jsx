@@ -11,6 +11,7 @@ import InquiryManagementLayout from "./views/layout/InquiryManagementLayout";
 import InquiryList from "./layout/inquirypage/InquiryList";
 import InquiryListView from "./views/pages/raiseaconcernViews/InquiryListView";
 import InquiryThreadView from "./views/pages/raiseaconcernViews/InquiryThreadView";
+import ReportViews from "./views/pages/raiseaconcernViews/ReportViews";
 const App = () => {
 
     const Layout = () => {
@@ -57,6 +58,10 @@ const App = () => {
                         {
                             path: "inquirylist/thread",
                             element: <InquiryThreadView/>,
+                        },
+                        {
+                            path: "report",
+                            element: <ReportViews/>,
                         },
                     ],
                 },

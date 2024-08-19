@@ -38,15 +38,17 @@ const InquirySidebar = () => {
                     Add Inquiry
                </button>
                 <div className=' leading-1'>
-                    <div className='flex-col space-y-2 mt-1'>
+                    <div className='flex-col space-y-3 mt-1'>
                         <Link to="inquirylist">
-                            <ListItem className='menu2 h-6 mb-1 flex justify-center gap-2 rounded-full text-custom-solidgreen font-semibold hover:bg-accent hover:text-white '>
+                            <ListItem className='menu2 h-7 mb-1 flex justify-center gap-2 rounded-full text-custom-solidgreen font-normal hover:font-semibold hover:bg-white '>
                                 Inquiries
                             </ListItem>
                         </Link>
-                        <ListItem className='menu2 h-6  mb-1 flex justify-center gap-2 rounded-full text-custom-solidgreen font-semibold hover:bg-accent hover:text-white'>
-                            Reports
-                        </ListItem> 
+                        <Link to="report">
+                            <ListItem className='menu2 h-7  mb-1 flex justify-center gap-2 rounded-full text-custom-solidgreen font-normal hover:font-semibold hover:bg-white'>
+                                Reports
+                            </ListItem> 
+                        </Link>
                     </div>
                 </div>
             </List>

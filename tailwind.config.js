@@ -25,6 +25,8 @@ export default {
         'custom-tablebg' : '#F3F7F2',
         'custom-gray81' : '#818181',
         'custom-gray71' : '#717171',
+        'custom-gray71' : '#717171',
+        'custom-gray12' : '#121212',
       },
       borderWidth: {
         '1': '1px',

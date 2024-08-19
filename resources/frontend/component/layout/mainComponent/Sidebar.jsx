@@ -1,79 +1,81 @@
-import React from 'react'
+import React, {useState} from 'react'
 
 import {
-    Card,
-    Typography,
-    List,
-    ListItem,
-    ListItemPrefix,
-    ListItemSuffix,
-    Chip,
-    Accordion,
-    AccordionHeader,
-    AccordionBody,
-  } from "@material-tailwind/react";
+  Card,
+  Typography,
+  List,
+  ListItem,
+  ListItemPrefix,
+  ListItemSuffix,
+  Chip,
+  Accordion,
+  AccordionHeader,
+  AccordionBody,
+} from "@material-tailwind/react";
 import { Link } from 'react-router-dom';
 const Sidebar = () => {
+
+  const [activeItem, setActiveItem] = useState(null);
+
+
+  const handleItemClick = (item) => {
+    setActiveItem(item);
+  };
+
   return (
     <>
-    <Card className=" w-full max-w-[15rem] p-4 pt-0 rounded-none bg-custombg">
-        <List className='px-3 mt-4'>
-          <ListItem className='h-7 mb-1 px-6 gap-2 rounded-2xl text-custom-solidgreen hover:bg-custom-lightestgreen hover:font-semibold'>
+      <Card className=" w-full max-w-[17rem] p-4 pt-0 rounded-none bg-custombg">
+        <List className='px-3 mt-6'>
+          <ListItem className='flex items-center h-7 mb-2 pl-5 gap-2 rounded-2xl text-custom-solidgreen hover:bg-custom-lightestgreen hover:font-semibold'>
             Notifications
             <ListItemSuffix>
-              {/* <Chip value="120" size="sm" variant="ghost" color="blue-gray" className="rounded-md gradient-btn2 text-white" /> */}
+              <Chip
+                value="120"
+                size="sm"
+                variant="ghost"
+                color="blue-gray"
+                className="rounded-md gradient-btn2 mr-32 text-white"
+              />
             </ListItemSuffix>
           </ListItem>
-          {/* <Link to='/dashboard' onClick={() => setActiveLink('/dashboard')}> */}
-            <ListItem className={`h-7 mb-1 px-6 gap-2 rounded-2xl text-custom-solidgreen hover:bg-custom-lightestgreen hover:font-semibold`} >
+          <ListItem className={`h-7 mb-2 pl-5 gap-2 rounded-2xl text-custom-solidgreen hover:bg-custom-lightestgreen hover:font-semibold`} >
             Property & Pricing
-            </ListItem>
-          {/* </Link> */}
-         {/*  <Link to='/profile' onClick={() => setActiveLink('/profile')}> */}
-            <ListItem className={`h-7 mb-1 px-2 gap-2 rounded-2xl text-custom-solidgreen hover:bg-custom-lightestgreen hover:font-semibold`}>
+          </ListItem>
+          <ListItem className={`h-7 mb-2 pl-5 gap-2 rounded-2xl text-custom-solidgreen hover:bg-custom-lightestgreen hover:font-semibold`}>
             Sales Management
-            </ListItem>
-        {/*   </Link> */}
+          </ListItem>
           <div className='flex items-center'>
-          {/* <Link to='/myproperties' onClick={() => setActiveLink('/myproperties')}> */}
-            <ListItem className={` h-7 mb-1 pl-6 gap-2 rounded-2xl text-custom-solidgreen hover:bg-custom-lightestgreen hover:font-semibold`}>
+            <ListItem className={` h-7 mb-2 pl-5 gap-2 rounded-2xl text-custom-solidgreen hover:bg-custom-lightestgreen hover:font-semibold`}>
               Broker Management
-              </ListItem>
-         {/*    </Link> */}
-             {/*  <div className={`${activeLink === '/myproperties' ? 'triangle' : ''}`}></div> */}
-          </div>
-         {/*  <Link to='/documents' onClick={() => setActiveLink('/documents')}> */}
-            <ListItem className={`h-7 mb-1 pl-3 gap-2 rounded-2xl text-custom-solidgreen hover:bg-custom-lightestgreen hover:font-semibold`}>
-            Inquiry Manangement
             </ListItem>
-         {/*  </Link> */}
+          </div>
+          <Link to="/inquirymanagement/inquirylist">
+            <ListItem
+              className={`h-7 mb-2 pl-5 gap-2 rounded-2xl ${activeItem === 'inquiry' ? 'bg-custom-lightestgreen text-custom-solidgreen' : 'text-custom-solidgreen'} hover:bg-custom-lightestgreen hover:font-semibold`}
+              onClick={() => handleItemClick('inquiry')}
+            >
+              Inquiry Management
+            </ListItem>
+        </Link>
           <div className='flex items-center'>
-           {/*  <Link to='/transaction' onClick={() => setActiveLink('/transaction')}> */}
-              <ListItem className={`h-7 mb-1 gap-2 rounded-2xl text-custom-solidgreen hover:bg-custom-lightestgreen hover:font-semibold`}>
+            <ListItem className={`h-7 mb-2 pl-5 gap-2 rounded-2xl text-custom-solidgreen hover:bg-custom-lightestgreen hover:font-semibold`}>
               Transaction Management
-              </ListItem>
-          {/*   </Link> */}
-           {/*  <div className={`${activeLink === '/transaction' ? 'triangle' : ''}`}></div> */}
-          </div>
-          <div className='flex items-center'>
-            {/* <Link to='/raiseaconcern' onClick={() => setActiveLink('/raiseaconcern')}> */}
-            <ListItem className={`h-7 mb-1 gap-2 rounded-2xl text-custom-solidgreen hover:bg-custom-lightestgreen hover:font-semibold`}>
-                Documents Management
             </ListItem>
-          {/* </Link> */}
           </div>
           <div className='flex items-center'>
-           {/*  <Link to='/transaction' onClick={() => setActiveLink('/transaction')}> */}
-              <ListItem className={`h-7 mb-1 pl-1 gap-2 rounded-2xl text-custom-solidgreen hover:bg-custom-lightestgreen hover:font-semibold`}>
-              Property Management
-              </ListItem>
-          {/*   </Link> */}
-           {/*  <div className={`${activeLink === '/transaction' ? 'triangle' : ''}`}></div> */}
+            <ListItem className={`h-7 mb-2 pl-5 gap-2 rounded-2xl text-custom-solidgreen hover:bg-custom-lightestgreen hover:font-semibold`}>
+              Documents Management
+            </ListItem>
           </div>
-         
-          
-          
-         {/*  <Accordion
+          <div className='flex items-center'>
+            <ListItem className={`h-7 mb-2 pl-5 gap-2 rounded-2xl text-custom-solidgreen hover:bg-custom-lightestgreen hover:font-semibold`}>
+              Property Management
+            </ListItem>
+          </div>
+
+
+
+          {/*  <Accordion
             open={open === 1}
             icon={
               <ChevronDownIcon
@@ -115,7 +117,7 @@ const Sidebar = () => {
               </List>
             </AccordionBody>
           </Accordion> */}
-          <hr className="my-1 mx-3 border-1 border-blue-gray-100" />
+          {/*  <hr className="my-1 mx-3 border-1 border-blue-gray-100" />
   
           <ListItem className='h-4 mb-1 px-6 gap-2 text-neutral font-normal'>
            Settings
@@ -124,8 +126,8 @@ const Sidebar = () => {
            FAQs
           </ListItem>
           <ListItem className='h-4 mb-1 px-6 gap-2 font-semibold'>
-           {/* <DashboardDom/> */}
-          </ListItem>
+         
+          </ListItem> */}
         </List>
       </Card>
     </>
