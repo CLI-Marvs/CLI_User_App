@@ -94,7 +94,7 @@ const InquiryThread = () => {
                             </div>
                         </div>
                     </div>
-                    <div  className='p-7 min-w-[436px] bg-white rounded-lg flex-grow-0 ' >
+                    <div  className='p-7 min-w-[436px] h-[fixed-height] bg-white rounded-lg' >
                         <AssignSidePanel/>
                     </div>
                 </div>

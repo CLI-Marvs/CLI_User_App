@@ -4,7 +4,7 @@ import AssignDetails from './AssignDetails'
 const AssignSidePanel = () => {
     return (
         <>
-            <div className='w-full'>
+            <div className='w-full '>
                 <div className="flex items-center border rounded-md overflow-hidden">
                     <span className=" text-custom-bluegreen font-semibold bg-custombg w-32 flex pl-3 py-2">Assign to</span>
                     <input name='name' type="text" className="w-full px-2 focus:outline-none" placeholder="Input Email or Name" />

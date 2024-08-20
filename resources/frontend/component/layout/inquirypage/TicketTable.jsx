@@ -30,20 +30,20 @@ const TicketTable = () => {
                 {data.map((row, index) => (
                     <tr
                         key={row.id}
-                        className={`flex items-center h-7 cursor-pointer mb-1
-                            ${checkedRows.includes(index) ? 'bg-custom-lightgreen' : 'bg-white'}
+                        className={`flex items-center h-7 cursor-pointer mb-1 bg-white
+                           /*  
                             hover:shadow-custom
                         `}
                     >
-                        <td className='w-10 flex justify-center'>
+                       {/*  <td className='w-10 flex justify-center'>
                             <input
                                 type="checkbox"
                                 checked={checkedRows.includes(index)}
                                 onChange={() => handleCheckboxChange(index)}
                                 className="cursor-pointer"
                             />
-                        </td>
-                        <td className='w-14 flex justify-center text-xl'>
+                        </td> */}
+                        <td className='w-14 flex justify-center text-xl text-custom-solidgreen'>
                             <TiPin />
                         </td>
                         <td className="w-40 font-semibold text-custom-bluegreen">
