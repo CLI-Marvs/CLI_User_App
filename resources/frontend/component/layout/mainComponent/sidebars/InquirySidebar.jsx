@@ -11,13 +11,13 @@ import {
     AccordionHeader,
     AccordionBody,
   } from "@material-tailwind/react";
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import InquiryFormModal from '../../inquirypage/InquiryFormModal';
 
 
 
 const InquirySidebar = () => {
-
+    const location = useLocation();
     const modalRef = useRef(null);
 
     const handleOpenModal = () => {
@@ -40,14 +40,14 @@ const InquirySidebar = () => {
                 <div className=' leading-1'>
                     <div className='flex-col space-y-3 mt-1'>
                         <Link to="inquirylist">
-                            <ListItem className='menu2 h-7 mb-1 flex justify-center gap-2 rounded-full text-custom-solidgreen font-normal hover:font-semibold hover:bg-white '>
+                            <ListItem className={`menu2 h-7 mb-1 flex justify-center gap-2 rounded-full text-custom-solidgreen font-normal hover:font-semibold hover:bg-white ${location.pathname === '/inquirymanagement/inquirylist' ? 'text-custom-solidgreen font-semibold bg-white' : 'text-custom-solidgreen'}`}>
                                 Inquiries
                             </ListItem>
                         </Link>
                         <Link to="report">
-                            <ListItem className='menu2 h-7  mb-1 flex justify-center gap-2 rounded-full text-custom-solidgreen font-normal hover:font-semibold hover:bg-white'>
+                            <ListItem className={`menu2 h-7 mb-1 flex justify-center gap-2 rounded-full font-normal hover:font-semibold hover:bg-white ${location.pathname === '/inquirymanagement/report' ? 'text-custom-solidgreen font-semibold bg-white' : 'text-custom-solidgreen'}`}>
                                 Reports
-                            </ListItem> 
+                            </ListItem>
                         </Link>
                     </div>
                 </div>

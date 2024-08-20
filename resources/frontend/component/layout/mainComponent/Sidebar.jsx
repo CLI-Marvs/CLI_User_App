@@ -51,7 +51,7 @@ const Sidebar = () => {
           </div>
           <Link to="/inquirymanagement/inquirylist">
             <ListItem
-              className={`h-7 mb-2 pl-5 gap-2 rounded-2xl ${activeItem === 'inquiry' ? 'bg-custom-lightestgreen text-custom-solidgreen' : 'text-custom-solidgreen'} hover:bg-custom-lightestgreen hover:font-semibold`}
+              className={`h-7 mb-2 pl-5 gap-2 rounded-2xl ${activeItem === 'inquiry' ? 'bg-custom-lightestgreen text-custom-solidgreen font-semibold' : 'text-custom-solidgreen'} hover:bg-custom-lightestgreen hover:font-semibold`}
               onClick={() => handleItemClick('inquiry')}
             >
               Inquiry Management
