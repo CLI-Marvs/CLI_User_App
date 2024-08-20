@@ -1,5 +1,5 @@
 import React, { PureComponent } from 'react';
-import { BarChart, Bar, Rectangle, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell,LabelList  } from 'recharts';
+import { BarChart, Bar, Rectangle, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell, LabelList, Label } from 'recharts';
 
 const data = [
     { name: "01", Resolved: 30, Unresolved: 10 },
@@ -15,6 +15,7 @@ const data = [
     { name: "11", Resolved: 30, Unresolved: 10 },
     { name: "12", Resolved: 30, Unresolved: 10 },
     { name: "13", Resolved: 30, Unresolved: 10 },
+    
 ];
 
 const data2 = [
@@ -27,32 +28,33 @@ const data3 = [
     { name: '38 Park Ave.', value1: 44, value2: 123 },
     { name: 'Casa Mira', value1: 136, value2: 220 },
     { name: 'Mivessa', value1: 275, value2: 44 },
+  
+    
+    
+
+
 ];
+
+const barHeight = 20; // Height per bar, adjust as needed
+const chartHeight = data3.length * (barHeight + 60)
 
 const COLORS = ['#5B9BD5', '#348017'];
 
 
 const CustomTooltip = ({ active, payload }) => {
     if (active && payload && payload.length) {
-      return (
-        <div className="bg-white p-2 shadow-lg rounded">
-          <p>{`${payload[0].name}`}</p>
-          <p>{`Value 1: ${payload[0].value}`}</p>
-          <p>{`Value 2: ${payload[1].value}`}</p>
-        </div>
-      );
+        return (
+            <div className="bg-white p-2 shadow-lg rounded">
+                <p>{`${payload[0].name}`}</p>
+                <p>{`Value 1: ${payload[0].value}`}</p>
+                <p>{`Value 2: ${payload[1].value}`}</p>
+            </div>
+        );
     }
-  
-    return null;
-  };
 
-const CustomLabel = ({ x, y, value }) => {
-    return (
-        <text x={x} y={y} dy={-6} fill="#333" fontSize={12} textAnchor="middle">
-            {value}
-        </text>
-    );
+    return null;
 };
+
 
 
 const ReportPage = () => {
@@ -109,8 +111,8 @@ const ReportPage = () => {
                     </div>
                 </div>
             </div>
-            <div className='flex gap-3 mt-4'>
-                <div className='w-[430px] pb-7 shrink-0 grow-0 bg-white rounded-lg'>
+            <div className='flex gap-3 mt-4 bg-custombg '>
+                <div className='w-[430px]  pb-7 max-h-[400px] flex-shrink-0 flex-grow-0 bg-white rounded-lg'>
                     <p className='p-4 text-base montserrat-bold'>Inquiries per category</p>
                     <div className='border border-t-1'></div>
                     <div className='mt-4 pl-4 pr-28'>
@@ -121,12 +123,12 @@ const ReportPage = () => {
                     </div>
                     <div className='flex'>
                         <div>
-                            <PieChart width={230} height={230}>
+                            <PieChart width={230} height={260}>
                                 <Pie
                                     data={data2}
                                     cx="50%"
                                     cy="50%"
-                                    outerRadius={85}
+                                    outerRadius={100}
                                     innerRadius={0}
                                     paddingAngle={1}
                                     strokeWidth={5}
@@ -168,8 +170,8 @@ const ReportPage = () => {
                         </div>
                     </div>
                 </div>
-                <div className='w-[520px] flex-grow-0 flex-shrink-0 bg-white rounded-lg'>
-                    <p className='p-4 text-base montserrat-bold'>Inquiries per category</p>
+                <div className=' h-auto flex-grow-0 flex-shrink-0 bg-white rounded-lg'>
+                    <p className='p-4 text-base montserrat-bold'>Inquiries per property</p>
                     <div className='border border-t-1'></div>
                     <div className='mt-4 pl-4 pr-48'>
                         <div className="flex items-center border rounded-md overflow-hidden w-full">
@@ -180,34 +182,59 @@ const ReportPage = () => {
                     <div>
                         <BarChart
                             width={400}
-                            height={300}
+                            height={chartHeight}
                             data={data3}
                             layout="vertical"
                             margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
                         >
-                            
-                            <XAxis type="number" hide  />
+
+                            <XAxis type="number" hide />
                             <YAxis type="category" dataKey="name" hide tick={false} />
                             <Tooltip content={<CustomTooltip />} />
                             <Bar
                                 dataKey="value1"
                                 fill="#348017"
-                                label={<CustomLabel />}
+
                                 barSize={15}
-                                radius={[4, 4, 0, 0]} // Rounded top corners
+                                radius={[0, 4, 4, 0]} // Rounded top corners
                             >
                                 <LabelList dataKey="value1" position="right" fill="#4a5568" />
+                                <LabelList
+                                    dataKey="name"
+                                    position="top"
+                                    content={({ x, y, value }) => (
+                                        <text
+                                            x={x}
+                                            y={y - 13}
+                                            fill="#00000"
+                                            textAnchor="start"
+                                            dominantBaseline="central"
+                                        >
+                                            {value}
+                                        </text>
+                                    )}
+                                />
                             </Bar>
                             <Bar
                                 dataKey="value2"
                                 fill="#D3F1D8"
-                                label={<CustomLabel />}
                                 barSize={15}
-                                radius={[10, 10, 0, 0]} // Rounded top corners
+                                radius={[0, 4, 4, 0]} // Rounded top corners
                             >
                                 <LabelList dataKey="value2" position="right" fill="#4a5568" />
                             </Bar>
                         </BarChart>
+                        <div className='flex justify-end'>
+                            <div className='flex items-center px-3 py-2 gap-3'>
+                                <span className='flex items-center text-custom-lightestgreen text-2xl'>●</span>
+                                <span className='text-custom-gray12'>Unresolved</span>
+                            </div>
+                            <div className='flex items-center px-3 py-2 gap-3'>
+                                <span className='flex items-center text-custom-solidgreen text-2xl'>●</span>
+                                <span className='text-custom-gray12'>Resolved</span>
+                            </div>
+
+                        </div>
                     </div>
                 </div>
             </div>
