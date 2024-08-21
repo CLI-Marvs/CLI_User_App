@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { TiPin } from "react-icons/ti";
+import { TiPin ,TiPinOutline } from "react-icons/ti";
 
 const TicketTable = () => {
     const [checkedRows, setCheckedRows] = useState([]); // Track checked rows
@@ -12,17 +12,45 @@ const TicketTable = () => {
         );
     };
 
-    const data = [
+    const [isPinned, setIsPinned] = useState(false);
+
+  
+
+    const [data, setData] = useState([
         {
             id: 1,
-            user: 'Mister Admin',
+            firstname: 'Kent',
+            lastname: 'Armelia',
             property: 'Casa Mira',
+            type: 'Transaction',
             code: 'CM0000002',
             message: 'Hello Sir Admin, I have an issue regarding my bank account',
-            date: 'July 24'
+            action: 'Inquiry Feedback Received',
+            date: 'July 25',
+            isPinned: false
         },
-        // Add more data as needed
-    ];
+        {
+            id: 2,
+            firstname: 'Tanjiro',
+            lastname: 'Kamado',
+            property: '38 Park Ave.',
+            type: 'Property',
+            code: '38P000031',
+            message: 'Hello Sir Admin, I have an issue regarding my bank account',
+            action: 'Assigned to "Name | Dept"',
+            date: '11:41 AM',
+            isPinned: false
+        },
+    
+    ]);
+
+
+    const togglePin = (index) => {
+        const updatedData = data.map((row, i) =>
+            i === index ? { ...row, isPinned: !row.isPinned } : row
+        );
+        setData(updatedData);
+    };
 
     return (
         <table className='flex flex-col gap-1 w-full'>
@@ -44,20 +72,25 @@ const TicketTable = () => {
                             />
                         </td> */}
                         <td className='w-14 flex justify-center text-xl text-custom-solidgreen'>
-                            <TiPin />
+                            <button onClick={() => togglePin(index)}>
+                                {row.isPinned ? <TiPin /> : <TiPinOutline />}
+                            </button>
                         </td>
                         <td className="w-40 font-semibold text-custom-bluegreen">
-                            <p>{row.user}</p>
+                            <p>{row.lastname}<span>,  </span>{row.firstname}</p>
                         </td>
                         <td className="flex flex-1 gap-1 text-custom-bluegreen">
                             <div className="font-semibold whitespace-nowrap">
-                                <span>{row.property}</span><span> (Property) </span><span> - </span><span>{row.code}</span>
+                                <span>{row.property}</span><span> ({row.type}) </span><span> - </span><span>{row.code}</span>
                             </div>
-                            <div className="flex-1 flex items-center w-10 pr-12">
+                            <div className="flex items-center w-48 mr-4">
                                 <p className="text-sm-light truncate text-gray-400">
                                     {row.message}
                                 </p>
                             </div>
+                        </td>
+                        <td className='w-56 flex items-center text-custom-lightgreen'>
+                            <p className='truncate'>{row.action}</p>
                         </td>
                         <td className='w-28 flex justify-end px-3 text-custom-bluegreen font-semibold'>
                             {row.date}

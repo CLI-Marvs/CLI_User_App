@@ -28,6 +28,7 @@ const data3 = [
     { name: '38 Park Ave.', value1: 44, value2: 123 },
     { name: 'Casa Mira', value1: 136, value2: 220 },
     { name: 'Mivessa', value1: 275, value2: 44 },
+    
   
     
     

@@ -62,18 +62,21 @@ const InquiryList = () => {
                 <IoIosArrowDown /> Unresolved
               </button>
             </div>
-            <div className='flex items-center bg-custom-lightgreen h-6 px-3 rounded-3xl '>
+            <button className='flex items-center bg-custom-lightgreen h-6 px-3 rounded-3xl'>
               <p className='text-sm text-white montserrat-semibold'>All</p>
-            </div>
-            <div className='flex items-center border-custom-lightgreen border text-custom-lightgreen h-6 px-3 rounded-3xl '>
+            </button>
+            <button className='flex items-center border-custom-lightgreen border text-custom-lightgreen h-6 px-3 rounded-3xl'>
+              <p className='text-sm montserrat-semibold'>Assigned to me</p>
+            </button>
+            <button className='flex items-center border-custom-lightgreen border text-custom-lightgreen h-6 px-3 rounded-3xl'>
               <p className='text-sm montserrat-semibold'>3+ Days</p>
-            </div>
-            <div className='flex items-center border-custom-lightgreen border text-custom-lightgreen h-6 px-3 rounded-3xl '>
+            </button>
+            <button className='flex items-center border-custom-lightgreen border text-custom-lightgreen h-6 px-3 rounded-3xl'>
               <p className='text-sm montserrat-semibold'>2 Days</p>
-            </div>
-            <div className='flex items-center border-custom-lightgreen border text-custom-lightgreen h-6 px-3 rounded-3xl '>
+            </button>
+            <button className='flex items-center border-custom-lightgreen border text-custom-lightgreen h-6 px-3 rounded-3xl'>
               <p className='text-sm montserrat-semibold'>1 Day</p>
-            </div>
+            </button>
           </div>
           <div>
             <TicketTable currentPage={currentPage} itemsPerPage={itemsPerPage} />

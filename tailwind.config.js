@@ -56,7 +56,7 @@ export default {
       width: {
         '3/5': '60%',
         '17/20': '85%',
-        '108': '27rem', // Add your custom width class here
+        '108': '27rem',
         '66' : '17rem',
         '90' : '23rem',
         '34' : '8.5rem',

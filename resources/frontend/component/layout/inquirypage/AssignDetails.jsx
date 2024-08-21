@@ -10,7 +10,7 @@ const AssignDetails = () => {
                 </div>
                 <div className='flex-1'>
                     <div className='truncate w-44'>
-                        <p className='text-xs text-custom-gray truncate'>Ticket inquired by client</p>
+                        <p className=' truncate'>Ticket inquired by client</p>
                     </div>
                     <p className='text-xs text-custom-gray space-x-1'>
                         (

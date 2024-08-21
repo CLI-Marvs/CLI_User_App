@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {useRef} from 'react'
 import Backbtn from '../../../../../public/Images/Expand_up.svg'
 import { LuTrash2 } from "react-icons/lu";
 import UserMessages from './UserMessages';
@@ -9,7 +9,18 @@ import FolderFile from '../../../../../public/Images/folder_file.svg'
 import { BsPaperclip } from "react-icons/bs";
 import { IoIosSend } from "react-icons/io";
 import AssignSidePanel from './AssignSidePanel';
+import ResolveModal from './ResolveModal';
 const InquiryThread = () => {
+
+    const modalRef = useRef(null);
+
+    const handleOpenModal = () => {
+        if (modalRef.current) {
+            modalRef.current.showModal();
+        }
+    };
+
+
     return (
         <>
             <div className='h-screen bg-custombg p-3 overflow-x-auto overflow-y-hidden'>
@@ -65,7 +76,9 @@ const InquiryThread = () => {
                             <div>
                                 <LuTrash2 />
                             </div>
-                            <p className='text-blue-500 cursor-pointer hover:underline font-semibold text-sm'>Mark as resolve</p>
+                            <button onClick={handleOpenModal} className='text-blue-500 cursor-pointer hover:underline font-semibold text-sm'>
+                                Mark as resolve
+                            </button>
                         </div>
                         <div className='flex-grow overflow-y-auto'>
                             <div className='h-full'>
@@ -97,6 +110,9 @@ const InquiryThread = () => {
                         <AssignSidePanel />
                     </div>
                 </div>
+            </div>
+            <div>
+                <ResolveModal modalRef={modalRef}/>
             </div>
         </>
     )

@@ -37,15 +37,15 @@ const InquirySidebar = () => {
                 </svg>
                     Add Inquiry
                </button>
-                <div className=' leading-1'>
-                    <div className='flex-col space-y-3 mt-1'>
+                <div className='px-5 leading-1'>
+                    <div className='flex flex-col space-y-1 mt-1'>
                         <Link to="inquirylist">
-                            <ListItem className={`menu2 h-7 mb-1 flex justify-center gap-2 rounded-full text-custom-solidgreen font-normal hover:font-semibold hover:bg-white ${location.pathname === '/inquirymanagement/inquirylist' ? 'text-custom-solidgreen font-semibold bg-white' : 'text-custom-solidgreen'}`}>
+                            <ListItem className={`menu2 h-7 mb-1 flex justify-start pl-4 gap-2 rounded-full text-custom-solidgreen font-normal hover:font-semibold hover:bg-white ${location.pathname === '/inquirymanagement/inquirylist' ? 'text-custom-solidgreen font-semibold bg-white' : 'text-custom-solidgreen'}`}>
                                 Inquiries
                             </ListItem>
                         </Link>
                         <Link to="report">
-                            <ListItem className={`menu2 h-7 mb-1 flex justify-center gap-2 rounded-full font-normal hover:font-semibold hover:bg-white ${location.pathname === '/inquirymanagement/report' ? 'text-custom-solidgreen font-semibold bg-white' : 'text-custom-solidgreen'}`}>
+                            <ListItem className={`menu2 h-7 mb-1 flex justify-start pl-4 gap-2 rounded-full font-normal hover:font-semibold hover:bg-white ${location.pathname === '/inquirymanagement/report' ? 'text-custom-solidgreen font-semibold bg-white' : 'text-custom-solidgreen'}`}>
                                 Reports
                             </ListItem>
                         </Link>
