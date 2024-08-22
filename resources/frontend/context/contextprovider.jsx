@@ -5,21 +5,24 @@ import React, {
     useEffect,
     useState,
 } from "react";
-
-
+import apiService from "../component/servicesApi/apiService";
 
 const StateContext = createContext({
     user: null,
     token: null,
-    setUser: () => { },
-    setToken: () => { },
+    setUser: () => {},
+    setToken: () => {},
 });
 
 export const ContextProvider = ({ children }) => {
     const [user, setUser] = useState({});
     const [token, _setToken] = useState(localStorage.getItem("authToken"));
-    const [getConcernData, setGetConcernData] = useState([]);
+    /*     const [getConcernData, setGetConcernData] = useState([]); */
 
+    const [currentPage, setCurrentPage] = useState(0);
+    const [data, setData] = useState([]);
+    const itemsPerPage = 20;
+    const [pageCount, setPageCount] = useState(0);
 
     const setToken = (token) => {
         _setToken(token);
@@ -30,19 +33,22 @@ export const ContextProvider = ({ children }) => {
         }
     };
 
-    const getAllBuyerConcern = async () => {
-        const response = await apiService.get(`get-concern/${user?.id}`);
-        const data = response.data;
-        setGetConcernData(data);
+    const getAllConcerns = async () => {
+        try {
+            const response = await apiService.get(
+                `get-concern?page=${currentPage + 1}`
+            );
+            setData(response.data.data);
+            setPageCount(response.data.last_page);
+        } catch (error) {
+            console.error("Error fetching data: ", error);
+        }
     };
 
 
     useEffect(() => {
-        if (user?.email) {
-            getAllBuyerConcern();
-        }
-
-    }, [user]);
+        getAllConcerns();
+    }, [currentPage]);
     return (
         <StateContext.Provider
             value={{
@@ -50,13 +56,15 @@ export const ContextProvider = ({ children }) => {
                 token,
                 setUser,
                 setToken,
-                getConcernData
+                currentPage,
+                setCurrentPage,
+                data,
+                pageCount,
             }}
         >
             {children}
         </StateContext.Provider>
     );
 };
-
 
 export const useStateContext = () => useContext(StateContext);

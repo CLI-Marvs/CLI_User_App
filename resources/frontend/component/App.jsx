@@ -62,7 +62,7 @@ const App = () => {
                             element: <InquiryListView/>,
                         },
                         {
-                            path: "inquirylist/thread",
+                            path: "thread/:id",
                             element: <InquiryThreadView/>,
                         },
                         {

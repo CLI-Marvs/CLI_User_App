@@ -10,16 +10,24 @@ import { BsPaperclip } from "react-icons/bs";
 import { IoIosSend } from "react-icons/io";
 import AssignSidePanel from './AssignSidePanel';
 import ResolveModal from './ResolveModal';
+import { useLocation, useNavigate } from 'react-router-dom';
 const InquiryThread = () => {
 
     const modalRef = useRef(null);
 
+    const navigate = useNavigate();
+    const location = useLocation(); 
+    const {item} = location.state;
     const handleOpenModal = () => {
         if (modalRef.current) {
             modalRef.current.showModal();
         }
     };
 
+  
+    const handleBack = () => {
+        navigate('/inquirymanagement/inquirylist');
+    };
 
     return (
         <>
@@ -66,11 +74,11 @@ const InquiryThread = () => {
                 <div className='flex bg-custombg gap-3 max-w-6xl h-full pb-24'>
                     <div className='p-7 max-w-3xl shrink-0 bg-white rounded-lg flex flex-col h-full'>
                         <div className='flex items-center gap-3'>
-                            <img src={Backbtn} alt="back button" />
+                            <img src={Backbtn} alt="back button" onClick={handleBack} />
                             <p className='text-sm montserrat-semibold text-custom-gray81 space-x-1'>
                                 <span>Ticket #</span><span>CM0000002</span><span>|</span>
                                 <span>Transaction</span><span>|</span>
-                                <span>38 Park Avenue</span><span>|</span>
+                                <span>{item.property}</span><span>|</span>
                                 <span>T207.012</span>
                             </p>
                             <div>

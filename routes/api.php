@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ConcernController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -10,3 +11,9 @@ Route::get('/user', function (Request $request) {
 
 
 Route::middleware('auth:sanctum')->post('/auth/logout', [AuthController::class, 'logout']);
+
+
+Route::post('/add-concern', [ConcernController::class, 'addConcernPublic']);
+
+Route::get('/get-concern', [ConcernController::class, 'getAllConcerns']);
+
