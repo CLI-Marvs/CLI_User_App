@@ -2,7 +2,7 @@ import axios from "axios";
 
 export const imgUrl = import.meta.env.VITE_IMG_URL;
 
-export const API_PROVIDER = `${import.meta.env.GOOGLE_PROVIDER}/auth`;
+export const API_PROVIDER = `${import.meta.env.VITE_GOOGLE_PROVIDER}/auth`;
 
 const API_BASE_URL = `${import.meta.env.VITE_API_BASE_URL}/api`;
 

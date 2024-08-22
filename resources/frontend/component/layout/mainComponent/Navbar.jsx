@@ -1,8 +1,25 @@
 import React from 'react'
 import CLILogo from '../../../../../public/Images/CLILogo.png';
 import Kent from '../../../../../public/Images/kent.png';
+import apiService from '../../servicesApi/apiService';
 
 const Navbar = () => {
+
+  const handleLogout = async () => {
+    try {
+        const response = await apiService.post("auth/logout", {});
+        if (response.status === 200) {
+            /*    localStorage.removeItem("selectedUnit");
+            sessionStorage.removeItem("modalAlreadyShown"); */
+            localStorage.removeItem("authToken");
+            window.location.href = "/";
+        } else {
+            console.log("Logout failed");
+        }
+    } catch (error) {
+        console.log("Error", error);
+    }
+};
   return (
     <div className="flex justify-between px-5 pr-16 w-screen bg-custombg">
       <div className='flex'>
@@ -17,7 +34,7 @@ const Navbar = () => {
       <div className="flex items-center justify-center">
         <div className="flex gap-3">
           <div className='flex items-center'>
-            <button className='text-lg font-bold'>Logout</button>
+            <button className='text-lg font-bold' onClick={handleLogout}>Logout</button>
           </div>
           <div >
             <img src={Kent} alt="kent" className='h-14 w-14 rounded-full  border-8' />

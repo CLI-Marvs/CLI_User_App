@@ -5,7 +5,7 @@ import { API_PROVIDER } from "../../servicesApi/apiService";
 
 const Login = () => {
     const signinGoogle = () => {
-        window.location.href = 'http://localhost:8001/auth/google/redirect';
+        window.location.href = `${API_PROVIDER}/google/redirect`;
     };
 
     return (

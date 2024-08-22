@@ -1,5 +1,5 @@
 .bg-left-side{
-    background-image: url('./Images/PcBldg.jpeg');
+    background-image: url('/Images/PcBldg.jpeg');
     background-size: cover;
     background-position: center;
 }
