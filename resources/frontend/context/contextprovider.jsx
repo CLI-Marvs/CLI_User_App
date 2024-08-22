@@ -18,19 +18,31 @@ const StateContext = createContext({
 export const ContextProvider = ({ children }) => {
     const [user, setUser] = useState({});
     const [token, _setToken] = useState(localStorage.getItem("authToken"));
+    const [getConcernData, setGetConcernData] = useState([]);
 
 
     const setToken = (token) => {
         _setToken(token);
         if (token) {
-            setIsAuthenticated(true);
             localStorage.setItem("authToken", token);
         } else {
-            setIsAuthenticated(false);
             localStorage.removeItem("authToken");
         }
     };
 
+    const getAllBuyerConcern = async () => {
+        const response = await apiService.get(`get-concern/${user?.id}`);
+        const data = response.data;
+        setGetConcernData(data);
+    };
+
+
+    useEffect(() => {
+        if (user?.email) {
+            getAllBuyerConcern();
+        }
+
+    }, [user]);
     return (
         <StateContext.Provider
             value={{
@@ -38,6 +50,7 @@ export const ContextProvider = ({ children }) => {
                 token,
                 setUser,
                 setToken,
+                getConcernData
             }}
         >
             {children}

@@ -1,11 +1,15 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import TicketTable from './TicketTable';
 import { IoIosArrowUp, IoIosArrowDown } from "react-icons/io";
 import ReactPaginate from 'react-paginate';
+import { useStateContext } from '../../../context/contextprovider';
 
 const InquiryList = () => {
   const [currentPage, setCurrentPage] = useState(0);
+  const {getConcernData} = useStateContext();
   const itemsPerPage = 10; // Adjust this according to your data
+
+  const [data, setData] = useState([]);
 
   const handlePageClick = (data) => {
     const selectedPage = data.selected;
@@ -14,6 +18,10 @@ const InquiryList = () => {
     // Example: fetch data from API or filter data from a local array
   };
 
+  
+  useEffect(() => {
+    setData(getConcernData)
+}, [getConcernData]);
   return (
     <>
       <div className='h-screen max-w-full bg-custombg p-4'>
@@ -79,7 +87,7 @@ const InquiryList = () => {
             </button>
           </div>
           <div>
-            <TicketTable currentPage={currentPage} itemsPerPage={itemsPerPage} />
+            <TicketTable currentPage={currentPage} itemsPerPage={itemsPerPage} setConcernData={data} />
           </div>
           
           <div className='flex justify-end items-center h-12 px-6 gap-2 bg-white rounded-b-lg'>

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { TiPin ,TiPinOutline } from "react-icons/ti";
 
-const TicketTable = () => {
+const TicketTable = ({setConcernData}) => {
     const [checkedRows, setCheckedRows] = useState([]); // Track checked rows
 
     const handleCheckboxChange = (index) => {
@@ -55,7 +55,7 @@ const TicketTable = () => {
     return (
         <table className='flex flex-col gap-1 w-full'>
             <tbody>
-                {data.map((row, index) => (
+                {setConcernData.length > 0 && setConcernData.map((row, index) => (
                     <tr
                         key={row.id}
                         className={`flex items-center h-7 cursor-pointer mb-1 bg-white

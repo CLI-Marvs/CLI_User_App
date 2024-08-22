@@ -2,9 +2,9 @@ import axios from "axios";
 
 export const imgUrl = import.meta.env.VITE_IMG_URL;
 
-export const API_PROVIDER = `${import.meta.env.VITE_API_BASE_URL}/auth`;
+export const API_PROVIDER = `${import.meta.env.GOOGLE_PROVIDER}/auth`;
 
-const API_BASE_URL = `${import.meta.env.APP_URL}/api`;
+const API_BASE_URL = `${import.meta.env.VITE_API_BASE_URL}/api`;
 
 const apiService = axios.create({
   baseURL: API_BASE_URL,

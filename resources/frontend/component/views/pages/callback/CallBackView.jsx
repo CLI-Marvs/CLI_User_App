@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import apiService from "../../../servicesApi/apiService";
 import { useNavigate } from "react-router-dom";
 import { useStateContext } from "../../../../context/contextprovider";
@@ -10,6 +10,7 @@ const CallBackView = () => {
     useEffect(() => {
         const urlParams = new URLSearchParams(window.location.search);
         const token = urlParams.get("token");
+        console.log(token);
 
         if (token) {
             setToken(token);

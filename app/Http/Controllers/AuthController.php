@@ -3,9 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
-use Illuminate\Container\Attributes\Auth;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+
 use Laravel\Socialite\Facades\Socialite;
+use Illuminate\Support\Str;
+
 
 
 class AuthController extends Controller
@@ -19,7 +22,7 @@ class AuthController extends Controller
     {
         try {
              if (!$request->has('code')) {
-                return redirect('/login')->with('error', 'Authentication failed. Missing code parameter.');
+                return redirect('/')->with('error', 'Authentication failed. Missing code parameter.');
             }
     
             $googleUser = Socialite::driver("google")->user();
