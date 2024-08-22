@@ -11,6 +11,7 @@ import InquiryManagementLayout from "./views/layout/InquiryManagementLayout";
 import InquiryList from "./layout/inquirypage/InquiryList";
 import InquiryListView from "./views/pages/raiseaconcernViews/InquiryListView";
 import InquiryThreadView from "./views/pages/raiseaconcernViews/InquiryThreadView";
+import CallBackView from "./views/pages/callback/CallBackView";
 const App = () => {
 
     const Layout = () => {
@@ -38,6 +39,11 @@ const App = () => {
             path: "/login",
             element: <LoginView/>,
         }, 
+
+        {
+            path: "/callback",
+            element: <CallBackView/>,
+        },
         {
             path: "/",
             element: <Layout />,
