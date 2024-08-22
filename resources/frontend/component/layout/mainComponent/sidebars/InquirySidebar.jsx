@@ -11,13 +11,13 @@ import {
     AccordionHeader,
     AccordionBody,
   } from "@material-tailwind/react";
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import InquiryFormModal from '../../inquirypage/InquiryFormModal';
 
 
 
 const InquirySidebar = () => {
-
+    const location = useLocation();
     const modalRef = useRef(null);
 
     const handleOpenModal = () => {
@@ -37,16 +37,18 @@ const InquirySidebar = () => {
                 </svg>
                     Add Inquiry
                </button>
-                <div className=' leading-1'>
-                    <div className='flex-col space-y-2 mt-1'>
+                <div className='px-5 leading-1'>
+                    <div className='flex flex-col space-y-1 mt-1'>
                         <Link to="inquirylist">
-                            <ListItem className='menu2 h-6 mb-1 flex justify-center gap-2 rounded-full text-custom-solidgreen font-semibold hover:bg-accent hover:text-white '>
+                            <ListItem className={`menu2 h-7 mb-1 flex justify-start pl-4 gap-2 rounded-full text-custom-solidgreen font-normal hover:font-semibold hover:bg-white ${location.pathname === '/inquirymanagement/inquirylist' ? 'text-custom-solidgreen font-semibold bg-white' : 'text-custom-solidgreen'}`}>
                                 Inquiries
                             </ListItem>
                         </Link>
-                        <ListItem className='menu2 h-6  mb-1 flex justify-center gap-2 rounded-full text-custom-solidgreen font-semibold hover:bg-accent hover:text-white'>
-                            Reports
-                        </ListItem> 
+                        <Link to="report">
+                            <ListItem className={`menu2 h-7 mb-1 flex justify-start pl-4 gap-2 rounded-full font-normal hover:font-semibold hover:bg-white ${location.pathname === '/inquirymanagement/report' ? 'text-custom-solidgreen font-semibold bg-white' : 'text-custom-solidgreen'}`}>
+                                Reports
+                            </ListItem>
+                        </Link>
                     </div>
                 </div>
             </List>

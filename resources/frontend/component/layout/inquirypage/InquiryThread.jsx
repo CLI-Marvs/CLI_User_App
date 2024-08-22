@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {useRef} from 'react'
 import Backbtn from '../../../../../public/Images/Expand_up.svg'
 import { LuTrash2 } from "react-icons/lu";
 import UserMessages from './UserMessages';
@@ -9,10 +9,21 @@ import FolderFile from '../../../../../public/Images/folder_file.svg'
 import { BsPaperclip } from "react-icons/bs";
 import { IoIosSend } from "react-icons/io";
 import AssignSidePanel from './AssignSidePanel';
+import ResolveModal from './ResolveModal';
 const InquiryThread = () => {
+
+    const modalRef = useRef(null);
+
+    const handleOpenModal = () => {
+        if (modalRef.current) {
+            modalRef.current.showModal();
+        }
+    };
+
+
     return (
         <>
-            <div className='h-screen bg-custombg p-3 overflow-x-auto'>
+            <div className='h-screen bg-custombg p-3 overflow-x-auto overflow-y-hidden'>
                 <div className='max-w-full bg-custombg'>
                     <div className='h-14 bg-custombg -mt-3'>
                         <div className='relative flex justify-start gap-3'>
@@ -52,8 +63,8 @@ const InquiryThread = () => {
                         </div>
                     </div>
                 </div>
-                <div className='flex bg-custombg gap-3 max-w-6xl'>
-                    <div className='flex-grow-0 flex-shrink-0 p-7 max-w-3xl bg-white rounded-lg'>
+                <div className='flex bg-custombg gap-3 max-w-6xl h-full pb-24'>
+                    <div className='p-7 max-w-3xl shrink-0 bg-white rounded-lg flex flex-col h-full'>
                         <div className='flex items-center gap-3'>
                             <img src={Backbtn} alt="back button" />
                             <p className='text-sm montserrat-semibold text-custom-gray81 space-x-1'>
@@ -65,16 +76,17 @@ const InquiryThread = () => {
                             <div>
                                 <LuTrash2 />
                             </div>
-                            <p className=' text-blue-500 cursor-pointer hover:underline font-semibold text-sm'>Mark as resolve</p>
+                            <button onClick={handleOpenModal} className='text-blue-500 cursor-pointer hover:underline font-semibold text-sm'>
+                                Mark as resolve
+                            </button>
                         </div>
-                        <div className='h-[460px] overflow-y-auto'>
-                            <UserMessages />
-                           <AdminMessages />
-                           <AdminMessages />
-                           <UserMessages />
-                           <AdminMessages />
+                        <div className='flex-grow overflow-y-auto'>
+                            <div className='h-full'>
+                                <UserMessages />
+                                <AdminMessages />                         
+                            </div>
                         </div>
-                        <div className=" mt-2 mb-3 relative">
+                        <div className="mt-2 mb-3 relative">
                             <input
                                 name="chat"
                                 type="text"
@@ -94,10 +106,13 @@ const InquiryThread = () => {
                             </div>
                         </div>
                     </div>
-                    <div  className='p-7 min-w-[436px] bg-white rounded-lg flex-grow-0 ' >
-                        <AssignSidePanel/>
+                    <div className='p-7 min-w-[436px] max-h-[620px] bg-white rounded-lg' >
+                        <AssignSidePanel />
                     </div>
                 </div>
+            </div>
+            <div>
+                <ResolveModal modalRef={modalRef}/>
             </div>
         </>
     )
