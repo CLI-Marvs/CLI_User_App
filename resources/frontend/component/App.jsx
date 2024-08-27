@@ -13,6 +13,12 @@ import InquiryListView from "./views/pages/raiseaconcernViews/InquiryListView";
 import InquiryThreadView from "./views/pages/raiseaconcernViews/InquiryThreadView";
 import CallBackView from "./views/pages/callback/CallBackView";
 import ReportViews from "./views/pages/raiseaconcernViews/ReportViews";
+import PropertyAndPricingLayout from "./views/layout/PropertyAndPricingLayout";
+import PricingMasterListView from "./views/pages/PropertyAndPricingViews/PricingMasterListView";
+import BasicPricingView from "./views/pages/PropertyAndPricingViews/BasicPricingView";
+import PaymentSchemeView from "./views/pages/PropertyAndPricingViews/PaymentSchemeView";
+import PriceVersioningView from "./views/pages/PropertyAndPricingViews/PriceVersioningView";
+import PromotionalPricingView from "./views/pages/PropertyAndPricingViews/PromotionalPricingView";
 const App = () => {
 
     const Layout = () => {
@@ -68,6 +74,32 @@ const App = () => {
                         {
                             path: "report",
                             element: <ReportViews/>,
+                        },
+                    ],
+                },
+                {
+                    path: "propertyandpricing",
+                    element: <PropertyAndPricingLayout/>,
+                    children: [
+                        {
+                            path: "pricingmasterlist",
+                            element: <PricingMasterListView/>,
+                        },
+                        {
+                            path: "basicpricing",
+                            element: <BasicPricingView/>,
+                        },
+                        {
+                            path: "paymentscheme",
+                            element: <PaymentSchemeView/>,
+                        },
+                        {
+                            path: "priceversioning",
+                            element: <PriceVersioningView/>,
+                        },
+                        {
+                            path: "promotionalPricing",
+                            element: <PromotionalPricingView/>,
                         },
                     ],
                 },

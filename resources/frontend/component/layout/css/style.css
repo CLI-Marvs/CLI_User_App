@@ -45,3 +45,17 @@
   .gradient-background3 {
     background: linear-gradient(to right, #175D5F 17%, #348017 70%, #70AD47 96%);
 }
+
+.gradient-border {
+  background: radial-gradient(circle at 100% 100%, #ffffff 0, #ffffff 11px, transparent 11px) 0% 0%/13px 13px no-repeat,
+  radial-gradient(circle at 0 100%, #ffffff 0, #ffffff 11px, transparent 11px) 100% 0%/13px 13px no-repeat,
+  radial-gradient(circle at 100% 0, #ffffff 0, #ffffff 11px, transparent 11px) 0% 100%/13px 13px no-repeat,
+  radial-gradient(circle at 0 0, #ffffff 0, #ffffff 11px, transparent 11px) 100% 100%/13px 13px no-repeat,
+  linear-gradient(#ffffff, #ffffff) 50% 50%/calc(100% - 4px) calc(100% - 26px) no-repeat,
+  linear-gradient(#ffffff, #ffffff) 50% 50%/calc(100% - 26px) calc(100% - 4px) no-repeat,
+  linear-gradient(90deg, #3628b6 0%, #3fe50c 100%);
+border-radius: 13px;
+padding: 9px;
+box-sizing: border-box;
+}
+

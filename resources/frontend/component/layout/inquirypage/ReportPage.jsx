@@ -3,18 +3,17 @@ import { BarChart, Bar, Rectangle, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
 
 const data = [
     { name: "01", Resolved: 30, Unresolved: 10 },
-    { name: "02", Resolved: 30, Unresolved: 10 },
-    { name: "03", Resolved: 30, Unresolved: 10 },
-    { name: "04", Resolved: 30, Unresolved: 10 },
-    { name: "05", Resolved: 30, Unresolved: 10 },
-    { name: "06", Resolved: 30, Unresolved: 10 },
-    { name: "07", Resolved: 30, Unresolved: 10 },
-    { name: "08", Resolved: 30, Unresolved: 10 },
-    { name: "09", Resolved: 30, Unresolved: 10 },
-    { name: "10", Resolved: 30, Unresolved: 10 },
-    { name: "11", Resolved: 30, Unresolved: 10 },
-    { name: "12", Resolved: 30, Unresolved: 10 },
-    { name: "13", Resolved: 30, Unresolved: 10 },
+    { name: "02", Resolved: 23, Unresolved: 5 },
+    { name: "03", Resolved: 26, Unresolved: 15 },
+    { name: "04", Resolved: 15, Unresolved: 13 },
+    { name: "05", Resolved: 4, Unresolved: 1 },
+    { name: "06", Resolved: 5, Unresolved: 11 },
+    { name: "07", Resolved: 19, Unresolved: 9 },
+    { name: "08", Resolved: 19, Unresolved: 19 },
+    { name: "09", Resolved: 15, Unresolved: 20 },
+    { name: "10", Resolved: 23, Unresolved: 9 },
+    { name: "11", Resolved: 28, Unresolved: 26 },
+    { name: "12", Resolved: 13, Unresolved: 9 },
     
 ];
 
@@ -28,12 +27,6 @@ const data3 = [
     { name: '38 Park Ave.', value1: 44, value2: 123 },
     { name: 'Casa Mira', value1: 136, value2: 220 },
     { name: 'Mivessa', value1: 275, value2: 44 },
-    
-  
-    
-    
-
-
 ];
 
 const barHeight = 20; // Height per bar, adjust as needed
@@ -62,16 +55,17 @@ const ReportPage = () => {
     return (
         <div className='h-screen bg-custombg p-4 '>
             <div className='bg-white p-4 rounded-xl '>
-                <div className='w-72 mb-2'>
+                <div className='w-80 mb-2'>
                     <p className='text-lg montserrat-bold'>Resolved vs. Unresolved Chart</p>
                     <div className="flex items-center border rounded-md overflow-hidden">
-                        <span className="text-custom-gray81 bg-custombg flex items-center w-28 -mr-3 pl-3 py-1">Month</span>
+                        <span className="text-custom-gray81 bg-custombg flex items-center w-44 -mr-3 pl-3 py-1">Department</span>
                         <div className="relative w-full">
                             <select name="concern" className="appearance-none w-full px-4 py-1 bg-white focus:outline-none border-0">
                                 <option value="">Select</option>
-                                <option value="january">January</option>
-                                <option value="February">February</option>
-                                <option value="March">March</option>
+                                <option value="january">Engineering</option>
+                                <option value="February">Sales</option>
+                                <option value="February">AP Commission</option>
+                                
                             </select>
                             <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3 bg-custombg">
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-custom-gray81" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
