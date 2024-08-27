@@ -17,15 +17,15 @@ const InquiryFormModal = ({modalRef}) => {
                 <div className="flex flex-col gap-2">
                     <div className="flex items-center border rounded-md overflow-hidden">
                         <span className="text-custom-gray81 bg-custombg flex w-3/4 pl-3 py-1">Name</span>
-                        <input name='name' type="text" className="w-full px-4 focus:outline-none" placeholder="Input Text" />
+                        <input name='name' type="text" className="w-full px-4 focus:outline-none" placeholder="" />
                     </div>
                     <div className="flex items-center border rounded-md overflow-hidden">
                         <span className="text-custom-gray81 bg-custombg flex w-3/4 pl-3 py-1">Contact Number</span>
-                        <input name='contact' type="text" className="w-full px-4 focus:outline-none" placeholder="Input Text" />
+                        <input name='contact' type="text" className="w-full px-4 focus:outline-none" placeholder="" />
                     </div>
                     <div className="flex items-center border rounded-md overflow-hidden">
                         <span className="text-custom-gray81 bg-custombg flex w-3/4 pl-3 py-1">Email</span>
-                        <input name='email' type="email" className="w-full px-4 focus:outline-none" placeholder="Input Text" />
+                        <input name='email' type="email" className="w-full px-4 focus:outline-none" placeholder="" />
                     </div>
                     <div className="flex items-center border rounded-md overflow-hidden">
                         <span className="text-custom-gray81 bg-custombg flex items-center w-3/4 -mr-3 pl-3 py-1">Concern</span>

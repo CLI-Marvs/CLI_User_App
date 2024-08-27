@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import TicketTable from "./TicketTable";
 import { IoIosArrowUp, IoIosArrowDown } from "react-icons/io";
+import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md";
 import ReactPaginate from "react-paginate";
 import { useStateContext } from "../../../context/contextprovider";
 import apiService from "../../servicesApi/apiService";
@@ -12,6 +13,31 @@ const InquiryList = () => {
         const selectedPage = data.selected;
         setCurrentPage(selectedPage);
     };
+
+    const [isOpen, setIsOpen] = useState(false);
+    const [selectedOption, setSelectedOption] = useState('All');
+  
+    const toggleDropdown = () => {
+      setIsOpen(!isOpen);
+    };
+  
+    const handleOptionClick = (option) => {
+      setSelectedOption(option);
+      setIsOpen(false); 
+    };
+
+    const [activeDayButton, setActiveDayButton] = useState(null);
+    const [assignedToMeActive, setAssignedToMeActive] = useState(false);
+
+    const handleDayClick = (day) => {
+        setActiveDayButton((prev) => (prev === day ? null : day));
+      };
+    
+      const handleAssignedToMeClick = () => {
+        setAssignedToMeActive(!assignedToMeActive);
+      };
+  
+      const dayButtonLabels = ['3+ Days', '2 Days', '1 Day'];
 
     return (
         <>
@@ -36,7 +62,7 @@ const InquiryList = () => {
                             <input
                                 type="text"
                                 className="h-10 w-full rounded-lg pl-9 pr-6 text-sm"
-                                placeholder="Search Reservation"
+                                placeholder="Search"
                             />
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
@@ -56,35 +82,66 @@ const InquiryList = () => {
                     </div>
                 </div>
                 <div className="max-w-5xl">
-                    <div className="flex items-center h-12 mt-3 px-6 gap-2 bg-white rounded-t-lg mb-1">
-                        <div className="mr-4">
-                            <button className="flex items-center gap-3 text-custom-bluegreen font-semibold">
-                                <IoIosArrowDown /> Unresolved
+                    <div className="flex justify-between items-center h-12 mt-3 px-6 gap-2 bg-white rounded-t-lg mb-1">
+                        <div className="relative mr-4">
+                            <button
+                                className="flex text-[20px] items-center gap-3 text-custom-bluegreen font-semibold"
+                                onClick={toggleDropdown}
+                            >
+                                {isOpen ? <IoIosArrowUp /> : <IoIosArrowDown /> } {selectedOption}
                             </button>
+
+                            {/* Dropdown Menu */}
+                            {isOpen && (
+                                <div className="absolute top-full mt-2 w-48 bg-white border border-gray-200 shadow-lg rounded-md">
+                                <ul className="py-2">
+                                    <li
+                                    className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                                    onClick={() => handleOptionClick('All')}
+                                    >
+                                    All
+                                    </li>
+                                    <li
+                                    className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                                    onClick={() => handleOptionClick('Resolve')}
+                                    >
+                                    Resolve
+                                    </li>
+                                    <li
+                                    className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                                    onClick={() => handleOptionClick('Unresolve')}
+                                    >
+                                    Unresolve
+                                    </li>
+                                </ul>
+                                </div>
+                            )}
                         </div>
-                        <button className="flex items-center bg-custom-lightgreen h-6 px-3 rounded-3xl">
-                            <p className="text-sm text-white montserrat-semibold">
-                                All
-                            </p>
-                        </button>
-                        <button className="flex items-center border-custom-lightgreen border text-custom-lightgreen h-6 px-3 rounded-3xl">
-                            <p className="text-sm montserrat-semibold">
-                                Assigned to me
-                            </p>
-                        </button>
-                        <button className="flex items-center border-custom-lightgreen border text-custom-lightgreen h-6 px-3 rounded-3xl">
-                            <p className="text-sm montserrat-semibold">
-                                3+ Days
-                            </p>
-                        </button>
-                        <button className="flex items-center border-custom-lightgreen border text-custom-lightgreen h-6 px-3 rounded-3xl">
-                            <p className="text-sm montserrat-semibold">
-                                2 Days
-                            </p>
-                        </button>
-                        <button className="flex items-center border-custom-lightgreen border text-custom-lightgreen h-6 px-3 rounded-3xl">
-                            <p className="text-sm montserrat-semibold">1 Day</p>
-                        </button>
+                       <div className="flex gap-2 justify-end">
+                            <div className="flex space-x-2">
+                                <button
+                                    onClick={handleAssignedToMeClick}
+                                    className={`flex items-center border border-custom-lightgreen text-custom-lightgreen h-[25px] px-3 rounded-3xl ${
+                                    assignedToMeActive ? 'bg-custom-lightgreen text-white' : ''
+                                    }`}
+                                >
+                                    <p className="text-sm montserrat-semibold">Assigned to me</p>
+                                </button>
+
+                                {dayButtonLabels.map((label) => (
+                                    <button
+                                    key={label}
+                                    onClick={() => handleDayClick(label)}
+                                    className={`flex items-center border border-custom-lightgreen text-custom-lightgreen h-[25px] px-3 rounded-3xl ${
+                                        activeDayButton === label ? 'bg-custom-lightgreen text-white' : ''
+                                    }`}
+                                    >
+                                    <p className="text-sm montserrat-semibold">{label}</p>
+                                    </button>
+                                ))}
+                            </div>
+                       </div>
+                        
                     </div>
                     <div>
                         <TicketTable
@@ -100,27 +157,19 @@ const InquiryList = () => {
                     <div className="flex justify-end mt-4">
                         <div className="p-4 rounded-lg">
                             <ReactPaginate
-                                previousLabel={"Previous"}
-                                nextLabel={"Next"}
+                                previousLabel={<MdKeyboardArrowLeft />}
+                                nextLabel={<MdKeyboardArrowRight />}
                                 breakLabel={"..."}
                                 pageCount={pageCount} // Use the dynamic pageCount state
                                 marginPagesDisplayed={2}
                                 pageRangeDisplayed={1}
                                 onPageChange={handlePageClick}
                                 containerClassName={"flex gap-2"}
-                                previousLinkClassName={
-                                    "bg-white text-custom-bluegreen font-semibold px-3 py-1 rounded-lg hover:bg-custom-bluegreen hover:text-white"
-                                }
-                                nextLinkClassName={
-                                    "bg-white text-custom-bluegreen font-semibold px-3 py-1 rounded-lg hover:bg-custom-bluegreen hover:text-white"
-                                }
-                                pageLinkClassName={
-                                    "bg-white text-custom-bluegreen font-semibold px-3 py-1 rounded-lg hover:bg-custom-bluegreen hover:text-white"
-                                }
-                                /*    activeLinkClassName={"bg-green-500 text-white"} */
-                                activeLinkClassName={
-                                    "bg-custom-bluegreen text-white"
-                                }
+                                previousClassName="bg-white text-custom-bluegreen font-semibold px-2 py-2 rounded-[4px] hover:bg-custom-lightgreen hover:text-white"
+                                nextClassName="bg-white text-custom-bluegreen font-semibold px-2 py-2 rounded-[4px] hover:bg-custom-lightgreen hover:text-white"
+                                pageClassName="bg-gray-200 text-black rounded-full p-2 hover:bg-gray-300"
+                                activeClassName="bg-custom-solidgreen text-white"
+                               
                                 disabledLinkClassName={
                                     "text-gray-300 cursor-not-allowed"
                                 }

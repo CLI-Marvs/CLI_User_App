@@ -34,7 +34,7 @@ const Navbar = () => {
       <div className="flex items-center justify-center">
         <div className="flex gap-3">
           <div className='flex items-center'>
-            <button className='text-lg font-bold' onClick={handleLogout}>Logout</button>
+            <button className='text-base font-bold bg-gradient-to-r from-custom-bluegreen via-custom-lightgreen to-custom-lightgreen bg-clip-text text-transparent' onClick={handleLogout}>Logout</button>
           </div>
           <div >
             <img src={Kent} alt="kent" className='h-14 w-14 rounded-full  border-8' />

@@ -24,9 +24,9 @@ const Sidebar = () => {
 
   return (
     <>
-      <Card className=" w-full max-w-[17rem] p-4 pt-0 rounded-none bg-custombg">
+      <Card className=" w-[230px] max-w-[230px] p-4 pt-0 rounded-none bg-custombg">
         <List className='px-3 mt-6'>
-          <ListItem className='flex items-center h-7 mb-2 pl-5 gap-2 rounded-2xl text-custom-solidgreen hover:bg-custom-lightestgreen hover:font-semibold'>
+          <ListItem className='flex text-sm items-center h-[39px] pl-5 gap-2 rounded-[50px] text-custom-solidgreen hover:bg-custom-lightestgreen hover:font-semibold'>
             Notifications
             <ListItemSuffix>
               <Chip
@@ -38,40 +38,49 @@ const Sidebar = () => {
               />
             </ListItemSuffix>
           </ListItem>
-          <ListItem className={`h-7 mb-2 pl-5 gap-2 rounded-2xl text-custom-solidgreen hover:bg-custom-lightestgreen hover:font-semibold`} >
-            Property & Pricing
-          </ListItem>
-          <ListItem className={`h-7 mb-2 pl-5 gap-2 rounded-2xl text-custom-solidgreen hover:bg-custom-lightestgreen hover:font-semibold`}>
-            Sales Management
-          </ListItem>
-          <div className='flex items-center'>
-            <ListItem className={` h-7 mb-2 pl-5 gap-2 rounded-2xl text-custom-solidgreen hover:bg-custom-lightestgreen hover:font-semibold`}>
-              Broker Management
-            </ListItem>
-          </div>
           <Link to="/inquirymanagement/inquirylist">
             <ListItem
-              className={`h-7 mb-2 pl-5 gap-2 rounded-2xl ${activeItem === 'inquiry' ? 'bg-custom-lightestgreen text-custom-solidgreen font-semibold' : 'text-custom-solidgreen'} hover:bg-custom-lightestgreen hover:font-semibold`}
+              className={`h-[39px] text-sm mb-2 pl-5 gap-2 rounded-[50px] ${activeItem === 'inquiry' ? 'bg-custom-lightestgreen text-custom-solidgreen font-semibold' : 'text-custom-solidgreen'} hover:bg-custom-lightestgreen hover:font-semibold`}
               onClick={() => handleItemClick('inquiry')}
             >
               Inquiry Management
             </ListItem>
-        </Link>
-          <div className='flex items-center'>
-            <ListItem className={`h-7 mb-2 pl-5 gap-2 rounded-2xl text-custom-solidgreen hover:bg-custom-lightestgreen hover:font-semibold`}>
-              Transaction Management
-            </ListItem>
+          </Link>
+          <div className='mt-3 mb-1 px-4'>
+            <p className='text-[14px] font-bold bg-gradient-to-r from-custom-bluegreen via-custom-lightgreen to-custom-solidgreen bg-clip-text text-transparent'>Coming Soon</p>
           </div>
-          <div className='flex items-center'>
-            <ListItem className={`h-7 mb-2 pl-5 gap-2 rounded-2xl text-custom-solidgreen hover:bg-custom-lightestgreen hover:font-semibold`}>
-              Documents Management
-            </ListItem>
+          <div className=' text-sm p-4 h-auto rounded-[10px] text-gray-400 border border-custom-lightestgreen flex flex-col gap-4 cursor-not-allowed'>
+            <p>Property & Pricing</p>
+            <p>Sales Management</p>
+            <p>Broker Management</p>
+            <p className='leading-none'>Transaction <br/>Management</p>
+            <p className='leading-none'>Document<br/> Management</p>
+            <p className='leading-none'>Property<br/> Management</p>
+
+
+
+            {/*  <ListItem className={`h-7 mb-2 pl-5 gap-2 rounded-2xl text-custom-solidgreen hover:bg-custom-lightestgreen hover:font-semibold`} >
+                Property & Pricing
+              </ListItem>
+              <ListItem className={`h-7 mb-2 pl-5 gap-2 rounded-2xl text-custom-solidgreen hover:bg-custom-lightestgreen hover:font-semibold`}>
+                Sales Management
+              </ListItem>
+            
+              <ListItem className={` h-7 mb-2 pl-5 gap-2 rounded-2xl text-custom-solidgreen hover:bg-custom-lightestgreen hover:font-semibold`}>
+                Broker Management
+              </ListItem>
+              <ListItem className={`h-7 mb-2 pl-5 gap-2 rounded-2xl text-custom-solidgreen hover:bg-custom-lightestgreen hover:font-semibold`}>
+                Transaction Management
+              </ListItem>
+              <ListItem className={`h-7 mb-2 pl-5 gap-2 rounded-2xl text-custom-solidgreen hover:bg-custom-lightestgreen hover:font-semibold`}>
+                Documents Management
+              </ListItem>
+              <ListItem className={`h-7 mb-2 pl-5 gap-2 rounded-2xl text-custom-solidgreen hover:bg-custom-lightestgreen hover:font-semibold`}>
+                Property Management
+              </ListItem> */}
           </div>
-          <div className='flex items-center'>
-            <ListItem className={`h-7 mb-2 pl-5 gap-2 rounded-2xl text-custom-solidgreen hover:bg-custom-lightestgreen hover:font-semibold`}>
-              Property Management
-            </ListItem>
-          </div>
+          
+          
 
 
 
