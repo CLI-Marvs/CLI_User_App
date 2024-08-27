@@ -160,7 +160,7 @@ class ConcernController extends Controller
                 'log_type' => 'admin_reply',
                 'details' => [
                     'admin_name' => $request->admin_name,
-                   'department' => $request->admin_email,
+                    'department' => $request->admin_email,
                 ]
             ];
 
