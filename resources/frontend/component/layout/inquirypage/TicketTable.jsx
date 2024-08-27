@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { TiPin, TiPinOutline } from "react-icons/ti";
 import { Link, useNavigate } from "react-router-dom";
+import { useStateContext } from "../../../context/contextprovider";
 
 const TicketTable = ({ setConcernData }) => {
     const [checkedRows, setCheckedRows] = useState([]); // Track checked rows
@@ -54,10 +55,12 @@ const TicketTable = ({ setConcernData }) => {
     };
 
     const navigateToThread = (items) => {
-        navigate(`/inquirymanagement/thread/${items.ticket_id}`, {
+        const encodedTicketId = encodeURIComponent(items.ticket_id);
+        navigate(`/inquirymanagement/thread/${encodedTicketId}`, {
             state: { item: items },
         });
     };
+    
 
     return (
         <table className="flex flex-col gap-1 w-full">

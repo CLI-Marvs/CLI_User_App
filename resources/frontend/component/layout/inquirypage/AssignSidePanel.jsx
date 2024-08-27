@@ -1,8 +1,12 @@
-import React,{useRef} from 'react'
+import React,{useEffect, useRef} from 'react'
 import AssignDetails from './AssignDetails'
 import AssignModal from './AssignModal';
+import { useStateContext } from '../../../context/contextprovider';
 
-const AssignSidePanel = () => {
+const AssignSidePanel = ({ticketId}) => {
+    const { setTicketId, logs} = useStateContext();
+
+    const logsMessages = logs[ticketId] || [];
 
     const modalRef = useRef(null);
 
@@ -11,6 +15,12 @@ const AssignSidePanel = () => {
             modalRef.current.showModal();
         }
     };
+
+    console.log("logs", logs);
+
+    useEffect(() => {
+        setTicketId(ticketId);
+    }, [ticketId, setTicketId]);
 
     return (
         <>
@@ -32,12 +42,8 @@ const AssignSidePanel = () => {
                 </div>
                 <div className="h-full flex flex-col">
                     <div className="h-90 overflow-y-auto">
-                        <AssignDetails />
-                        <AssignDetails /> 
-                        <AssignDetails />  
-                        <AssignDetails />  
-                        <AssignDetails />  
-                        <AssignDetails />  
+                        <AssignDetails logMessages={logsMessages}/>
+                      
   
                     </div>
                     <div className="border border-t-1 border-custom-lightestgreen flex-shrink-0"></div>

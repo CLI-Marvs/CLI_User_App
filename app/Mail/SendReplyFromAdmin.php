@@ -1,0 +1,78 @@
+<?php
+
+namespace App\Mail;
+
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Mail\Mailable;
+use Illuminate\Mail\Mailables\Content;
+use Illuminate\Mail\Mailables\Envelope;
+use Illuminate\Mail\Mailables\Headers;
+use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
+
+class SendReplyFromAdmin extends Mailable
+{
+    use Queueable, SerializesModels;
+
+    protected $ticket_id;
+    protected $email;
+    protected $details_message;
+    protected $message_id;
+
+    public function __construct($ticket_id, $email, $details_message, $message_id = null)
+    {
+        $this->ticket_id = $ticket_id;
+        $this->email = $email;
+        $this->details_message = $details_message;
+        $this->message_id = $message_id;
+        
+    }
+
+    /**
+     * Get the message envelope.
+     */
+    public function envelope(): Envelope
+    {
+
+        return new Envelope(
+            subject: "[CLI Inquiry] Transaction {$this->ticket_id}",
+        );
+    }
+
+    public function headers(): Headers
+    {
+
+        return new Headers(
+            messageId: $this->message_id, 
+            references: [$this->message_id],
+            text: [
+                'In-Reply-To' => $this->message_id,
+                'X-Custom-Header' => 'Custom Value',
+            ],
+        );
+    }
+
+    /**
+     * Get the message content definition.
+     */
+    public function content(): Content
+    {
+        return new Content(
+            view: 'message',
+            with: [
+                'details_message' => $this->details_message
+            ],
+        );
+    }
+
+    /**
+     * Get the attachments for the message.
+     *
+     * @return array<int, \Illuminate\Mail\Mailables\Attachment>
+     */
+    public function attachments(): array
+    {
+        return [];
+    }
+}

@@ -6,11 +6,36 @@ import { useStateContext } from "../../../context/contextprovider";
 import apiService from "../../servicesApi/apiService";
 
 const InquiryList = () => {
-    const { currentPage, setCurrentPage, data, pageCount } = useStateContext();
+    const {
+        currentPage,
+        setCurrentPage,
+        data,
+        pageCount,
+        getAllConcerns,
+        daysFilter,
+        setDaysFilter,
+    } = useStateContext();
 
     const handlePageClick = (data) => {
         const selectedPage = data.selected;
         setCurrentPage(selectedPage);
+        
+    };
+
+    const handleRefresh = () => {
+        setDaysFilter(null);
+        getAllConcerns();
+    };
+
+    const displayAll = () => {
+        setDaysFilter(null);
+        setCurrentPage(0);
+    };
+
+    const handleFilterChange = (days) => {
+        setDaysFilter(days);
+        setCurrentPage(0);
+
     };
 
     return (
@@ -62,7 +87,10 @@ const InquiryList = () => {
                                 <IoIosArrowDown /> Unresolved
                             </button>
                         </div>
-                        <button className="flex items-center bg-custom-lightgreen h-6 px-3 rounded-3xl">
+                        <button
+                            onClick={displayAll}
+                            className="flex items-center bg-custom-lightgreen h-6 px-3 rounded-3xl"
+                        >
                             <p className="text-sm text-white montserrat-semibold">
                                 All
                             </p>
@@ -72,24 +100,38 @@ const InquiryList = () => {
                                 Assigned to me
                             </p>
                         </button>
-                        <button className="flex items-center border-custom-lightgreen border text-custom-lightgreen h-6 px-3 rounded-3xl">
+                        <button
+                            onClick={() => handleFilterChange(3)}
+                            className="flex items-center border-custom-lightgreen border text-custom-lightgreen h-6 px-3 rounded-3xl"
+                        >
                             <p className="text-sm montserrat-semibold">
                                 3+ Days
                             </p>
                         </button>
-                        <button className="flex items-center border-custom-lightgreen border text-custom-lightgreen h-6 px-3 rounded-3xl">
+                        <button
+                            onClick={() => handleFilterChange(2)}
+                            className="flex items-center border-custom-lightgreen border text-custom-lightgreen h-6 px-3 rounded-3xl"
+                        >
                             <p className="text-sm montserrat-semibold">
                                 2 Days
                             </p>
                         </button>
-                        <button className="flex items-center border-custom-lightgreen border text-custom-lightgreen h-6 px-3 rounded-3xl">
+                        <button
+                            onClick={() => handleFilterChange(1)}
+                            className="flex items-center border-custom-lightgreen border text-custom-lightgreen h-6 px-3 rounded-3xl"
+                        >
                             <p className="text-sm montserrat-semibold">1 Day</p>
                         </button>
+                        <button onClick={handleRefresh}>Refresh</button>
                     </div>
                     <div>
-                        <TicketTable
-                            setConcernData={data}
-                        />
+                        {data.length === 0 ? (
+                            <p className="text-center text-gray-500 py-4">
+                                No data found
+                            </p>
+                        ) : (
+                            <TicketTable setConcernData={data} />
+                        )}
                     </div>
 
                     <div className="flex justify-end items-center h-12 px-6 gap-2 bg-white rounded-b-lg">
@@ -103,7 +145,7 @@ const InquiryList = () => {
                                 previousLabel={"Previous"}
                                 nextLabel={"Next"}
                                 breakLabel={"..."}
-                                pageCount={pageCount} // Use the dynamic pageCount state
+                                pageCount={pageCount}
                                 marginPagesDisplayed={2}
                                 pageRangeDisplayed={1}
                                 onPageChange={handlePageClick}
@@ -118,12 +160,11 @@ const InquiryList = () => {
                                     "bg-white text-custom-bluegreen font-semibold px-3 py-1 rounded-lg hover:bg-custom-bluegreen hover:text-white"
                                 }
                                 /*    activeLinkClassName={"bg-green-500 text-white"} */
-                                activeLinkClassName={
-                                    "bg-custom-bluegreen text-white"
-                                }
+                                activeLinkClassName={"bg-red-500 text-white"}
                                 disabledLinkClassName={
                                     "text-gray-300 cursor-not-allowed"
                                 }
+                                forcePage={currentPage}
                             />
                         </div>
                     </div>
