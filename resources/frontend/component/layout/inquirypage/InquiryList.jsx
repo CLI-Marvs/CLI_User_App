@@ -169,13 +169,13 @@ const InquiryList = () => {
                         
                     </div>
                     <div>
-                        {data.length === 0 ? (
-                            <p className="text-center text-gray-500 py-4">
-                                No data found
-                            </p>
-                        ) : (
-                            <TicketTable setConcernData={data} />
-                        )}
+                    {(data && data.length === 0) ? (
+                        <p className="text-center text-gray-500 py-4">
+                            No data found
+                        </p>
+                    ) : (
+                        <TicketTable setConcernData={data || []} />
+                    )}
                     </div>
 
                     <div className="flex justify-end items-center h-12 px-6 gap-2 bg-white rounded-b-lg">
