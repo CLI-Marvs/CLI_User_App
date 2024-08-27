@@ -5,7 +5,7 @@ import { useStateContext } from "../../../context/contextprovider";
 
 const TicketTable = ({ setConcernData }) => {
     const [checkedRows, setCheckedRows] = useState([]); // Track checked rows
-
+    const {getMessages} = useStateContext();
     const handleCheckboxChange = (index) => {
         setCheckedRows((prevCheckedRows) =>
             prevCheckedRows.includes(index)
@@ -55,6 +55,7 @@ const TicketTable = ({ setConcernData }) => {
     };
 
     const navigateToThread = (items) => {
+        getMessages(items.ticket_id);
         const encodedTicketId = encodeURIComponent(items.ticket_id);
         navigate(`/inquirymanagement/thread/${encodedTicketId}`, {
             state: { item: items },

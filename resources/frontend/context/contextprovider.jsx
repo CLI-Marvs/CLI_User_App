@@ -81,8 +81,6 @@ export const ContextProvider = ({ children }) => {
     };
 
 
-
-
     useEffect(() => {
         getAllConcerns();
     }, [currentPage, daysFilter]);
