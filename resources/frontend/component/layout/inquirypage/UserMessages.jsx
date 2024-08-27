@@ -2,7 +2,7 @@ import React from 'react'
 import FolderFile from '../../../../../public/Images/folder_file.svg'
 import Kent from '../../../../../public/Images/kent.png'
 
-const UserMessages = () => {
+const UserMessages = ({items}) => {
   return (
     <div className='w-full'>
         <div className='flex w-full mt-10 gap-2'>
@@ -17,7 +17,7 @@ const UserMessages = () => {
         <div className='w-full mt-2 pl-12'>
             <div className='w-full h-auto gradient-background1 rounded-b-lg rounded-r-lg  px-8 py-3 text-white'>
                 <div>
-                    <p>I have an issue regarding my bank account it seems that it's not functioning very well when i use it to pay my bills on the property.</p>
+                    <p>{items.details_message}</p>
                 </div>
                 <div className='mt-4'>
                     <button className='flex items-center justify-start bg-customnavbar h-12 px-24 pl-4 text-black gap-2 rounded-lg'>

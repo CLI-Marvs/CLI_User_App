@@ -1,7 +1,7 @@
 import React from 'react'
 import Sho from '../../../../../public/Images/rodfil.png'
 
-const AdminMessages = () => {
+const AdminMessages = ({items}) => {
   return (
     <div className='w-full'>
         <div className='flex justify-end w-full mt-10 gap-2 '>
@@ -17,7 +17,7 @@ const AdminMessages = () => {
         <div className='w-full mt-2 mb-5 pr-12'>
             <div className=' w-full h-auto gradient-background2 rounded-b-lg rounded-l-lg px-8 py-3'>
                 <div>
-                    <p>I found the issue regarding your bank account and it seems that it’s functioning very well now. Use it when you pay bills on your property.</p>
+                    <p>{items.details_message}</p>
                 </div>
                 {/*  <div className='mt-4'>
                     <button className='flex items-center justify-start bg-customnavbar h-12 px-24 pl-4 text-black gap-2 rounded-lg'>

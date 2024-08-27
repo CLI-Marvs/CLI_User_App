@@ -14,17 +14,18 @@ const CallBackView = () => {
 
         if (token) {
             setToken(token);
-            navigate("/inquirymanagement", { replace: true });
+            navigate("/inquirymanagement/inquirylist", { replace: true });
         }
     }, [navigate]);
 
     useEffect(() => {
         const getData = async () => {
             const response = await apiService.get("user");
+            console.log("response data user", response.data);
             setUser(response.data);
         };
         getData();
-    }, []);
+    }, [setUser]);
     return <div></div>;
 };
 

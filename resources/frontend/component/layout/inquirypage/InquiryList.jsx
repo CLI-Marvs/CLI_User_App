@@ -7,11 +7,36 @@ import { useStateContext } from "../../../context/contextprovider";
 import apiService from "../../servicesApi/apiService";
 
 const InquiryList = () => {
-    const { currentPage, setCurrentPage, data, pageCount } = useStateContext();
+    const {
+        currentPage,
+        setCurrentPage,
+        data,
+        pageCount,
+        getAllConcerns,
+        daysFilter,
+        setDaysFilter,
+    } = useStateContext();
 
     const handlePageClick = (data) => {
         const selectedPage = data.selected;
         setCurrentPage(selectedPage);
+        
+    };
+
+    const handleRefresh = () => {
+        setDaysFilter(null);
+        getAllConcerns();
+    };
+
+    const displayAll = () => {
+        setDaysFilter(null);
+        setCurrentPage(0);
+    };
+
+    const handleFilterChange = (days) => {
+        setDaysFilter(days);
+        setCurrentPage(0);
+
     };
 
     const [isOpen, setIsOpen] = useState(false);
@@ -144,9 +169,13 @@ const InquiryList = () => {
                         
                     </div>
                     <div>
-                        <TicketTable
-                            setConcernData={data}
-                        />
+                        {data.length === 0 ? (
+                            <p className="text-center text-gray-500 py-4">
+                                No data found
+                            </p>
+                        ) : (
+                            <TicketTable setConcernData={data} />
+                        )}
                     </div>
 
                     <div className="flex justify-end items-center h-12 px-6 gap-2 bg-white rounded-b-lg">
@@ -160,7 +189,7 @@ const InquiryList = () => {
                                 previousLabel={<MdKeyboardArrowLeft />}
                                 nextLabel={<MdKeyboardArrowRight />}
                                 breakLabel={"..."}
-                                pageCount={pageCount} // Use the dynamic pageCount state
+                                pageCount={pageCount}
                                 marginPagesDisplayed={2}
                                 pageRangeDisplayed={1}
                                 onPageChange={handlePageClick}
@@ -173,6 +202,7 @@ const InquiryList = () => {
                                 disabledLinkClassName={
                                     "text-gray-300 cursor-not-allowed"
                                 }
+                                forcePage={currentPage}
                             />
                         </div>
                     </div>

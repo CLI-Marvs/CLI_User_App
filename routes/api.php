@@ -17,3 +17,10 @@ Route::post('/add-concern', [ConcernController::class, 'addConcernPublic']);
 
 Route::get('/get-concern', [ConcernController::class, 'getAllConcerns']);
 
+Route::get('/get-message/{ticketId}', [ConcernController::class, 'getMessage']);
+
+
+Route::post('/send-message', [ConcernController::class, 'sendMessage']);
+
+
+Route::get('/get-logs/{ticketId}', [ConcernController::class, 'getInquiryLogs']);
