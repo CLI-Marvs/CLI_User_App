@@ -56,7 +56,6 @@ const TicketTable = ({ setConcernData }) => {
 
     const navigateToThread = (items) => {
         getMessages(items.ticket_id);
-        getAllConcerns();
         const encodedTicketId = encodeURIComponent(items.ticket_id);
         navigate(`/inquirymanagement/thread/${encodedTicketId}`, {
             state: { item: items },
