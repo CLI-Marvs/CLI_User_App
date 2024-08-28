@@ -39,10 +39,12 @@ const InquiryThread = () => {
 
     console.log("message_idsss", messageId);
     const submitMessage = async () => {
+        const encodedTicketId = encodeURIComponent(ticketId);
+
         try {
             const response = await apiService.post("send-message", {
                 admin_email: user?.employee_email,
-                ticket_id: ticketId,
+                ticket_id: encodedTicketId,
                 details_message: chatMessage,
                 admin_name: user?.firstname + ' ' + user?.lastname,
                 message_id: messageId,
