@@ -19,6 +19,7 @@ import BasicPricingView from "./views/pages/PropertyAndPricingViews/BasicPricing
 import PaymentSchemeView from "./views/pages/PropertyAndPricingViews/PaymentSchemeView";
 import PriceVersioningView from "./views/pages/PropertyAndPricingViews/PriceVersioningView";
 import PromotionalPricingView from "./views/pages/PropertyAndPricingViews/PromotionalPricingView";
+import NotificationView from "./views/pages/notificationViews/NotificationView";
 const App = () => {
 
     const Layout = () => {
@@ -58,6 +59,10 @@ const App = () => {
                 {
                     path: "home",
                     element:<Home/>,
+                },
+                {
+                    path: "notification",
+                    element:<NotificationView/>,
                 },
                 {
                     path: "inquirymanagement",

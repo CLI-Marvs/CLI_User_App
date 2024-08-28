@@ -83,7 +83,7 @@ const TicketTable = ({ setConcernData }) => {
                                 className="cursor-pointer"
                             />
                         </td> */}
-                            <td className="w-14 flex justify-center text-xl text-custom-solidgreen">
+                            <td className="w-14 flex justify-center pl-4 text-xl text-custom-solidgreen">
                                 <button onClick={() => togglePin(index)}>
                                     {row.isPinned ? (
                                         <TiPin />
@@ -92,7 +92,7 @@ const TicketTable = ({ setConcernData }) => {
                                     )}
                                 </button>
                             </td>
-                            <td className="w-40 font-semibold text-custom-bluegreen">
+                            <td className="w-40 px-4 shrink-0 truncate font-semibold text-custom-bluegreen">
                                 <p>{row.buyer_name}</p>
                             </td>
                             <td className="flex flex-1 gap-1 text-custom-bluegreen">

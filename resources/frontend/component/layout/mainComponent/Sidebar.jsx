@@ -24,20 +24,26 @@ const Sidebar = () => {
 
   return (
     <>
-      <Card className=" w-[230px] max-w-[230px] p-4 pt-0 rounded-none bg-custombg">
+      <Card className=" w-[230px] max-w-[230px] p-4 pt-0 rounded-none bg-custom-grayFA">
         <List className='px-3 mt-6'>
-          <ListItem className='flex text-sm items-center h-[39px] pl-5 gap-2 rounded-[50px] text-custom-solidgreen hover:bg-custom-lightestgreen hover:font-semibold'>
-            Notifications
-            <ListItemSuffix>
-              <Chip
-                value="120"
-                size="sm"
-                variant="ghost"
-                color="blue-gray"
-                className="rounded-md gradient-btn2 mr-32 text-white"
-              />
-            </ListItemSuffix>
-          </ListItem>
+          <Link to="/notification">
+            <ListItem 
+              className={`flex text-sm items-center h-[39px] pl-5 gap-2 rounded-[50px] ${activeItem === 'notification' ? 'bg-custom-lightestgreen text-custom-solidgreen font-semibold' : 'text-custom-solidgreen'} hover:bg-custom-lightestgreen hover:font-semibold`}
+              onClick={() => handleItemClick('notification')}
+            >
+              Notifications
+              <ListItemSuffix>
+                <Chip
+                  value="120"
+                  size="sm"
+                  variant="ghost"
+                  color="blue-gray"
+                  className="rounded-md gradient-btn2 mr-32 text-white"
+                />
+              </ListItemSuffix>
+            </ListItem>
+          </Link>
+          
           <Link to="/inquirymanagement/inquirylist">
             <ListItem
               className={`h-[39px] text-sm mb-2 pl-5 gap-2 rounded-[50px] ${activeItem === 'inquiry' ? 'bg-custom-lightestgreen text-custom-solidgreen font-semibold' : 'text-custom-solidgreen'} hover:bg-custom-lightestgreen hover:font-semibold`}

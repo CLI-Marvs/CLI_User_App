@@ -27,6 +27,9 @@ export default {
         'custom-gray71' : '#717171',
         'custom-gray71' : '#717171',
         'custom-gray12' : '#121212',
+        'custom-grayA5' : '#A5A5A5',
+        'custom-grayF1' : '#F1F1F1',
+        'custom-grayFA' : '#FAFAFA',
       },
       borderWidth: {
         '1': '1px',
@@ -51,6 +54,7 @@ export default {
         'custom': '0px 0px 10px rgba(0, 0, 0, 0.20)',
         'custom2': '0px 0px 20px rgba(0, 0, 0, 0.50)',
         'custom3': '0px 0px 10px rgba(0, 0, 0, 0.30)',
+        'custom4': '0px 3px 5px rgba(0, 0, 0, 0.30)',
 
       },
       width: {
