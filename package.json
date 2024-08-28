@@ -15,7 +15,10 @@
         "vite": "^5.0"
     },
     "dependencies": {
+        "@emotion/react": "^11.13.3",
+        "@emotion/styled": "^11.13.0",
         "@material-tailwind/react": "^2.1.9",
+        "@mui/material": "^6.0.0",
         "js-cookie": "^3.0.5",
         "react": "^18.3.1",
         "react-dom": "^18.3.1",

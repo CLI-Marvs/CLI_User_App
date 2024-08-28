@@ -183,7 +183,6 @@ const InquiryList = () => {
                                 <button onClick={handleRefresh}>Refresh</button>
                             </div>
                        </div>
-                        
                     </div>
                     <div>
                     {(data && data.length === 0) ? (
