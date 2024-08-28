@@ -39,8 +39,6 @@ const InquiryThread = () => {
 
     console.log("message_idsss", messageId);
     const submitMessage = async () => {
-        const encodedTicketId = encodeURIComponent(ticketId);
-
         try {
             const response = await apiService.post("send-message", {
                 admin_email: user?.employee_email,
@@ -75,7 +73,7 @@ const InquiryThread = () => {
     };
     useEffect(() => {
         getSpecificMessageId();
-    }, [messageId]);
+    }, []);
     return (
         <>
             <div className="h-screen bg-custombg p-3 overflow-x-auto overflow-y-hidden">
