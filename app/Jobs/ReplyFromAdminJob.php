@@ -29,6 +29,9 @@ class ReplyFromAdminJob implements ShouldQueue
         $this->details_message = $details_message;
         $this->message_id = $message_id;
 
+
+        Log::info('message_id from job constructor', ['message_id' => $this->message_id]);
+
     }
 
     public function handle(Mailer $mailer)

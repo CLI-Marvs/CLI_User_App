@@ -26,7 +26,6 @@ class SendReplyFromAdmin extends Mailable
         $this->email = $email;
         $this->details_message = $details_message;
         $this->message_id = $message_id;
-        
     }
 
     /**
@@ -43,14 +42,19 @@ class SendReplyFromAdmin extends Mailable
     public function headers(): Headers
     {
 
-        return new Headers(
-            messageId: $this->message_id, 
-            references: [$this->message_id],
-            text: [
+        $headers = new Headers();
+
+        if ($this->message_id) {
+            // Only add these headers if message_id is provided
+            $headers->messageId = $this->message_id;
+            $headers->references = [$this->message_id];
+            $headers->text = [
                 'In-Reply-To' => $this->message_id,
                 'X-Custom-Header' => 'Custom Value',
-            ],
-        );
+            ];
+        }
+
+        return $headers;
     }
 
     /**

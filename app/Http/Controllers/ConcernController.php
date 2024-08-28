@@ -3,12 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Jobs\ReplyFromAdminJob;
+use App\Mail\SendReplyFromAdmin;
 use App\Models\Concerns;
 use App\Models\InquiryLogs;
 use App\Models\Messages;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-
+use Illuminate\Support\Facades\Mail;
 
 class ConcernController extends Controller
 {
@@ -133,20 +134,17 @@ class ConcernController extends Controller
         try {
             $message_id = $request->message_id;
             $messages = new Messages();
-            /*    $messages->buyer_id = $request->buyer_id; */
             $messages->admin_email = $request->admin_email;
             $messages->attachment = $request->attachment;
             $messages->ticket_id = $request->ticket_id;
-           /*  $messages->buyer_email = $request->buyer_email; */
             $messages->details_message = $request->details_message;
             $messages->save();
 
             $this->inquiryAdminLogs($request);
 
+            ReplyFromAdminJob::dispatch($messages->ticket_id, $request->buyer_email, $messages->details_message, $message_id);
+        /*   Mail::to($request->buyer_email)->send(new SendReplyFromAdmin($messages->ticket_id, $messages->details_message, $message_id)); */
 
-            
-            ReplyFromAdminJob::dispatch($messages->ticket_id, $messages->buyer_email, $messages->details_message, $message_id);
-            
 
             return response()->json("Sucessfully send");
         } catch (\Exception $e) {
