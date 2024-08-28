@@ -58,7 +58,7 @@ const InquiryThread = () => {
 
     useEffect(() => {
         setTicketId(ticketId);
-    }, [ticketId, setTicketId, item]);
+    }, [ticketId, setTicketId]);
     return (
         <>
             <div className="h-screen bg-custombg p-3 overflow-x-auto overflow-y-hidden">

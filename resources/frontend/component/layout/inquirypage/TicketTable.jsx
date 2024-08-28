@@ -62,9 +62,6 @@ const TicketTable = ({ setConcernData }) => {
         });
     };
     
-    useEffect(() => {
-        getAllConcerns();
-    }, []);
     return (
         <table className="flex flex-col gap-1 w-full">
             <tbody>
