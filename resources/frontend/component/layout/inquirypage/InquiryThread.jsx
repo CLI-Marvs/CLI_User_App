@@ -36,7 +36,7 @@ const InquiryThread = () => {
     };
 
 
-    console.log("message_id", item.message_id);
+    console.log("message_idsss", item.message_id);
     const submitMessage = async () => {
         try {
             const response = await apiService.post("send-message", {
