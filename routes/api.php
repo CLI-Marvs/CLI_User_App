@@ -24,3 +24,6 @@ Route::post('/send-message', [ConcernController::class, 'sendMessage']);
 
 
 Route::get('/get-logs/{ticketId}', [ConcernController::class, 'getInquiryLogs']);
+
+Route::get('/get-messageId/{ticketId}', [ConcernController::class, 'getMessageId']);
+

@@ -16,6 +16,7 @@ import apiService from "../../servicesApi/apiService";
 const InquiryThread = () => {
     const { messages, setTicketId, getMessages, user, getInquiryLogs } = useStateContext();
     const [chatMessage, setChatMessage] = useState("");
+    const [messageId, setMessageId] = useState(null);
     const modalRef = useRef(null);
     const navigate = useNavigate();
     const location = useLocation();
@@ -36,7 +37,7 @@ const InquiryThread = () => {
     };
 
 
-    console.log("message_idsss", item.message_id);
+    console.log("message_idsss", messageId);
     const submitMessage = async () => {
         try {
             const response = await apiService.post("send-message", {
@@ -59,6 +60,20 @@ const InquiryThread = () => {
     useEffect(() => {
         setTicketId(ticketId);
     }, [ticketId, setTicketId]);
+
+    const getSpecificMessageId = async() => {
+        try {
+            const encodedTicketId = encodeURIComponent(ticketId);
+
+            const response = await apiService.get(`get-messageId/${encodedTicketId}`);
+            setMessageId(response.data);
+        } catch (error) {
+            console.log("error retrieving message id", error);
+        }
+    };
+    useEffect(() => {
+        getSpecificMessageId();
+    }, [messageId]);
     return (
         <>
             <div className="h-screen bg-custombg p-3 overflow-x-auto overflow-y-hidden">
@@ -112,9 +127,8 @@ const InquiryThread = () => {
                                 onClick={handleBack}
                             />
                             <p className="text-sm montserrat-semibold text-custom-gray81 space-x-1">
-                                <span>Ticket #</span>
-                                <span>CM0000002</span>
-                                <span>|</span>
+                                {item.ticket_id}
+                                <span> |</span>
                                 <span>Transaction</span>
                                 <span>|</span>
                                 {item && (
