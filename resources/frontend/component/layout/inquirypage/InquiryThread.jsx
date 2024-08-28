@@ -19,11 +19,10 @@ const InquiryThread = () => {
     const modalRef = useRef(null);
     const navigate = useNavigate();
     const location = useLocation();
-    const { item } = location?.state;
+    const { item } = location?.state || {};
     const params = useParams();
     const ticketId = decodeURIComponent(params.id);
 
-    console.log("item", item);
     const conversationMessages = messages[ticketId] || [];
 
     const handleOpenModal = () => {
@@ -116,7 +115,9 @@ const InquiryThread = () => {
                                 <span>|</span>
                                 <span>Transaction</span>
                                 <span>|</span>
-                                <span>{item.property}</span>
+                                {item && (
+                                      <span>{item.property}</span>
+                                )}
                                 <span>|</span>
                                 <span>T207.012</span>
                             </p>

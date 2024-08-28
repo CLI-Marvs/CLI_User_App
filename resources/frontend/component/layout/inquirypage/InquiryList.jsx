@@ -33,11 +33,11 @@ const InquiryList = () => {
         setCurrentPage(0);
     };
 
-    const handleFilterChange = (days) => {
+   /*  const handleFilterChange = (days) => {
         setDaysFilter(days);
         setCurrentPage(0);
 
-    };
+    }; */
 
     const [isOpen, setIsOpen] = useState(false);
     const [selectedOption, setSelectedOption] = useState('All');
@@ -49,13 +49,29 @@ const InquiryList = () => {
     const handleOptionClick = (option) => {
       setSelectedOption(option);
       setIsOpen(false); 
+
+      if(option === "All") {
+        setDaysFilter(null);
+        setCurrentPage(0);
+      }
     };
 
     const [activeDayButton, setActiveDayButton] = useState(null);
     const [assignedToMeActive, setAssignedToMeActive] = useState(false);
 
     const handleDayClick = (day) => {
+        let newValue = 0;
+        
+        if(day === '3+ Days') {
+            newValue = 3;
+        } else if(day === '2 Days') {
+            newValue = 2;
+        } else if (day === '1 Day') {
+            newValue = 1;
+        }
         setActiveDayButton((prev) => (prev === day ? null : day));
+        setDaysFilter(newValue);
+        setCurrentPage(0);
       };
     
       const handleAssignedToMeClick = () => {
@@ -164,6 +180,7 @@ const InquiryList = () => {
                                     <p className="text-sm montserrat-semibold">{label}</p>
                                     </button>
                                 ))}
+                                <button onClick={handleRefresh}>Refresh</button>
                             </div>
                        </div>
                         
