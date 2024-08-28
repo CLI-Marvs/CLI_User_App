@@ -144,7 +144,9 @@ class ConcernController extends Controller
             $this->inquiryAdminLogs($request);
 
 
-            ReplyFromAdminJob::dispatch($messages->ticket_id, $messages->buyer_email, $messages->details_message, $message_id);
+            if($message_id !== null) {
+                ReplyFromAdminJob::dispatch($messages->ticket_id, $messages->buyer_email, $messages->details_message, $message_id);
+            }
 
             return response()->json("Sucessfully send");
         } catch (\Exception $e) {

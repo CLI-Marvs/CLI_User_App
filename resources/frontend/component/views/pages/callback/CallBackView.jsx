@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useStateContext } from "../../../../context/contextprovider";
 
 const CallBackView = () => {
-    const { setUser, setToken } = useStateContext();
+    const { setToken } = useStateContext();
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -18,15 +18,7 @@ const CallBackView = () => {
         }
     }, [navigate]);
 
-    useEffect(() => {
-        const getData = async () => {
-            const response = await apiService.get("user");
-            console.log("response data user", response.data);
-            setUser(response.data);
-        };
-        getData();
-    }, [setUser]);
-    return <div></div>;
+
 };
 
 export default CallBackView;

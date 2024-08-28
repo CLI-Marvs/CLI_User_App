@@ -37,6 +37,15 @@ export const ContextProvider = ({ children }) => {
         }
     };
 
+    useEffect(() => {
+        const getData = async () => {
+            const response = await apiService.get("user");
+            console.log("response data user", response.data);
+            setUser(response.data);
+        };
+        getData();
+    }, []);
+
     const getAllConcerns = async () => {
         try {
             const response = await apiService.get(

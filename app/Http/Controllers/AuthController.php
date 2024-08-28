@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Employee;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -38,15 +39,14 @@ class AuthController extends Controller
             }
             
 
-            $user = User::updateOrCreate(
+            $user = Employee::updateOrCreate(
                 ['google_id' => $googleUser->id],
                 [
-                    'fname' => $name[0],
-                    'lname' => $name[1],
-                    'email' => $googleUser->email,
-                    'password' => Str::password(12),
-                    'email_verified_at' => now(),
-                    'login_type' => "sso"
+                    'firstname' => $name[0],
+                    'lastname' => $name[1],
+                    'employee_email' => $googleUser->email,
+                    'email_verify_at' => now(),
+                 /*    'login_type' => "sso" */
                 ]
             );
             Auth::login($user);
