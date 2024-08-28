@@ -45,7 +45,7 @@ const InquiryThread = () => {
                 ticket_id: ticketId,
                 details_message: chatMessage,
                 admin_name: user?.firstname + ' ' + user?.lastname,
-                message_id: item.message_id,
+                message_id: messageId,
                 buyer_email: item.buyer_email
             });
 
