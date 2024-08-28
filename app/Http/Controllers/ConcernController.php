@@ -137,7 +137,7 @@ class ConcernController extends Controller
             $messages->admin_email = $request->admin_email;
             $messages->attachment = $request->attachment;
             $messages->ticket_id = $request->ticket_id;
-            $messages->buyer_email = $request->buyer_email;
+           /*  $messages->buyer_email = $request->buyer_email; */
             $messages->details_message = $request->details_message;
             $messages->save();
 

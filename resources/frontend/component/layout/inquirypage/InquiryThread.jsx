@@ -40,11 +40,12 @@ const InquiryThread = () => {
     const submitMessage = async () => {
         try {
             const response = await apiService.post("send-message", {
-                admin_email: user?.email,
+                admin_email: user?.employee_email,
                 ticket_id: ticketId,
                 details_message: chatMessage,
-                admin_name: user?.fname + ' ' + user?.lname,
-                message_id: item.message_id
+                admin_name: user?.firstname + ' ' + user?.lastname,
+                message_id: item.message_id,
+                buyer_email: item.buyer_email
             });
 
             getMessages(ticketId);
