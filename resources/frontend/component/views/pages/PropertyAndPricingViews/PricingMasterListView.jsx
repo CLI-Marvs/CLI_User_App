@@ -1,5 +1,6 @@
 import React from 'react'
-import PricingMasterList from '../../../layout/propertyandpricingpage/PricingMasterList'
+import PricingMasterList from '../../../layout/propertyandpricingpage/pricingmasterlist/PricingMasterList'
+
 
 const PricingMasterListView = () => {
   return (

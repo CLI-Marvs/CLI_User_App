@@ -1,5 +1,6 @@
 import React from 'react'
-import PromotionalPricing from '../../../layout/propertyandpricingpage/PromotionalPricing'
+import PromotionalPricing from '../../../layout/propertyandpricingpage/promotionalpricing/PromotionalPricing'
+
 
 const PromotionalPricingView = () => {
   return (

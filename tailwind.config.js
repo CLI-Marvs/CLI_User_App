@@ -55,6 +55,7 @@ export default {
         'custom2': '0px 0px 20px rgba(0, 0, 0, 0.50)',
         'custom3': '0px 0px 10px rgba(0, 0, 0, 0.30)',
         'custom4': '0px 3px 5px rgba(0, 0, 0, 0.30)',
+        'custom5': '0px 0px 5px rgba(0, 0, 0, 0.40)',
 
       },
       width: {

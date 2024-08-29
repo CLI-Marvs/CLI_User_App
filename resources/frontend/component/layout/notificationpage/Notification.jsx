@@ -101,25 +101,27 @@ const Notification = () => {
                 </table>
             </div>
             <div className='h-[63px] bg-white rounded-b-[10px] px-4 flex justify-start items-center gap-4'> </div>
-            <div className='flex w-full justify-end'>
-                         <ReactPaginate
-                                previousLabel={<MdKeyboardArrowLeft />}
-                                nextLabel={<MdKeyboardArrowRight />}
-                                breakLabel={"..."}
-                                pageCount={1}
-                                marginPagesDisplayed={2}
-                                pageRangeDisplayed={1}
-                                /* onPageChange={handlePageClick} */
-                                containerClassName={"flex gap-2"}
-                                previousClassName="border border-[#EEEEEE] text-custom-bluegreen font-semibold px-2 py-2 rounded-[4px] hover:bg-custom-lightgreen hover:text-white"
-                                nextClassName="border border-[#EEEEEE] text-custom-bluegreen font-semibold px-2 py-2 rounded-[4px] hover:bg-custom-lightgreen hover:text-white"
-                                pageClassName=" border border-[#EEEEEE] text-black p-2 hover:bg-custom-lightgreen"
-                                activeClassName="px-3 py-1 border border-[#EEEEEE] bg-[#F5F5F5] bg-custom-solidgreen rounded-[4px]"
-                                disabledLinkClassName={
-                                    "text-gray-300 cursor-not-allowed"
-                                }
-                                /* forcePage={currentPage} */
-                            />
+            <div className='flex w-full justify-end mt-3'>
+                <ReactPaginate
+                previousLabel={<MdKeyboardArrowLeft className='text-[#404B52]'/>}
+                nextLabel={<MdKeyboardArrowRight className='text-[#404B52]'/>}
+                breakLabel={"..."}
+                pageCount={2}
+                marginPagesDisplayed={2}
+                pageRangeDisplayed={1}
+                /* onPageChange={handlePageClick} */
+                containerClassName={"flex gap-2"}
+                previousClassName="border border-[#EEEEEE] text-custom-bluegreen font-semibold w-[26px] h-[24px] rounded-[4px] flex justify-center items-center hover:text-white hover:bg-custom-lightgreen hover:text-white"
+                nextClassName="border border-[#EEEEEE] text-custom-bluegreen font-semibold w-[26px] h-[24px] rounded-[4px] flex justify-center items-center hover:text-white hover:bg-custom-lightgreen hover:text-white"
+                pageClassName=" border border-[#EEEEEE] text-black w-[26px] h-[24px] rounded-[4px] flex justify-center items-center hover:bg-custom-lightgreen text-[12px]"
+                activeClassName="w-[26px] h-[24px] border border-[#EEEEEE] bg-custom-lightgreen text-[#404B52] rounded-[4px] text-white text-[12px]"
+                pageLinkClassName="w-full h-full flex justify-center items-center"
+                activeLinkClassName="w-full h-full flex justify-center items-center"
+                disabledLinkClassName={
+                    "text-gray-300 cursor-not-allowed"
+                }
+                /* forcePage={currentPage} */
+            />
             </div>
         </div>
     </div>
