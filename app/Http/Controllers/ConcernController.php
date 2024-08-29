@@ -172,4 +172,16 @@ class ConcernController extends Controller
 
         }
     }
+
+    public function getMessageId($ticketId)
+    {
+        try {
+            $messageId = Concerns::where('ticket_id', $ticketId)->pluck('message_id')->first();
+
+            return response()->json($messageId);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
+
+        }
+    }
 }

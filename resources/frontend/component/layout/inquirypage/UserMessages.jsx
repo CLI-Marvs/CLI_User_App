@@ -19,12 +19,12 @@ const UserMessages = ({items}) => {
                 <div>
                     <p>{items.details_message}</p>
                 </div>
-                <div className='mt-4'>
+              {/*   <div className='mt-4'>
                     <button className='flex items-center justify-start bg-customnavbar h-12 px-24 pl-4 text-black gap-2 rounded-lg'>
                         <img src={FolderFile} alt="download btn" />
                         Document.pdf
                     </button>
-                </div>
+                </div> */}
             </div>
             <div className='w-full flex justify-end'>
                 <p className='flex text-custom-gray81 text-sm space-x-1'>

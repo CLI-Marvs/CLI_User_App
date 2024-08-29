@@ -4,7 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useStateContext } from "../../../context/contextprovider";
 
 const TicketTable = ({ setConcernData }) => {
-    const [checkedRows, setCheckedRows] = useState([]); // Track checked rows
+    const [checkedRows, setCheckedRows] = useState([]); 
     const {getMessages, getAllConcerns} = useStateContext();
     const handleCheckboxChange = (index) => {
         setCheckedRows((prevCheckedRows) =>
@@ -62,9 +62,6 @@ const TicketTable = ({ setConcernData }) => {
         });
     };
     
-    useEffect(() => {
-        getAllConcerns();
-    }, []);
     return (
         <table className="flex flex-col gap-1 w-full">
             <tbody>

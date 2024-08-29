@@ -27,7 +27,6 @@ export const ContextProvider = ({ children }) => {
     const [ticketId, setTicketId] = useState(null);
 
 
-    console.log("user", user);
     const setToken = (token) => {
         _setToken(token);
         if (token) {
