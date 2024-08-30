@@ -46,7 +46,8 @@ const InquiryThread = () => {
         navigate("/inquirymanagement/inquirylist");
     };
 
-    console.log("messageID", dataConcern.message_id || null);
+    const messageId = dataConcern?.message_id || null; // Safely access message_id
+    console.log("messageID", messageId);
     const submitMessage = async () => {
         try {
             const response = await apiService.post("send-message", {
@@ -54,7 +55,7 @@ const InquiryThread = () => {
                 ticket_id: ticketId,
                 details_message: chatMessage,
                 admin_name: user?.firstname + " " + user?.lastname,
-                message_id: dataConcern.message_id,
+                message_id: messageId,
                 admin_id: user?.id,
                 buyer_email: dataConcern.buyer_email,
             });
