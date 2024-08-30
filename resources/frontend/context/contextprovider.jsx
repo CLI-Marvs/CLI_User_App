@@ -38,24 +38,29 @@ export const ContextProvider = ({ children }) => {
     };
 
     useEffect(() => {
+       if(token) {
         const getData = async () => {
             const response = await apiService.get("user");
             setUser(response.data);
         };
         getData();
-    }, []);
+       }
+    }, [token]);
 
 
     useEffect(() => {
+       if(token) {
         const getEmployeeData = async () => {
             const response = await apiService.get("employee-list");
             console.log("allEmployees", response.data);
             setAllEmployees(response.data);
         };
         getEmployeeData();
-    }, []);
+       }
+    }, [token]);
 
     const getAllConcerns = async () => {
+       if(token) {
         try {
             const response = await apiService.get(
                 `get-concern?page=${currentPage + 1}&days=${daysFilter || ''}`
@@ -66,6 +71,7 @@ export const ContextProvider = ({ children }) => {
         } catch (error) {
             console.error("Error fetching data: ", error);
         }
+       }
     };
 
 
@@ -102,7 +108,7 @@ export const ContextProvider = ({ children }) => {
 
     useEffect(() => {
         getAllConcerns();
-    }, [currentPage, daysFilter]);
+    }, [currentPage, daysFilter, token]);
 
     useEffect(() => {
         if (ticketId) {
@@ -111,9 +117,10 @@ export const ContextProvider = ({ children }) => {
         }
     }, [ticketId]);
 
+    console.log("user", user);
     useEffect(() => {
 
-    }, [user]);
+    }, [user, token]);
     return (
         <StateContext.Provider
             value={{

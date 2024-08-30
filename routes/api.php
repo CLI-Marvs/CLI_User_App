@@ -32,7 +32,6 @@ Route::get('/get-logs/{ticketId}', [ConcernController::class, 'getInquiryLogs'])
 
 Route::get('/get-messageId/{ticketId}', [ConcernController::class, 'getMessageId']);
  */
-Route::get('/employee-list', [ConcernController::class, 'getAllEmployeeList']);
 
 
  Route::middleware('auth:sanctum')->group(function () {
@@ -41,4 +40,6 @@ Route::get('/employee-list', [ConcernController::class, 'getAllEmployeeList']);
     Route::post('/send-message', [ConcernController::class, 'sendMessage']);
     Route::get('/get-logs/{ticketId}', [ConcernController::class, 'getInquiryLogs']);
     Route::get('/get-messageId/{ticketId}', [ConcernController::class, 'getMessageId']);
+   Route::get('/employee-list', [ConcernController::class, 'getAllEmployeeList']);
+
 });

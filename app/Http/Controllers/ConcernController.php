@@ -16,16 +16,14 @@ use Illuminate\Support\Facades\Mail;
 
 class ConcernController extends Controller
 {
-    //*FOR CSR Department
-
 
     public function getAllConcerns(Request $request)
     {
         try {
-            $days = $request->query("days", null);
-
             $employee = $request->user();
             $employeeDepartment = $employee->department;
+            $days = $request->query("days", null);
+
 
             $assignedInquiries = $this->getAssignInquiries($employee->employee_email);
             $ticketIds = $assignedInquiries->pluck('ticket_id')->toArray();
@@ -247,10 +245,13 @@ class ConcernController extends Controller
         }
     }
 
-    public function getAllEmployeeList()
+    public function getAllEmployeeList(Request $request)
     {
+        $user = $request->user();
+
         $employees = Employee::select('firstname', 'employee_email', 'department')
             ->where('department', '!=', 'CSR')
+            ->where('employee_email', '!=', $user->employee_email)
             ->get();
         return response()->json($employees);
     }
