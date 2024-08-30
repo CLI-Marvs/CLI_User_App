@@ -176,7 +176,7 @@ const InquiryThread = () => {
                                 placeholder="Reply..."
                                 value={chatMessage}
                                 onChange={(e) => setChatMessage(e.target.value)}
-                                className="h-12 w-full pl-2 pr-14 gradient-border rounded-full text-sm focus:outline-none"
+                                className="h-12 w-full pl-2 pr-14 border border-custom-solidgreen rounded-[10px] text-sm focus:outline-none"
                             />
                             <div className="absolute inset-y-0 right-24 flex items-center">
                                 <button type="button">

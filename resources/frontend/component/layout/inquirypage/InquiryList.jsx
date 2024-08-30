@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef} from "react";
 import TicketTable from "./TicketTable";
 import { IoIosArrowUp, IoIosArrowDown } from "react-icons/io";
 import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md";
@@ -46,15 +46,21 @@ const InquiryList = () => {
     const [isFilterVisible, setIsFilterVisible] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
     const [selectedOption, setSelectedOption] = useState('All');
+    const filterBoxRef = useRef(null);
 
     const toggleDropdown = () => {
         setIsOpen(!isOpen);
     };
 
     const toggleFilterBox = () => {
-        setIsFilterVisible(!isFilterVisible);
+        setIsFilterVisible((prev) => !prev);
     };
 
+    const handleClickOutside = (event) => {
+        if (filterBoxRef.current && !filterBoxRef.current.contains(event.target)) {
+            setIsFilterVisible(false);
+        }
+    };
 
     const handleOptionClick = (option) => {
         setSelectedOption(option);
@@ -88,14 +94,36 @@ const InquiryList = () => {
         setAssignedToMeActive(!assignedToMeActive);
     };
 
-    const dayButtonLabels = ['3+ Days', '2 Days', '1 Day'];
+    const dayButtonLabels = ['3+ Days', '2 Days', '1 Day']; 
+
+    const handleKeyDown = (event) => {
+        if (event.key === 'Escape') {
+            setIsFilterVisible(false);
+        }
+    };
+
+     useEffect(() => {
+        if (isFilterVisible) {
+            document.addEventListener('mousedown', handleClickOutside);
+            document.addEventListener('keydown', handleKeyDown);
+        } else {
+            document.removeEventListener('mousedown', handleClickOutside);
+            document.removeEventListener('keydown', handleKeyDown);
+        }
+
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+            document.removeEventListener('keydown', handleKeyDown);
+        };
+    }, [isFilterVisible]);
+
 
     return (
         <>
             <div className="h-screen max-w-full bg-custom-grayFA p-4">
                 <div className="bg-custom-grayFA">
                     <div className="relative flex justify-start gap-3">
-                        <div className="relative w-1/2">
+                        <div className="relative w-[604px]">
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
                                 fill="none"
@@ -133,6 +161,7 @@ const InquiryList = () => {
                         </div>
                         {isFilterVisible && (
                         <div
+                            ref={filterBoxRef}
                             className="absolute left-0 mt-12 p-8 bg-white border border-gray-300 shadow-lg rounded-lg z-10 w-[604px]"
                         >
                             <div className="flex flex-col gap-2">
@@ -262,7 +291,7 @@ const InquiryList = () => {
                         </p>
                     </div>
                     <div className="flex justify-end mt-4">
-                        <div className='flex w-full justify-end mt-3'>
+                        <div className='flex w-full justify-end mt-3 mb-10'>
                             <ReactPaginate
                                 previousLabel={<MdKeyboardArrowLeft className='text-[#404B52]' />}
                                 nextLabel={<MdKeyboardArrowRight className='text-[#404B52]' />}
