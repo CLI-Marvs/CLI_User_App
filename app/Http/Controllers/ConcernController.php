@@ -216,7 +216,7 @@ class ConcernController extends Controller
 
             $this->inquiryAdminLogs($request);
 
-            ReplyFromAdminJob::dispatch($messages->ticket_id, $request->buyer_email, $messages->details_message, $message_id);
+            ReplyFromAdminJob::dispatch($messages->ticket_id, $request->buyer_email, $request->details_message, $message_id);
             /*   Mail::to($request->buyer_email)->send(new SendReplyFromAdmin($messages->ticket_id, $messages->details_message, $message_id)); */
 
 
