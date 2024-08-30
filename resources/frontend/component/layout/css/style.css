@@ -59,3 +59,10 @@ padding: 9px;
 box-sizing: border-box;
 }
 
+.gradient-text {
+  background: linear-gradient(to right, #175D5F, #a3e635); 
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+

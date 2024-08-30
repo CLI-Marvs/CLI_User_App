@@ -1,108 +1,279 @@
-import React from 'react'
+import React, { useState } from 'react'
+import ReCAPTCHA from "react-google-recaptcha";
+import { IoIosSend } from "react-icons/io";
+const InquiryFormModal = ({ modalRef }) => {
 
-const InquiryFormModal = ({modalRef}) => {
+    const [fileName, setFileName] = useState('');
+
+    const handleFileChange = (event) => {
+        const file = event.target.files[0];
+        if (file) {
+            const fileType = file.name.split(".").pop();
+            const truncatedName =
+                file.name.length > 15
+                    ? `${file.name.substring(0, 12)}... .${fileType}`
+                    : file.name;
+            setFileName(truncatedName);
+        } else {
+            setFileName("");
+        }
+    };
     return (
-        <dialog id="Employment" className="modal w-2/5 rounded-lg" ref={modalRef}>
+        <dialog id="Employment" className="modal w-[589px] rounded-[10px] shadow-custom5" ref={modalRef}>
             <div className=' px-20 rounded-lg'>
                 <div className=''>
-                    <form method="dialog" className="pt-3 flex justify-end -mr-20">
+                    <form method="dialog" className="pt-1 flex justify-end -mr-[75px]">
                         <button className="flex justify-center w-10 h-10 items-center rounded-full bg-custombg3 text-custom-bluegreen hover:bg-custombg">
                             ✕
                         </button>
                     </form>
-                </div>
-                <div className='pt-5 flex justify-start items-center mb-5'>
-                    <p className='montserrat-bold'>Inquiry Form</p>
-                </div>
-                <div className="flex flex-col gap-2">
-                    <div className="flex items-center border rounded-md overflow-hidden">
-                        <span className="text-custom-gray81 bg-custombg flex w-3/4 pl-3 py-1">Name</span>
-                        <input name='name' type="text" className="w-full px-4 focus:outline-none" placeholder="" />
-                    </div>
-                    <div className="flex items-center border rounded-md overflow-hidden">
-                        <span className="text-custom-gray81 bg-custombg flex w-3/4 pl-3 py-1">Contact Number</span>
-                        <input name='contact' type="text" className="w-full px-4 focus:outline-none" placeholder="" />
-                    </div>
-                    <div className="flex items-center border rounded-md overflow-hidden">
-                        <span className="text-custom-gray81 bg-custombg flex w-3/4 pl-3 py-1">Email</span>
-                        <input name='email' type="email" className="w-full px-4 focus:outline-none" placeholder="" />
-                    </div>
-                    <div className="flex items-center border rounded-md overflow-hidden">
-                        <span className="text-custom-gray81 bg-custombg flex items-center w-3/4 -mr-3 pl-3 py-1">Concern</span>
-                        <div className="relative w-full">
-                            <select name="concern" className="appearance-none w-full px-4 py-1 bg-white text-gray-400 focus:outline-none border-0">
-                                <option value="">Select Concern</option>
-                                <option value="concern1">Concern 1</option>
-                                <option value="concern2">Concern 2</option>
-                                <option value="concern3">Concern 3</option>
-                            </select>
-                            <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3 bg-custombg">
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-custom-gray81" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                                </svg>
-                            </span>
+                    <div>
+                        <div className='flex justify-center items-center my-2 mobile:mb-7 mobile:my-0'>
+                            <p className='montserrat-bold text-[19px] text-custom-solidgreen mobile:text-sm'>Feedback / Inquiry Form</p>
                         </div>
                     </div>
-                    <div className="flex items-center border rounded-md overflow-hidden">
-                        <span className="text-custom-gray81 bg-custombg flex items-center w-3/4 -mr-3 pl-3 py-1">Property</span>
-                        <div className="relative w-full">
-                            <select name="property" className="appearance-none w-full px-4 py-1 bg-white text-gray-400 focus:outline-none border-0">
-                                <option value="">Select Property</option>
-                                <option value="property1">Property 1</option>
-                                <option value="property2">Property 2</option>
-                                <option value="property3">Property 3</option>
-                            </select>
-                            <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3 bg-custombg">
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-custom-gray81" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                                </svg>
-                            </span>
-                        </div>
+                    <div className='mb-3'>
+                        <p className='text-sm font-semibold mobile:text-xs'>Required</p>
                     </div>
-                </div>
-                <div className='border border-b-1 border-gray-300 my-2'></div>
-                <div className=' bg-custombg border'>
-                    <div className='flex items-center justify-between'>
-                        <p className='text-custom-gray81 pl-3 text-sm montserrat-semibold flex-grow'>Details</p>
-                        <span className='bg-white text-sm2 text-gray-400 font-normal py-3 border pl-2 pr-12 ml-auto'>0/1000 characters</span>
-                    </div>
-                    <div className='flex gap-3'>
-                        <textarea id="message" rows="4" className="block border-t-1 h-40 p-2.5 w-full text-sm text-gray-900 bg-white"></textarea>
-                    </div> 
-                </div>
-                <div className="mt-5 mb-12">
-                    <form method="dialog" className='flex justify-between'>
-                        <label
-                            htmlFor="changeprofile"
-                            className="h-10 px-3 text-sm-xlight border montserrat-medium border-custom-solidgreen rounded-lg text-custom-solidgreen flex justify-center items-center gap-1 cursor-pointer hover:shadow-custom"
+                    <div className="flex flex-col gap-2">
+                        <div
+                            className={`flex items-center border rounded-[5px] overflow-hidden border-custombg`}
                         >
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                strokeWidth="1.5"
-                                stroke="currentColor"
-                                className="size-3"
-                            >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244"
-                                />
-                            </svg>
-                            Attachments
+                            <span className="text-custom-gray81 text-sm bg-custom-grayFA flex pl-3 py-1 w-[240px]">First Name</span>
+                            <input name='fname' type="text" className="w-full px-4 text-sm focus:outline-none mobile:text-xs"
+                                placeholder="" />
+                        </div>
+                        <div
+                            className={`flex items-center border rounded-[5px] overflow-hidden`}
+                        >
+                            <span className="text-custom-gray81 text-sm bg-custom-grayFA flex w-[240px] pl-3 py-1">Last Name</span>
+                            <input name='lname' type="text" className="w-full px-4 text-sm focus:outline-none mobile:text-xs" placeholder="" />
+                        </div>
+                        <div
+                            className={`flex items-center border rounded-[5px] overflow-hidden`}
+                        >
+                            <span className="text-custom-gray81 text-sm bg-custom-grayFA flex w-[240px] pl-3 py-1">Email</span>
+                            <input name='buyer_email' type="email" className="w-full px-4 text-sm focus:outline-none mobile:text-xs" placeholder="" />
+                        </div>
+                        <div
+                            className={`flex items-center border rounded-[5px] overflow-hidden `}
+                        >
+                            <span className="text-custom-gray81 text-sm bg-custom-grayFA flex w-[240px] pl-3 py-1">Mobile Number</span>
+                            <input name='mobile_number' type="number" className="w-full px-4 text-sm focus:outline-none mobile:text-xs"
+                                placeholder="" />
+                        </div>
+                        <div
+                            className={`flex items-center border rounded-[5px] overflow-hidden`}
+                        >
+                            <span className="text-custom-gray81 text-sm bg-custom-grayFA flex items-center w-[250px] tablet:w-[175px] mobile:w-[270px] mobile:text-xs -mr-3 pl-3 py-1">Property</span>
+                            <div className="relative w-full">
+                                <select name="property" className="appearance-none w-full px-4 text-sm py-1 bg-white focus:outline-none border-0 mobile:text-xs">
+                                    <option value="">(Select)</option>
+                                    <option value="property1">Property 1</option>
+                                    <option value="property2">Property 2</option>
+                                    <option value="property3">Property 3</option>
+                                </select>
+                                <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3 bg-custom-grayFA">
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        className="h-4 w-4 text-custom-gray81"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                        strokeWidth="2"
+                                    >
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            d="M19 9l-7 7-7-7"
+                                        />
+                                    </svg>
+                                </span>
+                            </div>
+                        </div>
+                        <div className="border border-t-1"></div>
+                        <div className="mt-3">
+                            <p className="text-sm font-semibold mobile:text-xs">
+                                Optional
+                            </p>
+                        </div>
+                        <div className="flex items-center border rounded-[5px] overflow-hidden">
+                            <span className="text-custom-gray81 text-sm bg-custom-grayFA flex items-center w-[250px] tablet:w-[175px] mobile:w-[270px] mobile:text-xs -mr-4 pl-3 py-1">
+                                I am
+                            </span>
+                            <div className="relative w-full">
+                                <select
+                                    name="user_type"
+                                    className="appearance-none w-full px-4 py-1 text-sm bg-white focus:outline-none border-0 mobile:text-xs"
+                                >
+                                    <option value="">
+                                        (Select)
+                                    </option>
+                                    <option value="Property Owner">
+                                        Property Owner
+                                    </option>
+                                    <option value="Buyer">
+                                        Buyer
+                                    </option>
+                                    <option value="Broker">
+                                        Broker
+                                    </option>
+                                </select>
+                                <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3  bg-custom-grayFA">
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        className="h-4 w-4 text-custom-gray81"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                        strokeWidth="2"
+                                    >
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            d="M19 9l-7 7-7-7"
+                                        />
+                                    </svg>
+                                </span>
+                            </div>
+                        </div>
+                        <div className="flex items-center border rounded-[5px] overflow-hidden">
+                            <span className="text-custom-gray81 text-sm bg-custom-grayFA flex w-[240px] pl-3 py-1">
+                                Contract Number
+                            </span>
                             <input
-                                type="file"
-                                id="changeprofile"
-                                className="hidden"
-                            // Optionally, you can add an `onChange` event handler here
+                                name="contract_number"
+                                type="text"
+                                className="w-full px-4 text-sm focus:outline-none mobile:text-xs"
+                                placeholder=""
                             />
-                        </label>
-                        <button className='h-10 text-white px-10 rounded-lg gradient-btn2'>
-                            Submit
-                        </button>
-                    </form>
+                        </div>
+                        <div className="flex items-center border rounded-[5px] overflow-hidden">
+                            <span className="text-custom-gray81 text-sm bg-custom-grayFA flex items-center w-[250px] tablet:w-[175px] mobile:w-[270px] mobile:text-xs -mr-3 pl-3 py-1">
+                                Concern regarding
+                            </span>
+                            <div className="relative w-full">
+                                <select
+                                    name="details_concern"
+                                    className="appearance-none text-sm w-full px-4 py-1 bg-white focus:outline-none border-0 mobile:text-xs"
+                                >
+                                    <option value="">
+                                        (Select)
+                                    </option>
+                                    <option value="Reservation Documents">
+                                        Reservation Documents
+                                    </option>
+                                    <option value="Payment Issues">
+                                        Payment Issues
+                                    </option>
+                                    <option value="Statement of Account and Billing Statement">
+                                        Statement of Account and
+                                        Billing Statement
+                                    </option>
+                                    <option value="Turnover Status/Unit Concerns">
+                                        Turnover Status/Unit
+                                        Concerns
+                                    </option>
+                                    <option value="Loan Application">
+                                        Loan Application
+                                    </option>
+                                    <option value="Titile and Other Registration Documents">
+                                        Titile and Other
+                                        Registration Documents
+                                    </option>
+                                    <option value="Commissions">
+                                        Commissions
+                                    </option>
+                                    <option value="Other Concerns">
+                                        Other Concerns
+                                    </option>
+                                </select>
+                                <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3 bg-custom-grayFA">
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        className="h-4 w-4 text-custom-gray81"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                        strokeWidth="2"
+                                    >
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            d="M19 9l-7 7-7-7"
+                                        />
+                                    </svg>
+                                </span>
+                            </div>
+                        </div>
+                        <div className="flex items-center border rounded-[5px] overflow-hidden">
+                            <span className="text-custom-gray81 text-sm bg-custom-grayFA flex w-[240px] pl-3 py-1">
+                                Unit/Lot Number
+                            </span>
+                            <input
+                                name="unit_number"
+                                type="text"
+                                className="w-full px-4 text-sm focus:outline-none mobile:text-xs"
+                                placeholder=""
+                            />
+                        </div>
+                    </div>
+                    <div className='border border-b-1 border-gray-300 my-2'></div>
+                    <div className={`border-gray-300 rounded-[5px] bg-custom-grayFA border`}>
+                        <div className='flex items-center justify-between'>
+                            <p className='text-custom-gray81 text-sm bg-custom-grayFA pl-3  montserrat-semibold flex-grow mobile:text-xs mobile:w-[170px]'>Details (Required)</p>
+                            <span className='bg-white text-sm2 text-gray-400 font-normal py-3 border pl-2 pr-12 mobile:pr-1 mobile:text-xs ml-auto rounded-r-[4px]'> 0/500 characters</span>
+                        </div>
+                        <div className='flex gap-3 '>
+                            <textarea id="details_message" name='details_message' placeholder='Write your concern here.' rows="4" className={`block border-t-1  rounded-[5px] h-40 p-2.5 w-full text-sm text-gray-900 bg-white border-gray-300`}></textarea>
+                        </div>
+                    </div>
+                    <div className="flex flex-col mt-5 mb-12">
+                        <div className="flex justify-between w-54 tablet:flex-col">
+                            <label
+                                htmlFor="attachment"
+                                className="tablet:w-full h-10 px-5 text-sm border montserrat-medium border-custom-solidgreen rounded-lg text-custom-solidgreen flex justify-center items-center gap-1 cursor-pointer hover:shadow-custom"
+                            >
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    strokeWidth="1.5"
+                                    stroke="currentColor"
+                                    className="size-3"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244"
+                                    />
+                                </svg>
+                                Attachments
+                                <input
+                                    type="file"
+                                    id="attachment"
+                                    className="hidden"
+                                    onChange={handleFileChange}
+                                />
+                            </label>
+                            {fileName && (
+                                <p className=" flex items-center ml-2 text-sm text-gray-600 truncate gap-1">
+                                    {fileName}
+                                    < IoMdTrash
+                                        className='hover:text-red-500'
+                                        onClick={handleDelete}
+                                    />
+                                </p>
+                            )}
+                            <button type="submit" className='h-10 text-white px-10 rounded-lg gradient-btn2 flex justify-center items-center gap-2 tablet:w-full'>
+                                Submit
+                                <IoIosSend />
+                            </button>
+                        </div>
+
+                    </div>
                 </div>
+
             </div>
         </dialog>
     )

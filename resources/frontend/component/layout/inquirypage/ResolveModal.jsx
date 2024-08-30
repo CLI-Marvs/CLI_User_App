@@ -25,14 +25,14 @@ const ResolveModal = ({ modalRef, ticketId }) => {
 
    
     return (
-        <dialog id="Resolved" className="modal w-2/5 rounded-lg" ref={modalRef}>
+        <dialog id="Resolved" className="modal w-[557px] rounded-lg" ref={modalRef}>
             <div className=" px-20 rounded-lg">
                 <div className="">
                     <form
                         method="dialog"
                         className="pt-3 flex justify-end -mr-16"
                     >
-                        <button className="flex justify-center w-10 h-10 items-center rounded-full bg-custombg3 text-custom-bluegreen hover:bg-custombg">
+                        <button className="flex justify-center w-10 h-10 items-center rounded-full bg-custom-grayFA text-custom-bluegreen hover:bg-custombg">
                             ✕
                         </button>
                     </form>

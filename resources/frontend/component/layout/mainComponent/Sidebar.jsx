@@ -28,7 +28,7 @@ const Sidebar = () => {
         <List className='px-3 mt-6'>
           <Link to="/notification">
             <ListItem 
-              className={`flex text-sm items-center h-[39px] pl-5 gap-2 rounded-[50px] ${activeItem === 'notification' ? 'bg-custom-lightestgreen text-custom-solidgreen font-semibold' : 'text-custom-solidgreen'} hover:bg-custom-lightestgreen hover:font-semibold`}
+              className={`flex text-sm items-center h-[39px] pl-5 gap-2 rounded-[50px] ${activeItem === 'notification' ? 'bg-custom-lightestgreen text-custom-solidgreen font-semibold' : ' hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen '} `}
               onClick={() => handleItemClick('notification')}
             >
               Notifications
@@ -46,7 +46,7 @@ const Sidebar = () => {
           
           <Link to="/inquirymanagement/inquirylist">
             <ListItem
-              className={`h-[39px] text-sm mb-2 pl-5 gap-2 rounded-[50px] ${activeItem === 'inquiry' ? 'bg-custom-lightestgreen text-custom-solidgreen font-semibold' : 'text-custom-solidgreen'} hover:bg-custom-lightestgreen hover:font-semibold`}
+              className={`h-[39px] text-sm mb-2 pl-5 gap-2 rounded-[50px] ${activeItem === 'inquiry' ? 'bg-custom-lightestgreen text-custom-solidgreen font-semibold' : 'hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen '}`}
               onClick={() => handleItemClick('inquiry')}
             >
               Inquiry Management
