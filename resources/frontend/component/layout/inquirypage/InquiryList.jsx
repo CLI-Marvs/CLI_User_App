@@ -84,8 +84,8 @@ const InquiryList = () => {
 
     return (
         <>
-            <div className="h-screen max-w-full bg-custombg p-4">
-                <div className="bg-custombg">
+            <div className="h-screen max-w-full bg-custom-grayFA p-4">
+                <div className="bg-custom-grayFA">
                     <div className="relative flex justify-start gap-3">
                         <div className="relative w-1/2">
                             <svg
@@ -202,26 +202,27 @@ const InquiryList = () => {
                         </p>
                     </div>
                     <div className="flex justify-end mt-4">
-                        <div className="p-4 rounded-lg">
+                        <div className='flex w-full justify-start mt-3'>
                             <ReactPaginate
-                                previousLabel={<MdKeyboardArrowLeft />}
-                                nextLabel={<MdKeyboardArrowRight />}
-                                breakLabel={"..."}
-                                pageCount={pageCount}
-                                marginPagesDisplayed={2}
-                                pageRangeDisplayed={1}
-                                onPageChange={handlePageClick}
-                                containerClassName={"flex gap-2"}
-                                previousClassName="bg-white text-custom-bluegreen font-semibold px-2 py-2 rounded-[4px] hover:bg-custom-lightgreen hover:text-white"
-                                nextClassName="bg-white text-custom-bluegreen font-semibold px-2 py-2 rounded-[4px] hover:bg-custom-lightgreen hover:text-white"
-                                pageClassName="bg-gray-200 text-black rounded-full p-2 hover:bg-gray-300"
-                                activeClassName="bg-custom-solidgreen text-white"
-                               
-                                disabledLinkClassName={
-                                    "text-gray-300 cursor-not-allowed"
-                                }
-                                forcePage={currentPage}
-                            />
+                            previousLabel={<MdKeyboardArrowLeft className='text-[#404B52]'/>}
+                            nextLabel={<MdKeyboardArrowRight className='text-[#404B52]'/>}
+                            breakLabel={"..."}
+                            pageCount={pageCount}
+                            marginPagesDisplayed={2}
+                            pageRangeDisplayed={1}
+                            onPageChange={handlePageClick}
+                            containerClassName={"flex gap-2"}
+                            previousClassName="border border-[#EEEEEE] text-custom-bluegreen font-semibold w-[26px] h-[24px] rounded-[4px] flex justify-center items-center hover:text-white hover:bg-custom-lightgreen hover:text-white"
+                            nextClassName="border border-[#EEEEEE] text-custom-bluegreen font-semibold w-[26px] h-[24px] rounded-[4px] flex justify-center items-center hover:text-white hover:bg-custom-lightgreen hover:text-white"
+                            pageClassName=" border border-[#EEEEEE] bg- text-black w-[26px] h-[24px] rounded-[4px] flex justify-center items-center hover:bg-custom-lightgreen text-[12px]"
+                            activeClassName="w-[26px] h-[24px] border border-[#EEEEEE] bg-custom-lightgreen text-[#404B52] rounded-[4px] text-white text-[12px]"
+                            pageLinkClassName="w-full h-full flex justify-center items-center"
+                            activeLinkClassName="w-full h-full flex justify-center items-center"
+                            disabledLinkClassName={
+                                "text-gray-300 cursor-not-allowed"
+                            }
+                            /* forcePage={currentPage} */
+                        />
                         </div>
                     </div>
                 </div>

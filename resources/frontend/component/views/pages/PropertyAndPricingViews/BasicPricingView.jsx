@@ -1,5 +1,6 @@
 import React from 'react'
-import BasicPricing from '../../../layout/propertyandpricingpage/BasicPricing'
+import BasicPricing from '../../../layout/propertyandpricingpage/basicpricing/BasicPricing'
+
 
 const BasicPricingView = () => {
   return (
