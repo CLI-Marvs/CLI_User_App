@@ -18,6 +18,7 @@
             font-style: normal;
         }
 
+       
 
         p {
             font-family: 'Barlow', sans-serif;
@@ -120,6 +121,6 @@
     </style>
 </head>
 
-<body
-{{ $details_message }}
+<body>
+{{ $emailContent }}
 </body>

@@ -39,6 +39,8 @@ const InquiryList = () => {
 
     }; */
 
+   
+
     const [isOpen, setIsOpen] = useState(false);
     const [selectedOption, setSelectedOption] = useState('All');
   
@@ -190,7 +192,7 @@ const InquiryList = () => {
                             No data found
                         </p>
                     ) : (
-                        <TicketTable setConcernData={data || []} />
+                        <TicketTable concernData={data || []} />
                     )}
                     </div>
 

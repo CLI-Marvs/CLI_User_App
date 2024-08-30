@@ -1,4 +1,4 @@
-import React,{useEffect, useRef} from 'react'
+import React,{useEffect, useRef, useState} from 'react'
 import AssignDetails from './AssignDetails'
 import AssignModal from './AssignModal';
 import { useStateContext } from '../../../context/contextprovider';
@@ -7,8 +7,8 @@ import Autocomplete from '@mui/material/Autocomplete';
 
 
 const AssignSidePanel = ({ticketId}) => {
-    const { setTicketId, logs} = useStateContext();
-
+    const { setTicketId, logs, allEmployees} = useStateContext();
+    const [isSelected, setIsSelected] = useState({});
     const logsMessages = logs[ticketId] || [];
 
     const modalRef = useRef(null);
@@ -19,13 +19,22 @@ const AssignSidePanel = ({ticketId}) => {
         }
     };
 
-    console.log("logs", logs);
+    const selectedEmployee = (event, value) => {
+        setIsSelected(value);
+    };
+    
+    const employeeOptions = allEmployees.map(employee => ({
+        label: `${employee.firstname} (${employee.department})`, 
+        email: employee.employee_email, 
+        firstname: employee.firstname,
+        department: employee.department,
+        ticketId: ticketId
+    }));
 
     useEffect(() => {
         setTicketId(ticketId);
     }, [ticketId, setTicketId]);
 
-    const options = ['Sho', 'Kent' , 'gabz', 'brother john','willson' , 'kyla' , 'kin' , 'kai', 'james', 'jay' , 'jhunax', 'clavel' ,'mark kevin' ,'eden', 'suzette'];
     
     return (
         <>
@@ -33,7 +42,9 @@ const AssignSidePanel = ({ticketId}) => {
                 <div>
                     <Autocomplete
                         disablePortal
-                        options={options}
+                        options={employeeOptions}
+                        getOptionLabel={(option) => option.label}
+                        onChange={selectedEmployee}
                         className='w-full rounded-[5px]'
                         renderInput={(params) => <TextField {...params} label="Assign To" size="small" className='w-full rounded-[5px]' />}
                  />
@@ -57,7 +68,7 @@ const AssignSidePanel = ({ticketId}) => {
                 </div>
             </div>
             <div>
-                <AssignModal modalRef={modalRef}/>
+                <AssignModal modalRef={modalRef} employeeData={isSelected} />
             </div>
         </>
     )

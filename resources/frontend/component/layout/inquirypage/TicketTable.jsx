@@ -3,9 +3,9 @@ import { TiPin, TiPinOutline } from "react-icons/ti";
 import { Link, useNavigate } from "react-router-dom";
 import { useStateContext } from "../../../context/contextprovider";
 
-const TicketTable = ({ setConcernData }) => {
+const TicketTable = ({ concernData }) => {
     const [checkedRows, setCheckedRows] = useState([]); 
-    const {getMessages, getAllConcerns} = useStateContext();
+    const {getMessages, getAllConcerns, user} = useStateContext();
     const handleCheckboxChange = (index) => {
         setCheckedRows((prevCheckedRows) =>
             prevCheckedRows.includes(index)
@@ -56,17 +56,18 @@ const TicketTable = ({ setConcernData }) => {
 
     const navigateToThread = (items) => {
         getMessages(items.ticket_id);
+        getAllConcerns();
         const encodedTicketId = encodeURIComponent(items.ticket_id);
-        navigate(`/inquirymanagement/thread/${encodedTicketId}`, {
+        navigate(`/inquirymanagement/thread/${encodedTicketId}`/* , {
             state: { item: items },
-        });
+        } */);
     };
-    
+
     return (
         <table className="flex flex-col gap-1 w-full">
             <tbody>
-                {setConcernData &&
-                    setConcernData.map((row, index) => (
+                {concernData && 
+                    concernData.map((row, index) => (
                         <tr
                             key={row.id}
                             onClick={() => navigateToThread(row)}

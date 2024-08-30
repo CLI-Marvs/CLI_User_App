@@ -14,39 +14,49 @@ import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useStateContext } from "../../../context/contextprovider";
 import apiService from "../../servicesApi/apiService";
 const InquiryThread = () => {
-    const { messages, setTicketId, getMessages, user, getInquiryLogs } = useStateContext();
+    const {
+        messages,
+        setTicketId,
+        getMessages,
+        user,
+        getInquiryLogs,
+        getAllConcerns,
+        data
+    } = useStateContext();
     const [chatMessage, setChatMessage] = useState("");
-    const [messageId, setMessageId] = useState(null);
     const modalRef = useRef(null);
     const navigate = useNavigate();
-    const location = useLocation();
-    const { item } = location?.state || {};
+  /*   const location = useLocation();
+    const { item } = location?.state || {}; */
     const params = useParams();
     const ticketId = decodeURIComponent(params.id);
 
     const conversationMessages = messages[ticketId] || [];
 
+    const dataConcern = data.find((items) => items.ticket_id === ticketId);
+    
     const handleOpenModal = () => {
         if (modalRef.current) {
             modalRef.current.showModal();
         }
     };
 
+
     const handleBack = () => {
         navigate("/inquirymanagement/inquirylist");
     };
 
-
-    console.log("message_idsss", messageId);
+    console.log("messageID", dataConcern.message_id);
     const submitMessage = async () => {
         try {
             const response = await apiService.post("send-message", {
                 admin_email: user?.employee_email,
-                ticket_id: encodedTicketId,
+                ticket_id: ticketId,
                 details_message: chatMessage,
-                admin_name: user?.firstname + ' ' + user?.lastname,
-                message_id: messageId,
-                buyer_email: item.buyer_email
+                admin_name: user?.firstname + " " + user?.lastname,
+                message_id: dataConcern.message_id,
+                admin_id: user?.id,
+                buyer_email: dataConcern.buyer_email,
             });
 
             getMessages(ticketId);
@@ -61,19 +71,6 @@ const InquiryThread = () => {
         setTicketId(ticketId);
     }, [ticketId, setTicketId]);
 
-    const getSpecificMessageId = async() => {
-        try {
-            const encodedTicketId = encodeURIComponent(ticketId);
-
-            const response = await apiService.get(`get-messageId/${encodedTicketId}`);
-            setMessageId(response.data);
-        } catch (error) {
-            console.log("error retrieving message id", error);
-        }
-    };
-    useEffect(() => {
-        getSpecificMessageId();
-    }, []);
     return (
         <>
             <div className="h-screen bg-custombg p-3 overflow-x-auto overflow-y-hidden">
@@ -127,25 +124,31 @@ const InquiryThread = () => {
                                 onClick={handleBack}
                             />
                             <p className="text-sm montserrat-semibold text-custom-gray81 space-x-1">
-                                {item.ticket_id}
+                                {dataConcern.ticket_id}
                                 <span> |</span>
                                 <span>Transaction</span>
                                 <span>|</span>
-                                {item && (
-                                      <span>{item.property}</span>
-                                )}
+                                {dataConcern && <span>{dataConcern.property}</span>}
                                 <span>|</span>
                                 <span>T207.012</span>
                             </p>
                             <div>
                                 <LuTrash2 />
                             </div>
-                            <button
-                                onClick={handleOpenModal}
-                                className="text-blue-500 cursor-pointer hover:underline font-semibold text-sm"
-                            >
-                                Mark as resolve
-                            </button>
+                            {dataConcern && dataConcern.status === "Resolved" ? (
+                                <>
+                                    <span className="text-blue-500 cursor-pointer hover:underline font-semibold text-sm">
+                                        Resolved
+                                    </span>
+                                </>
+                            ) : (
+                                <button
+                                    onClick={handleOpenModal}
+                                    className="text-blue-500 cursor-pointer hover:underline font-semibold text-sm"
+                                >
+                                    Mark as resolve
+                                </button>
+                            )}
                         </div>
                         <div className="flex-grow overflow-y-auto">
                             <div className="h-full">
@@ -192,12 +195,12 @@ const InquiryThread = () => {
                         </div>
                     </div>
                     <div className="p-7 min-w-[436px] max-h-[620px] bg-white rounded-lg">
-                        <AssignSidePanel ticketId={ticketId}/>
+                        <AssignSidePanel ticketId={ticketId} />
                     </div>
                 </div>
             </div>
             <div>
-                <ResolveModal modalRef={modalRef} />
+                <ResolveModal modalRef={modalRef} ticketId={ticketId} />
             </div>
         </>
     );

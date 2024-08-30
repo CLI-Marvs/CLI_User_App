@@ -15,6 +15,11 @@ Route::middleware('auth:sanctum')->post('/auth/logout', [AuthController::class, 
 
 Route::post('/add-concern', [ConcernController::class, 'addConcernPublic']);
 
+Route::post('/add-assignee', [ConcernController::class, 'assignInquiryTo']);
+Route::post('/resolve', [ConcernController::class, 'markAsResolve']);
+
+
+/* 
 Route::get('/get-concern', [ConcernController::class, 'getAllConcerns']);
 
 Route::get('/get-message/{ticketId}', [ConcernController::class, 'getMessage']);
@@ -26,4 +31,14 @@ Route::post('/send-message', [ConcernController::class, 'sendMessage']);
 Route::get('/get-logs/{ticketId}', [ConcernController::class, 'getInquiryLogs']);
 
 Route::get('/get-messageId/{ticketId}', [ConcernController::class, 'getMessageId']);
+ */
+Route::get('/employee-list', [ConcernController::class, 'getAllEmployeeList']);
 
+
+ Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/get-concern', [ConcernController::class, 'getAllConcerns']);
+    Route::get('/get-message/{ticketId}', [ConcernController::class, 'getMessage']);
+    Route::post('/send-message', [ConcernController::class, 'sendMessage']);
+    Route::get('/get-logs/{ticketId}', [ConcernController::class, 'getInquiryLogs']);
+    Route::get('/get-messageId/{ticketId}', [ConcernController::class, 'getMessageId']);
+});

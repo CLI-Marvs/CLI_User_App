@@ -17,6 +17,7 @@ const StateContext = createContext({
 export const ContextProvider = ({ children }) => {
     const [user, setUser] = useState({});
     const [token, _setToken] = useState(localStorage.getItem("authToken"));
+    const [allEmployees, setAllEmployees] = useState([]);
     const [daysFilter, setDaysFilter] = useState(null);
     const [currentPage, setCurrentPage] = useState(0);
     const [data, setData] = useState([]);
@@ -39,10 +40,19 @@ export const ContextProvider = ({ children }) => {
     useEffect(() => {
         const getData = async () => {
             const response = await apiService.get("user");
-            console.log("response data user", response.data);
             setUser(response.data);
         };
         getData();
+    }, []);
+
+
+    useEffect(() => {
+        const getEmployeeData = async () => {
+            const response = await apiService.get("employee-list");
+            console.log("allEmployees", response.data);
+            setAllEmployees(response.data);
+        };
+        getEmployeeData();
     }, []);
 
     const getAllConcerns = async () => {
@@ -50,6 +60,7 @@ export const ContextProvider = ({ children }) => {
             const response = await apiService.get(
                 `get-concern?page=${currentPage + 1}&days=${daysFilter || ''}`
             );
+
             setData(response.data.data);
             setPageCount(response.data.last_page);
         } catch (error) {
@@ -124,7 +135,8 @@ export const ContextProvider = ({ children }) => {
                 setDaysFilter,
                 getInquiryLogs,
                 logs,
-                setLogs
+                setLogs,
+                allEmployees
             }}
         >
             {children}

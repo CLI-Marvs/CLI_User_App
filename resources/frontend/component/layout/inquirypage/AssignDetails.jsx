@@ -21,18 +21,41 @@ const AssignDetails = ({ logMessages }) => {
             case "admin_reply":
                 return (
                     <>
-                       <div className="truncate w-44">
+                        <div className="truncate w-44">
                             <p className="truncate">
-                               Replied by {details.admin_name}
+                                Replied by {details.admin_name}
                             </p>
                         </div>
-                      
                     </>
                 );
-            /*   case 'status_update':
+            case "assign_to":
                 return (
-                    <p><strong>Status:</strong> {details.status || 'N/A'}</p>
-                ); */
+                    <>
+                        <div className="truncate w-44">
+                            <p className="truncate">
+                                Assign to {details.assign_to_name} Department (
+                                {details.assign_to_department})
+                            </p>
+                            <p className="truncate">
+                                Assign by {details.assign_by} Department (
+                                {details.assign_by_department})
+                            </p>
+                            <p className="truncate">{details.remarks}</p>
+                        </div>
+                    </>
+                );
+                case "inquiry_status":
+                    return (
+                        <>
+                            <div className="truncate w-44">
+                                <p className="truncate">
+                                    Resolved by {details.resolve_by} Department (
+                                    {details.department})
+                                </p>
+                                <p className="truncate">{details.remarks}</p>
+                            </div>
+                        </>
+                    );
             default:
                 return <p>Unknown log type</p>;
         }
@@ -49,7 +72,12 @@ const AssignDetails = ({ logMessages }) => {
                         logData = JSON.parse(item.admin_reply);
                     } else if (item.requestor_reply) {
                         logData = JSON.parse(item.requestor_reply);
+                    } else if (item.assign_to) {
+                        logData = JSON.parse(item.assign_to);
+                    } else if (item.inquiry_status) {
+                        logData = JSON.parse(item.inquiry_status);
                     }
+
 
                     const logType = logData.log_type || "unknown";
                     const details = logData.details || {};
