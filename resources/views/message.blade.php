@@ -120,6 +120,6 @@
     </style>
 </head>
 
-<body
+<body>
 {{ $details_message }}
 </body>
