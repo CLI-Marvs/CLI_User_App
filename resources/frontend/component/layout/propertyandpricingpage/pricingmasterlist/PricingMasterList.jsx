@@ -100,9 +100,10 @@ const PricingMasterList = () => {
                         <label className='flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]'> Status</label>
                         <select className='w-full border-b-1 outline-none'>
                           <option value="">Select Status</option>
-                          <option value="active">Active</option>
-                          <option value="inactive">Inactive</option>
-                          <option value="pending">Pending</option>
+                          <option value="draft">Draft</option>
+                          <option value="ongoing">On-going approval</option>
+                          <option value="approvenotlive">Approved not Live</option>
+                          <option value="approveandlive">Approve and Live</option>
                         </select>
                       </div>
                       <div className='mt-3 flex justify-end'>
