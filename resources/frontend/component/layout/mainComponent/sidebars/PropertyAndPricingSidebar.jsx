@@ -19,7 +19,7 @@ const PropertyAndPricingSidebar = () => {
 
   return (
     <>
-        <Card className='flex w-[230px] h-screen pt-3 rounded-none bg-customnavbar'>
+        <Card className='flex w-[230px] h-screen pt-3 rounded-[10px] bg-customnavbar'>
             <List className='flex flex-col justify-center w-full'>
                 <div className='px-5 leading-1'>
                     <div className='flex flex-col space-y-1 mt-1'>

@@ -35,7 +35,7 @@ const Notification = () => {
                 </div>
             </div>
             <div>
-                <table className='flex flex-col gap-1 w-full'>
+                <table className='flex flex-col gap-1 w-full '>
                     <tbody>
                         {/* UNREAD */}
                         <tr className='flex items-center h-[47px] cursor-pointer my-1 bg-white hover:shadow-custom4'>

@@ -21,7 +21,7 @@ const AssignModal = ({modalRef, employeeData}) => {
         }
     };
   return (
-    <dialog id="Assign" className="modal w-2/5 rounded-lg" ref={modalRef}>
+    <dialog id="Assign" className="modal w-[557px] rounded-[10px] shadow-custom4" ref={modalRef}>
             <div className=' px-20 rounded-lg'>
                 <div className=''>
                     <form method="dialog" className="pt-3 flex justify-end -mr-16">

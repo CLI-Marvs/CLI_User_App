@@ -5,6 +5,9 @@ import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md";
 import ReactPaginate from "react-paginate";
 import { useStateContext } from "../../../context/contextprovider";
 import apiService from "../../servicesApi/apiService";
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
+import DateLogo from '../../../../../public/Images/Date_range.svg'
 
 const InquiryList = () => {
     const {
@@ -20,7 +23,7 @@ const InquiryList = () => {
     const handlePageClick = (data) => {
         const selectedPage = data.selected;
         setCurrentPage(selectedPage);
-        
+
     };
 
     const handleRefresh = () => {
@@ -33,29 +36,34 @@ const InquiryList = () => {
         setCurrentPage(0);
     };
 
-   /*  const handleFilterChange = (days) => {
-        setDaysFilter(days);
-        setCurrentPage(0);
+    /*  const handleFilterChange = (days) => {
+         setDaysFilter(days);
+         setCurrentPage(0);
+ 
+     }; */
 
-    }; */
-
-   
-
+    const [startDate, setStartDate] = useState(new Date());
+    const [isFilterVisible, setIsFilterVisible] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
     const [selectedOption, setSelectedOption] = useState('All');
-  
-    const toggleDropdown = () => {
-      setIsOpen(!isOpen);
-    };
-  
-    const handleOptionClick = (option) => {
-      setSelectedOption(option);
-      setIsOpen(false); 
 
-      if(option === "All") {
-        setDaysFilter(null);
-        setCurrentPage(0);
-      }
+    const toggleDropdown = () => {
+        setIsOpen(!isOpen);
+    };
+
+    const toggleFilterBox = () => {
+        setIsFilterVisible(!isFilterVisible);
+    };
+
+
+    const handleOptionClick = (option) => {
+        setSelectedOption(option);
+        setIsOpen(false);
+
+        if (option === "All") {
+            setDaysFilter(null);
+            setCurrentPage(0);
+        }
     };
 
     const [activeDayButton, setActiveDayButton] = useState(null);
@@ -63,10 +71,10 @@ const InquiryList = () => {
 
     const handleDayClick = (day) => {
         let newValue = 0;
-        
-        if(day === '3+ Days') {
+
+        if (day === '3+ Days') {
             newValue = 3;
-        } else if(day === '2 Days') {
+        } else if (day === '2 Days') {
             newValue = 2;
         } else if (day === '1 Day') {
             newValue = 1;
@@ -74,13 +82,13 @@ const InquiryList = () => {
         setActiveDayButton((prev) => (prev === day ? null : day));
         setDaysFilter(newValue);
         setCurrentPage(0);
-      };
-    
-      const handleAssignedToMeClick = () => {
+    };
+
+    const handleAssignedToMeClick = () => {
         setAssignedToMeActive(!assignedToMeActive);
-      };
-  
-      const dayButtonLabels = ['3+ Days', '2 Days', '1 Day'];
+    };
+
+    const dayButtonLabels = ['3+ Days', '2 Days', '1 Day'];
 
     return (
         <>
@@ -108,12 +116,13 @@ const InquiryList = () => {
                                 placeholder="Search"
                             />
                             <svg
+                                onClick={toggleFilterBox}
                                 xmlns="http://www.w3.org/2000/svg"
                                 fill="none"
                                 viewBox="0 0 24 24"
                                 strokeWidth={1.5}
                                 stroke="currentColor"
-                                className="size-4 absolute right-3 top-3 text-custom-bluegreen"
+                                className="size-4 absolute right-3 top-3 text-custom-bluegreen hover:bg-gray-200"
                             >
                                 <path
                                     strokeLinecap="round"
@@ -122,78 +131,129 @@ const InquiryList = () => {
                                 />
                             </svg>
                         </div>
+                        {isFilterVisible && (
+                        <div
+                            className="absolute left-0 mt-12 p-8 bg-white border border-gray-300 shadow-lg rounded-lg z-10 w-[604px]"
+                        >
+                            <div className="flex flex-col gap-2">
+                                <div className='flex'>
+                                    <label className='flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]'> Name</label>
+                                    <input type="text" className='w-full  border-b-1 outline-none' />
+                                </div>
+                                <div className='flex'>
+                                    <label className='flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]'> Category</label>
+                                    <input type="text" className='w-full  border-b-1 outline-none' />
+                                </div>
+                                <div className='flex'>
+                                    <label className='flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]'> Email</label>
+                                    <input type="text" className='w-full  border-b-1 outline-none' />
+                                </div>
+                                <div className='flex'>
+                                    <label className='flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]'> Ticket</label>
+                                    <input type="text" className='w-full  border-b-1 outline-none' />
+                                </div>
+                                <div className='flex gap-3'>
+                                    <label className='flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]'>Date</label>
+                                    <div className="relative">
+                                        <DatePicker
+                                            selected={startDate}
+                                            onChange={(date) => setStartDate(date)}
+                                            className=" border-b-1 outline-none w-[176px]"
+                                            calendarClassName="custom-calendar"
+                                        />
+
+                                        <img src={DateLogo} alt="date" className='absolute top-[45%] right-0 transform -translate-y-1/2 text-custom-bluegreen size-6' />
+
+                                    </div>
+                                    <label className='flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]'> Status</label>
+                                    <select className='w-full border-b-1 outline-none'>
+                                        <option value="">Select Status</option>
+                                        <option value="draft">Draft</option>
+                                        <option value="ongoing">On-going approval</option>
+                                        <option value="approvenotlive">Approved not Live</option>
+                                        <option value="approveandlive">Approve and Live</option>
+                                    </select>
+                                </div>
+                                <div className="mt-5 flex gap-5">
+                                    <input type="checkbox" /><label className='flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]'> Has Attachments</label>
+                                </div>
+                                <div className='mt-3 flex justify-end'>
+                                    <button className='h-[37px] w-[88px] gradient-btn rounded-[10px] text-white text-sm'>Search</button>
+                                </div>
+                            </div>
+                        </div>
+                        )}
                     </div>
                 </div>
+
                 <div className="max-w-5xl">
-                    <div className="flex justify-between items-center h-12 mt-3 px-6 gap-2 bg-white rounded-t-lg mb-1">
+                    <div className="flex justify-between items-center h-12 mt-3 px-6 gap-24 bg-white rounded-t-lg mb-1 ">
                         <div className="relative mr-4">
                             <button
                                 className="flex text-[20px] items-center gap-3 text-custom-bluegreen font-semibold"
                                 onClick={toggleDropdown}
                             >
-                                {isOpen ? <IoIosArrowUp /> : <IoIosArrowDown /> } {selectedOption}
+                                {isOpen ? <IoIosArrowUp /> : <IoIosArrowDown />} {selectedOption}
                             </button>
 
                             {/* Dropdown Menu */}
                             {isOpen && (
                                 <div className="absolute top-full mt-2 w-48 bg-white border border-gray-200 shadow-lg rounded-md">
-                                <ul className="py-2">
-                                    <li
-                                    className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                                    onClick={() => handleOptionClick('All')}
-                                    >
-                                    All
-                                    </li>
-                                    <li
-                                    className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                                    onClick={() => handleOptionClick('Resolve')}
-                                    >
-                                    Resolve
-                                    </li>
-                                    <li
-                                    className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                                    onClick={() => handleOptionClick('Unresolve')}
-                                    >
-                                    Unresolve
-                                    </li>
-                                </ul>
+                                    <ul className="py-2">
+                                        <li
+                                            className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                                            onClick={() => handleOptionClick('All')}
+                                        >
+                                            All
+                                        </li>
+                                        <li
+                                            className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                                            onClick={() => handleOptionClick('Resolve')}
+                                        >
+                                            Resolve
+                                        </li>
+                                        <li
+                                            className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                                            onClick={() => handleOptionClick('Unresolve')}
+                                        >
+                                            Unresolve
+                                        </li>
+                                    </ul>
                                 </div>
                             )}
                         </div>
-                       <div className="flex gap-2 justify-end">
+                        <div className="flex gap-2">
                             <div className="flex space-x-2">
                                 <button
                                     onClick={handleAssignedToMeClick}
-                                    className={`flex items-center border border-custom-lightgreen text-custom-lightgreen h-[25px] px-3 rounded-3xl ${
-                                    assignedToMeActive ? 'bg-custom-lightgreen text-white' : ''
-                                    }`}
+                                    className={`flex items-center border border-custom-lightgreen text-custom-lightgreen h-[25px] px-3 rounded-3xl ${assignedToMeActive ? 'bg-custom-lightgreen text-white' : 'hover:bg-custom-lightestgreen'
+                                        }`}
                                 >
                                     <p className="text-sm montserrat-semibold">Assigned to me</p>
                                 </button>
 
                                 {dayButtonLabels.map((label) => (
                                     <button
-                                    key={label}
-                                    onClick={() => handleDayClick(label)}
-                                    className={`flex items-center border border-custom-lightgreen text-custom-lightgreen h-[25px] px-3 rounded-3xl ${
-                                        activeDayButton === label ? 'bg-custom-lightgreen text-white' : ''
-                                    }`}
+                                        key={label}
+                                        onClick={() => handleDayClick(label)}
+                                        className={`flex items-center border border-custom-lightgreen text-custom-lightgreen h-[25px] px-3 rounded-3xl ${activeDayButton === label ? 'bg-custom-lightgreen text-white' : 'hover:bg-custom-lightestgreen'
+                                            }`}
                                     >
-                                    <p className="text-sm montserrat-semibold">{label}</p>
+                                        <p className="text-sm montserrat-semibold">{label}</p>
                                     </button>
                                 ))}
                                 <button onClick={handleRefresh}>Refresh</button>
                             </div>
-                       </div>
+                        </div>
                     </div>
                     <div>
-                    {(data && data.length === 0) ? (
-                        <p className="text-center text-gray-500 py-4">
-                            No data found
-                        </p>
-                    ) : (
-                        <TicketTable concernData={data || []} />
-                    )}
+                        {(data && data.length === 0) ? (
+                            <p className="text-center text-gray-500 py-4">
+                                No data found
+                            </p>
+                        ) : (
+                            <TicketTable concernData={data || []} />
+                        )}
                     </div>
 
                     <div className="flex justify-end items-center h-12 px-6 gap-2 bg-white rounded-b-lg">
@@ -204,25 +264,25 @@ const InquiryList = () => {
                     <div className="flex justify-end mt-4">
                         <div className='flex w-full justify-end mt-3'>
                             <ReactPaginate
-                            previousLabel={<MdKeyboardArrowLeft className='text-[#404B52]'/>}
-                            nextLabel={<MdKeyboardArrowRight className='text-[#404B52]'/>}
-                            breakLabel={"..."}
-                            pageCount={pageCount}
-                            marginPagesDisplayed={2}
-                            pageRangeDisplayed={1}
-                            onPageChange={handlePageClick}
-                            containerClassName={"flex gap-2"}
-                            previousClassName="border border-[#EEEEEE] text-custom-bluegreen font-semibold w-[26px] h-[24px] rounded-[4px] flex justify-center items-center hover:text-white hover:bg-custom-lightgreen hover:text-white"
-                            nextClassName="border border-[#EEEEEE] text-custom-bluegreen font-semibold w-[26px] h-[24px] rounded-[4px] flex justify-center items-center hover:text-white hover:bg-custom-lightgreen hover:text-white"
-                            pageClassName=" border border-[#EEEEEE] bg- text-black w-[26px] h-[24px] rounded-[4px] flex justify-center items-center hover:bg-custom-lightgreen text-[12px]"
-                            activeClassName="w-[26px] h-[24px] border border-[#EEEEEE] bg-custom-lightgreen text-[#404B52] rounded-[4px] text-white text-[12px]"
-                            pageLinkClassName="w-full h-full flex justify-center items-center"
-                            activeLinkClassName="w-full h-full flex justify-center items-center"
-                            disabledLinkClassName={
-                                "text-gray-300 cursor-not-allowed"
-                            }
+                                previousLabel={<MdKeyboardArrowLeft className='text-[#404B52]' />}
+                                nextLabel={<MdKeyboardArrowRight className='text-[#404B52]' />}
+                                breakLabel={"..."}
+                                pageCount={pageCount}
+                                marginPagesDisplayed={2}
+                                pageRangeDisplayed={1}
+                                onPageChange={handlePageClick}
+                                containerClassName={"flex gap-2"}
+                                previousClassName="border border-[#EEEEEE] text-custom-bluegreen font-semibold w-[26px] h-[24px] rounded-[4px] flex justify-center items-center hover:text-white hover:bg-custom-lightgreen hover:text-white"
+                                nextClassName="border border-[#EEEEEE] text-custom-bluegreen font-semibold w-[26px] h-[24px] rounded-[4px] flex justify-center items-center hover:text-white hover:bg-custom-lightgreen hover:text-white"
+                                pageClassName=" border border-[#EEEEEE] bg- text-black w-[26px] h-[24px] rounded-[4px] flex justify-center items-center hover:bg-custom-lightgreen text-[12px]"
+                                activeClassName="w-[26px] h-[24px] border border-[#EEEEEE] bg-custom-lightgreen text-[#404B52] rounded-[4px] text-white text-[12px]"
+                                pageLinkClassName="w-full h-full flex justify-center items-center"
+                                activeLinkClassName="w-full h-full flex justify-center items-center"
+                                disabledLinkClassName={
+                                    "text-gray-300 cursor-not-allowed"
+                                }
                             /* forcePage={currentPage} */
-                        />
+                            />
                         </div>
                     </div>
                 </div>
