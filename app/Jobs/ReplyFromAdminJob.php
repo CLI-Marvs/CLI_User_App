@@ -30,7 +30,7 @@ class ReplyFromAdminJob implements ShouldQueue
         $this->message_id = $message_id;
 
 
-        Log::info('message_id from job constructor', ['message_id' => $this->message_id]);
+        Log::info('message_id from job constructor', ['details_message' => $this->details_message]);
 
     }
 
