@@ -25,7 +25,7 @@ const ResolveModal = ({ modalRef, ticketId }) => {
 
    
     return (
-        <dialog id="Resolved" className="modal w-[557px] rounded-lg" ref={modalRef}>
+        <dialog id="Resolved" className="modal w-[557px] rounded-[10px] shadow-custom5" ref={modalRef}>
             <div className=" px-20 rounded-lg">
                 <div className="">
                     <form
