@@ -33,7 +33,7 @@ const InquiryThread = () => {
 
     const conversationMessages = messages[ticketId] || [];
 
-    const dataConcern = data.find((items) => items.ticket_id === ticketId);
+    const dataConcern = data?.find((items) => items.ticket_id === ticketId) || {};
     
     const handleOpenModal = () => {
         if (modalRef.current) {
