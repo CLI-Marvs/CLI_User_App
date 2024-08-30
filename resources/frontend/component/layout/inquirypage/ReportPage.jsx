@@ -53,12 +53,12 @@ const CustomTooltip = ({ active, payload }) => {
 
 const ReportPage = () => {
     return (
-        <div className='h-screen bg-custombg p-4 '>
+        <div className='h-screen bg-custom-grayFA p-4 '>
             <div className='bg-white p-4 rounded-xl '>
                 <div className='w-80 mb-2'>
                     <p className='text-lg montserrat-bold'>Resolved vs. Unresolved Chart</p>
                     <div className="flex items-center border rounded-md overflow-hidden">
-                        <span className="text-custom-gray81 bg-custombg flex items-center w-44 -mr-3 pl-3 py-1">Department</span>
+                        <span className="text-custom-gray81 bg-custom-grayFA flex items-center w-44 -mr-3 pl-3 py-1">Department</span>
                         <div className="relative w-full">
                             <select name="concern" className="appearance-none w-full px-4 py-1 bg-white focus:outline-none border-0">
                                 <option value="">Select</option>
@@ -67,7 +67,7 @@ const ReportPage = () => {
                                 <option value="February">AP Commission</option>
                                 
                             </select>
-                            <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3 bg-custombg">
+                            <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3 bg-custom-grayFA">
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-custom-gray81" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
                                 </svg>
@@ -106,13 +106,13 @@ const ReportPage = () => {
                     </div>
                 </div>
             </div>
-            <div className='flex gap-3 mt-4 bg-custombg '>
+            <div className='flex gap-3 mt-4 bg-custom-grayFA '>
                 <div className='w-[430px]  pb-7 max-h-[400px] flex-shrink-0 flex-grow-0 bg-white rounded-lg'>
                     <p className='p-4 text-base montserrat-bold'>Inquiries per category</p>
                     <div className='border border-t-1'></div>
                     <div className='mt-4 pl-4 pr-28'>
                         <div className="flex items-center border rounded-md overflow-hidden w-full">
-                            <span className="text-custom-gray81 bg-custombg flex w-34 pl-2 py-1">For the month of</span>
+                            <span className="text-custom-gray81 bg-custom-grayFA flex w-34 pl-2 py-1">For the month of</span>
                             <input name='contact' type="text" className="w-36 pl-2 focus:outline-none" placeholder="" />
                         </div>
                     </div>
@@ -170,7 +170,7 @@ const ReportPage = () => {
                     <div className='border border-t-1'></div>
                     <div className='mt-4 pl-4 pr-48'>
                         <div className="flex items-center border rounded-md overflow-hidden w-full">
-                            <span className="text-custom-gray81 bg-custombg flex w-34 pl-2 py-1">For the month of</span>
+                            <span className="text-custom-gray81 bg-custom-grayFA flex w-34 pl-2 py-1">For the month of</span>
                             <input name='contact' type="text" className="w-36 pl-2 focus:outline-none" placeholder="" />
                         </div>
                     </div>

@@ -202,7 +202,7 @@ const InquiryList = () => {
                         </p>
                     </div>
                     <div className="flex justify-end mt-4">
-                        <div className='flex w-full justify-start mt-3'>
+                        <div className='flex w-full justify-end mt-3'>
                             <ReactPaginate
                             previousLabel={<MdKeyboardArrowLeft className='text-[#404B52]'/>}
                             nextLabel={<MdKeyboardArrowRight className='text-[#404B52]'/>}
