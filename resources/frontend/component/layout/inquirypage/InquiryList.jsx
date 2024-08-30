@@ -18,6 +18,7 @@ const InquiryList = () => {
         getAllConcerns,
         daysFilter,
         setDaysFilter,
+        setStatusFilter
     } = useStateContext();
 
     const handlePageClick = (data) => {
@@ -61,6 +62,15 @@ const InquiryList = () => {
         setIsOpen(false);
 
         if (option === "All") {
+            setDaysFilter(null);
+            setStatusFilter(null);
+            setCurrentPage(0);
+        } else if (option === "Resolve") {
+            setStatusFilter('Resolved');
+            setDaysFilter(null);
+            setCurrentPage(0);
+        } else if (option === "Unresolve") {
+            setStatusFilter('unresolved');
             setDaysFilter(null);
             setCurrentPage(0);
         }
@@ -281,7 +291,7 @@ const InquiryList = () => {
                                 disabledLinkClassName={
                                     "text-gray-300 cursor-not-allowed"
                                 }
-                            /* forcePage={currentPage} */
+                                forcePage={currentPage}
                             />
                         </div>
                     </div>

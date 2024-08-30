@@ -46,7 +46,7 @@ const InquiryThread = () => {
         navigate("/inquirymanagement/inquirylist");
     };
 
-    const messageId = dataConcern?.message_id || null; // Safely access message_id
+    const messageId = dataConcern?.message_id || null; 
     console.log("messageID", messageId);
     const submitMessage = async () => {
         try {

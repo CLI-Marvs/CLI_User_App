@@ -19,6 +19,8 @@ export const ContextProvider = ({ children }) => {
     const [token, _setToken] = useState(localStorage.getItem("authToken"));
     const [allEmployees, setAllEmployees] = useState([]);
     const [daysFilter, setDaysFilter] = useState(null);
+    const [statusFilter, setStatusFilter] = useState(null);
+
     const [currentPage, setCurrentPage] = useState(0);
     const [data, setData] = useState([]);
     const itemsPerPage = 20;
@@ -63,7 +65,7 @@ export const ContextProvider = ({ children }) => {
        if(token) {
         try {
             const response = await apiService.get(
-                `get-concern?page=${currentPage + 1}&days=${daysFilter || ''}`
+                `get-concern?page=${currentPage + 1}&days=${daysFilter || ''}&status=${statusFilter || ''}`
             );
 
             setData(response.data.data);
@@ -108,7 +110,7 @@ export const ContextProvider = ({ children }) => {
 
     useEffect(() => {
         getAllConcerns();
-    }, [currentPage, daysFilter, token]);
+    }, [currentPage, daysFilter, token, statusFilter]);
 
     useEffect(() => {
         if (ticketId) {
@@ -143,7 +145,8 @@ export const ContextProvider = ({ children }) => {
                 getInquiryLogs,
                 logs,
                 setLogs,
-                allEmployees
+                allEmployees,
+                setStatusFilter
             }}
         >
             {children}

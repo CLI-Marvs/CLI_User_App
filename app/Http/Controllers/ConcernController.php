@@ -23,29 +23,36 @@ class ConcernController extends Controller
             $employee = $request->user();
             $employeeDepartment = $employee->department;
             $days = $request->query("days", null);
-
-
+            $status = $request->query("status", null);
+    
             $assignedInquiries = $this->getAssignInquiries($employee->employee_email);
             $ticketIds = $assignedInquiries->pluck('ticket_id')->toArray();
-
+    
             $query = Concerns::orderBy("created_at", "desc");
-
+    
             if ($days !== null) {
                 $startOfDay = now()->subDays($days)->startOfDay();
                 $endOfDay = now()->subDays($days)->endOfDay();
                 $query->whereBetween('created_at', [$startOfDay, $endOfDay]);
             }
-
+    
             if ($employeeDepartment !== 'CSR') {
                 $query->whereIn('ticket_id', $ticketIds);
             }
-
+    
+            if ($status === 'Resolved') {
+                $query->where('status', 'Resolved');  // Assuming there is a 'status' column in your 'concerns' table
+            } elseif ($status === 'unresolved') {
+                $query->where('status', 'unresolved');
+            }
+    
             $allConcerns = $query->paginate(20);
             return response()->json($allConcerns);
         } catch (\Exception $e) {
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
         }
     }
+    
 
     private function getAssignInquiries($email)
     {
