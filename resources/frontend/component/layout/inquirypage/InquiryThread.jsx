@@ -46,7 +46,7 @@ const InquiryThread = () => {
         navigate("/inquirymanagement/inquirylist");
     };
 
-    console.log("messageID", dataConcern.message_id);
+    console.log("messageID", dataConcern.message_id || null);
     const submitMessage = async () => {
         try {
             const response = await apiService.post("send-message", {
