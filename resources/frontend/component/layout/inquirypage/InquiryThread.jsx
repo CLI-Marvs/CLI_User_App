@@ -47,7 +47,6 @@ const InquiryThread = () => {
     };
 
     const messageId = dataConcern?.message_id || null; 
-    console.log("messageID", messageId);
     const submitMessage = async () => {
         try {
             const response = await apiService.post("send-message", {
@@ -63,6 +62,7 @@ const InquiryThread = () => {
             getMessages(ticketId);
             setChatMessage("");
             getInquiryLogs(ticketId);
+            getAllConcerns();
         } catch (error) {
             console.log("error sending messaing", error);
         }
@@ -127,7 +127,7 @@ const InquiryThread = () => {
                             <p className="text-sm montserrat-semibold text-custom-gray81 space-x-1">
                                 {dataConcern.ticket_id}
                                 <span> |</span>
-                                <span>Transaction</span>
+                                <span>{dataConcern.details_concern}</span>
                                 <span>|</span>
                                 {dataConcern && <span>{dataConcern.property}</span>}
                                 <span>|</span>
@@ -201,7 +201,7 @@ const InquiryThread = () => {
                 </div>
             </div>
             <div>
-                <ResolveModal modalRef={modalRef} ticketId={ticketId} />
+                <ResolveModal modalRef={modalRef} ticketId={ticketId} dataRef={dataConcern} />
             </div>
         </>
     );

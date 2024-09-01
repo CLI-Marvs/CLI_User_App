@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { TiPin, TiPinOutline } from "react-icons/ti";
 import { Link, useNavigate } from "react-router-dom";
 import { useStateContext } from "../../../context/contextprovider";
+import moment from "moment";
 
 const TicketTable = ({ concernData }) => {
     const [checkedRows, setCheckedRows] = useState([]); 
@@ -63,6 +64,28 @@ const TicketTable = ({ concernData }) => {
         } */);
     };
 
+    const formatTime = (createdAt) => {
+        const date = new Date(createdAt);
+        const now = new Date();
+      
+        const isToday = date.toDateString() === now.toDateString();
+        
+        if (isToday) {
+          let hours = date.getHours();
+          const minutes = date.getMinutes();
+          const ampm = hours >= 12 ? 'pm' : 'am';
+          
+          hours = hours % 12;
+          hours = hours ? hours : 12; 
+          
+          const formattedTime = `${hours}:${minutes < 10 ? '0' + minutes : minutes} ${ampm}`;
+          return formattedTime;
+        } else {
+          const options = { month: 'long', day: 'numeric' };
+          return date.toLocaleDateString(undefined, options);
+        }
+      };
+      console.log("concernData", concernData);
     return (
         <table className="flex flex-col gap-1 w-full">
             <tbody>
@@ -99,7 +122,7 @@ const TicketTable = ({ concernData }) => {
                             <td className="flex flex-1 gap-1 text-custom-bluegreen">
                                 <div className="font-semibold whitespace-nowrap">
                                     <span>{row.property}</span>
-                                    <span> (Transaction) </span>
+                                    <span>({row.details_concern || "Transaction"})</span>
                                     <span> - </span>
                                     <span>{row.ticket_id}</span>
                                 </div>
@@ -110,10 +133,10 @@ const TicketTable = ({ concernData }) => {
                                 </div>
                             </td>
                             <td className="w-56 flex items-center text-custom-lightgreen">
-                                <p className="truncate">{row.action}</p>
+                                <p className="truncate">{row.message_log}</p>
                             </td>
-                            <td className="w-28 flex justify-end px-3 text-custom-bluegreen font-semibold">
-                                {row.date}
+                            <td className="w-28 flex justify-end pr-3 text-custom-bluegreen font-semibold">
+                              {formatTime(row.created_at)}
                             </td>
                         </tr>
                     ))}
