@@ -131,7 +131,7 @@ const InquiryThread = () => {
                                 <span>|</span>
                                 {dataConcern && <span>{dataConcern.property}</span>}
                                 <span>|</span>
-                                <span>T207.012</span>
+                                <span>{dataConcern.unit_number}</span>
                             </p>
                             <div>
                                 <LuTrash2 />

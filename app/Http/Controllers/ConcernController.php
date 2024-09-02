@@ -15,17 +15,85 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
-
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 
 class ConcernController extends Controller
 {
-
     //*Add concern and get
+
+    public function token()
+    {
+        $client_id = \Config('services.google.client_id_gdrive');
+        $client_secret = \Config('services.google.client_secret_gdrive');
+        $refresh_token = \Config('services.google.refresh_token_gdrive');
+        $folder_id = \Config('services.google.folder_id');
+        $response = Http::post('https://oauth2.googleapis.com/token', [
+            'client_id' => $client_id,
+            'client_secret' => $client_secret,
+            'refresh_token' => $refresh_token,
+            'grant_type' => 'refresh_token'
+        ]);
+
+        $accessToken = json_decode((string)$response->getBody(), true)['access_token'];
+        return $accessToken;
+    }
+
+    public function store($file)
+    {
+        $accessToken = $this->token();
+        $name = $file->getClientOriginalName();
+        $mime = $file->getClientMimeType();
+        $path = $file->getRealPath();
+
+        $folder_id = \Config('services.google.folder_id');
+        $response = Http::withToken($accessToken)
+            ->attach('data', file_get_contents($path), $name)
+            ->post(
+                'https://www.googleapis.com/upload/drive/v3/files',
+                [
+                    'name' => 'file',
+                    'contents' => file_get_contents($path),
+                    'filename' => $name,
+                ],
+                [
+                    'name' => 'mimeType',
+                    'contents' => $mime,
+                ],
+                [
+                    'name' => 'parents',
+                    'contents' => [\Config('services.google.folder_id')],
+                ],
+            );
+
+        if ($response->successful()) {
+            // Retrieve the file ID from the response
+            $fileId = json_decode($response->getBody(), true)['id'];
+
+            $this->createShareableLink($accessToken, $fileId);
+
+            $fileLink = "https://drive.google.com/file/d/" . $fileId . "/view";
+
+            return $fileLink;
+        } else {
+            return response()->json(['message' => 'Failed to upload to Google Drive'], 500);
+        }
+    }
+
+    public function createShareableLink($accessToken, $fileId)
+    {
+        Http::withToken($accessToken)
+            ->post("https://www.googleapis.com/drive/v3/files/$fileId/permissions", [
+                'role' => 'reader',
+                'type' => 'anyone',
+            ]);
+    }
+
+
     public function addConcernPublic(Request $request)
     {
         try {
-
+            $file = $request->file('file');
             $lastConcern = Concerns::latest()->first();
             $nextId = $lastConcern ? $lastConcern->id + 1 : 1;
 
@@ -37,12 +105,12 @@ class ConcernController extends Controller
             $concerns = new Concerns();
             $concerns->details_concern = $request->details_concern;
             $concerns->property = $request->property;
-            $concerns->details_message = $request->details_message;
+            $concerns->details_message = $request->message;
             $concerns->status = "unresolved";
             $concerns->ticket_id = $ticketId;
             $concerns->user_type = $request->user_type;
-            $concerns->buyer_name = $request->buyer_name;
-            $concerns->user_type = $request->mobile_number;
+            $concerns->buyer_name = $request->fname . ' ' . $request->lname;
+            $concerns->mobile_number = $request->mobile_number;
             $concerns->contract_number = $request->contract_number;
             $concerns->unit_number = $request->unit_number;
             $concerns->buyer_email = $request->buyer_email;
@@ -52,13 +120,15 @@ class ConcernController extends Controller
             $concerns->save();
 
             $this->inquiryReceivedLogs($request, $ticketId);
+
+            $fileLink = $this->store($file);
             $messages = new Messages();
-            $messages->buyer_id = $request->buyer_id;
             $messages->admin_email = $request->admin_email;
             $messages->attachment = $request->attachment;
             $messages->ticket_id = $concerns->ticket_id;
-            $messages->details_message = $request->details_message;
-            $messages->buyer_email = $request->buyer_email;
+            $messages->details_message = $request->message;
+           /*  $messages->buyer_email = $request->buyer_email; */
+            $messages->attachment = $fileLink;
             $messages->save();
 
 
@@ -108,8 +178,6 @@ class ConcernController extends Controller
                 $join->on('concerns.ticket_id', '=', 'latest_logs.ticket_id');
             })->select('concerns.*', 'latest_logs.message_log')->paginate(20);
 
-            /*  dd($allConcerns); */
-            /* $allConcerns = $query->paginate(20); */
             return response()->json($allConcerns);
         } catch (\Exception $e) {
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);

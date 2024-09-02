@@ -1,9 +1,13 @@
-import React, { useState } from 'react'
+import React, { useState } from "react";
 import ReCAPTCHA from "react-google-recaptcha";
-import { IoIosSend } from "react-icons/io";
-const InquiryFormModal = ({ modalRef }) => {
+import { IoIosSend, IoMdTrash } from "react-icons/io";
+import apiService from "../../servicesApi/apiService";
+import { useStateContext } from "../../../context/contextprovider";
 
-    const [fileName, setFileName] = useState('');
+const InquiryFormModal = ({ modalRef }) => {
+    const [fileName, setFileName] = useState("");
+    const [message, setMessage] = useState("");
+    const { user } = useStateContext();
 
     const handleFileChange = (event) => {
         const file = event.target.files[0];
@@ -18,60 +22,165 @@ const InquiryFormModal = ({ modalRef }) => {
             setFileName("");
         }
     };
+
+    const handleDelete = () => {
+        setFileName("");
+    };
+
+    const [formData, setFormData] = useState({
+        fname: "",
+        lname: "",
+        buyer_email: "",
+        mobile_number: "",
+        property: "",
+        user_type: "",
+        contract_number: "",
+        details_concern: "",
+        unit_number: "",
+    });
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData((prevData) => ({
+            ...prevData,
+            [name]: value,
+        }));
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            const fileData = new FormData();
+            fileData.append(
+                "file",
+                document.getElementById("attachment").files[0]
+            );
+            Object.keys(formData).forEach((key) => {
+                fileData.append(key, formData[key]);
+            });
+            fileData.append("message", message);
+            fileData.append("admin_email", user?.employee_email);
+            const response = await apiService.post("add-concern", fileData, {
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                },
+            });
+        } catch (error) {
+            console.log("error saving concerns", error);
+        }
+    };
     return (
-        <dialog id="Employment" className="modal w-[589px] rounded-[10px] shadow-custom5" ref={modalRef}>
-            <div className=' px-20 rounded-lg'>
-                <div className=''>
-                    <form method="dialog" className="pt-1 flex justify-end -mr-[75px]">
+        <dialog
+            id="Employment"
+            className="modal w-[589px] rounded-[10px] shadow-custom5"
+            ref={modalRef}
+        >
+            <div className=" px-20 rounded-lg">
+                <div className="">
+                    <form
+                        method="dialog"
+                        className="pt-1 flex justify-end -mr-[75px]"
+                    >
                         <button className="flex justify-center w-10 h-10 items-center rounded-full bg-custombg3 text-custom-bluegreen hover:bg-custombg">
                             ✕
                         </button>
                     </form>
                     <div>
-                        <div className='flex justify-center items-center my-2 mobile:mb-7 mobile:my-0'>
-                            <p className='montserrat-bold text-[19px] text-custom-solidgreen mobile:text-sm'>Feedback / Inquiry Form</p>
+                        <div className="flex justify-center items-center my-2 mobile:mb-7 mobile:my-0">
+                            <p className="montserrat-bold text-[19px] text-custom-solidgreen mobile:text-sm">
+                                Feedback / Inquiry Form
+                            </p>
                         </div>
                     </div>
-                    <div className='mb-3'>
-                        <p className='text-sm font-semibold mobile:text-xs'>Required</p>
+                    <div className="mb-3">
+                        <p className="text-sm font-semibold mobile:text-xs">
+                            Required
+                        </p>
                     </div>
                     <div className="flex flex-col gap-2">
                         <div
                             className={`flex items-center border rounded-[5px] overflow-hidden border-custombg`}
                         >
-                            <span className="text-custom-gray81 text-sm bg-custom-grayFA flex pl-3 py-1 w-[240px]">First Name</span>
-                            <input name='fname' type="text" className="w-full px-4 text-sm focus:outline-none mobile:text-xs"
-                                placeholder="" />
+                            <span className="text-custom-gray81 text-sm bg-custom-grayFA flex pl-3 py-1 w-[240px]">
+                                First Name
+                            </span>
+                            <input
+                                name="fname"
+                                type="text"
+                                className="w-full px-4 text-sm focus:outline-none mobile:text-xs"
+                                placeholder=""
+                                value={formData.fname}
+                                onChange={handleChange}
+                            />
                         </div>
                         <div
                             className={`flex items-center border rounded-[5px] overflow-hidden`}
                         >
-                            <span className="text-custom-gray81 text-sm bg-custom-grayFA flex w-[240px] pl-3 py-1">Last Name</span>
-                            <input name='lname' type="text" className="w-full px-4 text-sm focus:outline-none mobile:text-xs" placeholder="" />
+                            <span className="text-custom-gray81 text-sm bg-custom-grayFA flex w-[240px] pl-3 py-1">
+                                Last Name
+                            </span>
+                            <input
+                                name="lname"
+                                type="text"
+                                value={formData.lname}
+                                onChange={handleChange}
+                                className="w-full px-4 text-sm focus:outline-none mobile:text-xs"
+                                placeholder=""
+                            />
                         </div>
                         <div
                             className={`flex items-center border rounded-[5px] overflow-hidden`}
                         >
-                            <span className="text-custom-gray81 text-sm bg-custom-grayFA flex w-[240px] pl-3 py-1">Email</span>
-                            <input name='buyer_email' type="email" className="w-full px-4 text-sm focus:outline-none mobile:text-xs" placeholder="" />
+                            <span className="text-custom-gray81 text-sm bg-custom-grayFA flex w-[240px] pl-3 py-1">
+                                Email
+                            </span>
+                            <input
+                                name="buyer_email"
+                                value={formData.buyer_email}
+                                onChange={handleChange}
+                                type="email"
+                                className="w-full px-4 text-sm focus:outline-none mobile:text-xs"
+                                placeholder=""
+                            />
                         </div>
                         <div
                             className={`flex items-center border rounded-[5px] overflow-hidden `}
                         >
-                            <span className="text-custom-gray81 text-sm bg-custom-grayFA flex w-[240px] pl-3 py-1">Mobile Number</span>
-                            <input name='mobile_number' type="number" className="w-full px-4 text-sm focus:outline-none mobile:text-xs"
-                                placeholder="" />
+                            <span className="text-custom-gray81 text-sm bg-custom-grayFA flex w-[240px] pl-3 py-1">
+                                Mobile Number
+                            </span>
+                            <input
+                                value={formData.mobile_number}
+                                onChange={handleChange}
+                                name="mobile_number"
+                                type="number"
+                                className="w-full px-4 text-sm focus:outline-none mobile:text-xs"
+                                placeholder=""
+                            />
                         </div>
                         <div
                             className={`flex items-center border rounded-[5px] overflow-hidden`}
                         >
-                            <span className="text-custom-gray81 text-sm bg-custom-grayFA flex items-center w-[250px] tablet:w-[175px] mobile:w-[270px] mobile:text-xs -mr-3 pl-3 py-1">Property</span>
+                            <span className="text-custom-gray81 text-sm bg-custom-grayFA flex items-center w-[250px] tablet:w-[175px] mobile:w-[270px] mobile:text-xs -mr-3 pl-3 py-1">
+                                Property
+                            </span>
                             <div className="relative w-full">
-                                <select name="property" className="appearance-none w-full px-4 text-sm py-1 bg-white focus:outline-none border-0 mobile:text-xs">
+                                <select
+                                    name="property"
+                                    value={formData.property}
+                                    onChange={handleChange}
+                                    className="appearance-none w-full px-4 text-sm py-1 bg-white focus:outline-none border-0 mobile:text-xs"
+                                >
                                     <option value="">(Select)</option>
-                                    <option value="property1">Property 1</option>
-                                    <option value="property2">Property 2</option>
-                                    <option value="property3">Property 3</option>
+                                    <option value="property1">
+                                        Property 1
+                                    </option>
+                                    <option value="property2">
+                                        Property 2
+                                    </option>
+                                    <option value="property3">
+                                        Property 3
+                                    </option>
                                 </select>
                                 <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3 bg-custom-grayFA">
                                     <svg
@@ -104,20 +213,16 @@ const InquiryFormModal = ({ modalRef }) => {
                             <div className="relative w-full">
                                 <select
                                     name="user_type"
+                                    value={formData.user_type}
+                                    onChange={handleChange}
                                     className="appearance-none w-full px-4 py-1 text-sm bg-white focus:outline-none border-0 mobile:text-xs"
                                 >
-                                    <option value="">
-                                        (Select)
-                                    </option>
+                                    <option value="">(Select)</option>
                                     <option value="Property Owner">
                                         Property Owner
                                     </option>
-                                    <option value="Buyer">
-                                        Buyer
-                                    </option>
-                                    <option value="Broker">
-                                        Broker
-                                    </option>
+                                    <option value="Buyer">Buyer</option>
+                                    <option value="Broker">Broker</option>
                                 </select>
                                 <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3  bg-custom-grayFA">
                                     <svg
@@ -143,6 +248,8 @@ const InquiryFormModal = ({ modalRef }) => {
                             </span>
                             <input
                                 name="contract_number"
+                                value={formData.contract_number}
+                                onChange={handleChange}
                                 type="text"
                                 className="w-full px-4 text-sm focus:outline-none mobile:text-xs"
                                 placeholder=""
@@ -155,11 +262,11 @@ const InquiryFormModal = ({ modalRef }) => {
                             <div className="relative w-full">
                                 <select
                                     name="details_concern"
+                                    value={formData.details_concern}
+                                    onChange={handleChange}
                                     className="appearance-none text-sm w-full px-4 py-1 bg-white focus:outline-none border-0 mobile:text-xs"
                                 >
-                                    <option value="">
-                                        (Select)
-                                    </option>
+                                    <option value="">(Select)</option>
                                     <option value="Reservation Documents">
                                         Reservation Documents
                                     </option>
@@ -167,19 +274,17 @@ const InquiryFormModal = ({ modalRef }) => {
                                         Payment Issues
                                     </option>
                                     <option value="Statement of Account and Billing Statement">
-                                        Statement of Account and
-                                        Billing Statement
+                                        Statement of Account and Billing
+                                        Statement
                                     </option>
                                     <option value="Turnover Status/Unit Concerns">
-                                        Turnover Status/Unit
-                                        Concerns
+                                        Turnover Status/Unit Concerns
                                     </option>
                                     <option value="Loan Application">
                                         Loan Application
                                     </option>
                                     <option value="Titile and Other Registration Documents">
-                                        Titile and Other
-                                        Registration Documents
+                                        Titile and Other Registration Documents
                                     </option>
                                     <option value="Commissions">
                                         Commissions
@@ -212,20 +317,37 @@ const InquiryFormModal = ({ modalRef }) => {
                             </span>
                             <input
                                 name="unit_number"
+                                value={formData.unit_number}
+                                onChange={handleChange}
                                 type="text"
                                 className="w-full px-4 text-sm focus:outline-none mobile:text-xs"
                                 placeholder=""
                             />
                         </div>
                     </div>
-                    <div className='border border-b-1 border-gray-300 my-2'></div>
-                    <div className={`border-gray-300 rounded-[5px] bg-custom-grayFA border`}>
-                        <div className='flex items-center justify-between'>
-                            <p className='text-custom-gray81 text-sm bg-custom-grayFA pl-3  montserrat-semibold flex-grow mobile:text-xs mobile:w-[170px]'>Details (Required)</p>
-                            <span className='bg-white text-sm2 text-gray-400 font-normal py-3 border pl-2 pr-12 mobile:pr-1 mobile:text-xs ml-auto rounded-r-[4px]'> 0/500 characters</span>
+                    <div className="border border-b-1 border-gray-300 my-2"></div>
+                    <div
+                        className={`border-gray-300 rounded-[5px] bg-custom-grayFA border`}
+                    >
+                        <div className="flex items-center justify-between">
+                            <p className="text-custom-gray81 text-sm bg-custom-grayFA pl-3  montserrat-semibold flex-grow mobile:text-xs mobile:w-[170px]">
+                                Details (Required)
+                            </p>
+                            <span className="bg-white text-sm2 text-gray-400 font-normal py-3 border pl-2 pr-12 mobile:pr-1 mobile:text-xs ml-auto rounded-r-[4px]">
+                                {" "}
+                                0/500 characters
+                            </span>
                         </div>
-                        <div className='flex gap-3 '>
-                            <textarea id="details_message" name='details_message' placeholder='Write your concern here.' rows="4" className={`block border-t-1  rounded-[5px] h-40 p-2.5 w-full text-sm text-gray-900 bg-white border-gray-300`}></textarea>
+                        <div className="flex gap-3 ">
+                            <textarea
+                                id="details_message"
+                                value={message}
+                                onChange={(e) => setMessage(e.target.value)}
+                                name="details_message"
+                                placeholder="Write your concern here."
+                                rows="4"
+                                className={`block border-t-1  rounded-[5px] h-40 p-2.5 w-full text-sm text-gray-900 bg-white border-gray-300`}
+                            ></textarea>
                         </div>
                     </div>
                     <div className="flex flex-col mt-5 mb-12">
@@ -259,24 +381,25 @@ const InquiryFormModal = ({ modalRef }) => {
                             {fileName && (
                                 <p className=" flex items-center ml-2 text-sm text-gray-600 truncate gap-1">
                                     {fileName}
-                                    < IoMdTrash
-                                        className='hover:text-red-500'
+                                    <IoMdTrash
+                                        className="hover:text-red-500"
                                         onClick={handleDelete}
                                     />
                                 </p>
                             )}
-                            <button type="submit" className='h-10 text-white px-10 rounded-lg gradient-btn2 flex justify-center items-center gap-2 tablet:w-full'>
+                            <button
+                                type="submit" onClick={handleSubmit}
+                                className="h-10 text-white px-10 rounded-lg gradient-btn2 flex justify-center items-center gap-2 tablet:w-full"
+                            >
                                 Submit
                                 <IoIosSend />
                             </button>
                         </div>
-
                     </div>
                 </div>
-
             </div>
         </dialog>
-    )
-}
+    );
+};
 
-export default InquiryFormModal
+export default InquiryFormModal;

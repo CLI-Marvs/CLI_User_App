@@ -31,7 +31,11 @@ return [
     'google' => [
         'client_id' => env('GOOGLE_CLIENT_ID'),
         'client_secret' => env('GOOGLE_CLIENT_SECRET'),
-        'redirect' => env('GOOGLE_REDIRECT')
+        'redirect' => env('GOOGLE_REDIRECT'),
+        'client_id_gdrive' => env('GOOGLE_DRIVE_CLIENT_ID'),
+        'client_secret_gdrive' => env('GOOGLE_DRIVE_CLIENT_SECRET'),
+        'refresh_token_gdrive' => env('GOOGLE_DRIVE_REFRESH_TOKEN'),
+        'folder_id_gdrive' => env('GOOGLE_DRIVE_FOLDER_ID')
     ],
 
     'slack' => [
@@ -40,5 +44,7 @@ return [
             'channel' => env('SLACK_BOT_USER_DEFAULT_CHANNEL'),
         ],
     ],
+
+    
 
 ];

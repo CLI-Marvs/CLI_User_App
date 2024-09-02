@@ -1,11 +1,12 @@
 import React from "react";
 import Sho from "../../../../../public/Images/rodfil.png";
 import { useStateContext } from "../../../context/contextprovider";
+import FolderFile from "../../../../../public/Images/folder_file.svg";
 import moment from "moment";
 
 const AdminMessages = ({ items }) => {
     const { user } = useStateContext();
-    
+
     const formatTime = (createdAt) => {
         return moment(createdAt).fromNow();
     };
@@ -32,12 +33,19 @@ const AdminMessages = ({ items }) => {
                     <div>
                         <p>{items.details_message}</p>
                     </div>
-                    {/*  <div className='mt-4'>
-                    <button className='flex items-center justify-start bg-customnavbar h-12 px-24 pl-4 text-black gap-2 rounded-lg'>
-                        <img src={FolderFile} alt="download btn" />
-                        Document.pdf
-                    </button>
-                </div> */}
+                    {items.attachment && (
+                        <div className="mt-4">
+                            <button
+                                onClick={() =>
+                                    window.open(items.attachment, "_blank")
+                                }
+                                className="flex items-center justify-start bg-customnavbar h-12 px-24 pl-4 text-black gap-2 rounded-lg"
+                            >
+                                <img src={FolderFile} alt="download btn" />
+                                View Attachment
+                            </button>
+                        </div>
+                    )}
                 </div>
                 <div className="w-full flex justify-start">
                     <p className="flex text-custom-gray81 text-sm space-x-1">
