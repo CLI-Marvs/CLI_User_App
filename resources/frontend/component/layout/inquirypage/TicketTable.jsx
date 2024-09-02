@@ -72,7 +72,6 @@ const TicketTable = ({ concernData }) => {
                             key={row.id}
                             onClick={() => navigateToThread(row)}
                             className={`flex items-center h-7 cursor-pointer mb-1 bg-white
-                           /*  
                             hover:shadow-custom
                         `}
                         >

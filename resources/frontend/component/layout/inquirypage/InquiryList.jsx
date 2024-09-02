@@ -120,7 +120,7 @@ const InquiryList = () => {
 
     return (
         <>
-            <div className="h-screen max-w-full bg-custom-grayFA p-4">
+            <div className="h-screen max-w-full bg-custom-grayFA px-4">
                 <div className="bg-custom-grayFA">
                     <div className="relative flex justify-start gap-3">
                         <div className="relative w-[604px]">
@@ -216,7 +216,7 @@ const InquiryList = () => {
                 </div>
 
                 <div className="max-w-5xl">
-                    <div className="flex justify-between items-center h-12 mt-3 px-6 gap-24 bg-white rounded-t-lg mb-1 ">
+                    <div className="flex justify-start items-center h-12 mt-3 px-6 gap-24 bg-white rounded-t-lg mb-1 ">
                         <div className="relative mr-4">
                             <button
                                 className="flex text-[20px] items-center gap-3 text-custom-bluegreen font-semibold"

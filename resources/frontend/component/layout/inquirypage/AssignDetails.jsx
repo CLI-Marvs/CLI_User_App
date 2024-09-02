@@ -6,23 +6,29 @@ const AssignDetails = ({ logMessages }) => {
             case "client_inquiry":
                 return (
                     <>
-                        <div className="truncate w-44">
-                            <p className="truncate">
+                    <div className="flex flex-col gap-1">
+                        <div className="truncate">
+                            <p className="truncate text-sm text-[#616161]">
                                 Inquiry Feedback Received
                             </p>
                         </div>
-                        <p className="text-xs text-custom-gray space-x-1">
-                            (<span>{details.buyer_name || "N/A"}</span>
-                            <span>|</span>
-                            <span> {details.buyer_email || "N/A"}</span>)
-                        </p>
+                        <div>
+                            <p className="text-xs text-custom-gray space-x-1">
+                                (<span>{details.buyer_name || "N/A"}</span>
+                                <span>|</span>
+                                <span> {details.buyer_email || "N/A"}</span>)
+                            </p>
+                        </div>
+                        
+                    </div>
+                        
                     </>
                 );
             case "admin_reply":
                 return (
                     <>
-                        <div className="truncate w-44">
-                            <p className="truncate">
+                        <div className=" flex flex-col truncate">
+                            <p className="truncate text-sm text-[#616161]">
                                 Replied by {details.admin_name}
                             </p>
                         </div>
@@ -31,8 +37,8 @@ const AssignDetails = ({ logMessages }) => {
             case "assign_to":
                 return (
                     <>
-                        <div className="truncate w-44">
-                            <p className="truncate">
+                        <div className="flex flex-col truncate ">
+                            <p className="truncate text-sm text-[#616161]">
                                 Assign to {details.assign_to_name} Department (
                                 {details.assign_to_department})
                             </p>
@@ -47,8 +53,8 @@ const AssignDetails = ({ logMessages }) => {
                 case "inquiry_status":
                     return (
                         <>
-                            <div className="truncate w-44">
-                                <p className="truncate">
+                            <div className="flex flex-col truncate">
+                                <p className="truncate text-sm text-[#616161]">
                                     Resolved by {details.resolve_by} Department (
                                     {details.department})
                                 </p>
@@ -84,22 +90,23 @@ const AssignDetails = ({ logMessages }) => {
 
                     return (
                         <div
-                            className="flex h-12 w-full gap-5 items-center mt-1 mb-5"
+                            className="flex h-auto py-1 gap-5 items-start mt-1 mb-5 grow-0"
                             key={index}
                         >
-                            <div className="flex w-36 flex-col text-custom-gray71">
+                            <div className="flex w-[144px] shrink-0 flex-col text-[#A5A5A5]">
                                 <p className="flex justify-end text-sm">
                                     {new Date(
                                         item.created_at
                                     ).toLocaleDateString()}
                                 </p>
-                                <p className="flex justify-end text-sm">
+                                <p className="flex justify-end text-sm gap-1">
                                     {new Date(
                                         item.created_at
                                     ).toLocaleTimeString()}
+                                    <span>○</span>
                                 </p>
                             </div>
-                            <div className="flex-1">
+                            <div className="items-start flex-1 flex">
                                 {renderDetails(logType, details)}
                             </div>
                         </div>

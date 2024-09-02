@@ -21,7 +21,7 @@ const Navbar = () => {
     }
 };
   return (
-    <div className="flex justify-between px-5 pr-16 w-screen bg-custom-grayFA">
+    <div className="flex justify-between h-[100px] pr-16 w-screen bg-custom-grayFA">
       <div className='flex'>
         <div className="flex justify-center items-center">
           <img className='h-16 ml-5' src={CLILogo} alt="cli logo" />

@@ -46,7 +46,7 @@ const AssignModal = ({modalRef, employeeData}) => {
                 <div className="mt-5 mb-12">
                     <form method="dialog" className='flex justify-end'>
                       
-                        <button onClick={saveAssignee} className='h-12 text-white px-10 rounded-lg gradient-btn2'>
+                        <button onClick={saveAssignee} className='h-12 text-white px-10 rounded-lg gradient-btn2 hover:shadow-custom4'>
                             Assign
                         </button>
                     </form>

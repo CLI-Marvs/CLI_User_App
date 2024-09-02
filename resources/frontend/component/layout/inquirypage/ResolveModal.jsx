@@ -64,7 +64,7 @@ const ResolveModal = ({ modalRef, ticketId }) => {
                 </div>
                 <div className="mt-5 mb-12">
                     <form method="dialog" className="flex justify-end">
-                        <button onClick={updateStatus} className="h-12 text-white px-10 rounded-lg gradient-btn2">
+                        <button onClick={updateStatus} className="h-12 text-white px-10 rounded-lg gradient-btn2 hover:shadow-custom4">
                             Mark as Resolved
                         </button>
                     </form>

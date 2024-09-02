@@ -38,7 +38,7 @@ const AssignSidePanel = ({ticketId}) => {
     
     return (
         <>
-            <div className='w-full '>
+            <div className=''>
                 <div>
                     <Autocomplete
                         disablePortal
@@ -50,7 +50,7 @@ const AssignSidePanel = ({ticketId}) => {
                  />
                 </div>
                 <div className='flex w-full justify-center items-center p-4'>
-                    <button onClick={handleOpenModal} className='h-9 gradient-btn2 px-16 text-white rounded-lg'>
+                    <button onClick={handleOpenModal} className='h-9 gradient-btn2 hover:shadow-custom4 px-16 text-white rounded-lg'>
                         Assign
                     </button>
                 </div>
@@ -61,7 +61,7 @@ const AssignSidePanel = ({ticketId}) => {
                     </div>
                 </div>
                 <div className="h-full flex flex-col">
-                    <div className="h-90 overflow-y-auto">
+                    <div className=" h-full overflow-y-auto">
                         <AssignDetails logMessages={logsMessages}/>
                     </div>
                     <div className="border border-t-1 border-custom-lightestgreen flex-shrink-0"></div>

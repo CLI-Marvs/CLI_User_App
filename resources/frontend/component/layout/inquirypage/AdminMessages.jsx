@@ -1,5 +1,5 @@
 import React from "react";
-import Sho from "../../../../../public/Images/rodfil.png";
+import AdminLogo from "../../../../../public/Images/AdminSilouette.svg";
 import { useStateContext } from "../../../context/contextprovider";
 import moment from "moment";
 
@@ -24,7 +24,7 @@ const AdminMessages = ({ items }) => {
                     </p>
                 </div>
                 <div className="h-12 w-12">
-                    <img className="rounded-full" src={Sho} alt="" />
+                    <img className="rounded-full" src={AdminLogo} alt="Admin Logo" />
                 </div>
             </div>
             <div className="w-full mt-2 mb-5 pr-12">
