@@ -56,7 +56,7 @@ const AssignDetails = ({ logMessages }) => {
                                 {details.message_tag} {details.resolve_by}
                             </p>
                             <p className="text-xs text-custom-gray space-x-1">
-                            (<span>{details.remarks}</span>)
+                            (<span className="truncate">{details.remarks}</span>)
                         </p>
                         </div>
                     </>
