@@ -1,8 +1,25 @@
-import React, { PureComponent } from 'react';
-import { BarChart, Bar, Rectangle, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell, LabelList, Label } from 'recharts';
+import React, { PureComponent, useCallback, useEffect, useState } from "react";
+import {
+    BarChart,
+    Bar,
+    Rectangle,
+    XAxis,
+    YAxis,
+    CartesianGrid,
+    Tooltip,
+    Legend,
+    ResponsiveContainer,
+    PieChart,
+    Pie,
+    Cell,
+    LabelList,
+    Label,
+} from "recharts";
+import apiService from "../../servicesApi/apiService";
+import debounce from "lodash/debounce";
 
 const data = [
-    { name: "01", Resolved: 30, Unresolved: 10 },
+    { name: "01", Resolved: 0, Unresolved: 0 },
     { name: "02", Resolved: 23, Unresolved: 5 },
     { name: "03", Resolved: 26, Unresolved: 15 },
     { name: "04", Resolved: 15, Unresolved: 13 },
@@ -14,27 +31,34 @@ const data = [
     { name: "10", Resolved: 23, Unresolved: 9 },
     { name: "11", Resolved: 28, Unresolved: 26 },
     { name: "12", Resolved: 13, Unresolved: 9 },
-    
 ];
 
 const data2 = [
     { name: "Group A", value: 40 },
     { name: "Group B", value: 60 },
-
 ];
 
 const data3 = [
-    { name: '38 Park Ave.', value1: 44, value2: 123 },
-    { name: 'Casa Mira', value1: 136, value2: 220 },
-    { name: 'Mivessa', value1: 275, value2: 44 },
+    { name: "38 Park Ave.", value1: 44, value2: 123 },
+    { name: "Casa Mira", value1: 136, value2: 220 },
+    { name: "Mivessa", value1: 275, value2: 44 },
 ];
 
-const barHeight = 20; // Height per bar, adjust as needed
-const chartHeight = data3.length * (barHeight + 60)
+const barHeight = 20;
+const chartHeight = data3.length * (barHeight + 60);
 
-const COLORS = ['#5B9BD5', '#348017'];
+const COLORS = ["#5B9BD5", "#348017"];
 
+const categoryColors = {
+    "Reservation Documents": "#348017",
+    "Payment Issues": "#5B9BD5",
+};
 
+const SINGLE_COLOR = "#5B9BD5";
+
+const getCategoryColor = (categoryName) => {
+    return categoryColors[categoryName] || "#8884d8"; 
+};
 const CustomTooltip = ({ active, payload }) => {
     if (active && payload && payload.length) {
         return (
@@ -49,37 +73,154 @@ const CustomTooltip = ({ active, payload }) => {
     return null;
 };
 
-
-
 const ReportPage = () => {
+    const [dataSet, setDataSet] = useState([]);
+    const [department, setDepartment] = useState("All");
+    const [dataCategory, setDataCategory] = useState([]);
+    const [month, setMonth] = useState("");
+
+    const fetchCategory = useCallback(
+        debounce(async (month) => {
+            if (!month || !isValidMonth(month)) {
+                return;
+            }
+            try {
+                const response = await apiService.get("category-monthly", {
+                    params: { month: month },
+                });
+
+                const result = response.data;
+
+
+                const formattedData = result.map((item) => ({
+                    name: item.details_concern,
+                    value: item.total
+                }));
+                setDataCategory(formattedData);
+            } catch (error) {
+                console.log("Error retrieving data", error);
+            }
+        }, 300),
+        []
+    );
+    const fetchDataReport = async () => {
+        try {
+            const response = await apiService.get("report-monthly", {
+                params: { department: department },
+            });
+            const result = response.data;
+
+            const formattedData = result.map((item) => ({
+                name: item.month.toString().padStart(2, "0"),
+                Resolved: item.resolved,
+                Unresolved: item.unresolved,
+            }));
+
+            setDataSet(formattedData);
+        } catch (error) {
+            console.error("Error fetching data:", error);
+        }
+    };
+
+    const isValidMonth = (month) => {
+        const validMonths = {
+            January: "January",
+            Feb: "February",
+            February: "February",
+            Mar: "March",
+            March: "March",
+            Apr: "April",
+            April: "April",
+            May: "May",
+            Jun: "June",
+            June: "June",
+            Jul: "July",
+            July: "July",
+            Aug: "August",
+            August: "August",
+            Sep: "September",
+            September: "September",
+            Oct: "October",
+            October: "October",
+            Nov: "November",
+            November: "November",
+            Dec: "December",
+            December: "December",
+        };
+
+        const normalizedMonth =
+            month.charAt(0).toUpperCase() + month.slice(1).toLowerCase();
+
+        return validMonths.hasOwnProperty(normalizedMonth);
+    };
+
+    const handleInputChange = (e) => {
+        setMonth(e.target.value);
+    };
+
+    const handleKeyDown = (e) => {
+        if (e.key === "Enter") {
+            fetchCategory(month);
+        }
+    };
+    useEffect(() => {
+        fetchDataReport();
+        if (month) {
+            fetchCategory(month);
+        }
+    }, [department, month]);
+
     return (
-        <div className='h-screen bg-custom-grayFA p-4 '>
-            <div className='bg-white p-4 rounded-xl '>
-                <div className='w-80 mb-2'>
-                    <p className='text-lg montserrat-bold'>Resolved vs. Unresolved Chart</p>
+        <div className="h-screen bg-custom-grayFA p-4 ">
+            <div className="bg-white p-4 rounded-xl ">
+                <div className="w-80 mb-2">
+                    <p className="text-lg montserrat-bold">
+                        Resolved vs. Unresolved Chart
+                    </p>
                     <div className="flex items-center border rounded-md overflow-hidden">
-                        <span className="text-custom-gray81 bg-custom-grayFA flex items-center w-44 -mr-3 pl-3 py-1">Department</span>
+                        <span className="text-custom-gray81 bg-custom-grayFA flex items-center w-44 -mr-3 pl-3 py-1">
+                            Department
+                        </span>
                         <div className="relative w-full">
-                            <select name="concern" className="appearance-none w-full px-4 py-1 bg-white focus:outline-none border-0">
-                                <option value="">Select</option>
-                                <option value="january">Engineering</option>
-                                <option value="February">Sales</option>
-                                <option value="February">AP Commission</option>
-                                
+                            <select
+                                name="concern"
+                                className="appearance-none w-full px-4 py-1 bg-white focus:outline-none border-0"
+                                value={department}
+                                onChange={(e) => setDepartment(e.target.value)}
+                            >
+                                <option value="All">All</option>
+                                <option value="CSR">
+                                    Customer Service Relations
+                                </option>
+                                <option value="Sales">Sales</option>
+                                <option value="AP Comission">
+                                    AP Commission
+                                </option>
                             </select>
                             <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3 bg-custom-grayFA">
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-custom-gray81" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    className="h-4 w-4 text-custom-gray81"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        d="M19 9l-7 7-7-7"
+                                    />
                                 </svg>
                             </span>
                         </div>
                     </div>
                 </div>
-                <div className='overflow-x-auto'>
+                <div className="overflow-x-auto">
                     <BarChart
                         width={1000}
                         height={180}
-                        data={data}
+                        data={dataSet}
                         margin={{
                             top: 5,
                             right: 30,
@@ -91,36 +232,62 @@ const ReportPage = () => {
                         <XAxis dataKey="name" />
                         <YAxis ticks={[10, 20, 30]} />
                         <Tooltip />
-                        <Bar dataKey="Resolved" fill="#348017" barSize={12} radius={[3, 3, 0, 0]} />
-                        <Bar dataKey="Unresolved" fill="#D6E4D1" barSize={12} radius={[3, 3, 0, 0]} />
+                        <Bar
+                            dataKey="Resolved"
+                            fill="#348017"
+                            barSize={12}
+                            radius={[3, 3, 0, 0]}
+                        />
+                        <Bar
+                            dataKey="Unresolved"
+                            fill="#D6E4D1"
+                            barSize={12}
+                            radius={[3, 3, 0, 0]}
+                        />
                     </BarChart>
                 </div>
-                <div className='flex gap-6'>
-                    <div className='flex items-center px-3 py-2 gap-3'>
-                        <span className='flex items-center text-custom-solidgreen text-2xl'>●</span>
-                        <span className='text-custom-gray12'>Resolved</span>
+                <div className="flex gap-6">
+                    <div className="flex items-center px-3 py-2 gap-3">
+                        <span className="flex items-center text-custom-solidgreen text-2xl">
+                            ●
+                        </span>
+                        <span className="text-custom-gray12">Resolved</span>
                     </div>
-                    <div className='flex items-center px-3 py-2 gap-3'>
-                        <span className='flex items-center text-custom-lightestgreen text-2xl'>●</span>
-                        <span className='text-custom-gray12'>Unresolved</span>
+                    <div className="flex items-center px-3 py-2 gap-3">
+                        <span className="flex items-center text-custom-lightestgreen text-2xl">
+                            ●
+                        </span>
+                        <span className="text-custom-gray12">Unresolved</span>
                     </div>
                 </div>
             </div>
-            <div className='flex gap-3 mt-4 bg-custom-grayFA '>
-                <div className='w-[430px]  pb-7 max-h-[400px] flex-shrink-0 flex-grow-0 bg-white rounded-lg'>
-                    <p className='p-4 text-base montserrat-bold'>Inquiries per category</p>
-                    <div className='border border-t-1'></div>
-                    <div className='mt-4 pl-4 pr-28'>
+            <div className="flex gap-3 mt-4 bg-custom-grayFA ">
+                <div className="w-[430px]  pb-7 max-h-[400px] flex-shrink-0 flex-grow-0 bg-white rounded-lg">
+                    <p className="p-4 text-base montserrat-bold">
+                        Inquiries per category
+                    </p>
+                    <div className="border border-t-1"></div>
+                    <div className="mt-4 pl-4 pr-28">
                         <div className="flex items-center border rounded-md overflow-hidden w-full">
-                            <span className="text-custom-gray81 bg-custom-grayFA flex w-34 pl-2 py-1">For the month of</span>
-                            <input name='contact' type="text" className="w-36 pl-2 focus:outline-none" placeholder="" />
+                            <span className="text-custom-gray81 bg-custom-grayFA flex w-34 pl-2 py-1">
+                                For the month of
+                            </span>
+                            <input
+                                name="month"
+                                type="text"
+                                className="w-36 pl-2 focus:outline-none"
+                                placeholder="Enter month (e.g., August)"
+                                value={month}
+                                onChange={handleInputChange}
+                                onKeyDown={handleKeyDown}
+                            />
                         </div>
                     </div>
-                    <div className='flex'>
+                    <div className="flex">
                         <div>
                             <PieChart width={230} height={260}>
                                 <Pie
-                                    data={data2}
+                                    data={dataCategory}
                                     cx="50%"
                                     cy="50%"
                                     outerRadius={100}
@@ -133,45 +300,101 @@ const ReportPage = () => {
                                     startAngle={90}
                                     endAngle={450}
                                 >
-                                    {data.map((entry, index) => (
-                                        <Cell key={index} fill={COLORS[index % COLORS.length]} />
+                                    {dataCategory.map((entry, index) => (
+                                        <Cell
+                                            key={index}
+                                            fill={COLORS[index % COLORS.length]}
+                                        />
                                     ))}
                                 </Pie>
                             </PieChart>
                         </div>
-                        <div className='w-full flex justify-start items-center'>
-                            <div className='flex flex-col'>
-                                <div className='flex gap-10 '>
-                                    <div className='flex gap-1 items-center'>
-                                        <span className='text-xl mb-1 text-custom-lightblue'>●</span>
-                                        <span className='text-sm text-gray-500'>Transactions</span>
+                       
+                       {/*  <div className="w-full flex justify-start items-center">
+                            <div className="flex flex-col">
+                                <div className="flex gap-10 ">
+                                    <div className="flex gap-1 items-center">
+                                        <span className="text-xl mb-1 text-custom-lightblue">
+                                            ●
+                                        </span>
+                                        <span className="text-sm text-gray-500">
+                                            Reservation Documents
+                                        </span>
                                     </div>
-                                    <div className='flex items-center gap-1'>
-                                        <span className='text-gray-700 font-semibold text-lg'>40</span>
-                                        <span className='text-custom-gray81'>%</span>
+                                    <div className="flex items-center gap-1">
+                                        <span className="text-gray-700 font-semibold text-lg">
+                                            40
+                                        </span>
+                                        <span className="text-custom-gray81">
+                                            %
+                                        </span>
                                     </div>
                                 </div>
-                                <div className='flex gap-10 justify-between'>
-                                    <div className='flex gap-1 items-center'>
-                                        <span className='text-xl mb-1 text-custom-solidgreen'>●</span>
-                                        <span className='text-sm text-gray-500'>Property</span>
+                                <div className="flex gap-10 justify-between">
+                                    <div className="flex gap-1 items-center">
+                                        <span className="text-xl mb-1 text-custom-solidgreen">
+                                            ●
+                                        </span>
+                                        <span className="text-sm text-gray-500">
+                                            Payment Issues
+                                        </span>
                                     </div>
-                                    <div className='flex items-center gap-1'>
-                                        <span className='text-gray-700 font-semibold text-lg'>60</span>
-                                        <span className='text-custom-gray81'>%</span>
+                                    <div className="flex items-center gap-1">
+                                        <span className="text-gray-700 font-semibold text-lg">
+                                            60
+                                        </span>
+                                        <span className="text-custom-gray81">
+                                            %
+                                        </span>
                                     </div>
                                 </div>
+                            </div>
+                        </div> */}
+                        <div className="w-full flex justify-start items-center">
+                            <div className="flex flex-col">
+                                {dataCategory.map((category, index) => (
+                                    <div className="flex gap-10" key={index}>
+                                        <div className="flex gap-1 items-center">
+                                            <span
+                                                className="text-xl mb-1"
+                                                style={{ color: getCategoryColor(category.name) }}
+                                            >
+                                                ●
+                                            </span>
+                                            <span className="text-sm text-gray-500">
+                                                {category.name}
+                                            </span>
+                                        </div>
+                                        <div className="flex items-center gap-1">
+                                            <span className="text-gray-700 font-semibold text-lg">
+                                                {category.value}
+                                            </span>
+                                            <span className="text-custom-gray81">
+                                                %
+                                            </span>
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
                         </div>
                     </div>
                 </div>
-                <div className=' h-auto flex-grow-0 flex-shrink-0 bg-white rounded-lg'>
-                    <p className='p-4 text-base montserrat-bold'>Inquiries per property</p>
-                    <div className='border border-t-1'></div>
-                    <div className='mt-4 pl-4 pr-48'>
+                <div className=" h-auto flex-grow-0 flex-shrink-0 bg-white rounded-lg">
+                    <p className="p-4 text-base montserrat-bold">
+                        Inquiries per property
+                    </p>
+                    <div className="border border-t-1"></div>
+                    <div className="mt-4 pl-4 pr-48">
                         <div className="flex items-center border rounded-md overflow-hidden w-full">
-                            <span className="text-custom-gray81 bg-custom-grayFA flex w-34 pl-2 py-1">For the month of</span>
-                            <input name='contact' type="text" className="w-36 pl-2 focus:outline-none" placeholder="" />
+                            <span className="text-custom-gray81 bg-custom-grayFA flex w-34 pl-2 py-1">
+                                For the month of
+                            </span>
+                            <input
+                                name="contact"
+                                type="text"
+                                className="w-36 pl-2 focus:outline-none"
+                                placeholder=""
+                            />
                         </div>
                     </div>
                     <div>
@@ -182,18 +405,25 @@ const ReportPage = () => {
                             layout="vertical"
                             margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
                         >
-
                             <XAxis type="number" hide />
-                            <YAxis type="category" dataKey="name" hide tick={false} />
+                            <YAxis
+                                type="category"
+                                dataKey="name"
+                                hide
+                                tick={false}
+                            />
                             <Tooltip content={<CustomTooltip />} />
                             <Bar
                                 dataKey="value1"
                                 fill="#348017"
-
                                 barSize={15}
                                 radius={[0, 4, 4, 0]} // Rounded top corners
                             >
-                                <LabelList dataKey="value1" position="right" fill="#4a5568" />
+                                <LabelList
+                                    dataKey="value1"
+                                    position="right"
+                                    fill="#4a5568"
+                                />
                                 <LabelList
                                     dataKey="name"
                                     position="top"
@@ -216,28 +446,36 @@ const ReportPage = () => {
                                 barSize={15}
                                 radius={[0, 4, 4, 0]} // Rounded top corners
                             >
-                                <LabelList dataKey="value2" position="right" fill="#4a5568" />
+                                <LabelList
+                                    dataKey="value2"
+                                    position="right"
+                                    fill="#4a5568"
+                                />
                             </Bar>
                         </BarChart>
-                        <div className='flex justify-end'>
-                            <div className='flex items-center px-3 py-2 gap-3'>
-                                <span className='flex items-center text-custom-lightestgreen text-2xl'>●</span>
-                                <span className='text-custom-gray12'>Unresolved</span>
+                        <div className="flex justify-end">
+                            <div className="flex items-center px-3 py-2 gap-3">
+                                <span className="flex items-center text-custom-lightestgreen text-2xl">
+                                    ●
+                                </span>
+                                <span className="text-custom-gray12">
+                                    Unresolved
+                                </span>
                             </div>
-                            <div className='flex items-center px-3 py-2 gap-3'>
-                                <span className='flex items-center text-custom-solidgreen text-2xl'>●</span>
-                                <span className='text-custom-gray12'>Resolved</span>
+                            <div className="flex items-center px-3 py-2 gap-3">
+                                <span className="flex items-center text-custom-solidgreen text-2xl">
+                                    ●
+                                </span>
+                                <span className="text-custom-gray12">
+                                    Resolved
+                                </span>
                             </div>
-
                         </div>
                     </div>
                 </div>
             </div>
-
-
         </div>
+    );
+};
 
-    )
-}
-
-export default ReportPage
+export default ReportPage;

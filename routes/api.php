@@ -33,13 +33,20 @@ Route::get('/get-logs/{ticketId}', [ConcernController::class, 'getInquiryLogs'])
 Route::get('/get-messageId/{ticketId}', [ConcernController::class, 'getMessageId']);
  */
 
+Route::get('/report-monthly', [ConcernController::class, 'getMonthlyReports']);
+Route::get('/category-monthly', [ConcernController::class, 'getInquiriesByCategory']);
+Route::post('/isread', [ConcernController::class, 'updateIsReadStatus']);
 
- Route::middleware('auth:sanctum')->group(function () {
+
+
+
+Route::middleware('auth:sanctum')->group(function () {
     Route::get('/get-concern', [ConcernController::class, 'getAllConcerns']);
     Route::get('/get-message/{ticketId}', [ConcernController::class, 'getMessage']);
     Route::post('/send-message', [ConcernController::class, 'sendMessage']);
     Route::get('/get-logs/{ticketId}', [ConcernController::class, 'getInquiryLogs']);
     Route::get('/get-messageId/{ticketId}', [ConcernController::class, 'getMessageId']);
-   Route::get('/employee-list', [ConcernController::class, 'getAllEmployeeList']);
-
+    Route::get('/employee-list', [ConcernController::class, 'getAllEmployeeList']);
+    Route::get('/notifications', [ConcernController::class, 'listOfNotifications']);
+    Route::get('/unread-count', [ConcernController::class, 'countUnreadNotifications']);
 });

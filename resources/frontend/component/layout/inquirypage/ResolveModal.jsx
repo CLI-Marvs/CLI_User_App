@@ -2,16 +2,17 @@ import React, { useEffect, useState } from "react";
 import { useStateContext } from "../../../context/contextprovider";
 import apiService from "../../servicesApi/apiService";
 
-const ResolveModal = ({ modalRef, ticketId }) => {
+const ResolveModal = ({ modalRef, ticketId, dataRef }) => {
     const {getAllConcerns, user, getInquiryLogs} = useStateContext();
     const [remarks, setRemarks] = useState("");
-
+    
     const updateStatus = async () => {
         try {
             const response = await apiService.post("resolve", {
                 ticket_id: ticketId,
                 admin_name: user?.firstname,
                 department: user?.department,
+                buyer_email: dataRef.buyer_email,
                 remarks: remarks
             });
             setRemarks("");

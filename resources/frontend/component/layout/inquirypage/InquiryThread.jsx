@@ -73,8 +73,7 @@ const InquiryThread = () => {
         navigate("/inquirymanagement/inquirylist");
     };
 
-    const messageId = dataConcern?.message_id || null; // Safely access message_id
-    console.log("messageID", messageId);
+    const messageId = dataConcern?.message_id || null; 
     const submitMessage = async () => {
         try {
             const response = await apiService.post("send-message", {
@@ -90,6 +89,7 @@ const InquiryThread = () => {
             getMessages(ticketId);
             setChatMessage("");
             getInquiryLogs(ticketId);
+            getAllConcerns();
         } catch (error) {
             console.log("error sending messaing", error);
         }
@@ -222,11 +222,11 @@ const InquiryThread = () => {
                             <p className="text-sm montserrat-semibold text-custom-gray81 space-x-1">
                                 {dataConcern.ticket_id}
                                 <span> |</span>
-                                <span>Transaction</span>
+                                <span>{dataConcern.details_concern}</span>
                                 <span>|</span>
                                 {dataConcern && <span>{dataConcern.property}</span>}
                                 <span>|</span>
-                                <span>T207.012</span>
+                                <span>{dataConcern.unit_number}</span>
                             </p>
                             <div>
                                 <LuTrash2 className="text-custom-bluegreen hover:text-red-500" />
@@ -296,7 +296,7 @@ const InquiryThread = () => {
                 </div>
             </div>
             <div>
-                <ResolveModal modalRef={modalRef} ticketId={ticketId} />
+                <ResolveModal modalRef={modalRef} ticketId={ticketId} dataRef={dataConcern} />
             </div>
         </>
     );

@@ -1,16 +1,15 @@
 import React from "react";
 
 const AssignDetails = ({ logMessages }) => {
+    console.log("logs", logMessages);
     const renderDetails = (actionType, details) => {
         switch (actionType) {
             case "client_inquiry":
                 return (
                     <>
-                    <div className="flex flex-col gap-1">
-                        <div className="truncate">
-                            <p className="truncate text-sm text-[#616161]">
-                                Inquiry Feedback Received
-                            </p>
+                    <div>
+                        <div className="truncate w-44">
+                            <p className="truncate">{details.message_tag}</p>
                         </div>
                         <div>
                             <p className="text-xs text-custom-gray space-x-1">
@@ -27,9 +26,9 @@ const AssignDetails = ({ logMessages }) => {
             case "admin_reply":
                 return (
                     <>
-                        <div className=" flex flex-col truncate">
-                            <p className="truncate text-sm text-[#616161]">
-                                Replied by {details.admin_name}
+                        <div className="truncate w-44">
+                            <p className="truncate">
+                                {details.message_tag} {details.admin_name}
                             </p>
                         </div>
                     </>
@@ -37,31 +36,31 @@ const AssignDetails = ({ logMessages }) => {
             case "assign_to":
                 return (
                     <>
-                        <div className="flex flex-col truncate ">
-                            <p className="truncate text-sm text-[#616161]">
-                                Assign to {details.assign_to_name} Department (
-                                {details.assign_to_department})
-                            </p>
+                        <div className="truncate w-44">
                             <p className="truncate">
-                                Assign by {details.assign_by} Department (
-                                {details.assign_by_department})
+                                {details.message_tag} {details.assign_to_name} 
                             </p>
-                            <p className="truncate">{details.remarks}</p>
+                            <p className="text-xs text-custom-gray space-x-1">
+                                <span>by {details.assign_by}</span>
+                                <span>|</span>
+                                <span>{details.assign_by_department}</span>
+                            </p>
                         </div>
                     </>
                 );
-                case "inquiry_status":
-                    return (
-                        <>
-                            <div className="flex flex-col truncate">
-                                <p className="truncate text-sm text-[#616161]">
-                                    Resolved by {details.resolve_by} Department (
-                                    {details.department})
-                                </p>
-                                <p className="truncate">{details.remarks}</p>
-                            </div>
-                        </>
-                    );
+            case "inquiry_status":
+                return (
+                    <>
+                        <div className="truncate w-44">
+                            <p className="truncate">
+                                {details.message_tag} {details.resolve_by}
+                            </p>
+                            <p className="text-xs text-custom-gray space-x-1">
+                            (<span>{details.remarks}</span>)
+                        </p>
+                        </div>
+                    </>
+                );
             default:
                 return <p>Unknown log type</p>;
         }
@@ -83,7 +82,6 @@ const AssignDetails = ({ logMessages }) => {
                     } else if (item.inquiry_status) {
                         logData = JSON.parse(item.inquiry_status);
                     }
-
 
                     const logType = logData.log_type || "unknown";
                     const details = logData.details || {};

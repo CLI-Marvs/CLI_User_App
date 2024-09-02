@@ -19,14 +19,19 @@ export const ContextProvider = ({ children }) => {
     const [token, _setToken] = useState(localStorage.getItem("authToken"));
     const [allEmployees, setAllEmployees] = useState([]);
     const [daysFilter, setDaysFilter] = useState(null);
+    const [statusFilter, setStatusFilter] = useState(null);
+    const [notifications, setNotifications] = useState([]);
+    const [unreadCount, setUnreadCount] = useState(0);
+    const [notifStatus, setNotifStatus] = useState("");
     const [currentPage, setCurrentPage] = useState(0);
+    const [notifCurrentPage, setNotifCurrentPage] = useState(0);
     const [data, setData] = useState([]);
     const itemsPerPage = 20;
     const [pageCount, setPageCount] = useState(0);
+    const [notifPageCount, setNotifPageCount] = useState(0);
     const [messages, setMessages] = useState([]);
     const [logs, setLogs] = useState([]);
     const [ticketId, setTicketId] = useState(null);
-
 
     const setToken = (token) => {
         _setToken(token);
@@ -38,48 +43,80 @@ export const ContextProvider = ({ children }) => {
     };
 
     useEffect(() => {
-       if(token) {
-        const getData = async () => {
-            const response = await apiService.get("user");
-            setUser(response.data);
-        };
-        getData();
-       }
+        if (token) {
+            const getData = async () => {
+                const response = await apiService.get("user");
+                setUser(response.data);
+            };
+            getData();
+        }
     }, [token]);
 
-
     useEffect(() => {
-       if(token) {
-        const getEmployeeData = async () => {
-            const response = await apiService.get("employee-list");
-            console.log("allEmployees", response.data);
-            setAllEmployees(response.data);
-        };
-        getEmployeeData();
-       }
+        if (token) {
+            const getEmployeeData = async () => {
+                const response = await apiService.get("employee-list");
+                console.log("allEmployees", response.data);
+                setAllEmployees(response.data);
+            };
+            getEmployeeData();
+        }
     }, [token]);
 
     const getAllConcerns = async () => {
-       if(token) {
-        try {
-            const response = await apiService.get(
-                `get-concern?page=${currentPage + 1}&days=${daysFilter || ''}`
-            );
+        if (token) {
+            try {
+                const response = await apiService.get(
+                    `get-concern?page=${currentPage + 1}&days=${
+                        daysFilter || ""
+                    }&status=${statusFilter || ""}`
+                );
 
-            setData(response.data.data);
-            setPageCount(response.data.last_page);
-        } catch (error) {
-            console.error("Error fetching data: ", error);
+                setData(response.data.data);
+                setPageCount(response.data.last_page);
+            } catch (error) {
+                console.error("Error fetching data: ", error);
+            }
         }
-       }
     };
 
+    const getCount = async () => {
+        if(token) {
+            try {
+                const response = await apiService.get("unread-count");
+                setUnreadCount(response.data.unreadCount);
+            } catch (error) {
+                console.log("errror", error);
+            }
+        }
+    };
+
+    const getNotifications = async () => {
+        if (token) {
+            try {
+                const response = await apiService.get(
+                    `notifications?page=${notifCurrentPage + 1}&status=${
+                        notifStatus || ""
+                    }`
+                );
+
+                console.log("notifications", response.data);
+
+                setNotifications(response.data.data);
+                setNotifPageCount(response.data.last_page);
+            } catch (error) {
+                console.log("error retrieving", error);
+            }
+        }
+    };
 
     const getMessages = async (ticketId) => {
         /* if (messages[id]) return; */
         try {
             const encodedTicketId = encodeURIComponent(ticketId);
-            const response = await apiService.get(`get-message/${encodedTicketId}`);
+            const response = await apiService.get(
+                `get-message/${encodedTicketId}`
+            );
             const data = response.data;
             setMessages((prevMessages) => ({
                 ...prevMessages,
@@ -94,7 +131,9 @@ export const ContextProvider = ({ children }) => {
         /* if (messages[id]) return; */
         try {
             const encodedTicketId = encodeURIComponent(ticketId);
-            const response = await apiService.get(`get-logs/${encodedTicketId}`);
+            const response = await apiService.get(
+                `get-logs/${encodedTicketId}`
+            );
             const data = response.data;
             setLogs((prevLogs) => ({
                 ...prevLogs,
@@ -105,10 +144,13 @@ export const ContextProvider = ({ children }) => {
         }
     };
 
-
     useEffect(() => {
         getAllConcerns();
-    }, [currentPage, daysFilter, token]);
+    }, [currentPage, daysFilter, token, statusFilter]);
+
+    useEffect(() => {
+        getNotifications();
+    }, [notifCurrentPage, notifStatus, token]);
 
     useEffect(() => {
         if (ticketId) {
@@ -117,10 +159,11 @@ export const ContextProvider = ({ children }) => {
         }
     }, [ticketId]);
 
-    console.log("user", user);
     useEffect(() => {
+        getCount();
+    }, [unreadCount, token]);
 
-    }, [user, token]);
+    useEffect(() => {}, [user, token]);
     return (
         <StateContext.Provider
             value={{
@@ -132,7 +175,7 @@ export const ContextProvider = ({ children }) => {
                 setCurrentPage,
                 data,
                 pageCount,
-                getAllConcerns, 
+                getAllConcerns,
                 setMessages,
                 messages,
                 ticketId,
@@ -143,7 +186,15 @@ export const ContextProvider = ({ children }) => {
                 getInquiryLogs,
                 logs,
                 setLogs,
-                allEmployees
+                allEmployees,
+                setStatusFilter,
+                setNotifCurrentPage,
+                notifPageCount,
+                notifications,
+                notifCurrentPage,
+                getNotifications,
+                setNotifStatus,
+                unreadCount,
             }}
         >
             {children}

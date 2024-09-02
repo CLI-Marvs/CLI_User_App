@@ -1,4 +1,4 @@
-import React, {useState} from 'react'
+import React, {useEffect, useState} from 'react'
 
 import {
   Card,
@@ -13,8 +13,10 @@ import {
   AccordionBody,
 } from "@material-tailwind/react";
 import { Link } from 'react-router-dom';
+import apiService from '../../servicesApi/apiService';
+import { useStateContext } from '../../../context/contextprovider';
 const Sidebar = () => {
-
+  const {unreadCount} = useStateContext();
   const [activeItem, setActiveItem] = useState(null);
 
 
@@ -34,7 +36,7 @@ const Sidebar = () => {
               Notifications
               <ListItemSuffix>
                 <Chip
-                  value="120"
+                  value={unreadCount}
                   size="sm"
                   variant="ghost"
                   color="blue-gray"
