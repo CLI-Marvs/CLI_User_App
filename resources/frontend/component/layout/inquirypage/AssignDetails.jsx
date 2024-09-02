@@ -7,9 +7,9 @@ const AssignDetails = ({ logMessages }) => {
             case "client_inquiry":
                 return (
                     <>
-                    <div>
-                        <div className="truncate w-44">
-                            <p className="truncate">{details.message_tag}</p>
+                    <div className="flex flex-col gap-1">
+                        <div className="truncate">
+                            <p className="truncate text-sm text-[#616161]">{details.message_tag}</p>
                         </div>
                         <div>
                             <p className="text-xs text-custom-gray space-x-1">
@@ -26,8 +26,8 @@ const AssignDetails = ({ logMessages }) => {
             case "admin_reply":
                 return (
                     <>
-                        <div className="truncate w-44">
-                            <p className="truncate">
+                        <div className="flex flex-col truncate">
+                            <p className="truncate text-sm text-[#616161]">
                                 {details.message_tag} {details.admin_name}
                             </p>
                         </div>
@@ -36,8 +36,8 @@ const AssignDetails = ({ logMessages }) => {
             case "assign_to":
                 return (
                     <>
-                        <div className="truncate w-44">
-                            <p className="truncate">
+                        <div className="flex flex-col truncate">
+                            <p className="truncate text-sm text-[#616161]">
                                 {details.message_tag} {details.assign_to_name} 
                             </p>
                             <p className="text-xs text-custom-gray space-x-1">
@@ -51,8 +51,8 @@ const AssignDetails = ({ logMessages }) => {
             case "inquiry_status":
                 return (
                     <>
-                        <div className="truncate w-44">
-                            <p className="truncate">
+                        <div className="flex flex-col truncate">
+                            <p className="text-sm text-[#616161]">
                                 {details.message_tag} {details.resolve_by}
                             </p>
                             <p className="text-xs text-custom-gray space-x-1">
