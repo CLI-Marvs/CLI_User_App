@@ -4,7 +4,7 @@ import BasicPricing from '../../../layout/propertyandpricingpage/basicpricing/Ba
 
 const BasicPricingView = () => {
   return (
-    <div>
+    <div className='bg-custom-grayFA'>
         <BasicPricing/>
     </div>
   )

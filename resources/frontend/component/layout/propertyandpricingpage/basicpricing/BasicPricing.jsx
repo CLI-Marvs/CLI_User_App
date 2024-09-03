@@ -8,6 +8,8 @@ import ReviewsandApprovalRouting from './accordion/ReviewsandApprovalRouting'
 import FloorPremiums from './accordion/FloorPremiums'
 import AddPropertyModal from './AddPropertyModal'
 
+
+
 const BasicPricing = () => {
 
   const modalRef = useRef(null);
@@ -19,10 +21,13 @@ const BasicPricing = () => {
   };
   return (
     <div className='h-screen max-w-[957px] min-w-[897px] bg-custom-grayFA px-[30px] '>
+      {/* button ra if walay pa property */}
       <div className='px-5 mb-7'>
           <button onClick={handleOpenModal} className='montserrat-semibold text-sm px-2 gradient-btn2 w-[214px] h-[37px] rounded-[10px] text-white hover:shadow-custom4'>Add Property and Pricing</button>
       </div>
+      {/* kung naa nay property */}
       <ProjectDetails/>
+      {/* ------------------------- */}
       <div className='flex flex-col gap-1 w-full border-t-1 border-custom-lightestgreen py-4'>
           <PriceListSettings/>
           <FloorPremiums/>
