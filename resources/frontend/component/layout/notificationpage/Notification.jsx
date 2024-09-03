@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import ReactPaginate from "react-paginate";
 import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md";
 import { useStateContext } from "../../../context/contextprovider";
@@ -33,10 +33,10 @@ const Notification = () => {
     };
 
 
-    const handleRefresh = () => {
+   /*  const handleRefresh = () => {
         setNotifStatus("");
-        getAllConcerns();
-    };
+        getNotifications();
+    }; */
     const buttonLabels = ["All", "Unread", "Read"];
 
     const navigateToThread = (items) => {
@@ -60,6 +60,9 @@ const Notification = () => {
         }
     };
 
+    useEffect(() => {
+        getNotifications();
+    }, []);
     return (
         <div className="h-screen bg-custom-grayFA">
             <div className="bg-custom-grayFA px-5">
@@ -83,7 +86,7 @@ const Notification = () => {
                                 {label}
                             </button>
                         ))}
-                        <span onClick={handleRefresh}>Refresh</span>
+                       {/*  <span onClick={handleRefresh}>Refresh</span> */}
                     </div>
                 </div>
                 <div>

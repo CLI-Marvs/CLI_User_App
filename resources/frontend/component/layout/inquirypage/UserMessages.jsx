@@ -4,11 +4,13 @@ import Kent from "../../../../../public/Images/kent.png";
 import moment from "moment";
 
 const UserMessages = ({ items }) => {
+    const attachmentData = JSON.parse(items.attachment || "[]");
+
     const formatTime = (createdAt) => {
         return moment(createdAt).fromNow();
     };
     return (
-        <div className="w-full">
+    <div className="w-full">
             <div className="flex w-full mt-10 gap-2">
                 <div className="h-12 w-12">
                     <img className="rounded-full" src={Kent} alt="" />
@@ -25,19 +27,24 @@ const UserMessages = ({ items }) => {
                     <div>
                         <p>{items.details_message}</p>
                     </div>
-                    {items.attachment && (
-                        <div className="mt-4">
-                            <button
-                                onClick={() =>
-                                    window.open(items.attachment, "_blank")
-                                }
-                                className="flex items-center justify-start bg-customnavbar h-12 px-24 pl-4 text-black gap-2 rounded-lg"
-                            >
-                                <img src={FolderFile} alt="download btn" />
-                                View Attachment
-                            </button>
-                        </div>
-                    )}
+                    {Array.isArray(attachmentData) &&
+                        attachmentData.length > 0 &&
+                        attachmentData.map((attachment, index) => (
+                            <div className="mt-4" key={index}>
+                                <button
+                                    onClick={() =>
+                                        window.open(attachment, "_blank")
+                                    }
+                                    className="flex items-center justify-start bg-customnavbar h-12 px-24 pl-4 text-black gap-2 rounded-lg"
+                                >
+                                    <img
+                                        src={FolderFile}
+                                        alt="View Attachment"
+                                    />
+                                    View Attachment
+                                </button>
+                            </div>
+                        ))}
                 </div>
                 <div className="w-full flex justify-end">
                     <p className="flex text-custom-gray81 text-sm space-x-1">
