@@ -17,6 +17,8 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
+use GuzzleHttp\Client;
+
 
 class ConcernController extends Controller
 {
@@ -27,7 +29,6 @@ class ConcernController extends Controller
         $client_id = \Config('services.google.client_id_gdrive');
         $client_secret = \Config('services.google.client_secret_gdrive');
         $refresh_token = \Config('services.google.refresh_token_gdrive');
-        $folder_id = \Config('services.google.folder_id');
         $response = Http::post('https://oauth2.googleapis.com/token', [
             'client_id' => $client_id,
             'client_secret' => $client_secret,
@@ -39,6 +40,7 @@ class ConcernController extends Controller
         return $accessToken;
     }
 
+
     public function store($file)
     {
         $accessToken = $this->token();
@@ -46,39 +48,211 @@ class ConcernController extends Controller
         $mime = $file->getClientMimeType();
         $path = $file->getRealPath();
 
-        $folder_id = \Config('services.google.folder_id');
-        $response = Http::withToken($accessToken)
-            ->attach('data', file_get_contents($path), $name)
-            ->post(
-                'https://www.googleapis.com/upload/drive/v3/files',
-                [
-                    'name' => 'file',
-                    'contents' => file_get_contents($path),
-                    'filename' => $name,
+        $folder_id = \Config('services.google.folder_id_gdrive');
+
+        $client = new Client();
+
+        $metadata = [
+            'name' => $name,
+            'parents' => [$folder_id],
+            'mimeType' => $mime
+        ];
+
+        $multipart = [
+            [
+                'name'     => 'metadata',
+                'contents' => json_encode($metadata),
+                'headers'  => [
+                    'Content-Type' => 'application/json; charset=UTF-8'
+                ]
+            ],
+            [
+                'name'     => 'file',
+                'contents' => fopen($path, 'r'),
+                'headers'  => [
+                    'Content-Type' => $mime
+                ]
+            ]
+        ];
+
+        try {
+            $response = $client->request('POST', 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', [
+                'headers' => [
+                    'Authorization' => 'Bearer ' . $accessToken,
                 ],
-                [
-                    'name' => 'mimeType',
-                    'contents' => $mime,
-                ],
-                [
-                    'name' => 'parents',
-                    'contents' => [\Config('services.google.folder_id')],
-                ],
-            );
+                'multipart' => $multipart
+            ]);
 
-        if ($response->successful()) {
-            // Retrieve the file ID from the response
-            $fileId = json_decode($response->getBody(), true)['id'];
+            $responseBody = json_decode($response->getBody(), true);
 
-            $this->createShareableLink($accessToken, $fileId);
+            if ($response->getStatusCode() == 200) {
+                $fileId = $responseBody['id'];
 
-            $fileLink = "https://drive.google.com/file/d/" . $fileId . "/view";
+                $this->createShareableLink($accessToken, $fileId);
 
-            return $fileLink;
-        } else {
-            return response()->json(['message' => 'Failed to upload to Google Drive'], 500);
+                return "https://drive.google.com/file/d/" . $fileId . "/view";
+            } else {
+                return response()->json(['message' => 'Failed to upload to Google Drive', 'error' => $responseBody], 500);
+            }
+        } catch (\Exception $e) {
+            \Log::error('Upload to Google Drive failed', [
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json(['message' => 'Error during file upload', 'error' => $e->getMessage()], 500);
         }
     }
+
+    // public function sendMessage(Request $request)
+    // {
+    //     try {
+    //         $files = $request->file('files');
+    //         $fileLinks = [];
+    //         if($files) {
+    //             foreach($files as $file) {
+    //                 $fileLink = $this->store($file);
+    //                 $fileLinks[] = $fileLink;
+    //             }
+    //         }
+    //         $adminMessage = $request->details_message;
+    //         $message_id = $request->message_id;
+    //         $messages = new Messages();
+    //         $messages->admin_id = $request->admin_id;
+    //         $messages->admin_email = $request->admin_email;
+    //         $messages->attachment = json_encode($fileLinks);
+    //         $messages->ticket_id = $request->ticket_id;
+    //         $messages->details_message = $adminMessage;
+    //         $messages->admin_name = $request->admin_name;
+    //         $messages->save();
+
+
+
+    //         $this->inquiryAdminLogs($request);
+
+    //         ReplyFromAdminJob::dispatch($messages->ticket_id, $request->buyer_email, $adminMessage, $message_id /* $files */);
+
+    //         return response()->json("Sucessfully send");
+    //     } catch (\Exception $e) {
+    //         return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
+    //     }
+    // }
+
+    public function handleFilesToGdrive($files)
+    {
+
+        $fileLinks = [];
+        if ($files) {
+            foreach ($files as $file) {
+                $fileLink = $this->store($file);
+                $fileLinks[] = $fileLink;
+            }
+        }
+
+        return $fileLinks;
+    }
+    // public function sendMessage(Request $request)
+    // {
+    //     try {
+    //         $allFiles = [];
+    //         $files = $request->file('files'); 
+    //         if ($files) {
+    //             $destinationPath = public_path('fileupload');
+    //             foreach ($files as $file) {
+    //                 $fileName = $file->getClientOriginalName(); 
+    //                 $destinationPath = public_path('fileupload'); 
+    //                 $file->move($destinationPath, $fileName); 
+    //                 $allFiles[] = 'fileupload/' . $fileName;
+    //             }
+    //         }
+    //         $fileLinks = $this->handleFilesToGdrive($files);
+    //         $adminMessage = $request->input('details_message', '');
+    //         $message_id = $request->input('message_id', '');
+    //         $admin_email = $request->input('admin_email', '');
+    //         $ticket_id = $request->input('ticket_id', '');
+    //         $admin_name = $request->input('admin_name', '');
+    //         $admin_id = $request->input('admin_id', '');
+    //         $buyer_email = $request->input('buyer_email', '');
+
+    //         $messages = new Messages();
+    //         $messages->admin_id = $admin_id;
+    //         $messages->admin_email = $admin_email;
+    //         $messages->attachment = json_encode($fileLinks);
+    //         $messages->ticket_id = $ticket_id;
+    //         $messages->details_message = $adminMessage;
+    //         $messages->admin_name = $admin_name;
+    //         $messages->save();
+
+    //         $this->inquiryAdminLogs($request);
+
+    //         // ReplyFromAdminJob::dispatch($messages->ticket_id, $buyer_email, $adminMessage, $message_id, $allFiles);
+
+    //         Mail::to($buyer_email)->send(new SendReplyFromAdmin($messages->ticket_id, $buyer_email, $adminMessage, $message_id, $allFiles));
+
+    //         return response()->json("Successfully sent");
+    //     } catch (\Exception $e) {
+    //         return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
+    //     }
+    // }
+
+    public function sendMessage(Request $request)
+{
+    try {
+        $allFiles = [];
+        $files = $request->file('files'); 
+        if ($files) {
+            foreach ($files as $file) {
+                // Get the file's original name
+                $fileName = $file->getClientOriginalName(); 
+                
+                // Store file in memory
+                $fileContents = $file->get(); 
+                
+                // Prepare files for email attachment
+                $allFiles[] = [
+                    'name' => $fileName,
+                    'contents' => $fileContents,
+                ];
+            }
+        }
+
+        // Assuming handleFilesToGdrive stores files in Google Drive and returns links
+        $fileLinks = $this->handleFilesToGdrive($files); 
+
+        $adminMessage = $request->input('details_message', '');
+        $message_id = $request->input('message_id', '');
+        $admin_email = $request->input('admin_email', '');
+        $ticket_id = $request->input('ticket_id', '');
+        $admin_name = $request->input('admin_name', '');
+        $admin_id = $request->input('admin_id', '');
+        $buyer_email = $request->input('buyer_email', '');
+
+        $messages = new Messages();
+        $messages->admin_id = $admin_id;
+        $messages->admin_email = $admin_email;
+        $messages->attachment = json_encode($fileLinks);
+        $messages->ticket_id = $ticket_id;
+        $messages->details_message = $adminMessage;
+        $messages->admin_name = $admin_name;
+        $messages->save();
+
+        $this->inquiryAdminLogs($request);
+
+
+        if($files) {
+            Mail::to($buyer_email)->send(new SendReplyFromAdmin($messages->ticket_id, $buyer_email, $adminMessage, $message_id, $allFiles));
+            
+        }else {
+            ReplyFromAdminJob::dispatch($messages->ticket_id, $buyer_email, $adminMessage, $message_id, $allFiles);
+        }
+       
+
+        return response()->json("Successfully sent");
+    } catch (\Exception $e) {
+        return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
+    }
+}
+
+
 
     public function createShareableLink($accessToken, $fileId)
     {
@@ -90,13 +264,13 @@ class ConcernController extends Controller
     }
 
 
+
     public function addConcernPublic(Request $request)
     {
         try {
-            $file = $request->file('file');
+            $files = $request->file('files');
             $lastConcern = Concerns::latest()->first();
             $nextId = $lastConcern ? $lastConcern->id + 1 : 1;
-
             $formattedId = str_pad($nextId, 7, '0', STR_PAD_LEFT);
 
             $ticketId = 'Ticket#24' . $formattedId;
@@ -115,20 +289,24 @@ class ConcernController extends Controller
             $concerns->unit_number = $request->unit_number;
             $concerns->buyer_email = $request->buyer_email;
             $concerns->inquiry_type = "from_admin";
-
-            /*         $concerns->message_id = $messageId; */
             $concerns->save();
 
             $this->inquiryReceivedLogs($request, $ticketId);
 
-            $fileLink = $this->store($file);
+            $fileLinks = [];
+            if ($files) {
+                foreach ($files as $file) {
+                    $fileLink = $this->store($file);
+                    $fileLinks[] = $fileLink;
+                }
+            }
+
             $messages = new Messages();
             $messages->admin_email = $request->admin_email;
-            $messages->attachment = $request->attachment;
+            $messages->admin_id = $request->admin_id;
+            $messages->attachment = json_encode($fileLinks);
             $messages->ticket_id = $concerns->ticket_id;
             $messages->details_message = $request->message;
-           /*  $messages->buyer_email = $request->buyer_email; */
-            $messages->attachment = $fileLink;
             $messages->save();
 
 
@@ -326,6 +504,7 @@ class ConcernController extends Controller
             $logData = [
                 'log_type' => 'client_inquiry',
                 'details' => [
+                    'message_tag' => "Inquiry Feedback Received",
                     'buyer_name' => $request->fname . ' ' . $request->lname,
                     'buyer_email' => $request->buyer_email,
                     'contact_no' => $request->mobile_number
@@ -334,6 +513,7 @@ class ConcernController extends Controller
 
             $inquiry->received_inquiry = json_encode($logData);
             $inquiry->ticket_id = $ticketId;
+            $inquiry->message_log = "Inquiry Feedback Received";
             $inquiry->save();
         } catch (\Exception $e) {
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
@@ -418,31 +598,7 @@ class ConcernController extends Controller
         }
     }
 
-    public function sendMessage(Request $request)
-    {
-        try {
-            $adminMessage = $request->details_message;
-            $message_id = $request->message_id;
-            $messages = new Messages();
-            $messages->admin_id = $request->admin_id;
-            $messages->admin_email = $request->admin_email;
-            $messages->attachment = $request->attachment;
-            $messages->ticket_id = $request->ticket_id;
-            $messages->details_message = $adminMessage;
-            $messages->admin_name = $request->admin_name;
-            $messages->save();
 
-            $this->inquiryAdminLogs($request);
-
-            ReplyFromAdminJob::dispatch($messages->ticket_id, $request->buyer_email, $adminMessage, $message_id);
-            /*   Mail::to($request->buyer_email)->send(new SendReplyFromAdmin($messages->ticket_id, $messages->details_message, $message_id)); */
-
-
-            return response()->json("Sucessfully send");
-        } catch (\Exception $e) {
-            return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
-        }
-    }
 
     public function getMessageId($ticketId)
     {

@@ -4,40 +4,42 @@ import { IoIosSend, IoMdTrash } from "react-icons/io";
 import apiService from "../../servicesApi/apiService";
 import { useStateContext } from "../../../context/contextprovider";
 
+const formDataState = {
+    fname: "",
+    lname: "",
+    buyer_email: "",
+    mobile_number: "",
+    property: "",
+    user_type: "",
+    contract_number: "",
+    details_concern: "",
+    unit_number: "",
+}
 const InquiryFormModal = ({ modalRef }) => {
+    const [files, setFiles] = useState([]);
     const [fileName, setFileName] = useState("");
     const [message, setMessage] = useState("");
-    const { user } = useStateContext();
+    const { user, getAllConcerns } = useStateContext();
 
     const handleFileChange = (event) => {
-        const file = event.target.files[0];
-        if (file) {
-            const fileType = file.name.split(".").pop();
-            const truncatedName =
-                file.name.length > 15
-                    ? `${file.name.substring(0, 12)}... .${fileType}`
-                    : file.name;
-            setFileName(truncatedName);
-        } else {
-            setFileName("");
-        }
+        const selectedFiles = Array.from(event.target.files);
+        const fileNames = selectedFiles.map((file) =>
+            file.name.length > 15
+                ? `${file.name.substring(0, 12)}... .${file.name
+                      .split(".")
+                      .pop()}`
+                : file.name
+        );
+        setFiles(selectedFiles);
     };
 
-    const handleDelete = () => {
-        setFileName("");
+    const handleDelete = (fileNameToDelete) => {
+        setFiles((prevFiles) =>
+            prevFiles.filter((file) => file.name !== fileNameToDelete)
+        );
     };
 
-    const [formData, setFormData] = useState({
-        fname: "",
-        lname: "",
-        buyer_email: "",
-        mobile_number: "",
-        property: "",
-        user_type: "",
-        contract_number: "",
-        details_concern: "",
-        unit_number: "",
-    });
+    const [formData, setFormData] = useState(formDataState);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -47,24 +49,37 @@ const InquiryFormModal = ({ modalRef }) => {
         }));
     };
 
+    const callBackHandler = () => {
+        getAllConcerns();
+        setFormData(formDataState);
+        setFiles([]);
+        setMessage("");
+    }
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
             const fileData = new FormData();
-            fileData.append(
-                "file",
-                document.getElementById("attachment").files[0]
-            );
+            files.forEach((file) => {
+                fileData.append("files[]", file);
+            });
             Object.keys(formData).forEach((key) => {
                 fileData.append(key, formData[key]);
             });
             fileData.append("message", message);
             fileData.append("admin_email", user?.employee_email);
+            fileData.append("admin_id", user?.id);
+
+
             const response = await apiService.post("add-concern", fileData, {
                 headers: {
                     "Content-Type": "multipart/form-data",
                 },
             });
+            if(modalRef.current) {
+                modalRef.current.close();
+            }
+            callBackHandler();
         } catch (error) {
             console.log("error saving concerns", error);
         }
@@ -374,21 +389,33 @@ const InquiryFormModal = ({ modalRef }) => {
                                 <input
                                     type="file"
                                     id="attachment"
+                                    name="files[]"
+                                    multiple
                                     className="hidden"
                                     onChange={handleFileChange}
                                 />
                             </label>
-                            {fileName && (
-                                <p className=" flex items-center ml-2 text-sm text-gray-600 truncate gap-1">
-                                    {fileName}
-                                    <IoMdTrash
-                                        className="hover:text-red-500"
-                                        onClick={handleDelete}
-                                    />
-                                </p>
+                            {files.length > 0 && (
+                                <div className="flex flex-col mt-2">
+                                    {files.map((file, index) => (
+                                        <p
+                                            key={index}
+                                            className="flex items-center text-sm text-gray-600 truncate gap-1"
+                                        >
+                                            {file.name}
+                                            <IoMdTrash
+                                                className="hover:text-red-500"
+                                                onClick={() =>
+                                                    handleDelete(file.name)
+                                                }
+                                            />
+                                        </p>
+                                    ))}
+                                </div>
                             )}
                             <button
-                                type="submit" onClick={handleSubmit}
+                                type="submit"
+                                onClick={handleSubmit}
                                 className="h-10 text-white px-10 rounded-lg gradient-btn2 flex justify-center items-center gap-2 tablet:w-full"
                             >
                                 Submit

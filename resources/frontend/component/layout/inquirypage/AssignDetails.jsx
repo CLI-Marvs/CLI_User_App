@@ -1,7 +1,6 @@
 import React from "react";
 
 const AssignDetails = ({ logMessages }) => {
-    console.log("logs", logMessages);
     const renderDetails = (actionType, details) => {
         switch (actionType) {
             case "client_inquiry":

@@ -10,6 +10,7 @@ use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Mail\Mailables\Headers;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Mail\Mailables\Attachment;
 
 class SendReplyFromAdmin extends Mailable
 {
@@ -19,13 +20,15 @@ class SendReplyFromAdmin extends Mailable
     protected $email;
     protected $details_message;
     protected $message_id;
+    protected $files;
 
-    public function __construct($ticket_id, $email, $details_message, $message_id = null)
+    public function __construct($ticket_id, $email, $details_message, $message_id = null, $files)
     {
         $this->ticket_id = $ticket_id;
         $this->email = $email;
         $this->details_message = $details_message;
         $this->message_id = $message_id;
+        $this->files = $files;
     }
 
     /**
@@ -77,6 +80,25 @@ class SendReplyFromAdmin extends Mailable
      */
     public function attachments(): array
     {
-        return [];
+        // $attachments = [];
+        // foreach ($this->files as $file) {
+        //     if (file_exists($file)) {
+        //         $attachments[] = Attachment::fromPath(public_path($file));
+        //     } else {
+        //         Log::error("File does not exist: " . $file);
+        //     }
+        // }
+
+        // return $attachments;
+
+        $attachments = [];
+        foreach ($this->files as $file) {
+            $attachments[] = Attachment::fromData(
+                fn() => $file['contents'], // Closure returning file contents
+                $file['name'] // File name
+            );
+        }
+
+        return $attachments;
     }
 }
