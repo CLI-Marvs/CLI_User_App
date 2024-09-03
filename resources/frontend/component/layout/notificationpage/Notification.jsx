@@ -33,10 +33,10 @@ const Notification = () => {
     };
 
 
-    const handleRefresh = () => {
+   /*  const handleRefresh = () => {
         setNotifStatus("");
         getNotifications();
-    };
+    }; */
     const buttonLabels = ["All", "Unread", "Read"];
 
     const navigateToThread = (items) => {
@@ -86,7 +86,7 @@ const Notification = () => {
                                 {label}
                             </button>
                         ))}
-                        <span onClick={handleRefresh}>Refresh</span>
+                       {/*  <span onClick={handleRefresh}>Refresh</span> */}
                     </div>
                 </div>
                 <div>

@@ -150,107 +150,56 @@ class ConcernController extends Controller
 
         return $fileLinks;
     }
-    // public function sendMessage(Request $request)
-    // {
-    //     try {
-    //         $allFiles = [];
-    //         $files = $request->file('files'); 
-    //         if ($files) {
-    //             $destinationPath = public_path('fileupload');
-    //             foreach ($files as $file) {
-    //                 $fileName = $file->getClientOriginalName(); 
-    //                 $destinationPath = public_path('fileupload'); 
-    //                 $file->move($destinationPath, $fileName); 
-    //                 $allFiles[] = 'fileupload/' . $fileName;
-    //             }
-    //         }
-    //         $fileLinks = $this->handleFilesToGdrive($files);
-    //         $adminMessage = $request->input('details_message', '');
-    //         $message_id = $request->input('message_id', '');
-    //         $admin_email = $request->input('admin_email', '');
-    //         $ticket_id = $request->input('ticket_id', '');
-    //         $admin_name = $request->input('admin_name', '');
-    //         $admin_id = $request->input('admin_id', '');
-    //         $buyer_email = $request->input('buyer_email', '');
-
-    //         $messages = new Messages();
-    //         $messages->admin_id = $admin_id;
-    //         $messages->admin_email = $admin_email;
-    //         $messages->attachment = json_encode($fileLinks);
-    //         $messages->ticket_id = $ticket_id;
-    //         $messages->details_message = $adminMessage;
-    //         $messages->admin_name = $admin_name;
-    //         $messages->save();
-
-    //         $this->inquiryAdminLogs($request);
-
-    //         // ReplyFromAdminJob::dispatch($messages->ticket_id, $buyer_email, $adminMessage, $message_id, $allFiles);
-
-    //         Mail::to($buyer_email)->send(new SendReplyFromAdmin($messages->ticket_id, $buyer_email, $adminMessage, $message_id, $allFiles));
-
-    //         return response()->json("Successfully sent");
-    //     } catch (\Exception $e) {
-    //         return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
-    //     }
-    // }
-
+ 
     public function sendMessage(Request $request)
-{
-    try {
-        $allFiles = [];
-        $files = $request->file('files'); 
-        if ($files) {
-            foreach ($files as $file) {
-                // Get the file's original name
-                $fileName = $file->getClientOriginalName(); 
-                
-                // Store file in memory
-                $fileContents = $file->get(); 
-                
-                // Prepare files for email attachment
-                $allFiles[] = [
-                    'name' => $fileName,
-                    'contents' => $fileContents,
-                ];
+    {
+        try {
+            $allFiles = [];
+            $files = $request->file('files');
+            if ($files) {
+                foreach ($files as $file) {
+                    $fileName = $file->getClientOriginalName();
+                    $fileContents = $file->get();
+                    $allFiles[] = [
+                        'name' => $fileName,
+                        'contents' => $fileContents,
+                    ];
+                }
             }
+
+            $fileLinks = $this->handleFilesToGdrive($files);
+            $adminMessage = $request->input('details_message', '');
+            $message_id = $request->input('message_id', '');
+            $admin_email = $request->input('admin_email', '');
+            $ticket_id = $request->input('ticket_id', '');
+            $admin_name = $request->input('admin_name', '');
+            $admin_id = $request->input('admin_id', '');
+            $buyer_email = $request->input('buyer_email', '');
+
+            $messages = new Messages();
+            $messages->admin_id = $admin_id;
+            $messages->admin_email = $admin_email;
+            $messages->attachment = json_encode($fileLinks);
+            $messages->ticket_id = $ticket_id;
+            $messages->details_message = $adminMessage;
+            $messages->admin_name = $admin_name;
+            $messages->save();
+
+            $this->inquiryAdminLogs($request);
+
+
+            if ($files) {
+                Mail::to($buyer_email)->send(new SendReplyFromAdmin($messages->ticket_id, $buyer_email, $adminMessage, $message_id, $allFiles));
+            } else {
+                ReplyFromAdminJob::dispatch($messages->ticket_id, $buyer_email, $adminMessage, $message_id, $allFiles);
+            }
+
+
+            return response()->json("Successfully sent");
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
         }
-
-        // Assuming handleFilesToGdrive stores files in Google Drive and returns links
-        $fileLinks = $this->handleFilesToGdrive($files); 
-
-        $adminMessage = $request->input('details_message', '');
-        $message_id = $request->input('message_id', '');
-        $admin_email = $request->input('admin_email', '');
-        $ticket_id = $request->input('ticket_id', '');
-        $admin_name = $request->input('admin_name', '');
-        $admin_id = $request->input('admin_id', '');
-        $buyer_email = $request->input('buyer_email', '');
-
-        $messages = new Messages();
-        $messages->admin_id = $admin_id;
-        $messages->admin_email = $admin_email;
-        $messages->attachment = json_encode($fileLinks);
-        $messages->ticket_id = $ticket_id;
-        $messages->details_message = $adminMessage;
-        $messages->admin_name = $admin_name;
-        $messages->save();
-
-        $this->inquiryAdminLogs($request);
-
-
-        if($files) {
-            Mail::to($buyer_email)->send(new SendReplyFromAdmin($messages->ticket_id, $buyer_email, $adminMessage, $message_id, $allFiles));
-            
-        }else {
-            ReplyFromAdminJob::dispatch($messages->ticket_id, $buyer_email, $adminMessage, $message_id, $allFiles);
-        }
-       
-
-        return response()->json("Successfully sent");
-    } catch (\Exception $e) {
-        return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
     }
-}
 
 
 

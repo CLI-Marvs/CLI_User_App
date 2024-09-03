@@ -6,20 +6,21 @@ const AssignDetails = ({ logMessages }) => {
             case "client_inquiry":
                 return (
                     <>
-                    <div className="flex flex-col gap-1">
-                        <div className="truncate">
-                            <p className="truncate text-sm text-[#616161]">{details.message_tag}</p>
+                        <div className="flex flex-col gap-1">
+                            <div className="truncate">
+                                <p className="truncate text-sm text-[#616161]">
+                                    {details.message_tag}
+                                </p>
+                            </div>
+                            <div>
+                                <p className="text-xs text-custom-gray space-x-1">
+                                    (<span>{details.buyer_name || "N/A"}</span>
+                                    <span>|</span>
+                                    <span> {details.buyer_email || "N/A"}</span>
+                                    )
+                                </p>
+                            </div>
                         </div>
-                        <div>
-                            <p className="text-xs text-custom-gray space-x-1">
-                                (<span>{details.buyer_name || "N/A"}</span>
-                                <span>|</span>
-                                <span> {details.buyer_email || "N/A"}</span>)
-                            </p>
-                        </div>
-                        
-                    </div>
-                        
                     </>
                 );
             case "admin_reply":
@@ -37,7 +38,7 @@ const AssignDetails = ({ logMessages }) => {
                     <>
                         <div className="flex flex-col truncate">
                             <p className="truncate text-sm text-[#616161]">
-                                {details.message_tag} {details.assign_to_name} 
+                                {details.message_tag} {details.assign_to_name}
                             </p>
                             <p className="text-xs text-custom-gray space-x-1">
                                 <span>by {details.assign_by}</span>
@@ -55,8 +56,29 @@ const AssignDetails = ({ logMessages }) => {
                                 {details.message_tag} {details.resolve_by}
                             </p>
                             <p className="text-xs text-custom-gray space-x-1">
-                            (<span className="truncate">{details.remarks}</span>)
-                        </p>
+                                (
+                                <span className="truncate">
+                                    {details.remarks}
+                                </span>
+                                )
+                            </p>
+                        </div>
+                    </>
+                );
+            case "requestor_reply":
+                return (
+                    <>
+                        <div className="flex flex-col truncate">
+                            <p className="text-sm text-[#616161]">
+                                {details.message_tag} 
+                            </p>
+                           {/*  <p className="text-xs text-custom-gray space-x-1">
+                                (
+                                <span className="truncate">
+                                    {details.remarks}
+                                </span>
+                                )
+                            </p> */}
                         </div>
                     </>
                 );
