@@ -1,13 +1,27 @@
-import React,{useRef} from 'react'
+import React,{useRef,useState} from 'react'
 import UploadUnitDetailsModal from './UploadUnitDetailsModal';
 
 const ProjectDetails = () => {
 
+    const [fileName, setFileName] = useState('');
+    const fileInputRef = useRef(null);
     const modalRef = useRef(null);
 
+
+    
     const handleOpenModal = () => {
-        if (modalRef.current) {
-            modalRef.current.showModal();
+        if (fileInputRef.current) {
+            fileInputRef.current.click();
+        }
+    };
+
+    const handleFileChange = (event) => {
+        const file = event.target.files[0];
+        if (file) {
+            setFileName(file.name);
+            if (modalRef.current) {
+                modalRef.current.showModal();
+            }
         }
     };
 
@@ -50,8 +64,14 @@ const ProjectDetails = () => {
                     </div>
                 </button>
             </div>
+            <input 
+                type="file" 
+                ref={fileInputRef} 
+                className='hidden'
+                onChange={handleFileChange} 
+            />
             <div>
-                <UploadUnitDetailsModal modalRef={modalRef}/>
+                <UploadUnitDetailsModal modalRef={modalRef} fileName={fileName}/>
             </div>
         </>
 

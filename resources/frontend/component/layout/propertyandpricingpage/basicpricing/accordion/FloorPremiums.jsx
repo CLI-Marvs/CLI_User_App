@@ -1,10 +1,18 @@
-import React, { useState } from 'react'
+import React, { useState , useRef} from 'react'
 import { IoIosArrowDown } from "react-icons/io";
-
+import { FaRegTrashAlt } from "react-icons/fa";
+import FloorPremiumAddUnitModal from '../FloorPremiumAddUnitModal';
 
 const FloorPremiums = () => {
 
     const [accordionOpen, setAccordionOpen] = useState(false);
+    const modalRef = useRef(null);
+
+    const handleOpenModal = () => {
+        if (modalRef.current) {
+            modalRef.current.showModal();
+        }
+    };
 
     return (
         <>
@@ -19,9 +27,120 @@ const FloorPremiums = () => {
             <div className={`mx-5 rounded-[10px] shadow-custom5 grid overflow-hidden transition-all duration-300 ease-in-out
             ${accordionOpen ? 'mt-2 mb-4 grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}
             `}>
-                <div className=' overflow-hidden'>
-                    blank page
+                <div className='bg-white overflow-hidden'>
+                    <div className='w-full p-5 h-[370px]'>
+                        <div className='flex justify-center w-full h-[31px] gap-3 mb-4'>
+                            <div className="flex items-center border border-custom-grayF1 rounded-[5px] overflow-hidden w-[204px]">
+                                <span className="text-custom-gray81 bg-custom-grayFA flex items-center w-[120%] font-semibold -mr-3 pl-3 py-1">Floor</span>
+                                <div className="relative w-full">
+                                    <select name="transferCharge" className="appearance-none w-full px-4 py-1 bg-white focus:outline-none border-0">
+                                        <option value="8">8</option>
+                                    </select>
+                                    <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3 bg-custom-grayFA">
+                                    <IoIosArrowDown className='text-custom-gray81' />
+                                    </span>
+                                </div>
+                            </div>
+                            <div className="flex items-center border border-custom-grayF1 rounded-[5px] overflow-hidden w-[204px]">
+                                <span className="text-custom-gray81 bg-custom-grayFA font-semibold flex w-[250px] pl-3 py-1">Cost (Sq.m)</span>
+                                <input name='basePrice' type="text" className="w-full px-4 focus:outline-none" placeholder="" />
+                            </div>
+                            <div>
+                                <button onClick={handleOpenModal} className='w-[60px] h-[31px] rounded-[7px] gradient-btn2 p-[4px]  text-custom-solidgreen hover:shadow-custom4'>
+                                    <div className='flex justify-center items-center  bg-white montserrat-bold h-full w-full rounded-[4px] p-[4px]'>
+                                        ADD
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+                        <div className='flex justify-center w-full '>
+                            <div className='w-[662px]'>
+                                <table>
+                                    <thead>
+                                        <tr className='h-[49px] bg-custom-grayFA text-custom-gray81 montserrat-semibold'>
+                                            <th className='rounded-tl-[10px] pl-[10px] w-[150px] text-left'>Floor</th>
+                                            <th className='w-[150px] text-left'>Premium Cost</th>
+                                            <th className='w-[150px] text-left'>Lucky No.</th>
+                                            <th className='w-[150px] text-left'>Unit Assignment</th>
+                                            <th className='rounded-tr-[10px] w-[62px]'></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr className='h-[46px] bg-white'>
+                                            <td className='text-custom-gray81'>1</td>
+                                            <td>
+                                                <div className='bg-white h-[29px] w-[120px] border border-[#D9D9D9] rounded-[5px] px-2'>
+                                                    <p>1,200.00</p>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <input type="checkbox" className="h-[16px] w-[16px] ml-[16px] rounded-[2px] appearance-none border border-gray-400 checked:bg-transparent flex items-center justify-center checked:before:bg-black checked:before:w-[12px] checked:before:h-[12px] checked:before:block checked:before:content-['']" />
+                                             </td>
+                                            <td className='text-blue-500 underline cursor-pointer'>Assign</td>
+                                            <td><FaRegTrashAlt className='size-5 text-custom-gray81 hover:text-red-500'/></td>
+                                        </tr>
+                                        <tr className='h-[46px] bg-custom-grayFA'>
+                                            <td className='text-custom-gray81'>2</td>
+                                            <td>
+                                                <div className='bg-white h-[29px] w-[120px] border border-[#D9D9D9] rounded-[5px] px-2'>
+                                                    <p>1,000.00</p>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <input type="checkbox" className="h-[16px] w-[16px] ml-[16px] rounded-[2px] appearance-none border border-gray-400 checked:bg-transparent flex items-center justify-center checked:before:bg-black checked:before:w-[12px] checked:before:h-[12px] checked:before:block checked:before:content-['']" />
+                                             </td>
+                                            <td className='text-blue-500 underline cursor-pointer'>Assign</td>
+                                            <td><FaRegTrashAlt className='size-5 text-custom-gray81 hover:text-red-500'/></td>
+                                        </tr>
+                                        <tr className='h-[46px] bg-white'>
+                                            <td className='text-custom-gray81'>3</td>
+                                            <td>
+                                                <div className='bg-white h-[29px] w-[120px] border border-[#D9D9D9] rounded-[5px] px-2'>
+                                                    <p>900.00</p>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <input type="checkbox" className="h-[16px] w-[16px] ml-[16px] rounded-[2px] appearance-none border border-gray-400 checked:bg-transparent flex items-center justify-center checked:before:bg-black checked:before:w-[12px] checked:before:h-[12px] checked:before:block checked:before:content-['']" />
+                                             </td>
+                                            <td className='text-blue-500 underline cursor-pointer'>Assign</td>
+                                            <td><FaRegTrashAlt className='size-5 text-custom-gray81 hover:text-red-500'/></td>
+                                        </tr>
+                                        <tr className='h-[46px] bg-custom-grayFA'>
+                                            <td className='text-custom-gray81'>4</td>
+                                            <td>
+                                                <div className='bg-white h-[29px] w-[120px] border border-[#D9D9D9] rounded-[5px] px-2'>
+                                                    <p>800.00</p>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <input type="checkbox" className="h-[16px] w-[16px] ml-[16px] rounded-[2px] appearance-none border border-gray-400 checked:bg-transparent flex items-center justify-center checked:before:bg-black checked:before:w-[12px] checked:before:h-[12px] checked:before:block checked:before:content-['']" />
+                                             </td>
+                                            <td className='text-blue-500 underline cursor-pointer'>Assign</td>
+                                            <td><FaRegTrashAlt className='size-5 text-custom-gray81 hover:text-red-500'/></td>
+                                        </tr>
+                                        <tr className='h-[46px] bg-white'>
+                                            <td className='text-custom-gray81'>5</td>
+                                            <td>
+                                                <div className='bg-white h-[29px] w-[120px] border border-[#D9D9D9] rounded-[5px] px-2'>
+                                                    <p>700.00</p>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <input type="checkbox" className="h-[16px] w-[16px] ml-[16px] rounded-[2px] appearance-none border border-gray-400 checked:bg-transparent flex items-center justify-center checked:before:bg-black checked:before:w-[12px] checked:before:h-[12px] checked:before:block checked:before:content-['']" />
+                                             </td>
+                                            <td className='text-blue-500 underline cursor-pointer'>Assign</td>
+                                            <td><FaRegTrashAlt className='size-5 text-custom-gray81 hover:text-red-500'/></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                       
+                    </div>
                 </div>
+            </div>
+            <div>
+                <FloorPremiumAddUnitModal modalRef={modalRef}/>
             </div>
         </>
 

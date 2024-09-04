@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { IoIosArrowDown } from "react-icons/io";
-
+import { IoMdArrowDropdown } from "react-icons/io";
+import { LiaPercentSolid } from "react-icons/lia";
 const PriceListSettings = () => {
 
   const [accordionOpen, setAccordionOpen] = useState(false);
@@ -18,8 +19,59 @@ const PriceListSettings = () => {
       <div className={`mx-5 rounded-[10px] shadow-custom5 grid overflow-hidden transition-all duration-300 ease-in-out
           ${accordionOpen ? 'mt-2 mb-4 grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}
           `}>
-        <div className=' overflow-hidden'>
-          blank page
+        <div className='overflow-hidden bg-white'>
+          <div className='flex flex-col justify-between w-full h-[153px] p-5'>
+              <div className='flex gap-2 h-[31px]'>
+                    <div className="flex items-center border border-custom-grayF1 rounded-[5px] overflow-hidden w-[375px]">
+                        <span className="text-custom-gray81 bg-custom-grayFA font-semibold flex w-[180%] pl-3 py-1">Base Price Per Sq. M.</span>
+                        <input name='basePrice' type="text" className="w-full px-4 focus:outline-none" placeholder="" />
+                    </div>
+                    <div className="flex items-center border border-custom-grayF1 rounded-[5px] overflow-hidden w-[375px]">
+                        <span className="text-custom-gray81 bg-custom-grayFA flex items-center w-[163%] font-semibold -mr-3 pl-3 py-1">Transfer Charge</span>
+                        <div className="relative w-full">
+                            <select name="transferCharge" className="appearance-none w-full px-4 py-1 bg-white focus:outline-none border-0">
+                                <option value="8">8</option>
+                            </select>
+                            <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3 bg-custom-grayFA">
+                              <LiaPercentSolid className='text-custom-gray81'/><IoMdArrowDropdown className='text-custom-gray81' />
+                            </span>
+                        </div>
+                    </div>
+              </div>
+              <div className='flex gap-2 h-[31px]'>
+                    <div className="flex items-center border border-custom-grayF1 rounded-[5px] overflow-hidden w-[375px]">
+                        <span className="text-custom-gray81 bg-custom-grayFA flex items-center w-[163%] font-semibold -mr-3 pl-3 py-1">Effective Balcony Base</span>
+                        <div className="relative w-full">
+                            <select name="effectiveBalconyBase" className="appearance-none w-full px-4 py-1 bg-white focus:outline-none border-0">
+                                <option value="50">50</option>
+                            </select>
+                            <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3 bg-custom-grayFA">
+                              <LiaPercentSolid className='text-custom-gray81'/><IoMdArrowDropdown className='text-custom-gray81' />
+                            </span>
+                        </div>
+                    </div>
+                    <div className="flex items-center border border-custom-grayF1 rounded-[5px] overflow-hidden w-[375px]">
+                        <span className="text-custom-gray81 bg-custom-grayFA flex items-center w-[163%] font-semibold -mr-3 pl-3 py-1">VAT</span>
+                        <div className="relative w-full">
+                            <select name="vat" className="appearance-none w-full px-4 py-1 bg-white focus:outline-none border-0">
+                                <option value="12">12</option>
+                            </select>
+                            <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3 bg-custom-grayFA">
+                              <LiaPercentSolid className='text-custom-gray81'/><IoMdArrowDropdown className='text-custom-gray81' />
+                            </span>
+                        </div>
+                    </div>
+              </div>
+              <div className='flex gap-2 h-[31px]'>
+                    <div className="flex items-center border border-custom-grayF1 rounded-[5px] overflow-hidden w-[375px]">
+                        <span className="text-custom-gray81 bg-custom-grayFA font-semibold flex w-[180%] pl-3 py-1">VATable List Price&nbsp;<span className='flex items-center font-semibold text-xs'>(greater than)</span></span>
+                        <input name='vatableListPrice' type="text" className="w-full px-4 focus:outline-none" placeholder="" />
+                    </div><div className="flex items-center border border-custom-grayF1 rounded-[5px] overflow-hidden w-[375px]">
+                        <span className="text-custom-gray81 bg-custom-grayFA font-semibold flex w-[180%] pl-3 py-1">Reservation Fee</span>
+                        <input name='reservationFee' type="text" className="w-full px-4 focus:outline-none" placeholder="" />
+                    </div>
+              </div>
+          </div>
         </div>
       </div>
     </>

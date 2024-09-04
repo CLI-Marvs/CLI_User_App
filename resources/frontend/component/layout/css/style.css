@@ -68,3 +68,14 @@ box-sizing: border-box;
   color: transparent;
 }
 
+.file-input {
+  display: none;
+}
+
+.layout-container {
+  overflow: hidden;
+}
+
+.property-layout-container {
+  overflow-y: hidden;
+}
