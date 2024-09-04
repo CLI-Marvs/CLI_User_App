@@ -6,7 +6,7 @@ import PriceVersions from './accordion/PriceVersions'
 import PaymentSchemes from './accordion/PaymentSchemes'
 import ReviewsandApprovalRouting from './accordion/ReviewsandApprovalRouting'
 import FloorPremiums from './accordion/FloorPremiums'
-import AddPropertyModal from './AddPropertyModal'
+import AddPropertyModal from './modals/AddPropertyModal'
 
 
 

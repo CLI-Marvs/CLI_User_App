@@ -16,6 +16,14 @@
   .gradient-btn3 {
     background: linear-gradient(to right,#70AD47 , #175D5F);
   }
+
+  .gradient-btn4 {
+    background: linear-gradient(to right,#1A73E8 , #70AD47);
+  }
+
+  .gradient-btn5 {
+    background: linear-gradient(to right,#175D5f,#348017, #70AD47);
+  }
   
 
   .gradient-border {

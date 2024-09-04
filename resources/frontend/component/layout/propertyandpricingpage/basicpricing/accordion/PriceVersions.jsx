@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { FaRegTrashAlt } from 'react-icons/fa';
 import { IoIosArrowDown } from "react-icons/io";
 
 
@@ -20,7 +21,56 @@ const PriceVersions = () => {
             ${accordionOpen ? 'mt-2 mb-4 grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}
             `}>
                 <div className=' overflow-hidden'>
-                    blank page
+                <div className='w-full p-5 h-[370px]'>
+                        <div className='flex justify-center w-full '>
+                            <div className='w-[662px]'>
+                                <table>
+                                    <thead>
+                                        <tr className='h-[83px] bg-custom-grayFA text-custom-grayA5 montserrat-semibold text-sm'>
+                                            <th className='rounded-tl-[10px] pl-[10px] w-[150px] text-left'>Version</th>
+                                            <th className='w-[150px] text-left pr-10 leading-[18px]'>Percent Increase</th>
+                                            <th className='w-[150px] text-left pr-16 leading-[18px]'>No. of allowed buyers</th>
+                                            <th className='w-[150px] text-left'>Expiry Date</th>
+                                            <th className='rounded-tr-[10px] w-[62px]'></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr className='h-[46px] bg-white'>
+                                            <td className='px-[10px]'>
+                                                <input type="text" className='w-[150px]' />
+                                                </td>
+                                            <td className='px-[10px]'>
+                                                <input type="text" className='w-[100px]'/>
+                                            </td>
+                                            <td className='px-[10px]'>
+                                                <input type="text" className='w-[100px]'/>
+                                             </td>
+                                            <td className='px-[10px]'>
+                                                <input type="date" className='w-[100px]'/>
+                                            </td>
+                                            <td><FaRegTrashAlt className='size-5 text-custom-gray81 hover:text-red-500'/></td>
+                                        </tr>
+                                        <tr className='h-[46px] bg-custom-grayFA'>
+                                            <td className='px-[10px]'>
+                                                <input type="text" className='w-[150px]' />
+                                                </td>
+                                            <td className='px-[10px]'>
+                                                <input type="text" className='w-[100px]'/>
+                                            </td>
+                                            <td className='px-[10px]'>
+                                                <input type="text" className='w-[100px]'/>
+                                             </td>
+                                            <td className='px-[10px] text-sm'>
+                                                <input type="date" className='w-[100px]'/>
+                                            </td>
+                                            <td><FaRegTrashAlt className='size-5 text-custom-gray81 hover:text-red-500'/></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                       
+                    </div>
                 </div>
             </div>
         </>
