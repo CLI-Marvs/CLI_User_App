@@ -65,7 +65,7 @@ const AssignDetails = ({ logMessages }) => {
                         </div>
                     </>
                 );
-            case "requestor_reply":
+            case "buyer_reply":
                 return (
                     <>
                         <div className="flex flex-col truncate">
