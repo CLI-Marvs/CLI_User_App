@@ -122,11 +122,11 @@ const Notification = () => {
                                         </td>
                                         <td className="w-[320px] shrink-0 h-full px-10 flex items-center">
                                             <p className="flex space-x-4 text-xs text-custom-solidgreen">
-                                                <span>Transactions</span>
+                                                <span>Inquiry Management</span>
                                                 <span>&gt;</span>
-                                                <span>Casa Mira</span>
+                                                <span>Inquiries</span>
                                                 <span>&gt;</span>
-                                                <span>Equity</span>
+                                               {/*  <span>Equity</span> */}
                                             </p>
                                         </td>
                                         <td className="h-full shrink-0 flex justify-center items-center">

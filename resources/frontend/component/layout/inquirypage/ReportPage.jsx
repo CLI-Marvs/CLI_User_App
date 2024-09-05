@@ -17,6 +17,7 @@ import {
 } from "recharts";
 import apiService from "../../servicesApi/apiService";
 import debounce from "lodash/debounce";
+import { useStateContext } from "../../../context/contextprovider";
 
 const data = [
     { name: "01", Resolved: 0, Unresolved: 0 },
@@ -52,20 +53,26 @@ const COLORS = ["#5B9BD5", "#348017"];
 const categoryColors = {
     "Reservation Documents": "#348017",
     "Payment Issues": "#5B9BD5",
+    "Statement of Account and Billing Statement": "#348017",
+    "Turnover Status/Unit Concerns": "#5B9BD5",
+    "Loan Application": "#348017",
+    "Title and Other Registration Documents": "#5B9BD5",
+    Commissions: "#5B9BD5",
+    "Other Concerns": "#5B9BD5",
 };
 
 const SINGLE_COLOR = "#5B9BD5";
 
 const getCategoryColor = (categoryName) => {
-    return categoryColors[categoryName] || "#8884d8"; 
+    return categoryColors[categoryName] || "#8884d8";
 };
 const CustomTooltip = ({ active, payload }) => {
     if (active && payload && payload.length) {
         return (
             <div className="bg-white p-2 shadow-lg rounded">
-                <p>{`${payload[0].name}`}</p>
-                <p>{`Value 1: ${payload[0].value}`}</p>
-                <p>{`Value 2: ${payload[1].value}`}</p>
+               {/*  <p>{`${payload[0].name}`}</p> */}
+                <p>{`Resolved: ${payload[0].value}`}</p>
+                <p>{`Unresolved: ${payload[1].value}`}</p>
             </div>
         );
     }
@@ -76,33 +83,19 @@ const CustomTooltip = ({ active, payload }) => {
 const ReportPage = () => {
     const [dataSet, setDataSet] = useState([]);
     const [department, setDepartment] = useState("All");
-    const [dataCategory, setDataCategory] = useState([]);
-    const [month, setMonth] = useState("");
+    const {
+        setMonth,
+        month,
+        dataCategory,
+        fetchCategory,
+        dataProperty,
+        getInquiriesPerProperty,
+        propertyMonth,
+        setPropertyMonth,
+    } = useStateContext();
 
-    const fetchCategory = useCallback(
-        debounce(async (month) => {
-            if (!month || !isValidMonth(month)) {
-                return;
-            }
-            try {
-                const response = await apiService.get("category-monthly", {
-                    params: { month: month },
-                });
-
-                const result = response.data;
-
-
-                const formattedData = result.map((item) => ({
-                    name: item.details_concern,
-                    value: item.total
-                }));
-                setDataCategory(formattedData);
-            } catch (error) {
-                console.log("Error retrieving data", error);
-            }
-        }, 300),
-        []
-    );
+    const defaultData = [{ name: "No Data" }];
+    const dataToDisplay = dataCategory.length > 0 ? dataCategory : defaultData;
     const fetchDataReport = async () => {
         try {
             const response = await apiService.get("report-monthly", {
@@ -122,40 +115,20 @@ const ReportPage = () => {
         }
     };
 
-    const isValidMonth = (month) => {
-        const validMonths = {
-            January: "January",
-            Feb: "February",
-            February: "February",
-            Mar: "March",
-            March: "March",
-            Apr: "April",
-            April: "April",
-            May: "May",
-            Jun: "June",
-            June: "June",
-            Jul: "July",
-            July: "July",
-            Aug: "August",
-            August: "August",
-            Sep: "September",
-            September: "September",
-            Oct: "October",
-            October: "October",
-            Nov: "November",
-            November: "November",
-            Dec: "December",
-            December: "December",
-        };
+    console.log("dataPorperty", dataProperty);
 
-        const normalizedMonth =
-            month.charAt(0).toUpperCase() + month.slice(1).toLowerCase();
-
-        return validMonths.hasOwnProperty(normalizedMonth);
+    const getCurrentMonth = () => {
+        const date = new Date();
+        const options = { month: "long" };
+        return new Intl.DateTimeFormat("en-US", options).format(date);
     };
 
     const handleInputChange = (e) => {
         setMonth(e.target.value);
+    };
+
+    const handleInputChangeProperty = (e) => {
+        setPropertyMonth(e.target.value);
     };
 
     const handleKeyDown = (e) => {
@@ -163,12 +136,24 @@ const ReportPage = () => {
             fetchCategory(month);
         }
     };
+
+    const handleKeyDownProperty = (e) => {
+        if (e.key === "Enter") {
+            getInquiriesPerProperty(propertyMonth);
+        }
+    };
+    useEffect(() => {
+        const currentMonth = getCurrentMonth();
+        setMonth(currentMonth);
+        setPropertyMonth(currentMonth);
+    }, []);
+
     useEffect(() => {
         fetchDataReport();
-        if (month) {
+        /*  if (month) {
             fetchCategory(month);
-        }
-    }, [department, month]);
+        } */
+    }, [department]);
 
     return (
         <div className="h-screen bg-custom-grayFA p-4 ">
@@ -287,7 +272,7 @@ const ReportPage = () => {
                         <div>
                             <PieChart width={230} height={260}>
                                 <Pie
-                                    data={dataCategory}
+                                    data={dataToDisplay}
                                     cx="50%"
                                     cy="50%"
                                     outerRadius={100}
@@ -300,7 +285,7 @@ const ReportPage = () => {
                                     startAngle={90}
                                     endAngle={450}
                                 >
-                                    {dataCategory.map((entry, index) => (
+                                    {dataToDisplay.map((entry, index) => (
                                         <Cell
                                             key={index}
                                             fill={COLORS[index % COLORS.length]}
@@ -309,8 +294,8 @@ const ReportPage = () => {
                                 </Pie>
                             </PieChart>
                         </div>
-                       
-                       {/*  <div className="w-full flex justify-start items-center">
+
+                        {/*  <div className="w-full flex justify-start items-center">
                             <div className="flex flex-col">
                                 <div className="flex gap-10 ">
                                     <div className="flex gap-1 items-center">
@@ -352,12 +337,16 @@ const ReportPage = () => {
                         </div> */}
                         <div className="w-full flex justify-start items-center">
                             <div className="flex flex-col">
-                                {dataCategory.map((category, index) => (
+                                {dataToDisplay.map((category, index) => (
                                     <div className="flex gap-10" key={index}>
                                         <div className="flex gap-1 items-center">
                                             <span
                                                 className="text-xl mb-1"
-                                                style={{ color: getCategoryColor(category.name) }}
+                                                style={{
+                                                    color: getCategoryColor(
+                                                        category.name
+                                                    ),
+                                                }}
                                             >
                                                 ●
                                             </span>
@@ -370,7 +359,7 @@ const ReportPage = () => {
                                                 {category.value}
                                             </span>
                                             <span className="text-custom-gray81">
-                                                %
+                                                {category.value ? "%" : ""}
                                             </span>
                                         </div>
                                     </div>
@@ -392,16 +381,19 @@ const ReportPage = () => {
                             <input
                                 name="contact"
                                 type="text"
+                                onKeyDown={handleKeyDownProperty}
+                                value={propertyMonth}
+                                onChange={handleInputChangeProperty}
                                 className="w-36 pl-2 focus:outline-none"
                                 placeholder=""
                             />
                         </div>
                     </div>
                     <div>
-                        <BarChart
+                        {/* <BarChart
                             width={400}
                             height={chartHeight}
-                            data={data3}
+                            data={dataProperty}
                             layout="vertical"
                             margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
                         >
@@ -417,7 +409,7 @@ const ReportPage = () => {
                                 dataKey="value1"
                                 fill="#348017"
                                 barSize={15}
-                                radius={[0, 4, 4, 0]} // Rounded top corners
+                                radius={[0, 4, 4, 0]} 
                             >
                                 <LabelList
                                     dataKey="value1"
@@ -452,7 +444,66 @@ const ReportPage = () => {
                                     fill="#4a5568"
                                 />
                             </Bar>
+                        </BarChart> */}
+
+                        <BarChart
+                            width={400}
+                            height={chartHeight}
+                            data={dataProperty}
+                            layout="vertical"
+                            margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                        >
+                            <XAxis type="number" hide />
+                            <YAxis
+                                type="category"
+                                dataKey="name"
+                                hide
+                                tick={false}
+                            />
+                            <Tooltip content={<CustomTooltip />} />
+
+                            <Bar
+                                dataKey="resolved" 
+                                fill="#348017"
+                                barSize={15}
+                                radius={[0, 4, 4, 0]}
+                            >
+                                <LabelList
+                                    dataKey="resolved" 
+                                    position="right"
+                                    fill="#4a5568"
+                                />
+                                <LabelList
+                                    dataKey="name"
+                                    position="top"
+                                    content={({ x, y, value }) => (
+                                        <text
+                                            x={x}
+                                            y={y - 13}
+                                            fill="#00000"
+                                            textAnchor="start"
+                                            dominantBaseline="central"
+                                        >
+                                            {value}
+                                        </text>
+                                    )}
+                                />
+                            </Bar>
+
+                            <Bar
+                                dataKey="unresolved" // Update this to unresolved
+                                fill="#D3F1D8"
+                                barSize={15}
+                                radius={[0, 4, 4, 0]}
+                            >
+                                <LabelList
+                                    dataKey="unresolved" // Update this to unresolved
+                                    position="right"
+                                    fill="#4a5568"
+                                />
+                            </Bar>
                         </BarChart>
+
                         <div className="flex justify-end">
                             <div className="flex items-center px-3 py-2 gap-3">
                                 <span className="flex items-center text-custom-lightestgreen text-2xl">

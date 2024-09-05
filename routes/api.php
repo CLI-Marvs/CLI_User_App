@@ -35,6 +35,8 @@ Route::get('/get-messageId/{ticketId}', [ConcernController::class, 'getMessageId
 
 Route::get('/report-monthly', [ConcernController::class, 'getMonthlyReports']);
 Route::get('/category-monthly', [ConcernController::class, 'getInquiriesByCategory']);
+Route::get('/inquiries-property', [ConcernController::class, 'getInquiriesPerProperty']);
+
 Route::post('/isread', [ConcernController::class, 'updateIsReadStatus']);
 
 

@@ -1,13 +1,14 @@
-import React, { useEffect, useState, useRef} from "react";
+import React, { useEffect, useState, useRef } from "react";
 import TicketTable from "./TicketTable";
 import { IoIosArrowUp, IoIosArrowDown } from "react-icons/io";
 import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md";
 import ReactPaginate from "react-paginate";
 import { useStateContext } from "../../../context/contextprovider";
 import apiService from "../../servicesApi/apiService";
-import DatePicker from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker.css';
-import DateLogo from '../../../../../public/Images/Date_range.svg'
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import DateLogo from "../../../../../public/Images/Date_range.svg";
+import moment from "moment";
 
 const InquiryList = () => {
     const {
@@ -18,13 +19,35 @@ const InquiryList = () => {
         getAllConcerns,
         daysFilter,
         setDaysFilter,
-        setStatusFilter
+        setStatusFilter,
+        setSearchFilter,
+        setHasAttachments,
+        hasAttachments
     } = useStateContext();
 
+    const [name, setName] = useState("");
+    const [category, setCategory] = useState("");
+    const [email, setEmail] = useState("");
+    const [ticket, setTicket] = useState("");
+    const [status, setStatus] = useState("");
+
+    const [activeDayButton, setActiveDayButton] = useState(null);
+    const [assignedToMeActive, setAssignedToMeActive] = useState(false);
+
+
+    const [startDate, setStartDate] = useState(null);
+    const [isFilterVisible, setIsFilterVisible] = useState(false);
+    const [isOpen, setIsOpen] = useState(false);
+    const [selectedOption, setSelectedOption] = useState("All");
+    const filterBoxRef = useRef(null);
+
+
+    const handleCheckboxChange = () => {
+        setHasAttachments(!hasAttachments);
+    };
     const handlePageClick = (data) => {
         const selectedPage = data.selected;
         setCurrentPage(selectedPage);
-
     };
 
     const handleRefresh = () => {
@@ -43,11 +66,7 @@ const InquiryList = () => {
  
      }; */
 
-    const [startDate, setStartDate] = useState(new Date());
-    const [isFilterVisible, setIsFilterVisible] = useState(false);
-    const [isOpen, setIsOpen] = useState(false);
-    const [selectedOption, setSelectedOption] = useState('All');
-    const filterBoxRef = useRef(null);
+  
 
     const toggleDropdown = () => {
         setIsOpen(!isOpen);
@@ -57,8 +76,15 @@ const InquiryList = () => {
         setIsFilterVisible((prev) => !prev);
     };
 
+    const handleDateChange = (date) => {
+        setStartDate(date);
+    };
+
     const handleClickOutside = (event) => {
-        if (filterBoxRef.current && !filterBoxRef.current.contains(event.target)) {
+        if (
+            filterBoxRef.current &&
+            !filterBoxRef.current.contains(event.target)
+        ) {
             setIsFilterVisible(false);
         }
     };
@@ -71,28 +97,33 @@ const InquiryList = () => {
             setDaysFilter(null);
             setStatusFilter(null);
             setCurrentPage(0);
+            setSearchFilter("");
         } else if (option === "Resolve") {
-            setStatusFilter('Resolved');
+            setStatusFilter("Resolved");
             setDaysFilter(null);
             setCurrentPage(0);
+            setSearchFilter("");
         } else if (option === "Unresolve") {
-            setStatusFilter('unresolved');
+            setStatusFilter("unresolved");
             setDaysFilter(null);
             setCurrentPage(0);
+            setSearchFilter("");
         }
     };
 
-    const [activeDayButton, setActiveDayButton] = useState(null);
-    const [assignedToMeActive, setAssignedToMeActive] = useState(false);
 
+    const handleStatus = (e) => {
+        setStatus(e.target.value);
+    }
+  
     const handleDayClick = (day) => {
         let newValue = 0;
 
-        if (day === '3+ Days') {
+        if (day === "3+ Days") {
             newValue = 3;
-        } else if (day === '2 Days') {
+        } else if (day === "2 Days") {
             newValue = 2;
-        } else if (day === '1 Day') {
+        } else if (day === "1 Day") {
             newValue = 1;
         }
         setActiveDayButton((prev) => (prev === day ? null : day));
@@ -104,29 +135,42 @@ const InquiryList = () => {
         setAssignedToMeActive(!assignedToMeActive);
     };
 
-    const dayButtonLabels = ['3+ Days', '2 Days', '1 Day']; 
+    const dayButtonLabels = ["3+ Days", "2 Days", "1 Day"];
 
     const handleKeyDown = (event) => {
-        if (event.key === 'Escape') {
+        if (event.key === "Escape") {
             setIsFilterVisible(false);
         }
     };
 
-     useEffect(() => {
+    const handleSearch = () => {
+        setSearchFilter({
+            name,
+            category,
+            email,
+            ticket,
+            startDate,
+            status
+        });
+        setDaysFilter(null);
+        setIsFilterVisible(false);
+        setCurrentPage(0);
+    };
+
+    useEffect(() => {
         if (isFilterVisible) {
-            document.addEventListener('mousedown', handleClickOutside);
-            document.addEventListener('keydown', handleKeyDown);
+            document.addEventListener("mousedown", handleClickOutside);
+            document.addEventListener("keydown", handleKeyDown);
         } else {
-            document.removeEventListener('mousedown', handleClickOutside);
-            document.removeEventListener('keydown', handleKeyDown);
+            document.removeEventListener("mousedown", handleClickOutside);
+            document.removeEventListener("keydown", handleKeyDown);
         }
 
         return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
-            document.removeEventListener('keydown', handleKeyDown);
+            document.removeEventListener("mousedown", handleClickOutside);
+            document.removeEventListener("keydown", handleKeyDown);
         };
     }, [isFilterVisible]);
-
 
     return (
         <>
@@ -150,6 +194,7 @@ const InquiryList = () => {
                             </svg>
                             <input
                                 type="text"
+                                onClick={toggleFilterBox}
                                 className="h-10 w-full rounded-lg pl-9 pr-6 text-sm"
                                 placeholder="Search"
                             />
@@ -170,57 +215,122 @@ const InquiryList = () => {
                             </svg>
                         </div>
                         {isFilterVisible && (
-                        <div
-                            ref={filterBoxRef}
-                            className="absolute left-0 mt-12 p-8 bg-white border border-gray-300 shadow-lg rounded-lg z-10 w-[604px]"
-                        >
-                            <div className="flex flex-col gap-2">
-                                <div className='flex'>
-                                    <label className='flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]'> Name</label>
-                                    <input type="text" className='w-full  border-b-1 outline-none' />
-                                </div>
-                                <div className='flex'>
-                                    <label className='flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]'> Category</label>
-                                    <input type="text" className='w-full  border-b-1 outline-none' />
-                                </div>
-                                <div className='flex'>
-                                    <label className='flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]'> Email</label>
-                                    <input type="text" className='w-full  border-b-1 outline-none' />
-                                </div>
-                                <div className='flex'>
-                                    <label className='flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]'> Ticket</label>
-                                    <input type="text" className='w-full  border-b-1 outline-none' />
-                                </div>
-                                <div className='flex gap-3'>
-                                    <label className='flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]'>Date</label>
-                                    <div className="relative">
-                                        <DatePicker
-                                            selected={startDate}
-                                            onChange={(date) => setStartDate(date)}
-                                            className=" border-b-1 outline-none w-[176px]"
-                                            calendarClassName="custom-calendar"
+                            <div
+                                ref={filterBoxRef}
+                                className="absolute left-0 mt-12 p-8 bg-white border border-gray-300 shadow-lg rounded-lg z-10 w-[604px]"
+                            >
+                                <div className="flex flex-col gap-2">
+                                    <div className="flex">
+                                        <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
+                                            {" "}
+                                            Name
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={name}
+                                            onChange={(e) =>
+                                                setName(e.target.value)
+                                            }
+                                            className="w-full  border-b-1 outline-none"
                                         />
-
-                                        <img src={DateLogo} alt="date" className='absolute top-[45%] right-0 transform -translate-y-1/2 text-custom-bluegreen size-6' />
-
                                     </div>
-                                    <label className='flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]'> Status</label>
-                                    <select className='w-full border-b-1 outline-none'>
-                                        <option value="">Select Status</option>
-                                        <option value="draft">Draft</option>
-                                        <option value="ongoing">On-going approval</option>
-                                        <option value="approvenotlive">Approved not Live</option>
-                                        <option value="approveandlive">Approve and Live</option>
-                                    </select>
-                                </div>
-                                <div className="mt-5 flex gap-5">
-                                    <input type="checkbox" /><label className='flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]'> Has Attachments</label>
-                                </div>
-                                <div className='mt-3 flex justify-end'>
-                                    <button className='h-[37px] w-[88px] gradient-btn rounded-[10px] text-white text-sm'>Search</button>
+                                    <div className="flex">
+                                        <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
+                                            {" "}
+                                            Category
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={category}
+                                            onChange={(e) =>
+                                                setCategory(e.target.value)
+                                            }
+                                            className="w-full  border-b-1 outline-none"
+                                        />
+                                    </div>
+                                    <div className="flex">
+                                        <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
+                                            {" "}
+                                            Email
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={email}
+                                            onChange={(e) =>
+                                                setEmail(e.target.value)
+                                            }
+                                            className="w-full  border-b-1 outline-none"
+                                        />
+                                    </div>
+                                    <div className="flex">
+                                        <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
+                                            {" "}
+                                            Ticket
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={ticket}
+                                            onChange={(e) =>
+                                                setTicket(e.target.value)
+                                            }
+                                            className="w-full  border-b-1 outline-none"
+                                        />
+                                    </div>
+                                    <div className="flex gap-3">
+                                        <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
+                                            Date
+                                        </label>
+                                        <div className="relative">
+                                            <DatePicker
+                                                selected={startDate}
+                                                onChange={handleDateChange}
+                                                className="border-b-1 outline-none w-[176px]"
+                                                calendarClassName="custom-calendar"
+                                            />
+
+                                            <img
+                                                src={DateLogo}
+                                                alt="date"
+                                                className="absolute top-[45%] right-0 transform -translate-y-1/2 text-custom-bluegreen size-6"
+                                            />
+                                        </div>
+                                        <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
+                                            {" "}
+                                            Status
+                                        </label>
+                                        <select className="w-full border-b-1 outline-none" onChange={handleStatus} value={status}>
+                                            <option value="">
+                                                Select Status
+                                            </option>
+                                            <option value="Inquiry Feedback Received">Inquiry Feedback Received</option>
+                                            <option value="Replied By">
+                                                Replied By
+                                            </option>
+                                            <option value="Assign To">
+                                                Assign To
+                                            </option>
+                                            <option value="Mark as resolved">
+                                               Mark as resolve
+                                            </option>
+                                        </select>
+                                    </div>
+                                    <div className="mt-5 flex gap-5">
+                                        <input type="checkbox" checked={hasAttachments} onChange={handleCheckboxChange}/>
+                                        <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
+                                            {" "}
+                                            Has Attachments
+                                        </label>
+                                    </div>
+                                    <div className="mt-3 flex justify-end">
+                                        <button
+                                            className="h-[37px] w-[88px] gradient-btn rounded-[10px] text-white text-sm"
+                                            onClick={handleSearch}
+                                        >
+                                            Search
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
                         )}
                     </div>
                 </div>
@@ -232,7 +342,8 @@ const InquiryList = () => {
                                 className="flex text-[20px] items-center gap-3 text-custom-bluegreen font-semibold"
                                 onClick={toggleDropdown}
                             >
-                                {isOpen ? <IoIosArrowUp /> : <IoIosArrowDown />} {selectedOption}
+                                {isOpen ? <IoIosArrowUp /> : <IoIosArrowDown />}{" "}
+                                {selectedOption}
                             </button>
 
                             {/* Dropdown Menu */}
@@ -241,19 +352,25 @@ const InquiryList = () => {
                                     <ul className="py-2">
                                         <li
                                             className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                                            onClick={() => handleOptionClick('All')}
+                                            onClick={() =>
+                                                handleOptionClick("All")
+                                            }
                                         >
                                             All
                                         </li>
                                         <li
                                             className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                                            onClick={() => handleOptionClick('Resolve')}
+                                            onClick={() =>
+                                                handleOptionClick("Resolve")
+                                            }
                                         >
                                             Resolve
                                         </li>
                                         <li
                                             className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                                            onClick={() => handleOptionClick('Unresolve')}
+                                            onClick={() =>
+                                                handleOptionClick("Unresolve")
+                                            }
                                         >
                                             Unresolve
                                         </li>
@@ -265,20 +382,30 @@ const InquiryList = () => {
                             <div className="flex space-x-2">
                                 <button
                                     onClick={handleAssignedToMeClick}
-                                    className={`flex items-center border border-custom-lightgreen text-custom-lightgreen h-[25px] px-3 rounded-3xl ${assignedToMeActive ? 'bg-custom-lightgreen text-white' : 'hover:bg-custom-lightestgreen'
-                                        }`}
+                                    className={`flex items-center border border-custom-lightgreen text-custom-lightgreen h-[25px] px-3 rounded-3xl ${
+                                        assignedToMeActive
+                                            ? "bg-custom-lightgreen text-white"
+                                            : "hover:bg-custom-lightestgreen"
+                                    }`}
                                 >
-                                    <p className="text-sm montserrat-semibold">Assigned to me</p>
+                                    <p className="text-sm montserrat-semibold">
+                                        Assigned to me
+                                    </p>
                                 </button>
 
                                 {dayButtonLabels.map((label) => (
                                     <button
                                         key={label}
                                         onClick={() => handleDayClick(label)}
-                                        className={`flex items-center border border-custom-lightgreen text-custom-lightgreen h-[25px] px-3 rounded-3xl ${activeDayButton === label ? 'bg-custom-lightgreen text-white' : 'hover:bg-custom-lightestgreen'
-                                            }`}
+                                        className={`flex items-center border border-custom-lightgreen text-custom-lightgreen h-[25px] px-3 rounded-3xl ${
+                                            activeDayButton === label
+                                                ? "bg-custom-lightgreen text-white"
+                                                : "hover:bg-custom-lightestgreen"
+                                        }`}
                                     >
-                                        <p className="text-sm montserrat-semibold">{label}</p>
+                                        <p className="text-sm montserrat-semibold">
+                                            {label}
+                                        </p>
                                     </button>
                                 ))}
                                 <button onClick={handleRefresh}>Refresh</button>
@@ -286,7 +413,7 @@ const InquiryList = () => {
                         </div>
                     </div>
                     <div>
-                        {(data && data.length === 0) ? (
+                        {data && data.length === 0 ? (
                             <p className="text-center text-gray-500 py-4">
                                 No data found
                             </p>
@@ -301,10 +428,14 @@ const InquiryList = () => {
                         </p>
                     </div>
                     <div className="flex justify-end mt-4">
-                        <div className='flex w-full justify-end mt-3 mb-10'>
+                        <div className="flex w-full justify-end mt-3 mb-10">
                             <ReactPaginate
-                                previousLabel={<MdKeyboardArrowLeft className='text-[#404B52]' />}
-                                nextLabel={<MdKeyboardArrowRight className='text-[#404B52]' />}
+                                previousLabel={
+                                    <MdKeyboardArrowLeft className="text-[#404B52]" />
+                                }
+                                nextLabel={
+                                    <MdKeyboardArrowRight className="text-[#404B52]" />
+                                }
                                 breakLabel={"..."}
                                 pageCount={pageCount}
                                 marginPagesDisplayed={2}

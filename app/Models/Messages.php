@@ -11,4 +11,11 @@ class Messages extends Model
 
     protected $table = 'messages';
     protected $guarded = array();
+
+
+   public function concern()
+{
+    return $this->belongsTo(Concern::class, 'ticket_id', 'ticket_id');
+}
+
 }
