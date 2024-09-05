@@ -9,7 +9,7 @@ const PropertyAndPricingLayout = () => {
         <div className="fixed h-full">
          <PropertyAndPricingSidebar/>
         </div>
-        <div className="flex-1 overflow-y-auto ml-[230px]">
+        <div className="flex-1 overflow-y-auto ml-[230px] bg-custom-grayFA">
           <Outlet />
         </div>
       </div>

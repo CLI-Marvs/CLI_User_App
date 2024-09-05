@@ -1,5 +1,5 @@
 import React,{useRef,useState} from 'react'
-import UploadUnitDetailsModal from './UploadUnitDetailsModal';
+import UploadUnitDetailsModal from './modals/UploadUnitDetailsModal';
 
 const ProjectDetails = () => {
 
