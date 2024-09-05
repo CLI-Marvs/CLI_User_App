@@ -335,7 +335,7 @@ const InquiryList = () => {
                     </div>
                 </div>
 
-                <div className="max-w-5xl">
+                <div className="max-w-[954PX]">
                     <div className="flex justify-start items-center h-12 mt-3 px-6 gap-24 bg-white rounded-t-lg mb-1 ">
                         <div className="relative mr-4">
                             <button
@@ -412,7 +412,7 @@ const InquiryList = () => {
                             </div>
                         </div>
                     </div>
-                    <div>
+                    <div className="w-[954px]">
                         {data && data.length === 0 ? (
                             <p className="text-center text-gray-500 py-4">
                                 No data found

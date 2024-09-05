@@ -16,12 +16,18 @@ import apiService from "../../servicesApi/apiService";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import DateLogo from "../../../../../public/Images/Date_range.svg";
+import CircularProgress from '@mui/material/CircularProgress';
 
 const InquiryThread = () => {
     const [attachedFiles, setAttachedFiles] = useState([]);
     const [startDate, setStartDate] = useState(new Date());
     const [isFilterVisible, setIsFilterVisible] = useState(false);
+    const [loading, setLoading] = useState(false);
+
+
     const filterBoxRef = useRef(null);
+
+
     const {
         messages,
         setTicketId,
@@ -103,6 +109,7 @@ const InquiryThread = () => {
     // };
 
     const submitMessage = async () => {
+        setLoading(true);
         const formData = new FormData();
     
         if (attachedFiles && attachedFiles.length > 0) {
@@ -131,6 +138,8 @@ const InquiryThread = () => {
             setAttachedFiles([]);
         } catch (error) {
             console.log("error sending message", error);
+        } finally {
+            setLoading(false);
         }
     };
     
@@ -312,35 +321,40 @@ const InquiryThread = () => {
                                 onClick={handleBack}
                                 className="hover:bg-gray-100 rounded-full"
                             />
-                            <p className="text-sm montserrat-semibold text-custom-gray81 space-x-1">
-                                {dataConcern.ticket_id}
-                                <span> |</span>
-                                <span>{dataConcern.details_concern}</span>
-                                <span>|</span>
-                                {dataConcern && (
-                                    <span>{dataConcern.property}</span>
-                                )}
-                                <span>|</span>
-                                <span>{dataConcern.unit_number}</span>
-                            </p>
-                            <div>
+                            <div className="flex-1 flex flex-wrap">
+                                <p className="space-x-1 text-sm montserrat-semibold text-custom-gray81">
+                                    {dataConcern.ticket_id}
+                                    <span> |</span>
+                                    <span>{dataConcern.details_concern}</span>
+                                    <span>|</span>
+                                    {dataConcern && (
+                                        <span>{dataConcern.property}</span>
+                                    )}
+                                    <span>|</span>
+                                    <span>{dataConcern.unit_number}</span>
+                                </p>
+                            </div>
+                            <div className="flex justify-center w-[20px] shrink-0">
                                 <LuTrash2 className="text-custom-bluegreen hover:text-red-500" />
                             </div>
-                            {dataConcern &&
-                            dataConcern.status === "Resolved" ? (
-                                <>
-                                    <span className="text-blue-500 cursor-pointer hover:underline font-semibold text-sm">
-                                        Resolved
-                                    </span>
-                                </>
-                            ) : (
-                                <button
-                                    onClick={handleOpenModal}
-                                    className="text-blue-500 cursor-pointer hover:underline font-semibold text-sm"
-                                >
-                                    Mark as resolve
-                                </button>
-                            )}
+                            <div className="flex justify-end shrink-0">
+                                {dataConcern &&
+                                dataConcern.status === "Resolved" ? (
+                                    <>
+                                        <span className="text-blue-500 cursor-pointer hover:underline font-semibold text-sm">
+                                            Resolved
+                                        </span>
+                                    </>
+                                ) : (
+                                    <button
+                                        onClick={handleOpenModal}
+                                        className="text-blue-500 cursor-pointer hover:underline font-semibold text-sm"
+                                    >
+                                        Mark as resolve
+                                    </button>
+                                )}
+                            </div>
+                            
                         </div>
                         <div className="flex-grow  overflow-y-auto">
                             <div className="">
@@ -483,16 +497,21 @@ const InquiryThread = () => {
                                         <BsPaperclip className="h-5 w-5 text-custom-solidgreen hover:text-gray-700" />
                                     </button>
                                 </div>
-
                                 {/* Send button */}
                                 <div className="absolute bottom-4 right-4 flex items-center">
                                     <button
                                         type="button"
                                         onClick={submitMessage}
-                                        className="flex h-7 px-2 rounded-lg font-semibold text-white text-sm items-center gradient-background3 hover:shadow-custom4"
+                                        className="flex w-[68px] h-[31px] rounded-lg font-semibold text-white text-sm justify-center items-center gradient-background3 hover:shadow-custom4"
                                     >
-                                        Send
-                                        <IoIosSend className="h-3 w-3 text-white" />
+                                        {loading ? (
+                                           <CircularProgress className="spinnerSize" />
+                                        ) : (
+                                            <>
+                                                Send
+                                                <IoIosSend className="h-3 w-3 text-white" />
+                                            </>
+                                        )}
                                     </button>
                                 </div>
                             </div>

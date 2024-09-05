@@ -87,3 +87,8 @@ box-sizing: border-box;
 .property-layout-container {
   overflow-y: hidden;
 }
+.spinnerSize{
+  width: 24px !important;
+  height: 24px !important;
+ 
+}

@@ -61,7 +61,7 @@ const AssignSidePanel = ({ticketId}) => {
                     </div>
                 </div>
                 <div className="h-full flex flex-col">
-                    <div className=" h-full overflow-y-auto">
+                    <div className=" h-[400px] overflow-y-auto">
                         <AssignDetails logMessages={logsMessages}/>
                     </div>
                     <div className="border border-t-1 border-custom-lightestgreen flex-shrink-0"></div>

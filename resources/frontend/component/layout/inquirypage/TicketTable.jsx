@@ -94,7 +94,7 @@ const TicketTable = ({ concernData }) => {
                         <tr
                             key={row.id}
                             onClick={() => navigateToThread(row)}
-                            className={`flex items-center h-7 cursor-pointer mb-1 bg-white
+                            className={`flex items-center h-7 cursor-pointer mb-1 text-sm bg-white
                             hover:shadow-custom
                         `}
                         >
@@ -106,7 +106,7 @@ const TicketTable = ({ concernData }) => {
                                 className="cursor-pointer"
                             />
                         </td> */}
-                            <td className="w-14 flex justify-center pl-4 text-xl text-custom-solidgreen">
+                            <td className="w-[60px] shrink-0 flex justify-center text-xl text-custom-solidgreen">
                                 <button onClick={() => togglePin(index)}>
                                     {row.isPinned ? (
                                         <TiPin />
@@ -115,26 +115,31 @@ const TicketTable = ({ concernData }) => {
                                     )}
                                 </button>
                             </td>
-                            <td className="w-40 px-4 shrink-0 truncate font-semibold text-custom-bluegreen">
-                                <p>{row.buyer_name}</p>
+                            <td className="shrink-0 font-semibold text-custom-bluegreen">
+                                <p className="w-[130px] pr-2 truncate">{(() => {
+                                    const nameParts = row.buyer_name.split(" ");
+                                    const lastName = nameParts.pop();
+                                    const firstName = nameParts.join(" ");
+                                    return `${lastName}, ${firstName}`;
+                                    })()}
+                                </p>
                             </td>
-                            <td className="flex flex-1 gap-1 text-custom-bluegreen">
-                                <div className="font-semibold whitespace-nowrap">
+                            <td className="flex flex-1 gap-1 text-custom-bluegreen shrink-0">
+                                <p className="flex-1 flex gap-1 font-semibold truncate text-[16px] w-[200px]">
                                     <span>{row.property}</span>
-                                    <span>({row.details_concern || "Transaction"})</span>
-                                    <span> - </span>
-                                    <span>{row.ticket_id}</span>
-                                </div>
-                                <div className="flex items-center w-48 mr-4">
-                                    <p className="text-sm-light truncate text-gray-400">
+                                    <span className="">({row.details_concern || "Transaction"}) - {row.ticket_id}</span>
+                                    <span className=" text-sm text-gray-400">
                                         {row.details_message}
-                                    </p>
-                                </div>
+                                    </span>
+                                </p>
                             </td>
-                            <td className="w-56 flex items-center text-custom-lightgreen">
-                                <p className="truncate">{row.message_log}</p>
+                            <td className="truncate w-[106px]">
+                               
                             </td>
-                            <td className="w-28 flex justify-end pr-3 text-custom-bluegreen font-semibold">
+                            <td className="w-[214px] flex items-center text-custom-lightgreen">
+                                <p className="truncate">{row.message_log} </p>
+                            </td>
+                            <td className="w-[105px] flex justify-end pr-3 text-custom-bluegreen font-semibold">
                               {formatTime(row.created_at)}
                             </td>
                         </tr>
