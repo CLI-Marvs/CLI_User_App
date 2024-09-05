@@ -121,25 +121,26 @@ const TicketTable = ({ concernData }) => {
                                     const lastName = nameParts.pop();
                                     const firstName = nameParts.join(" ");
                                     return `${lastName}, ${firstName}`;
-                                    })()}
+                                    })()}W
                                 </p>
                             </td>
-                            <td className="flex flex-1 gap-1 text-custom-bluegreen shrink-0">
-                                <p className="flex-1 flex gap-1 font-semibold truncate text-[16px] w-[200px]">
-                                    <span>{row.property}</span>
-                                    <span className="">({row.details_concern || "Transaction"}) - {row.ticket_id}</span>
-                                    <span className=" text-sm text-gray-400">
-                                        {row.details_message}
+                            <td className="flex flex-1 gap-1 truncate">
+                                <p className="font-semibold text-custom-bluegreen truncate">
+                                    <span className="flex-1 truncate">{row.property}</span> 
+                                    <span className="text-gray-500 truncate">
+                                        ({row.details_concern || "Transaction"})
                                     </span>
+                                    <span className="text-gray-500"> - </span>
+                                    <span className="text-gray-500 truncate">{row.ticket_id}</span>
+                                </p>
+                                <p className="flex-1 truncate overflow-hidden whitespace-nowrap text-sm text-gray-400">
+                                    {row.details_message}
                                 </p>
                             </td>
-                            <td className="truncate w-[106px]">
-                               
+                            <td className="w-[210px] flex items-center text-custom-lightgreen">
+                                <p className="truncate">{row.message_log}</p>
                             </td>
-                            <td className="w-[214px] flex items-center text-custom-lightgreen">
-                                <p className="truncate">{row.message_log} </p>
-                            </td>
-                            <td className="w-[105px] flex justify-end pr-3 text-custom-bluegreen font-semibold">
+                            <td className="w-[110px] flex justify-end pr-3 text-custom-bluegreen font-semibold">
                               {formatTime(row.created_at)}
                             </td>
                         </tr>

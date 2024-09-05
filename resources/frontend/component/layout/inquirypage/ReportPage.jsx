@@ -247,7 +247,7 @@ const ReportPage = () => {
                 </div>
             </div>
             <div className="flex gap-3 mt-4 bg-custom-grayFA ">
-                <div className="w-[430px]  pb-7 max-h-[400px] flex-shrink-0 flex-grow-0 bg-white rounded-lg">
+                <div className="w-[418px]  pb-7 min-h-[335px] flex-grow-1 bg-white rounded-lg">
                     <p className="p-4 text-base montserrat-bold">
                         Inquiries per category
                     </p>
@@ -335,10 +335,64 @@ const ReportPage = () => {
                                 </div>
                             </div>
                         </div> */}
-                        <div className="w-full flex justify-start items-center">
+                        <div className="w-full flex justify-start mt-[90px]">
                             <div className="flex flex-col">
                                 {dataToDisplay.map((category, index) => (
-                                    <div className="flex gap-10" key={index}>
+                                    <div className="flex justify-between" key={index}>
+                                        <div className="flex gap-1 items-center">
+                                            <span
+                                                className="text-xl mb-1"
+                                                style={{
+                                                    color: getCategoryColor(
+                                                        category.name
+                                                    ),
+                                                }}
+                                            >
+                                                ●
+                                            </span>
+                                            <span className="text-sm text-gray-500">
+                                                {category.name}
+                                            </span>
+                                        </div>
+                                        <div className="flex items-center gap-1">
+                                            <span className="text-gray-700 font-semibold text-lg">
+                                                {category.value}
+                                            </span>
+                                            <span className="text-custom-gray81">
+                                                {category.value ? "%" : ""}
+                                            </span>
+                                        </div>
+                                    </div>
+                                ))}
+                                 {dataToDisplay.map((category, index) => (
+                                    <div className="flex justify-between" key={index}>
+                                        <div className="flex gap-1 items-center">
+                                            <span
+                                                className="text-xl mb-1"
+                                                style={{
+                                                    color: getCategoryColor(
+                                                        category.name
+                                                    ),
+                                                }}
+                                            >
+                                                ●
+                                            </span>
+                                            <span className="text-sm text-gray-500">
+                                                {category.name}
+                                            </span>
+                                        </div>
+                                        <div className="flex items-center gap-1">
+                                            <span className="text-gray-700 font-semibold text-lg">
+                                                {category.value}
+                                            </span>
+                                            <span className="text-custom-gray81">
+                                                {category.value ? "%" : ""}
+                                            </span>
+                                        </div>
+                                    </div>
+                                ))}
+                                 {dataToDisplay.map((category, index) => (
+                                    <div className="flex justify-between" key={index}>
                                         <div className="flex gap-1 items-center">
                                             <span
                                                 className="text-xl mb-1"
@@ -368,7 +422,7 @@ const ReportPage = () => {
                         </div>
                     </div>
                 </div>
-                <div className=" h-auto flex-grow-0 flex-shrink-0 bg-white rounded-lg">
+                <div className=" flex-grow-2 bg-white rounded-lg">
                     <p className="p-4 text-base montserrat-bold">
                         Inquiries per property
                     </p>

@@ -25,6 +25,17 @@
     background: linear-gradient(to right,#175D5f,#348017, #70AD47);
   }
   
+  .gradient-btn2hover {
+    background: linear-gradient(to right,#175D5f,#348017, #70AD47);
+  }
+
+  .gradient-btn2hover:hover{
+    background: #d6e4d1;
+  }
+  .bglightgreen-btn{
+    background:#70AD47;
+    color:white;
+  }
 
   .gradient-border {
     border: 4px solid black; 

@@ -9,6 +9,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import DateLogo from "../../../../../public/Images/Date_range.svg";
 import moment from "moment";
+import { MdRefresh } from "react-icons/md";
 
 const InquiryList = () => {
     const {
@@ -66,7 +67,7 @@ const InquiryList = () => {
  
      }; */
 
-  
+
 
     const toggleDropdown = () => {
         setIsOpen(!isOpen);
@@ -115,7 +116,7 @@ const InquiryList = () => {
     const handleStatus = (e) => {
         setStatus(e.target.value);
     }
-  
+
     const handleDayClick = (day) => {
         let newValue = 0;
 
@@ -310,12 +311,12 @@ const InquiryList = () => {
                                                 Assign To
                                             </option>
                                             <option value="Mark as resolved">
-                                               Mark as resolve
+                                                Mark as resolve
                                             </option>
                                         </select>
                                     </div>
                                     <div className="mt-5 flex gap-5">
-                                        <input type="checkbox" checked={hasAttachments} onChange={handleCheckboxChange}/>
+                                        <input type="checkbox" checked={hasAttachments} onChange={handleCheckboxChange} />
                                         <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
                                             {" "}
                                             Has Attachments
@@ -336,10 +337,10 @@ const InquiryList = () => {
                 </div>
 
                 <div className="max-w-[954PX]">
-                    <div className="flex justify-start items-center h-12 mt-3 px-6 gap-24 bg-white rounded-t-lg mb-1 ">
-                        <div className="relative mr-4">
+                    <div className="flex justify-start items-center h-12 mt-3 px-6 gap-[60px] bg-white rounded-t-lg mb-1 ">
+                        <div className="relative mr-4 ">
                             <button
-                                className="flex text-[20px] items-center gap-3 text-custom-bluegreen font-semibold"
+                                className="flex text-[20px] w-[130px] items-center gap-3 text-custom-bluegreen font-semibold"
                                 onClick={toggleDropdown}
                             >
                                 {isOpen ? <IoIosArrowUp /> : <IoIosArrowDown />}{" "}
@@ -382,34 +383,36 @@ const InquiryList = () => {
                             <div className="flex space-x-2">
                                 <button
                                     onClick={handleAssignedToMeClick}
-                                    className={`flex items-center border border-custom-lightgreen text-custom-lightgreen h-[25px] px-3 rounded-3xl ${
-                                        assignedToMeActive
-                                            ? "bg-custom-lightgreen text-white"
-                                            : "hover:bg-custom-lightestgreen"
-                                    }`}
+                                    className={`flex items-center border text-custom-lightgreen h-[29px] w-[125px] rounded-[55px] p-[2px] ${assignedToMeActive
+                                            ? "bglightgreen-btn"
+                                            : "gradient-btn2hover "
+                                        }`}
                                 >
-                                    <p className="text-sm montserrat-semibold">
+                                    <p className={`h-full w-full flex justify-center items-center  text-xs montserrat-semibold rounded-[50px] 
+                                            ${assignedToMeActive ? "bglightgreen-btn" : "bg-white hover:bg-custom-lightestgreen"}
+                                        `}>
                                         Assigned to me
                                     </p>
                                 </button>
-
                                 {dayButtonLabels.map((label) => (
                                     <button
                                         key={label}
                                         onClick={() => handleDayClick(label)}
-                                        className={`flex items-center border border-custom-lightgreen text-custom-lightgreen h-[25px] px-3 rounded-3xl ${
-                                            activeDayButton === label
-                                                ? "bg-custom-lightgreen text-white"
-                                                : "hover:bg-custom-lightestgreen"
-                                        }`}
+                                        className={`flex justify-center items-center border border-custom-lightgreen text-custom-lightgreen h-[25px] rounded-[55px] p-[2px] ${activeDayButton === label ? "bglightgreen-btn hover:bg-custom-lightgreen" : "gradient-btn2hover"
+                                            } hover:bg-custom-lightestgreen ${label === "3+ Days" ? "w-[76px]" : label === "2 Days" ? "w-[69px]" : "w-[60px]"
+                                            }`}
                                     >
-                                        <p className="text-sm montserrat-semibold">
+                                        <p className={`h-full w-full flex justify-center items-center text-xs montserrat-semibold rounded-[50px]
+                                            ${activeDayButton === label ? "bglightgreen-btn" : "bg-white hover:bg-custom-lightestgreen"}
+                                            `}>
                                             {label}
                                         </p>
                                     </button>
                                 ))}
-                                <button onClick={handleRefresh}>Refresh</button>
                             </div>
+                        </div>
+                        <div className="flex justify-end items-center w-full">
+                            <button className="flex justify-center items-center h-[20px] w-[20px] hover:shadow-custom4 rounded-full" onClick={handleRefresh}><MdRefresh /></button>
                         </div>
                     </div>
                     <div className="w-[954px]">
