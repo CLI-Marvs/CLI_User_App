@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { IoIosArrowDown } from "react-icons/io";
+import { IoMdArrowDropdown } from "react-icons/io";
 
 
 const ReviewsandApprovalRouting = () => {
@@ -20,7 +21,51 @@ const ReviewsandApprovalRouting = () => {
             ${accordionOpen ? 'mt-2 mb-4 grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}
             `}>
                 <div className=' overflow-hidden'>
-                    blank page
+                    <div className='p-[20px] space-y-[10px]'>
+                        <div>
+                            <p className='underline text-blue-500 text-sm cursor-pointer'>Download Excel</p>
+                        </div>
+                        <div>
+                            <iframe src="" frameborder="0" className="w-[814px] h-[400px] overflow-auto"></iframe>
+                        </div>
+                        <div className='flex flex-col gap-[10px] w-[429px]'>
+                            <div className="flex  items-center border rounded-md overflow-hidden w-[375px] text-sm">
+                                <span className="text-custom-gray81 bg-custombg flex w-[80%] pl-3 py-1">Prepared by</span>
+                                <input name='preparedBy' type="text" className="w-full h-[31px] px-4 focus:outline-none" placeholder="" />
+                            </div>
+                            <div className="flex items-center border rounded-md overflow-hidden w-[375px] text-sm">
+                                <span className="text-custom-gray81 bg-custombg flex items-center w-[80%] -mr-3 pl-3 py-1">Reviewed by</span>
+                                <div className="relative w-full">
+                                    <select name="reviewedBy" className="appearance-none w-full px-4 py-1 bg-white focus:outline-none border-0">
+                                        <option value="">Firstname M. Lastname</option>
+                                    </select>
+                                    <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3 bg-custombg">
+                                        <IoMdArrowDropdown/>
+                                    </span>
+                                </div>
+                            </div>
+                            <div className="flex items-center border rounded-md overflow-hidden w-[375px] text-sm">
+                                <span className="text-custom-gray81 bg-custombg flex items-center w-[80%] -mr-3 pl-3 py-1">Approved by</span>
+                                <div className="relative w-full">
+                                    <select name="approvedBy" className="appearance-none w-full px-4 py-1 bg-white focus:outline-none border-0">
+                                        <option value="">Firstname M. Lastname</option>
+                                    </select>
+                                    <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3 bg-custombg">
+                                        <IoMdArrowDropdown/>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div className='flex gap-1 justify-center'>
+                            <button className='h-[37px] w-[176px] rounded-[10px] text-white montserrat-semibold text-sm gradient-btn5 hover:shadow-custom4'>Submit for Approval</button>
+                            <button className='h-[37px] w-[117px] rounded-[10px] text-custom-solidgreen montserrat-semibold text-sm gradient-btn5 hover:shadow-custom4 p-[3px]'>
+                                <div className='flex justify-center items-center h-full w-full rounded-[8px] bg-white'>
+                                    Save as Draft
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+
                 </div>
             </div>
         </>

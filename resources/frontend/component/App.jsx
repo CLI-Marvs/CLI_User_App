@@ -24,6 +24,18 @@ const App = () => {
 
     const Layout = () => {
         return (
+            <div className="bg-white relative max-h-screen flex flex-col h-screen">
+              <Navbar />
+              <div className="flex flex-1 overflow-hidden">
+                <Sidebar />
+                <div className="flex-1 overflow-y-auto">
+                  <Outlet />
+                </div>
+              </div>
+            </div>
+          );
+
+       /*  return (
             <>
                 <div className="bg-white relative max-h-screen flex flex-col">
                     <Navbar/>
@@ -35,7 +47,7 @@ const App = () => {
                     </div>
                 </div>
             </>
-        );
+        ); */
     };
 
     const router = createBrowserRouter([

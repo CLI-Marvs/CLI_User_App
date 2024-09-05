@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { FaRegTrashAlt } from 'react-icons/fa';
 import { IoIosArrowDown } from "react-icons/io";
-
+import { MdFormatListBulletedAdd } from "react-icons/md";
 
 const PriceVersions = () => {
 
@@ -21,7 +21,7 @@ const PriceVersions = () => {
             ${accordionOpen ? 'mt-2 mb-4 grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}
             `}>
                 <div className=' overflow-hidden'>
-                <div className='w-full p-5 h-[370px]'>
+                <div className='w-full p-5 h-[370px] bg-white'>
                         <div className='flex justify-center w-full '>
                             <div className='w-[662px]'>
                                 <table>
@@ -35,39 +35,60 @@ const PriceVersions = () => {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr className='h-[46px] bg-white'>
+                                        <tr className='h-[66px] bg-white text-sm'>
                                             <td className='px-[10px]'>
-                                                <input type="text" className='w-[150px]' />
-                                                </td>
-                                            <td className='px-[10px]'>
-                                                <input type="text" className='w-[100px]'/>
+                                                <input type="text" value="version 1" className='pl-3 w-[150px] border border-custom-grayF1 rounded-[5px]' />
                                             </td>
                                             <td className='px-[10px]'>
-                                                <input type="text" className='w-[100px]'/>
-                                             </td>
+                                                <input type="text" value="0" className='pl-3 w-[100px] border border-custom-grayF1 rounded-[5px]'/>
+                                            </td>
                                             <td className='px-[10px]'>
-                                                <input type="date" className='w-[100px]'/>
+                                                <input type="text" value="100" className='pl-3 w-[100px] border border-custom-grayF1 rounded-[5px]'/>
+                                            </td>
+                                            <td className='px-[10px]'>
+                                                <input type="date" className='pl-3 w-[120px] border border-custom-grayF1 rounded-[5px]'/>
                                             </td>
                                             <td><FaRegTrashAlt className='size-5 text-custom-gray81 hover:text-red-500'/></td>
                                         </tr>
-                                        <tr className='h-[46px] bg-custom-grayFA'>
+                                        <tr className='h-[66px] bg-custom-grayFA text-sm'>
                                             <td className='px-[10px]'>
-                                                <input type="text" className='w-[150px]' />
-                                                </td>
-                                            <td className='px-[10px]'>
-                                                <input type="text" className='w-[100px]'/>
+                                                <input type="text" value="version 2" className='pl-3 w-[150px] border border-custom-grayF1 rounded-[5px]' />
                                             </td>
                                             <td className='px-[10px]'>
-                                                <input type="text" className='w-[100px]'/>
-                                             </td>
-                                            <td className='px-[10px] text-sm'>
-                                                <input type="date" className='w-[100px]'/>
+                                                <input type="text" value="5" className='pl-3 w-[100px] border border-custom-grayF1 rounded-[5px]'/>
+                                            </td>
+                                            <td className='px-[10px]'>
+                                                <input type="text" value="100" className='pl-3 w-[100px] border border-custom-grayF1 rounded-[5px]'/>
+                                            </td>
+                                            <td className='px-[10px]'>
+                                                <input type="date" className='pl-3 w-[120px] border border-custom-grayF1 rounded-[5px]'/>
+                                            </td>
+                                            <td><FaRegTrashAlt className='size-5 text-custom-gray81 hover:text-red-500'/></td>
+                                        </tr>
+                                        <tr className='h-[66px] bg-white text-sm'>
+                                            <td className='px-[10px]'>
+                                                <input type="text" className='pl-3 w-[150px] border border-custom-grayF1 rounded-[5px]' />
+                                            </td>
+                                            <td className='px-[10px]'>
+                                                <input type="text" className='pl-3 w-[100px] border border-custom-grayF1 rounded-[5px]'/>
+                                            </td>
+                                            <td className='px-[10px]'>
+                                                <input type="text" className='pl-3 w-[100px] border border-custom-grayF1 rounded-[5px]'/>
+                                            </td>
+                                            <td className='px-[10px]'>
+                                                <input type="date" className='pl-3 w-[120px] border border-custom-grayF1 rounded-[5px]'/>
                                             </td>
                                             <td><FaRegTrashAlt className='size-5 text-custom-gray81 hover:text-red-500'/></td>
                                         </tr>
                                     </tbody>
                                 </table>
+                                <div className='flex justify-center mt-4'>
+                                <button className='h-[44px] w-[81px] flex gap-2 rounded-[10px] justify-center items-center bg-custom-grayFA text-sm border border-custom-grayF1' >
+                                    <span>Add</span><span><MdFormatListBulletedAdd /></span>
+                                </button>
                             </div>
+                            </div>
+                           
                         </div>
                        
                     </div>

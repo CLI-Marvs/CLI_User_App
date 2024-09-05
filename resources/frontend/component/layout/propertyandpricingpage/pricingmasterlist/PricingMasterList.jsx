@@ -25,7 +25,7 @@ const PricingMasterList = () => {
   };
 
     return (
-      <div className='h-screen bg-custom-grayFA px-4'>
+      <div className='h-screen max-w-[1800px] bg-custom-grayFA px-4'>
           <div className=''>
             <button onClick={handleOpenModal} className='montserrat-semibold text-sm px-2 gradient-btn w-[214px] h-[37px] rounded-[10px] text-white'>Add Property and Pricing</button>
           </div>

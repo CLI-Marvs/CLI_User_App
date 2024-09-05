@@ -64,7 +64,7 @@ const Notification = () => {
         getNotifications();
     }, []);
     return (
-        <div className="h-screen bg-custom-grayFA">
+        <div className=" bg-custom-grayFA ">
             <div className="bg-custom-grayFA px-5">
                 <div className="h-[63px] bg-white rounded-t-[10px] px-4 flex justify-start items-center gap-4">
                     <div>

@@ -4,6 +4,16 @@ import PropertyAndPricingSidebar from '../../layout/mainComponent/sidebars/Prope
 
 const PropertyAndPricingLayout = () => {
   return (
+    <div className="flex bg-white relative h-full">
+      <div className="fixed h-full">
+        <PropertyAndPricingSidebar />
+      </div>
+      <div className="flex-1 ml-[230px] bg-custom-grayFA">
+        <Outlet />
+      </div>
+    </div>
+  );
+  /* return (
     <>
       <div className="flex bg-white relative h-screen">
         <div className="fixed h-full">
@@ -14,7 +24,7 @@ const PropertyAndPricingLayout = () => {
         </div>
       </div>
     </>
-  )
+  ) */
 }
 
 export default PropertyAndPricingLayout

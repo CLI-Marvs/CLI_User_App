@@ -3,7 +3,18 @@ import { Outlet } from 'react-router-dom'
 import InquirySidebar from '../../layout/mainComponent/sidebars/InquirySidebar'
 
 const InquiryManagementLayout = () => {
+
   return (
+    <div className="flex bg-white relative h-full">
+      <div className="fixed h-full">
+        <InquirySidebar />
+      </div>
+      <div className="flex-1 ml-52">
+        <Outlet />
+      </div>
+    </div>
+  );
+ /*  return (
     <>
       <div className="flex bg-white relative h-screen">
         <div className="fixed h-full">
@@ -14,7 +25,7 @@ const InquiryManagementLayout = () => {
         </div>
       </div>
     </>
-  )
+  ) */
 }
 
 export default InquiryManagementLayout

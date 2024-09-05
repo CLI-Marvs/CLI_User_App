@@ -171,7 +171,7 @@ const ReportPage = () => {
     }, [department, month]);
 
     return (
-        <div className="h-screen bg-custom-grayFA p-4 ">
+        <div className="h-screen bg-custom-grayFA p-4">   
             <div className="bg-white p-4 rounded-xl ">
                 <div className="w-80 mb-2">
                     <p className="text-lg montserrat-bold">
