@@ -6,6 +6,7 @@ import React, {
     useState,
 } from "react";
 import apiService from "../component/servicesApi/apiService";
+import debounce from "lodash/debounce";
 
 const StateContext = createContext({
     user: null,
@@ -19,12 +20,14 @@ export const ContextProvider = ({ children }) => {
     const [token, _setToken] = useState(localStorage.getItem("authToken"));
     const [allEmployees, setAllEmployees] = useState([]);
     const [daysFilter, setDaysFilter] = useState(null);
+    const [hasAttachments, setHasAttachments] = useState(false);
     const [statusFilter, setStatusFilter] = useState(null);
     const [notifications, setNotifications] = useState([]);
     const [unreadCount, setUnreadCount] = useState(0);
     const [notifStatus, setNotifStatus] = useState("");
     const [currentPage, setCurrentPage] = useState(0);
     const [notifCurrentPage, setNotifCurrentPage] = useState(0);
+    const [searchFilter, setSearchFilter] = useState({});
     const [data, setData] = useState([]);
     const itemsPerPage = 20;
     const [pageCount, setPageCount] = useState(0);
@@ -32,6 +35,10 @@ export const ContextProvider = ({ children }) => {
     const [messages, setMessages] = useState([]);
     const [logs, setLogs] = useState([]);
     const [ticketId, setTicketId] = useState(null);
+    const [dataCategory, setDataCategory] = useState([]);
+    const [dataProperty, setDataPropery] = useState([]);
+    const [month, setMonth] = useState("");
+    const [propertyMonth, setPropertyMonth] = useState("");
 
     const setToken = (token) => {
         _setToken(token);
@@ -42,34 +49,19 @@ export const ContextProvider = ({ children }) => {
         }
     };
 
-    useEffect(() => {
-        if (token) {
-            const getData = async () => {
-                const response = await apiService.get("user");
-                setUser(response.data);
-            };
-            getData();
-        }
-    }, [token]);
-
-    useEffect(() => {
-        if (token) {
-            const getEmployeeData = async () => {
-                const response = await apiService.get("employee-list");
-                console.log("allEmployees", response.data);
-                setAllEmployees(response.data);
-            };
-            getEmployeeData();
-        }
-    }, [token]);
-
     const getAllConcerns = async () => {
         if (token) {
             try {
+                const searchParams = new URLSearchParams({
+                    search: JSON.stringify(searchFilter),
+                    page: currentPage + 1,
+                    days: daysFilter || "",
+                    status: statusFilter || "",
+                    has_attachments: hasAttachments,
+                }).toString();
+
                 const response = await apiService.get(
-                    `get-concern?page=${currentPage + 1}&days=${
-                        daysFilter || ""
-                    }&status=${statusFilter || ""}`
+                    `/get-concern?${searchParams}`
                 );
 
                 setData(response.data.data);
@@ -80,8 +72,55 @@ export const ContextProvider = ({ children }) => {
         }
     };
 
+    const fetchCategory = useCallback(
+        debounce(async (month) => {
+            if (!month || !isValidMonth(month)) {
+                return;
+            }
+            try {
+                const response = await apiService.get("category-monthly", {
+                    params: { month: month },
+                });
+                const result = response.data;
+                const formattedData = result.map((item) => ({
+                    name: item.details_concern,
+                    value: item.total,
+                }));
+                setDataCategory(formattedData);
+            } catch (error) {
+                console.log("Error retrieving data", error);
+            }
+        }, 300),
+        []
+    );
+
+    const getInquiriesPerProperty = useCallback(
+        debounce(async (propertyMonth) => {
+            console.log("month", propertyMonth);
+            if (!propertyMonth) {
+                return;
+            }
+            try {
+                const response = await apiService.get("inquiries-property", {
+                    params: { propertyMonth: propertyMonth },
+                });
+                const result = response.data;
+                console.log("result", result);
+                const formattedData = result.map((item) => ({
+                    name: item.property,
+                    resolved: item.resolved,
+                    unresolved: item.unresolved,
+                }));
+                setDataPropery(formattedData);
+            } catch (error) {
+                console.log("error retrieving", error);
+            }
+        }, 300),
+        []
+    );
+
     const getCount = async () => {
-        if(token) {
+        if (token) {
             try {
                 const response = await apiService.get("unread-count");
                 setUnreadCount(response.data.unreadCount);
@@ -144,9 +183,69 @@ export const ContextProvider = ({ children }) => {
         }
     };
 
+    const isValidMonth = (month) => {
+        const validMonths = {
+            January: "January",
+            Feb: "February",
+            February: "February",
+            Mar: "March",
+            March: "March",
+            Apr: "April",
+            April: "April",
+            May: "May",
+            Jun: "June",
+            June: "June",
+            Jul: "July",
+            July: "July",
+            Aug: "August",
+            August: "August",
+            Sep: "September",
+            September: "September",
+            Oct: "October",
+            October: "October",
+            Nov: "November",
+            November: "November",
+            Dec: "December",
+            December: "December",
+        };
+
+        const normalizedMonth =
+            month.charAt(0).toUpperCase() + month.slice(1).toLowerCase();
+
+        return validMonths.hasOwnProperty(normalizedMonth);
+    };
+
+    useEffect(() => {
+        if (token) {
+            const getData = async () => {
+                const response = await apiService.get("user");
+                setUser(response.data);
+            };
+            getData();
+        }
+    }, [token]);
+
+    useEffect(() => {
+        if (token) {
+            const getEmployeeData = async () => {
+                const response = await apiService.get("employee-list");
+                console.log("allEmployees", response.data);
+                setAllEmployees(response.data);
+            };
+            getEmployeeData();
+        }
+    }, [token]);
+
     useEffect(() => {
         getAllConcerns();
-    }, [currentPage, daysFilter, token, statusFilter]);
+    }, [
+        currentPage,
+        daysFilter,
+        token,
+        statusFilter,
+        searchFilter,
+        hasAttachments,
+    ]);
 
     useEffect(() => {
         getNotifications();
@@ -164,6 +263,18 @@ export const ContextProvider = ({ children }) => {
     }, [unreadCount, token]);
 
     useEffect(() => {}, [user, token]);
+
+    useEffect(() => {
+        if (month) {
+            fetchCategory(month);
+        }
+    }, [month]);
+
+    useEffect(() => {
+        if (propertyMonth) {
+            getInquiriesPerProperty(propertyMonth);
+        }
+    }, [propertyMonth]);
     return (
         <StateContext.Provider
             value={{
@@ -195,6 +306,17 @@ export const ContextProvider = ({ children }) => {
                 getNotifications,
                 setNotifStatus,
                 unreadCount,
+                setSearchFilter,
+                setHasAttachments,
+                hasAttachments,
+                setMonth,
+                month,
+                dataCategory,
+                fetchCategory,
+                propertyMonth,
+                dataProperty,
+                getInquiriesPerProperty,
+                setPropertyMonth,
             }}
         >
             {children}

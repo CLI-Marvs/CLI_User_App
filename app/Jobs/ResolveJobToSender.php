@@ -9,6 +9,8 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
+
 
 class ResolveJobToSender implements ShouldQueue
 {
@@ -24,6 +26,9 @@ class ResolveJobToSender implements ShouldQueue
     {
         $this->buyer_email = $buyer_email;
         $this->remarks = $remarks;
+
+        Log::info('Files being sent', ['buyer_email' => $this->buyer_email]);
+
     }
 
     /**

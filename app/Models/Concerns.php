@@ -11,4 +11,11 @@ class Concerns extends Model
 
     protected $table = 'concerns';
     protected $guarded = array();
+
+
+    public function messages()
+    {
+        return $this->hasMany(Messages::class, 'ticket_id', 'ticket_id');
+    }
+    
 }

@@ -176,10 +176,11 @@ class ConcernController extends Controller
             $admin_id = $request->input('admin_id', '');
             $buyer_email = $request->input('buyer_email', '');
 
+            $attachment = !empty($fileLinks) ? json_encode($fileLinks) : null;
             $messages = new Messages();
             $messages->admin_id = $admin_id;
             $messages->admin_email = $admin_email;
-            $messages->attachment = json_encode($fileLinks);
+            $messages->attachment = $attachment;
             $messages->ticket_id = $ticket_id;
             $messages->details_message = $adminMessage;
             $messages->admin_name = $admin_name;
@@ -250,10 +251,11 @@ class ConcernController extends Controller
                 }
             }
 
+            $attachment = !empty($fileLinks) ? json_encode($fileLinks) : null;
             $messages = new Messages();
             $messages->admin_email = $request->admin_email;
             $messages->admin_id = $request->admin_id;
-            $messages->attachment = json_encode($fileLinks);
+            $messages->attachment = $attachment;
             $messages->ticket_id = $concerns->ticket_id;
             $messages->details_message = $request->message;
             $messages->save();
@@ -272,7 +274,9 @@ class ConcernController extends Controller
             $employeeDepartment = $employee->department;
             $days = $request->query("days", null);
             $status = $request->query("status", null);
-
+            $search = $request->query("search", null);
+            $hasAttachments = $request->query("has_attachments", null);
+           
             $assignedInquiries = $this->getAssignInquiries($employee->employee_email);
             $ticketIds = $assignedInquiries->pluck('ticket_id')->toArray();
 
@@ -285,7 +289,7 @@ class ConcernController extends Controller
             }
 
             if ($employeeDepartment !== 'CSR') {
-                $query->whereIn('ticket_id', $ticketIds);
+                $query->whereIn('concerns.ticket_id', $ticketIds);
             }
 
             if ($status === 'Resolved') {
@@ -294,6 +298,19 @@ class ConcernController extends Controller
                 $query->where('status', 'unresolved');
             }
 
+            if ($search !== null) {
+                $searchParams = json_decode($search, true);
+                $query = $this->handleSearchFilter($query, $searchParams);
+            }           
+
+
+            if ($hasAttachments === 'true') {
+                $query->whereHas('messages', function($messageQuery) {
+                    $messageQuery->whereNotNull('attachment');
+                });
+            }
+            
+            
             $latestLogs = DB::table('inquiry_logs')
                 ->select('ticket_id', 'message_log')
                 ->whereIn('id', function ($subquery) {
@@ -309,6 +326,34 @@ class ConcernController extends Controller
         } catch (\Exception $e) {
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
         }
+    }
+
+    public function handleSearchFilter($query, $searchParams)
+    {
+
+        if (!empty($searchParams['name'])) {
+            $query->where('buyer_name', 'ILIKE', '%' . $searchParams['name'] . '%');
+        }
+        if (!empty($searchParams['category'])) {
+            $query->where('details_concern', 'ILIKE', '%' . $searchParams['category'] . '%');
+        }
+        if (!empty($searchParams['email'])) {
+            $query->where('buyer_email', 'ILIKE', '%' . $searchParams['email'] . '%');
+        }
+        if (!empty($searchParams['ticket'])) {
+            $query->where('concerns.ticket_id', 'ILIKE', '%' . $searchParams['ticket'] . '%');
+        }
+
+        if (!empty($searchParams['status'])) {
+            $query->where('message_log', 'ILIKE', '%' . $searchParams['status'] . '%');
+        }
+        
+        if (!empty($searchParams['startDate'])) {
+            $startDate = Carbon::parse($searchParams['startDate'])->setTimezone('Asia/Manila');
+            $query->whereDate('created_at', '=', $startDate);
+        }
+    
+        return $query;
     }
 
     public function listOfNotifications(Request $request)
@@ -606,6 +651,29 @@ class ConcernController extends Controller
 
         return response()->json($allMonths);
     }
+
+    
+    public function getInquiriesPerProperty(Request $request)
+    {
+
+        $monthNumber = Carbon::parse($request->propertyMonth)->month;
+        $query = Concerns::select(
+            DB::raw('property'),
+          /*   DB::raw('EXTRACT(MONTH FROM created_at) as month'), */
+            DB::raw('SUM(case when status = \'Resolved\' then 1 else 0 end) as Resolved'),
+            DB::raw('SUM(case when status = \'unresolved\' then 1 else 0 end) as Unresolved')
+            
+        )
+            ->whereMonth('created_at', $monthNumber)
+            ->whereNotNull('status')
+            ->groupBy('property')
+            ->get();
+
+       /*  dd($query); */
+
+       return response()->json($query);
+    }
+    
 
     public function getInquiriesByCategory(Request $request)
     {
