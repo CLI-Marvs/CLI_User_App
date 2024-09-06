@@ -308,7 +308,6 @@ class ConcernController extends Controller
                 }
             }           
             
-            
             $latestLogs = DB::table('inquiry_logs')
                 ->select('ticket_id', 'message_log')
                 ->whereIn('id', function ($subquery) {
@@ -704,5 +703,16 @@ class ConcernController extends Controller
             ->get();
 
         return response()->json($concerns);
+    }
+    
+    public function getSpecificInquiry(Request $request)
+    {   
+        $employee = $request->user();
+        $assignTo = InquiryAssignee::where('email', 'trodfil@gmail.com')->pluck('email');
+        
+        
+        return response()->json([
+            'email' => $assignTo
+        ]);
     }
 }

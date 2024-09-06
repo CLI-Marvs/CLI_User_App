@@ -39,6 +39,7 @@ export const ContextProvider = ({ children }) => {
     const [dataProperty, setDataPropery] = useState([]);
     const [month, setMonth] = useState("");
     const [propertyMonth, setPropertyMonth] = useState("");
+    const [specificInquiry, setSpecificInquiry] = useState(null);
 
     const setToken = (token) => {
         _setToken(token);

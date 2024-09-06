@@ -36,10 +36,8 @@ Route::get('/get-messageId/{ticketId}', [ConcernController::class, 'getMessageId
 Route::get('/report-monthly', [ConcernController::class, 'getMonthlyReports']);
 Route::get('/category-monthly', [ConcernController::class, 'getInquiriesByCategory']);
 Route::get('/inquiries-property', [ConcernController::class, 'getInquiriesPerProperty']);
-
 Route::post('/isread', [ConcernController::class, 'updateIsReadStatus']);
-
-
+Route::get('/specific-assignee', [ConcernController::class, 'getSpecificInquiry']);
 
 
 Route::middleware('auth:sanctum')->group(function () {
