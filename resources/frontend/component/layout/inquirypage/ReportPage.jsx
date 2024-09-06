@@ -80,6 +80,36 @@ const CustomTooltip = ({ active, payload }) => {
     return null;
 };
 
+const monthNames = {
+    '01': 'January',
+    '02': 'February',
+    '03': 'March',
+    '04': 'April',
+    '05': 'May',
+    '06': 'June',
+    '07': 'July',
+    '08': 'August',
+    '09': 'September',
+    '10': 'October',
+    '11': 'November',
+    '12': 'December',
+  };
+
+const CustomTooltip1 = ({ active, payload, label }) => {
+    if (active && payload && payload.length) {
+        const monthName = monthNames[label] || label;
+      return (
+        <div className="custom-tooltip bg-white p-2 shadow-md rounded">
+          <p className="label">{`${monthName}`}</p>
+          <p>{`Resolved: ${payload[0].value}`}</p>
+          <p>{`Unresolved: ${payload[1].value}`}</p>
+        </div>
+      );
+    }
+  
+    return null;
+  };
+
 const ReportPage = () => {
     const [dataSet, setDataSet] = useState([]);
     const [department, setDepartment] = useState("All");
@@ -217,7 +247,7 @@ const ReportPage = () => {
                         <CartesianGrid strokeDasharray="3 3" vertical={false} />
                         <XAxis dataKey="name" />
                         <YAxis ticks={[10, 20, 30]} />
-                        <Tooltip />
+                        <Tooltip content={<CustomTooltip1 />} />
                         <Bar
                             dataKey="Resolved"
                             fill="#348017"
@@ -247,7 +277,7 @@ const ReportPage = () => {
                     </div>
                 </div>
             </div>
-            <div className="flex gap-3 mt-4 bg-custom-grayFA ">
+            <div className="flex gap-3 mt-4 bg-custom-grayFA items-start">
                 <div className="w-[418px] pb-7 min-h-[335px] flex-grow-1 bg-white rounded-lg">
                     <p className="p-4 text-base montserrat-bold">
                         Inquiries per category
@@ -369,8 +399,8 @@ const ReportPage = () => {
                         </div>
                     </div>
                 </div>
-                <div className=" bg-white rounded-lg">
-                    <p className="p-4 flex-grow w-[500px] text-base montserrat-bold">
+                <div className=" bg-white rounded-[10px] flex-grow-0 self-start w-[500px]">
+                    <p className="p-4  text-base montserrat-bold">
                         Inquiries per property
                     </p>
                     <div className="border border-t-1"></div>
