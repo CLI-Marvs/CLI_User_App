@@ -412,7 +412,7 @@ const InquiryList = () => {
                             </div>
                         </div>
                         <div className="flex justify-end items-center w-full">
-                            <button className="flex justify-center items-center h-[20px] w-[20px] hover:shadow-custom4 rounded-full" onClick={handleRefresh}><MdRefresh /></button>
+                            <button className="flex justify-center items-center h-[30px] w-[30px] hover:bg-custom-grayF1 rounded-full text-custom-bluegreen hover:text-custom-lightblue" onClick={handleRefresh}><MdRefresh /></button>
                         </div>
                     </div>
                     <div className="w-[954px]">

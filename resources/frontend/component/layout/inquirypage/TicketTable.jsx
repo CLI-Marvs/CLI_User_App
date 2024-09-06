@@ -49,7 +49,7 @@ const TicketTable = ({ concernData }) => {
     ]);
 
     const togglePin = (index) => {
-        const updatedData = data.map((row, i) =>
+        const updatedData = concernData.map((row, i) =>
             i === index ? { ...row, isPinned: !row.isPinned } : row
         );
         setData(updatedData);
@@ -94,8 +94,9 @@ const TicketTable = ({ concernData }) => {
                         <tr
                             key={row.id}
                             onClick={() => navigateToThread(row)}
-                            className={`flex items-center h-7 cursor-pointer mb-1 text-sm bg-white
+                            className={`flex items-center h-7 cursor-pointer mb-1 text-sm 
                             hover:shadow-custom
+                            ${row.status === "Resolved" ? "bg-custom-grayF1" : "bg-white"}
                         `}
                         >
                             {/*  <td className='w-10 flex justify-center'>
@@ -106,8 +107,11 @@ const TicketTable = ({ concernData }) => {
                                 className="cursor-pointer"
                             />
                         </td> */}
-                            <td className="w-[60px] shrink-0 flex justify-center text-xl text-custom-solidgreen">
-                                <button onClick={() => togglePin(index)}>
+                            <td className={`w-[60px] shrink-0 flex justify-center text-xl  ${row.status === "Resolved" ? "text-gray-500" : "text-custom-bluegreen"}`}>
+                                <button className="hover:shadow-custom4" onClick={(event) => {
+                                    event.stopPropagation();
+                                    togglePin(index)
+                                    }}>
                                     {row.isPinned ? (
                                         <TiPin />
                                     ) : (
@@ -115,8 +119,10 @@ const TicketTable = ({ concernData }) => {
                                     )}
                                 </button>
                             </td>
-                            <td className="shrink-0 font-semibold text-custom-bluegreen">
-                                <p className="w-[130px] pr-2 truncate">{(() => {
+                            <td className={`shrink-0 
+                                ${row.status === "Resolved" ? "text-black font-normal" : "text-custom-bluegreen font-semibold"}
+                                `}>
+                                <p className={`w-[130px] pr-2 truncate`}>{(() => {
                                     const nameParts = row.buyer_name.split(" ");
                                     const lastName = nameParts.pop();
                                     const firstName = nameParts.join(" ");
@@ -125,22 +131,24 @@ const TicketTable = ({ concernData }) => {
                                 </p>
                             </td>
                             <td className="flex flex-1 gap-1 truncate">
-                                <p className="font-semibold text-custom-bluegreen truncate">
+                                <p className={`truncate
+                                    ${row.status === "Resolved" ? "text-black font-normal" : "text-custom-bluegreen font-semibold"}
+                                    `}>
                                     <span className="flex-1 truncate">{row.property}</span> 
-                                    <span className="text-gray-500 truncate">
+                                    <span className="truncate">
                                         ({row.details_concern || "Transaction"})
                                     </span>
-                                    <span className="text-gray-500"> - </span>
-                                    <span className="text-gray-500 truncate">{row.ticket_id}</span>
+                                    <span className=""> - </span>
+                                    <span className="truncate">{row.ticket_id}</span>
                                 </p>
                                 <p className="flex-1 truncate overflow-hidden whitespace-nowrap text-sm text-gray-400">
                                     {row.details_message}
                                 </p>
                             </td>
-                            <td className="w-[210px] flex items-center text-custom-lightgreen">
+                            <td className={`w-[210px] flex items-center  ${row.status === "Resolved" ? "text-gray-500" : "text-custom-lightgreen"}`}>
                                 <p className="truncate">{row.message_log}</p>
                             </td>
-                            <td className="w-[110px] flex justify-end pr-3 text-custom-bluegreen font-semibold">
+                            <td className={`w-[110px] flex justify-end pr-3 ${row.status === "Resolved" ? "text-black" : "text-custom-bluegreen"} font-semibold`}>
                               {formatTime(row.created_at)}
                             </td>
                         </tr>

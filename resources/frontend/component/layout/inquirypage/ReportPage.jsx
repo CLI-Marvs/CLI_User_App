@@ -247,7 +247,7 @@ const ReportPage = () => {
                 </div>
             </div>
             <div className="flex gap-3 mt-4 bg-custom-grayFA ">
-                <div className="w-[418px]  pb-7 min-h-[335px] flex-grow-1 bg-white rounded-lg">
+                <div className="w-[418px] pb-7 min-h-[335px] flex-grow-1 bg-white rounded-lg">
                     <p className="p-4 text-base montserrat-bold">
                         Inquiries per category
                     </p>
@@ -364,66 +364,13 @@ const ReportPage = () => {
                                         </div>
                                     </div>
                                 ))}
-                                 {dataToDisplay.map((category, index) => (
-                                    <div className="flex justify-between" key={index}>
-                                        <div className="flex gap-1 items-center">
-                                            <span
-                                                className="text-xl mb-1"
-                                                style={{
-                                                    color: getCategoryColor(
-                                                        category.name
-                                                    ),
-                                                }}
-                                            >
-                                                ●
-                                            </span>
-                                            <span className="text-sm text-gray-500">
-                                                {category.name}
-                                            </span>
-                                        </div>
-                                        <div className="flex items-center gap-1">
-                                            <span className="text-gray-700 font-semibold text-lg">
-                                                {category.value}
-                                            </span>
-                                            <span className="text-custom-gray81">
-                                                {category.value ? "%" : ""}
-                                            </span>
-                                        </div>
-                                    </div>
-                                ))}
-                                 {dataToDisplay.map((category, index) => (
-                                    <div className="flex justify-between" key={index}>
-                                        <div className="flex gap-1 items-center">
-                                            <span
-                                                className="text-xl mb-1"
-                                                style={{
-                                                    color: getCategoryColor(
-                                                        category.name
-                                                    ),
-                                                }}
-                                            >
-                                                ●
-                                            </span>
-                                            <span className="text-sm text-gray-500">
-                                                {category.name}
-                                            </span>
-                                        </div>
-                                        <div className="flex items-center gap-1">
-                                            <span className="text-gray-700 font-semibold text-lg">
-                                                {category.value}
-                                            </span>
-                                            <span className="text-custom-gray81">
-                                                {category.value ? "%" : ""}
-                                            </span>
-                                        </div>
-                                    </div>
-                                ))}
+                                
                             </div>
                         </div>
                     </div>
                 </div>
-                <div className=" flex-grow-2 bg-white rounded-lg">
-                    <p className="p-4 text-base montserrat-bold">
+                <div className=" bg-white rounded-lg">
+                    <p className="p-4 flex-grow w-[500px] text-base montserrat-bold">
                         Inquiries per property
                     </p>
                     <div className="border border-t-1"></div>
