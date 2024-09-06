@@ -109,13 +109,13 @@ const InquiryThread = () => {
     const submitMessage = async () => {
         setLoading(true);
         const formData = new FormData();
-    
+
         if (attachedFiles && attachedFiles.length > 0) {
             attachedFiles.forEach((file) => {
                 formData.append('files[]', file);
             });
         }
-    
+
         // Append other fields to FormData
         formData.append('admin_email', user?.employee_email || '');
         formData.append('ticket_id', ticketId || '');
@@ -124,14 +124,14 @@ const InquiryThread = () => {
         formData.append('message_id', messageId || '');
         formData.append('admin_id', user?.id || '');
         formData.append('buyer_email', dataConcern.buyer_email || '');
-    
+
         try {
             const response = await apiService.post("send-message", formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 }
             });
-    
+
             callBackHandler();
             setAttachedFiles([]);
         } catch (error) {
@@ -140,8 +140,8 @@ const InquiryThread = () => {
             setLoading(false);
         }
     };
-    
-    
+
+
     const callBackHandler = () => {
         getMessages(ticketId);
         setChatMessage("");
@@ -169,7 +169,7 @@ const InquiryThread = () => {
     return (
         <>
             <div className="h-screen bg-custom-grayFA p-3 overflow-x-auto overflow-y-hidden">
-                <div className="bg-custom-grayFA mb-3">
+                <div className="bg-custom-grayFA mb-3">                                                                 {/* boxdevref */}
                     <div className="relative flex justify-start gap-3">
                         <div className="relative w-[604px]">
                             <svg
@@ -310,8 +310,8 @@ const InquiryThread = () => {
                         )}
                     </div>
                 </div>
-                <div className="flex min-w-[107%] bg-custom-grayFA gap-3 h-full pb-24">
-                    <div className="p-7 w-[728px] shrink-0 bg-white rounded-lg flex flex-col h-full">
+                <div className="flex min-w-[107%] bg-custom-grayFA gap-3 h-full pb-24">               
+                    <div className="p-7 w-[728px] shrink-0 bg-white rounded-lg flex flex-col h-full">      {/* boxdevref */}
                         <div className="flex items-center gap-3">
                             <img
                                 src={Backbtn}
@@ -337,7 +337,7 @@ const InquiryThread = () => {
                             </div>
                             <div className="flex justify-end shrink-0">
                                 {dataConcern &&
-                                dataConcern.status === "Resolved" ? (
+                                    dataConcern.status === "Resolved" ? (
                                     <>
                                         <span className="text-blue-500 cursor-pointer hover:underline font-semibold text-sm">
                                             Resolved
@@ -352,7 +352,7 @@ const InquiryThread = () => {
                                     </button>
                                 )}
                             </div>
-                            
+
                         </div>
                         <div className="flex-grow  overflow-y-auto">
                             <div className="">
@@ -435,7 +435,7 @@ const InquiryThread = () => {
                             </div>
                         </div> */}
 
-                        <div className="mt-2 mb-3 relative">
+                        <div className="mt-2 mb-3 relative">                      {/* boxref */}
                             {/* Container for chat input and attached files */}
                             <div className="border border-custom-solidgreen rounded-[10px] p-2 relative">
                                 {/* Display attached files inside the same container */}
@@ -500,10 +500,11 @@ const InquiryThread = () => {
                                     <button
                                         type="button"
                                         onClick={submitMessage}
+                                        disabled={!chatMessage.trim()}
                                         className="flex w-[68px] h-[31px] rounded-lg font-semibold text-white text-sm justify-center items-center gradient-background3 hover:shadow-custom4"
                                     >
                                         {loading ? (
-                                           <CircularProgress className="spinnerSize" />
+                                            <CircularProgress className="spinnerSize" />
                                         ) : (
                                             <>
                                                 Send
@@ -515,7 +516,7 @@ const InquiryThread = () => {
                             </div>
                         </div>
                     </div>
-                    <div className="p-[16px] w-[436px] max-h-[620px] bg-white rounded-lg">
+                    <div className="p-[16px] w-[436px] max-h-[620px] bg-white rounded-lg"> {/* boxref */}
                         <AssignSidePanel ticketId={ticketId} />
                     </div>
                 </div>
