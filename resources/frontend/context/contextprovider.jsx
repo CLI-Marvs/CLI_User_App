@@ -57,7 +57,7 @@ export const ContextProvider = ({ children }) => {
                     page: currentPage + 1,
                     days: daysFilter || "",
                     status: statusFilter || "",
-                    has_attachments: hasAttachments,
+                   /*  has_attachments: hasAttachments, */
                 }).toString();
 
                 const response = await apiService.get(
@@ -77,6 +77,7 @@ export const ContextProvider = ({ children }) => {
             if (!month || !isValidMonth(month)) {
                 return;
             }
+
             try {
                 const response = await apiService.get("category-monthly", {
                     params: { month: month },
@@ -96,7 +97,6 @@ export const ContextProvider = ({ children }) => {
 
     const getInquiriesPerProperty = useCallback(
         debounce(async (propertyMonth) => {
-            console.log("month", propertyMonth);
             if (!propertyMonth) {
                 return;
             }
@@ -105,7 +105,6 @@ export const ContextProvider = ({ children }) => {
                     params: { propertyMonth: propertyMonth },
                 });
                 const result = response.data;
-                console.log("result", result);
                 const formattedData = result.map((item) => ({
                     name: item.property,
                     resolved: item.resolved,
@@ -138,9 +137,6 @@ export const ContextProvider = ({ children }) => {
                         notifStatus || ""
                     }`
                 );
-
-                console.log("notifications", response.data);
-
                 setNotifications(response.data.data);
                 setNotifPageCount(response.data.last_page);
             } catch (error) {
@@ -229,7 +225,6 @@ export const ContextProvider = ({ children }) => {
         if (token) {
             const getEmployeeData = async () => {
                 const response = await apiService.get("employee-list");
-                console.log("allEmployees", response.data);
                 setAllEmployees(response.data);
             };
             getEmployeeData();

@@ -275,7 +275,6 @@ class ConcernController extends Controller
             $days = $request->query("days", null);
             $status = $request->query("status", null);
             $search = $request->query("search", null);
-            $hasAttachments = $request->query("has_attachments", null);
            
             $assignedInquiries = $this->getAssignInquiries($employee->employee_email);
             $ticketIds = $assignedInquiries->pluck('ticket_id')->toArray();
@@ -301,14 +300,13 @@ class ConcernController extends Controller
             if ($search !== null) {
                 $searchParams = json_decode($search, true);
                 $query = $this->handleSearchFilter($query, $searchParams);
+
+                if (!empty($searchParams) && $searchParams['hasAttachments'] === true) {
+                    $query->whereHas('messages', function($messageQuery) {
+                        $messageQuery->whereNotNull('attachment');
+                    });
+                }
             }           
-
-
-            if ($hasAttachments === 'true') {
-                $query->whereHas('messages', function($messageQuery) {
-                    $messageQuery->whereNotNull('attachment');
-                });
-            }
             
             
             $latestLogs = DB::table('inquiry_logs')
@@ -471,11 +469,27 @@ class ConcernController extends Controller
             JobToPersonnelAssign::dispatch($request->email, $emailContent, $request->email);
 
             return response()->json('Successfully assign');
-        } catch (\Throwable $e) {
+        } catch (\Exception $e) {
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
         }
     }
 
+    public function reassignInquiry(Request $request)
+    {
+        try {
+            $emailContent = "Hey " . $request->firstname . ", inquiry " . $request->ticketId . " has been assigned to you.";
+            $prevInquiry = InquiryAssignee::where('ticket_id', $request->ticket_id)->first();
+
+            $prevInquiry->email = $request->email;
+            $prevInquiry->save();
+            
+            JobToPersonnelAssign::dispatch($request->email, $emailContent, $request->email);
+
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
+
+        }
+    }
     public function getInquiryLogs($ticketId)
     {
         try {
@@ -669,7 +683,6 @@ class ConcernController extends Controller
             ->groupBy('property')
             ->get();
 
-       /*  dd($query); */
 
        return response()->json($query);
     }

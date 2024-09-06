@@ -49,8 +49,6 @@ const InquiryThread = () => {
 
     const dataConcern =
         data?.find((items) => items.ticket_id === ticketId) || {};
-
-        console.log("dataconcern", dataConcern);
     const toggleFilterBox = () => {
         setIsFilterVisible((prev) => !prev);
     };

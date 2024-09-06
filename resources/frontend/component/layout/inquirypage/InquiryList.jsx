@@ -22,8 +22,8 @@ const InquiryList = () => {
         setDaysFilter,
         setStatusFilter,
         setSearchFilter,
-        setHasAttachments,
-        hasAttachments
+       /*  setHasAttachments,
+        hasAttachments */
     } = useStateContext();
 
     const [name, setName] = useState("");
@@ -31,6 +31,8 @@ const InquiryList = () => {
     const [email, setEmail] = useState("");
     const [ticket, setTicket] = useState("");
     const [status, setStatus] = useState("");
+    const [hasAttachments, setHasAttachments] = useState(false);
+
 
     const [activeDayButton, setActiveDayButton] = useState(null);
     const [assignedToMeActive, setAssignedToMeActive] = useState(false);
@@ -40,6 +42,7 @@ const InquiryList = () => {
     const [isFilterVisible, setIsFilterVisible] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
     const [selectedOption, setSelectedOption] = useState("All");
+    const [lastActivity, setLastActivity] = useState(null);
     const filterBoxRef = useRef(null);
 
 
@@ -53,6 +56,8 @@ const InquiryList = () => {
 
     const handleRefresh = () => {
         setDaysFilter(null);
+        setStatusFilter("All");
+        setSearchFilter({});
         getAllConcerns();
     };
 
@@ -136,12 +141,23 @@ const InquiryList = () => {
         setAssignedToMeActive(!assignedToMeActive);
     };
 
+    const updateLastActivity = () => {
+        const currentTime = new Date();
+        setLastActivity(currentTime);
+    };
     const dayButtonLabels = ["3+ Days", "2 Days", "1 Day"];
 
     const handleKeyDown = (event) => {
         if (event.key === "Escape") {
             setIsFilterVisible(false);
         }
+    };
+
+    const getTimeDifference = () => {
+        if (!lastActivity) return '0 minutes';
+        const now = new Date();
+        const diff = Math.floor((now - lastActivity) / (1000 * 60)); 
+        return diff === 0 ? '0 minutes' : `${diff} minutes ago`;
     };
 
     const handleSearch = () => {
@@ -151,11 +167,19 @@ const InquiryList = () => {
             email,
             ticket,
             startDate,
-            status
+            status,
+            hasAttachments
         });
         setDaysFilter(null);
+        setStatusFilter(null);
         setIsFilterVisible(false);
         setCurrentPage(0);
+        setName("");
+        setCategory("");
+        setEmail("");
+        setTicket("");
+        setStatus("");
+        setHasAttachments(false);
     };
 
     useEffect(() => {
@@ -172,6 +196,10 @@ const InquiryList = () => {
             document.removeEventListener("keydown", handleKeyDown);
         };
     }, [isFilterVisible]);
+
+    useEffect(() => {
+        updateLastActivity();
+    }, []);
 
     return (
         <>
@@ -427,7 +455,7 @@ const InquiryList = () => {
 
                     <div className="flex justify-end items-center h-12 px-6 gap-2 bg-white rounded-b-lg">
                         <p className="text-sm text-gray-400">
-                            Last account activity: 0 minutes
+                          Last account activity: {getTimeDifference()}
                         </p>
                     </div>
                     <div className="flex justify-end mt-4">
