@@ -119,6 +119,15 @@ export const ContextProvider = ({ children }) => {
         []
     );
 
+    const getSpecificInquiry = async () => {
+        try {
+            const response = await apiService.get("specific-assignee");
+            setSpecificInquiry(response.data);
+        } catch (error) {
+            console.log('error', error);
+        }    
+    };
+
     const getCount = async () => {
         if (token) {
             try {
@@ -271,6 +280,11 @@ export const ContextProvider = ({ children }) => {
             getInquiriesPerProperty(propertyMonth);
         }
     }, [propertyMonth]);
+
+
+    useEffect(() => {
+        getSpecificInquiry();
+    }, [])
     return (
         <StateContext.Provider
             value={{
@@ -313,6 +327,10 @@ export const ContextProvider = ({ children }) => {
                 dataProperty,
                 getInquiriesPerProperty,
                 setPropertyMonth,
+                setData,
+                searchFilter,
+                statusFilter,
+                specificInquiry
             }}
         >
             {children}

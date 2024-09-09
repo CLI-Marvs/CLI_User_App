@@ -11,6 +11,7 @@ use App\Models\Employee;
 use App\Models\InquiryAssignee;
 use App\Models\InquiryLogs;
 use App\Models\Messages;
+use App\Models\PinnedConcerns;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -150,7 +151,7 @@ class ConcernController extends Controller
 
         return $fileLinks;
     }
- 
+
     public function sendMessage(Request $request)
     {
         try {
@@ -267,57 +268,58 @@ class ConcernController extends Controller
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
         }
     }
+
+    public function pinConcern(Request $request, $concernId)
+    {
+        try {
+            $user = $request->user();
+            $existingPin = PinnedConcerns
+                ::where('user_id', $user->id)
+                ->where('concern_id', $concernId)
+                ->first();
+
+
+            if ($existingPin) {
+                PinnedConcerns
+                    ::where('user_id', $user->id)
+                    ->where('concern_id', $concernId)
+                    ->delete();
+            } else {
+                PinnedConcerns::insert([
+                    'user_id' => $user->id,
+                    'concern_id' => $concernId,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                    'pinned_at' => now()
+                ]);
+            }
+
+            return response()->json(['message' => 'Concern pin status updated.']);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Error pinning concern.', 'error' => $e->getMessage()], 500);
+        }
+    }
+
+
     public function getAllConcerns(Request $request)
     {
         try {
             $employee = $request->user();
-            $employeeDepartment = $employee->department;
-            $days = $request->query("days", null);
-            $status = $request->query("status", null);
-            $search = $request->query("search", null);
-           
-            $assignedInquiries = $this->getAssignInquiries($employee->employee_email);
-            $ticketIds = $assignedInquiries->pluck('ticket_id')->toArray();
+            $query = Concerns::query();
 
-            $query = Concerns::orderBy("created_at", "desc");
+            $this->applyFilters($query, $request, $employee);
 
-            if ($days !== null) {
-                $startOfDay = now()->subDays($days)->startOfDay();
-                $endOfDay = now()->subDays($days)->endOfDay();
-                $query->whereBetween('created_at', [$startOfDay, $endOfDay]);
-            }
+            $latestLogs = $this->getLatestLogsSubquery();
+            $pinnedSubquery = $this->getPinnedConcernsSubquery($employee);
 
-            if ($employeeDepartment !== 'CSR') {
-                $query->whereIn('concerns.ticket_id', $ticketIds);
-            }
-
-            if ($status === 'Resolved') {
-                $query->where('status', 'Resolved');
-            } elseif ($status === 'unresolved') {
-                $query->where('status', 'unresolved');
-            }
-
-            if ($search !== null) {
-                $searchParams = json_decode($search, true);
-                $query = $this->handleSearchFilter($query, $searchParams);
-
-                if (!empty($searchParams) && $searchParams['hasAttachments'] === true) {
-                    $query->whereHas('messages', function($messageQuery) {
-                        $messageQuery->whereNotNull('attachment');
-                    });
-                }
-            }           
-            
-            $latestLogs = DB::table('inquiry_logs')
-                ->select('ticket_id', 'message_log')
-                ->whereIn('id', function ($subquery) {
-                    $subquery->select(DB::raw('MAX(id)'))
-                        ->from('inquiry_logs')
-                        ->groupBy('ticket_id');
-                });
             $allConcerns = $query->leftJoinSub($latestLogs, 'latest_logs', function ($join) {
                 $join->on('concerns.ticket_id', '=', 'latest_logs.ticket_id');
-            })->select('concerns.*', 'latest_logs.message_log')->paginate(20);
+            })
+                ->leftJoinSub($pinnedSubquery, 'pinned', function ($join) {
+                    $join->on('concerns.id', '=', 'pinned.concern_id');
+                })
+                ->select('concerns.*', 'latest_logs.message_log', DB::raw('CASE WHEN pinned.concern_id IS NOT NULL THEN 1 ELSE 0 END AS isPinned'))
+                ->paginate(20);
 
             return response()->json($allConcerns);
         } catch (\Exception $e) {
@@ -325,9 +327,73 @@ class ConcernController extends Controller
         }
     }
 
+    private function applyFilters($query, Request $request, $employee)
+    {
+        $days = $request->query("days", null);
+        $status = $request->query("status", null);
+        $search = $request->query("search", null);
+
+        $assignedInquiries = $this->getAssignInquiries($employee->employee_email);
+        $ticketIds = $assignedInquiries->pluck('ticket_id')->toArray();
+
+        $pinnedConcerns = PinnedConcerns::where('user_id', $employee->id)
+            ->pluck('concern_id')
+            ->toArray();
+
+        if (!empty($pinnedConcerns)) {
+            $query->leftJoin('pinned_concerns', function ($join) use ($employee) {
+                $join->on('concerns.id', '=', 'pinned_concerns.concern_id')
+                    ->where('pinned_concerns.user_id', $employee->id);
+            })
+                ->orderByRaw("CASE WHEN concerns.id IN (" . implode(',', $pinnedConcerns) . ") THEN 0 ELSE 1 END, pinned_concerns.pinned_at DESC");
+        } else {
+            $query->orderBy('created_at', 'desc');
+        }
+
+        if ($days !== null) {
+            $startOfDay = now()->subDays($days)->startOfDay();
+            $endOfDay = now()->subDays($days)->endOfDay();
+            $query->whereBetween('concerns.created_at', [$startOfDay, $endOfDay]);
+        }
+
+        if ($employee->department !== 'CSR') {
+            $query->whereIn('concerns.ticket_id', $ticketIds);
+        }
+
+        if ($status) {
+            $query->where('status', $status);
+        }
+
+        if ($search) {
+            $searchParams = json_decode($search, true);
+            $query = $this->handleSearchFilter($query, $searchParams);
+
+            if (!empty($searchParams['hasAttachments'])) {
+                $query->whereHas('messages', function ($messageQuery) {
+                    $messageQuery->whereNotNull('attachment');
+                });
+            }
+        }
+    }
+
+    private function getLatestLogsSubquery()
+    {
+        return InquiryLogs::select('ticket_id', 'message_log')
+            ->whereIn('id', function ($subquery) {
+                $subquery->select(DB::raw('MAX(id)'))
+                    ->from('inquiry_logs')
+                    ->groupBy('ticket_id');
+            });
+    }
+
+    private function getPinnedConcernsSubquery($employee)
+    {
+        return PinnedConcerns::select('concern_id')
+            ->where('user_id', $employee->id);
+    }
+
     public function handleSearchFilter($query, $searchParams)
     {
-
         if (!empty($searchParams['name'])) {
             $query->where('buyer_name', 'ILIKE', '%' . $searchParams['name'] . '%');
         }
@@ -344,14 +410,129 @@ class ConcernController extends Controller
         if (!empty($searchParams['status'])) {
             $query->where('message_log', 'ILIKE', '%' . $searchParams['status'] . '%');
         }
-        
+
         if (!empty($searchParams['startDate'])) {
             $startDate = Carbon::parse($searchParams['startDate'])->setTimezone('Asia/Manila');
-            $query->whereDate('created_at', '=', $startDate);
+            $query->whereDate('concerns.created_at', '=', $startDate);
         }
-    
+
         return $query;
     }
+
+
+    //*Not clean code
+    // public function getAllConcerns(Request $request)
+    // {
+    //     try {
+    //         $employee = $request->user();
+    //         $employeeDepartment = $employee->department;
+    //         $days = $request->query("days", null);
+    //         $status = $request->query("status", null);
+    //         $search = $request->query("search", null);
+
+    //         $assignedInquiries = $this->getAssignInquiries($employee->employee_email);
+    //         $ticketIds = $assignedInquiries->pluck('ticket_id')->toArray();
+
+    //         $pinnedConcerns = PinnedConcerns::where('user_id', $employee->id)
+    //                                         ->pluck('concern_id')
+    //                                         ->toArray();
+
+    //         $query = Concerns::query();
+
+    //         if (!empty($pinnedConcerns)) {
+    //             $query->leftJoin('pinned_concerns', function ($join) use ($employee) {
+    //                 $join->on('concerns.id', '=', 'pinned_concerns.concern_id')
+    //                      ->where('pinned_concerns.user_id', $employee->id);
+    //             })
+    //             ->orderByRaw("CASE WHEN concerns.id IN (" . implode(',', $pinnedConcerns) . ") THEN 0 ELSE 1 END, pinned_concerns.pinned_at DESC");
+    //         } else {
+    //             $query->orderBy('created_at', 'desc');
+    //         }
+
+    //         if ($days !== null) {
+    //             $startOfDay = now()->subDays($days)->startOfDay();
+    //             $endOfDay = now()->subDays($days)->endOfDay();
+    //             $query->whereBetween('concerns.created_at', [$startOfDay, $endOfDay]);
+    //         }
+
+    //         if ($employeeDepartment !== 'CSR') {
+    //             $query->whereIn('concerns.ticket_id', $ticketIds);
+    //         }
+
+    //         if ($status === 'Resolved') {
+    //             $query->where('status', 'Resolved');
+    //         } elseif ($status === 'unresolved') {
+    //             $query->where('status', 'unresolved');
+    //         }
+
+    //         if ($search !== null) {
+    //             $searchParams = json_decode($search, true);
+    //             $query = $this->handleSearchFilter($query, $searchParams);
+
+    //             if (!empty($searchParams) && $searchParams['hasAttachments'] === true) {
+    //                 $query->whereHas('messages', function ($messageQuery) {
+    //                     $messageQuery->whereNotNull('attachment');
+    //                 });
+    //             }
+    //         }
+
+    //         $pinnedSubquery = PinnedConcerns
+    //         ::select('concern_id')
+    //         ->where('user_id', $employee->id);
+
+    //         $latestLogs = InquiryLogs::select('ticket_id', 'message_log')
+    //             ->whereIn('id', function ($subquery) {
+    //                 $subquery->select(DB::raw('MAX(id)'))
+    //                     ->from('inquiry_logs')
+    //                     ->groupBy('ticket_id');
+    //             });
+    //         // $allConcerns = $query->leftJoinSub($latestLogs, 'latest_logs', function ($join) {
+    //         //     $join->on('concerns.ticket_id', '=', 'latest_logs.ticket_id');
+    //         // })->select('concerns.*', 'latest_logs.message_log')
+    //         // ->paginate(20);
+
+    //         $allConcerns = $query->leftJoinSub($latestLogs, 'latest_logs', function ($join) {
+    //             $join->on('concerns.ticket_id', '=', 'latest_logs.ticket_id');
+    //         })
+    //         ->leftJoinSub($pinnedSubquery, 'pinned', function ($join) {
+    //             $join->on('concerns.id', '=', 'pinned.concern_id');
+    //         })
+    //         ->select('concerns.*', 'latest_logs.message_log', DB::raw('CASE WHEN pinned.concern_id IS NOT NULL THEN 1 ELSE 0 END AS isPinned'))
+    //         ->paginate(20);
+
+    //         return response()->json($allConcerns);
+    //     } catch (\Exception $e) {
+    //         return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
+    //     }
+    // }
+
+    // public function handleSearchFilter($query, $searchParams)
+    // {
+
+    //     if (!empty($searchParams['name'])) {
+    //         $query->where('buyer_name', 'ILIKE', '%' . $searchParams['name'] . '%');
+    //     }
+    //     if (!empty($searchParams['category'])) {
+    //         $query->where('details_concern', 'ILIKE', '%' . $searchParams['category'] . '%');
+    //     }
+    //     if (!empty($searchParams['email'])) {
+    //         $query->where('buyer_email', 'ILIKE', '%' . $searchParams['email'] . '%');
+    //     }
+    //     if (!empty($searchParams['ticket'])) {
+    //         $query->where('concerns.ticket_id', 'ILIKE', '%' . $searchParams['ticket'] . '%');
+    //     }
+
+    //     if (!empty($searchParams['status'])) {
+    //         $query->where('message_log', 'ILIKE', '%' . $searchParams['status'] . '%');
+    //     }
+
+    //     if (!empty($searchParams['startDate'])) {
+    //         $startDate = Carbon::parse($searchParams['startDate'])->setTimezone('Asia/Manila');
+    //         $query->whereDate('concerns.created_at', '=', $startDate);
+    //     }
+
+    //     return $query;
+    // }
 
     public function listOfNotifications(Request $request)
     {
@@ -456,12 +637,16 @@ class ConcernController extends Controller
     public function assignInquiryTo(Request $request)
     {
         try {
+
             $emailContent = "Hey " . $request->firstname . ", inquiry " . $request->ticketId . " has been assigned to you.";
             $assignInquiry = new InquiryAssignee();
             $assignInquiry->ticket_id = $request->ticketId;
             $assignInquiry->email = $request->email;
             $assignInquiry->save();
 
+            $concern = Concerns::where("ticket_id", $request->ticketId)->first();
+            $concern->resolve_from = $request->department;
+            $concern->save();
 
             $this->inquiryAssigneeLogs($request);
 
@@ -477,16 +662,20 @@ class ConcernController extends Controller
     {
         try {
             $emailContent = "Hey " . $request->firstname . ", inquiry " . $request->ticketId . " has been assigned to you.";
-            $prevInquiry = InquiryAssignee::where('ticket_id', $request->ticket_id)->first();
+            $prevInquiry = InquiryAssignee::where('ticket_id', $request->ticketId)->first();
 
+            
+            $concern = Concerns::where("ticket_id", $request->ticketId)->first();
+            $concern->resolve_from = $request->department;
+            $concern->save();
+            
             $prevInquiry->email = $request->email;
             $prevInquiry->save();
-            
-            JobToPersonnelAssign::dispatch($request->email, $emailContent, $request->email);
 
+            $this->inquiryAssigneeLogs($request);
+            JobToPersonnelAssign::dispatch($request->email, $emailContent, $request->email);
         } catch (\Exception $e) {
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
-
         }
     }
     public function getInquiryLogs($ticketId)
@@ -665,17 +854,17 @@ class ConcernController extends Controller
         return response()->json($allMonths);
     }
 
-    
+
     public function getInquiriesPerProperty(Request $request)
     {
 
         $monthNumber = Carbon::parse($request->propertyMonth)->month;
         $query = Concerns::select(
             DB::raw('property'),
-          /*   DB::raw('EXTRACT(MONTH FROM created_at) as month'), */
+            /*   DB::raw('EXTRACT(MONTH FROM created_at) as month'), */
             DB::raw('SUM(case when status = \'Resolved\' then 1 else 0 end) as Resolved'),
             DB::raw('SUM(case when status = \'unresolved\' then 1 else 0 end) as Unresolved')
-            
+
         )
             ->whereMonth('created_at', $monthNumber)
             ->whereNotNull('status')
@@ -683,9 +872,9 @@ class ConcernController extends Controller
             ->get();
 
 
-       return response()->json($query);
+        return response()->json($query);
     }
-    
+
 
     public function getInquiriesByCategory(Request $request)
     {
@@ -704,15 +893,23 @@ class ConcernController extends Controller
 
         return response()->json($concerns);
     }
-    
+
     public function getSpecificInquiry(Request $request)
-    {   
-        $employee = $request->user();
-        $assignTo = InquiryAssignee::where('email', 'trodfil@gmail.com')->pluck('email');
-        
-        
-        return response()->json([
-            'email' => $assignTo
-        ]);
+    {
+        $user = $request->user();
+        $assignTo = InquiryAssignee::where('email', $user->employee_email)->pluck('ticket_id');
+        return response()->json($assignTo);
+    }
+
+
+    public function deleteConcern($ticket_id)
+    {
+        $concern = Concerns::where('ticket_id', $ticket_id)->firstOrFail();
+
+        $concern->messages()->where('ticket_id', $ticket_id)->delete();
+
+        $concern->delete();
+
+        return response()->json(['message' => 'Concern and related messages deleted successfully']);
     }
 }
