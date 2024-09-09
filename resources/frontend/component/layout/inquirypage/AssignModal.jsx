@@ -61,7 +61,7 @@ const AssignModal = ({ modalRef, employeeData, isAssign }) => {
     return (
         <dialog
             id="Assign"
-            className="modal w-[557px] rounded-[10px] shadow-custom4"
+            className="modal w-[557px] rounded-[10px] shadow-custom4 backdrop:bg-black/50"
             ref={modalRef}
         >
             <div className=" px-20 rounded-lg">

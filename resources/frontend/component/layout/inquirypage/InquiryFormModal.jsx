@@ -87,7 +87,7 @@ const InquiryFormModal = ({ modalRef }) => {
     return (
         <dialog
             id="Employment"
-            className="modal w-[589px] rounded-[10px] shadow-custom5"
+            className="modal w-[589px] rounded-[10px] shadow-custom5 backdrop:bg-black/50"
             ref={modalRef}
         >
             <div className=" px-20 rounded-lg">
