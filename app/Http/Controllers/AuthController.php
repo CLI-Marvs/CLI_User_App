@@ -46,6 +46,7 @@ class AuthController extends Controller
                     'lastname' => $name[1],
                     'employee_email' => $googleUser->email,
                     'email_verify_at' => now(),
+                    'profile_picture' => $googleUser->avatar
                  /*    'login_type' => "sso" */
                 ]
             );

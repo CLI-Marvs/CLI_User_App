@@ -1,12 +1,20 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useStateContext } from "../../../context/contextprovider";
 import apiService from "../../servicesApi/apiService";
+import { useNavigate } from "react-router-dom";
 
-const AssignModal = ({ modalRef, employeeData }) => {
-    const { user, getInquiryLogs } = useStateContext();
+const AssignModal = ({ modalRef, employeeData, isAssign }) => {
+    const { user, getInquiryLogs, getAllConcerns } = useStateContext();
     const [remarks, setRemarks] = useState("");
+    const navigate = useNavigate();
 
+    console.log("isAssign", isAssign);
     const saveAssignee = async () => {
+        console.log("trigger here new");
+        if(!employeeData || Object.keys(employeeData).length === 0) {
+            alert("please select employee first");
+            return;
+        }
         try {
             const response = await apiService.post("add-assignee", {
                 ...employeeData,
@@ -15,13 +23,41 @@ const AssignModal = ({ modalRef, employeeData }) => {
                 remarks: remarks,
             });
             getInquiryLogs(employeeData.ticketId);
+            getAllConcerns();
             console.log("sucess");
         } catch (error) {
             console.log("error assigning", error);
         }
     };
-    const hasAccessToAssign = user?.department === "CSR";
-    
+
+
+
+
+    const reassignInquiry = async () => {
+        console.log("trigger here to reassign");
+        console.log("employeeData", employeeData);
+        if(!employeeData || Object.keys(employeeData).length === 0) {
+            alert("please select employee first");
+            return;
+        }
+        try {
+            const response = await apiService.post("reassign", {
+                ...employeeData,
+                assign_by: user?.firstname,
+                assign_by_department: user?.department,
+                remarks: remarks,
+            });
+            getInquiryLogs(employeeData.ticketId);
+            getAllConcerns();
+            navigate("/inquirymanagement/inquirylist");
+        } catch (error) {
+            console.log("error assigning", error);
+        }
+    };
+   
+    useEffect(() => {
+
+    }, [isAssign]);
     return (
         <dialog
             id="Assign"
@@ -67,7 +103,7 @@ const AssignModal = ({ modalRef, employeeData }) => {
                 <div className="mt-5 mb-12">
                     <form method="dialog" className="flex justify-end">
                         <button
-                            onClick={saveAssignee}
+                            onClick={isAssign ? reassignInquiry : saveAssignee}
                             className="h-12 text-white px-10 rounded-lg gradient-btn2 hover:shadow-custom4"
                         >
                             Assign

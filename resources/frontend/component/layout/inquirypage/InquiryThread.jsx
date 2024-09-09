@@ -115,7 +115,6 @@ const InquiryThread = () => {
                 formData.append('files[]', file);
             });
         }
-
         // Append other fields to FormData
         formData.append('admin_email', user?.employee_email || '');
         formData.append('ticket_id', ticketId || '');

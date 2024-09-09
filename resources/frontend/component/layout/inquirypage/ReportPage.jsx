@@ -212,6 +212,9 @@ const ReportPage = () => {
                                 <option value="AP Comission">
                                     AP Commission
                                 </option>
+                                <option value="PM">
+                                    Property Management
+                                </option>
                             </select>
                             <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3 bg-custom-grayFA">
                                 <svg

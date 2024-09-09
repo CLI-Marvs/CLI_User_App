@@ -2,8 +2,10 @@ import React from 'react'
 import CLILogo from '../../../../../public/Images/CLILogo.png';
 import Kent from '../../../../../public/Images/kent.png';
 import apiService from '../../servicesApi/apiService';
+import { useStateContext } from '../../../context/contextprovider';
 
 const Navbar = () => {
+  const {user} = useStateContext();
 
   const handleLogout = async () => {
     try {
@@ -37,7 +39,7 @@ const Navbar = () => {
             <button className='text-base font-bold bg-gradient-to-r from-custom-bluegreen via-custom-lightgreen to-custom-lightgreen bg-clip-text text-transparent' onClick={handleLogout}>Logout</button>
           </div>
           <div >
-            <img src={Kent} alt="kent" className='h-14 w-14 rounded-full  border-8' />
+            <img src={user?.profile_picture} alt="kent" className='h-14 w-14 rounded-full  border-8' />
           </div>
           <div className='flex items-center'>
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-7">

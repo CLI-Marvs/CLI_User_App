@@ -22,6 +22,8 @@ const InquiryList = () => {
         setDaysFilter,
         setStatusFilter,
         setSearchFilter,
+        statusFilter,
+        searhFilter
        /*  setHasAttachments,
         hasAttachments */
     } = useStateContext();
@@ -55,9 +57,14 @@ const InquiryList = () => {
     };
 
     const handleRefresh = () => {
-        setDaysFilter(null);
-        setStatusFilter("All");
-        setSearchFilter({});
+        if(daysFilter) {
+            setDaysFilter(null);
+        } else if (statusFilter) {
+            setStatusFilter("All");
+        } else if (searhFilter) {
+            setSearchFilter({});
+
+        }
         getAllConcerns();
     };
 
@@ -71,9 +78,6 @@ const InquiryList = () => {
          setCurrentPage(0);
  
      }; */
-
-
-
     const toggleDropdown = () => {
         setIsOpen(!isOpen);
     };
@@ -199,7 +203,7 @@ const InquiryList = () => {
 
     useEffect(() => {
         updateLastActivity();
-    }, []);
+    }, [searhFilter, statusFilter,daysFilter]);
 
     return (
         <>

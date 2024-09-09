@@ -16,6 +16,8 @@ Route::middleware('auth:sanctum')->post('/auth/logout', [AuthController::class, 
 Route::post('/add-concern', [ConcernController::class, 'addConcernPublic']);
 
 Route::post('/add-assignee', [ConcernController::class, 'assignInquiryTo']);
+Route::post('/reassign', [ConcernController::class, 'reassignInquiry']);
+
 Route::post('/resolve', [ConcernController::class, 'markAsResolve']);
 
 
@@ -37,8 +39,7 @@ Route::get('/report-monthly', [ConcernController::class, 'getMonthlyReports']);
 Route::get('/category-monthly', [ConcernController::class, 'getInquiriesByCategory']);
 Route::get('/inquiries-property', [ConcernController::class, 'getInquiriesPerProperty']);
 Route::post('/isread', [ConcernController::class, 'updateIsReadStatus']);
-Route::get('/specific-assignee', [ConcernController::class, 'getSpecificInquiry']);
-
+Route::delete('delete-concerns', [ConcernController::class, 'deleteConcern']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/get-concern', [ConcernController::class, 'getAllConcerns']);
@@ -49,4 +50,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/employee-list', [ConcernController::class, 'getAllEmployeeList']);
     Route::get('/notifications', [ConcernController::class, 'listOfNotifications']);
     Route::get('/unread-count', [ConcernController::class, 'countUnreadNotifications']);
+    Route::post('/pin-concern/{id}', [ConcernController::class, 'pinConcern']);
+    Route::get('/specific-assignee', [ConcernController::class, 'getSpecificInquiry']);
 });
