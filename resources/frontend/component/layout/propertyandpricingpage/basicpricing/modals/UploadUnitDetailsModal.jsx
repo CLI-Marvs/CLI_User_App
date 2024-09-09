@@ -6,7 +6,7 @@ const UploadUnitDetailsModal = ({ modalRef, fileName }) => {
   return (
 
     
-    <dialog className="modal w-[474px] rounded-lg" ref={modalRef}>
+    <dialog className="modal w-[474px] rounded-lg backdrop:bg-black/50" ref={modalRef}>
             <div className=' px-14 mb-5 rounded-[10px]'>
                 <div className=''>
                     <form method="dialog" className="pt-3 flex justify-end -mr-[50px]">

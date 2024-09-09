@@ -1,5 +1,5 @@
 import React from 'react'
-import PriceVersioning from '../../../layout/propertyandpricingpage/priceverioning/PriceVersioning'
+import PriceVersioning from '../../../layout/propertyandpricingpage/priceversioning/PriceVersioning'
 
 
 const PriceVersioningView = () => {

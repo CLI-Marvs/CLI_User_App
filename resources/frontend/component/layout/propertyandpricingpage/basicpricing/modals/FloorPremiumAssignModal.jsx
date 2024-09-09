@@ -13,7 +13,7 @@ const FloorPremiumAssignModal = ({modalRef}) => {
   };
 
   return (
-    <dialog className="modal w-[1200px] rounded-lg bg-custom-grayFA" ref={modalRef}>
+    <dialog className="modal w-[1200px] rounded-lg bg-custom-grayFA backdrop:bg-black/50" ref={modalRef}>
         <div className=' px-14 mb-5 rounded-[10px]'>
             <div className=''>
                 <form method="dialog" className="pt-3 flex justify-end -mr-[50px]">

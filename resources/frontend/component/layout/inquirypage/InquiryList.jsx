@@ -205,7 +205,7 @@ const InquiryList = () => {
         <>
             <div className="h-screen max-w-full bg-custom-grayFA px-4">
                 <div className="bg-custom-grayFA">
-                    <div className="relative flex justify-start gap-3">
+                    <div className="relative flex justify-start gap-3 pt-1">
                         <div className="relative w-[604px]">
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
@@ -224,7 +224,7 @@ const InquiryList = () => {
                             <input
                                 type="text"
                                 onClick={toggleFilterBox}
-                                className="h-10 w-full rounded-lg pl-9 pr-6 text-sm"
+                                className="h-[47px] w-[606px] rounded-[10px] pl-9 pr-6 text-sm"
                                 placeholder="Search"
                             />
                             <svg
@@ -234,7 +234,7 @@ const InquiryList = () => {
                                 viewBox="0 0 24 24"
                                 strokeWidth={1.5}
                                 stroke="currentColor"
-                                className="size-4 absolute right-3 top-3 text-custom-bluegreen hover:bg-gray-200"
+                                className="size-[24px] absolute right-3 top-3 text-custom-bluegreen hover:bg-gray-200"
                             >
                                 <path
                                     strokeLinecap="round"
@@ -243,6 +243,7 @@ const InquiryList = () => {
                                 />
                             </svg>
                         </div>
+                        
                         {isFilterVisible && (
                             <div
                                 ref={filterBoxRef}
@@ -365,7 +366,7 @@ const InquiryList = () => {
                 </div>
 
                 <div className="max-w-[954PX]">
-                    <div className="flex justify-start items-center h-12 mt-3 px-6 gap-[60px] bg-white rounded-t-lg mb-1 ">
+                    <div className="flex justify-start items-center h-12 mt-[15px] px-6 gap-[60px] bg-white rounded-t-lg mb-1 ">
                         <div className="relative mr-4 ">
                             <button
                                 className="flex text-[20px] w-[130px] items-center gap-3 text-custom-bluegreen font-semibold"

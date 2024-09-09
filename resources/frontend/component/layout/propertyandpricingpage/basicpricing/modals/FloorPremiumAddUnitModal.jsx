@@ -5,7 +5,7 @@ const FloorPremiumAddUnitModal = ({modalRef}) => {
     <dialog className="modal w-[474px] rounded-lg" ref={modalRef}>
     <div className=' px-14 mb-5 rounded-[10px]'>
         <div className=''>
-            <form method="dialog" className="pt-3 flex justify-end -mr-[50px]">
+            <form method="dialog" className="pt-3 flex justify-end -mr-[50px] backdrop:bg-black/50">
                 <button className="flex justify-center w-10 h-10 items-center rounded-full bg-custombg3 text-custom-bluegreen hover:bg-custombg">
                     ✕
                 </button>

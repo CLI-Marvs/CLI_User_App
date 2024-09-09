@@ -2,7 +2,7 @@ import React from 'react'
 
 const PremiumChecklistModal = ({modalRef2}) => {
   return (
-    <dialog className="modal w-[385px] rounded-lg bg-white" ref={modalRef2}>
+    <dialog className="modal w-[385px] rounded-lg bg-white backdrop:bg-black/50" ref={modalRef2}>
     <div className=' px-[50px] mb-5 rounded-[10px]'>
         <div className=''>
             <form method="dialog" className="pt-3 flex justify-end -mr-[40px]">

@@ -2,7 +2,7 @@ import React from 'react'
 
 const AddPropertyModal = ({ modalRef }) => {
     return (
-        <dialog className="modal w-[475px] h-[330px] rounded-lg" ref={modalRef}>
+        <dialog className="modal w-[475px] h-[330px] rounded-lg backdrop:bg-black/50" ref={modalRef}>
             <div className=' px-14 mb-5 rounded-lg'>
                 <div className=''>
                     <form method="dialog" className="pt-3 flex justify-end -mr-[50px]">
