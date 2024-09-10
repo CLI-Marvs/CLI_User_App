@@ -4,6 +4,7 @@ import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md";
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import DateLogo from '../../../../../../public/Images/Date_range.svg'
+import AddPriceVersionModal from './AddPriceVersionModal';
 const PriceVersioning = () => {
 
   const [startDate, setStartDate] = useState(new Date());
@@ -130,14 +131,14 @@ const PriceVersioning = () => {
               <tbody className='flex flex-col gap-[20px]'>
                 {/*                                                      example 1                                                                     */}
                 <div className='border-b border-custom-lightestgreen pb-[20px]'>
-                  <tr className='flex gap-[10px]  overflow-hidden bg-white p-1'>
+                  <tr className='flex  gap-[10px]  overflow-hidden bg-white p-1'>
                     <td className='flex flex-col gap-[10px] justify-center w-[169px] p-[20px] rounded-[10px] shadow-custom5'>
                       <p className='montserrat-semibold text-sm leading-[17px]'>38 Park Avenue Parking, Tower 2</p>
                       <p className='underline text-blue-500 cursor-pointer text-sm'>Edit</p>
                     </td>
                     <td className='rounded-[10px] shadow-custom5 text-sm w-[572px] overflow-hidden'>
                       <table className='w-full border-separate'>
-                        <tr className='flex bg-white gap-[30px] '>
+                        <tr className='flex items-center bg-white gap-[30px] '>
                           <td className=' w-[150px] p-[15px]'>
                             Version 1
                           </td>
@@ -200,14 +201,14 @@ const PriceVersioning = () => {
                 {/*                                                   END                                                  */}
                  {/*                                                      example 2                                                                    */}
                  <div className='border-b border-custom-lightestgreen pb-[20px]'>
-                  <tr className='flex gap-[10px]  overflow-hidden bg-white p-1'>
+                  <tr className='flex  gap-[10px]  overflow-hidden bg-white p-1'>
                     <td className='flex flex-col gap-[10px] justify-center w-[169px] p-[20px] rounded-[10px] shadow-custom5'>
                       <p className='montserrat-semibold text-sm leading-[17px]'>38 Park Avenue, Tower 2</p>
                       <p className='underline text-blue-500 cursor-pointer text-sm'>Edit</p>
                     </td>
                     <td className='rounded-[10px] shadow-custom5 text-sm w-[572px] overflow-hidden'>
                       <table className='w-full border-separate'>
-                        <tr className='flex bg-white gap-[30px]'>
+                        <tr className='flex items-center bg-white gap-[30px]'>
                           <td className=' w-[150px] p-[15px]'>
                             Version 1
                           </td>
@@ -270,14 +271,14 @@ const PriceVersioning = () => {
                 {/*                                                   END                                                  */}
                  {/*                                                      example 2                                                                    */}
                  <div className='border-b border-custom-lightestgreen pb-[20px]'>
-                  <tr className='flex gap-[10px]  overflow-hidden bg-white p-1'>
+                  <tr className='flex  gap-[10px]  overflow-hidden bg-white p-1'>
                     <td className='flex flex-col gap-[10px] justify-center w-[169px] p-[20px] rounded-[10px] shadow-custom5'>
                       <p className='montserrat-semibold text-sm leading-[17px]'>38 Park Avenue, Tower 2</p>
                       <p className='underline text-blue-500 cursor-pointer text-sm'>Edit</p>
                     </td>
                     <td className='rounded-[10px] shadow-custom5 text-sm w-[572px] overflow-hidden'>
                       <table className='w-full border-separate'>
-                        <tr className='flex bg-white gap-[30px]'>
+                        <tr className='flex items-center bg-white gap-[30px]'>
                           <td className=' w-[150px] p-[15px]'>
                             Version 1
                           </td>
@@ -291,7 +292,7 @@ const PriceVersioning = () => {
                             NA
                           </td>
                         </tr>
-                        <tr className='flex  bg-custom-grayFA gap-[30px]'>
+                        <tr className='flex items-center bg-custom-grayFA gap-[30px]'>
                           <td className='flex flex-col gap-[10px] w-[150px] p-[15px]'>
                             <p>Version 2</p>
                             <p className='font-bold text-[#E06464] flex items-center'>
@@ -345,7 +346,7 @@ const PriceVersioning = () => {
               </tbody>
             </table>
       </div>
-      <div className='flex w-full justify-start mt-[20px] pb-[150px]'>
+      <div className='flex w-full justify-start mt-[20px] pb-[150px] bg-custom-grayFA'>
                 <ReactPaginate
                 previousLabel={<MdKeyboardArrowLeft className='text-[#404B52]'/>}
                 nextLabel={<MdKeyboardArrowRight className='text-[#404B52]'/>}
@@ -366,6 +367,9 @@ const PriceVersioning = () => {
                 }
                 /* forcePage={currentPage} */
             />
+            </div>
+            <div>
+              <AddPriceVersionModal modalRef={modalRef}/>
             </div>
     </div>
   )

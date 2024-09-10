@@ -82,8 +82,8 @@ const TicketTable = ({ concernData }) => {
                             hover:shadow-custom
                             ${
                                 row.status === "Resolved"
-                                    ? "bg-custom-grayF1"
-                                    : "bg-white"
+                                    ? row.ispinned === 1 ? "bg-custom-lightestgreen" : "bg-custom-grayF1"
+                                    : row.ispinned === 1 ? "bg-custom-lightestgreen" : "bg-white"
                             }
                         `}
                         >
@@ -103,7 +103,7 @@ const TicketTable = ({ concernData }) => {
                                 }`}
                             >
                                 <button
-                                    className="hover:shadow-custom4"
+                                    className="hover:shadow-custom4 text-custom-solidgreen"
                                     onClick={(event) => {
                                         event.stopPropagation();
                                         togglePin(index, row);
@@ -133,7 +133,6 @@ const TicketTable = ({ concernData }) => {
                                         const firstName = nameParts.join(" ");
                                         return `${lastName}, ${firstName}`;
                                     })()}
-                                    W
                                 </p>
                             </td>
                             <td className="flex flex-1 gap-1 truncate">
