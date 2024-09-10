@@ -355,11 +355,8 @@ class ConcernController extends Controller
             $query->whereIn('concerns.ticket_id', $ticketIds);
         }
         
-        if($specificAssignCSR !== null) {
-            $query->whereIn('concerns.ticket_id', $ticketIds);
-        }
-
         $this->daysAndStatusFilter($status, $days, $query);
+        $this->specificAssigneeAndDaysFilter($specificAssignCSR, $query, $ticketIds, $days);
 
         if ($search) {
             $searchParams = json_decode($search, true);
@@ -373,21 +370,48 @@ class ConcernController extends Controller
         }
     }
 
+    private function specificAssigneeAndDaysFilter($specificAssignCSR, $query, $ticketIds, $days)
+    {
+        if($specificAssignCSR !== null && $days !== null) {
+            $query->whereIn('concerns.ticket_id', $ticketIds);
+            if ($days === "3+") {
+                $query->where('concerns.created_at', '<', now()->subDays(3)->startOfDay());
+            } else {
+                $startOfDay = now()->subDays($days)->startOfDay();
+                $endOfDay = now()->subDays($days)->endOfDay();
+                $query->whereBetween('concerns.created_at', [$startOfDay, $endOfDay]);
+            }
+            
+        } else if($specificAssignCSR !== null) {
+            $query->whereIn('concerns.ticket_id', $ticketIds);
+        }
+    }
+
     private function daysAndStatusFilter($status, $days, $query) 
     {
         if ($status && $days !== null) {
-            $startOfDay = now()->subDays($days)->startOfDay();
-            $endOfDay = now()->subDays($days)->endOfDay();
-            $query->where('status', $status)
-                   ->whereBetween('concerns.created_at', [$startOfDay, $endOfDay]);
-        } else if($status) {
+            if ($days === "3+") {
+                $query->where('status', $status)
+                      ->where('concerns.created_at', '<', now()->subDays(3)->startOfDay());
+            } else {
+                $startOfDay = now()->subDays($days)->startOfDay();
+                $endOfDay = now()->subDays($days)->endOfDay();
+                $query->where('status', $status)
+                      ->whereBetween('concerns.created_at', [$startOfDay, $endOfDay]);
+            }
+        } else if ($status) {
             $query->where('status', $status);
         } else if ($days !== null) {
-            $startOfDay = now()->subDays($days)->startOfDay();
-            $endOfDay = now()->subDays($days)->endOfDay();
-            $query->whereBetween('concerns.created_at', [$startOfDay, $endOfDay]);
+            if ($days === "3+") {
+                $query->where('concerns.created_at', '<', now()->subDays(3)->startOfDay());
+            } else {
+                $startOfDay = now()->subDays($days)->startOfDay();
+                $endOfDay = now()->subDays($days)->endOfDay();
+                $query->whereBetween('concerns.created_at', [$startOfDay, $endOfDay]);
+            }
         }
     }
+    
     private function getLatestLogsSubquery()
     {
         return InquiryLogs::select('ticket_id', 'message_log')

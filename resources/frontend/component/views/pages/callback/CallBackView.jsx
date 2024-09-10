@@ -10,7 +10,6 @@ const CallBackView = () => {
     useEffect(() => {
         const urlParams = new URLSearchParams(window.location.search);
         const token = urlParams.get("token");
-        console.log(token);
 
         if (token) {
             setToken(token);

@@ -26,6 +26,7 @@ const InquiryList = () => {
         searhFilter,
         user,
         setSpecificAssigneeCsr,
+        specificAssigneeCsr,
         /*  setHasAttachments,
         hasAttachments */
     } = useStateContext();
@@ -58,10 +59,20 @@ const InquiryList = () => {
     const handleRefresh = () => {
         if (daysFilter) {
             setDaysFilter(null);
+            setActiveDayButton(null);
         } else if (statusFilter) {
             setStatusFilter("All");
         } else if (searhFilter) {
             setSearchFilter({});
+        } else if (specificAssigneeCsr) {
+            console.log("if assign only");
+            setSpecificAssigneeCsr("");
+            setAssignedToMeActive(false);
+        }
+        if (specificAssigneeCsr !== "" && daysFilter !== null) {
+            setSpecificAssigneeCsr("");
+            setAssignedToMeActive(false);
+            setDaysFilter(null);
         }
         getAllConcerns();
     };
@@ -107,14 +118,20 @@ const InquiryList = () => {
             setCurrentPage(0);
             setSearchFilter("");
             setActiveDayButton(null);
+            setSpecificAssigneeCsr("");
+            setAssignedToMeActive(false);
         } else if (option === "Resolve") {
             setStatusFilter("Resolved");
             setCurrentPage(0);
             setSearchFilter("");
+            setSpecificAssigneeCsr("");
+            setAssignedToMeActive(false);
         } else if (option === "Unresolve") {
             setStatusFilter("unresolved");
             setCurrentPage(0);
             setSearchFilter("");
+            setSpecificAssigneeCsr("");
+            setAssignedToMeActive(false);
         }
     };
 
@@ -148,22 +165,27 @@ const InquiryList = () => {
 
             let newValue = 0;
             if (day === "3+ Days") {
-                newValue = 3;
+                newValue = "3+";
             } else if (day === "2 Days") {
                 newValue = 2;
             } else if (day === "1 Day") {
                 newValue = 1;
             }
             setDaysFilter(newValue);
-
             return day;
         });
+
         setCurrentPage(0);
     };
 
     const handleAssignedToMeClick = () => {
         setAssignedToMeActive(!assignedToMeActive);
-        setSpecificAssigneeCsr(user?.employee_email);
+        if (assignedToMeActive) {
+            setSpecificAssigneeCsr("");
+            setCurrentPage(0);
+        } else {
+            setSpecificAssigneeCsr(user?.employee_email);
+        }
     };
 
     const updateLastActivity = () => {
@@ -205,6 +227,7 @@ const InquiryList = () => {
         setTicket("");
         setStatus("");
         setHasAttachments(false);
+        setSpecificAssigneeCsr("");
     };
 
     useEffect(() => {
@@ -224,7 +247,13 @@ const InquiryList = () => {
 
     useEffect(() => {
         updateLastActivity();
-    }, [searhFilter, statusFilter, daysFilter]);
+    }, [
+        searhFilter,
+        statusFilter,
+        daysFilter,
+        specificAssigneeCsr,
+        currentPage,
+    ]);
 
     return (
         <>
@@ -469,9 +498,17 @@ const InquiryList = () => {
                                     <button
                                         key={label}
                                         onClick={() => handleDayClick(label)}
-                                        className={`flex justify-center items-center  text-custom-lightgreen h-[25px] rounded-[55px] p-[2px] ${activeDayButton === label ? "bglightgreen-btn hover:bg-custom-lightgreen" : "gradient-btn2hover border-custom-lightgreen"
-                                            } hover:bg-custom-lightestgreen ${label === "3+ Days" ? "w-[76px]" : label === "2 Days" ? "w-[69px]" : "w-[60px]"
-                                            }`}
+                                        className={`flex justify-center items-center  text-custom-lightgreen h-[25px] rounded-[55px] p-[2px] ${
+                                            activeDayButton === label
+                                                ? "bglightgreen-btn hover:bg-custom-lightgreen"
+                                                : "gradient-btn2hover border-custom-lightgreen"
+                                        } hover:bg-custom-lightestgreen ${
+                                            label === "3+ Days"
+                                                ? "w-[76px]"
+                                                : label === "2 Days"
+                                                ? "w-[69px]"
+                                                : "w-[60px]"
+                                        }`}
                                     >
                                         <p
                                             className={`h-full w-full flex justify-center items-center text-xs montserrat-semibold rounded-[50px]

@@ -25,7 +25,7 @@ export const ContextProvider = ({ children }) => {
     const [notifications, setNotifications] = useState([]);
     const [unreadCount, setUnreadCount] = useState(0);
     const [notifStatus, setNotifStatus] = useState("");
-    const [specificAssigneeCsr, setSpecificAssigneeCsr] = useState(null);
+    const [specificAssigneeCsr, setSpecificAssigneeCsr] = useState("");
     const [currentPage, setCurrentPage] = useState(0);
     const [notifCurrentPage, setNotifCurrentPage] = useState(0);
     const [searchFilter, setSearchFilter] = useState({});
@@ -59,8 +59,8 @@ export const ContextProvider = ({ children }) => {
                     page: currentPage + 1,
                     days: daysFilter || "",
                     status: statusFilter || "",
-                    specificAssigneeCsr: specificAssigneeCsr || ""
-                   /*  has_attachments: hasAttachments, */
+                    specificAssigneeCsr: specificAssigneeCsr || "",
+                    /*  has_attachments: hasAttachments, */
                 }).toString();
 
                 const response = await apiService.get(
@@ -122,12 +122,14 @@ export const ContextProvider = ({ children }) => {
     );
 
     const getSpecificInquiry = async () => {
-        try {
-            const response = await apiService.get("specific-assignee");
-            setSpecificInquiry(response.data);
-        } catch (error) {
-            console.log('error', error);
-        }    
+        if (token) {
+            try {
+                const response = await apiService.get("specific-assignee");
+                setSpecificInquiry(response.data);
+            } catch (error) {
+                console.log("error", error);
+            }
+        }
     };
 
     const getCount = async () => {
@@ -252,6 +254,7 @@ export const ContextProvider = ({ children }) => {
         statusFilter,
         searchFilter,
         hasAttachments,
+        specificAssigneeCsr,
     ]);
 
     useEffect(() => {
@@ -283,10 +286,9 @@ export const ContextProvider = ({ children }) => {
         }
     }, [propertyMonth]);
 
-
     useEffect(() => {
         getSpecificInquiry();
-    }, [])
+    }, []);
     return (
         <StateContext.Provider
             value={{
@@ -333,7 +335,8 @@ export const ContextProvider = ({ children }) => {
                 searchFilter,
                 statusFilter,
                 specificInquiry,
-                setSpecificAssigneeCsr
+                setSpecificAssigneeCsr,
+                specificAssigneeCsr
             }}
         >
             {children}
