@@ -4,9 +4,11 @@ import apiService from "../../servicesApi/apiService";
 import { useNavigate } from "react-router-dom";
 
 const AssignModal = ({ modalRef, employeeData, isAssign }) => {
+
     const { user, getInquiryLogs, getAllConcerns } = useStateContext();
     const [remarks, setRemarks] = useState("");
     const navigate = useNavigate();
+    const maxCharacters = 500;
 
     console.log("isAssign", isAssign);
     const saveAssignee = async () => {
@@ -64,11 +66,11 @@ const AssignModal = ({ modalRef, employeeData, isAssign }) => {
             className="modal w-[557px] rounded-[10px] shadow-custom4 backdrop:bg-black/50"
             ref={modalRef}
         >
-            <div className=" px-20 rounded-lg">
+            <div className=" px-[25px] rounded-lg">
                 <div className="">
                     <form
                         method="dialog"
-                        className="pt-3 flex justify-end -mr-16"
+                        className="pt-3 flex justify-end -mr-3"
                     >
                         <button className="flex justify-center w-10 h-10 items-center rounded-full bg-custombg3 text-custom-bluegreen hover:bg-custombg">
                             ✕
@@ -87,7 +89,7 @@ const AssignModal = ({ modalRef, employeeData, isAssign }) => {
                             Details
                         </p>
                         <span className="bg-white text-sm2 text-gray-400 font-normal py-3 border pl-2 pr-12 ml-auto">
-                            0/500 characters
+                            {remarks.length}/500 characters
                         </span>
                     </div>
                     <div className="flex gap-3">
@@ -95,12 +97,13 @@ const AssignModal = ({ modalRef, employeeData, isAssign }) => {
                             onChange={(e) => setRemarks(e.target.value)}
                             value={remarks}
                             id="message"
+                            maxLength={maxCharacters}
                             rows="4"
                             className="block border-t-1 h-40 p-2.5 w-full text-sm text-gray-900 bg-white"
                         ></textarea>
                     </div>
                 </div>
-                <div className="mt-5 mb-12">
+                <div className="mt-5 mb-[25px]">
                     <form method="dialog" className="flex justify-end">
                         <button
                             onClick={isAssign ? reassignInquiry : saveAssignee}
