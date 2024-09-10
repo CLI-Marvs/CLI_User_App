@@ -80,9 +80,8 @@ const TicketTable = ({ concernData }) => {
                             ${
                                 row.status === "Resolved"
                                     ? row.ispinned === 1 ? "bg-custom-lightestgreen" : "bg-custom-grayF1"
-                                    : row.ispinned === 1 ? "bg-custom-lightestgreen" : "bg-white"
-                            }
-                        `}
+                                    : row.ispinned === 1 ? "bg-custom-lightestgreen" : "bg-white"}`
+                                }
                         >
                             {/*  <td className='w-10 flex justify-center'>
                             <input
