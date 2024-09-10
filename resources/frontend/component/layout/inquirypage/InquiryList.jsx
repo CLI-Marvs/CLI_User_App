@@ -368,7 +368,6 @@ const InquiryList = () => {
                         )}
                     </div>
                 </div>
-
                 <div className="max-w-[954PX]">
                     <div className="flex justify-start items-center h-12 mt-[15px] px-6 gap-[60px] bg-white rounded-t-lg mb-1 ">
                         <div className="relative mr-4 ">
@@ -431,7 +430,7 @@ const InquiryList = () => {
                                     <button
                                         key={label}
                                         onClick={() => handleDayClick(label)}
-                                        className={`flex justify-center items-center border border-custom-lightgreen text-custom-lightgreen h-[25px] rounded-[55px] p-[2px] ${activeDayButton === label ? "bglightgreen-btn hover:bg-custom-lightgreen" : "gradient-btn2hover"
+                                        className={`flex justify-center items-center  text-custom-lightgreen h-[25px] rounded-[55px] p-[2px] ${activeDayButton === label ? "bglightgreen-btn hover:bg-custom-lightgreen" : "gradient-btn2hover border-custom-lightgreen"
                                             } hover:bg-custom-lightestgreen ${label === "3+ Days" ? "w-[76px]" : label === "2 Days" ? "w-[69px]" : "w-[60px]"
                                             }`}
                                     >
