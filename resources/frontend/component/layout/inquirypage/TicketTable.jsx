@@ -30,9 +30,6 @@ const TicketTable = ({ concernData }) => {
         }
 
     };
-    
-
-    console.log("concernData", concernData);
    
     const navigateToThread = (items) => {
         getMessages(items.ticket_id);

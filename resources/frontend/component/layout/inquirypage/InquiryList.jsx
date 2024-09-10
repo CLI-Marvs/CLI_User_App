@@ -23,8 +23,10 @@ const InquiryList = () => {
         setStatusFilter,
         setSearchFilter,
         statusFilter,
-        searhFilter
-       /*  setHasAttachments,
+        searhFilter,
+        user,
+        setSpecificAssigneeCsr,
+        /*  setHasAttachments,
         hasAttachments */
     } = useStateContext();
 
@@ -35,10 +37,8 @@ const InquiryList = () => {
     const [status, setStatus] = useState("");
     const [hasAttachments, setHasAttachments] = useState(false);
 
-
     const [activeDayButton, setActiveDayButton] = useState(null);
     const [assignedToMeActive, setAssignedToMeActive] = useState(false);
-
 
     const [startDate, setStartDate] = useState(null);
     const [isFilterVisible, setIsFilterVisible] = useState(false);
@@ -46,7 +46,6 @@ const InquiryList = () => {
     const [selectedOption, setSelectedOption] = useState("All");
     const [lastActivity, setLastActivity] = useState(null);
     const filterBoxRef = useRef(null);
-
 
     const handleCheckboxChange = () => {
         setHasAttachments(!hasAttachments);
@@ -57,13 +56,12 @@ const InquiryList = () => {
     };
 
     const handleRefresh = () => {
-        if(daysFilter) {
+        if (daysFilter) {
             setDaysFilter(null);
         } else if (statusFilter) {
             setStatusFilter("All");
         } else if (searhFilter) {
             setSearchFilter({});
-
         }
         getAllConcerns();
     };
@@ -108,41 +106,64 @@ const InquiryList = () => {
             setStatusFilter(null);
             setCurrentPage(0);
             setSearchFilter("");
+            setActiveDayButton(null);
         } else if (option === "Resolve") {
             setStatusFilter("Resolved");
-            setDaysFilter(null);
             setCurrentPage(0);
             setSearchFilter("");
         } else if (option === "Unresolve") {
             setStatusFilter("unresolved");
-            setDaysFilter(null);
             setCurrentPage(0);
             setSearchFilter("");
         }
     };
 
-
     const handleStatus = (e) => {
         setStatus(e.target.value);
-    }
+    };
+
+    // const handleDayClick = (day) => {
+    //     let newValue = 0;
+
+    //     if (day === "3+ Days") {
+    //         newValue = 3;
+    //     } else if (day === "2 Days") {
+    //         newValue = 2;
+    //     } else if (day === "1 Day") {
+    //         newValue = 1;
+    //     } else if(day === "") {
+    //         setDaysFilter("");
+    //     }
+    //     setActiveDayButton((prev) => (prev === day ? null : day));
+    //     setDaysFilter(newValue);
+    //     setCurrentPage(0);
+    // };
 
     const handleDayClick = (day) => {
-        let newValue = 0;
+        setActiveDayButton((prev) => {
+            if (prev === day) {
+                setDaysFilter("");
+                return null;
+            }
 
-        if (day === "3+ Days") {
-            newValue = 3;
-        } else if (day === "2 Days") {
-            newValue = 2;
-        } else if (day === "1 Day") {
-            newValue = 1;
-        }
-        setActiveDayButton((prev) => (prev === day ? null : day));
-        setDaysFilter(newValue);
+            let newValue = 0;
+            if (day === "3+ Days") {
+                newValue = 3;
+            } else if (day === "2 Days") {
+                newValue = 2;
+            } else if (day === "1 Day") {
+                newValue = 1;
+            }
+            setDaysFilter(newValue);
+
+            return day;
+        });
         setCurrentPage(0);
     };
 
     const handleAssignedToMeClick = () => {
         setAssignedToMeActive(!assignedToMeActive);
+        setSpecificAssigneeCsr(user?.employee_email);
     };
 
     const updateLastActivity = () => {
@@ -158,10 +179,10 @@ const InquiryList = () => {
     };
 
     const getTimeDifference = () => {
-        if (!lastActivity) return '0 minutes';
+        if (!lastActivity) return "0 minutes";
         const now = new Date();
-        const diff = Math.floor((now - lastActivity) / (1000 * 60)); 
-        return diff === 0 ? '0 minutes' : `${diff} minutes ago`;
+        const diff = Math.floor((now - lastActivity) / (1000 * 60));
+        return diff === 0 ? "0 minutes" : `${diff} minutes ago`;
     };
 
     const handleSearch = () => {
@@ -172,7 +193,7 @@ const InquiryList = () => {
             ticket,
             startDate,
             status,
-            hasAttachments
+            hasAttachments,
         });
         setDaysFilter(null);
         setStatusFilter(null);
@@ -203,7 +224,7 @@ const InquiryList = () => {
 
     useEffect(() => {
         updateLastActivity();
-    }, [searhFilter, statusFilter,daysFilter]);
+    }, [searhFilter, statusFilter, daysFilter]);
 
     return (
         <>
@@ -247,7 +268,7 @@ const InquiryList = () => {
                                 />
                             </svg>
                         </div>
-                        
+
                         {isFilterVisible && (
                             <div
                                 ref={filterBoxRef}
@@ -332,11 +353,17 @@ const InquiryList = () => {
                                             {" "}
                                             Status
                                         </label>
-                                        <select className="w-full border-b-1 outline-none" onChange={handleStatus} value={status}>
+                                        <select
+                                            className="w-full border-b-1 outline-none"
+                                            onChange={handleStatus}
+                                            value={status}
+                                        >
                                             <option value="">
                                                 Select Status
                                             </option>
-                                            <option value="Inquiry Feedback Received">Inquiry Feedback Received</option>
+                                            <option value="Inquiry Feedback Received">
+                                                Inquiry Feedback Received
+                                            </option>
                                             <option value="Replied By">
                                                 Replied By
                                             </option>
@@ -349,7 +376,11 @@ const InquiryList = () => {
                                         </select>
                                     </div>
                                     <div className="mt-5 flex gap-5">
-                                        <input type="checkbox" checked={hasAttachments} onChange={handleCheckboxChange} />
+                                        <input
+                                            type="checkbox"
+                                            checked={hasAttachments}
+                                            onChange={handleCheckboxChange}
+                                        />
                                         <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
                                             {" "}
                                             Has Attachments
@@ -414,30 +445,52 @@ const InquiryList = () => {
                         </div>
                         <div className="flex gap-2">
                             <div className="flex space-x-2">
-                                <button
-                                    onClick={handleAssignedToMeClick}
-                                    className={`flex items-center border text-custom-lightgreen h-[29px] w-[125px] rounded-[55px] p-[2px] ${assignedToMeActive
-                                            ? "bglightgreen-btn"
-                                            : "gradient-btn2hover "
+                                {user?.department === "CSR" && (
+                                    <button
+                                        onClick={handleAssignedToMeClick}
+                                        className={`flex items-center border text-custom-lightgreen h-[29px] w-[125px] rounded-[55px] p-[2px] ${
+                                            assignedToMeActive
+                                                ? "bglightgreen-btn"
+                                                : "gradient-btn2hover "
                                         }`}
-                                >
-                                    <p className={`h-full w-full flex justify-center items-center  text-xs montserrat-semibold rounded-[50px] 
-                                            ${assignedToMeActive ? "bglightgreen-btn" : "bg-white hover:bg-custom-lightestgreen"}
-                                        `}>
-                                        Assigned to me
-                                    </p>
-                                </button>
+                                    >
+                                        <p
+                                            className={`h-full w-full flex justify-center items-center  text-xs montserrat-semibold rounded-[50px]   ${
+                                                assignedToMeActive
+                                                    ? "bglightgreen-btn"
+                                                    : "bg-white hover:bg-custom-lightestgreen"
+                                            }
+                                        `}
+                                        >
+                                            Assigned to me
+                                        </p>
+                                    </button>
+                                )}
                                 {dayButtonLabels.map((label) => (
                                     <button
                                         key={label}
                                         onClick={() => handleDayClick(label)}
-                                        className={`flex justify-center items-center border border-custom-lightgreen text-custom-lightgreen h-[25px] rounded-[55px] p-[2px] ${activeDayButton === label ? "bglightgreen-btn hover:bg-custom-lightgreen" : "gradient-btn2hover"
-                                            } hover:bg-custom-lightestgreen ${label === "3+ Days" ? "w-[76px]" : label === "2 Days" ? "w-[69px]" : "w-[60px]"
-                                            }`}
+                                        className={`flex justify-center items-center border border-custom-lightgreen text-custom-lightgreen h-[25px] rounded-[55px] p-[2px] ${
+                                            activeDayButton === label
+                                                ? "bglightgreen-btn hover:bg-custom-lightgreen"
+                                                : "gradient-btn2hover"
+                                        } hover:bg-custom-lightestgreen ${
+                                            label === "3+ Days"
+                                                ? "w-[76px]"
+                                                : label === "2 Days"
+                                                ? "w-[69px]"
+                                                : "w-[60px]"
+                                        }`}
                                     >
-                                        <p className={`h-full w-full flex justify-center items-center text-xs montserrat-semibold rounded-[50px]
-                                            ${activeDayButton === label ? "bglightgreen-btn" : "bg-white hover:bg-custom-lightestgreen"}
-                                            `}>
+                                        <p
+                                            className={`h-full w-full flex justify-center items-center text-xs montserrat-semibold rounded-[50px]
+                                            ${
+                                                activeDayButton === label
+                                                    ? "bglightgreen-btn"
+                                                    : "bg-white hover:bg-custom-lightestgreen"
+                                            }
+                                            `}
+                                        >
                                             {label}
                                         </p>
                                     </button>
@@ -445,7 +498,12 @@ const InquiryList = () => {
                             </div>
                         </div>
                         <div className="flex justify-end items-center w-full">
-                            <button className="flex justify-center items-center h-[30px] w-[30px] hover:bg-custom-grayF1 rounded-full text-custom-bluegreen hover:text-custom-lightblue" onClick={handleRefresh}><MdRefresh /></button>
+                            <button
+                                className="flex justify-center items-center h-[30px] w-[30px] hover:bg-custom-grayF1 rounded-full text-custom-bluegreen hover:text-custom-lightblue"
+                                onClick={handleRefresh}
+                            >
+                                <MdRefresh />
+                            </button>
                         </div>
                     </div>
                     <div className="w-[954px]">
@@ -460,7 +518,7 @@ const InquiryList = () => {
 
                     <div className="flex justify-end items-center h-12 px-6 gap-2 bg-white rounded-b-lg">
                         <p className="text-sm text-gray-400">
-                          Last account activity: {getTimeDifference()}
+                            Last account activity: {getTimeDifference()}
                         </p>
                     </div>
                     <div className="flex justify-end mt-4">
