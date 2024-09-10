@@ -25,6 +25,7 @@ export const ContextProvider = ({ children }) => {
     const [notifications, setNotifications] = useState([]);
     const [unreadCount, setUnreadCount] = useState(0);
     const [notifStatus, setNotifStatus] = useState("");
+    const [specificAssigneeCsr, setSpecificAssigneeCsr] = useState(null);
     const [currentPage, setCurrentPage] = useState(0);
     const [notifCurrentPage, setNotifCurrentPage] = useState(0);
     const [searchFilter, setSearchFilter] = useState({});
@@ -58,6 +59,7 @@ export const ContextProvider = ({ children }) => {
                     page: currentPage + 1,
                     days: daysFilter || "",
                     status: statusFilter || "",
+                    specificAssigneeCsr: specificAssigneeCsr || ""
                    /*  has_attachments: hasAttachments, */
                 }).toString();
 
@@ -330,7 +332,8 @@ export const ContextProvider = ({ children }) => {
                 setData,
                 searchFilter,
                 statusFilter,
-                specificInquiry
+                specificInquiry,
+                setSpecificAssigneeCsr
             }}
         >
             {children}

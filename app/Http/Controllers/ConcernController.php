@@ -332,6 +332,7 @@ class ConcernController extends Controller
         $days = $request->query("days", null);
         $status = $request->query("status", null);
         $search = $request->query("search", null);
+        $specificAssignCSR = $request->query('specificAssigneeCsr', null);
 
         $assignedInquiries = $this->getAssignInquiries($employee->employee_email);
         $ticketIds = $assignedInquiries->pluck('ticket_id')->toArray();
@@ -350,19 +351,15 @@ class ConcernController extends Controller
             $query->orderBy('created_at', 'desc');
         }
 
-        if ($days !== null) {
-            $startOfDay = now()->subDays($days)->startOfDay();
-            $endOfDay = now()->subDays($days)->endOfDay();
-            $query->whereBetween('concerns.created_at', [$startOfDay, $endOfDay]);
-        }
-
         if ($employee->department !== 'CSR') {
             $query->whereIn('concerns.ticket_id', $ticketIds);
         }
-
-        if ($status) {
-            $query->where('status', $status);
+        
+        if($specificAssignCSR !== null) {
+            $query->whereIn('concerns.ticket_id', $ticketIds);
         }
+
+        $this->daysAndStatusFilter($status, $days, $query);
 
         if ($search) {
             $searchParams = json_decode($search, true);
@@ -376,6 +373,21 @@ class ConcernController extends Controller
         }
     }
 
+    private function daysAndStatusFilter($status, $days, $query) 
+    {
+        if ($status && $days !== null) {
+            $startOfDay = now()->subDays($days)->startOfDay();
+            $endOfDay = now()->subDays($days)->endOfDay();
+            $query->where('status', $status)
+                   ->whereBetween('concerns.created_at', [$startOfDay, $endOfDay]);
+        } else if($status) {
+            $query->where('status', $status);
+        } else if ($days !== null) {
+            $startOfDay = now()->subDays($days)->startOfDay();
+            $endOfDay = now()->subDays($days)->endOfDay();
+            $query->whereBetween('concerns.created_at', [$startOfDay, $endOfDay]);
+        }
+    }
     private function getLatestLogsSubquery()
     {
         return InquiryLogs::select('ticket_id', 'message_log')
@@ -813,7 +825,6 @@ class ConcernController extends Controller
         $user = $request->user();
 
         $employees = Employee::select('firstname', 'employee_email', 'department')
-            ->where('department', '!=', 'CSR')
             ->where('employee_email', '!=', $user->employee_email)
             ->get();
         return response()->json($employees);
