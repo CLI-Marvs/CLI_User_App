@@ -96,8 +96,8 @@ const AssignDetails = ({ logMessages }) => {
                         logData = JSON.parse(item.received_inquiry);
                     } else if (item.admin_reply) {
                         logData = JSON.parse(item.admin_reply);
-                    } else if (item.requestor_reply) {
-                        logData = JSON.parse(item.requestor_reply);
+                    } else if (item.buyer_reply) {
+                        logData = JSON.parse(item.buyer_reply);
                     } else if (item.assign_to) {
                         logData = JSON.parse(item.assign_to);
                     } else if (item.inquiry_status) {
