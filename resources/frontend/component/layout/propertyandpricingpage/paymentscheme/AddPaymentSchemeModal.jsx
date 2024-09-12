@@ -3,7 +3,7 @@ import { IoMdArrowDropdown } from "react-icons/io";
 const AddPaymentSchemeModal = ({ modalRef }) => {
 
     const [message, setMessage] = useState("");
-    const maxCharacters = 500;
+    const maxCharacters = 350;
 
     return (
         <dialog className="modal w-[475px] rounded-lg backdrop:bg-black/50" ref={modalRef}>
