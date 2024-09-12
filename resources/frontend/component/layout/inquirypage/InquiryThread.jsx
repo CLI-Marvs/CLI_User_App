@@ -197,7 +197,7 @@ const InquiryThread = () => {
                                 viewBox="0 0 24 24"
                                 strokeWidth={1.5}
                                 stroke="currentColor"
-                                className="size-4 absolute right-3 top-3 text-custom-bluegreen hover:bg-gray-200"
+                                className="size-[24px] absolute right-3 top-3 text-custom-bluegreen hover:bg-gray-200"
                             >
                                 <path
                                     strokeLinecap="round"

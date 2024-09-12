@@ -20,6 +20,7 @@ const InquiryFormModal = ({ modalRef }) => {
     const [fileName, setFileName] = useState("");
     const [message, setMessage] = useState("");
     const { user, getAllConcerns } = useStateContext();
+    const maxCharacters = 500;
 
     const handleFileChange = (event) => {
         const selectedFiles = Array.from(event.target.files);
@@ -96,7 +97,7 @@ const InquiryFormModal = ({ modalRef }) => {
                         method="dialog"
                         className="pt-1 flex justify-end -mr-[75px]"
                     >
-                        <button className="flex justify-center w-10 h-10 items-center rounded-full bg-custombg3 text-custom-bluegreen hover:bg-custombg">
+                        <button className="flex justify-center w-10 h-10 items-center rounded-full text-custom-bluegreen hover:bg-custombg">
                             ✕
                         </button>
                     </form>
@@ -114,7 +115,7 @@ const InquiryFormModal = ({ modalRef }) => {
                     </div>
                     <div className="flex flex-col gap-2">
                         <div
-                            className={`flex items-center border rounded-[5px] overflow-hidden border-custombg`}
+                            className={`flex items-center border border-custom-grayF1 rounded-[5px] overflow-hidden`}
                         >
                             <span className="text-custom-gray81 text-sm bg-custom-grayFA flex pl-3 py-1 w-[240px]">
                                 First Name
@@ -129,7 +130,7 @@ const InquiryFormModal = ({ modalRef }) => {
                             />
                         </div>
                         <div
-                            className={`flex items-center border rounded-[5px] overflow-hidden`}
+                            className={`flex items-center border border-custom-grayF1 rounded-[5px] overflow-hidden`}
                         >
                             <span className="text-custom-gray81 text-sm bg-custom-grayFA flex w-[240px] pl-3 py-1">
                                 Last Name
@@ -144,7 +145,7 @@ const InquiryFormModal = ({ modalRef }) => {
                             />
                         </div>
                         <div
-                            className={`flex items-center border rounded-[5px] overflow-hidden`}
+                            className={`flex items-center border border-custom-grayF1 rounded-[5px] overflow-hidden`}
                         >
                             <span className="text-custom-gray81 text-sm bg-custom-grayFA flex w-[240px] pl-3 py-1">
                                 Email
@@ -159,7 +160,7 @@ const InquiryFormModal = ({ modalRef }) => {
                             />
                         </div>
                         <div
-                            className={`flex items-center border rounded-[5px] overflow-hidden `}
+                            className={`flex items-center border border-custom-grayF1 rounded-[5px] overflow-hidden `}
                         >
                             <span className="text-custom-gray81 text-sm bg-custom-grayFA flex w-[240px] pl-3 py-1">
                                 Mobile Number
@@ -174,7 +175,7 @@ const InquiryFormModal = ({ modalRef }) => {
                             />
                         </div>
                         <div
-                            className={`flex items-center border rounded-[5px] overflow-hidden`}
+                            className={`flex items-center border border-custom-grayF1 rounded-[5px] overflow-hidden`}
                         >
                             <span className="text-custom-gray81 text-sm bg-custom-grayFA flex items-center w-[250px] tablet:w-[175px] mobile:w-[270px] mobile:text-xs -mr-3 pl-3 py-1">
                                 Property
@@ -215,13 +216,13 @@ const InquiryFormModal = ({ modalRef }) => {
                                 </span>
                             </div>
                         </div>
-                        <div className="border border-t-1"></div>
+                        <div className="border border-t-1 border-[#D9D9D9]"></div>
                         <div className="mt-3">
                             <p className="text-sm font-semibold mobile:text-xs">
                                 Optional
                             </p>
                         </div>
-                        <div className="flex items-center border rounded-[5px] overflow-hidden">
+                        <div className="flex items-center border border-custom-grayF1 rounded-[5px] overflow-hidden">
                             <span className="text-custom-gray81 text-sm bg-custom-grayFA flex items-center w-[250px] tablet:w-[175px] mobile:w-[270px] mobile:text-xs -mr-4 pl-3 py-1">
                                 I am
                             </span>
@@ -257,7 +258,7 @@ const InquiryFormModal = ({ modalRef }) => {
                                 </span>
                             </div>
                         </div>
-                        <div className="flex items-center border rounded-[5px] overflow-hidden">
+                        <div className="flex items-center border border-custom-grayF1 rounded-[5px] overflow-hidden">
                             <span className="text-custom-gray81 text-sm bg-custom-grayFA flex w-[240px] pl-3 py-1">
                                 Contract Number
                             </span>
@@ -270,7 +271,7 @@ const InquiryFormModal = ({ modalRef }) => {
                                 placeholder=""
                             />
                         </div>
-                        <div className="flex items-center border rounded-[5px] overflow-hidden">
+                        <div className="flex items-center border border-custom-grayF1 rounded-[5px] overflow-hidden">
                             <span className="text-custom-gray81 text-sm bg-custom-grayFA flex items-center w-[250px] tablet:w-[175px] mobile:w-[270px] mobile:text-xs -mr-3 pl-3 py-1">
                                 Concern regarding
                             </span>
@@ -326,7 +327,7 @@ const InquiryFormModal = ({ modalRef }) => {
                                 </span>
                             </div>
                         </div>
-                        <div className="flex items-center border rounded-[5px] overflow-hidden">
+                        <div className="flex items-center border border-custom-grayF1 rounded-[5px] overflow-hidden">
                             <span className="text-custom-gray81 text-sm bg-custom-grayFA flex w-[240px] pl-3 py-1">
                                 Unit/Lot Number
                             </span>
@@ -340,17 +341,17 @@ const InquiryFormModal = ({ modalRef }) => {
                             />
                         </div>
                     </div>
-                    <div className="border border-b-1 border-gray-300 my-2"></div>
+                    <div className="border border-b-1 border-[#D9D9D9] my-2"></div>
                     <div
-                        className={`border-gray-300 rounded-[5px] bg-custom-grayFA border`}
+                        className={`border-custom-grayF1 rounded-[5px] bg-custom-grayFA border`}
                     >
                         <div className="flex items-center justify-between">
                             <p className="text-custom-gray81 text-sm bg-custom-grayFA pl-3  montserrat-semibold flex-grow mobile:text-xs mobile:w-[170px]">
                                 Details (Required)
                             </p>
-                            <span className="bg-white text-sm2 text-gray-400 font-normal py-3 border pl-2 pr-12 mobile:pr-1 mobile:text-xs ml-auto rounded-r-[4px]">
+                            <span className="bg-white text-sm2 text-gray-400 font-normal py-3 border border-custom-grayF1 pl-2 pr-12 mobile:pr-1 mobile:text-xs ml-auto rounded-r-[4px]">
                                 {" "}
-                                0/500 characters
+                                {message.length}/500 characters
                             </span>
                         </div>
                         <div className="flex gap-3 ">
@@ -358,10 +359,11 @@ const InquiryFormModal = ({ modalRef }) => {
                                 id="details_message"
                                 value={message}
                                 onChange={(e) => setMessage(e.target.value)}
+                                maxLength={maxCharacters}
                                 name="details_message"
                                 placeholder="Write your concern here."
                                 rows="4"
-                                className={`block border-t-1  rounded-[5px] h-40 p-2.5 w-full text-sm text-gray-900 bg-white border-gray-300`}
+                                className={`block border-t-1 border-custom-grayF1 rounded-[5px] h-40 p-2.5 w-full text-sm text-gray-900 bg-white`}
                             ></textarea>
                         </div>
                     </div>
@@ -416,7 +418,7 @@ const InquiryFormModal = ({ modalRef }) => {
                             <button
                                 type="submit"
                                 onClick={handleSubmit}
-                                className="h-10 text-white px-10 rounded-lg gradient-btn2 flex justify-center items-center gap-2 tablet:w-full"
+                                className="h-10 text-white px-10 rounded-lg gradient-btn2 flex justify-center items-center gap-2 tablet:w-full hover:shadow-custom4"
                             >
                                 Submit
                                 <IoIosSend />

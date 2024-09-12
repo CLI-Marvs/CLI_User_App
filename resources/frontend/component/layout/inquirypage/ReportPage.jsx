@@ -18,6 +18,7 @@ import {
 import apiService from "../../servicesApi/apiService";
 import debounce from "lodash/debounce";
 import { useStateContext } from "../../../context/contextprovider";
+import { IoMdArrowDropdown } from "react-icons/io";
 
 const data = [
     { name: "01", Resolved: 0, Unresolved: 0 },
@@ -188,8 +189,8 @@ const ReportPage = () => {
 
     return (
         <div className="h-screen bg-custom-grayFA p-4">   
-            <div className="bg-white p-4 rounded-xl ">
-                <div className="w-80 mb-2">
+            <div className="bg-white p-4 rounded-[10px]">
+                <div className="w-[300px] mb-2">
                     <p className="text-lg montserrat-bold">
                         Resolved vs. Unresolved Chart
                     </p>
@@ -216,21 +217,8 @@ const ReportPage = () => {
                                     Property Management
                                 </option>
                             </select>
-                            <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3 bg-custom-grayFA">
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    className="h-4 w-4 text-custom-gray81"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                    strokeWidth="2"
-                                >
-                                    <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        d="M19 9l-7 7-7-7"
-                                    />
-                                </svg>
+                            <span className="absolute inset-y-0 right-0 flex items-center text-custom-gray81 pr-3 pl-3 bg-custom-grayFA pointer-events-none">
+                               <IoMdArrowDropdown/>
                             </span>
                         </div>
                     </div>
