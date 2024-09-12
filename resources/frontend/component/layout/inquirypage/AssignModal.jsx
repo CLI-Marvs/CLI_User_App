@@ -10,9 +10,7 @@ const AssignModal = ({ modalRef, employeeData, isAssign }) => {
     const navigate = useNavigate();
     const maxCharacters = 500;
 
-    console.log("isAssign", isAssign);
     const saveAssignee = async () => {
-        console.log("trigger here new");
         if(!employeeData || Object.keys(employeeData).length === 0) {
             alert("please select employee first");
             return;
@@ -36,8 +34,6 @@ const AssignModal = ({ modalRef, employeeData, isAssign }) => {
 
 
     const reassignInquiry = async () => {
-        console.log("trigger here to reassign");
-        console.log("employeeData", employeeData);
         if(!employeeData || Object.keys(employeeData).length === 0) {
             alert("please select employee first");
             return;

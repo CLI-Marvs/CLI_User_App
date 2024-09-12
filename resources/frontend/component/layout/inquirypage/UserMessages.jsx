@@ -1,6 +1,7 @@
 import React from "react";
 import FolderFile from "../../../../../public/Images/folder_file.svg";
 import Kent from "../../../../../public/Images/kent.png";
+import defaultAvatar from "../../../../../public/Images/AdminSilouette.svg";
 import moment from "moment";
 
 const UserMessages = ({ items }) => {
@@ -9,11 +10,12 @@ const UserMessages = ({ items }) => {
     const formatTime = (createdAt) => {
         return moment(createdAt).fromNow();
     };
+
     return (
     <div className="w-full">
             <div className="flex w-full mt-10 gap-2">
                 <div className="h-12 w-12">
-                    <img className="rounded-full" src={Kent} alt="" />
+                    <img className="rounded-full" src={defaultAvatar} alt="" />
                 </div>
                 <div className="flex flex-col">
                     <p className="font-bold text-custom-bluegreen">Buyer</p>

@@ -11,6 +11,7 @@ const AdminMessages = ({ items }) => {
         return moment(createdAt).fromNow();
     };
 
+    console.log("user", user);
     const dynamicName =
         user?.id === parseInt(items?.admin_id) ? "You" : "CLI Support";
     return (
@@ -25,7 +26,7 @@ const AdminMessages = ({ items }) => {
                     </p>
                 </div>
                 <div className="h-12 w-12">
-                    <img className="rounded-full" src={AdminLogo} alt="Admin Logo" />
+                    <img className="rounded-full" src={user?.profile_picture ? user?.profile_picture : AdminLogo} alt="Admin Logo" />
                 </div>
             </div>
             <div className="w-full mt-2 mb-5 pr-12">

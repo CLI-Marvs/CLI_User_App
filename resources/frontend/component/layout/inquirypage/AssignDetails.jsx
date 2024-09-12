@@ -55,13 +55,6 @@ const AssignDetails = ({ logMessages }) => {
                             <p className="text-sm text-[#616161]">
                                 {details.message_tag} {details.resolve_by}
                             </p>
-                            <p className="text-xs text-custom-gray space-x-1">
-                                (
-                                <span className="truncate">
-                                    {details.remarks}
-                                </span>
-                                )
-                            </p>
                         </div>
                     </>
                 );
@@ -96,7 +89,7 @@ const AssignDetails = ({ logMessages }) => {
                         logData = JSON.parse(item.received_inquiry);
                     } else if (item.admin_reply) {
                         logData = JSON.parse(item.admin_reply);
-                    } else if (item.requestor_repy) {
+                    } else if (item.requestor_reply) {
                         logData = JSON.parse(item.requestor_reply);
                     } else if (item.assign_to) {
                         logData = JSON.parse(item.assign_to);
