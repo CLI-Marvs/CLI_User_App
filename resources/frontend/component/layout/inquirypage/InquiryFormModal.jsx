@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import ReCAPTCHA from "react-google-recaptcha";
-import { IoIosSend, IoMdTrash } from "react-icons/io";
+import { IoIosSend, IoMdArrowDropdown, IoMdTrash } from "react-icons/io";
 import apiService from "../../servicesApi/apiService";
 import { useStateContext } from "../../../context/contextprovider";
 
@@ -198,21 +198,8 @@ const InquiryFormModal = ({ modalRef }) => {
                                         Property 3
                                     </option>
                                 </select>
-                                <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3 bg-custom-grayFA">
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        className="h-4 w-4 text-custom-gray81"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke="currentColor"
-                                        strokeWidth="2"
-                                    >
-                                        <path
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                            d="M19 9l-7 7-7-7"
-                                        />
-                                    </svg>
+                                <span className="absolute inset-y-0 right-0 flex  items-center pr-3 pl-3 bg-custom-grayFA text-custom-gray81 pointer-events-none">
+                                    <IoMdArrowDropdown/>
                                 </span>
                             </div>
                         </div>
@@ -240,21 +227,8 @@ const InquiryFormModal = ({ modalRef }) => {
                                     <option value="Buyer">Buyer</option>
                                     <option value="Broker">Broker</option>
                                 </select>
-                                <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3  bg-custom-grayFA">
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        className="h-4 w-4 text-custom-gray81"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke="currentColor"
-                                        strokeWidth="2"
-                                    >
-                                        <path
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                            d="M19 9l-7 7-7-7"
-                                        />
-                                    </svg>
+                                <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3  bg-custom-grayFA text-custom-gray81 pointer-events-none">
+                                   <IoMdArrowDropdown/>
                                 </span>
                             </div>
                         </div>
@@ -309,21 +283,8 @@ const InquiryFormModal = ({ modalRef }) => {
                                         Other Concerns
                                     </option>
                                 </select>
-                                <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3 bg-custom-grayFA">
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        className="h-4 w-4 text-custom-gray81"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke="currentColor"
-                                        strokeWidth="2"
-                                    >
-                                        <path
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                            d="M19 9l-7 7-7-7"
-                                        />
-                                    </svg>
+                                <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3 bg-custom-grayFA text-custom-gray81 pointer-events-none">
+                                    <IoMdArrowDropdown/>
                                 </span>
                             </div>
                         </div>

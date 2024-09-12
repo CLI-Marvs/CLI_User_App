@@ -1,5 +1,6 @@
 import React from 'react'
 import { FaRegTrashAlt } from 'react-icons/fa'
+import { IoMdArrowDropdown } from 'react-icons/io'
 import { MdFormatListBulletedAdd } from 'react-icons/md'
 
 const AddPriceVersionModal = ({ modalRef }) => {
@@ -18,18 +19,16 @@ const AddPriceVersionModal = ({ modalRef }) => {
                 </div>
                 <div className="flex flex-col gap-2">
                     <div className="flex items-center w-[375px] border rounded-md overflow-hidden">
-                        <span className="text-custom-gray81 bg-custombg flex items-center w-full -mr-3 pl-3 py-1">Property</span>
+                        <span className="text-custom-gray81 bg-custombg flex items-center w-full -mr-3 pl-3 py-1 text-sm">Property</span>
                         <div className="relative w-full">
-                            <select name="concern" className="appearance-none w-[144px] px-4 py-1 bg-white focus:outline-none border-0">
+                            <select name="property" className="appearance-none w-[144px] px-4 py-1 bg-white focus:outline-none border-0">
                                 <option value="">Select Property</option>
                                 <option value="concern1">Type 1</option>
                                 <option value="concern2">Type 2</option>
                                 <option value="concern3">Type 3</option>
                             </select>
-                            <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3 bg-custombg">
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-custom-gray81" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                                </svg>
+                            <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3 bg-custombg text-custom-gray81 pointer-events-none">
+                               <IoMdArrowDropdown/>
                             </span>
                         </div>
                     </div>
