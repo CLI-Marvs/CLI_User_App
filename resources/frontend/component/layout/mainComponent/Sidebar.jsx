@@ -1,73 +1,98 @@
-import React, {useEffect, useState} from 'react'
+import React, { useEffect, useState } from "react";
 
 import {
-  Card,
-  Typography,
-  List,
-  ListItem,
-  ListItemPrefix,
-  ListItemSuffix,
-  Chip,
-  Accordion,
-  AccordionHeader,
-  AccordionBody,
+    Card,
+    Typography,
+    List,
+    ListItem,
+    ListItemPrefix,
+    ListItemSuffix,
+    Chip,
+    Accordion,
+    AccordionHeader,
+    AccordionBody,
 } from "@material-tailwind/react";
-import { Link } from 'react-router-dom';
-import apiService from '../../servicesApi/apiService';
-import { useStateContext } from '../../../context/contextprovider';
+import { Link, useLocation } from "react-router-dom";
+import apiService from "../../servicesApi/apiService";
+import { useStateContext } from "../../../context/contextprovider";
 const Sidebar = () => {
-  const {unreadCount} = useStateContext();
-  const [activeItem, setActiveItem] = useState(null);
+    const { unreadCount, getCount } = useStateContext();
+    const [activeItem, setActiveItem] = useState(null);
+    const location = useLocation();
+
+    const handleItemClick = (item) => {
+        setActiveItem(item);
+    };
 
 
-  const handleItemClick = (item) => {
-    setActiveItem(item);
-  };
+    useEffect(() => {
+      getCount();
+    }, [location]);
+    return (
+        <>
+            <Card className=" w-[230px] max-w-[230px] p-4 pt-0 rounded-none bg-custom-grayFA">
+                <List className="px-3 mt-6">
+                    <Link to="/notification">
+                        <ListItem
+                            className={`flex text-sm items-center h-[39px] pl-5 gap-2 rounded-[50px] ${
+                                activeItem === "notification" ||
+                                location.pathname.startsWith("/notification")
+                                    ? "bg-custom-lightestgreen text-custom-solidgreen font-semibold"
+                                    : " hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
+                            } `}
+                            onClick={() => handleItemClick("notification")}
+                        >
+                            Notifications
+                            <ListItemSuffix>
+                                <Chip
+                                    value={unreadCount}
+                                    size="sm"
+                                    variant="ghost"
+                                    color="blue-gray"
+                                    className="rounded-md gradient-btn2 mr-32 text-white"
+                                />
+                            </ListItemSuffix>
+                        </ListItem>
+                    </Link>
 
-  return (
-    <>
-      <Card className=" w-[230px] max-w-[230px] p-4 pt-0 rounded-none bg-custom-grayFA">
-        <List className='px-3 mt-6'>
-          <Link to="/notification">
-            <ListItem 
-              className={`flex text-sm items-center h-[39px] pl-5 gap-2 rounded-[50px] ${activeItem === 'notification' ||location.pathname.startsWith('/notification') ? 'bg-custom-lightestgreen text-custom-solidgreen font-semibold' : ' hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen '} `}
-              onClick={() => handleItemClick('notification')}
-            >
-              Notifications
-              <ListItemSuffix>
-                <Chip
-                  value={unreadCount}
-                  size="sm"
-                  variant="ghost"
-                  color="blue-gray"
-                  className="rounded-md gradient-btn2 mr-32 text-white"
-                />
-              </ListItemSuffix>
-            </ListItem>
-          </Link>
-          
-          <Link to="/inquirymanagement/inquirylist">
-            <ListItem
-              className={`h-[39px] text-sm mb-2 pl-5 gap-2 rounded-[50px] ${activeItem === 'inquiry' || location.pathname.startsWith('/inquirymanagement') ? 'bg-custom-lightestgreen text-custom-solidgreen font-semibold' : 'hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen '}`}
-              onClick={() => handleItemClick('inquiry')}
-            >
-              Inquiry Management
-            </ListItem>
-          </Link>
-          <div className='mt-3 mb-1 px-4'>
-            <p className='text-[14px] font-bold bg-gradient-to-r from-custom-bluegreen via-custom-lightgreen to-custom-solidgreen bg-clip-text text-transparent'>Coming Soon</p>
-          </div>
-          <div className=' text-sm p-4 h-auto rounded-[10px] text-gray-400 border border-custom-lightestgreen flex flex-col gap-4 cursor-not-allowed'>
-            <p>Property & Pricing</p>
-            <p>Sales Management</p>
-            <p>Broker Management</p>
-            <p className='leading-none'>Transaction <br/>Management</p>
-            <p className='leading-none'>Document<br/> Management</p>
-            <p className='leading-none'>Property<br/> Management</p>
+                    <Link to="/inquirymanagement/inquirylist">
+                        <ListItem
+                            className={`h-[39px] text-sm mb-2 pl-5 gap-2 rounded-[50px] ${
+                                activeItem === "inquiry" ||
+                                location.pathname.startsWith(
+                                    "/inquirymanagement"
+                                )
+                                    ? "bg-custom-lightestgreen text-custom-solidgreen font-semibold"
+                                    : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
+                            }`}
+                            onClick={() => handleItemClick("inquiry")}
+                        >
+                            Inquiry Management
+                        </ListItem>
+                    </Link>
+                    <div className="mt-3 mb-1 px-4">
+                        <p className="text-[14px] font-bold bg-gradient-to-r from-custom-bluegreen via-custom-lightgreen to-custom-solidgreen bg-clip-text text-transparent">
+                            Coming Soon
+                        </p>
+                    </div>
+                    <div className=" text-sm p-4 h-auto rounded-[10px] text-gray-400 border border-custom-lightestgreen flex flex-col gap-4 cursor-not-allowed">
+                        <p>Property & Pricing</p>
+                        <p>Sales Management</p>
+                        <p>Broker Management</p>
+                        <p className="leading-none">
+                            Transaction <br />
+                            Management
+                        </p>
+                        <p className="leading-none">
+                            Document
+                            <br /> Management
+                        </p>
+                        <p className="leading-none">
+                            Property
+                            <br /> Management
+                        </p>
 
-
-
-            {/*  <ListItem className={`h-7 mb-2 pl-5 gap-2 rounded-2xl text-custom-solidgreen hover:bg-custom-lightestgreen hover:font-semibold`} >
+                        {/*  <ListItem className={`h-7 mb-2 pl-5 gap-2 rounded-2xl text-custom-solidgreen hover:bg-custom-lightestgreen hover:font-semibold`} >
                 Property & Pricing
               </ListItem>
               <ListItem className={`h-7 mb-2 pl-5 gap-2 rounded-2xl text-custom-solidgreen hover:bg-custom-lightestgreen hover:font-semibold`}>
@@ -86,13 +111,9 @@ const Sidebar = () => {
               <ListItem className={`h-7 mb-2 pl-5 gap-2 rounded-2xl text-custom-solidgreen hover:bg-custom-lightestgreen hover:font-semibold`}>
                 Property Management
               </ListItem> */}
-          </div>
-          
-          
+                    </div>
 
-
-
-          {/*  <Accordion
+                    {/*  <Accordion
             open={open === 1}
             icon={
               <ChevronDownIcon
@@ -134,7 +155,7 @@ const Sidebar = () => {
               </List>
             </AccordionBody>
           </Accordion> */}
-          {/*  <hr className="my-1 mx-3 border-1 border-blue-gray-100" />
+                    {/*  <hr className="my-1 mx-3 border-1 border-blue-gray-100" />
   
           <ListItem className='h-4 mb-1 px-6 gap-2 text-neutral font-normal'>
            Settings
@@ -145,10 +166,10 @@ const Sidebar = () => {
           <ListItem className='h-4 mb-1 px-6 gap-2 font-semibold'>
          
           </ListItem> */}
-        </List>
-      </Card>
-    </>
-  )
-}
+                </List>
+            </Card>
+        </>
+    );
+};
 
-export default Sidebar
+export default Sidebar;
