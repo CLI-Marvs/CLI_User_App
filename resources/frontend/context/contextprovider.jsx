@@ -336,7 +336,8 @@ export const ContextProvider = ({ children }) => {
                 statusFilter,
                 specificInquiry,
                 setSpecificAssigneeCsr,
-                specificAssigneeCsr
+                specificAssigneeCsr,
+                getCount
             }}
         >
             {children}
