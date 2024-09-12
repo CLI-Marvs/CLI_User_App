@@ -277,6 +277,7 @@ const InquiryList = () => {
                             </svg>
                             <input
                                 type="text"
+                                readOnly={true}
                                 onClick={toggleFilterBox}
                                 className="h-[47px] w-[606px] rounded-[10px] pl-9 pr-6 text-sm"
                                 placeholder="Search"
@@ -288,7 +289,7 @@ const InquiryList = () => {
                                 viewBox="0 0 24 24"
                                 strokeWidth={1.5}
                                 stroke="currentColor"
-                                className="size-[24px] absolute right-3 top-3 text-custom-bluegreen hover:bg-gray-200"
+                                className="size-[24px] absolute right-3 top-3 text-custom-bluegreen hover:bg-gray-200 cursor-pointer"
                             >
                                 <path
                                     strokeLinecap="round"
@@ -428,7 +429,7 @@ const InquiryList = () => {
                         )}
                     </div>
                 </div>
-                <div className="max-w-[954PX]">
+                <div className="max-w-[954px] p-[20px]">
                     <div className="flex justify-start items-center h-12 mt-[15px] px-6 gap-[60px] bg-white rounded-t-lg mb-1 ">
                         <div className="relative mr-4 ">
                             <button
@@ -534,7 +535,7 @@ const InquiryList = () => {
                             </button>
                         </div>
                     </div>
-                    <div className="w-[954px]">
+                    <div className="w-[914px]">
                         {data && data.length === 0 ? (
                             <p className="text-center text-gray-500 py-4">
                                 No data found

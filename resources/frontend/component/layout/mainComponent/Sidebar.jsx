@@ -26,11 +26,11 @@ const Sidebar = () => {
 
   return (
     <>
-      <Card className=" w-[230px] max-w-[230px] p-4 pt-0 rounded-none bg-custom-grayFA">
+      <Card className="shadow-none w-[230px] max-w-[230px] p-4 pt-0 rounded-none bg-custom-grayFA">
         <List className='px-3 mt-6'>
           <Link to="/notification">
             <ListItem 
-              className={`flex text-sm items-center h-[39px] pl-5 gap-2 rounded-[50px] ${activeItem === 'notification' ||location.pathname.startsWith('/notification') ? 'bg-custom-lightestgreen text-custom-solidgreen font-semibold' : ' hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen '} `}
+              className={`flex text-sm items-center h-[39px] pl-5 gap-2 rounded-[50px] ${activeItem === 'notification' && location.pathname.startsWith('/notification') ? 'bg-custom-lightestgreen text-custom-solidgreen font-semibold' : ' hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen '} `}
               onClick={() => handleItemClick('notification')}
             >
               Notifications
@@ -48,7 +48,7 @@ const Sidebar = () => {
           
           <Link to="/inquirymanagement/inquirylist">
             <ListItem
-              className={`h-[39px] text-sm mb-2 pl-5 gap-2 rounded-[50px] ${activeItem === 'inquiry' || location.pathname.startsWith('/inquirymanagement') ? 'bg-custom-lightestgreen text-custom-solidgreen font-semibold' : 'hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen '}`}
+              className={`h-[39px] text-sm mb-2 pl-5 pr-1 overflow-hidden gap-2 rounded-[50px] ${activeItem === 'inquiry' || location.pathname.startsWith('/inquirymanagement') ? 'bg-custom-lightestgreen text-custom-solidgreen font-semibold' : 'hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen '}`}
               onClick={() => handleItemClick('inquiry')}
             >
               Inquiry Management
