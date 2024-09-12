@@ -91,7 +91,7 @@ const AddPriceVersionModal = ({ modalRef }) => {
                         </div>
                     </table>
                     <div className='flex justify-center my-3'>
-                        <button className='w-[129px] h-[37px] text-white montserrat-semibold text-sm gradient-btn2 rounded-[10px]'>Save Versions</button>
+                        <button className='w-[129px] h-[37px] text-white montserrat-semibold text-sm gradient-btn2 rounded-[10px] hover:shadow-custom4'>Save Versions</button>
                     </div>
                 </div>
             </div>
