@@ -27,7 +27,7 @@ const PricingMasterList = () => {
     return (
       <div className='h-screen max-w-[1800px] bg-custom-grayFA px-4'>
           <div className=''>
-            <button onClick={handleOpenModal} className='montserrat-semibold text-sm px-2 gradient-btn w-[214px] h-[37px] rounded-[10px] text-white'>Add Property and Pricing</button>
+            <button onClick={handleOpenModal} className='montserrat-semibold text-sm px-2 gradient-btn w-[214px] h-[37px] rounded-[10px] text-white hover:shadow-custom4'>Add Property and Pricing</button>
           </div>
           <div className="relative flex justify-start gap-3 mt-3">
               <div className="relative w-[582px]">
@@ -57,7 +57,7 @@ const PricingMasterList = () => {
                       viewBox="0 0 24 24"
                       strokeWidth={1.5}
                       stroke="currentColor"
-                      className="size-4 absolute right-3 top-3 text-custom-bluegreen hover:size-[17px]"
+                      className="size-[24px] absolute right-3 top-3 text-custom-bluegreen hover:size-[26px]"
                   >
                     
                       <path

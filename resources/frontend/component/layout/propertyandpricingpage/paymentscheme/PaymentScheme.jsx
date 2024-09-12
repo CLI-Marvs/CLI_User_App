@@ -32,7 +32,7 @@ const PaymentScheme = () => {
                 </tr>
               </thead>
               <tbody className='mt-{10px} rounded-[10px]'>
-                <tr className='flex min-h-[68px]  shadow-custom4 text-sm justify-start gap-[30px] px-[12px] bg-white  rounded-t-[10px]'>
+                <tr className='flex min-h-[68px]  shadow-custom5 text-sm justify-start gap-[30px] px-[12px] bg-white  rounded-t-[10px]'>
                   <td className='flex flex-col justify-center w-[100px] pr-3 py-3'>
                       <p className='font-bold text-custom-solidgreen '>Approved</p>
                       <p>3/3/2024</p>

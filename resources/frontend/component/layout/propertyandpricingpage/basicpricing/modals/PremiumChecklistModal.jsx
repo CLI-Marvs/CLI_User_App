@@ -5,8 +5,8 @@ const PremiumChecklistModal = ({modalRef2}) => {
     <dialog className="modal w-[385px] rounded-lg bg-white backdrop:bg-black/50" ref={modalRef2}>
     <div className=' px-[50px] mb-5 rounded-[10px]'>
         <div className=''>
-            <form method="dialog" className="pt-3 flex justify-end -mr-[40px]">
-                <button className="flex justify-center w-10 h-10 items-center rounded-full bg-custombg3 text-custom-bluegreen hover:bg-custombg">
+            <form method="dialog" className="pt-2 flex justify-end -mr-[45px]">
+                <button className="flex justify-center w-10 h-10 items-center rounded-full  text-custom-bluegreen hover:bg-custombg">
                     ✕
                 </button>
             </form>
@@ -39,7 +39,7 @@ const PremiumChecklistModal = ({modalRef2}) => {
             
         </div>
         <div className='flex justify-start mt-4 mb-8'>
-            <button className='w-[151px] h-[37px] text-white montserrat-semibold text-sm gradient-btn5 rounded-[10px]'>Apply Premiums</button>
+            <button className='w-[151px] h-[37px] text-white montserrat-semibold text-sm gradient-btn5 rounded-[10px] hover:shadow-custom4'>Apply Premiums</button>
         </div>
     </div>
 </dialog>
