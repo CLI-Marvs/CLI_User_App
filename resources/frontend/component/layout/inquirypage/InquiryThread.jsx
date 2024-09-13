@@ -456,7 +456,7 @@ const InquiryThread = () => {
 
                         <div className="mt-2 mb-3 relative">                      {/* boxref */}
                             {/* Container for chat input and attached files */}
-                            <div className="h-[61px] w-[668] gradient-btn2 rounded-[14px] p-[4px] relative">
+                            <div className="relative">
                                 {/* Display attached files inside the same container */}
                                 {attachedFiles.length > 0 && (
                                     <div className="mb-2">
@@ -482,56 +482,58 @@ const InquiryThread = () => {
                                     </div>
                                 )}
 
-                                {/* Input field */}
-                                <input
-                                    name="chat"
-                                    type="text"
-                                    placeholder="Reply..."
-                                    value={chatMessage}
-                                    onChange={(e) =>
-                                        setChatMessage(e.target.value)
-                                    }
-                                    className="h-full w-full pl-2 pr-14 border-none rounded-[10px] text-sm focus:outline-none"
-                                />
-
-                                {/* File attachment button */}
-                                <div className="absolute bottom-5 right-[85px] flex items-center">
+                                <div className="h-[61px] w-[668] gradient-btn2 rounded-[14px] p-[4px] ">
                                     <input
-                                        type="file"
-                                        id="fileInput"
-                                        multiple
-                                        style={{ display: "none" }}
-                                        onChange={handleFileAttach}
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={() =>
-                                            document
-                                                .getElementById("fileInput")
-                                                .click()
+                                        name="chat"
+                                        type="text"
+                                        placeholder="Reply..."
+                                        value={chatMessage}
+                                        onChange={(e) =>
+                                            setChatMessage(e.target.value)
                                         }
-                                    >
-                                        <BsPaperclip className="h-5 w-5 text-custom-solidgreen hover:text-gray-700" />
-                                    </button>
+                                        className="h-full w-full pl-2 pr-14 border-none rounded-[10px] text-sm focus:outline-none"
+                                    />
+
+                                    {/* File attachment button */}
+                                    <div className="absolute bottom-5 right-[85px] flex items-center">
+                                        <input
+                                            type="file"
+                                            id="fileInput"
+                                            multiple
+                                            style={{ display: "none" }}
+                                            onChange={handleFileAttach}
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() =>
+                                                document
+                                                    .getElementById("fileInput")
+                                                    .click()
+                                            }
+                                        >
+                                            <BsPaperclip className="h-5 w-5 text-custom-solidgreen hover:text-gray-700" />
+                                        </button>
+                                    </div>
+                                    {/* Send button */}
+                                    <div className="absolute bottom-4 right-4 flex items-center">
+                                        <button
+                                            type="button"
+                                            onClick={submitMessage}
+                                            disabled={!chatMessage.trim() || loading}
+                                            className={`flex w-[68px] h-[31px] rounded-lg font-semibold text-white text-sm justify-center items-center gradient-background3 hover:shadow-custom4 ${loading ? 'cursor-not-allowed' : '' }`}
+                                        >
+                                            {loading ? (
+                                                <CircularProgress className="spinnerSize" />
+                                            ) : (
+                                                <>
+                                                    Send
+                                                    <IoIosSend className="h-3 w-3 text-white" />
+                                                </>
+                                            )}
+                                        </button>
+                                    </div>
                                 </div>
-                                {/* Send button */}
-                                <div className="absolute bottom-4 right-4 flex items-center">
-                                    <button
-                                        type="button"
-                                        onClick={submitMessage}
-                                        disabled={!chatMessage.trim() || loading}
-                                        className={`flex w-[68px] h-[31px] rounded-lg font-semibold text-white text-sm justify-center items-center gradient-background3 hover:shadow-custom4 ${loading ? 'cursor-not-allowed' : '' }`}
-                                    >
-                                        {loading ? (
-                                            <CircularProgress className="spinnerSize" />
-                                        ) : (
-                                            <>
-                                                Send
-                                                <IoIosSend className="h-3 w-3 text-white" />
-                                            </>
-                                        )}
-                                    </button>
-                                </div>
+                                
                             </div>
                         </div>
                     </div>
