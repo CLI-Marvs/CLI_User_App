@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-const Modal = ({ isOpen, onClose, attachment }) => {
+const SampleModal = ({ isOpen, onClose, attachment }) => {
     if (!isOpen) return null;
 
     const getFileType = (url) => {
@@ -49,4 +49,4 @@ const Modal = ({ isOpen, onClose, attachment }) => {
     );
 };
 
-export default Modal;
+export default SampleModal;
