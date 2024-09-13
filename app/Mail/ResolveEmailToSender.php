@@ -8,6 +8,7 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Mail\Mailables\Headers;
 
 class ResolveEmailToSender extends Mailable
 {
@@ -16,12 +17,14 @@ class ResolveEmailToSender extends Mailable
     protected $buyer_email;
 
     protected $remarks;
+    
+    protected $messageId;
 
-
-    public function __construct($buyer_email, $remarks)
+    public function __construct($buyer_email, $remarks, $messageId = null)
     {
         $this->buyer_email = $buyer_email;
         $this->remarks = $remarks;
+        $this->messageId = $messageId;
     }
 
     /**
@@ -45,6 +48,24 @@ class ResolveEmailToSender extends Mailable
                 'remarks' => $this->remarks
             ],
         );
+    }
+
+
+    public function headers(): Headers
+    {
+
+        $headers = new Headers();
+
+        if ($this->messageId) {
+            $headers->messageId = $this->messageId;
+            $headers->references = [$this->messageId];
+            $headers->text = [
+                'In-Reply-To' => $this->messageId,
+                'X-Custom-Header' => 'Custom Value',
+            ];
+        }
+
+        return $headers;
     }
 
     /**

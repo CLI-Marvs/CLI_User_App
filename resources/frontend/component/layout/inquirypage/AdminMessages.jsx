@@ -12,10 +12,6 @@ const AdminMessages = ({ items }) => {
         return moment(createdAt).fromNow();
     };
 
-    
-
-    console.log("attachgmentData", attachmentData);
-
     const dynamicName =
         user?.id === parseInt(items?.admin_id) ? "You" : `CLI ${user?.department}`;
     return (

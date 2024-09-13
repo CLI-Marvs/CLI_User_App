@@ -377,32 +377,6 @@ class ConcernController extends Controller
         }
     }
 
-    // public function uploadToGCS($files)
-    // {
-    //     $fileLinks = [];
-    //     if ($files) {
-    //         $storage = new StorageClient([
-    //             'keyFilePath' => storage_path('keys/super-app-anaplan-2cbacd9f0192.json')
-    //         ]);
-    //         $bucket = $storage->bucket('super-app-storage');
-
-    //         foreach ($files as $file) {
-    //             $fileName = uniqid() . '.' . $file->getClientOriginalExtension();
-    //             $filePath = 'concerns/' . $fileName;
-
-    //             $bucket->upload(
-    //                 fopen($file->getPathname(), 'r'),
-    //                 ['name' => $filePath]
-    //             );
-
-    //             $fileLink = $bucket->object($filePath)->signedUrl(new \DateTime('tomorrow'));
-
-    //             $fileLinks[] = $fileLink;
-    //         }
-    //     }
-    //     return $fileLinks;
-    // }
-
     public function uploadToGCS($files)
     {
         $fileLinks = [];
@@ -413,53 +387,66 @@ class ConcernController extends Controller
             $bucket = $storage->bucket('super-app-storage');
 
             foreach ($files as $file) {
-                $fileName = uniqid() . '.' . $file->extension();
+                $fileName = uniqid() . '.' . $file->getClientOriginalExtension();
                 $filePath = 'concerns/' . $fileName;
 
                 $bucket->upload(
                     fopen($file->getPathname(), 'r'),
-                    [
-                        'name' => $filePath,
-                    ]
+                    ['name' => $filePath]
                 );
 
-                $fileLinks[] = $filePath; 
+                $fileLink = $bucket->object($filePath)->signedUrl(new \DateTime('tomorrow'));
+
+                $fileLinks[] = $fileLink;
             }
         }
         return $fileLinks;
     }
 
-
-    public function getFileUrl($filePath)
-    {
-        $storage = new StorageClient([
-            'keyFilePath' => storage_path('keys/super-app-anaplan-2cbacd9f0192.json')
-        ]);
-        $bucket = $storage->bucket('super-app-storage');
-        $object = $bucket->object($filePath);
-
-        $signedUrl = $object->signedUrl(new \DateTime('15 minutes'), [
-            'version' => 'v4',
-            'method' => 'GET'
-        ]);
-
-        return $signedUrl;
-    }
-
-    //*For message
-    // public function getMessage($ticketId)
+    // public function uploadToGCS($files)
     // {
-    //     try {
-    //         $message = Messages::where('ticket_id', $ticketId)
-    //             ->orderBy('created_at', 'desc')
-    //             ->get();
+    //     $fileLinks = [];
+    //     if ($files) {
+    //         $storage = new StorageClient([
+    //             'keyFilePath' => storage_path('keys/super-app-anaplan-2cbacd9f0192.json')
+    //         ]);
+    //         $bucket = $storage->bucket('super-app-storage');
 
-    //         return response()->json($message);
-    //     } catch (\Exception $e) {
-    //         return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
+    //         foreach ($files as $file) {
+    //             $fileName = uniqid() . '.' . $file->extension();
+    //             $filePath = 'concerns/' . $fileName;
+
+    //             $bucket->upload(
+    //                 fopen($file->getPathname(), 'r'),
+    //                 [
+    //                     'name' => $filePath,
+    //                 ]
+    //             );
+
+    //             $fileLinks[] = $filePath; 
+    //         }
     //     }
+    //     return $fileLinks;
     // }
 
+
+    // public function getFileUrl($filePath)
+    // {
+    //     $storage = new StorageClient([
+    //         'keyFilePath' => storage_path('keys/super-app-anaplan-2cbacd9f0192.json')
+    //     ]);
+    //     $bucket = $storage->bucket('super-app-storage');
+    //     $object = $bucket->object($filePath);
+
+    //     $signedUrl = $object->signedUrl(new \DateTime('15 minutes'), [
+    //         'version' => 'v4',
+    //         'method' => 'GET'
+    //     ]);
+
+    //     return $signedUrl;
+    // }
+
+    //*For message
     public function getMessage($ticketId)
     {
         try {
@@ -467,21 +454,34 @@ class ConcernController extends Controller
                 ->orderBy('created_at', 'desc')
                 ->get();
 
-            foreach ($message as $msg) {
-                if ($msg->attachment) {
-                    $attachments = json_decode($msg->attachment, true);
-                    foreach ($attachments as &$attachment) {
-                        $attachment = $this->getFileUrl($attachment); 
-                    }
-                    $msg->attachment = json_encode($attachments);
-                }
-            }
-
             return response()->json($message);
         } catch (\Exception $e) {
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
         }
     }
+
+    // public function getMessage($ticketId)
+    // {
+    //     try {
+    //         $message = Messages::where('ticket_id', $ticketId)
+    //             ->orderBy('created_at', 'desc')
+    //             ->get();
+
+    //         foreach ($message as $msg) {
+    //             if ($msg->attachment) {
+    //                 $attachments = json_decode($msg->attachment, true);
+    //                 foreach ($attachments as &$attachment) {
+    //                     $attachment = $this->getFileUrl($attachment); 
+    //                 }
+    //                 $msg->attachment = json_encode($attachments);
+    //             }
+    //         }
+
+    //         return response()->json($message);
+    //     } catch (\Exception $e) {
+    //         return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
+    //     }
+    // }
 
 
     public function getMessageId($ticketId)
@@ -1005,12 +1005,13 @@ class ConcernController extends Controller
         try {
             $concerns = Concerns::where('ticket_id', $request->ticket_id)->first();
 
+            $messageId = $request->message_id;
             $concerns->status = "Resolved";
             $concerns->resolve_from = $request->department;
             $concerns->save();
 
             $this->inquiryResolveLogs($request);
-            ResolveJobToSender::dispatch($request->buyer_email, $request->remarks);
+            ResolveJobToSender::dispatch($request->buyer_email, $request->remarks, $messageId);
         } catch (\Exception $e) {
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
         }
