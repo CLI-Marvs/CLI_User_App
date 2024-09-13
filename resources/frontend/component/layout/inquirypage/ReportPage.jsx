@@ -71,7 +71,7 @@ const CustomTooltip = ({ active, payload }) => {
     if (active && payload && payload.length) {
         return (
             <div className="bg-white p-2 shadow-lg rounded">
-               {/*  <p>{`${payload[0].name}`}</p> */}
+                {/*  <p>{`${payload[0].name}`}</p> */}
                 <p>{`Resolved: ${payload[0].value}`}</p>
                 <p>{`Unresolved: ${payload[1].value}`}</p>
             </div>
@@ -94,22 +94,22 @@ const monthNames = {
     '10': 'October',
     '11': 'November',
     '12': 'December',
-  };
+};
 
 const CustomTooltip1 = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
         const monthName = monthNames[label] || label;
-      return (
-        <div className="custom-tooltip bg-white p-2 shadow-md rounded">
-          <p className="label">{`${monthName}`}</p>
-          <p>{`Resolved: ${payload[0].value}`}</p>
-          <p>{`Unresolved: ${payload[1].value}`}</p>
-        </div>
-      );
+        return (
+            <div className="custom-tooltip bg-white p-2 shadow-md rounded">
+                <p className="label">{`${monthName}`}</p>
+                <p>{`Resolved: ${payload[0].value}`}</p>
+                <p>{`Unresolved: ${payload[1].value}`}</p>
+            </div>
+        );
     }
-  
+
     return null;
-  };
+};
 
 const ReportPage = () => {
     const [dataSet, setDataSet] = useState([]);
@@ -188,7 +188,7 @@ const ReportPage = () => {
     }, [department, propertyMonth, month]);
 
     return (
-        <div className="h-screen bg-custom-grayFA p-4">   
+        <div className="h-screen bg-custom-grayFA p-4">
             <div className="bg-white p-4 rounded-[10px]">
                 <div className="w-[300px] mb-2">
                     <p className="text-lg montserrat-bold">
@@ -218,7 +218,7 @@ const ReportPage = () => {
                                 </option>
                             </select>
                             <span className="absolute inset-y-0 right-0 flex items-center text-custom-gray81 pr-3 pl-3 bg-custom-grayFA pointer-events-none">
-                               <IoMdArrowDropdown/>
+                                <IoMdArrowDropdown />
                             </span>
                         </div>
                     </div>
@@ -274,20 +274,35 @@ const ReportPage = () => {
                         Inquiries per category
                     </p>
                     <div className="border border-t-1"></div>
-                    <div className="mt-4 pl-4 pr-28">
-                        <div className="flex items-center border rounded-md overflow-hidden w-full">
-                            <span className="text-custom-gray81 bg-custom-grayFA flex w-34 pl-2 py-1">
+                    <div className="mt-4 w-[300px]">
+                        <div className="flex items-center border rounded-md overflow-hidden">
+                            <span className="text-custom-gray81 bg-custom-grayFA flex items-center text-sm w-[150px] -mr-3 pl-3 py-1">
                                 For the month of
                             </span>
-                            <input
-                                name="month"
-                                type="text"
-                                className="w-36 pl-2 focus:outline-none"
-                                placeholder="Enter month (e.g., August)"
-                                value={month}
-                                onChange={handleInputChange}
-                                onKeyDown={handleKeyDown}
-                            />
+                            <div className="relative w-[159px]">
+                                <select
+                                    name="concern"
+                                    className="appearance-none w-full px-4 py-1 bg-white focus:outline-none border-0"
+                                /* value={department}
+                                onChange={(e) => setDepartment(e.target.value)} */
+                                >
+                                    <option value="january">January</option>
+                                    <option value="february">February</option>
+                                    <option value="march">March</option>
+                                    <option value="april">April</option>
+                                    <option value="may">May</option>
+                                    <option value="june">June</option>
+                                    <option value="july">July</option>
+                                    <option value="august">August</option>
+                                    <option value="september">September</option>
+                                    <option value="october">October</option>
+                                    <option value="november">November</option>
+                                    <option value="december">December</option>
+                                </select>
+                                <span className="absolute inset-y-0 right-0 flex items-center text-custom-gray81 pr-3 pl-3 bg-custom-grayFA pointer-events-none">
+                                    <IoMdArrowDropdown />
+                                </span>
+                            </div>
                         </div>
                     </div>
                     <div className="flex">
@@ -395,20 +410,35 @@ const ReportPage = () => {
                         Inquiries per property
                     </p>
                     <div className="border border-t-1"></div>
-                    <div className="mt-4 pl-4 pr-48">
-                        <div className="flex items-center border rounded-md overflow-hidden w-full">
-                            <span className="text-custom-gray81 bg-custom-grayFA flex w-34 pl-2 py-1">
+                    <div className="mt-4 w-[300px]">
+                        <div className="flex items-center border rounded-md overflow-hidden">
+                            <span className="text-custom-gray81 bg-custom-grayFA flex items-center text-sm w-[150px] -mr-3 pl-3 py-1">
                                 For the month of
                             </span>
-                            <input
-                                name="contact"
-                                type="text"
-                                onKeyDown={handleKeyDownProperty}
-                                value={propertyMonth}
-                                onChange={handleInputChangeProperty}
-                                className="w-36 pl-2 focus:outline-none"
-                                placeholder=""
-                            />
+                            <div className="relative w-[159px]">
+                                <select
+                                    name="concern"
+                                    className="appearance-none w-full px-4 py-1 bg-white focus:outline-none border-0"
+                                /* value={department}
+                                onChange={(e) => setDepartment(e.target.value)} */
+                                >
+                                    <option value="january">January</option>
+                                    <option value="february">February</option>
+                                    <option value="march">March</option>
+                                    <option value="april">April</option>
+                                    <option value="may">May</option>
+                                    <option value="june">June</option>
+                                    <option value="july">July</option>
+                                    <option value="august">August</option>
+                                    <option value="september">September</option>
+                                    <option value="october">October</option>
+                                    <option value="november">November</option>
+                                    <option value="december">December</option>
+                                </select>
+                                <span className="absolute inset-y-0 right-0 flex items-center text-custom-gray81 pr-3 pl-3 bg-custom-grayFA pointer-events-none">
+                                    <IoMdArrowDropdown />
+                                </span>
+                            </div>
                         </div>
                     </div>
                     <div>
@@ -485,13 +515,13 @@ const ReportPage = () => {
                             <Tooltip content={<CustomTooltip />} />
 
                             <Bar
-                                dataKey="resolved" 
+                                dataKey="resolved"
                                 fill="#348017"
                                 barSize={15}
                                 radius={[0, 4, 4, 0]}
                             >
                                 <LabelList
-                                    dataKey="resolved" 
+                                    dataKey="resolved"
                                     position="right"
                                     fill="#4a5568"
                                 />
