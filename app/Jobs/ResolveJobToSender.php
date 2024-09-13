@@ -18,14 +18,14 @@ class ResolveJobToSender implements ShouldQueue
 
     protected $buyer_email;
     protected $remarks;
+    protected $messageId;
 
 
-
-
-    public function __construct($buyer_email, $remarks)
+    public function __construct($buyer_email, $remarks, $messageId = null)
     {
         $this->buyer_email = $buyer_email;
         $this->remarks = $remarks;
+        $this->messageId = $messageId;
 
         Log::info('Files being sent', ['buyer_email' => $this->buyer_email]);
 
@@ -37,6 +37,6 @@ class ResolveJobToSender implements ShouldQueue
     public function handle(Mailer $mailer): void
     {
         $mailer->to($this->buyer_email)
-            ->send(new ResolveEmailToSender($this->buyer_email, $this->remarks));
+            ->send(new ResolveEmailToSender($this->buyer_email, $this->remarks, $this->messageId));
     }
 }

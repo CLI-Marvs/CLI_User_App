@@ -357,12 +357,13 @@ class ConcernController extends Controller
             $concerns->save();
 
             $this->inquiryReceivedLogs($request, $ticketId);
-            
+
             $fileLinks = $this->uploadToGCS($files);
             $attachment = !empty($fileLinks) ? json_encode($fileLinks) : null;
             $messages = new Messages();
             $messages->admin_email = $request->admin_email;
             $messages->admin_id = $request->admin_id;
+            $messages->admin_profile_picture = $request->admin_profile_picture;
             $messages->attachment = $attachment;
             $messages->ticket_id = $concerns->ticket_id;
             $messages->details_message = $request->message;
@@ -401,6 +402,99 @@ class ConcernController extends Controller
         }
         return $fileLinks;
     }
+
+    // public function uploadToGCS($files)
+    // {
+    //     $fileLinks = [];
+    //     if ($files) {
+    //         $storage = new StorageClient([
+    //             'keyFilePath' => storage_path('keys/super-app-anaplan-2cbacd9f0192.json')
+    //         ]);
+    //         $bucket = $storage->bucket('super-app-storage');
+
+    //         foreach ($files as $file) {
+    //             $fileName = uniqid() . '.' . $file->extension();
+    //             $filePath = 'concerns/' . $fileName;
+
+    //             $bucket->upload(
+    //                 fopen($file->getPathname(), 'r'),
+    //                 [
+    //                     'name' => $filePath,
+    //                 ]
+    //             );
+
+    //             $fileLinks[] = $filePath; 
+    //         }
+    //     }
+    //     return $fileLinks;
+    // }
+
+
+    // public function getFileUrl($filePath)
+    // {
+    //     $storage = new StorageClient([
+    //         'keyFilePath' => storage_path('keys/super-app-anaplan-2cbacd9f0192.json')
+    //     ]);
+    //     $bucket = $storage->bucket('super-app-storage');
+    //     $object = $bucket->object($filePath);
+
+    //     $signedUrl = $object->signedUrl(new \DateTime('15 minutes'), [
+    //         'version' => 'v4',
+    //         'method' => 'GET'
+    //     ]);
+
+    //     return $signedUrl;
+    // }
+
+    //*For message
+    public function getMessage($ticketId)
+    {
+        try {
+            $message = Messages::where('ticket_id', $ticketId)
+                ->orderBy('created_at', 'desc')
+                ->get();
+
+            return response()->json($message);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
+        }
+    }
+
+    // public function getMessage($ticketId)
+    // {
+    //     try {
+    //         $message = Messages::where('ticket_id', $ticketId)
+    //             ->orderBy('created_at', 'desc')
+    //             ->get();
+
+    //         foreach ($message as $msg) {
+    //             if ($msg->attachment) {
+    //                 $attachments = json_decode($msg->attachment, true);
+    //                 foreach ($attachments as &$attachment) {
+    //                     $attachment = $this->getFileUrl($attachment); 
+    //                 }
+    //                 $msg->attachment = json_encode($attachments);
+    //             }
+    //         }
+
+    //         return response()->json($message);
+    //     } catch (\Exception $e) {
+    //         return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
+    //     }
+    // }
+
+
+    public function getMessageId($ticketId)
+    {
+        try {
+            $messageId = Concerns::where('ticket_id', $ticketId)->pluck('message_id')->first();
+
+            return response()->json($messageId);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
+        }
+    }
+
 
     public function pinConcern(Request $request, $concernId)
     {
@@ -487,7 +581,7 @@ class ConcernController extends Controller
         if ($employee->department !== 'CSR') {
             $query->whereIn('concerns.ticket_id', $ticketIds);
         }
-        
+
         $this->daysAndStatusFilter($status, $days, $query);
         $this->specificAssigneeAndDaysFilter($specificAssignCSR, $query, $ticketIds, $days);
 
@@ -505,7 +599,7 @@ class ConcernController extends Controller
 
     private function specificAssigneeAndDaysFilter($specificAssignCSR, $query, $ticketIds, $days)
     {
-        if($specificAssignCSR !== null && $days !== null) {
+        if ($specificAssignCSR !== null && $days !== null) {
             $query->whereIn('concerns.ticket_id', $ticketIds);
             if ($days === "3+") {
                 $query->where('concerns.created_at', '<', now()->subDays(3)->startOfDay());
@@ -514,23 +608,22 @@ class ConcernController extends Controller
                 $endOfDay = now()->subDays($days)->endOfDay();
                 $query->whereBetween('concerns.created_at', [$startOfDay, $endOfDay]);
             }
-            
-        } else if($specificAssignCSR !== null) {
+        } else if ($specificAssignCSR !== null) {
             $query->whereIn('concerns.ticket_id', $ticketIds);
         }
     }
 
-    private function daysAndStatusFilter($status, $days, $query) 
+    private function daysAndStatusFilter($status, $days, $query)
     {
         if ($status && $days !== null) {
             if ($days === "3+") {
                 $query->where('status', $status)
-                      ->where('concerns.created_at', '<', now()->subDays(3)->startOfDay());
+                    ->where('concerns.created_at', '<', now()->subDays(3)->startOfDay());
             } else {
                 $startOfDay = now()->subDays($days)->startOfDay();
                 $endOfDay = now()->subDays($days)->endOfDay();
                 $query->where('status', $status)
-                      ->whereBetween('concerns.created_at', [$startOfDay, $endOfDay]);
+                    ->whereBetween('concerns.created_at', [$startOfDay, $endOfDay]);
             }
         } else if ($status) {
             $query->where('status', $status);
@@ -544,7 +637,7 @@ class ConcernController extends Controller
             }
         }
     }
-    
+
     private function getLatestLogsSubquery()
     {
         return InquiryLogs::select('ticket_id', 'message_log')
@@ -833,11 +926,11 @@ class ConcernController extends Controller
             $emailContent = "Hey " . $request->firstname . ", inquiry " . $request->ticketId . " has been assigned to you.";
             $prevInquiry = InquiryAssignee::where('ticket_id', $request->ticketId)->first();
 
-            
+
             $concern = Concerns::where("ticket_id", $request->ticketId)->first();
             $concern->resolve_from = $request->department;
             $concern->save();
-            
+
             $prevInquiry->email = $request->email;
             $prevInquiry->save();
 
@@ -912,12 +1005,13 @@ class ConcernController extends Controller
         try {
             $concerns = Concerns::where('ticket_id', $request->ticket_id)->first();
 
+            $messageId = $request->message_id;
             $concerns->status = "Resolved";
             $concerns->resolve_from = $request->department;
             $concerns->save();
 
             $this->inquiryResolveLogs($request);
-            ResolveJobToSender::dispatch($request->buyer_email, $request->remarks);
+            ResolveJobToSender::dispatch($request->buyer_email, $request->remarks, $messageId);
         } catch (\Exception $e) {
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
         }
@@ -947,34 +1041,6 @@ class ConcernController extends Controller
     }
 
 
-
-    //*For message
-    public function getMessage($ticketId)
-    {
-        try {
-            /*    dd($ticketId); */
-            $message = Messages::where('ticket_id', $ticketId)
-                ->orderBy('created_at', 'desc')
-                ->get();
-
-            return response()->json($message);
-        } catch (\Exception $e) {
-            return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
-        }
-    }
-
-
-
-    public function getMessageId($ticketId)
-    {
-        try {
-            $messageId = Concerns::where('ticket_id', $ticketId)->pluck('message_id')->first();
-
-            return response()->json($messageId);
-        } catch (\Exception $e) {
-            return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
-        }
-    }
 
     //*For Employees
     public function getAllEmployeeList(Request $request)

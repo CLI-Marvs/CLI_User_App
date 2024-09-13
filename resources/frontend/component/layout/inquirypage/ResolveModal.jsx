@@ -3,9 +3,13 @@ import { useStateContext } from "../../../context/contextprovider";
 import apiService from "../../servicesApi/apiService";
 
 const ResolveModal = ({ modalRef, ticketId, dataRef }) => {
-    const {getAllConcerns, user, getInquiryLogs} = useStateContext();
+    const {getAllConcerns, user, getInquiryLogs, data} = useStateContext();
     const [remarks, setRemarks] = useState("");
     const maxCharacters = 500;
+    const dataConcern =
+    data?.find((items) => items.ticket_id === ticketId) || {};
+
+    const messageId = dataConcern?.message_id || null;
 
     const updateStatus = async () => {
         try {
@@ -14,7 +18,8 @@ const ResolveModal = ({ modalRef, ticketId, dataRef }) => {
                 admin_name: user?.firstname,
                 department: user?.department,
                 buyer_email: dataRef.buyer_email,
-                remarks: remarks
+                remarks: remarks,
+                message_id: messageId
             });
             setRemarks("");
             getInquiryLogs(ticketId);
