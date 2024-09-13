@@ -413,7 +413,7 @@ class ConcernController extends Controller
             $bucket = $storage->bucket('super-app-storage');
 
             foreach ($files as $file) {
-                $fileName = uniqid() . '.' . $file->getClientOriginalExtension();
+                $fileName = uniqid() . '.' . $file->extension();
                 $filePath = 'concerns/' . $fileName;
 
                 $bucket->upload(
@@ -438,7 +438,6 @@ class ConcernController extends Controller
         $bucket = $storage->bucket('super-app-storage');
         $object = $bucket->object($filePath);
 
-        // Generate a signed URL valid for 15 minutes
         $signedUrl = $object->signedUrl(new \DateTime('15 minutes'), [
             'version' => 'v4',
             'method' => 'GET'
@@ -468,12 +467,11 @@ class ConcernController extends Controller
                 ->orderBy('created_at', 'desc')
                 ->get();
 
-            // Generate signed URLs for attachments
             foreach ($message as $msg) {
                 if ($msg->attachment) {
                     $attachments = json_decode($msg->attachment, true);
                     foreach ($attachments as &$attachment) {
-                        $attachment = $this->getFileUrl($attachment); // Generate signed URL
+                        $attachment = $this->getFileUrl($attachment); 
                     }
                     $msg->attachment = json_encode($attachments);
                 }
@@ -484,7 +482,6 @@ class ConcernController extends Controller
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
         }
     }
-
 
 
     public function getMessageId($ticketId)

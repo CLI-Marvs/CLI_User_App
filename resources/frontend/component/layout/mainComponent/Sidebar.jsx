@@ -12,18 +12,21 @@ import {
   AccordionHeader,
   AccordionBody,
 } from "@material-tailwind/react";
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import apiService from '../../servicesApi/apiService';
 import { useStateContext } from '../../../context/contextprovider';
 const Sidebar = () => {
-  const {unreadCount} = useStateContext();
+  const {unreadCount, getCount} = useStateContext();
   const [activeItem, setActiveItem] = useState(null);
-
+  const location = useLocation();
 
   const handleItemClick = (item) => {
     setActiveItem(item);
   };
 
+  useEffect(() => {
+    getCount();
+  }, [location]);
   return (
     <>
       <Card className="shadow-none w-[230px] max-w-[230px] p-4 pt-0 rounded-none bg-custom-grayFA">

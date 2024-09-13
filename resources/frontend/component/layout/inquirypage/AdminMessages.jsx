@@ -12,9 +12,12 @@ const AdminMessages = ({ items }) => {
         return moment(createdAt).fromNow();
     };
 
-    console.log("user", user);
+    
+
+    console.log("attachgmentData", attachmentData);
+
     const dynamicName =
-        user?.id === parseInt(items?.admin_id) ? "You" : "CLI Support";
+        user?.id === parseInt(items?.admin_id) ? "You" : `CLI ${user?.department}`;
     return (
         <div className="w-full">
             <div className="flex justify-end w-full mt-10 gap-2 ">
