@@ -1,17 +1,28 @@
-import React from "react";
+import React, { useState } from "react";
 import AdminLogo from "../../../../../public/Images/AdminSilouette.svg";
 import { useStateContext } from "../../../context/contextprovider";
 import FolderFile from "../../../../../public/Images/folder_file.svg";
 import moment from "moment";
+import SampleModal from "./SampleModal";
 
 const AdminMessages = ({ items }) => {
     const { user } = useStateContext();
-    const attachmentData = JSON.parse(items.attachment || "[]")
+    const attachmentData = JSON.parse(items.attachment || "[]");
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedAttachment, setSelectedAttachment] = useState(null);
     const formatTime = (createdAt) => {
         return moment(createdAt).fromNow();
     };
 
-    console.log("user", user);
+    const handleOpenModal = (attachment) => {
+        setSelectedAttachment(attachment);
+        setIsModalOpen(true);
+    };
+    const handleCloseModal = () => {
+        setIsModalOpen(false);
+        setSelectedAttachment(null);
+    };
+
     const dynamicName =
         user?.id === parseInt(items?.admin_id) ? "You" : "CLI Support";
     return (
@@ -39,9 +50,7 @@ const AdminMessages = ({ items }) => {
                         attachmentData.map((attachment, index) => (
                             <div className="mt-4" key={index}>
                                 <button
-                                    onClick={() =>
-                                        window.open(attachment, "_blank")
-                                    }
+                                     onClick={() => handleOpenModal(attachment)}
                                     className="flex items-center justify-start bg-customnavbar h-12 px-24 pl-4 text-black gap-2 rounded-lg"
                                 >
                                     <img
@@ -62,6 +71,7 @@ const AdminMessages = ({ items }) => {
                     </p>
                 </div>
             </div>
+            <SampleModal isOpen={isModalOpen} onClose={handleCloseModal} attachment={selectedAttachment} />
         </div>
     );
 };
