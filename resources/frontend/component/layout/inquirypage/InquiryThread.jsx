@@ -203,8 +203,10 @@ const InquiryThread = () => {
                                 />
                             </svg>
                             <input
+                                readOnly={true}
+                                onClick={toggleFilterBox}
                                 type="text"
-                                className="h-10 w-full rounded-lg pl-9 pr-6 text-sm"
+                                className="h-[47px] w-full rounded-lg pl-9 pr-6 text-sm"
                                 placeholder="Search"
                             />
                             <svg
@@ -214,7 +216,7 @@ const InquiryThread = () => {
                                 viewBox="0 0 24 24"
                                 strokeWidth={1.5}
                                 stroke="currentColor"
-                                className="size-[24px] absolute right-3 top-3 text-custom-bluegreen hover:bg-gray-200"
+                                className="size-[24px] absolute right-3 top-3 text-custom-bluegreen hover:bg-gray-200 cursor-pointer"
                             >
                                 <path
                                     strokeLinecap="round"
@@ -333,7 +335,7 @@ const InquiryThread = () => {
                                 src={Backbtn}
                                 alt="back button"
                                 onClick={handleBack}
-                                className="hover:bg-gray-100 rounded-full"
+                                className="hover:bg-gray-100 rounded-full cursor-pointer"
                             />
                             <div className="flex-1 flex flex-wrap">
                                 <p className="space-x-1 text-sm montserrat-semibold text-custom-gray81">
@@ -349,7 +351,7 @@ const InquiryThread = () => {
                                 </p>
                             </div>
                             <div className="flex justify-center w-[20px] shrink-0">
-                                <LuTrash2 className="text-custom-bluegreen hover:text-red-500" />
+                                <LuTrash2 className="text-custom-bluegreen hover:text-red-500 cursor-pointer" />
                             </div>
                             <div className="flex justify-end shrink-0">
                                 {dataConcern &&
@@ -454,7 +456,7 @@ const InquiryThread = () => {
 
                         <div className="mt-2 mb-3 relative">                      {/* boxref */}
                             {/* Container for chat input and attached files */}
-                            <div className="border border-custom-solidgreen rounded-[10px] p-2 relative">
+                            <div className="h-[61px] w-[668] gradient-btn2 rounded-[14px] p-[4px] relative">
                                 {/* Display attached files inside the same container */}
                                 {attachedFiles.length > 0 && (
                                     <div className="mb-2">
@@ -489,7 +491,7 @@ const InquiryThread = () => {
                                     onChange={(e) =>
                                         setChatMessage(e.target.value)
                                     }
-                                    className="h-12 w-full pl-2 pr-14 border-none rounded-[10px] text-sm focus:outline-none"
+                                    className="h-full w-full pl-2 pr-14 border-none rounded-[10px] text-sm focus:outline-none"
                                 />
 
                                 {/* File attachment button */}
@@ -517,8 +519,8 @@ const InquiryThread = () => {
                                     <button
                                         type="button"
                                         onClick={submitMessage}
-                                        disabled={!chatMessage.trim()}
-                                        className="flex w-[68px] h-[31px] rounded-lg font-semibold text-white text-sm justify-center items-center gradient-background3 hover:shadow-custom4"
+                                        disabled={!chatMessage.trim() || loading}
+                                        className={`flex w-[68px] h-[31px] rounded-lg font-semibold text-white text-sm justify-center items-center gradient-background3 hover:shadow-custom4 ${loading ? 'cursor-not-allowed' : '' }`}
                                     >
                                         {loading ? (
                                             <CircularProgress className="spinnerSize" />

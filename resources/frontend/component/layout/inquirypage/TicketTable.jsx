@@ -99,7 +99,7 @@ const TicketTable = ({ concernData }) => {
                                 }`}
                             >
                                 <button
-                                    className="hover:shadow-custom4 text-custom-solidgreen"
+                                    className="hover:shadow-custom5 hover:rounded-full text-custom-solidgreen"
                                     onClick={(event) => {
                                         event.stopPropagation();
                                         togglePin(index, row);
