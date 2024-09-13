@@ -7,7 +7,7 @@ import apiService from "../../servicesApi/apiService";
 
 const TicketTable = ({ concernData }) => {
     const [checkedRows, setCheckedRows] = useState([]);
-    const { getMessages, getAllConcerns, user, setData } = useStateContext();
+    const { getMessages, getAllConcerns, user, setData, getInquiryLogs } = useStateContext();
     const handleCheckboxChange = (index) => {
         setCheckedRows((prevCheckedRows) =>
             prevCheckedRows.includes(index)
