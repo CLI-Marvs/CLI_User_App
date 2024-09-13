@@ -23,6 +23,7 @@ const InquiryThread = () => {
     const [startDate, setStartDate] = useState(new Date());
     const [isFilterVisible, setIsFilterVisible] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [buyerName, setBuyerName] = useState("");
 
 
     const filterBoxRef = useRef(null);
@@ -88,6 +89,8 @@ const InquiryThread = () => {
     };
 
     const messageId = dataConcern?.message_id || null;
+
+   
     // const submitMessage = async () => {
     //     try {
     //         const response = await apiService.post("send-message", {
@@ -123,6 +126,8 @@ const InquiryThread = () => {
         formData.append('message_id', messageId || '');
         formData.append('admin_id', user?.id || '');
         formData.append('buyer_email', dataConcern.buyer_email || '');
+        formData.append('admin_profile_picture', user?.profile_picture || '');
+
 
         try {
             const response = await apiService.post("send-message", formData, {
@@ -165,6 +170,18 @@ const InquiryThread = () => {
             document.removeEventListener("keydown", handleKeyDown);
         };
     }, [isFilterVisible]);
+
+
+    useEffect(() => {
+        if (conversationMessages.length > 0) {
+            const lastIndex = conversationMessages.length - 1;
+            const lastMessage = conversationMessages[lastIndex];
+
+            const buyerName = lastMessage.buyer_name;
+            setBuyerName(buyerName);
+          } 
+    }, []);
+
     return (
         <>
             <div className="h-screen bg-custom-grayFA p-3 overflow-x-auto overflow-y-hidden">
@@ -361,6 +378,7 @@ const InquiryThread = () => {
                                             <UserMessages
                                                 items={item}
                                                 key={index}
+                                                buyerName={buyerName}
                                             />
                                         ) : (
                                             <AdminMessages

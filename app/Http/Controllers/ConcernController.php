@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 use GuzzleHttp\Client;
+use Google\Cloud\Storage\StorageClient;
 
 
 class ConcernController extends Controller
@@ -152,6 +153,62 @@ class ConcernController extends Controller
         return $fileLinks;
     }
 
+    //*for GDRIVE
+    // public function sendMessage(Request $request)
+    // {
+    //     try {
+    //         $allFiles = [];
+    //         $files = $request->file('files');
+    //         if ($files) {
+    //             foreach ($files as $file) {
+    //                 $fileName = $file->getClientOriginalName();
+    //                 $fileContents = $file->get();
+    //                 $allFiles[] = [
+    //                     'name' => $fileName,
+    //                     'contents' => $fileContents,
+    //                 ];
+    //             }
+    //         }
+
+    //         $fileLinks = $this->handleFilesToGdrive($files);
+    //         $adminMessage = $request->input('details_message', '');
+    //         $message_id = $request->input('message_id', '');
+    //         $admin_email = $request->input('admin_email', '');
+    //         $ticket_id = $request->input('ticket_id', '');
+    //         $admin_name = $request->input('admin_name', '');
+    //         $admin_id = $request->input('admin_id', '');
+    //         $buyer_email = $request->input('buyer_email', '');
+    //         $admin_profile_picture = $request->input('admin_profile_picture', '');
+
+
+    //         $attachment = !empty($fileLinks) ? json_encode($fileLinks) : null;
+    //         $messages = new Messages();
+    //         $messages->admin_id = $admin_id;
+    //         $messages->admin_email = $admin_email;
+    //         $messages->attachment = $attachment;
+    //         $messages->ticket_id = $ticket_id;
+    //         $messages->admin_profile_picture = $admin_profile_picture;
+    //         $messages->details_message = $adminMessage;
+    //         $messages->admin_name = $admin_name;
+    //         $messages->save();
+
+    //         $this->inquiryAdminLogs($request);
+
+
+    //         if ($files) {
+    //             Mail::to($buyer_email)->send(new SendReplyFromAdmin($messages->ticket_id, $buyer_email, $adminMessage, $message_id, $allFiles));
+    //         } else {
+    //             ReplyFromAdminJob::dispatch($messages->ticket_id, $buyer_email, $adminMessage, $message_id, $allFiles);
+    //         }
+
+
+    //         return response()->json("Successfully sent");
+    //     } catch (\Exception $e) {
+    //         return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
+    //     }
+    // }
+
+
     public function sendMessage(Request $request)
     {
         try {
@@ -168,7 +225,7 @@ class ConcernController extends Controller
                 }
             }
 
-            $fileLinks = $this->handleFilesToGdrive($files);
+            $fileLinks = $this->uploadToGCS($files);
             $adminMessage = $request->input('details_message', '');
             $message_id = $request->input('message_id', '');
             $admin_email = $request->input('admin_email', '');
@@ -176,6 +233,8 @@ class ConcernController extends Controller
             $admin_name = $request->input('admin_name', '');
             $admin_id = $request->input('admin_id', '');
             $buyer_email = $request->input('buyer_email', '');
+            $admin_profile_picture = $request->input('admin_profile_picture', '');
+
 
             $attachment = !empty($fileLinks) ? json_encode($fileLinks) : null;
             $messages = new Messages();
@@ -183,6 +242,7 @@ class ConcernController extends Controller
             $messages->admin_email = $admin_email;
             $messages->attachment = $attachment;
             $messages->ticket_id = $ticket_id;
+            $messages->admin_profile_picture = $admin_profile_picture;
             $messages->details_message = $adminMessage;
             $messages->admin_name = $admin_name;
             $messages->save();
@@ -204,7 +264,6 @@ class ConcernController extends Controller
     }
 
 
-
     public function createShareableLink($accessToken, $fileId)
     {
         Http::withToken($accessToken)
@@ -215,7 +274,62 @@ class ConcernController extends Controller
     }
 
 
+    //* For saving to gdrive
+    // public function addConcernPublic(Request $request)
+    // {
+    //     try {
+    //         $files = $request->file('files');
+    //         $lastConcern = Concerns::latest()->first();
+    //         $nextId = $lastConcern ? $lastConcern->id + 1 : 1;
+    //         $formattedId = str_pad($nextId, 7, '0', STR_PAD_LEFT);
 
+    //         $ticketId = 'Ticket#24' . $formattedId;
+
+
+    //         $concerns = new Concerns();
+    //         $concerns->details_concern = $request->details_concern;
+    //         $concerns->property = $request->property;
+    //         $concerns->details_message = $request->message;
+    //         $concerns->status = "unresolved";
+    //         $concerns->ticket_id = $ticketId;
+    //         $concerns->user_type = $request->user_type;
+    //         $concerns->buyer_name = $request->fname . ' ' . $request->lname;
+    //         $concerns->mobile_number = $request->mobile_number;
+    //         $concerns->contract_number = $request->contract_number;
+    //         $concerns->unit_number = $request->unit_number;
+    //         $concerns->buyer_email = $request->buyer_email;
+    //         $concerns->inquiry_type = "from_admin";
+    //         $concerns->save();
+
+    //         $this->inquiryReceivedLogs($request, $ticketId);
+
+    //         $fileLinks = [];
+    //         if ($files) {
+    //             foreach ($files as $file) {
+    //                 $fileLink = $this->store($file);
+    //                 $fileLinks[] = $fileLink;
+    //             }
+    //         }
+
+    //         $attachment = !empty($fileLinks) ? json_encode($fileLinks) : null;
+    //         $messages = new Messages();
+    //         $messages->admin_email = $request->admin_email;
+    //         $messages->admin_id = $request->admin_id;
+    //         $messages->attachment = $attachment;
+    //         $messages->ticket_id = $concerns->ticket_id;
+    //         $messages->details_message = $request->message;
+    //         $messages->save();
+
+
+
+    //         return response()->json('Successfully added');
+    //     } catch (\Exception $e) {
+    //         return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
+    //     }
+    // }
+
+
+    //*For Cloud Storage
     public function addConcernPublic(Request $request)
     {
         try {
@@ -243,15 +357,8 @@ class ConcernController extends Controller
             $concerns->save();
 
             $this->inquiryReceivedLogs($request, $ticketId);
-
-            $fileLinks = [];
-            if ($files) {
-                foreach ($files as $file) {
-                    $fileLink = $this->store($file);
-                    $fileLinks[] = $fileLink;
-                }
-            }
-
+            
+            $fileLinks = $this->uploadToGCS($files);
             $attachment = !empty($fileLinks) ? json_encode($fileLinks) : null;
             $messages = new Messages();
             $messages->admin_email = $request->admin_email;
@@ -267,6 +374,32 @@ class ConcernController extends Controller
         } catch (\Exception $e) {
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
         }
+    }
+
+    public function uploadToGCS($files)
+    {
+        $fileLinks = [];
+        if ($files) {
+            $storage = new StorageClient([
+                'keyFilePath' => storage_path('keys/super-app-anaplan-2cbacd9f0192.json')
+            ]);
+            $bucket = $storage->bucket('super-app-storage');
+
+            foreach ($files as $file) {
+                $fileName = uniqid() . '.' . $file->getClientOriginalExtension();
+                $filePath = 'concerns/' . $fileName;
+
+                $bucket->upload(
+                    fopen($file->getPathname(), 'r'),
+                    ['name' => $filePath]
+                );
+
+                $fileLink = $bucket->object($filePath)->signedUrl(new \DateTime('tomorrow'));
+
+                $fileLinks[] = $fileLink;
+            }
+        }
+        return $fileLinks;
     }
 
     public function pinConcern(Request $request, $concernId)

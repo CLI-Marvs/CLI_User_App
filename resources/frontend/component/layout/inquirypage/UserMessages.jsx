@@ -4,7 +4,7 @@ import Kent from "../../../../../public/Images/kent.png";
 import defaultAvatar from "../../../../../public/Images/AdminSilouette.svg";
 import moment from "moment";
 
-const UserMessages = ({ items }) => {
+const UserMessages = ({ items, buyerName }) => {
     const attachmentData = JSON.parse(items.attachment || "[]");
 
     const formatTime = (createdAt) => {
@@ -20,7 +20,7 @@ const UserMessages = ({ items }) => {
                 <div className="flex flex-col">
                     <p className="font-bold text-custom-bluegreen">Buyer</p>
                     <p className="font-semibold text-custom-gray81">
-                        {items.buyer_name}
+                        {buyerName}
                     </p>
                 </div>
             </div>
