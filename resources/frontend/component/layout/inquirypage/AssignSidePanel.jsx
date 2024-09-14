@@ -36,7 +36,9 @@ const AssignSidePanel = ({ ticketId }) => {
         ticketId: ticketId,
     }));
 
-    const assignedTicketId = specificInquiry ? specificInquiry.includes(ticketId) : null;
+    const assignedTicketId = specificInquiry
+        ? specificInquiry.includes(ticketId)
+        : null;
     const hasAccessToAssign = user?.department === "CSR" || assignedTicketId;
     useEffect(() => {
         setTicketId(ticketId);
@@ -67,12 +69,10 @@ const AssignSidePanel = ({ ticketId }) => {
                         onClick={handleOpenModal}
                         className="h-9 gradient-btn2 hover:shadow-custom4 px-16 text-white rounded-lg"
                     >
-                        {hasAccessToAssign && (
-                            dataConcern.resolve_from !== null ? (
-                                <span>Reassign</span>
-                            ) : (
-                                <span>Assign</span>
-                            )
+                        {dataConcern.resolve_from !== null ? (
+                            <span>Reassign</span>
+                        ) : (
+                            <span>Assign</span>
                         )}
                     </button>
                 </div>
@@ -92,7 +92,11 @@ const AssignSidePanel = ({ ticketId }) => {
                 </div>
             </div>
             <div>
-                <AssignModal modalRef={modalRef} employeeData={isSelected} isAssign={isAssign}/>
+                <AssignModal
+                    modalRef={modalRef}
+                    employeeData={isSelected}
+                    isAssign={isAssign}
+                />
             </div>
         </>
     );

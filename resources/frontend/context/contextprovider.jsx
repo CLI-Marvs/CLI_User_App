@@ -41,6 +41,16 @@ export const ContextProvider = ({ children }) => {
     const [month, setMonth] = useState("");
     const [propertyMonth, setPropertyMonth] = useState("");
     const [specificInquiry, setSpecificInquiry] = useState(null);
+    const [dataSet, setDataSet] = useState([]);
+    const [department, setDepartment] = useState("");
+    const [isDepartmentInitialized, setIsDepartmentInitialized] = useState(false);
+
+    useEffect(() => {
+        if (user && user.department && !isDepartmentInitialized) {
+            setDepartment(user.department === "CSR" ? "All" : user.department);
+            setIsDepartmentInitialized(true);
+        }
+    }, [user, isDepartmentInitialized]); //
 
     const setToken = (token) => {
         _setToken(token);
@@ -75,51 +85,60 @@ export const ContextProvider = ({ children }) => {
         }
     };
 
-    const fetchCategory = useCallback(
-        debounce(async (month) => {
-            if (!month || !isValidMonth(month)) {
-                return;
-            }
+    const fetchCategory = async () => {
+        if (!isDepartmentInitialized) return;
+        try {
+            const response = await apiService.get("category-monthly", {
+                params: { month: month, department: department },
+            });
+            const result = response.data;
+            const formattedData = result.map((item) => ({
+                name: item.details_concern,
+                value: item.total,
+            }));
+            setDataCategory(formattedData);
+        } catch (error) {
+            console.log("Error retrieving data", error);
+        }
+    };
 
-            try {
-                const response = await apiService.get("category-monthly", {
-                    params: { month: month },
-                });
-                const result = response.data;
-                const formattedData = result.map((item) => ({
-                    name: item.details_concern,
-                    value: item.total,
-                }));
-                setDataCategory(formattedData);
-            } catch (error) {
-                console.log("Error retrieving data", error);
-            }
-        }, 300),
-        []
-    );
+    const fetchDataReport = async () => {
+        if (!isDepartmentInitialized) return;
+        try {
+            const response = await apiService.get("report-monthly", {
+                params: { department: department },
+            });
+            const result = response.data;
 
-    const getInquiriesPerProperty = useCallback(
-        debounce(async (propertyMonth) => {
-            if (!propertyMonth) {
-                return;
-            }
-            try {
-                const response = await apiService.get("inquiries-property", {
-                    params: { propertyMonth: propertyMonth },
-                });
-                const result = response.data;
-                const formattedData = result.map((item) => ({
-                    name: item.property,
-                    resolved: item.resolved,
-                    unresolved: item.unresolved,
-                }));
-                setDataPropery(formattedData);
-            } catch (error) {
-                console.log("error retrieving", error);
-            }
-        }, 300),
-        []
-    );
+            const formattedData = result.map((item) => ({
+                name: item.month.toString().padStart(2, "0"),
+                Resolved: item.resolved,
+                Unresolved: item.unresolved,
+            }));
+
+            setDataSet(formattedData);
+        } catch (error) {
+            console.error("Error fetching data:", error);
+        }
+    };
+
+    const getInquiriesPerProperty = async () => {
+        if (!isDepartmentInitialized) return;
+        try {
+            const response = await apiService.get("inquiries-property", {
+                params: { propertyMonth: propertyMonth, department, department },
+            });
+            const result = response.data;
+            const formattedData = result.map((item) => ({
+                name: item.property,
+                resolved: item.resolved,
+                unresolved: item.unresolved,
+            }));
+            setDataPropery(formattedData);
+        } catch (error) {
+            console.log("error retrieving", error);
+        }
+    };
 
     const getSpecificInquiry = async () => {
         if (token) {
@@ -275,20 +294,24 @@ export const ContextProvider = ({ children }) => {
     useEffect(() => {}, [user, token]);
 
     useEffect(() => {
-        if (month) {
-            fetchCategory(month);
-        }
-    }, [month]);
-
-    useEffect(() => {
-        if (propertyMonth) {
-            getInquiriesPerProperty(propertyMonth);
-        }
-    }, [propertyMonth]);
-
-    useEffect(() => {
         getSpecificInquiry();
     }, []);
+
+    //* For Report Page
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                await fetchDataReport();
+                await getInquiriesPerProperty();
+                await fetchCategory();
+            } catch (error) {
+                console.error("Error fetching data:", error);
+            }
+        };
+    
+        fetchData();
+    }, [department, propertyMonth, month]);
+
     return (
         <StateContext.Provider
             value={{
@@ -337,7 +360,11 @@ export const ContextProvider = ({ children }) => {
                 specificInquiry,
                 setSpecificAssigneeCsr,
                 specificAssigneeCsr,
-                getCount
+                getCount,
+                department,
+                setDepartment,
+                fetchDataReport,
+                dataSet,
             }}
         >
             {children}

@@ -23,9 +23,9 @@ const Notification = () => {
         setNotifStatus(button);
         setNotifCurrentPage(0);
         setActiveButton((prev) => (prev === button ? null : button));
-        
     };
 
+    console.log("activeButton", activeButton);
     const navigate = useNavigate();
     const handlePageClick = (data) => {
         const selectedPage = data.selected;
@@ -46,14 +46,13 @@ const Notification = () => {
         getMessages(ticketId);
         getAllConcerns();
         navigate(`/inquirymanagement/thread/${encodedTicketId}`);
-        updateIsReadStatus(items.ticket_id);
+        updateIsReadStatus(items.id);
     };
 
-    const updateIsReadStatus = (ticketId) => {
+    const updateIsReadStatus = (concernId) => {
         try {
-            const response = apiService.post('isread', {
-                ticketId: ticketId
-            })
+            console.log("concernId", concernId);
+            const response = apiService.post(`isread/${concernId}`);
             console.log("updated successfully");
         } catch (error) {
             console.log("error updating status", error);
@@ -63,6 +62,7 @@ const Notification = () => {
     useEffect(() => {
         getNotifications();
     }, []);
+
     return (
         <div className=" bg-custom-grayFA ">
             <div className="bg-custom-grayFA px-5">
@@ -97,7 +97,7 @@ const Notification = () => {
                                 notifications.map((item, index) => (
                                     <tr
                                         onClick={() => navigateToThread(item)}
-                                        className={`flex items-center h-[47px] cursor-pointer my-1 ${item.isRead ? 'bg-custom-grayF1' : 'bg-white'} hover:shadow-custom4`}
+                                        className={`flex items-center h-[47px] cursor-pointer my-1 ${item.is_read === 1? 'bg-custom-grayF1' : 'bg-white'} hover:shadow-custom4`}
                                         key={index}
                                     >
                                         <td className="w-[228px] shrink-0 h-full px-4">

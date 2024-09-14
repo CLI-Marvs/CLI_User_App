@@ -19,6 +19,7 @@ import apiService from "../../servicesApi/apiService";
 import debounce from "lodash/debounce";
 import { useStateContext } from "../../../context/contextprovider";
 import { IoMdArrowDropdown } from "react-icons/io";
+import { useLocation } from "react-router-dom";
 
 const data = [
     { name: "01", Resolved: 0, Unresolved: 0 },
@@ -82,18 +83,18 @@ const CustomTooltip = ({ active, payload }) => {
 };
 
 const monthNames = {
-    '01': 'January',
-    '02': 'February',
-    '03': 'March',
-    '04': 'April',
-    '05': 'May',
-    '06': 'June',
-    '07': 'July',
-    '08': 'August',
-    '09': 'September',
-    '10': 'October',
-    '11': 'November',
-    '12': 'December',
+    "01": "January",
+    "02": "February",
+    "03": "March",
+    "04": "April",
+    "05": "May",
+    "06": "June",
+    "07": "July",
+    "08": "August",
+    "09": "September",
+    10: "October",
+    11: "November",
+    12: "December",
 };
 
 const CustomTooltip1 = ({ active, payload, label }) => {
@@ -112,8 +113,6 @@ const CustomTooltip1 = ({ active, payload, label }) => {
 };
 
 const ReportPage = () => {
-    const [dataSet, setDataSet] = useState([]);
-    const [department, setDepartment] = useState("All");
     const {
         setMonth,
         month,
@@ -123,35 +122,42 @@ const ReportPage = () => {
         getInquiriesPerProperty,
         propertyMonth,
         setPropertyMonth,
+        user,
+        department,
+        setDepartment,
+        dataSet,
+        fetchDataReport
     } = useStateContext();
 
     const defaultData = [{ name: "No Data" }];
     const dataToDisplay = dataCategory.length > 0 ? dataCategory : defaultData;
-    const fetchDataReport = async () => {
-        try {
-            const response = await apiService.get("report-monthly", {
-                params: { department: department },
-            });
-            const result = response.data;
-
-            const formattedData = result.map((item) => ({
-                name: item.month.toString().padStart(2, "0"),
-                Resolved: item.resolved,
-                Unresolved: item.unresolved,
-            }));
-
-            setDataSet(formattedData);
-        } catch (error) {
-            console.error("Error fetching data:", error);
-        }
-    };
-
+    const location = useLocation();
 
     const getCurrentMonth = () => {
-        const date = new Date();
-        const options = { month: "long" };
-        return new Intl.DateTimeFormat("en-US", options).format(date);
-    };
+        const months = [
+          'january', 'february', 'march', 'april', 'may', 'june',
+          'july', 'august', 'september', 'october', 'november', 'december'
+        ];
+        const currentMonthIndex = new Date().getMonth(); 
+        return months[currentMonthIndex];
+      };
+    
+    
+
+    const allDepartment = [
+        { key: "All", value: "All" },
+        { key: "CSR", value: "CSR" },
+        { key: "SALES", value: "Sales" },
+        { key: "AP", value: "Ap Commission" },
+        { key: "PM", value: "Property Management" },
+    ];
+
+
+    // const getCurrentMonth = () => {
+    //     const date = new Date();
+    //     const options = { month: "long" };
+    //     return new Intl.DateTimeFormat("en-US", options).format(date);
+    // };
 
     const handleInputChange = (e) => {
         setMonth(e.target.value);
@@ -172,20 +178,23 @@ const ReportPage = () => {
             getInquiriesPerProperty(propertyMonth);
         }
     };
+    // useEffect(() => {
+    //     const currentMonth = getCurrentMonth();
+    //     setMonth(currentMonth);
+    //     setPropertyMonth(currentMonth);
+    // }, []);
+  
     useEffect(() => {
-        const currentMonth = getCurrentMonth();
-        setMonth(currentMonth);
-        setPropertyMonth(currentMonth);
+        fetchCategory();
+        getInquiriesPerProperty();
+        fetchDataReport();
     }, []);
 
     useEffect(() => {
-        fetchDataReport();
-        getInquiriesPerProperty(propertyMonth);
-        fetchCategory(month)
-        /*  if (month) {
-            fetchCategory(month);
-        } */
-    }, [department, propertyMonth, month]);
+        setMonth(getCurrentMonth()); 
+        setPropertyMonth(getCurrentMonth());
+      }, []);
+
 
     return (
         <div className="h-screen bg-custom-grayFA p-4">
@@ -205,17 +214,17 @@ const ReportPage = () => {
                                 value={department}
                                 onChange={(e) => setDepartment(e.target.value)}
                             >
-                                <option value="All">All</option>
-                                <option value="CSR">
-                                    Customer Service Relations
-                                </option>
-                                <option value="Sales">Sales</option>
-                                <option value="AP Comission">
-                                    AP Commission
-                                </option>
-                                <option value="PM">
-                                    Property Management
-                                </option>
+                                {user?.department === "CSR" ? (
+                                    allDepartment.map((item, index) => (
+                                        <option key={index} value={item.key}>
+                                            {item.value}
+                                        </option>
+                                    ))
+                                ) : (
+                                    <option value={user?.department}>
+                                        {user?.department}
+                                    </option>
+                                )}
                             </select>
                             <span className="absolute inset-y-0 right-0 flex items-center text-custom-gray81 pr-3 pl-3 bg-custom-grayFA pointer-events-none">
                                 <IoMdArrowDropdown />
@@ -283,8 +292,8 @@ const ReportPage = () => {
                                 <select
                                     name="concern"
                                     className="appearance-none w-full px-4 py-1 bg-white focus:outline-none border-0"
-                                /* value={department}
-                                onChange={(e) => setDepartment(e.target.value)} */
+                                    value={month}
+                                    onChange={(e) => setMonth(e.target.value)}
                                 >
                                     <option value="january">January</option>
                                     <option value="february">February</option>
@@ -375,7 +384,10 @@ const ReportPage = () => {
                         <div className="w-full flex justify-start mt-[90px]">
                             <div className="flex flex-col">
                                 {dataToDisplay.map((category, index) => (
-                                    <div className="flex justify-between" key={index}>
+                                    <div
+                                        className="flex justify-between"
+                                        key={index}
+                                    >
                                         <div className="flex gap-1 items-center">
                                             <span
                                                 className="text-xl mb-1"
@@ -419,8 +431,8 @@ const ReportPage = () => {
                                 <select
                                     name="concern"
                                     className="appearance-none w-full px-4 py-1 bg-white focus:outline-none border-0"
-                                /* value={department}
-                                onChange={(e) => setDepartment(e.target.value)} */
+                                    onChange={(e) => setPropertyMonth(e.target.value)}
+                                    value={propertyMonth}
                                 >
                                     <option value="january">January</option>
                                     <option value="february">February</option>

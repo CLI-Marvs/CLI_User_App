@@ -38,7 +38,6 @@ Route::get('/get-messageId/{ticketId}', [ConcernController::class, 'getMessageId
 Route::get('/report-monthly', [ConcernController::class, 'getMonthlyReports']);
 Route::get('/category-monthly', [ConcernController::class, 'getInquiriesByCategory']);
 Route::get('/inquiries-property', [ConcernController::class, 'getInquiriesPerProperty']);
-Route::post('/isread', [ConcernController::class, 'updateIsReadStatus']);
 Route::delete('delete-concerns', [ConcernController::class, 'deleteConcern']);
 
 Route::middleware('auth:sanctum')->group(function () {
@@ -51,5 +50,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/notifications', [ConcernController::class, 'listOfNotifications']);
     Route::get('/unread-count', [ConcernController::class, 'countUnreadNotifications']);
     Route::post('/pin-concern/{id}', [ConcernController::class, 'pinConcern']);
+    Route::post('/isread/{concernId}', [ConcernController::class, 'readNotifByUser']);
     Route::get('/specific-assignee', [ConcernController::class, 'getSpecificInquiry']);
 });
