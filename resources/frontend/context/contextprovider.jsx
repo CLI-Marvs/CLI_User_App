@@ -126,7 +126,7 @@ export const ContextProvider = ({ children }) => {
         if (!isDepartmentInitialized) return;
         try {
             const response = await apiService.get("inquiries-property", {
-                params: { propertyMonth: propertyMonth, department, department },
+                params: { propertyMonth: propertyMonth, department: department },
             });
             const result = response.data;
             const formattedData = result.map((item) => ({
