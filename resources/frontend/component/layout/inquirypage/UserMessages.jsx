@@ -4,14 +4,13 @@ import Kent from "../../../../../public/Images/kent.png";
 import defaultAvatar from "../../../../../public/Images/AdminSilouette.svg";
 import moment from "moment";
 
-const UserMessages = ({ items, buyerName }) => {
+const UserMessages = ({ items }) => {
     const attachmentData = JSON.parse(items.attachment || "[]");
 
     const formatTime = (createdAt) => {
         return moment(createdAt).fromNow();
     };
 
-    console.log("items", items);
     return (
     <div className="w-full">
             <div className="flex w-full mt-10 gap-2">
@@ -21,7 +20,7 @@ const UserMessages = ({ items, buyerName }) => {
                 <div className="flex flex-col">
                     <p className="font-bold text-custom-bluegreen">Buyer</p>
                     <p className="font-semibold text-custom-gray81">
-                        {buyerName}
+                        {items.buyer_name}
                     </p>
                 </div>
             </div>
