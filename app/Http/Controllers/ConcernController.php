@@ -21,6 +21,9 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 use GuzzleHttp\Client;
 use Google\Cloud\Storage\StorageClient;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
+
 
 
 class ConcernController extends Controller
@@ -368,6 +371,7 @@ class ConcernController extends Controller
             $messages->attachment = $attachment;
             $messages->ticket_id = $concerns->ticket_id;
             $messages->details_message = $request->message;
+            $messages->buyer_name = $request->fname .' '. $request->lname;
             $messages->save();
 
 
@@ -801,7 +805,7 @@ class ConcernController extends Controller
     public function listOfNotifications(Request $request)
     {
         try {
-            $query = Concerns::query();
+            $concernsQuery = Concerns::query();
             $status = $request->query('status', null);
     
             $employee = $request->user();
@@ -811,51 +815,79 @@ class ConcernController extends Controller
             $ticketIds = $assignedInquiries->pluck('ticket_id')->toArray();
     
             if ($employeeDepartment !== "CSR") {
-                $query->whereIn('ticket_id', $ticketIds);
+                $concernsQuery->whereIn('ticket_id', $ticketIds);
             }
     
-            $query->leftJoin('read_notif_by_user', function ($join) use($employee) {
+            $concernsQuery->leftJoin('read_notif_by_user', function ($join) use ($employee) {
                 $join->on('concerns.id', '=', 'read_notif_by_user.concern_id')
-                     ->where('read_notif_by_user.user_id', $employee->id);
+                    ->where('read_notif_by_user.user_id', $employee->id);
             });
     
-            $query->select('concerns.*', \DB::raw('CASE WHEN read_notif_by_user.concern_id IS NULL THEN 0 ELSE 1 END as is_read'));
+            $concernsQuery->select('concerns.*', \DB::raw('CASE WHEN read_notif_by_user.concern_id IS NULL THEN 0 ELSE 1 END as is_read'));
     
-            if($status === 'Unread') {
-                $query->whereNull('read_notif_by_user.concern_id');
-            } else if($status === 'Read') {
-                $query->whereNotNull('read_notif_by_user.concern_id');
-            } 
-            $query->orderBy('is_read', 'asc')
-                  ->orderBy('concerns.created_at', 'desc');
+            $this->notifStatusFilter($status, $concernsQuery);
     
-            $notificationConcerns = $query->paginate(20);
+            $concernsResults = $concernsQuery->orderBy('is_read', 'asc')
+                                             ->orderBy('concerns.created_at', 'desc')
+                                             ->get();
     
-            return response()->json($notificationConcerns);
+            $latestBuyerReply = $this->buyerReplyNotif()->get();
+    
+            $combinedData = $concernsResults->merge($latestBuyerReply);
+
+            $perPage = 10;
+            $currentPage = LengthAwarePaginator::resolveCurrentPage();
+            $paginatedResults = $this->paginateCollection($combinedData, $perPage, $currentPage, $request->url());
+
+    
+            return response()->json($paginatedResults);
         } catch (\Exception $e) {
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
         }
     }
-
-    private function notifStatusFilter($status, $query) 
+    
+    public function paginateCollection(Collection $items, $perPage, $currentPage, $url)
     {
-        if($status === 'Unread') {
+        $offset = ($currentPage * $perPage) - $perPage;
+        $paginatedItems = $items->slice($offset, $perPage)->values();
+    
+        return new LengthAwarePaginator(
+            $paginatedItems,
+            $items->count(),
+            $perPage,
+            $currentPage,
+            ['path' => $url]
+        );
+    }
+    private function buyerReplyNotif()
+    {
+        return InquiryLogs::select('ticket_id', 'requestor_reply', 'created_at', 'id')
+            ->whereIn('id', function ($subquery) {
+                $subquery->select(DB::raw('MAX(id)'))
+                    ->from('inquiry_logs')
+                    ->whereNotNull('requestor_reply')
+                    ->groupBy('ticket_id');
+            });
+    }
+    private function notifStatusFilter($status, $query)
+    {
+        if ($status === 'Unread') {
             $query->whereNull('read_notif_by_user.concern_id');
-        } else if($status === 'Read') {
+        } else if ($status === 'Read') {
             $query->whereNotNull('read_notif_by_user.concern_id');
         }
     }
-    
-    
+
+
 
     public function readNotifByUser(Request $request, $concernId)
     {
         $user = $request->user();
-    
+
         $existingEntry = ReadNotifByUser::where('user_id', $user->id)
             ->where('concern_id', $concernId)
             ->first();
-    
+
         if (!$existingEntry) {
             ReadNotifByUser::insert([
                 'user_id' => $user->id,
@@ -865,7 +897,7 @@ class ConcernController extends Controller
             ]);
         }
     }
-        
+
     public function countUnreadNotifications(Request $request)
     {
         try {
@@ -883,10 +915,10 @@ class ConcernController extends Controller
 
             $unreadCount = $query->leftJoin('read_notif_by_user', function ($join) use ($employee) {
                 $join->on('concerns.id', '=', 'read_notif_by_user.concern_id')
-                     ->where('read_notif_by_user.user_id', $employee->id);
+                    ->where('read_notif_by_user.user_id', $employee->id);
             })
-            ->whereNull('read_notif_by_user.concern_id')
-            ->count();
+                ->whereNull('read_notif_by_user.concern_id')
+                ->count();
 
             return response()->json(['unreadCount' => $unreadCount]);
         } catch (\Exception $e) {
@@ -1039,13 +1071,17 @@ class ConcernController extends Controller
         try {
             $concerns = Concerns::where('ticket_id', $request->ticket_id)->first();
 
+            $allFiles = null;
             $messageId = $request->message_id;
+            $buyerEmail = $request->buyer_email;
+
             $concerns->status = "Resolved";
             $concerns->resolve_from = $request->department;
             $concerns->save();
 
             $this->inquiryResolveLogs($request);
-            ResolveJobToSender::dispatch($request->buyer_email, $request->remarks, $messageId);
+            ReplyFromAdminJob::dispatch($request->ticket_id, $buyerEmail, $request->remarks, $messageId, $allFiles);
+
         } catch (\Exception $e) {
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
         }
@@ -1102,7 +1138,7 @@ class ConcernController extends Controller
         if ($department && $department !== 'All') {
             $query->where('resolve_from', $department);
         }
-        
+
 
         $reports = $query->groupBy('month')
             ->orderBy('month')
@@ -1134,9 +1170,9 @@ class ConcernController extends Controller
         )
             ->whereMonth('created_at', $monthNumber)
             ->whereNotNull('status');
-            
 
-        if($department && $department !== "All") {
+
+        if ($department && $department !== "All") {
             $query->where('resolve_from', $department);
         }
 
@@ -1157,13 +1193,13 @@ class ConcernController extends Controller
         $query = Concerns::select('details_concern', DB::raw('COUNT(*) as total'))
             ->whereMonth('created_at', $monthNumber)
             ->whereNotNull('details_concern');
-        
-        if($department && $department !== "All") {
+
+        if ($department && $department !== "All") {
             $query->where('resolve_from', $department);
         }
 
-         $concerns = $query->groupBy('details_concern')->get();
-        
+        $concerns = $query->groupBy('details_concern')->get();
+
         return response()->json($concerns);
     }
 

@@ -179,7 +179,7 @@ const InquiryThread = () => {
 
             const buyerName = lastMessage.buyer_name;
             setBuyerName(buyerName);
-        }
+        } 
     }, [conversationMessages]);
 
     return (
