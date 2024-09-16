@@ -11,6 +11,7 @@ const UserMessages = ({ items, buyerName }) => {
         return moment(createdAt).fromNow();
     };
 
+    console.log("items", items);
     return (
     <div className="w-full">
             <div className="flex w-full mt-10 gap-2">
