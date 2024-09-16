@@ -69,7 +69,7 @@ const AssignSidePanel = ({ ticketId }) => {
                         onClick={handleOpenModal}
                         className="h-9 gradient-btn2 hover:shadow-custom4 px-16 text-white rounded-lg"
                     >
-                        {dataConcern.resolve_from !== null ? (
+                        {dataConcern.assign_to !== null ? (
                             <span>Reassign</span>
                         ) : (
                             <span>Assign</span>

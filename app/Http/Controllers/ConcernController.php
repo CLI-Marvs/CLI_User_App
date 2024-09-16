@@ -974,6 +974,7 @@ class ConcernController extends Controller
 
             $concern = Concerns::where("ticket_id", $request->ticketId)->first();
             $concern->resolve_from = $request->department;
+            $concern->assign_to = $request->department;
             $concern->save();
 
             $this->inquiryAssigneeLogs($request);
@@ -995,6 +996,7 @@ class ConcernController extends Controller
 
             $concern = Concerns::where("ticket_id", $request->ticketId)->first();
             $concern->resolve_from = $request->department;
+            $concern->assign_to = $request->department;
             $concern->save();
 
             $prevInquiry->email = $request->email;
