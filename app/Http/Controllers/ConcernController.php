@@ -6,6 +6,7 @@ use App\Jobs\JobToPersonnelAssign;
 use App\Jobs\ReplyFromAdminJob;
 use App\Jobs\ResolveJobToSender;
 use App\Mail\SendReplyFromAdmin;
+use App\Models\BuyerReplyNotif;
 use App\Models\Concerns;
 use App\Models\Employee;
 use App\Models\InquiryAssignee;
@@ -371,7 +372,7 @@ class ConcernController extends Controller
             $messages->attachment = $attachment;
             $messages->ticket_id = $concerns->ticket_id;
             $messages->details_message = $request->message;
-            $messages->buyer_name = $request->fname .' '. $request->lname;
+            $messages->buyer_name = $request->fname . ' ' . $request->lname;
             $messages->save();
 
 
@@ -807,50 +808,51 @@ class ConcernController extends Controller
         try {
             $concernsQuery = Concerns::query();
             $status = $request->query('status', null);
-    
+
             $employee = $request->user();
             $employeeDepartment = $employee->department;
-    
+
             $assignedInquiries = $this->getAssignInquiries($employee->employee_email);
             $ticketIds = $assignedInquiries->pluck('ticket_id')->toArray();
-    
+
             if ($employeeDepartment !== "CSR") {
                 $concernsQuery->whereIn('ticket_id', $ticketIds);
             }
-    
+
             $concernsQuery->leftJoin('read_notif_by_user', function ($join) use ($employee) {
                 $join->on('concerns.id', '=', 'read_notif_by_user.concern_id')
                     ->where('read_notif_by_user.user_id', $employee->id);
             });
-    
+
             $concernsQuery->select('concerns.*', \DB::raw('CASE WHEN read_notif_by_user.concern_id IS NULL THEN 0 ELSE 1 END as is_read'));
-    
+
             $this->notifStatusFilter($status, $concernsQuery);
-    
+
             $concernsResults = $concernsQuery->orderBy('is_read', 'asc')
-                                             ->orderBy('concerns.created_at', 'desc')
-                                             ->get();
-    
-            $latestBuyerReply = $this->buyerReplyNotif()->get();
-    
+                ->orderBy('concerns.created_at', 'desc')
+                ->get();
+
+            $latestBuyerReply = $this->buyerReplyNotifs();
+
+
             $combinedData = $concernsResults->merge($latestBuyerReply);
 
             $perPage = 10;
             $currentPage = LengthAwarePaginator::resolveCurrentPage();
             $paginatedResults = $this->paginateCollection($combinedData, $perPage, $currentPage, $request->url());
 
-    
+
             return response()->json($paginatedResults);
         } catch (\Exception $e) {
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
         }
     }
-    
+
     public function paginateCollection(Collection $items, $perPage, $currentPage, $url)
     {
         $offset = ($currentPage * $perPage) - $perPage;
         $paginatedItems = $items->slice($offset, $perPage)->values();
-    
+
         return new LengthAwarePaginator(
             $paginatedItems,
             $items->count(),
@@ -869,6 +871,48 @@ class ConcernController extends Controller
                     ->groupBy('ticket_id');
             });
     }
+
+    private function buyerReplyNotifs()
+    {
+        return BuyerReplyNotif::select('concern_id as id', 'ticket_id')->get();
+                              
+    }
+
+    // private function buyerReplyNotifs($employee)
+    // {
+    //     return BuyerReplyNotif::leftJoin('read_notif_by_user', function ($join) use ($employee) {
+    //         $join->on('buyer_reply_notif.concern_id', '=', 'read_notif_by_user.concern_id')
+    //             ->where('read_notif_by_user.user_id', $employee->id);
+    //     })
+    //         ->select(
+    //             'buyer_reply_notif.concern_id as id',
+    //             'buyer_reply_notif.ticket_id',
+    //             \DB::raw('CASE WHEN read_notif_by_user.concern_id IS NULL THEN 0 ELSE 1 END as is_read')
+    //         )
+    //         ->get();
+    // }
+
+    /* private function buyerReplyNotifs($employee)
+    {
+        // Step 1: Fetch all buyer replies without checking 'is_read' initially
+        $buyerReplies = BuyerReplyNotif::select('concern_id as id', 'ticket_id')->get();
+
+        // Step 2: Map through the replies and check if each has been read by the user
+        $buyerReplies->transform(function ($reply) use ($employee) {
+            $isRead = ReadNotifByUser::where('concern_id', $reply->id)
+                ->where('user_id', $employee->id)
+                ->exists();
+
+            // Add 'is_read' attribute to each reply based on the check
+            $reply->is_read = $isRead ? 1 : 0;
+
+            return $reply;
+        });
+
+        return $buyerReplies;
+    } */
+
+
     private function notifStatusFilter($status, $query)
     {
         if ($status === 'Unread') {
@@ -1083,7 +1127,6 @@ class ConcernController extends Controller
 
             $this->inquiryResolveLogs($request);
             ReplyFromAdminJob::dispatch($request->ticket_id, $buyerEmail, $request->remarks, $messageId, $allFiles);
-
         } catch (\Exception $e) {
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
         }
