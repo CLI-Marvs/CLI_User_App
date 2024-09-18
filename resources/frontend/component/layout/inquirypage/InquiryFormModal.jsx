@@ -189,15 +189,15 @@ const InquiryFormModal = ({ modalRef }) => {
                                     onChange={handleChange}
                                     className="appearance-none w-full px-4 text-sm py-1 bg-white focus:outline-none border-0 mobile:text-xs"
                                 >
-                                    <option value="">(Select)</option>
-                                    <option value="property1">
-                                        Property 1
+                                     <option value="">(Select)</option>
+                                    <option value="38 Park Avenue">
+                                    38 Park Avenue
                                     </option>
-                                    <option value="property2">
-                                        Property 2
+                                    <option value="Casa Mira Labangon">
+                                    Casa Mira Labangon
                                     </option>
-                                    <option value="property3">
-                                        Property 3
+                                    <option value="Mivesa Garden Residences">
+                                    Mivesa Garden Residences
                                     </option>
                                 </select>
                                 <span className="absolute inset-y-0 right-0 flex  items-center pr-3 pl-3 bg-custom-grayFA text-custom-gray81 pointer-events-none">
