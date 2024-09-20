@@ -12,7 +12,7 @@ const UserMessages = ({ items }) => {
     };
 
     return (
-    <div className="w-full">
+        <div className="w-full">
             <div className="flex w-full mt-10 gap-2">
                 <div className="h-12 w-12">
                     <img className="rounded-full" src={defaultAvatar} alt="" />
@@ -20,7 +20,19 @@ const UserMessages = ({ items }) => {
                 <div className="flex flex-col">
                     <p className="font-bold text-custom-bluegreen">Buyer</p>
                     <p className="font-semibold text-custom-gray81">
-                        {items.buyer_name}
+                        {(() => {
+                            const nameParts = items.buyer_name.split(" ");
+                            const lastName = nameParts.pop();
+                            const firstName = nameParts.join(" ");
+
+                            const capitalize = (name) =>
+                                name.charAt(0).toUpperCase() +
+                                name.slice(1).toLowerCase();
+
+                            return `${capitalize(firstName)} ${capitalize(
+                                lastName
+                            )}`;
+                        })()}
                     </p>
                 </div>
             </div>

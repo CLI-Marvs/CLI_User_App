@@ -7,7 +7,8 @@ import apiService from "../../servicesApi/apiService";
 
 const TicketTable = ({ concernData }) => {
     const [checkedRows, setCheckedRows] = useState([]);
-    const { getMessages, getAllConcerns, user, setData, getInquiryLogs } = useStateContext();
+    const { getMessages, getAllConcerns, user, setData, getInquiryLogs } =
+        useStateContext();
     const handleCheckboxChange = (index) => {
         setCheckedRows((prevCheckedRows) =>
             prevCheckedRows.includes(index)
@@ -28,9 +29,8 @@ const TicketTable = ({ concernData }) => {
         } catch (error) {
             console.log("error", error);
         }
-
     };
-   
+
     const navigateToThread = (items) => {
         getMessages(items.ticket_id);
         getAllConcerns();
@@ -42,7 +42,6 @@ const TicketTable = ({ concernData }) => {
         } */
         );
     };
-
 
     const formatTime = (createdAt) => {
         const date = new Date(createdAt);
@@ -67,7 +66,6 @@ const TicketTable = ({ concernData }) => {
             return date.toLocaleDateString(undefined, options);
         }
     };
-
     return (
         <table className="flex flex-col gap-1 w-full">
             <tbody>
@@ -80,9 +78,13 @@ const TicketTable = ({ concernData }) => {
                             hover:shadow-custom
                             ${
                                 row.status === "Resolved"
-                                    ? row.ispinned === 1 ? "bg-custom-lightestgreen" : "bg-custom-grayF1"
-                                    : row.ispinned === 1 ? "bg-custom-lightestgreen" : "bg-white"}`
-                                }
+                                    ? row.ispinned === 1
+                                        ? "bg-custom-lightestgreen"
+                                        : "bg-custom-grayF1"
+                                    : row.ispinned === 1
+                                    ? "bg-custom-lightestgreen"
+                                    : "bg-white"
+                            }`}
                         >
                             {/*  <td className='w-10 flex justify-center'>
                             <input
@@ -106,7 +108,7 @@ const TicketTable = ({ concernData }) => {
                                         togglePin(index, row);
                                     }}
                                 >
-                                    {row.ispinned === 1? (
+                                    {row.ispinned === 1 ? (
                                         <TiPin />
                                     ) : (
                                         <TiPinOutline />
@@ -128,7 +130,15 @@ const TicketTable = ({ concernData }) => {
                                             row.buyer_name.split(" ");
                                         const lastName = nameParts.pop();
                                         const firstName = nameParts.join(" ");
-                                        return `${lastName}, ${firstName}`;
+
+                                        // Helper function to capitalize the first letter of a string
+                                        const capitalize = (name) =>
+                                            name.charAt(0).toUpperCase() +
+                                            name.slice(1).toLowerCase();
+
+                                        return `${capitalize(
+                                            lastName
+                                        )}, ${capitalize(firstName)}`;
                                     })()}
                                 </p>
                             </td>

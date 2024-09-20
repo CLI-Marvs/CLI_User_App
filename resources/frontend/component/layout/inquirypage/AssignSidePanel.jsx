@@ -29,7 +29,7 @@ const AssignSidePanel = ({ ticketId }) => {
     };
 
     const employeeOptions = allEmployees.map((employee) => ({
-        label: `${employee.firstname} (${employee.department})`,
+        label: `${employee.firstname} ${employee.lastname} (${employee.department})`,
         email: employee.employee_email,
         firstname: employee.firstname,
         department: employee.department,

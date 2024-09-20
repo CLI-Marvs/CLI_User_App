@@ -8,6 +8,7 @@ use App\Jobs\ResolveJobToSender;
 use App\Mail\SendReplyFromAdmin;
 use App\Models\BuyerReplyNotif;
 use App\Models\Concerns;
+use App\Models\ConcernsCreatedBy;
 use App\Models\Employee;
 use App\Models\InquiryAssignee;
 use App\Models\InquiryLogs;
@@ -338,6 +339,8 @@ class ConcernController extends Controller
     public function addConcernPublic(Request $request)
     {
         try {
+            $user = $request->user();
+
             $files = $request->file('files');
             $lastConcern = Concerns::latest()->first();
             $nextId = $lastConcern ? $lastConcern->id + 1 : 1;
@@ -362,13 +365,14 @@ class ConcernController extends Controller
             $concerns->save();
 
             $this->inquiryReceivedLogs($request, $ticketId);
+            $this->concernsCreatedBy($user, $concerns->id);
 
             $fileLinks = $this->uploadToGCS($files);
             $attachment = !empty($fileLinks) ? json_encode($fileLinks) : null;
             $messages = new Messages();
-            $messages->admin_email = $request->admin_email;
-            $messages->admin_id = $request->admin_id;
-            $messages->admin_profile_picture = $request->admin_profile_picture;
+            $messages->buyer_email = $request->buyer_email;
+            /* $messages->admin_id = $request->admin_id; */
+            /*  $messages->admin_profile_picture = $request->admin_profile_picture; */
             $messages->attachment = $attachment;
             $messages->ticket_id = $concerns->ticket_id;
             $messages->details_message = $request->message;
@@ -383,6 +387,13 @@ class ConcernController extends Controller
         }
     }
 
+    public function concernsCreatedBy($user, $concernId)
+    {
+        $createdBy = new ConcernsCreatedBy();
+        $createdBy->user_id = $user->id;
+        $createdBy->concern_id = $concernId;
+        $createdBy->save();
+    }
     public function uploadToGCS($files)
     {
         $fileLinks = [];
@@ -544,6 +555,7 @@ class ConcernController extends Controller
 
             $latestLogs = $this->getLatestLogsSubquery();
             $pinnedSubquery = $this->getPinnedConcernsSubquery($employee);
+            $createdBySubQuery = ConcernsCreatedBy::select('concern_id', 'user_id as created_by');
 
             $allConcerns = $query->leftJoinSub($latestLogs, 'latest_logs', function ($join) {
                 $join->on('concerns.ticket_id', '=', 'latest_logs.ticket_id');
@@ -551,7 +563,11 @@ class ConcernController extends Controller
                 ->leftJoinSub($pinnedSubquery, 'pinned', function ($join) {
                     $join->on('concerns.id', '=', 'pinned.concern_id');
                 })
-                ->select('concerns.*', 'latest_logs.message_log', DB::raw('CASE WHEN pinned.concern_id IS NOT NULL THEN 1 ELSE 0 END AS isPinned'))
+
+                ->leftJoinSub($createdBySubQuery, 'created_by_subquery', function ($join) {
+                    $join->on('concerns.id', '=', 'created_by_subquery.concern_id');
+                })
+                ->select('concerns.*', 'latest_logs.message_log', DB::raw('CASE WHEN pinned.concern_id IS NOT NULL THEN 1 ELSE 0 END AS isPinned'), 'created_by_subquery.created_by')
                 ->paginate(20);
 
             return response()->json($allConcerns);
@@ -559,6 +575,7 @@ class ConcernController extends Controller
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
         }
     }
+
 
     private function applyFilters($query, Request $request, $employee)
     {
@@ -875,7 +892,6 @@ class ConcernController extends Controller
     private function buyerReplyNotifs()
     {
         return BuyerReplyNotif::select('concern_id as id', 'ticket_id')->get();
-                              
     }
 
     // private function buyerReplyNotifs($employee)
@@ -1162,7 +1178,7 @@ class ConcernController extends Controller
     {
         $user = $request->user();
 
-        $employees = Employee::select('firstname', 'employee_email', 'department')->get();
+        $employees = Employee::select('firstname', 'employee_email', 'department', 'lastname')->get();
         return response()->json($employees);
     }
 
@@ -1256,11 +1272,14 @@ class ConcernController extends Controller
     }
 
 
-    public function deleteConcern($ticket_id)
+    public function deleteConcern(Request $request)
     {
+        $ticket_id = $request->ticketId;
+       /*  dd($ticket_id); */
         $concern = Concerns::where('ticket_id', $ticket_id)->firstOrFail();
 
         $concern->messages()->where('ticket_id', $ticket_id)->delete();
+        $concern->logs()->where('ticket_id', $ticket_id)->delete();
 
         $concern->delete();
 
