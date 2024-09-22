@@ -20,11 +20,17 @@ import CircularProgress from "@mui/material/CircularProgress";
 
 const InquiryThread = () => {
     const [attachedFiles, setAttachedFiles] = useState([]);
-    const [startDate, setStartDate] = useState(new Date());
+    const [startDate, setStartDate] = useState(null);
     const [isFilterVisible, setIsFilterVisible] = useState(false);
     const [loading, setLoading] = useState(false);
     const filterBoxRef = useRef(null);
-
+    const [name, setName] = useState("");
+    const [category, setCategory] = useState("");
+    const [email, setEmail] = useState("");
+    const [ticket, setTicket] = useState("");
+    const [status, setStatus] = useState("");
+    const [hasAttachments, setHasAttachments] = useState(false);
+    
     const {
         messages,
         setTicketId,
@@ -42,6 +48,13 @@ const InquiryThread = () => {
     const params = useParams();
     const ticketId = decodeURIComponent(params.id);
 
+    const handleDateChange = (date) => {
+        setStartDate(date);
+    };
+
+    const handleStatus = (e) => {
+        setStatus(e.target.value);
+    };
     const conversationMessages = messages[ticketId] || [];
 
     const dataConcern =

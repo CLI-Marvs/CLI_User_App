@@ -849,12 +849,11 @@ class ConcernController extends Controller
                 ->orderBy('concerns.created_at', 'desc')
                 ->get();
 
-            $latestBuyerReply = $this->buyerReplyNotifs();
+            $latestBuyerReply = $this->buyerReplyNotifs($employee, $ticketIds, $employeeDepartment);
 
+            $combinedData = $concernsResults->concat($latestBuyerReply);
 
-            $combinedData = $concernsResults->merge($latestBuyerReply);
-
-            $perPage = 10;
+            $perPage = 5;
             $currentPage = LengthAwarePaginator::resolveCurrentPage();
             $paginatedResults = $this->paginateCollection($combinedData, $perPage, $currentPage, $request->url());
 
@@ -878,55 +877,32 @@ class ConcernController extends Controller
             ['path' => $url]
         );
     }
-    private function buyerReplyNotif()
+
+    private function buyerReplyNotifs($employee, $ticketIds, $employeeDepartment)
     {
-        return InquiryLogs::select('ticket_id', 'requestor_reply', 'created_at', 'id')
-            ->whereIn('id', function ($subquery) {
-                $subquery->select(DB::raw('MAX(id)'))
-                    ->from('inquiry_logs')
-                    ->whereNotNull('requestor_reply')
-                    ->groupBy('ticket_id');
-            });
-    }
+        $buyerReplyQuery = BuyerReplyNotif::query();
 
-    private function buyerReplyNotifs()
-    {
-        return BuyerReplyNotif::select('concern_id as id', 'ticket_id')->get();
-    }
+        if ($employeeDepartment !== "CSR") {
+            $buyerReplyQuery->whereIn('ticket_id', $ticketIds);
+        }
 
-    // private function buyerReplyNotifs($employee)
-    // {
-    //     return BuyerReplyNotif::leftJoin('read_notif_by_user', function ($join) use ($employee) {
-    //         $join->on('buyer_reply_notif.concern_id', '=', 'read_notif_by_user.concern_id')
-    //             ->where('read_notif_by_user.user_id', $employee->id);
-    //     })
-    //         ->select(
-    //             'buyer_reply_notif.concern_id as id',
-    //             'buyer_reply_notif.ticket_id',
-    //             \DB::raw('CASE WHEN read_notif_by_user.concern_id IS NULL THEN 0 ELSE 1 END as is_read')
-    //         )
-    //         ->get();
-    // }
-
-    /* private function buyerReplyNotifs($employee)
-    {
-        // Step 1: Fetch all buyer replies without checking 'is_read' initially
-        $buyerReplies = BuyerReplyNotif::select('concern_id as id', 'ticket_id')->get();
-
-        // Step 2: Map through the replies and check if each has been read by the user
-        $buyerReplies->transform(function ($reply) use ($employee) {
-            $isRead = ReadNotifByUser::where('concern_id', $reply->id)
-                ->where('user_id', $employee->id)
-                ->exists();
-
-            // Add 'is_read' attribute to each reply based on the check
-            $reply->is_read = $isRead ? 1 : 0;
-
-            return $reply;
+        $buyerReplyQuery->leftJoin('read_notif_by_user', function ($join) use ($employee) {
+            $join->on('buyer_reply_notif.id', '=', 'read_notif_by_user.reply_id')
+                ->where('read_notif_by_user.user_id', $employee->id);
         });
 
-        return $buyerReplies;
-    } */
+        $buyerReplyQuery->select(
+            'buyer_reply_notif.ticket_id',
+            'buyer_reply_notif.buyer_reply_status',
+            'buyer_reply_notif.created_at',
+            'buyer_reply_notif.updated_at',
+            'buyer_reply_notif.message_log',
+            \DB::raw('CASE WHEN read_notif_by_user.reply_id IS NULL THEN 0 ELSE 1 END as is_read'),
+            'buyer_reply_notif.id as buyer_notif_id' 
+        );
+
+        return $buyerReplyQuery->get();
+    }
 
 
     private function notifStatusFilter($status, $query)
@@ -944,19 +920,63 @@ class ConcernController extends Controller
     {
         $user = $request->user();
 
-        $existingEntry = ReadNotifByUser::where('user_id', $user->id)
-            ->where('concern_id', $concernId)
-            ->first();
 
-        if (!$existingEntry) {
-            ReadNotifByUser::insert([
-                'user_id' => $user->id,
-                'concern_id' => $concernId,
-                'created_at' => now(),
-                'updated_at' => now()
-            ]);
+        if ($request->buyerReply) {
+            $existingEntry = ReadNotifByUser::where('user_id', $user->id)
+            ->where('reply_id', $concernId)
+            ->first();
+            
+            if(!$existingEntry) {
+                ReadNotifByUser::insert([
+                    'user_id' => $user->id,
+                    'reply_id' => $concernId,
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ]);
+            }
+        } else {
+            $existingEntry = ReadNotifByUser::where('user_id', $user->id)
+                ->where('concern_id', $concernId)
+                ->first();
+
+            if (!$existingEntry) {
+                ReadNotifByUser::insert([
+                    'user_id' => $user->id,
+                    'concern_id' => $concernId,
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ]);
+            }
         }
     }
+
+    // public function countUnreadNotifications(Request $request)
+    // {
+    //     try {
+    //         $employee = $request->user();
+    //         $employeeDepartment = $employee->department;
+
+    //         $assignedInquiries = $this->getAssignInquiries($employee->employee_email);
+    //         $ticketIds = $assignedInquiries->pluck('ticket_id')->toArray();
+
+    //         $query = Concerns::query();
+
+    //         if ($employeeDepartment !== "CSR") {
+    //             $query->whereIn('ticket_id', $ticketIds);
+    //         }
+
+    //         $unreadCount = $query->leftJoin('read_notif_by_user', function ($join) use ($employee) {
+    //             $join->on('concerns.id', '=', 'read_notif_by_user.concern_id')
+    //                 ->where('read_notif_by_user.user_id', $employee->id);
+    //         })
+    //             ->whereNull('read_notif_by_user.concern_id')
+    //             ->count();
+
+    //         return response()->json(['unreadCount' => $unreadCount]);
+    //     } catch (\Exception $e) {
+    //         return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
+    //     }
+    // }
 
     public function countUnreadNotifications(Request $request)
     {
@@ -967,24 +987,41 @@ class ConcernController extends Controller
             $assignedInquiries = $this->getAssignInquiries($employee->employee_email);
             $ticketIds = $assignedInquiries->pluck('ticket_id')->toArray();
 
-            $query = Concerns::query();
-
+            // Count unread concerns
+            $concernsQuery = Concerns::query();
             if ($employeeDepartment !== "CSR") {
-                $query->whereIn('ticket_id', $ticketIds);
+                $concernsQuery->whereIn('ticket_id', $ticketIds);
             }
 
-            $unreadCount = $query->leftJoin('read_notif_by_user', function ($join) use ($employee) {
+            $unreadConcernsCount = $concernsQuery->leftJoin('read_notif_by_user', function ($join) use ($employee) {
                 $join->on('concerns.id', '=', 'read_notif_by_user.concern_id')
                     ->where('read_notif_by_user.user_id', $employee->id);
             })
                 ->whereNull('read_notif_by_user.concern_id')
                 ->count();
 
-            return response()->json(['unreadCount' => $unreadCount]);
+            // Count unread buyer replies
+            $buyerReplyQuery = BuyerReplyNotif::query();
+
+            if ($employeeDepartment !== "CSR") {
+                $buyerReplyQuery->whereIn('ticket_id', $ticketIds);
+            }
+            $unreadBuyerRepliesCount = $buyerReplyQuery->leftJoin('read_notif_by_user', function ($join) use ($employee) {
+                $join->on('buyer_reply_notif.id', '=', 'read_notif_by_user.reply_id')
+                    ->where('read_notif_by_user.user_id', $employee->id);
+            })
+                ->whereNull('read_notif_by_user.reply_id')
+                ->count();
+
+            // Total unread notifications
+            $totalUnreadCount = $unreadConcernsCount + $unreadBuyerRepliesCount;
+
+            return response()->json(['unreadCount' => $totalUnreadCount]);
         } catch (\Exception $e) {
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
         }
     }
+
 
     //* logs
     private function getAssignInquiries($email)
@@ -1275,7 +1312,7 @@ class ConcernController extends Controller
     public function deleteConcern(Request $request)
     {
         $ticket_id = $request->ticketId;
-       /*  dd($ticket_id); */
+        /*  dd($ticket_id); */
         $concern = Concerns::where('ticket_id', $ticket_id)->firstOrFail();
 
         $concern->messages()->where('ticket_id', $ticket_id)->delete();

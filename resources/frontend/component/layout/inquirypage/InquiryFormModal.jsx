@@ -63,7 +63,7 @@ const projectList = [
     "Velmiro Plains Bacolod",
     "Villa Casita - Balamban",
     "Villa Casita - Bogo",
-    "NA"
+    "N/A"
   ]
   
 const InquiryFormModal = ({ modalRef }) => {
