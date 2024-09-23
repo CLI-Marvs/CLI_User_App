@@ -3,11 +3,14 @@ import React from "react";
 const AssignDetails = ({ logMessages }) => {
     const capitalizeWords = (name) => {
         return name
-        .split(' ')
-        .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-        .join(' ');
+            .split(" ")
+            .map(
+                (word) =>
+                    word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+            )
+            .join(" ");
     };
-    
+
     const renderDetails = (actionType, details) => {
         switch (actionType) {
             case "client_inquiry":
@@ -38,10 +41,12 @@ const AssignDetails = ({ logMessages }) => {
                                 {details.message_tag}
                             </p>
                             <p className="text-xs text-custom-gray space-x-1">
-                                by {details.admin_name} 
+                                by {details.admin_name}
                             </p>
                             <p className="text-xs text-custom-gray space-x-1">
-                                {details.department === "CRS" ? "Customer Relations Services" : details.department} 
+                                {details.department === "CRS"
+                                    ? "Customer Relations Services"
+                                    : details.department}
                             </p>
                         </div>
                     </>
@@ -80,7 +85,12 @@ const AssignDetails = ({ logMessages }) => {
                             </p>
 
                             <p className="text-xs text-custom-gray space-x-1">
-                            <span>by ({capitalizeWords(details.buyer_name)})</span>
+                                {details.buyer_name && (
+                                    <span>
+                                        by (
+                                        {capitalizeWords(details.buyer_name)})
+                                    </span>
+                                )}
                             </p>
                             {/*  <p className="text-xs text-custom-gray space-x-1">
                                 (
