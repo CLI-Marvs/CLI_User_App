@@ -256,8 +256,6 @@ const InquiryList = () => {
         currentPage,
     ]);
 
-    console.log("test");
-
     return (
         <>
             <div className="h-screen max-w-full bg-custom-grayFA px-4">
