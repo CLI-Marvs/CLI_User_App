@@ -1,7 +1,11 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\BasicPricingController;
 use App\Http\Controllers\ConcernController;
+use App\Http\Controllers\PaymentSchemeController;
+use App\Http\Controllers\PricingMasterListController;
+use App\Http\Controllers\PropertyDetailController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -52,4 +56,15 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/pin-concern/{id}', [ConcernController::class, 'pinConcern']);
     Route::post('/isread/{concernId}', [ConcernController::class, 'readNotifByUser']);
     Route::get('/specific-assignee', [ConcernController::class, 'getSpecificInquiry']);
+
+    /* Pricing Master List */
+    Route::get('/get-pricing-master-lists', [PricingMasterListController::class, 'getAllPricingMasterLists']);
+    /*Basic Pricing */
+    Route::post('/basic-pricing', [BasicPricingController::class, 'storeBasicPricing']);
+    
+    /*Payment Scheme */
+    Route::post('/payment-schemes', [PaymentSchemeController::class, 'storePaymentScheme']);
+    Route::get('/get-payment-schemes', [PaymentSchemeController::class, 'getAllPaymentSchemes']);
+    /* Property Detail */
+    Route::post('/property-details', [PropertyDetailController::class, 'storePropertyDetail']);
 });
