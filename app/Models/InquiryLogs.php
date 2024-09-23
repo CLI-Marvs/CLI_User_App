@@ -11,4 +11,9 @@ class InquiryLogs extends Model
 
     protected $table = 'inquiry_logs';
     protected $guarded = array();
+
+    public function concern()
+    {
+        return $this->belongsTo(Concerns::class, 'ticket_id', 'ticket_id');
+    }
 }

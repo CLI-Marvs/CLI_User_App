@@ -18,7 +18,7 @@ const AssignModal = ({ modalRef, employeeData, isAssign }) => {
         try {
             const response = await apiService.post("add-assignee", {
                 ...employeeData,
-                assign_by: user?.firstname,
+                assign_by: user?.firstname + " " + user?.lastname,
                 assign_by_department: user?.department,
                 remarks: remarks,
             });
@@ -41,7 +41,7 @@ const AssignModal = ({ modalRef, employeeData, isAssign }) => {
         try {
             const response = await apiService.post("reassign", {
                 ...employeeData,
-                assign_by: user?.firstname,
+                assign_by: user?.firstname + " " + user?.lastname,
                 assign_by_department: user?.department,
                 remarks: remarks,
             });

@@ -17,7 +17,6 @@ Route::get('/user', function (Request $request) {
 Route::middleware('auth:sanctum')->post('/auth/logout', [AuthController::class, 'logout']);
 
 
-Route::post('/add-concern', [ConcernController::class, 'addConcernPublic']);
 
 Route::post('/add-assignee', [ConcernController::class, 'assignInquiryTo']);
 Route::post('/reassign', [ConcernController::class, 'reassignInquiry']);
@@ -42,10 +41,11 @@ Route::get('/get-messageId/{ticketId}', [ConcernController::class, 'getMessageId
 Route::get('/report-monthly', [ConcernController::class, 'getMonthlyReports']);
 Route::get('/category-monthly', [ConcernController::class, 'getInquiriesByCategory']);
 Route::get('/inquiries-property', [ConcernController::class, 'getInquiriesPerProperty']);
-Route::delete('delete-concerns', [ConcernController::class, 'deleteConcern']);
+Route::post('delete-concerns', [ConcernController::class, 'deleteConcern']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/get-concern', [ConcernController::class, 'getAllConcerns']);
+    Route::post('/add-concern', [ConcernController::class, 'addConcernPublic']);
     Route::get('/get-message/{ticketId}', [ConcernController::class, 'getMessage']);
     Route::post('/send-message', [ConcernController::class, 'sendMessage']);
     Route::get('/get-logs/{ticketId}', [ConcernController::class, 'getInquiryLogs']);

@@ -15,6 +15,57 @@ const formDataState = {
     details_concern: "",
     unit_number: "",
 }
+
+const projectList = [
+    "38 Park Avenue",
+    "Astra Centre",
+    "Asia Premiere",
+    "Base Line Center Phase 2",
+    "Baseline Center",
+    "Baseline Residences",
+    "Casa Mira Bacolod",
+    "Casa Mira Coast Sibulan",
+    "Casa Mira Homes Butuan",
+    "Casa Mira Iloilo Camalig",
+    "Casa Mira Linao",
+    "Casa Mira Towers CDO",
+    "Casa Mira Towers Guadalupe",
+    "Casa Mira Towers Labangon",
+    "Casa Mira Towers LPU Davao",
+    "Casa Mira Towers Mandaue",
+    "Casamira South",
+    "Calle 104",
+    "Casa Mira Dumaguete",
+    "Casa Mira Towers Bacolod",
+    "Casa Mira Towers Palawan",
+    "Costa Mira Beachtown",
+    "Costa Mira Beachtown Panglao",
+    "Latitude Corporate Center",
+    "Mesaverte Residences",
+    "Mesavirre Garden Residences",
+    "Midori Residences",
+    "Mivela Garden Residences",
+    "Mivesa Garden Residences",
+    "Mandtra Residences",
+    "Midori Plains",
+    "Mindara Residences",
+    "Patria De Cebu",
+    "Park Centrale Tower",
+    "San Jose Maria Village - Balamban",
+    "San Jose Maria Village - Minglanilla",
+    "San Jose Maria Village - Toledo",
+    "San Josemaria Village - Talisay",
+    "Test Project",
+    "The East Village",
+    "Velmiro Greens Bohol",
+    "Velmiro Heights",
+    "Velmiro Heights Uptown",
+    "Velmiro Plains Bacolod",
+    "Villa Casita - Balamban",
+    "Villa Casita - Bogo",
+    "N/A"
+  ]
+  
 const InquiryFormModal = ({ modalRef }) => {
     const [files, setFiles] = useState([]);
     const [fileName, setFileName] = useState("");
@@ -189,16 +240,12 @@ const InquiryFormModal = ({ modalRef }) => {
                                     onChange={handleChange}
                                     className="appearance-none w-full px-4 text-sm py-1 bg-white focus:outline-none border-0 mobile:text-xs"
                                 >
-                                    <option value="">(Select)</option>
-                                    <option value="property1">
-                                        Property 1
-                                    </option>
-                                    <option value="property2">
-                                        Property 2
-                                    </option>
-                                    <option value="property3">
-                                        Property 3
-                                    </option>
+                                     <option value="">(Select)</option>
+                                    {projectList.map((item, index) => {
+                                        return (
+                                            <option key={index} value={item}>{item}</option>
+                                        )
+                                    })}
                                 </select>
                                 <span className="absolute inset-y-0 right-0 flex  items-center pr-3 pl-3 bg-custom-grayFA text-custom-gray81 pointer-events-none">
                                     <IoMdArrowDropdown/>

@@ -52,7 +52,7 @@ export const ContextProvider = ({ children }) => {
             setDepartment(user.department === "CSR" ? "All" : user.department);
             setIsDepartmentInitialized(true);
         }
-    }, [user, isDepartmentInitialized]); //
+    }, [user, isDepartmentInitialized]); 
 
     const setToken = (token) => {
         _setToken(token);
@@ -175,6 +175,7 @@ export const ContextProvider = ({ children }) => {
                         notifStatus || ""
                     }`
                 );
+                console.log("response", response.data);
                 setNotifications(response.data.data);
                 setNotifPageCount(response.data.last_page);
             } catch (error) {

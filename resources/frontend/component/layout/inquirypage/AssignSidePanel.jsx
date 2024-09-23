@@ -29,7 +29,7 @@ const AssignSidePanel = ({ ticketId }) => {
     };
 
     const employeeOptions = allEmployees.map((employee) => ({
-        label: `${employee.firstname} (${employee.department})`,
+        label: `${employee.firstname} ${employee.lastname} (${employee.department})`,
         email: employee.employee_email,
         firstname: employee.firstname,
         department: employee.department,
@@ -69,7 +69,7 @@ const AssignSidePanel = ({ ticketId }) => {
                         onClick={handleOpenModal}
                         className="h-9 gradient-btn2 hover:shadow-custom4 px-16 text-white rounded-lg"
                     >
-                        {dataConcern.resolve_from !== null ? (
+                        {dataConcern.assign_to !== null ? (
                             <span>Reassign</span>
                         ) : (
                             <span>Assign</span>

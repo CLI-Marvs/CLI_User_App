@@ -17,5 +17,10 @@ class Concerns extends Model
     {
         return $this->hasMany(Messages::class, 'ticket_id', 'ticket_id');
     }
+
+    public function logs()
+    {
+        return $this->hasMany(InquiryLogs::class, 'ticket_id', 'ticket_id');
+    }
     
 }
