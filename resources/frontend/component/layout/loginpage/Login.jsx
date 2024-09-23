@@ -20,7 +20,7 @@ const Login = () => {
                         <button onClick={signinGoogle} className="relative flex justify-center items-center w-full text-sm border rounded-lg border-custom-lightgreen hover:shadow-custom3 text-custom-lightgreen h-11 mb-2">
                             <img src={GoogleLogo} className="h-5 w-5 mr-6" />
                             <span className="relative right-3 text-base">
-                                Login with Googless
+                                Login with Google
                             </span>
                         </button>
                     </div>
