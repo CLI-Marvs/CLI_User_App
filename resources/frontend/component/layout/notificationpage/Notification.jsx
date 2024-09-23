@@ -18,7 +18,7 @@ const Notification = () => {
         setNotifStatus,
     } = useStateContext();
     const [activeButton, setActiveButton] = useState("All");
-
+    
     const handleClick = (button) => {
         setNotifStatus(button);
         setNotifCurrentPage(0);

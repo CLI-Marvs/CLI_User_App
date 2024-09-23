@@ -1,9 +1,8 @@
-
 import { Outlet, RouterProvider, createBrowserRouter } from "react-router-dom";
 import DasboardView from "../views/Dashboard/DasboardView";
 import LoginView from "./views/pages/loginViews/LoginView";
-import './layout/css/font.css'
-import './layout/css/style.css'
+import "./layout/css/font.css";
+import "./layout/css/style.css";
 import Home from "./layout/Home";
 import Sidebar from "./layout/mainComponent/Sidebar";
 import Navbar from "./layout/mainComponent/Navbar";
@@ -20,22 +19,24 @@ import PaymentSchemeView from "./views/pages/PropertyAndPricingViews/PaymentSche
 import PriceVersioningView from "./views/pages/PropertyAndPricingViews/PriceVersioningView";
 import PromotionalPricingView from "./views/pages/PropertyAndPricingViews/PromotionalPricingView";
 import NotificationView from "./views/pages/notificationViews/NotificationView";
+import PriceListSettingFormDataProvider from "../context/BasicPricing/PriceListSettingsContext";
 const App = () => {
-
     const Layout = () => {
         return (
-            <div className="bg-white relative max-h-screen flex flex-col h-screen">
-              <Navbar />
-              <div className="flex flex-1 overflow-hidden">
-                <Sidebar />
-                <div className="flex-1 overflow-y-auto bg-custom-grayFA">
-                  <Outlet />
+            <PriceListSettingFormDataProvider>
+                <div className="bg-white relative max-h-screen flex flex-col h-screen">
+                    <Navbar />
+                    <div className="flex flex-1 overflow-hidden">
+                        <Sidebar />
+                        <div className="flex-1 overflow-y-auto bg-custom-grayFA">
+                            <Outlet />
+                        </div>
+                    </div>
                 </div>
-              </div>
-            </div>
-          );
+            </PriceListSettingFormDataProvider>
+        );
 
-       /*  return (
+        /*  return (
             <>
                 <div className="bg-white relative max-h-screen flex flex-col">
                     <Navbar/>
@@ -53,16 +54,16 @@ const App = () => {
     const router = createBrowserRouter([
         {
             path: "/",
-            element: <LoginView/>,
+            element: <LoginView />,
         },
         {
             path: "/login",
-            element: <LoginView/>,
-        }, 
+            element: <LoginView />,
+        },
 
         {
             path: "/callback",
-            element: <CallBackView/>,
+            element: <CallBackView />,
         },
         {
             path: "/",
@@ -70,53 +71,53 @@ const App = () => {
             children: [
                 {
                     path: "home",
-                    element:<Home/>,
+                    element: <Home />,
                 },
                 {
                     path: "notification",
-                    element:<NotificationView/>,
+                    element: <NotificationView />,
                 },
                 {
                     path: "inquirymanagement",
-                    element: <InquiryManagementLayout/>,
+                    element: <InquiryManagementLayout />,
                     children: [
                         {
                             path: "inquirylist",
-                            element: <InquiryListView/>,
+                            element: <InquiryListView />,
                         },
                         {
                             path: "thread/:id",
-                            element: <InquiryThreadView/>,
+                            element: <InquiryThreadView />,
                         },
                         {
                             path: "report",
-                            element: <ReportViews/>,
+                            element: <ReportViews />,
                         },
                     ],
                 },
                 {
                     path: "propertyandpricing",
-                    element: <PropertyAndPricingLayout/>,
+                    element: <PropertyAndPricingLayout />,
                     children: [
                         {
                             path: "pricingmasterlist",
-                            element: <PricingMasterListView/>,
+                            element: <PricingMasterListView />,
                         },
                         {
                             path: "basicpricing",
-                            element: <BasicPricingView/>,
+                            element: <BasicPricingView />,
                         },
                         {
                             path: "paymentscheme",
-                            element: <PaymentSchemeView/>,
+                            element: <PaymentSchemeView />,
                         },
                         {
                             path: "priceversioning",
-                            element: <PriceVersioningView/>,
+                            element: <PriceVersioningView />,
                         },
                         {
                             path: "promotionalPricing",
-                            element: <PromotionalPricingView/>,
+                            element: <PromotionalPricingView />,
                         },
                     ],
                 },

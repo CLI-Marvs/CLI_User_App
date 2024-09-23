@@ -43,8 +43,10 @@ export const ContextProvider = ({ children }) => {
     const [specificInquiry, setSpecificInquiry] = useState(null);
     const [dataSet, setDataSet] = useState([]);
     const [department, setDepartment] = useState("");
-    const [isDepartmentInitialized, setIsDepartmentInitialized] = useState(false);
-
+    const [isDepartmentInitialized, setIsDepartmentInitialized] =
+        useState(false);
+    const [pricingMasterLists, setPricingMasterLists] = useState([]);
+    const [paymentSchemes, setPaymentSchemes] = useState([]);
     useEffect(() => {
         if (user && user.department && !isDepartmentInitialized) {
             setDepartment(user.department === "CSR" ? "All" : user.department);
@@ -126,7 +128,10 @@ export const ContextProvider = ({ children }) => {
         if (!isDepartmentInitialized) return;
         try {
             const response = await apiService.get("inquiries-property", {
-                params: { propertyMonth: propertyMonth, department: department },
+                params: {
+                    propertyMonth: propertyMonth,
+                    department: department,
+                },
             });
             const result = response.data;
             const formattedData = result.map((item) => ({
@@ -245,6 +250,34 @@ export const ContextProvider = ({ children }) => {
         return validMonths.hasOwnProperty(normalizedMonth);
     };
 
+    // const getPricingMasterLists = async () => {
+    //     if (token) {
+    //         try {
+    //             const response = await apiService.get(
+    //                 "get-pricing-master-lists"
+    //             );
+    //             setPricingMasterLists(response.data);
+    //         } catch (error) {
+    //             console.error("Error fetching pricing master lists:", error);
+    //         }
+    //     }
+    // }; //get all pricing master lists data
+    const getPaymentSchemes = async () => {
+        if (token) {
+            try {
+                const response = await apiService.get("get-payment-schemes");
+                setPaymentSchemes(response.data);
+            } catch (error) {
+                console.error("Error fetching data:", error);
+            }
+        }
+    };
+    // useEffect(() => {
+    //     getPricingMasterLists();
+    // }, []);
+    useEffect(() => {
+        getPaymentSchemes();
+    }, [token]);
     useEffect(() => {
         if (token) {
             const getData = async () => {
@@ -309,7 +342,7 @@ export const ContextProvider = ({ children }) => {
                 console.error("Error fetching data:", error);
             }
         };
-    
+
         fetchData();
     }, [department, propertyMonth, month]);
 
@@ -366,6 +399,10 @@ export const ContextProvider = ({ children }) => {
                 setDepartment,
                 fetchDataReport,
                 dataSet,
+                pricingMasterLists,
+              
+                paymentSchemes,
+                getPaymentSchemes,
             }}
         >
             {children}
