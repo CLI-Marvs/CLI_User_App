@@ -546,7 +546,7 @@ const InquiryThread = () => {
                                         />
 
                                         {/* File attachment button */}
-                                        <div className="absolute bottom-7 right-[85px] flex items-center">
+                                        <div className="hidden absolute bottom-7 right-[85px] items-center">
                                             <input
                                                 type="file"
                                                 id="fileInput"
