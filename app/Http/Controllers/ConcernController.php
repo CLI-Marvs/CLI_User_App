@@ -853,9 +853,13 @@ class ConcernController extends Controller
 
             $combinedData = $concernsResults->concat($latestBuyerReply);
 
+            $sortedCombinedData = $combinedData->sortByDesc(function ($item) {
+                return $item->created_at;
+            })->values(); 
+
             $perPage = 20;
             $currentPage = LengthAwarePaginator::resolveCurrentPage();
-            $paginatedResults = $this->paginateCollection($combinedData, $perPage, $currentPage, $request->url());
+            $paginatedResults = $this->paginateCollection($sortedCombinedData, $perPage, $currentPage, $request->url());
 
 
             return response()->json($paginatedResults);
@@ -893,7 +897,7 @@ class ConcernController extends Controller
 
         $buyerReplyQuery->select(
             'buyer_reply_notif.ticket_id',
-            'buyer_reply_notif.buyer_reply_status',
+            'buyer_reply_notif.details_message',
             'buyer_reply_notif.created_at',
             'buyer_reply_notif.updated_at',
             'buyer_reply_notif.message_log',
@@ -1150,9 +1154,9 @@ class ConcernController extends Controller
             $logData = [
                 'log_type' => 'admin_reply',
                 'details' => [
-                    'message_tag' => "Replied by",
+                    'message_tag' => "CLI Reply",
                     'admin_name' => $request->admin_name,
-                    'department' => $request->admin_email,
+                    'department' => $request->department,
                 ]
             ];
 

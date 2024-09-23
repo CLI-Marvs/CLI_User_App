@@ -149,6 +149,8 @@ const InquiryThread = () => {
         formData.append("admin_id", user?.id || "");
         formData.append("buyer_email", dataConcern.buyer_email || "");
         formData.append("admin_profile_picture", user?.profile_picture || "");
+        formData.append("department", user?.department || "");
+
 
         try {
             const response = await apiService.post("send-message", formData, {
