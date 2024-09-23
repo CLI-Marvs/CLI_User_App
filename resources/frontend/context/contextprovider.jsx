@@ -175,7 +175,7 @@ export const ContextProvider = ({ children }) => {
                         notifStatus || ""
                     }`
                 );
-                console.log("response", response.data);
+                console.log("response getNotifications", response.data);
                 setNotifications(response.data.data);
                 setNotifPageCount(response.data.last_page);
             } catch (error) {
@@ -250,18 +250,19 @@ export const ContextProvider = ({ children }) => {
         return validMonths.hasOwnProperty(normalizedMonth);
     };
 
-    // const getPricingMasterLists = async () => {
-    //     if (token) {
-    //         try {
-    //             const response = await apiService.get(
-    //                 "get-pricing-master-lists"
-    //             );
-    //             setPricingMasterLists(response.data);
-    //         } catch (error) {
-    //             console.error("Error fetching pricing master lists:", error);
-    //         }
-    //     }
-    // }; //get all pricing master lists data
+    const getPricingMasterLists = async () => {
+        if (token) {
+            try {
+                const response = await apiService.get(
+                    "get-pricing-master-lists"
+                );
+               setPricingMasterLists(response.data);
+                 
+            } catch (error) {
+                console.error("Error fetching pricing master lists:", error);
+            }
+        }
+    }; //get all pricing master lists data
     const getPaymentSchemes = async () => {
         if (token) {
             try {
@@ -272,9 +273,9 @@ export const ContextProvider = ({ children }) => {
             }
         }
     };
-    // useEffect(() => {
-    //     getPricingMasterLists();
-    // }, []);
+    useEffect(() => {
+        getPricingMasterLists();
+    }, []);
     useEffect(() => {
         getPaymentSchemes();
     }, [token]);
@@ -400,7 +401,7 @@ export const ContextProvider = ({ children }) => {
                 fetchDataReport,
                 dataSet,
                 pricingMasterLists,
-              
+                getPricingMasterLists,
                 paymentSchemes,
                 getPaymentSchemes,
             }}

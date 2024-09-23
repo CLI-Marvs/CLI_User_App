@@ -9,13 +9,15 @@ import { useStateContext } from "../../../../context/contextprovider";
 import AddPricingModal from "./AddPricingModal";
 import AddPropertyModal from "../basicpricing/modals/AddPropertyModal";
 import { json } from "react-router-dom";
+import moment from "moment";
+
 const PricingMasterList = () => {
     const [startDate, setStartDate] = useState(new Date());
     const [toggled, setToggled] = useState(false);
 
     const [isFilterVisible, setIsFilterVisible] = useState(false);
     const { getPricingMasterLists, pricingMasterLists } = useStateContext();
-   // console.log("pricingMasterLists",pricingMasterLists);
+
     const toggleFilterBox = () => {
         setIsFilterVisible(!isFilterVisible);
     };
@@ -30,9 +32,9 @@ const PricingMasterList = () => {
 
     //--hooks--
 
-    // useEffect(() => {
-    //     getPricingMasterLists();
-    // }, []);
+    useEffect(() => {
+        getPricingMasterLists();
+    }, []);
 
     return (
         <div className="h-screen max-w-[1800px] bg-custom-grayFA px-4">
@@ -254,13 +256,6 @@ const PricingMasterList = () => {
                         {/*                                            ONGOING APPROVAL                                                */}
                         {pricingMasterLists.length > 0 &&
                             pricingMasterLists.map((item, index) => {
-                                // let priceSettingsArray = [];
-                                // try {
-                                //     priceSettingsArray = JSON.parse(item.price_settings);
-                                //     console.log("priceSettingsArray",priceSettingsArray[0].base_price)
-                                // } catch (e) {
-                                //     console.error("Error parsing price_settings:", e);
-                                // }
                                 return (
                                     <tr
                                         className="flex gap-4 mt-2 h-[144px] shadow-custom5 rounded-[10px] overflow-hidden px-4 bg-[#EBF0F6] text-custom-bluegreen text-sm"
@@ -268,21 +263,54 @@ const PricingMasterList = () => {
                                     >
                                         <td className="w-[100px] flex flex-col items-start justify-center gap-2">
                                             <div>
+                                                {/* {item.basic_pricing_data &&
+                                                    item.basic_pricing_data.map(
+                                                        (basicPricing) => (
+                                                            <p className="font-bold text-[#5B9BD5]">
+                                                                {basicPricing.status}
+                                                            </p>
+                                                        )
+                                                    )} */}
+
                                                 <p className="font-bold text-[#5B9BD5]">
-                                                    {item.status}
+                                                    {
+                                                        item?.basic_pricing_data
+                                                            ?.status
+                                                    }
                                                 </p>
-                                                <span>8/10/2024</span>
+
+                                                <span>
+                                                    {" "}
+                                                    {moment(
+                                                        item.created_at
+                                                    ).format("M / D / YYYY")}
+                                                </span>
                                             </div>
                                             <div>
                                                 <p className="underline text-blue-500 cursor-pointer">
-                                                    Cancel
+                                                    {item?.basic_pricing_data
+                                                        ?.status === 'On-going Approval'
+                                                        ? "Cancel"
+                                                        : "Edit"}
                                                 </p>
                                             </div>
                                         </td>
                                         <td className="w-[150px] flex items-center justify-start">
-                                            <div>
-                                                <p className="pr-1">
-                                                    {item.property_name}
+                                            <div className="">
+                                                <p className="pr-1  ">
+                                                    {
+                                                        item
+                                                            ?.property_details_data
+                                                            ?.property_name
+                                                    }
+                                                </p>
+                                                <p>
+                                                    Tower
+                                                    {
+                                                        item
+                                                            ?.property_details_data
+                                                            ?.tower
+                                                    }
                                                 </p>
                                             </div>
                                         </td>
@@ -295,7 +323,7 @@ const PricingMasterList = () => {
                                                     <span>
                                                         {
                                                             item
-                                                                .price_settings[0]
+                                                                ?.pricelist_settings_data
                                                                 ?.base_price
                                                         }
                                                     </span>
@@ -305,18 +333,17 @@ const PricingMasterList = () => {
                                                     <span>
                                                         {
                                                             item
-                                                                .price_settings[0]
-                                                                ?.reservation
+                                                                ?.pricelist_settings_data
+                                                                ?.reservation_fee
                                                         }
                                                     </span>
                                                 </p>
                                                 <p className="space-x-1">
                                                     <span>Transfer Charge</span>
                                                     <span>
-                                                        {" "}
                                                         {
                                                             item
-                                                                .price_settings[0]
+                                                                ?.pricelist_settings_data
                                                                 ?.transfer_charge
                                                         }
                                                     </span>
@@ -324,10 +351,9 @@ const PricingMasterList = () => {
                                                 <p className="space-x-1">
                                                     <span>VAT</span>
                                                     <span>
-                                                        {" "}
                                                         {
                                                             item
-                                                                .price_settings[0]
+                                                                ?.pricelist_settings_data
                                                                 ?.vat
                                                         }
                                                     </span>
@@ -337,11 +363,10 @@ const PricingMasterList = () => {
                                                         VATable Threshold
                                                     </span>
                                                     <span>
-                                                        {" "}
                                                         {
                                                             item
-                                                                .price_settings[0]
-                                                                ?.vatable_threshold
+                                                                ?.pricelist_settings_data
+                                                                ?.vatable_less_price
                                                         }
                                                     </span>
                                                 </p>
@@ -349,55 +374,27 @@ const PricingMasterList = () => {
                                                     <span>
                                                         Effective Balcony Base
                                                     </span>
-                                                    <span>
-                                                        {
-                                                            item
-                                                                .price_settings[0]
-                                                                ?.effective_balcony_base
-                                                        }
-                                                    </span>
-                                                </p>
-                                            </div>
-                                        </td>
-                                        <td className="w-[150px] flex items-center justify-start">
-                                            <div>
-                                                <p className="space-x-1">
-                                                    <span>Version 1 -</span>
-                                                    <span>
-                                                        {
-                                                            item.price_version
-                                                                .version_1
-                                                        }
-                                                    </span>
-                                                    {/* <span>(Active)</span> */}
-                                                </p>
-                                                {/* <p className="space-x-1">
-                                                    <span>Version 1 -</span>
-                                                    <span>0%</span>
-                                                    <span>(Active)</span>
-                                                </p>
-                                                <p className="space-x-1">
-                                                    <span>Version 2 -</span>
-                                                    <span>5%</span>
-                                                </p>
-                                                <p className="space-x-1">
-                                                    <span>Version 3 -</span>
-                                                    <span>5%</span>
-                                                </p>
-                                                <p className="space-x-1">
-                                                    <span>Version 4 -</span>
-                                                    <span>5%</span>
-                                                </p> */}
-                                            </div>
-                                        </td>
-                                        <td className="w-[150px] flex items-center justify-start">
-                                            <div>
-                                                <p className="space-x-1">
-                                                    <span>Version 1 -</span>
                                                     <span> {
-                                                            item.sold_per_version
-                                                                .version_1
+                                                            item
+                                                                ?.pricelist_settings_data
+                                                                ?.effective_balcony_base
                                                         }</span>
+                                                </p>
+                                            </div>
+                                        </td>
+                                        <td className="w-[150px] flex items-center justify-start">
+                                            <div>
+                                                <p className="space-x-1">
+                                                    <span>Version 1 -</span>
+                                                    <span>2</span>
+                                                </p>
+                                            </div>
+                                        </td>
+                                        <td className="w-[150px] flex items-center justify-start">
+                                            <div>
+                                                <p className="space-x-1">
+                                                    <span>Version 1 -</span>
+                                                    <span>2</span>
                                                 </p>
                                                 <p className="space-x-1">
                                                     <span>Version 2 -</span>
@@ -571,7 +568,6 @@ const PricingMasterList = () => {
             <div>
                 {/* <AddPricingModal modalRef={modalRef} /> */}
                 <AddPropertyModal modalRef={modalRef} />
-
             </div>
         </div>
     );

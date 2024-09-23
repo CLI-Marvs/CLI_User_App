@@ -14,7 +14,7 @@ class PricingMasterList extends Model
     protected $guarded = array();
 
     public function basicPricing(){
-        return $this->hasMany(BasicPricing::class);
+        return $this->hasMany(BasicPricing::class,'pricing_master_list_id');
     }
 
  
