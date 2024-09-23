@@ -146,7 +146,7 @@ const ReportPage = () => {
 
     const allDepartment = [
         { key: "All", value: "All" },
-        { key: "CSR", value: "CSR" },
+        { key: "CRS", value: "Customer Relations Services" },
         { key: "SALES", value: "Sales" },
         { key: "AP", value: "Ap Commission" },
         { key: "PM", value: "Property Management" },
@@ -214,7 +214,7 @@ const ReportPage = () => {
                                 value={department}
                                 onChange={(e) => setDepartment(e.target.value)}
                             >
-                                {user?.department === "CSR" ? (
+                                {user?.department === "CRS" ? (
                                     allDepartment.map((item, index) => (
                                         <option key={index} value={item.key}>
                                             {item.value}

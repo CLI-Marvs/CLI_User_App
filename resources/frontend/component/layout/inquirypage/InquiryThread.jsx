@@ -97,25 +97,31 @@ const InquiryThread = () => {
         navigate("/inquirymanagement/inquirylist");
     };
 
+    const handleCheckboxChange = () => {
+        setHasAttachments(!hasAttachments);
+    };
+
     const messageId = dataConcern?.message_id || null;
 
-    // const submitMessage = async () => {
-    //     try {
-    //         const response = await apiService.post("send-message", {
-    //             admin_email: user?.employee_email,
-    //             ticket_id: ticketId,
-    //             details_message: chatMessage,
-    //             admin_name: user?.firstname + " " + user?.lastname,
-    //             message_id: messageId,
-    //             admin_id: user?.id,
-    //             buyer_email: dataConcern.buyer_email,
-    //         });
-
-    //         callBackHandler();
-    //     } catch (error) {
-    //         console.log("error sending messaing", error);
-    //     }
-    // };
+    const handleSearch = () => {
+        setSearchFilter({
+            name,
+            category,
+            email,
+            ticket,
+            startDate,
+            status,
+            hasAttachments,
+        });
+        setIsFilterVisible(false);
+        /*  setCurrentPage(0); */
+        setName("");
+        setCategory("");
+        setEmail("");
+        setTicket("");
+        setStatus("");
+        setHasAttachments(false);
+    };
 
     const handleDeleteInquiry = async () => {
         await apiService.post("delete-concerns", { ticketId });
@@ -244,6 +250,10 @@ const InquiryThread = () => {
                                         <input
                                             type="text"
                                             className="w-full  border-b-1 outline-none"
+                                            value={name}
+                                            onChange={(e) =>
+                                                setName(e.target.value)
+                                            }
                                         />
                                     </div>
                                     <div className="flex">
@@ -254,6 +264,10 @@ const InquiryThread = () => {
                                         <input
                                             type="text"
                                             className="w-full  border-b-1 outline-none"
+                                            value={category}
+                                            onChange={(e) =>
+                                                setCategory(e.target.value)
+                                            }
                                         />
                                     </div>
                                     <div className="flex">
@@ -264,6 +278,10 @@ const InquiryThread = () => {
                                         <input
                                             type="text"
                                             className="w-full  border-b-1 outline-none"
+                                            value={email}
+                                            onChange={(e) =>
+                                                setEmail(e.target.value)
+                                            }
                                         />
                                     </div>
                                     <div className="flex">
@@ -274,6 +292,10 @@ const InquiryThread = () => {
                                         <input
                                             type="text"
                                             className="w-full  border-b-1 outline-none"
+                                            value={ticket}
+                                            onChange={(e) =>
+                                                setTicket(e.target.value)
+                                            }
                                         />
                                     </div>
                                     <div className="flex gap-3">
@@ -283,9 +305,7 @@ const InquiryThread = () => {
                                         <div className="relative">
                                             <DatePicker
                                                 selected={startDate}
-                                                onChange={(date) =>
-                                                    setStartDate(date)
-                                                }
+                                                onChange={handleDateChange}
                                                 className=" border-b-1 outline-none w-[176px]"
                                                 calendarClassName="custom-calendar"
                                             />
@@ -300,7 +320,11 @@ const InquiryThread = () => {
                                             {" "}
                                             Status
                                         </label>
-                                        <select className="w-full border-b-1 outline-none">
+                                        <select
+                                            className="w-full border-b-1 outline-none"
+                                            onChange={handleStatus}
+                                            value={status}
+                                        >
                                             <option value="">
                                                 Select Status
                                             </option>
@@ -319,14 +343,21 @@ const InquiryThread = () => {
                                         </select>
                                     </div>
                                     <div className="mt-5 flex gap-5">
-                                        <input type="checkbox" />
+                                        <input
+                                            type="checkbox"
+                                            checked={hasAttachments}
+                                            onChange={handleCheckboxChange}
+                                        />
                                         <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
                                             {" "}
                                             Has Attachments
                                         </label>
                                     </div>
                                     <div className="mt-3 flex justify-end">
-                                        <button className="h-[37px] w-[88px] gradient-btn rounded-[10px] text-white text-sm">
+                                        <button
+                                            className="h-[37px] w-[88px] gradient-btn rounded-[10px] text-white text-sm"
+                                            onClick={handleSearch}
+                                        >
                                             Search
                                         </button>
                                     </div>

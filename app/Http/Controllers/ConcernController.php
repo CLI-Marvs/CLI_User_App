@@ -601,7 +601,7 @@ class ConcernController extends Controller
             $query->orderBy('created_at', 'desc');
         }
 
-        if ($employee->department !== 'CSR') {
+        if ($employee->department !== 'CRS') {
             $query->whereIn('concerns.ticket_id', $ticketIds);
         }
 
@@ -832,7 +832,7 @@ class ConcernController extends Controller
             $assignedInquiries = $this->getAssignInquiries($employee->employee_email);
             $ticketIds = $assignedInquiries->pluck('ticket_id')->toArray();
 
-            if ($employeeDepartment !== "CSR") {
+            if ($employeeDepartment !== "CRS") {
                 $concernsQuery->whereIn('ticket_id', $ticketIds);
             }
 
@@ -853,7 +853,7 @@ class ConcernController extends Controller
 
             $combinedData = $concernsResults->concat($latestBuyerReply);
 
-            $perPage = 5;
+            $perPage = 20;
             $currentPage = LengthAwarePaginator::resolveCurrentPage();
             $paginatedResults = $this->paginateCollection($combinedData, $perPage, $currentPage, $request->url());
 
@@ -882,7 +882,7 @@ class ConcernController extends Controller
     {
         $buyerReplyQuery = BuyerReplyNotif::query();
 
-        if ($employeeDepartment !== "CSR") {
+        if ($employeeDepartment !== "CRS") {
             $buyerReplyQuery->whereIn('ticket_id', $ticketIds);
         }
 
@@ -989,7 +989,7 @@ class ConcernController extends Controller
 
             // Count unread concerns
             $concernsQuery = Concerns::query();
-            if ($employeeDepartment !== "CSR") {
+            if ($employeeDepartment !== "CRS") {
                 $concernsQuery->whereIn('ticket_id', $ticketIds);
             }
 
@@ -1003,7 +1003,7 @@ class ConcernController extends Controller
             // Count unread buyer replies
             $buyerReplyQuery = BuyerReplyNotif::query();
 
-            if ($employeeDepartment !== "CSR") {
+            if ($employeeDepartment !== "CRS") {
                 $buyerReplyQuery->whereIn('ticket_id', $ticketIds);
             }
             $unreadBuyerRepliesCount = $buyerReplyQuery->leftJoin('read_notif_by_user', function ($join) use ($employee) {
@@ -1312,7 +1312,6 @@ class ConcernController extends Controller
     public function deleteConcern(Request $request)
     {
         $ticket_id = $request->ticketId;
-        /*  dd($ticket_id); */
         $concern = Concerns::where('ticket_id', $ticket_id)->firstOrFail();
 
         $concern->messages()->where('ticket_id', $ticket_id)->delete();
@@ -1323,3 +1322,4 @@ class ConcernController extends Controller
         return response()->json(['message' => 'Concern and related messages deleted successfully']);
     }
 }
+

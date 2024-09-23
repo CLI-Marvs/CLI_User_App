@@ -39,7 +39,7 @@ const AssignSidePanel = ({ ticketId }) => {
     const assignedTicketId = specificInquiry
         ? specificInquiry.includes(ticketId)
         : null;
-    const hasAccessToAssign = user?.department === "CSR" || assignedTicketId;
+    const hasAccessToAssign = user?.department === "CRS" || assignedTicketId;
     useEffect(() => {
         setTicketId(ticketId);
     }, [ticketId, setTicketId]);

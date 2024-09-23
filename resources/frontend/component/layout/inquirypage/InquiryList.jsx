@@ -256,6 +256,8 @@ const InquiryList = () => {
         currentPage,
     ]);
 
+    console.log("test");
+
     return (
         <>
             <div className="h-screen max-w-full bg-custom-grayFA px-4">
@@ -475,7 +477,7 @@ const InquiryList = () => {
                         </div>
                         <div className="flex gap-2">
                             <div className="flex space-x-2">
-                                {user?.department === "CSR" && (
+                                {user?.department === "CRS" && (
                                     <button
                                         onClick={handleAssignedToMeClick}
                                         className={`flex items-center border text-custom-lightgreen h-[29px] w-[125px] rounded-[55px] p-[2px] ${
