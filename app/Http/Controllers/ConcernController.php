@@ -853,7 +853,7 @@ class ConcernController extends Controller
 
             $combinedData = $concernsResults->concat($latestBuyerReply);
 
-            $perPage = 5;
+            $perPage = 20;
             $currentPage = LengthAwarePaginator::resolveCurrentPage();
             $paginatedResults = $this->paginateCollection($combinedData, $perPage, $currentPage, $request->url());
 
@@ -1312,7 +1312,6 @@ class ConcernController extends Controller
     public function deleteConcern(Request $request)
     {
         $ticket_id = $request->ticketId;
-        /*  dd($ticket_id); */
         $concern = Concerns::where('ticket_id', $ticket_id)->firstOrFail();
 
         $concern->messages()->where('ticket_id', $ticket_id)->delete();
@@ -1323,3 +1322,4 @@ class ConcernController extends Controller
         return response()->json(['message' => 'Concern and related messages deleted successfully']);
     }
 }
+
