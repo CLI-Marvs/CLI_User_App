@@ -49,7 +49,7 @@ export const ContextProvider = ({ children }) => {
     const [paymentSchemes, setPaymentSchemes] = useState([]);
     useEffect(() => {
         if (user && user.department && !isDepartmentInitialized) {
-            setDepartment(user.department === "CSR" ? "All" : user.department);
+            setDepartment(user.department === "CRS" ? "All" : user.department);
             setIsDepartmentInitialized(true);
         }
     }, [user, isDepartmentInitialized]); 
