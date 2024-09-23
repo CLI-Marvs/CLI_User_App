@@ -66,6 +66,10 @@ const TicketTable = ({ concernData }) => {
             return date.toLocaleDateString(undefined, options);
         }
     };
+
+    useEffect(() => {
+        getAllConcerns();
+    }, []);
     return (
         <table className="flex flex-col gap-1 w-full">
             <tbody>

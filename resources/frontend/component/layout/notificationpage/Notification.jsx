@@ -15,10 +15,10 @@ const Notification = () => {
         getMessages,
         getAllConcerns,
         getNotifications,
-        setNotifStatus
+        setNotifStatus,
     } = useStateContext();
     const [activeButton, setActiveButton] = useState("All");
-
+    
     const handleClick = (button) => {
         setNotifStatus(button);
         setNotifCurrentPage(0);
@@ -31,8 +31,7 @@ const Notification = () => {
         setNotifCurrentPage(selectedPage);
     };
 
-
-   /*  const handleRefresh = () => {
+    /*  const handleRefresh = () => {
         setNotifStatus("");
         getNotifications();
     }; */
@@ -45,14 +44,22 @@ const Notification = () => {
         getMessages(ticketId);
         getAllConcerns();
         navigate(`/inquirymanagement/thread/${encodedTicketId}`);
-        updateIsReadStatus(items.id);
+        updateIsReadStatus(items);
     };
 
-    const updateIsReadStatus = (concernId) => {
+    const updateIsReadStatus = (item) => {
         try {
-            console.log("concernId", concernId);
-            const response = apiService.post(`isread/${concernId}`);
-            console.log("updated successfully");
+            console.log("item", item);
+            const concernId = item.id;
+            const messageLog = item.message_log;
+            if (messageLog) {
+                console.log("trigger here");
+                const response = apiService.post(`isread/${item.buyer_notif_id}`, {
+                    buyerReply: true,
+                });
+            } else {
+                const response = apiService.post(`isread/${concernId}`);
+            }
         } catch (error) {
             console.log("error updating status", error);
         }
@@ -87,7 +94,7 @@ const Notification = () => {
                                 {label}
                             </button>
                         ))}
-                       {/*  <span onClick={handleRefresh}>Refresh</span> */}
+                        {/*  <span onClick={handleRefresh}>Refresh</span> */}
                     </div>
                 </div>
                 <div>
@@ -98,13 +105,19 @@ const Notification = () => {
                                 notifications.map((item, index) => (
                                     <tr
                                         onClick={() => navigateToThread(item)}
-                                        className={`flex items-center h-[47px] cursor-pointer my-1 ${item.is_read === 1? 'bg-custom-grayF1' : 'bg-white'} hover:shadow-custom4`}
+                                        className={`flex items-center h-[47px] cursor-pointer my-1 ${
+                                            item.is_read === 1
+                                                ? "bg-custom-grayF1"
+                                                : "bg-white"
+                                        } hover:shadow-custom4`}
                                         key={index}
                                     >
                                         <td className="w-[228px] shrink-0 h-full px-4">
                                             <div className="h-full flex flex-col justify-center">
                                                 <p className="montserrat-medium text-[13px] text-custom-bluegreen">
-                                                    {item.buyer_name}
+                                                    {item.message_log
+                                                        ? item.message_log
+                                                        : item.buyer_name}
                                                 </p>
                                                 <p className="text-xs text-custom-grayA5">
                                                     {item.user_type}
@@ -127,7 +140,7 @@ const Notification = () => {
                                                 <span>&gt;</span>
                                                 <span>Inquiries</span>
                                                 <span>&gt;</span>
-                                               {/*  <span>Equity</span> */}
+                                                {/*  <span>Equity</span> */}
                                             </p>
                                         </td>
                                         <td className="h-full shrink-0 flex justify-center items-center">
