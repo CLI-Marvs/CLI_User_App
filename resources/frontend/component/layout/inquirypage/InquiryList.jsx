@@ -256,7 +256,6 @@ const InquiryList = () => {
         currentPage,
     ]);
 
-    console.log("test");
 
     return (
         <>
