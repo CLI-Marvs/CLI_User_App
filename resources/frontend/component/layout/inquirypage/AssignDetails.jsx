@@ -1,6 +1,13 @@
 import React from "react";
 
 const AssignDetails = ({ logMessages }) => {
+    const capitalizeWords = (name) => {
+        return name
+        .split(' ')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+        .join(' ');
+    };
+    
     const renderDetails = (actionType, details) => {
         switch (actionType) {
             case "client_inquiry":
@@ -73,7 +80,7 @@ const AssignDetails = ({ logMessages }) => {
                             </p>
 
                             <p className="text-xs text-custom-gray space-x-1">
-                                <span>by ({details.buyer_name})</span>
+                            <span>by ({capitalizeWords(details.buyer_name)})</span>
                             </p>
                             {/*  <p className="text-xs text-custom-gray space-x-1">
                                 (
