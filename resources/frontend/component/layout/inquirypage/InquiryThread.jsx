@@ -30,7 +30,7 @@ const InquiryThread = () => {
     const [ticket, setTicket] = useState("");
     const [status, setStatus] = useState("");
     const [hasAttachments, setHasAttachments] = useState(false);
-    
+
     const {
         messages,
         setTicketId,
@@ -118,10 +118,10 @@ const InquiryThread = () => {
     // };
 
     const handleDeleteInquiry = async () => {
-        await apiService.post('delete-concerns', { ticketId });
+        await apiService.post("delete-concerns", { ticketId });
         navigate("/inquirymanagement/inquirylist");
         getAllConcerns();
-    }
+    };
     const submitMessage = async () => {
         setLoading(true);
         const formData = new FormData();
@@ -159,7 +159,6 @@ const InquiryThread = () => {
             setLoading(false);
         }
     };
-
 
     const callBackHandler = () => {
         getMessages(ticketId);
@@ -305,15 +304,17 @@ const InquiryThread = () => {
                                             <option value="">
                                                 Select Status
                                             </option>
-                                            <option value="draft">Draft</option>
-                                            <option value="ongoing">
-                                                On-going approval
+                                            <option value="Inquiry Feedback Received">
+                                                Inquiry Feedback Received
                                             </option>
-                                            <option value="approvenotlive">
-                                                Approved not Live
+                                            <option value="Replied By">
+                                                Replied By
                                             </option>
-                                            <option value="approveandlive">
-                                                Approve and Live
+                                            <option value="Assign To">
+                                                Assign To
+                                            </option>
+                                            <option value="Mark as resolved">
+                                                Mark as resolve
                                             </option>
                                         </select>
                                     </div>
@@ -359,12 +360,14 @@ const InquiryThread = () => {
                                 </p>
                             </div>
                             {dataConcern.created_by &&
-                                dataConcern.created_by ===
-                                    user?.id && (
-                                        <div className="flex justify-center w-[20px] shrink-0">
-                                            <LuTrash2 className="text-custom-bluegreen hover:text-red-500 cursor-pointer" onClick={handleDeleteInquiry} />
-                                        </div>
-                                    )}
+                                dataConcern.created_by === user?.id && (
+                                    <div className="flex justify-center w-[20px] shrink-0">
+                                        <LuTrash2
+                                            className="text-custom-bluegreen hover:text-red-500 cursor-pointer"
+                                            onClick={handleDeleteInquiry}
+                                        />
+                                    </div>
+                                )}
                             <div className="flex justify-end shrink-0">
                                 {dataConcern &&
                                 dataConcern.status === "Resolved" ? (
