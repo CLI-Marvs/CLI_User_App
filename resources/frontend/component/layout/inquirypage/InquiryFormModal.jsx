@@ -72,7 +72,12 @@ const InquiryFormModal = ({ modalRef }) => {
     const [message, setMessage] = useState("");
     const { user, getAllConcerns } = useStateContext();
     const maxCharacters = 500;
-
+    const [hasErrors, setHasErrors] = useState(false);
+    const [isSuccess, setIsSuccess] = useState(false);
+    const [resetSuccess, setResetSuccess] = useState(false);
+    const [isSubmitted, setIsSubmitted] = useState(false);
+    const [isValid, setIsValid] = useState(true);
+    const [errors, setErrors] = useState({});
     const handleFileChange = (event) => {
         const selectedFiles = Array.from(event.target.files);
         const fileNames = selectedFiles.map((file) =>
@@ -99,17 +104,60 @@ const InquiryFormModal = ({ modalRef }) => {
             ...prevData,
             [name]: value,
         }));
+        setHasErrors(false);
+        setIsSubmitted(false);
+
+        if (name === "buyer_email") {
+            setErrors((prevErrors) => ({
+                ...prevErrors,
+                buyer_email: validateEmail(value)
+                    ? ""
+                    : "Invalid email address",
+            }));
+        }
+    };
+
+    const isTextareaValid = message.trim().length > 0;
+
+
+    const validateEmail = (email) => {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
+    };
+
+    const handleChangeValue = (e) => {
+        const newValue = e.target.value;
+        setMessage(newValue);
+        setIsValid(newValue.trim().length > 0);
     };
 
     const callBackHandler = () => {
-        getAllConcerns();
+        getAllConcerns();~
         setFormData(formDataState);
         setFiles([]);
         setMessage("");
     }
 
+    const {
+        user_type,
+        contract_number,
+        unit_number,
+        ...requiredFields
+    } = formData;
+
+    const isFormDataValid = Object.values(requiredFields).every(
+        (value) => value !== ""
+    );
+
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setIsSubmitted(true);
+        if (
+            isFormDataValid &&
+            isTextareaValid &&
+            !errors.buyer_email
+
+        ) {
         try {
             const fileData = new FormData();
             files.forEach((file) => {
@@ -130,12 +178,22 @@ const InquiryFormModal = ({ modalRef }) => {
                     "Content-Type": "multipart/form-data",
                 },
             });
+            setResetSuccess(true);
             if(modalRef.current) {
                 modalRef.current.close();
             }
             callBackHandler();
         } catch (error) {
             console.log("error saving concerns", error);
+            setHasErrors(true);
+            setResetSuccess(false);
+        }
+        } else {
+            setResetSuccess(false);
+            if (!isTextareaValid) {
+                setIsValid(false);
+            }
+            console.log("Form validation failed");
         }
     };
     return (
@@ -160,6 +218,27 @@ const InquiryFormModal = ({ modalRef }) => {
                                 Feedback / Inquiry Form
                             </p>
                         </div>
+                        {hasErrors && (
+                                <div className="w-full flex justify-center items-center h-12 bg-red-100 mb-4 rounded-lg">
+                                    <p className="flex text-[#C42E2E] ">
+                                        Please complete all required fields.
+                                    </p>
+                                </div>
+                            )}
+                             {/*  {isSuccess && (
+                                <div className="w-full flex justify-center items-center h-12 bg-custom-lightestgreen mb-4 rounded-lg">
+                                    <p className="flex text-custom-solidgreen ">
+                                       Message sent successfully.
+                                    </p>
+                                </div>
+                            )} */}
+                            {errors.buyer_email && (
+                                <div className="w-full flex justify-center items-center h-12 bg-red-100 mb-4 rounded-lg">
+                                    <p className="flex text-[#C42E2E] ">
+                                        Invalid email address
+                                    </p>
+                                </div>
+                            )}
                     </div>
                     <div className="mb-3">
                         <p className="text-sm font-semibold mobile:text-xs">
@@ -168,7 +247,11 @@ const InquiryFormModal = ({ modalRef }) => {
                     </div>
                     <div className="flex flex-col gap-2">
                         <div
-                            className={`flex items-center border border-custom-grayF1 rounded-[5px] overflow-hidden`}
+                             className={`flex items-center border border-custom-grayFA rounded-[5px] overflow-hidden ${
+                                isSubmitted && !formData.fname
+                                    ? resetSuccess ? "border-custombg" : "border-red-500"
+                                    : "border-custombg"
+                            }`}
                         >
                             <span className="text-custom-gray81 text-sm bg-custom-grayFA flex pl-3 py-1 w-[240px]">
                                 First Name
@@ -183,7 +266,11 @@ const InquiryFormModal = ({ modalRef }) => {
                             />
                         </div>
                         <div
-                            className={`flex items-center border border-custom-grayF1 rounded-[5px] overflow-hidden`}
+                           className={`flex items-center border border-custom-grayFA rounded-[5px] overflow-hidden ${
+                            isSubmitted && !formData.lname
+                                 ? resetSuccess ? "border-custombg" : "border-red-500"
+                                : "border-custombg"
+                        }`}
                         >
                             <span className="text-custom-gray81 text-sm bg-custom-grayFA flex w-[240px] pl-3 py-1">
                                 Last Name
@@ -198,7 +285,11 @@ const InquiryFormModal = ({ modalRef }) => {
                             />
                         </div>
                         <div
-                            className={`flex items-center border border-custom-grayF1 rounded-[5px] overflow-hidden`}
+                             className={`flex items-center border border-custom-grayFA rounded-[5px] overflow-hidden ${
+                                isSubmitted && !formData.buyer_email
+                                     ? resetSuccess ? "border-custombg" : "border-red-500"
+                                    : "border-custombg"
+                            }`}
                         >
                             <span className="text-custom-gray81 text-sm bg-custom-grayFA flex w-[240px] pl-3 py-1">
                                 Email
@@ -213,7 +304,11 @@ const InquiryFormModal = ({ modalRef }) => {
                             />
                         </div>
                         <div
-                            className={`flex items-center border border-custom-grayF1 rounded-[5px] overflow-hidden `}
+                           className={`flex items-center border border-custom-grayFA rounded-[5px] overflow-hidden ${
+                            isSubmitted && !formData.mobile_number
+                                ? resetSuccess ? "border-custombg" : "border-red-500"
+                                : "border-custombg"
+                            }`}
                         >
                             <span className="text-custom-gray81 text-sm bg-custom-grayFA flex w-[240px] pl-3 py-1">
                                 Mobile Number
@@ -228,7 +323,11 @@ const InquiryFormModal = ({ modalRef }) => {
                             />
                         </div>
                         <div
-                            className={`flex items-center border border-custom-grayF1 rounded-[5px] overflow-hidden`}
+                            className={`flex items-center border border-custom-grayFA rounded-[5px] overflow-hidden ${
+                                isSubmitted && !formData.property
+                                     ? resetSuccess ? "border-custombg" : "border-red-500"
+                                    : "border-custombg"
+                            }`}
                         >
                             <span className="text-custom-gray81 text-sm bg-custom-grayFA flex items-center w-[250px] tablet:w-[175px] mobile:w-[270px] mobile:text-xs -mr-3 pl-3 py-1">
                                 Property
@@ -252,49 +351,11 @@ const InquiryFormModal = ({ modalRef }) => {
                                 </span>
                             </div>
                         </div>
-                        <div className="border border-t-1 border-[#D9D9D9]"></div>
-                        <div className="mt-3">
-                            <p className="text-sm font-semibold mobile:text-xs">
-                                Optional
-                            </p>
-                        </div>
-                        <div className="flex items-center border border-custom-grayF1 rounded-[5px] overflow-hidden">
-                            <span className="text-custom-gray81 text-sm bg-custom-grayFA flex items-center w-[250px] tablet:w-[175px] mobile:w-[270px] mobile:text-xs -mr-4 pl-3 py-1">
-                                I am
-                            </span>
-                            <div className="relative w-full">
-                                <select
-                                    name="user_type"
-                                    value={formData.user_type}
-                                    onChange={handleChange}
-                                    className="appearance-none w-full px-4 py-1 text-sm bg-white focus:outline-none border-0 mobile:text-xs"
-                                >
-                                    <option value="">(Select)</option>
-                                    <option value="Property Owner">
-                                        Property Owner
-                                    </option>
-                                    <option value="Buyer">Buyer</option>
-                                    <option value="Broker">Broker</option>
-                                </select>
-                                <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3  bg-custom-grayFA text-custom-gray81 pointer-events-none">
-                                   <IoMdArrowDropdown/>
-                                </span>
-                            </div>
-                        </div>
-                        <div className="flex items-center border border-custom-grayF1 rounded-[5px] overflow-hidden">
-                            <span className="text-custom-gray81 text-sm bg-custom-grayFA flex w-[240px] pl-3 py-1">
-                                Contract Number
-                            </span>
-                            <input
-                                name="contract_number"
-                                value={formData.contract_number}
-                                onChange={handleChange}
-                                type="text"
-                                className="w-full px-4 text-sm focus:outline-none mobile:text-xs"
-                                placeholder=""
-                            />
-                        </div>
-                        <div className="flex items-center border border-custom-grayF1 rounded-[5px] overflow-hidden">
+                        <div className={`flex items-center border border-custom-grayFA rounded-[5px] overflow-hidden ${
+                                        isSubmitted && !formData.details_concern
+                                             ? resetSuccess ? "border-custombg" : "border-red-500"
+                                            : "border-custombg"
+                                    }`}>
                             <span className="text-custom-gray81 text-sm bg-custom-grayFA flex items-center w-[250px] tablet:w-[175px] mobile:w-[270px] mobile:text-xs -mr-3 pl-3 py-1">
                                 Concern regarding
                             </span>
@@ -337,7 +398,50 @@ const InquiryFormModal = ({ modalRef }) => {
                                 </span>
                             </div>
                         </div>
-                        <div className="flex items-center border border-custom-grayF1 rounded-[5px] overflow-hidden">
+                        <div className="border border-t-1 border-[#D9D9D9]"></div>
+                        <div className="mt-3">
+                            <p className="text-sm font-semibold mobile:text-xs">
+                                Optional
+                            </p>
+                        </div>
+                        <div className="flex items-center border border-custom-grayFA rounded-[5px] overflow-hidden">
+                            <span className="text-custom-gray81 text-sm bg-custom-grayFA flex items-center w-[250px] tablet:w-[175px] mobile:w-[270px] mobile:text-xs -mr-4 pl-3 py-1">
+                                I am
+                            </span>
+                            <div className="relative w-full">
+                                <select
+                                    name="user_type"
+                                    value={formData.user_type}
+                                    onChange={handleChange}
+                                    className="appearance-none w-full px-4 py-1 text-sm bg-white focus:outline-none border-0 mobile:text-xs"
+                                >
+                                    <option value="">(Select)</option>
+                                    <option value="Property Owner">
+                                        Property Owner
+                                    </option>
+                                    <option value="Buyer">Buyer</option>
+                                    <option value="Broker">Broker</option>
+                                </select>
+                                <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3  bg-custom-grayFA text-custom-gray81 pointer-events-none">
+                                   <IoMdArrowDropdown/>
+                                </span>
+                            </div>
+                        </div>
+                        <div className="flex items-center border border-custom-grayFA rounded-[5px] overflow-hidden">
+                            <span className="text-custom-gray81 text-sm bg-custom-grayFA flex w-[240px] pl-3 py-1">
+                                Contract Number
+                            </span>
+                            <input
+                                name="contract_number"
+                                value={formData.contract_number}
+                                onChange={handleChange}
+                                type="text"
+                                className="w-full px-4 text-sm focus:outline-none mobile:text-xs"
+                                placeholder=""
+                            />
+                        </div>
+                        
+                        <div className="flex items-center border border-custom-grayFA rounded-[5px] overflow-hidden">
                             <span className="text-custom-gray81 text-sm bg-custom-grayFA flex w-[240px] pl-3 py-1">
                                 Unit/Lot Number
                             </span>
@@ -353,13 +457,13 @@ const InquiryFormModal = ({ modalRef }) => {
                     </div>
                     <div className="border border-b-1 border-[#D9D9D9] my-2"></div>
                     <div
-                        className={`border-custom-grayF1 rounded-[5px] bg-custom-grayFA border`}
+                        className={`border-custom-grayFA rounded-[5px] bg-custom-grayFA border`}
                     >
                         <div className="flex items-center justify-between">
                             <p className="text-custom-gray81 text-sm bg-custom-grayFA pl-3  montserrat-semibold flex-grow mobile:text-xs mobile:w-[170px]">
                                 Details (Required)
                             </p>
-                            <span className="bg-white text-sm2 text-gray-400 font-normal py-3 border border-custom-grayF1 pl-2 pr-12 mobile:pr-1 mobile:text-xs ml-auto rounded-r-[4px]">
+                            <span className="bg-white text-sm2 text-gray-400 font-normal py-3 border border-custom-grayFA pl-2 pr-12 mobile:pr-1 mobile:text-xs ml-auto rounded-r-[4px]">
                                 {" "}
                                 {message.length}/500 characters
                             </span>
@@ -368,20 +472,24 @@ const InquiryFormModal = ({ modalRef }) => {
                             <textarea
                                 id="details_message"
                                 value={message}
-                                onChange={(e) => setMessage(e.target.value)}
+                                onChange={handleChangeValue}
                                 maxLength={maxCharacters}
                                 name="details_message"
                                 placeholder="Write your concern here."
                                 rows="4"
-                                className={`block border-t-1 border-custom-grayF1 rounded-[5px] h-40 p-2.5 w-full text-sm text-gray-900 bg-white`}
+                                className={`${
+                                    !isValid
+                                         ? resetSuccess ? "border-custombg" : "border-red-500"
+                                        : "border-gray-300" 
+                                } rounded-[5px] bg-custom-grayFA border border-custom-grayFA w-full pl-2`}
                             ></textarea>
                         </div>
                     </div>
                     <div className="flex flex-col mt-5 mb-12">
-                        <div className="flex justify-between w-54 tablet:flex-col">
+                        <div className="flex justify-end w-54 tablet:flex-col">
                             <label
                                 htmlFor="attachment"
-                                className="tablet:w-full h-10 px-5 text-sm border montserrat-medium border-custom-solidgreen rounded-lg text-custom-solidgreen flex justify-center items-center gap-1 cursor-pointer hover:shadow-custom"
+                                className="hidden tablet:w-full h-10 px-5 text-sm border montserrat-medium border-custom-solidgreen rounded-lg text-custom-solidgreen flex justify-center items-center gap-1 cursor-pointer hover:shadow-custom"
                             >
                                 <svg
                                     xmlns="http://www.w3.org/2000/svg"

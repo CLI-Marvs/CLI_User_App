@@ -6,10 +6,10 @@ const InquiryManagementLayout = () => {
 
   return (
     <div className="flex bg-white relative h-full">
-      <div className="fixed h-full">
+      <div className="fixed h-full z-50">
         <InquirySidebar />
       </div>
-      <div className="flex-1 ml-52">
+      <div className="relative flex-1 ml-52 z-10">
         <Outlet />
       </div>
     </div>

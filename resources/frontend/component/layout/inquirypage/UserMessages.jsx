@@ -18,8 +18,8 @@ const UserMessages = ({ items }) => {
                     <img className="rounded-full" src={defaultAvatar} alt="" />
                 </div>
                 <div className="flex flex-col">
-                    <p className="font-bold text-custom-bluegreen">Buyer</p>
-                    <p className="font-semibold text-custom-gray81">
+                    <p className="font-bold text-custom-gray81">Buyer</p>
+                    <p className="font-semibold text-custom-bluegreen">
                         {(() => {
                             const nameParts = items.buyer_name.split(" ");
                             const lastName = nameParts.pop();

@@ -29,7 +29,7 @@ const Sidebar = () => {
   }, [location]);
   return (
     <>
-      <Card className="shadow-none w-[230px] max-w-[230px] p-4 pt-0 rounded-none bg-custom-grayFA">
+      <Card className="shadow-none w-[230px] max-w-[230px] p-4 pt-0 rounded-none bg-custom-grayFA relative z-50">
         <List className='px-3 mt-6'>
           <Link to="/notification">
             <ListItem 

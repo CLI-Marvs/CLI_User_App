@@ -48,7 +48,7 @@ const data3 = [
 ];
 
 const barHeight = 20;
-const chartHeight = data3.length * (barHeight + 60);
+
 
 const COLORS = ["#5B9BD5", "#348017"];
 
@@ -142,7 +142,7 @@ const ReportPage = () => {
         return months[currentMonthIndex];
       };
     
-    
+    const chartHeight = dataProperty.length * (barHeight + 60);
 
     const allDepartment = [
         { key: "All", value: "All" },
@@ -399,7 +399,7 @@ const ReportPage = () => {
                                             >
                                                 ●
                                             </span>
-                                            <span className="text-sm text-gray-500">
+                                            <span className="text-sm text-gray-500 leading-[15px] py-[4px]">
                                                 {category.name}
                                             </span>
                                         </div>
@@ -417,7 +417,7 @@ const ReportPage = () => {
                         </div>
                     </div>
                 </div>
-                <div className=" bg-white rounded-[10px] flex-grow-0 self-start w-[500px]">
+                <div className=" bg-white rounded-[10px]  w-[500px] flex flex-col overflow-y-auto">
                     <p className="p-4  text-base montserrat-bold">
                         Inquiries per property
                     </p>
@@ -453,62 +453,7 @@ const ReportPage = () => {
                             </div>
                         </div>
                     </div>
-                    <div>
-                        {/* <BarChart
-                            width={400}
-                            height={chartHeight}
-                            data={dataProperty}
-                            layout="vertical"
-                            margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-                        >
-                            <XAxis type="number" hide />
-                            <YAxis
-                                type="category"
-                                dataKey="name"
-                                hide
-                                tick={false}
-                            />
-                            <Tooltip content={<CustomTooltip />} />
-                            <Bar
-                                dataKey="value1"
-                                fill="#348017"
-                                barSize={15}
-                                radius={[0, 4, 4, 0]} 
-                            >
-                                <LabelList
-                                    dataKey="value1"
-                                    position="right"
-                                    fill="#4a5568"
-                                />
-                                <LabelList
-                                    dataKey="name"
-                                    position="top"
-                                    content={({ x, y, value }) => (
-                                        <text
-                                            x={x}
-                                            y={y - 13}
-                                            fill="#00000"
-                                            textAnchor="start"
-                                            dominantBaseline="central"
-                                        >
-                                            {value}
-                                        </text>
-                                    )}
-                                />
-                            </Bar>
-                            <Bar
-                                dataKey="value2"
-                                fill="#D3F1D8"
-                                barSize={15}
-                                radius={[0, 4, 4, 0]} // Rounded top corners
-                            >
-                                <LabelList
-                                    dataKey="value2"
-                                    position="right"
-                                    fill="#4a5568"
-                                />
-                            </Bar>
-                        </BarChart> */}
+                    <div className="flex-grow">
 
                         <BarChart
                             width={400}
