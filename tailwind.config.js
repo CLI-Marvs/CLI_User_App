@@ -13,6 +13,7 @@ export default {
         'custom-solidgreen': '#348017',
         'custom-lightgreen': '#70AD47',
         'custom-lightestgreen': '#D6E4D1',
+        'custom-blue': '#1A73E8',
         'custom-solidblue': '#067ACS',
         'custom-lightblue': '#5B9BD5',
         'custom-gray': '#A5A5A5',

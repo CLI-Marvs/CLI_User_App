@@ -20,6 +20,11 @@ import PriceVersioningView from "./views/pages/PropertyAndPricingViews/PriceVers
 import PromotionalPricingView from "./views/pages/PropertyAndPricingViews/PromotionalPricingView";
 import NotificationView from "./views/pages/notificationViews/NotificationView";
 import PriceListSettingFormDataProvider from "../context/BasicPricing/PriceListSettingsContext";
+import SalesManagementLayout from "./views/layout/SalesManagementLayout";
+import ReservationListView from "./views/pages/salesViews/ReservationListView";
+import ReservationPageView from "./views/pages/salesViews/ReservationPageView";
+
+
 const App = () => {
     const Layout = () => {
         return (
@@ -121,6 +126,22 @@ const App = () => {
                         },
                     ],
                 },
+                {
+                    path: "salesmanagement",
+                    element: <SalesManagementLayout/>,
+                    children: [
+                        {
+                            path: "reservationlist", 
+                            element: <ReservationListView/>,
+                        },
+                        {
+                            path: "reservationpage", 
+                            element: <ReservationPageView/>,
+                        },
+                        
+                    ],
+                },
+                
             ],
         },
     ]);
