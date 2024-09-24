@@ -21,6 +21,7 @@ class AuthController extends Controller
 
     public function callback(Request $request)
     {
+        $csrUesr = ['rosemarie@cebulandmasters.com', 'jdadvincula@cebulandmasters.com', 'mocastillo@cebulandmasters.com'];
         try {
              if (!$request->has('code')) {
                 return redirect('/')->with('error', 'Authentication failed. Missing code parameter.');
@@ -37,7 +38,6 @@ class AuthController extends Controller
             } else {
                 $name = $explodeName;
             }
-            
 
             $user = Employee::updateOrCreate(
                 ['google_id' => $googleUser->id],

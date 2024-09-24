@@ -344,7 +344,7 @@ class ConcernController extends Controller
             $files = $request->file('files');
             $lastConcern = Concerns::latest()->first();
             $nextId = $lastConcern ? $lastConcern->id + 1 : 1;
-            $formattedId = str_pad($nextId, 7, '0', STR_PAD_LEFT);
+            $formattedId = str_pad($nextId, 8, '0', STR_PAD_LEFT);
 
             $ticketId = 'Ticket#24' . $formattedId;
 
