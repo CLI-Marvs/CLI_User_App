@@ -24,7 +24,7 @@ const InquiryList = () => {
         setStatusFilter,
         setSearchFilter,
         statusFilter,
-        searhFilter,
+        searchFilter,
         user,
         setSpecificAssigneeCsr,
         specificAssigneeCsr,
@@ -57,13 +57,14 @@ const InquiryList = () => {
         setCurrentPage(selectedPage);
     };
 
+    console.log("searchFilter", searchFilter);
     const handleRefresh = () => {
         if (daysFilter) {
             setDaysFilter(null);
             setActiveDayButton(null);
         } else if (statusFilter) {
             setStatusFilter("All");
-        } else if (searhFilter) {
+        } else if (searchFilter) {
             setSearchFilter({});
         } else if (specificAssigneeCsr) {
             console.log("if assign only");
@@ -249,7 +250,7 @@ const InquiryList = () => {
     useEffect(() => {
         updateLastActivity();
     }, [
-        searhFilter,
+        searchFilter,
         statusFilter,
         daysFilter,
         specificAssigneeCsr,

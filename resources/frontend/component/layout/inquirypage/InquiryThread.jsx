@@ -38,6 +38,7 @@ const InquiryThread = () => {
         user,
         getInquiryLogs,
         getAllConcerns,
+        setSearchFilter,
         data,
     } = useStateContext();
     const [chatMessage, setChatMessage] = useState("");
@@ -121,6 +122,7 @@ const InquiryThread = () => {
         setTicket("");
         setStatus("");
         setHasAttachments(false);
+        navigate("/inquirymanagement/inquirylist");
     };
 
     const handleDeleteInquiry = async () => {
