@@ -21,16 +21,16 @@ class AuthController extends Controller
 
     public function callback(Request $request)
     {
-        $csrUesr = ['rosemarie@cebulandmasters.com', 'jdadvincula@cebulandmasters.com', 'mocastillo@cebulandmasters.com'];
+        $crsUser = ['rosemarie@cebulandmasters.com', 'jdadvincula@cebulandmasters.com', 'mocastillo@cebulandmasters.com'];
         try {
-             if (!$request->has('code')) {
+            if (!$request->has('code')) {
                 return redirect('/')->with('error', 'Authentication failed. Missing code parameter.');
             }
-    
+        
             $googleUser = Socialite::driver("google")->user();
-
+        
             $explodeName = explode(' ', $googleUser->getName());
-
+        
             if (count($explodeName) > 2) {
                 $firstName = $explodeName[0];
                 $lastName = $explodeName[count($explodeName) - 1];
@@ -38,7 +38,9 @@ class AuthController extends Controller
             } else {
                 $name = $explodeName;
             }
-
+        
+            $department = in_array($googleUser->email, $crsUser) ? 'CRS' : null;
+        
             $user = Employee::updateOrCreate(
                 ['google_id' => $googleUser->id],
                 [
@@ -46,14 +48,16 @@ class AuthController extends Controller
                     'lastname' => $name[1],
                     'employee_email' => $googleUser->email,
                     'email_verify_at' => now(),
-                    'profile_picture' => $googleUser->avatar
-                 /*    'login_type' => "sso" */
+                    'profile_picture' => $googleUser->avatar,
+                    'department' => $department 
                 ]
             );
+        
             Auth::login($user);
-
+        
             $token = $user->createToken('authToken')->plainTextToken;
             return redirect(config("app.frontend_url") . "/callback?token=" . $token);
+        
         } catch (\Exception $e) {
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
         }
