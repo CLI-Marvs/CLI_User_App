@@ -17,6 +17,7 @@ const formDataState = {
 }
 
 const projectList = [
+    "N/A",
     "38 Park Avenue",
     "Astra Centre",
     "Asia Premiere",
@@ -63,7 +64,6 @@ const projectList = [
     "Velmiro Plains Bacolod",
     "Villa Casita - Balamban",
     "Villa Casita - Bogo",
-    "N/A"
   ]
   
 const InquiryFormModal = ({ modalRef }) => {
