@@ -3,6 +3,7 @@ import CLILogo from '../../../../../public/Images/CLILogo.png';
 import Kent from '../../../../../public/Images/kent.png';
 import apiService from '../../servicesApi/apiService';
 import { useStateContext } from '../../../context/contextprovider';
+import { Link } from 'react-router-dom';
 
 const Navbar = () => {
   const {user} = useStateContext();
@@ -28,9 +29,12 @@ const Navbar = () => {
         <div className="flex justify-center items-center">
           <img className='h-16 ml-5' src={CLILogo} alt="cli logo" />
         </div>
-        <div className='px-11 w-90 flex justify-between items-center'>
-          {/* <button className='h-11 w-32 rounded-lg bg-custom-solidgreen font-semibold text-white' onClick={handleOpenDisclaimerModal}>Reserve</button>
-        <button className='h-11 w-32 rounded-lg bg-custom-solidgreen font-semibold text-white'>Book a visit</button> */}
+        <div className=' flex ml-[65px] justify-between items-center'>
+          <Link to="salesmanagement/reservationpage">
+            <div>
+              <button className='w-[130px] h-[45px] rounded-[9px] montserrat-semibold gradient-btn2 text-white hover:shadow-custom4'>Reserve</button>
+            </div>
+          </Link>
         </div>
       </div>
       <div className="flex items-center justify-center">

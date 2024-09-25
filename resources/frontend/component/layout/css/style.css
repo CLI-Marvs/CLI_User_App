@@ -109,3 +109,91 @@ input[type="number"]::-webkit-inner-spin-button {
     -webkit-appearance: none;
     margin: 0;
 }
+
+.input-floating-label {
+  display: block;
+  width: 100%;
+  appearance: none;
+  
+  background-color: white;
+  padding: 1rem 0.625rem 0.625rem 0.625rem; 
+  font-size: 0.875rem; 
+  color: #175D5f; 
+  outline: none;
+  font-family: "Montserrat", sans-serif;
+  font-weight: 500;
+  font-style: normal;
+}
+
+.input-floating-label:focus {
+  color: #175D5f; 
+  outline: none;
+  box-shadow: none; /* focus:ring-0 */
+  font-size: 0.875rem; 
+  font-family: "Montserrat", sans-serif;
+  font-weight: 500;
+  font-style: normal;
+  
+}
+
+.label-floating {
+  position: absolute;
+  left: 0.625rem; /* 2.5 in Tailwind */
+  top: 1rem; /* adjusted for initial position */
+  color: #175D5F; /* gray-500 */
+  transition: all 0.3s ease-in-out;
+  font-family: "Montserrat", sans-serif;
+  font-weight: 500;
+  font-style: normal;
+}
+
+.input-floating-label:focus + .label-floating,
+.input-floating-label:not(:placeholder-shown) + .label-floating {
+  top: 0.2rem; /* 2 in Tailwind */ 
+  font-size: 0.7rem; /* text-sm */
+  color: #6b7280; /* blue-600 */
+  font-family: "Montserrat", sans-serif;
+  font-weight: 500;
+  font-style: normal;
+}
+
+.custom-border {
+  border-top: 1px solid black;
+  border-bottom: 1px solid black;
+  border-left: 1px solid transparent;
+  border-right: 1px solid transparent;
+}
+
+.input-floating-label:focus + .label-floating-custom-login,
+.input-floating-label:not(:placeholder-shown) + .label-floating-custom-login {
+  top: 0.3rem; /* 2 in Tailwind */ 
+  font-size: 0.7rem; /* text-sm */
+  color: #6b7280; /* blue-600 */
+}
+
+.label-floating-custom-login{
+position: absolute;
+left: 0.825rem; /* 2.5 in Tailwind */
+top: .8rem; /* adjusted for initial position */
+color: #6B7280; 
+transition: all 0.3s ease-in-out;
+}
+
+input[type="radio"]:checked {
+  background-color: #175d5f; /* This is for browsers that support background color */
+  border-color: #175d5f;     /* This sets the radio button border color */
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  display: none;
+  -webkit-appearance: none;
+}
+
+.custom-modal {
+  border-radius: 15px;
+}
+
+.align-super {
+  font-size: 0.65em; /* Adjust as needed */
+  vertical-align: super; /* Use super for proper alignment */
+}
