@@ -29,10 +29,10 @@ const Navbar = () => {
         <div className="flex justify-center items-center">
           <img className='h-16 ml-5' src={CLILogo} alt="cli logo" />
         </div>
-        <div className=' flex ml-[65px] justify-between items-center'>
+        <div className='flex ml-[65px] justify-between items-center'>
           <Link to="salesmanagement/reservationpage">
             <div>
-              <button className='w-[130px] h-[45px] rounded-[9px] montserrat-semibold gradient-btn2 text-white hover:shadow-custom4'>Reserve</button>
+              <button className='w-[130px] h-[45px] rounded-[9px] montserrat-semibold gradient-btn2 text-white hover:shadow-custom4 hidden'>Reserve</button>
             </div>
           </Link>
         </div>
