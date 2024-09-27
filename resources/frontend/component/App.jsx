@@ -23,6 +23,8 @@ import PriceListSettingFormDataProvider from "../context/BasicPricing/PriceListS
 import SalesManagementLayout from "./views/layout/SalesManagementLayout";
 import ReservationListView from "./views/pages/salesViews/ReservationListView";
 import ReservationPageView from "./views/pages/salesViews/ReservationPageView";
+import PaymentMainView from "./views/pages/paymentViews/PaymentMainView";
+import PaymentSectionView from "./views/pages/paymentViews/PaymentSectionView";
 
 
 const App = () => {
@@ -143,6 +145,14 @@ const App = () => {
                 },
                 
             ],
+        },
+        {
+            path: "/paymentmethod",
+            element: <PaymentMainView/>,
+        },
+        {
+            path: "/paymentmethod/payonlinenow",
+            element: <PaymentSectionView/>,
         },
     ]);
 
