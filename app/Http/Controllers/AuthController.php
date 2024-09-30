@@ -70,7 +70,7 @@ class AuthController extends Controller
         try {
             if (!$request->has('code')) {
                 return redirect('/')->with('error', 'Authentication failed. Missing code parameter.');
-            }
+            }   
 
             $googleUser = Socialite::driver("google")->user();
             $explodeName = explode(' ', $googleUser->getName());
