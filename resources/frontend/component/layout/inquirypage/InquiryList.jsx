@@ -259,7 +259,7 @@ const InquiryList = () => {
 
     return (
         <>
-            <div className="h-screen max-w-full bg-custom-grayFA px-4">
+            <div className="h-screen max-w-full bg-custom-grayFA px-[20px]">
                 <div className="bg-custom-grayFA">
                     <div className="relative flex justify-start gap-3 pt-1">
                         <div className="relative w-[604px]">
@@ -431,8 +431,8 @@ const InquiryList = () => {
                         )}
                     </div>
                 </div>
-                <div className="max-w-[954px] p-[20px]">
-                    <div className="flex justify-start items-center h-12 mt-[15px] px-6 gap-[60px] bg-white rounded-t-lg mb-1 ">
+                <div className="max-w-[954px] ">
+                    <div className="flex justify-between items-center h-12 mt-[15px] px-6 bg-white rounded-t-lg mb-1 ">
                         <div className="relative mr-4 ">
                             <button
                                 className="flex text-[20px] w-[130px] items-center gap-3 text-custom-bluegreen font-semibold"
@@ -474,6 +474,7 @@ const InquiryList = () => {
                                 </div>
                             )}
                         </div>
+                        <div className="flex gap-[10px]">
                         <div className="flex gap-2">
                             <div className="flex space-x-2">
                                 {user?.department === "CRS" && (
@@ -528,13 +529,14 @@ const InquiryList = () => {
                                 ))}
                             </div>
                         </div>
-                        <div className="flex justify-end items-center w-full">
+                        <div className="flex justify-end items-center">
                             <button
                                 className="flex justify-center items-center h-[30px] w-[30px] hover:bg-custom-grayF1 rounded-full text-custom-bluegreen hover:text-custom-lightblue"
                                 onClick={handleRefresh}
                             >
                                 <MdRefresh />
                             </button>
+                        </div>
                         </div>
                     </div>
                     <div className="w-[914px]">
