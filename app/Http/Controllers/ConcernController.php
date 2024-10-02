@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\SampleEvent;
 use App\Jobs\JobToPersonnelAssign;
 use App\Jobs\ReplyFromAdminJob;
 use App\Jobs\ResolveJobToSender;
@@ -9,6 +10,7 @@ use App\Mail\SendReplyFromAdmin;
 use App\Models\BuyerReplyNotif;
 use App\Models\Concerns;
 use App\Models\ConcernsCreatedBy;
+use App\Models\Conversations;
 use App\Models\Employee;
 use App\Models\InquiryAssignee;
 use App\Models\InquiryLogs;
@@ -855,7 +857,7 @@ class ConcernController extends Controller
 
             $sortedCombinedData = $combinedData->sortByDesc(function ($item) {
                 return $item->created_at;
-            })->values(); 
+            })->values();
 
             $perPage = 20;
             $currentPage = LengthAwarePaginator::resolveCurrentPage();
@@ -902,7 +904,7 @@ class ConcernController extends Controller
             'buyer_reply_notif.updated_at',
             'buyer_reply_notif.message_log',
             \DB::raw('CASE WHEN read_notif_by_user.reply_id IS NULL THEN 0 ELSE 1 END as is_read'),
-            'buyer_reply_notif.id as buyer_notif_id' 
+            'buyer_reply_notif.id as buyer_notif_id'
         );
 
         return $buyerReplyQuery->get();
@@ -927,10 +929,10 @@ class ConcernController extends Controller
 
         if ($request->buyerReply) {
             $existingEntry = ReadNotifByUser::where('user_id', $user->id)
-            ->where('reply_id', $concernId)
-            ->first();
-            
-            if(!$existingEntry) {
+                ->where('reply_id', $concernId)
+                ->first();
+
+            if (!$existingEntry) {
                 ReadNotifByUser::insert([
                     'user_id' => $user->id,
                     'reply_id' => $concernId,
@@ -1325,5 +1327,103 @@ class ConcernController extends Controller
 
         return response()->json(['message' => 'Concern and related messages deleted successfully']);
     }
-}
 
+    public function sendMessageConcerns(Request $request)
+    {
+        try {
+            $conversation = new Conversations();
+            $conversation->sender_id = $request->sender_id;
+            $conversation->concern_id = $request->concern_id;
+            $conversation->message = $request->message;
+            $conversation->save();
+
+            $user = Employee::find($request->sender_id);
+
+            $data = [
+                'message' => $conversation,
+                'firstname' => $user ? $user->firstname : 'Unknown User',
+                'lastname' => $user ? $user->lastname : 'Unknown User',
+                'concernId' => $request->concern_id
+            ];
+
+            SampleEvent::dispatch($data);
+
+            return response()->json('Successfully sent');
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function retrieveConcernsMessages(Request $request)
+    {
+        $concernId = $request->query('concernId');
+       /*  dd($request->all()); */
+        try {           
+           $conversations = Conversations::where('concern_id', $concernId)
+                                          ->join('employee', 'employee.id', '=', 'conversations.sender_id')
+                                          ->select('conversations.*', 'employee.firstname', 'employee.lastname')
+                                        /*   ->orderBy('created_at', 'desc') */
+                                          ->get();
+
+           return response()->json($conversations);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
+        }       
+    }
+
+    // public function sendMessageConcerns(Request $request)
+    // {
+    //     try {
+    //        /*  dd($request->all()); */
+    //         $conversation = new Conversations();
+    //         $conversation->sender_id = $request->sender_id;
+    //         $conversation->concern_id = $request->concern_id;
+    //         $conversation->message = $request->message;
+    //         $conversation->save();
+
+    //         \Log::info("Count before dispatching event: " . $conversation);
+
+    //         SampleEvent::dispatch($conversation);
+
+    //         return response()->json('Successfully send');
+
+    //     } catch (\Exception $e) {
+    //         return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
+    //     }
+
+    //    /*  try {
+    //         $user = $request->user();
+
+    //         $files = $request->file('files');
+    //         $lastConcern = Concerns::latest()->first();
+    //         $nextId = $lastConcern ? $lastConcern->id + 1 : 1;
+    //         $formattedId = str_pad($nextId, 8, '0', STR_PAD_LEFT);
+
+    //         $ticketId = 'Ticket#24' . $formattedId;
+
+
+    //         $concerns = new Concerns();
+    //         $concerns->details_concern = $request->details_concern;
+    //         $concerns->property = $request->property;
+    //         $concerns->details_message = $request->message;
+    //         $concerns->status = "unresolved";
+    //         $concerns->ticket_id = $ticketId;
+    //         $concerns->user_type = $request->user_type;
+    //         $concerns->buyer_name = $request->fname . ' ' . $request->lname;
+    //         $concerns->mobile_number = $request->mobile_number;
+    //         $concerns->contract_number = $request->contract_number;
+    //         $concerns->unit_number = $request->unit_number;
+    //         $concerns->buyer_email = $request->buyer_email;
+    //         $concerns->inquiry_type = "from_admin";
+    //         $concerns->save();
+
+    //         $count = Concerns::count();
+    //         \Log::info("Count before dispatching event: " . $count);
+    //         SampleEvent::dispatch($count);
+
+    //         return response()->json('Successfully added');
+    //     } catch (\Exception $e) {
+    //         return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
+    //     } */
+    // }
+}

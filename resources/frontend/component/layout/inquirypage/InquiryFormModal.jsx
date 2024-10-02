@@ -435,7 +435,7 @@ const InquiryFormModal = ({ modalRef }) => {
                                 name="contract_number"
                                 value={formData.contract_number}
                                 onChange={handleChange}
-                                type="text"
+                                type="number"
                                 className="w-full px-4 text-sm focus:outline-none mobile:text-xs"
                                 placeholder=""
                             />

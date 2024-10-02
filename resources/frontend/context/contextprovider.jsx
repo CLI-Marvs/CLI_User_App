@@ -47,6 +47,8 @@ export const ContextProvider = ({ children }) => {
         useState(false);
     const [pricingMasterLists, setPricingMasterLists] = useState([]);
     const [paymentSchemes, setPaymentSchemes] = useState([]);
+    const [concernMessages, setConcernMessages] = useState([]);
+    const [concernId, setConcernId] = useState("");
     useEffect(() => {
         if (user && user.department && !isDepartmentInitialized) {
             setDepartment(user.department === "CRS" ? "All" : user.department);
@@ -175,13 +177,23 @@ export const ContextProvider = ({ children }) => {
                         notifStatus || ""
                     }`
                 );
-                console.log("response getNotifications", response.data);
                 setNotifications(response.data.data);
                 setNotifPageCount(response.data.last_page);
             } catch (error) {
                 console.log("error retrieving", error);
             }
         }
+    };
+
+    const getConcernMessages = async () => {
+       if(concernId) {  
+        try {
+            const response = await apiService.get(`get-concern-messages?concernId=${parseInt(concernId)}`);
+            setConcernMessages(response.data);
+        } catch (error) {
+            console.log("error retrieving", error);
+        }
+       }
     };
 
     const getMessages = async (ticketId) => {
@@ -332,6 +344,10 @@ export const ContextProvider = ({ children }) => {
         getSpecificInquiry();
     }, []);
 
+    useEffect(() => {
+        getConcernMessages();
+    }, [concernId]);
+
     //* For Report Page
     useEffect(() => {
         const fetchData = async () => {
@@ -404,6 +420,11 @@ export const ContextProvider = ({ children }) => {
                 getPricingMasterLists,
                 paymentSchemes,
                 getPaymentSchemes,
+                setConcernId,
+                concernMessages,
+                concernId,
+                getConcernMessages,
+                setConcernMessages
             }}
         >
             {children}

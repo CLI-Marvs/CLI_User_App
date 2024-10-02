@@ -25,6 +25,7 @@ import ReservationListView from "./views/pages/salesViews/ReservationListView";
 import ReservationPageView from "./views/pages/salesViews/ReservationPageView";
 import PaymentMainView from "./views/pages/paymentViews/PaymentMainView";
 import PaymentSectionView from "./views/pages/paymentViews/PaymentSectionView";
+import MainComponent from "./layout/chatComponent/MainComponent";
 
 
 const App = () => {
@@ -71,6 +72,10 @@ const App = () => {
         {
             path: "/callback",
             element: <CallBackView />,
+        },
+        {
+            path: "/chatbox",
+            element: <MainComponent />,
         },
         {
             path: "/",
