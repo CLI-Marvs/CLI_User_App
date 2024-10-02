@@ -197,19 +197,19 @@ const InquiryThread = () => {
 
     return (
         <>
-            <div className="h-screen bg-custom-grayFA p-3 overflow-x-auto overflow-y-hidden">
-                <div className="bg-custom-grayFA mb-3">
+            <div className="flex h-screen bg-custom-grayFA overflow-x-auto overflow-y-hidden">
+                <div className="bg-custom-grayFA w-[601px] px-[20px] pb-[103px]">
                     {" "}
                     {/* boxdevref */}
-                    <div className="relative flex justify-start gap-3">
-                        <div className="relative w-[604px]">
+                    <div className="relative flex justify-start gap-3 mb-[12px] mt-[2px]">
+                        <div className="relative w-full ">
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
                                 fill="none"
                                 viewBox="0 0 24 24"
                                 strokeWidth="1.5"
                                 stroke="currentColor"
-                                className="size-4 absolute left-3 top-3 text-gray-500"
+                                className="size-4 absolute left-3 top-4 text-gray-500"
                             >
                                 <path
                                     strokeLinecap="round"
@@ -221,7 +221,7 @@ const InquiryThread = () => {
                                 readOnly={true}
                                 onClick={toggleFilterBox}
                                 type="text"
-                                className="h-[47px] w-full rounded-lg pl-9 pr-6 text-sm"
+                                className="h-[47px] w-full rounded-lg pl-9 pr-6 text-sm bg-custom-grayF1"
                                 placeholder="Search"
                             />
                             <svg
@@ -369,12 +369,10 @@ const InquiryThread = () => {
                             </div>
                         )}
                     </div>
-                </div>
-                <div className="flex min-w-[107%] bg-custom-grayFA gap-3 h-full pb-24">
-                    <div className="p-7 w-[728px] shrink-0 bg-white rounded-lg flex flex-col h-full">
+                    <div className="p-[16px] shrink-0 bg-white rounded-lg flex flex-col min-h-full">
                         {" "}
                         {/* boxdevref */}
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-[9px] px-[20px]">
                             <img
                                 src={Backbtn}
                                 alt="back button"
@@ -382,19 +380,11 @@ const InquiryThread = () => {
                                 className="hover:bg-gray-100 rounded-full cursor-pointer"
                             />
                             <div className="flex-1 flex flex-wrap">
-                                <p className="space-x-1 text-sm montserrat-semibold text-custom-gray81">
-                                    {dataConcern.ticket_id}
-                                    <span> |</span>
-                                    <span>{dataConcern.details_concern}</span>
-                                    <span>|</span>
-                                    {dataConcern && (
-                                        <span>{dataConcern.property}</span>
-                                    )}
-                                    <span>|</span>
-                                    <span>{dataConcern.unit_number}</span>
+                                <p className="space-x-1 text-custom-bluegreen">
+                                    Casa Mira (Transaction) <span>-</span> Ticket # 2400000083
                                 </p>
                             </div>
-                            {dataConcern.created_by &&
+                          {/*   {dataConcern.created_by &&
                                 dataConcern.created_by === user?.id && (
                                     <div className="flex justify-center w-[20px] shrink-0">
                                         <LuTrash2
@@ -402,26 +392,14 @@ const InquiryThread = () => {
                                             onClick={handleDeleteInquiry}
                                         />
                                     </div>
-                                )}
+                                )} */}
                             <div className="flex justify-end shrink-0">
-                                {dataConcern &&
-                                dataConcern.status === "Resolved" ? (
-                                    <>
-                                        <span className="text-blue-500 cursor-pointer hover:underline font-semibold text-sm">
-                                            Resolved
-                                        </span>
-                                    </>
-                                ) : (
-                                    <button
-                                        onClick={handleOpenModal}
-                                        className="text-blue-500 cursor-pointer hover:underline font-semibold text-sm"
-                                    >
-                                        Mark as resolve
-                                    </button>
-                                )}
+                                <button className="w-[85px] h-[29px] rounded-[10px] gradient-btn5 montserrat-medium text-sm text-white hover:shadow-custom4">
+                                    Add Info
+                                </button>
                             </div>
                         </div>
-                        <div className="flex-grow  overflow-y-auto">
+                        <div className="flex-grow overflow-y-auto">
                             <div className="">
                                 {conversationMessages.length > 0 &&
                                     conversationMessages.map((item, index) =>
@@ -501,12 +479,12 @@ const InquiryThread = () => {
                                 </button>
                             </div>
                         </div> */}
-                        <div className="mt-2 mb-3 relative">
+                        <div className="mt-2 relative">
                             {" "}
                             {/* boxref */}
                             {/* Container for chat input and attached files */}
-                            <div className="gradient-btn2 rounded-[12px] p-[4px] relative">
-                                <div className="bg-white p-[4px] rounded-[10px]">
+                            <div className="gradient-btn2 rounded-[12px] p-[2px] relative">
+                                <div className="bg-white p-[10px] pr-0 rounded-[10px]">
                                     {/* Display attached files inside the same container */}
                                     {attachedFiles.length > 0 && (
                                         <div className="mb-2 ">
@@ -537,20 +515,21 @@ const InquiryThread = () => {
                                     )}
 
                                     {/* Input field */}
-                                    <div className="h-[61px] w-[668]  rounded-[14px] p-[4px] ">
-                                        <input
-                                            name="chat"
-                                            type="text"
-                                            placeholder="Reply..."
-                                            value={chatMessage}
+                                    <div className="h-[101px] w-[668]  ">
+                                         <textarea
+                                          placeholder="Reply..."
                                             onChange={(e) =>
                                                 setChatMessage(e.target.value)
                                             }
-                                            className="h-full w-full pl-2 pr-14 border-none rounded-[10px] text-sm focus:outline-none"
-                                        />
+                                            value={chatMessage}
+                                            id="chat"
+                                            name="chat"
+                                            rows="4"
+                                            className="h-full w-full pl-2 pr-[123px] border-none  text-sm focus:outline-none"
+                                        ></textarea>
 
                                         {/* File attachment button */}
-                                        <div className="hidden absolute bottom-7 right-[85px] items-center">
+                                        <div className=" absolute bottom-2 right-[115px] items-center">
                                             <input
                                                 type="file"
                                                 id="fileInput"
@@ -572,7 +551,7 @@ const InquiryThread = () => {
                                             </button>
                                         </div>
                                         {/* Send button */}
-                                        <div className="absolute bottom-6 right-4 flex items-center">
+                                        <div className="absolute bottom-2 right-6 flex items-center">
                                             <button
                                                 type="button"
                                                 onClick={submitMessage}
@@ -580,18 +559,16 @@ const InquiryThread = () => {
                                                     !chatMessage.trim() ||
                                                     loading
                                                 }
-                                                className={`flex w-[68px] h-[31px] rounded-lg font-semibold text-white text-sm justify-center items-center gradient-background3 hover:shadow-custom4 ${
-                                                    loading
+                                                className={`flex w-[82px] h-[28px] rounded-[5px] text-white text-xs justify-center items-center gradient-background3 hover:shadow-custom4 ${loading
                                                         ? "cursor-not-allowed"
                                                         : ""
-                                                }`}
+                                                    }`}
                                             >
                                                 {loading ? (
                                                     <CircularProgress className="spinnerSize" />
                                                 ) : (
                                                     <>
-                                                        Send
-                                                        <IoIosSend className="h-3 w-3 text-white" />
+                                                        Send Reply
                                                     </>
                                                 )}
                                             </button>
@@ -600,8 +577,14 @@ const InquiryThread = () => {
                                 </div>
                             </div>
                         </div>
+                        <div className="text-[11px] text-custom-bluegreen ">
+                            <p>Note: This message will be send to <span className="font-semibold">JOSHUA DOE</span>. Please use the comment section for CLI internal communication.</p>
+                        </div>
                     </div>
-                    <div className="p-[16px] w-[436px] max-h-[620px] bg-white rounded-lg">
+                </div>
+                <div className="flex w-[623px] bg-custom-grayFA gap-3 h-full pb-24">
+
+                    <div className=" w-[623px] ">
                         {" "}
                         {/* boxref */}
                         <AssignSidePanel ticketId={ticketId} />
