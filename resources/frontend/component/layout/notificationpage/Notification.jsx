@@ -25,6 +25,8 @@ const Notification = () => {
         setActiveButton((prev) => (prev === button ? null : button));
     };
 
+    console.log("activeButton", activeButton);
+
     const navigate = useNavigate();
     const handlePageClick = (data) => {
         const selectedPage = data.selected;

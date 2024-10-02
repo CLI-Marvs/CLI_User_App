@@ -501,6 +501,7 @@ export const ContextProvider = ({ children }) => {
                 setConcernMessages,
                 concernId,
                 setConcernId,
+                getConcernMessages 
             }}
         >
             {children}

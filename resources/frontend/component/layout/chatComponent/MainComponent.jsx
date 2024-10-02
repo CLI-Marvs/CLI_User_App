@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import ConcernSelector from "./ConcernSelector";
 import { useStateContext } from "../../../context/contextprovider";
 import Messages from "./Messages";
@@ -17,6 +17,8 @@ const MainComponent = () => {
     } = useStateContext();
     const [concernIdList, setConcernIdList] = useState([]);
     const [message, setMessage] = useState("");
+
+    const messagesEndRef = useRef(null)
 
     useEffect(() => {
         const concernIds = data.map((item) => item.id);
@@ -41,17 +43,19 @@ const MainComponent = () => {
         }
     };
     useEffect(() => {
+        let channel; 
+    
         if (concernId) {
-            const channel = window.Echo.channel(`concerns.${concernId}`);
+            channel = window.Echo.channel(`concerns.${concernId}`);
             console.log("Channel created:", channel);
-
+    
             channel.listen("SampleEvent", (event) => {
                 console.log("event", event);
                 setConcernMessages((prevMessages) => {
-                    if (prevMessages.find(msg => msg.id === event.data.message.id)) {
-                        return prevMessages; 
+                    if (prevMessages.find((msg) => msg.id === event.data.message.id)) {
+                        return prevMessages;
                     }
-                    return [
+                  /*   return [
                         ...prevMessages,
                         {
                             id: event.data.message.id,
@@ -62,24 +66,41 @@ const MainComponent = () => {
                             concernId: event.data.concernId,
                             created_at: event.data.message.created_at,
                         },
-                    ];
+                    ]; */
+
+                    const newMessage = {
+                        id: event.data.message.id,
+                        message: event.data.message.message,
+                        sender_id: event.data.message.sender_id,
+                        firstname: event.data.firstname,
+                        lastname: event.data.lastname,
+                        concernId: event.data.concernId,
+                        created_at: event.data.message.created_at,
+                    };
+
+                    return [...prevMessages, newMessage].sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
                 });
             });
-            
-
-            /* return () => {
-                channel.stopListening("SampleEvent");
-            }; */
         }
+    
+        return () => {
+            if (channel) {
+                channel.stopListening("SampleEvent"); 
+                window.Echo.leaveChannel(`concerns.${concernId}`); 
+            }
+        };
     }, [concernId]);
+
+   /*  useEffect(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, [concernMessages]);  */
 
     useEffect(() => {
-     /*    if (concernId) {
-            getConcernMessages();
-        } */
-    }, [concernId]);
+        if (messagesEndRef.current) {
+            messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+        }
+    }, [concernMessages]);
     
-
     console.log("concernMessages", concernMessages);
 
     return (
