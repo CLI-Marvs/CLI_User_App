@@ -7,6 +7,7 @@ use App\Models\BasicPricing;
 use App\Models\PriceListSetting;
 use App\Models\PricingMasterList;
 use App\Models\PropertyDetail;
+use App\Models\PropertyMaster;
 use Illuminate\Http\Request;
 use PhpParser\Node\Stmt\TryCatch;
 
@@ -31,7 +32,7 @@ class PricingMasterListController extends Controller
 
             // Retrieve PriceListSetting and PropertyDetail data
             $this->attachPriceListSettings($pricingMasterList, $basicPricing->pricelist_settings_id);
-            $this->attachPropertyDetails($pricingMasterList, $basicPricing->property_details_id);
+            $this->attachPropertyDetails($pricingMasterList, $basicPricing->property_masters_id);
           }
         }
       }
@@ -55,7 +56,7 @@ class PricingMasterListController extends Controller
   private function attachPropertyDetails($pricingMasterList, $propertyDetailsId)
   {
     if ($propertyDetailsId) {
-      $propertyDetails = PropertyDetail::find($propertyDetailsId);
+      $propertyDetails = PropertyMaster::find($propertyDetailsId);
       if ($propertyDetails) {
         $pricingMasterList->property_details_data = $propertyDetails->toArray();
       }

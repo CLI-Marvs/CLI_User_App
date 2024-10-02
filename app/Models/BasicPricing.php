@@ -9,13 +9,14 @@ use App\Models\PriceListSetting;
 use App\Models\PriceVersion;
 use App\Models\PricingMasterList;
 use App\Models\PropertyDetail;
+use App\Models\PropertyMaster;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class BasicPricing extends Model
 {
     use HasFactory;
-  
+
     protected $guarded = array();
 
     public function floorPremium()
@@ -32,9 +33,9 @@ class BasicPricing extends Model
         return $this->hasMany(PaymentScheme::class);
     }
 
-    public function propertyDetails()
+    public function propertyMasters()
     {
-        return $this->hasMany(PropertyDetail::class);
+        return $this->hasMany(PropertyMaster::class);
     }
 
     public function pricingMasterList()

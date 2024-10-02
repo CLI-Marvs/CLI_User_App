@@ -17,7 +17,7 @@ const PricingMasterList = () => {
 
     const [isFilterVisible, setIsFilterVisible] = useState(false);
     const { getPricingMasterLists, pricingMasterLists } = useStateContext();
-
+         
     const toggleFilterBox = () => {
         setIsFilterVisible(!isFilterVisible);
     };
@@ -289,7 +289,8 @@ const PricingMasterList = () => {
                                             <div>
                                                 <p className="underline text-blue-500 cursor-pointer">
                                                     {item?.basic_pricing_data
-                                                        ?.status === 'On-going Approval'
+                                                        ?.status ===
+                                                    "On-going Approval"
                                                         ? "Cancel"
                                                         : "Edit"}
                                                 </p>
@@ -305,7 +306,7 @@ const PricingMasterList = () => {
                                                     }
                                                 </p>
                                                 <p>
-                                                    Tower
+                                                    Tower{" "}
                                                     {
                                                         item
                                                             ?.property_details_data
@@ -374,11 +375,14 @@ const PricingMasterList = () => {
                                                     <span>
                                                         Effective Balcony Base
                                                     </span>
-                                                    <span> {
+                                                    <span>
+                                                        {" "}
+                                                        {
                                                             item
                                                                 ?.pricelist_settings_data
                                                                 ?.effective_balcony_base
-                                                        }</span>
+                                                        }
+                                                    </span>
                                                 </p>
                                             </div>
                                         </td>

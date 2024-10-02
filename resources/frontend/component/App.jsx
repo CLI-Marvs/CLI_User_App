@@ -19,21 +19,19 @@ import PaymentSchemeView from "./views/pages/PropertyAndPricingViews/PaymentSche
 import PriceVersioningView from "./views/pages/PropertyAndPricingViews/PriceVersioningView";
 import PromotionalPricingView from "./views/pages/PropertyAndPricingViews/PromotionalPricingView";
 import NotificationView from "./views/pages/notificationViews/NotificationView";
-import PriceListSettingFormDataProvider from "../context/BasicPricing/PriceListSettingsContext";
+
 const App = () => {
     const Layout = () => {
         return (
-            <PriceListSettingFormDataProvider>
-                <div className="bg-white relative max-h-screen flex flex-col h-screen">
-                    <Navbar />
-                    <div className="flex flex-1 overflow-hidden">
-                        <Sidebar />
-                        <div className="flex-1 overflow-y-auto bg-custom-grayFA">
-                            <Outlet />
-                        </div>
+            <div className="bg-white relative max-h-screen flex flex-col h-screen">
+                <Navbar />
+                <div className="flex flex-1 overflow-hidden">
+                    <Sidebar />
+                    <div className="flex-1 overflow-y-auto bg-custom-grayFA">
+                        <Outlet />
                     </div>
                 </div>
-            </PriceListSettingFormDataProvider>
+            </div>
         );
 
         /*  return (

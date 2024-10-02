@@ -21,5 +21,5 @@ const PriceListSettingFormDataProvider = ({ children }) => {
     );
 };
 export default PriceListSettingFormDataProvider;
-export const useStateContext = () =>
+export   const usePriceListStateContext = () =>
     useContext(PriceListSettingFormDataContext);

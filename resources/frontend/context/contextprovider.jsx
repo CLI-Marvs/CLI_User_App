@@ -47,12 +47,20 @@ export const ContextProvider = ({ children }) => {
         useState(false);
     const [pricingMasterLists, setPricingMasterLists] = useState([]);
     const [paymentSchemes, setPaymentSchemes] = useState([]);
+    const [propertyId, setPropertyId] = useState(null);
+    const [floorPremiumsAccordionOpen, setFloorPremiumsAccordionOpen] =
+        useState(false);
+    const [propertyFloors, setPropertyFloors] = useState([]);
+    const [selectedFloor, setSelectedFloor] = useState(null);
+    const [propertyUnit, setPropertyUnits] = useState([]);
+    const [towerPhaseId, setTowerPhaseId] = useState(0);
+    const [isLoading, setIsLoading] = useState(false);
     useEffect(() => {
         if (user && user.department && !isDepartmentInitialized) {
             setDepartment(user.department === "CRS" ? "All" : user.department);
             setIsDepartmentInitialized(true);
         }
-    }, [user, isDepartmentInitialized]); 
+    }, [user, isDepartmentInitialized]);
 
     const setToken = (token) => {
         _setToken(token);
@@ -256,13 +264,13 @@ export const ContextProvider = ({ children }) => {
                 const response = await apiService.get(
                     "get-pricing-master-lists"
                 );
-               setPricingMasterLists(response.data);
-                 
+                setPricingMasterLists(response.data);
             } catch (error) {
                 console.error("Error fetching pricing master lists:", error);
             }
         }
     }; //get all pricing master lists data
+
     const getPaymentSchemes = async () => {
         if (token) {
             try {
@@ -272,13 +280,65 @@ export const ContextProvider = ({ children }) => {
                 console.error("Error fetching data:", error);
             }
         }
-    };
+    }; //get all payment schemes
+
+    const getPropertyFloors = async (towerPhaseId) => {
+        // Check if property floors have already been fetched
+        if (!propertyFloors[towerPhaseId] && towerPhaseId && token) {
+            try {
+                setIsLoading(true);
+                const response = await apiService.get(
+                    `property-floors/${towerPhaseId}`
+                );
+                 return response.data; // Return the data
+                // Merge the new floors data with existing propertyFloors
+                // setPropertyFloors((prev) => ({
+                //     ...prev,
+                //     [towerPhaseId]: response.data, // Store floors based on towerPhaseId
+                // }));
+            } catch (error) {
+                console.error("Error fetching property floors:", error);
+                return null;
+            } finally {
+                setIsLoading(false);
+            }
+        }
+    }; //get property floors
+
+    const getPropertyUnits = async (towerPhaseId, selectedFloor) => {
+        if (token || selectedFloor || towerPhaseId) {
+            try {
+                setIsLoading(true);
+                const response = await apiService.post("property-units", {
+                    towerPhaseId,
+                    selectedFloor,
+                });
+                setPropertyUnits(response.data);
+            } catch (error) {
+                console.error("Error fetching property units:", error);
+            } finally {
+                setIsLoading(false);
+            }
+        }
+    }; //get property units
+
+    useEffect(() => {
+        getPropertyUnits(towerPhaseId, selectedFloor);
+    }, [token, towerPhaseId, selectedFloor]);
+
     useEffect(() => {
         getPricingMasterLists();
-    }, []);
-    useEffect(() => {
         getPaymentSchemes();
     }, [token]);
+    
+    useEffect(() => {
+        if (towerPhaseId) {
+            getPropertyFloors(towerPhaseId);
+        }
+    }, [towerPhaseId, token]);
+    // useEffect(() => {
+    //     getPaymentSchemes();
+    // }, [token]);
     useEffect(() => {
         if (token) {
             const getData = async () => {
@@ -404,6 +464,21 @@ export const ContextProvider = ({ children }) => {
                 getPricingMasterLists,
                 paymentSchemes,
                 getPaymentSchemes,
+                getPropertyFloors,
+                setPropertyId,
+                propertyFloors,
+                propertyId,
+                floorPremiumsAccordionOpen,
+                setFloorPremiumsAccordionOpen,
+                selectedFloor,
+                setSelectedFloor,
+                propertyUnit,
+                setPropertyUnits,
+                getPropertyUnits,
+                towerPhaseId,
+                setTowerPhaseId,
+                isLoading,
+                setPropertyFloors,
             }}
         >
             {children}

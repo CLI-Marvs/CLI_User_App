@@ -2,16 +2,22 @@ import React, { useRef, useState } from "react";
 import { IoMdArrowDropdown } from "react-icons/io";
 import apiService from "../../../../servicesApi/apiService";
 import { useNavigate } from "react-router-dom";
+import CircularProgress from "@mui/material/CircularProgress";
+import { useStateContext } from "../../../../../context/contextprovider";
 const formDataState = {
     propertyName: "",
     type: "",
     towerPhase: "",
+ 
 };
 
 const AddPropertyModal = ({ modalRef }) => {
     //state
+    const { setFloorPremiumsAccordionOpen } = useStateContext();
     const [formData, setFormData] = useState(formDataState);
     const navigate = useNavigate();
+    const [loading, setLoading] = useState(false);
+
     //event handler
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -25,29 +31,38 @@ const AddPropertyModal = ({ modalRef }) => {
         e.preventDefault();
         const form = new FormData();
         try {
+            setLoading(true);
+
             // Append form data
             form.append("propertyName", formData.propertyName);
             form.append("towerPhase", formData.towerPhase);
             form.append("type", formData.type);
+            
             // API call
             const response = await apiService.post("property-details", form, {
                 headers: {
                     "Content-Type": "multipart/form-data",
                 },
             });
-            const passData = response.data.propertyData;
-
+            console.log("response in addProps",response)
+            const passData = response.data;
+           
              alert(response.data.message);
             //Close modal and call callback handler
             if (modalRef.current) {
                 modalRef.current.close();
             }
             setFormData(formDataState);
+            setFloorPremiumsAccordionOpen(false);
             navigate("/propertyandpricing/basicpricing", {
                 state: { passPropertyDetails: passData },
             }); //navigate to Basic pricing components   with the property detail data as props
+             
         } catch (error) {
             console.log("Error sending property details", error);
+        } finally {
+            
+            setLoading(false);
         }
     };
     return (
@@ -110,7 +125,7 @@ const AddPropertyModal = ({ modalRef }) => {
                         </span>
                         <input
                             name="towerPhase"
-                            type="text"
+                            type="number"
                             className="w-full px-4 focus:outline-none"
                             placeholder=""
                             onChange={handleChange}
@@ -119,10 +134,16 @@ const AddPropertyModal = ({ modalRef }) => {
                     </div>
                     <div className="flex justify-center my-3">
                         <button
-                            className="w-[173px] h-[37px] text-white montserrat-semibold text-sm gradient-btn rounded-[10px] hover:shadow-custom4"
+                            className={`w-[173px] h-[37px] text-white montserrat-semibold text-sm gradient-btn rounded-[10px] hover:shadow-custom4 ${
+                                loading ? "cursor-not-allowed" : ""
+                            }`}
                             onClick={handleSubmit}
                         >
-                            Create Pricing Draft
+                            {loading ? (
+                                <CircularProgress className="spinnerSize" />
+                            ) : (
+                                <> Create Pricing Draft</>
+                            )}
                         </button>
                     </div>
                 </div>

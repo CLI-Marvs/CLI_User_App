@@ -2,12 +2,13 @@ import React, { useState } from "react";
 import { IoIosArrowDown } from "react-icons/io";
 import { IoMdArrowDropdown } from "react-icons/io";
 import { LiaPercentSolid } from "react-icons/lia";
-import { useStateContext } from "../../../../../context/BasicPricing/PriceListSettingsContext";
+import { usePriceListStateContext } from "../../../../../context/BasicPricing/PriceListSettingsContext";
 
 const PriceListSettings = () => {
     //state
     const [accordionOpen, setAccordionOpen] = useState(false);
-    const { priceListSettingformData, setPriceListSettingformData } = useStateContext();
+    const { priceListSettingformData, setPriceListSettingformData } =
+        usePriceListStateContext();
     
     //event handler
     const handleChange = (e) => {
