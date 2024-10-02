@@ -47,6 +47,16 @@ export const ContextProvider = ({ children }) => {
         useState(false);
     const [pricingMasterLists, setPricingMasterLists] = useState([]);
     const [paymentSchemes, setPaymentSchemes] = useState([]);
+    const [propertyId, setPropertyId] = useState(null);
+    const [floorPremiumsAccordionOpen, setFloorPremiumsAccordionOpen] =
+        useState(false);
+    const [propertyFloors, setPropertyFloors] = useState([]);
+    const [selectedFloor, setSelectedFloor] = useState(null);
+    const [propertyUnit, setPropertyUnits] = useState([]);
+    const [towerPhaseId, setTowerPhaseId] = useState(0);
+    const [isLoading, setIsLoading] = useState(false);
+    const [concernMessages, setConcernMessages] = useState([]);
+    const [concernId, setConcernId] = useState(null);
     useEffect(() => {
         if (user && user.department && !isDepartmentInitialized) {
             setDepartment(user.department === "CRS" ? "All" : user.department);
@@ -184,14 +194,16 @@ export const ContextProvider = ({ children }) => {
     };
 
     const getConcernMessages = async () => {
-       if(concernId) {  
-        try {
-            const response = await apiService.get(`get-concern-messages?concernId=${parseInt(concernId)}`);
-            setConcernMessages(response.data);
-        } catch (error) {
-            console.log("error retrieving", error);
+        if (concernId) {
+            try {
+                const response = await apiService.get(
+                    `get-concern-messages?concernId=${parseInt(concernId)}`
+                );
+                setConcernMessages(response.data);
+            } catch (error) {
+                console.log("error retrieving", error);
+            }
         }
-       }
     };
 
     const getMessages = async (ticketId) => {
@@ -292,7 +304,7 @@ export const ContextProvider = ({ children }) => {
                 const response = await apiService.get(
                     `property-floors/${towerPhaseId}`
                 );
-                 return response.data; // Return the data
+                return response.data; // Return the data
                 // Merge the new floors data with existing propertyFloors
                 // setPropertyFloors((prev) => ({
                 //     ...prev,
@@ -332,7 +344,7 @@ export const ContextProvider = ({ children }) => {
         getPricingMasterLists();
         getPaymentSchemes();
     }, [token]);
-    
+
     useEffect(() => {
         if (towerPhaseId) {
             getPropertyFloors(towerPhaseId);
@@ -470,6 +482,25 @@ export const ContextProvider = ({ children }) => {
                 getPricingMasterLists,
                 paymentSchemes,
                 getPaymentSchemes,
+                getPropertyFloors,
+                setPropertyId,
+                propertyFloors,
+                propertyId,
+                floorPremiumsAccordionOpen,
+                setFloorPremiumsAccordionOpen,
+                selectedFloor,
+                setSelectedFloor,
+                propertyUnit,
+                setPropertyUnits,
+                getPropertyUnits,
+                towerPhaseId,
+                setTowerPhaseId,
+                isLoading,
+                setPropertyFloors,
+                concernMessages,
+                setConcernMessages,
+                concernId,
+                setConcernId,
             }}
         >
             {children}
