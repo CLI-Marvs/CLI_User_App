@@ -71,6 +71,8 @@ const Sidebar = () => {
           </Link>
           {isInquiryOpen && location.pathname.startsWith('/inquirymanagement') && (
             <div className="px-[25px] py-[20px] w-[185px] h-[109px] flex flex-col gap-[5px] bg-custom-lightestgreen border-t rounded-t-none rounded-b-[10px] border-custom-solidgreen">
+              
+              <button className='h-[38px] w-[161px] gradient-btn5 text-white'>Add Inquiry</button>
               <Link to="/inquirymanagement/inquirylist">
                 <ListItem
                   className={`h-[32px] w-[134px] py-[8px] px-[18px] text-sm rounded-[50px] ${location.pathname === '/inquirymanagement/inquirylist' ? 'bg-white text-custom-solidgreen font-semibold' : 'hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen '}`}

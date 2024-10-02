@@ -197,3 +197,19 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   font-size: 0.65em; /* Adjust as needed */
   vertical-align: super; /* Use super for proper alignment */
 }
+
+.custom-checkbox:checked {
+  background-color: #4ADE80; /* Your custom green color */
+  border-color: #4ADE80; /* Match the border with the checkmark color */
+}
+
+.custom-checkbox:checked::after {
+  content: '';
+  position: absolute;
+  width: 8px; /* Adjust width */
+  height: 8px; /* Adjust height */
+  background-color: white; /* Color of the checkmark */
+  left: 2px; /* Adjust position */
+  top: 2px; /* Adjust position */
+  transform: rotate(45deg); /* Rotate to create a checkmark */
+}
