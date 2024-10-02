@@ -63,7 +63,7 @@ const Navbar = () => {
           <Stack spacing={2}>
             <Breadcrumbs separator={<FaAngleRight className='text-custom-solidgreen' />} aria-label="breadcrumb">
               {breadcrumbs}
-            </Breadcrumbs>
+            </Breadcrumbs>3 
           </Stack>
         </div>
       </div>
