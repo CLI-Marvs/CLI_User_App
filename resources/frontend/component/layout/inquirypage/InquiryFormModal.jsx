@@ -17,6 +17,7 @@ const formDataState = {
 }
 
 const projectList = [
+    "N/A",
     "38 Park Avenue",
     "Astra Centre",
     "Asia Premiere",
@@ -63,7 +64,6 @@ const projectList = [
     "Velmiro Plains Bacolod",
     "Villa Casita - Balamban",
     "Villa Casita - Bogo",
-    "N/A"
   ]
   
 const InquiryFormModal = ({ modalRef }) => {
@@ -435,7 +435,7 @@ const InquiryFormModal = ({ modalRef }) => {
                                 name="contract_number"
                                 value={formData.contract_number}
                                 onChange={handleChange}
-                                type="text"
+                                type="number"
                                 className="w-full px-4 text-sm focus:outline-none mobile:text-xs"
                                 placeholder=""
                             />

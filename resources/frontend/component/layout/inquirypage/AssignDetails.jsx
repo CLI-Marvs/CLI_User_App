@@ -1,6 +1,16 @@
 import React from "react";
 
 const AssignDetails = ({ logMessages }) => {
+    const capitalizeWords = (name) => {
+        return name
+            .split(" ")
+            .map(
+                (word) =>
+                    word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+            )
+            .join(" ");
+    };
+
     const renderDetails = (actionType, details) => {
         switch (actionType) {
             case "client_inquiry":
@@ -28,7 +38,15 @@ const AssignDetails = ({ logMessages }) => {
                     <>
                         <div className="flex flex-col truncate">
                             <p className="truncate text-sm text-[#616161]">
-                                {details.message_tag} {details.admin_name}
+                                {details.message_tag}
+                            </p>
+                            <p className="text-xs text-custom-gray space-x-1">
+                                by {details.admin_name}
+                            </p>
+                            <p className="text-xs text-custom-gray space-x-1">
+                                {details.department === "CRS"
+                                    ? "Customer Relations Services"
+                                    : details.department}
                             </p>
                         </div>
                     </>
@@ -63,9 +81,18 @@ const AssignDetails = ({ logMessages }) => {
                     <>
                         <div className="flex flex-col truncate">
                             <p className="text-sm text-[#616161]">
-                                {details.message_tag} 
+                                {details.message_tag}
                             </p>
-                           {/*  <p className="text-xs text-custom-gray space-x-1">
+
+                            <p className="text-xs text-custom-gray space-x-1">
+                                {details.buyer_name && (
+                                    <span>
+                                        by (
+                                        {capitalizeWords(details.buyer_name)})
+                                    </span>
+                                )}
+                            </p>
+                            {/*  <p className="text-xs text-custom-gray space-x-1">
                                 (
                                 <span className="truncate">
                                     {details.remarks}

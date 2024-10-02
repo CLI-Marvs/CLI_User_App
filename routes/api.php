@@ -44,6 +44,11 @@ Route::get('/category-monthly', [ConcernController::class, 'getInquiriesByCatego
 Route::get('/inquiries-property', [ConcernController::class, 'getInquiriesPerProperty']);
 Route::post('delete-concerns', [ConcernController::class, 'deleteConcern']);
 
+Route::post('conversation', [ConcernController::class, 'sendMessageConcerns']);
+Route::get('/get-concern-messages', [ConcernController::class, 'retrieveConcernsMessages']);
+
+
+
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/get-concern', [ConcernController::class, 'getAllConcerns']);
     Route::post('/add-concern', [ConcernController::class, 'addConcernPublic']);

@@ -38,6 +38,7 @@ const InquiryThread = () => {
         user,
         getInquiryLogs,
         getAllConcerns,
+        setSearchFilter,
         data,
     } = useStateContext();
     const [chatMessage, setChatMessage] = useState("");
@@ -121,6 +122,7 @@ const InquiryThread = () => {
         setTicket("");
         setStatus("");
         setHasAttachments(false);
+        navigate("/inquirymanagement/inquirylist");
     };
 
     const handleDeleteInquiry = async () => {
@@ -149,6 +151,8 @@ const InquiryThread = () => {
         formData.append("admin_id", user?.id || "");
         formData.append("buyer_email", dataConcern.buyer_email || "");
         formData.append("admin_profile_picture", user?.profile_picture || "");
+        formData.append("department", user?.department || "");
+
 
         try {
             const response = await apiService.post("send-message", formData, {
@@ -546,7 +550,7 @@ const InquiryThread = () => {
                                         />
 
                                         {/* File attachment button */}
-                                        <div className="absolute bottom-7 right-[85px] flex items-center">
+                                        <div className="hidden absolute bottom-7 right-[85px] items-center">
                                             <input
                                                 type="file"
                                                 id="fileInput"

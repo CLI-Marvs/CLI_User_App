@@ -6,7 +6,6 @@ import "./layout/css/style.css";
 import Home from "./layout/Home";
 import Sidebar from "./layout/mainComponent/Sidebar";
 import Navbar from "./layout/mainComponent/Navbar";
-import InquiryManagementLayout from "./views/layout/InquiryManagementLayout";
 import InquiryList from "./layout/inquirypage/InquiryList";
 import InquiryListView from "./views/pages/raiseaconcernViews/InquiryListView";
 import InquiryThreadView from "./views/pages/raiseaconcernViews/InquiryThreadView";
@@ -19,6 +18,14 @@ import PaymentSchemeView from "./views/pages/PropertyAndPricingViews/PaymentSche
 import PriceVersioningView from "./views/pages/PropertyAndPricingViews/PriceVersioningView";
 import PromotionalPricingView from "./views/pages/PropertyAndPricingViews/PromotionalPricingView";
 import NotificationView from "./views/pages/notificationViews/NotificationView";
+import PriceListSettingFormDataProvider from "../context/BasicPricing/PriceListSettingsContext";
+import SalesManagementLayout from "./views/layout/SalesManagementLayout";
+import ReservationListView from "./views/pages/salesViews/ReservationListView";
+import ReservationPageView from "./views/pages/salesViews/ReservationPageView";
+import PaymentMainView from "./views/pages/paymentViews/PaymentMainView";
+import PaymentSectionView from "./views/pages/paymentViews/PaymentSectionView";
+import MainComponent from "./layout/chatComponent/MainComponent";
+
 
 const App = () => {
     const Layout = () => {
@@ -64,6 +71,10 @@ const App = () => {
             element: <CallBackView />,
         },
         {
+            path: "/chatbox",
+            element: <MainComponent />,
+        },
+        {
             path: "/",
             element: <Layout />,
             children: [
@@ -76,22 +87,16 @@ const App = () => {
                     element: <NotificationView />,
                 },
                 {
-                    path: "inquirymanagement",
-                    element: <InquiryManagementLayout />,
-                    children: [
-                        {
-                            path: "inquirylist",
-                            element: <InquiryListView />,
-                        },
-                        {
-                            path: "thread/:id",
-                            element: <InquiryThreadView />,
-                        },
-                        {
-                            path: "report",
-                            element: <ReportViews />,
-                        },
-                    ],
+                    path: "inquirymanagement/inquirylist",
+                    element: <InquiryListView />,
+                },
+                {
+                    path: "inquirymanagement/thread/:id",
+                    element: <InquiryThreadView />,
+                },
+                {
+                    path: "inquirymanagement/report",
+                    element: <ReportViews />,
                 },
                 {
                     path: "propertyandpricing",
@@ -119,7 +124,31 @@ const App = () => {
                         },
                     ],
                 },
+                {
+                    path: "salesmanagement",
+                    element: <SalesManagementLayout/>,
+                    children: [
+                        {
+                            path: "reservationlist", 
+                            element: <ReservationListView/>,
+                        },
+                        {
+                            path: "reservationpage", 
+                            element: <ReservationPageView/>,
+                        },
+                        
+                    ],
+                },
+                
             ],
+        },
+        {
+            path: "/paymentmethod",
+            element: <PaymentMainView/>,
+        },
+        {
+            path: "/paymentmethod/payonlinenow",
+            element: <PaymentSectionView/>,
         },
     ]);
 
