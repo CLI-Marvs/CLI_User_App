@@ -6,7 +6,6 @@ import "./layout/css/style.css";
 import Home from "./layout/Home";
 import Sidebar from "./layout/mainComponent/Sidebar";
 import Navbar from "./layout/mainComponent/Navbar";
-import InquiryManagementLayout from "./views/layout/InquiryManagementLayout";
 import InquiryList from "./layout/inquirypage/InquiryList";
 import InquiryListView from "./views/pages/raiseaconcernViews/InquiryListView";
 import InquiryThreadView from "./views/pages/raiseaconcernViews/InquiryThreadView";
@@ -90,22 +89,16 @@ const App = () => {
                     element: <NotificationView />,
                 },
                 {
-                    path: "inquirymanagement",
-                    element: <InquiryManagementLayout />,
-                    children: [
-                        {
-                            path: "inquirylist",
-                            element: <InquiryListView />,
-                        },
-                        {
-                            path: "thread/:id",
-                            element: <InquiryThreadView />,
-                        },
-                        {
-                            path: "report",
-                            element: <ReportViews />,
-                        },
-                    ],
+                    path: "inquirymanagement/inquirylist",
+                    element: <InquiryListView />,
+                },
+                {
+                    path: "inquirymanagement/thread/:id",
+                    element: <InquiryThreadView />,
+                },
+                {
+                    path: "inquirymanagement/report",
+                    element: <ReportViews />,
                 },
                 {
                     path: "propertyandpricing",
