@@ -369,7 +369,7 @@ const InquiryThread = () => {
                             </div>
                         )}
                     </div>
-                    <div className="p-[16px] shrink-0 bg-white rounded-lg flex flex-col min-h-full">
+                    <div className="p-[16px] shrink-0 bg-white rounded-lg flex flex-col flex-grow min-h-screen">
                         {" "}
                         {/* boxdevref */}
                         <div className="flex items-center gap-[9px] px-[20px]">
@@ -399,7 +399,7 @@ const InquiryThread = () => {
                                 </button>
                             </div>
                         </div>
-                        <div className="flex-grow overflow-y-auto">
+                        <div className="flex-grow overflow-y-auto max-h-[calc(100vh-400px)]">
                             <div className="">
                                 {conversationMessages.length > 0 &&
                                     conversationMessages.map((item, index) =>
@@ -577,7 +577,7 @@ const InquiryThread = () => {
                                 </div>
                             </div>
                         </div>
-                        <div className="text-[11px] text-custom-bluegreen ">
+                        <div className="text-[11px] text-custom-bluegreen">
                             <p>Note: This message will be send to <span className="font-semibold">JOSHUA DOE</span>. Please use the comment section for CLI internal communication.</p>
                         </div>
                     </div>

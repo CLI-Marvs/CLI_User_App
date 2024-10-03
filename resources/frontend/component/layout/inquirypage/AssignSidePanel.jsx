@@ -14,16 +14,20 @@ const AssignSidePanel = ({ ticketId }) => {
     const [search, setSearch] = useState('');
     const [selectedOptions, setSelectedOptions] = useState([]);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const [selectedAssignees, setSelectedAssignees] = useState([]);
 
     const modalRef = useRef(null);
     const dropdownRef = useRef(null);
 
     const options = [
         { name: 'Jane Doe', email: 'jane.doe@example.com', position: 'Customer Relations' },
-        { name: 'John Smith', email: 'john.smith@example.com', position: 'Sales Manager' },
-        { name: 'Alice Johnson', email: 'alice.johnson@example.com', position: 'Marketing Specialist' },
-        { name: 'Bob Williams', email: 'bob.williams@example.com', position: 'HR Manager' },
-        { name: 'Charlie Brown', email: 'charlie.brown@example.com', position: 'Product Manager' },
+        { name: 'John Dulosa', email: 'johnh@example.com', position: 'Sales Manager' },
+        { name: 'Alice Gou', email: 'alice@example.com', position: 'Marketing Specialist' },
+        { name: 'PG Bornea', email: 'wassusbefore@example.com', position: 'IU/UX Specialist' },
+        { name: 'willson on the bus', email: 'roundnround@example.com', position: 'Product Manager' },
+        { name: 'shomoy rodfil', email: 'fullstack@example.com', position: 'Fullstack Programmer' },
+        { name: 'jeahael Suhot', email: 'backend@example.com', position: 'Backend Programmer' },
+        { name: 'Kent Armelia', email: 'frontsend@example.com', position: 'frontend Programmer' },
     ];
 
     const dataConcern =
@@ -91,17 +95,24 @@ const AssignSidePanel = ({ ticketId }) => {
         if (!search) return text;
         const parts = text.split(new RegExp(`(${search})`, 'gi'));
         return (
-          <span>
-            {parts.map((part, index) =>
-              part.toLowerCase() === search.toLowerCase() ? (
-                <span key={index} className="font-semibold">{part}</span>
-              ) : (
-                part
-              )
-            )}
-          </span>
+            <span>
+                {parts.map((part, index) =>
+                    part.toLowerCase() === search.toLowerCase() ? (
+                        <span key={index} className="font-semibold">{part}</span>
+                    ) : (
+                        part
+                    )
+                )}
+            </span>
         );
-      };
+    };
+
+
+    const handleAssign = () => {
+        setIsDropdownOpen(false); // Close the dropdown
+        setSelectedAssignees(selectedOptions); // Save the selected options
+    };
+
 
     React.useEffect(() => {
         document.addEventListener('mousedown', handleClickOutside);
@@ -119,54 +130,54 @@ const AssignSidePanel = ({ ticketId }) => {
         <>
             <div className="mb-3 mt-[4px]">
                 <div className="relative w-[623px]" ref={dropdownRef}>
-                <div className="relative">
-                    <input
-                        type="text"
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                        placeholder="Assign to..."
-                        className={` 
+                    <div className="relative">
+                        <input
+                            type="text"
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            placeholder="Assign to..."
+                            className={` 
                             ${isDropdownOpen ? 'rounded-[10px] rounded-b-none' : 'rounded-[10px]'}
                         
                                  h-[47px] px-[20px] pr-[40px] rounded-[10px] bg-custom-grayF1 w-full outline-none`}
-                        onFocus={() => setIsDropdownOpen(true)}
-                    />
+                            onFocus={() => setIsDropdownOpen(true)}
+                        />
 
-                    {/* Absolute button inside the input, aligned to the right */}
-                    {isDropdownOpen && (
-                        <button
-                            onClick={() => setIsDropdownOpen(false)} // Close the dropdown when clicked
-                            className="absolute right-[10px] top-1/2 transform -translate-y-1/2 gradient-btn5 text-white rounded-[10px] w-[80px] h-[31px] flex items-center justify-center"
-                        >
-                           Assign
-                        </button>
-                    )}
-                </div>
+                        {/* Absolute button inside the input, aligned to the right */}
+                        {isDropdownOpen && (
+                            <button
+                                onClick={handleAssign} // Close the dropdown when clicked
+                                className="absolute right-[10px] top-1/2 transform -translate-y-1/2 gradient-btn5 text-white rounded-[10px] w-[80px] h-[31px] flex items-center justify-center"
+                            >
+                                Assign
+                            </button>
+                        )}
+                    </div>
 
                     {/* Conditionally render the list when dropdown is open */}
                     {isDropdownOpen && filteredOptions.length > 0 && (
                         <>
-                        <div className="absolute w-[623px] min-h-[550px] space-y-2 border-t-0 border-gray-300 p-2 py-[20px] shadow-custom4 rounded-t-non rounded-[10px] bg-custom-grayF1">
-                            <div className="mb-4 flex flex-wrap gap-2 h-[26px]">
-                                        {selectedOptions.map(option => (
-                                            <div
-                                                key={option.name}
-                                                className="flex justify-between items-center text-xs bg-custom-solidgreen text-white min-w-[99px] h-[26px] rounded-full pr-[10px] pl-[10px]"
+                            <div className="absolute w-[623px] min-h-[550px] space-y-2 border-t-0 border-gray-300 p-2 py-[20px] shadow-custom4 rounded-t-non rounded-[10px] bg-custom-grayF1 z-20">
+                                <div className="mb-4 flex flex-wrap gap-2 min-h-[26px]">
+                                    {selectedOptions.map(option => (
+                                        <div
+                                            key={option.name}
+                                            className="flex justify-between items-center text-xs bg-custom-solidgreen text-white min-w-[99px] h-[26px] rounded-full pr-[10px] pl-[10px]"
+                                        >
+                                            <span>{option.name}</span>
+                                            <button
+                                                onClick={() => removeTag(option)}
+                                                className="ml-2 pb-[2px] border border-white text-[15px] text-white bg-custom-solidgreen rounded-full h-5 w-5 flex items-center justify-center"
                                             >
-                                                <span>{option.name}</span>
-                                                <button
-                                                    onClick={() => removeTag(option)}
-                                                    className="ml-2 pb-[2px] border border-white text-[15px] text-white bg-custom-solidgreen rounded-full h-5 w-5 flex items-center justify-center"
-                                                >
-                                                    &times;
-                                                </button>
-                                            </div>
-                                        ))}
-                                    </div>
+                                                &times;
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
                                 <ul className="flex flex-col space-y-2 max-h-[550px] overflow-auto">
                                     {/* Selected options displayed as tags */}
-                                
-                                    
+
+
                                     {/* Render filtered options */}
                                     {filteredOptions.map((option) => (
                                         <li key={option.name} className="flex h-[110px] w-full py-[20px] px-[30px] gap-[18px] bg-custom-lightestgreen rounded-[10px]">
@@ -178,7 +189,7 @@ const AssignSidePanel = ({ ticketId }) => {
                                                     className="form-checkbox custom-checkbox accent-custom-lightgreen text-white"
                                                 />
                                             </div>
-                                            
+
                                             <div>
                                                 <span>{highlightText(option.name)}</span><br />
                                                 <span className="text-sm">{highlightText(option.email)}</span><br />
@@ -188,14 +199,51 @@ const AssignSidePanel = ({ ticketId }) => {
                                     ))}
                                 </ul>
                             </div>
-                            
+
                         </>
                     )}
                 </div>
             </div>
             <div className=" w-full bg-white rounded-[10px] py-[16px] px-[20px]">
-                <div className="flex w-full justify-start items-center ">
-                   <p className="text-sm text-custom-bluegreen font-semibold">Assignee</p>
+                <div className="flex w-full justify-start items-center overflow">
+                    <p className="text-sm text-custom-bluegreen font-semibold">Assignee</p>
+                    <div className="ml-2 flex flex-wrap gap-2">
+                        {selectedAssignees.length > 0 ? (
+                            <>
+                                {selectedAssignees.slice(0, 4).map((assignee) => (
+                                    <span
+                                        key={assignee.name}
+                                        className="bg-custom-lightgreen text-white rounded-full px-3 py-1 text-xs"
+                                    >
+                                        {assignee.name}
+                                    </span>
+                                ))}
+
+                                {selectedAssignees.length > 4 && (
+                                    <div className="relative group">
+                                        <span
+                                            className="bg-custom-lightgreen text-white rounded-full px-3 py-1 text-xs cursor-pointer"
+                                        >
+                                            +{selectedAssignees.length - 4}
+                                        </span>
+
+                                        {/* Tooltip for remaining assignees */}
+                                        <div className="absolute left-0 mt-2 min-w-[120px] hidden group-hover:flex flex-col bg-white text-black p-2 rounded shadow-lg z-10">
+                                            <div className="flex flex-col gap-1">
+                                                {selectedAssignees.slice(4).map((assignee) => (
+                                                    <span key={assignee.name} className="bg-custom-lightgreen text-white rounded-full px-3 py-1 text-xs">
+                                                        {assignee.name}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+                            </>
+                        ) : (
+                            <span className="text-sm text-gray-500">No assignee selected</span>
+                        )}
+                    </div>
                 </div>
                 <div className="flex h-[49px] w-full gradient-btn2 p-[2px] rounded-[10px] items-center justify-center my-[16px]">
                     <div className="w-full h-full flex items-center bg-white rounded-[8px] p-[10px]">
