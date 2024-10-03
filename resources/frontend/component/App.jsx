@@ -34,7 +34,7 @@ const App = () => {
                 <Navbar />
                 <div className="flex flex-1 overflow-hidden">
                     <Sidebar />
-                    <div className="flex-1 overflow-y-auto bg-custom-grayFA">
+                    <div className="flex-1 overflow-y-auto bg-custom-grayFA ">
                         <Outlet />
                     </div>
                 </div>

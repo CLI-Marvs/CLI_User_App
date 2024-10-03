@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import { IoIosArrowDown } from "react-icons/io";
 import {
   Card,
@@ -15,6 +15,7 @@ import {
 import { Link, useLocation } from 'react-router-dom';
 import apiService from '../../servicesApi/apiService';
 import { useStateContext } from '../../../context/contextprovider';
+import InquiryFormModal from '../inquirypage/InquiryFormModal';
 const Sidebar = () => {
   const { unreadCount, getCount } = useStateContext();
   const [activeItem, setActiveItem] = useState(null);
@@ -27,6 +28,14 @@ const Sidebar = () => {
 
   const handleItemClick = (item) => {
     setActiveItem(item);
+  };
+
+  const modalRef = useRef(null);
+
+  const handleOpenModal = () => {
+      if (modalRef.current) {
+          modalRef.current.showModal();
+      }
   };
 
   useEffect(() => {
@@ -73,7 +82,7 @@ const Sidebar = () => {
             <div className="px-[12px] py-[20px] w-[185px] h-[162px] flex flex-col gap-[5px] bg-custom-lightestgreen border-t rounded-t-none rounded-b-[10px] border-custom-solidgreen">
               
       
-                <button className='h-[38px] w-[161px] gradient-btn5 text-white mb-[15px] text-xs rounded-[10px]'> + Add Inquiry</button>
+                <button onClick={handleOpenModal} className='h-[38px] w-[161px] gradient-btn5 text-white mb-[15px] text-xs rounded-[10px]'> + Add Inquiry</button>
           
               <Link to="/inquirymanagement/inquirylist">
                 <ListItem
@@ -186,6 +195,9 @@ const Sidebar = () => {
           </ListItem> */}
         </List>
       </Card>
+      <div>
+        <InquiryFormModal modalRef={modalRef}/>
+      </div>
     </>
   )
 }

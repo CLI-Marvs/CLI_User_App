@@ -21,54 +21,54 @@ const AssignDetails = ({ logMessages, ticketId }) => {
             }
         }
     };
-    useEffect(() => {
-        let channel; 
+    // useEffect(() => {
+    //     let channel; 
     
-        if (ticketId) {
-            channel = window.Echo.channel(`concerns.${ticketId}`);
-            console.log("Channel created:", channel);
+    //     if (ticketId) {
+    //         channel = window.Echo.channel(`concerns.${ticketId}`);
+    //         console.log("Channel created:", channel);
     
-            channel.listen("SampleEvent", (event) => {
-                console.log("event", event);
-                setConcernMessages((prevMessages) => {
-                    if (prevMessages.find((msg) => msg.id === event.data.message.id)) {
-                        return prevMessages;
-                    }
-                  /*   return [
-                        ...prevMessages,
-                        {
-                            id: event.data.message.id,
-                            message: event.data.message.message,
-                            sender_id: event.data.message.sender_id,
-                            firstname: event.data.firstname,
-                            lastname: event.data.lastname,
-                            concernId: event.data.concernId,
-                            created_at: event.data.message.created_at,
-                        },
-                    ]; */
+    //         channel.listen("SampleEvent", (event) => {
+    //             console.log("event", event);
+    //             setConcernMessages((prevMessages) => {
+    //                 if (prevMessages.find((msg) => msg.id === event.data.message.id)) {
+    //                     return prevMessages;
+    //                 }
+    //               /*   return [
+    //                     ...prevMessages,
+    //                     {
+    //                         id: event.data.message.id,
+    //                         message: event.data.message.message,
+    //                         sender_id: event.data.message.sender_id,
+    //                         firstname: event.data.firstname,
+    //                         lastname: event.data.lastname,
+    //                         concernId: event.data.concernId,
+    //                         created_at: event.data.message.created_at,
+    //                     },
+    //                 ]; */
 
-                    const newMessage = {
-                        id: event.data.message.id,
-                        message: event.data.message.message,
-                        sender_id: event.data.message.sender_id,
-                        firstname: event.data.firstname,
-                        lastname: event.data.lastname,
-                        ticketId: event.data.ticketId,
-                        created_at: event.data.message.created_at,
-                    };
+    //                 const newMessage = {
+    //                     id: event.data.message.id,
+    //                     message: event.data.message.message,
+    //                     sender_id: event.data.message.sender_id,
+    //                     firstname: event.data.firstname,
+    //                     lastname: event.data.lastname,
+    //                     ticketId: event.data.ticketId,
+    //                     created_at: event.data.message.created_at,
+    //                 };
 
-                    return [...prevMessages, newMessage].sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
-                });
-            });
-        }
+    //                 return [...prevMessages, newMessage].sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+    //             });
+    //         });
+    //     }
     
-        return () => {
-            if (channel) {
-                channel.stopListening("SampleEvent"); 
-                window.Echo.leaveChannel(`concerns.${ticketId}`); 
-            }
-        };
-    }, [ticketId]);
+    //     return () => {
+    //         if (channel) {
+    //             channel.stopListening("SampleEvent"); 
+    //             window.Echo.leaveChannel(`concerns.${ticketId}`); 
+    //         }
+    //     };
+    // }, [ticketId]);
     return (
         <>
             <div className="flex h-[49px] w-full gradient-btn2 p-[2px] rounded-[10px] items-center justify-center my-[16px]">
@@ -83,13 +83,17 @@ const AssignDetails = ({ logMessages, ticketId }) => {
 
             <div className="w-full p-[10px] mt-[12px] flex flex-col gap-[10px]">
                 <div className="flex flex-col gap-[10px]">
-                    <div className="flex gap-1 text-sm montserrat-medium">
-                        <p className="montserrat-medium text-sm">
-                            September 10, 2024
-                        </p>
-                        <span className="text-custom-gray81">09:15 AM</span>
-                        <span>|</span>
-                        <p className="text-custom-bluegreen">Jannet Doe</p>
+                    <div className="flex gap-[10px] text-sm montserrat-medium items-center">
+                        <div className="flex gap-1 items-center">
+                            <span className="flex mb-1 text-[25px] text-custom-gray81">⚬</span>
+                            <p className="montserrat-medium text-sm text-custom-gray81">
+                                September 10, 2024
+                            </p>
+                            <span className="montserrat-medium text-custom-blue">09:15 AM</span>
+                            <span className="text-custom-bluegreen">|</span>
+                            <p className="montserrat-bold text-custom-bluegreen">Jannet Doe</p>
+                        </div>
+                        <div className="border-b flex-grow"></div>
                     </div>
                     <div className="w-full min-h-[39px] border-[2px] border-custom-grayF1 p-[10px] rounded-[10px]">
                         <p className="text-sm">
@@ -99,9 +103,17 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                     </div>
                 </div>
                 <div className="flex flex-col gap-[10px]">
-                    <div className="flex gap-1 text-sm montserrat-medium">
-                        <span className="text-custom-gray81">09:00 AM</span>
-                        <p className="text-custom-bluegreen">Jannet Doe</p>
+                    <div className="flex gap-[10px] text-sm montserrat-medium items-center">
+                        <div className="flex gap-1 items-center">
+                            <span className="flex mb-1 text-[25px] text-custom-gray81">⚬</span>
+                            <p className="montserrat-medium text-sm text-custom-gray81">
+                                September 10, 2024
+                            </p>
+                            <span className="montserrat-medium text-custom-blue">09:00 AM</span>
+                            <span className="text-custom-bluegreen">|</span>
+                            <p className="montserrat-bold text-custom-bluegreen">Jannet Doe</p>
+                        </div>
+                        <div className="border-b flex-grow"></div>
                     </div>
                     <div className="w-full">
                         <p className="montserrat-medium text-sm text-custom-solidgreen">
@@ -110,14 +122,208 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                     </div>
                 </div>
                 <div className="flex flex-col text-sm montserrat-medium">
-                    <div className="flex gap-1">
-                        <span className="text-custom-gray81">8:00 AM</span>
-                        <p className="text-custom-solidgreen">
-                            Follow up reply
-                        </p>
-                    </div>
+                    <div className="flex gap-1 items-center">
+                            <span className="flex mb-1 text-[25px] text-custom-gray81">⚬</span>
+                            <p className="montserrat-medium text-sm text-custom-gray81">
+                                September 6, 2024
+                            </p>
+                            <span className="montserrat-medium text-custom-blue">10:00 AM</span>
+                            <span className="text-custom-lightgreen">|</span>
+                            <p className="montserrat-medium text-sm text-custom-lightgreen">Follow up reply</p>
+                        </div>
                     <div>
                         <p className="text-custom-solidgreen">by Jack Doe</p>
+                    </div>
+                    <div>
+                        <p className="text-custom-solidgreen">
+                            Customer Relations Services
+                        </p>
+                    </div>
+                </div>
+                <div className="flex flex-col text-sm montserrat-medium">
+                    <div className="flex gap-1 items-center">
+                            <span className="flex mb-1 text-[25px] text-custom-gray81">⚬</span>
+                            <p className="montserrat-medium text-sm text-custom-gray81">
+                                September 6, 2024
+                            </p>
+                            <span className="montserrat-medium text-custom-blue">08:00 AM</span>
+                            <span className="text-custom-lightgreen">|</span>
+                            <p className="montserrat-medium text-sm text-custom-lightgreen">CLI Reply</p>
+                        </div>
+                    <div>
+                        <p className="text-custom-solidgreen">by Jannet Doe</p>
+                    </div>
+                    <div>
+                        <p className="text-custom-solidgreen">
+                            Customer Relations Services
+                        </p>
+                    </div>
+                </div>
+                <div className="flex flex-col text-sm montserrat-medium">
+                    <div className="flex gap-1 items-center">
+                            <span className="flex mb-1 text-[25px] text-custom-gray81">⚬</span>
+                            <p className="montserrat-medium text-sm text-custom-gray81">
+                                September 6, 2024
+                            </p>
+                            <span className="montserrat-medium text-custom-blue">08:00 AM</span>
+                            <span className="text-custom-lightgreen">|</span>
+                            <p className="montserrat-medium text-sm text-custom-lightgreen">CLI Reply</p>
+                        </div>
+                    <div>
+                        <p className="text-custom-solidgreen">by Jannet Doe</p>
+                    </div>
+                    <div>
+                        <p className="text-custom-solidgreen">
+                            Customer Relations Services
+                        </p>
+                    </div>
+                </div>
+                <div className="flex flex-col text-sm montserrat-medium">
+                    <div className="flex gap-1 items-center">
+                            <span className="flex mb-1 text-[25px] text-custom-gray81">⚬</span>
+                            <p className="montserrat-medium text-sm text-custom-gray81">
+                                September 6, 2024
+                            </p>
+                            <span className="montserrat-medium text-custom-blue">08:00 AM</span>
+                            <span className="text-custom-lightgreen">|</span>
+                            <p className="montserrat-medium text-sm text-custom-lightgreen">CLI Reply</p>
+                        </div>
+                    <div>
+                        <p className="text-custom-solidgreen">by Jannet Doe</p>
+                    </div>
+                    <div>
+                        <p className="text-custom-solidgreen">
+                            Customer Relations Services
+                        </p>
+                    </div>
+                </div>
+                <div className="flex flex-col text-sm montserrat-medium">
+                    <div className="flex gap-1 items-center">
+                            <span className="flex mb-1 text-[25px] text-custom-gray81">⚬</span>
+                            <p className="montserrat-medium text-sm text-custom-gray81">
+                                September 6, 2024
+                            </p>
+                            <span className="montserrat-medium text-custom-blue">08:00 AM</span>
+                            <span className="text-custom-lightgreen">|</span>
+                            <p className="montserrat-medium text-sm text-custom-lightgreen">CLI Reply</p>
+                        </div>
+                    <div>
+                        <p className="text-custom-solidgreen">by Jannet Doe</p>
+                    </div>
+                    <div>
+                        <p className="text-custom-solidgreen">
+                            Customer Relations Services
+                        </p>
+                    </div>
+                </div>
+
+                <div className="flex flex-col text-sm montserrat-medium">
+                    <div className="flex gap-1 items-center">
+                            <span className="flex mb-1 text-[25px] text-custom-gray81">⚬</span>
+                            <p className="montserrat-medium text-sm text-custom-gray81">
+                                September 6, 2024
+                            </p>
+                            <span className="montserrat-medium text-custom-blue">08:00 AM</span>
+                            <span className="text-custom-lightgreen">|</span>
+                            <p className="montserrat-medium text-sm text-custom-lightgreen">CLI Reply</p>
+                        </div>
+                    <div>
+                        <p className="text-custom-solidgreen">by Jannet Doe</p>
+                    </div>
+                    <div>
+                        <p className="text-custom-solidgreen">
+                            Customer Relations Services
+                        </p>
+                    </div>
+                </div>
+                <div className="flex flex-col text-sm montserrat-medium">
+                    <div className="flex gap-1 items-center">
+                            <span className="flex mb-1 text-[25px] text-custom-gray81">⚬</span>
+                            <p className="montserrat-medium text-sm text-custom-gray81">
+                                September 6, 2024
+                            </p>
+                            <span className="montserrat-medium text-custom-blue">08:00 AM</span>
+                            <span className="text-custom-lightgreen">|</span>
+                            <p className="montserrat-medium text-sm text-custom-lightgreen">CLI Reply</p>
+                        </div>
+                    <div>
+                        <p className="text-custom-solidgreen">by Jannet Doe</p>
+                    </div>
+                    <div>
+                        <p className="text-custom-solidgreen">
+                            Customer Relations Services
+                        </p>
+                    </div>
+                </div>
+                <div className="flex flex-col text-sm montserrat-medium">
+                    <div className="flex gap-1 items-center">
+                            <span className="flex mb-1 text-[25px] text-custom-gray81">⚬</span>
+                            <p className="montserrat-medium text-sm text-custom-gray81">
+                                September 6, 2024
+                            </p>
+                            <span className="montserrat-medium text-custom-blue">08:00 AM</span>
+                            <span className="text-custom-lightgreen">|</span>
+                            <p className="montserrat-medium text-sm text-custom-lightgreen">CLI Reply</p>
+                        </div>
+                    <div>
+                        <p className="text-custom-solidgreen">by Jannet Doe</p>
+                    </div>
+                    <div>
+                        <p className="text-custom-solidgreen">
+                            Customer Relations Services
+                        </p>
+                    </div>
+                </div>
+                <div className="flex flex-col text-sm montserrat-medium">
+                    <div className="flex gap-1 items-center">
+                            <span className="flex mb-1 text-[25px] text-custom-gray81">⚬</span>
+                            <p className="montserrat-medium text-sm text-custom-gray81">
+                                September 6, 2024
+                            </p>
+                            <span className="montserrat-medium text-custom-blue">08:00 AM</span>
+                            <span className="text-custom-lightgreen">|</span>
+                            <p className="montserrat-medium text-sm text-custom-lightgreen">CLI Reply</p>
+                        </div>
+                    <div>
+                        <p className="text-custom-solidgreen">by Jannet Doe</p>
+                    </div>
+                    <div>
+                        <p className="text-custom-solidgreen">
+                            Customer Relations Services
+                        </p>
+                    </div>
+                </div>
+                <div className="flex flex-col text-sm montserrat-medium">
+                    <div className="flex gap-1 items-center">
+                            <span className="flex mb-1 text-[25px] text-custom-gray81">⚬</span>
+                            <p className="montserrat-medium text-sm text-custom-gray81">
+                                September 6, 2024
+                            </p>
+                            <span className="montserrat-medium text-custom-blue">08:00 AM</span>
+                            <span className="text-custom-lightgreen">|</span>
+                            <p className="montserrat-medium text-sm text-custom-lightgreen">CLI Reply</p>
+                        </div>
+                    <div>
+                        <p className="text-custom-solidgreen">by Jannet Doe</p>
+                    </div>
+                    <div>
+                        <p className="text-custom-solidgreen">
+                            Customer Relations Services
+                        </p>
+                    </div>
+                </div>
+                <div className="flex flex-col text-sm montserrat-medium">
+                    <div className="flex gap-1 items-center">
+                            <span className="flex mb-1 text-[25px] text-custom-gray81">⚬</span>
+                            <p className="montserrat-medium text-sm text-custom-gray81">
+                                September 6, 2024
+                            </p>
+                            <span className="montserrat-medium text-custom-blue">08:00 AM</span>
+                            <span className="text-custom-lightgreen">|</span>
+                            <p className="montserrat-medium text-sm text-custom-lightgreen">CLI Reply</p>
+                        </div>
+                    <div>
+                        <p className="text-custom-solidgreen">by Jannet Doe</p>
                     </div>
                     <div>
                         <p className="text-custom-solidgreen">

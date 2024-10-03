@@ -17,6 +17,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import DateLogo from "../../../../../public/Images/Date_range.svg";
 import CircularProgress from "@mui/material/CircularProgress";
+import AddInfoModal from "./AddInfoModal";
 
 const InquiryThread = () => {
     const [attachedFiles, setAttachedFiles] = useState([]);
@@ -197,7 +198,7 @@ const InquiryThread = () => {
 
     return (
         <>
-            <div className="flex h-screen bg-custom-grayFA overflow-x-auto overflow-y-hidden">
+            <div className="flex h-full bg-custom-grayFA overflow-x-auto">
                 <div className="bg-custom-grayFA w-[601px] px-[20px] pb-[103px]">
                     {" "}
                     {/* boxdevref */}
@@ -394,7 +395,7 @@ const InquiryThread = () => {
                                     </div>
                                 )} */}
                             <div className="flex justify-end shrink-0">
-                                <button className="w-[85px] h-[29px] rounded-[10px] gradient-btn5 montserrat-medium text-sm text-white hover:shadow-custom4">
+                                <button onClick={ handleOpenModal} className="w-[85px] h-[29px] rounded-[10px] gradient-btn5 montserrat-medium text-sm text-white hover:shadow-custom4">
                                     Add Info
                                 </button>
                             </div>
@@ -582,9 +583,9 @@ const InquiryThread = () => {
                         </div>
                     </div>
                 </div>
-                <div className="flex w-[623px] bg-custom-grayFA gap-3 h-full pb-24">
+                <div className="flex w-[623px] bg-custom-grayFA gap-3 pb-24">
 
-                    <div className=" w-[623px] ">
+                    <div className="w-[623px]">
                         {" "}
                         {/* boxref */}
                         <AssignSidePanel ticketId={ticketId} />
@@ -592,11 +593,7 @@ const InquiryThread = () => {
                 </div>
             </div>
             <div>
-                <ResolveModal
-                    modalRef={modalRef}
-                    ticketId={ticketId}
-                    dataRef={dataConcern}
-                />
+                <AddInfoModal modalRef={modalRef}/>
             </div>
         </>
     );

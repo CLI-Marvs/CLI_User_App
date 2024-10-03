@@ -205,7 +205,7 @@ const AssignSidePanel = ({ ticketId }) => {
                 </div>
             </div>
             <div className=" w-full bg-white rounded-[10px] py-[16px] px-[20px]">
-                <div className="flex w-full justify-start items-center overflow">
+                <div className="flex w-full justify-start items-center">
                     <p className="text-sm text-custom-bluegreen font-semibold">Assignee</p>
                     <div className="ml-2 flex flex-wrap gap-2">
                         {selectedAssignees.length > 0 ? (
@@ -247,10 +247,10 @@ const AssignSidePanel = ({ ticketId }) => {
                 </div>
                
                 <div className="h-full flex flex-col">
-                    <div className=" h-[400px] overflow-y-auto">
+                    <div className=" min-h-[400px]">
                         <AssignDetails logMessages={logsMessages} ticketId={ticketId} />
                     </div>
-                    <div className="border border-t-1 border-custom-lightestgreen flex-shrink-0"></div>
+                    <div className="border border-t-1 border-custom-lightestgreen flex-shrink-0 mb-[160px] mt-[17px]"></div>
                 </div>
             </div>
             <div>
