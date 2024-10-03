@@ -245,18 +245,10 @@ const AssignSidePanel = ({ ticketId }) => {
                         )}
                     </div>
                 </div>
-                <div className="flex h-[49px] w-full gradient-btn2 p-[2px] rounded-[10px] items-center justify-center my-[16px]">
-                    <div className="w-full h-full flex items-center bg-white rounded-[8px] p-[10px]">
-                        <input type="text" className="w-full outline-none" />
-                        <button className="w-[76px] h-[28px] gradient-btn2 rounded-[10px] text-xs text-white">
-                            Comment
-                        </button>
-                    </div>
-                </div>
-                <div className="border border-t-1 border-custom-lightestgreen"></div>
+               
                 <div className="h-full flex flex-col">
                     <div className=" h-[400px] overflow-y-auto">
-                        <AssignDetails logMessages={logsMessages} />
+                        <AssignDetails logMessages={logsMessages} ticketId={ticketId} />
                     </div>
                     <div className="border border-t-1 border-custom-lightestgreen flex-shrink-0"></div>
                 </div>

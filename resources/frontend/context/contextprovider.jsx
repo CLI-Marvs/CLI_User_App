@@ -56,7 +56,6 @@ export const ContextProvider = ({ children }) => {
     const [towerPhaseId, setTowerPhaseId] = useState(0);
     const [isLoading, setIsLoading] = useState(false);
     const [concernMessages, setConcernMessages] = useState([]);
-    const [concernId, setConcernId] = useState(null);
     useEffect(() => {
         if (user && user.department && !isDepartmentInitialized) {
             setDepartment(user.department === "CRS" ? "All" : user.department);
@@ -194,10 +193,12 @@ export const ContextProvider = ({ children }) => {
     };
 
     const getConcernMessages = async () => {
-        if (concernId) {
+        if (ticketId) {
             try {
+                const encodedTicketId = encodeURIComponent(ticketId);
+
                 const response = await apiService.get(
-                    `get-concern-messages?concernId=${parseInt(concernId)}`
+                    `get-concern-messages?ticketId=${encodedTicketId})}`
                 );
                 setConcernMessages(response.data);
             } catch (error) {
@@ -393,6 +394,8 @@ export const ContextProvider = ({ children }) => {
         if (ticketId) {
             getMessages(ticketId);
             getInquiryLogs(ticketId);
+            getConcernMessages();
+
         }
     }, [ticketId]);
 
@@ -406,9 +409,7 @@ export const ContextProvider = ({ children }) => {
         getSpecificInquiry();
     }, []);
 
-    useEffect(() => {
-        getConcernMessages();
-    }, [concernId]);
+   
 
     //* For Report Page
     useEffect(() => {
@@ -499,8 +500,6 @@ export const ContextProvider = ({ children }) => {
                 setPropertyFloors,
                 concernMessages,
                 setConcernMessages,
-                concernId,
-                setConcernId,
                 getConcernMessages 
             }}
         >

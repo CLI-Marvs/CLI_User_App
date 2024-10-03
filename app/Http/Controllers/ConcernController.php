@@ -1329,7 +1329,7 @@ class ConcernController extends Controller
         try {
             $conversation = new Conversations();
             $conversation->sender_id = $request->sender_id;
-            $conversation->concern_id = $request->concern_id;
+            $conversation->ticketId = $request->ticketId;
             $conversation->message = $request->message;
             $conversation->save();
 
@@ -1339,7 +1339,7 @@ class ConcernController extends Controller
                 'message' => $conversation,
                 'firstname' => $user ? $user->firstname : 'Unknown User',
                 'lastname' => $user ? $user->lastname : 'Unknown User',
-                'concernId' => $request->concern_id,
+                'ticketId' => $request->ticketId,
             ];
 
             SampleEvent::dispatch($data);

@@ -3,7 +3,7 @@ import { useStateContext } from "../../../context/contextprovider";
 import apiService from "../../servicesApi/apiService";
 import { useNavigate } from "react-router-dom";
 
-const AssignModal = ({ modalRef, employeeData, isAssign, concernId }) => {
+const AssignModal = ({ modalRef, employeeData, isAssign }) => {
 
     const { user, getInquiryLogs, getAllConcerns } = useStateContext();
     const [remarks, setRemarks] = useState("");
@@ -44,7 +44,6 @@ const AssignModal = ({ modalRef, employeeData, isAssign, concernId }) => {
                 assign_by: user?.firstname + " " + user?.lastname,
                 assign_by_department: user?.department,
                 remarks: remarks,
-                concernId: concernId
             });
             getInquiryLogs(employeeData.ticketId);
             getAllConcerns();
