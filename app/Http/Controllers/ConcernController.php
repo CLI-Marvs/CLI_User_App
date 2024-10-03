@@ -1068,8 +1068,7 @@ class ConcernController extends Controller
 
             $data = [
                 'firstname' => $request->firstname,
-             /*    'ticketId' => str_replace('#', '', $request->ticketId), */
-                'concernId' => $request->concernId,
+                'ticketId' => $request->ticketId,
             ];
             InquiryAssignedLogs::dispatch($data);
 

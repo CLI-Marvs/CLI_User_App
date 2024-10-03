@@ -7,14 +7,12 @@ use Illuminate\Support\Facades\Broadcast;
 }); */
 
 
-Broadcast::channel('concerns.{concernId}', function ($data) {
-    \Log::info('Event data in channel:', $data);
-
+Broadcast::channel('concerns.{ticketId}', function ($data) {
     return true;
 });
 
 
-Broadcast::channel('concernlogs.{concernId}', function ($data) {
+Broadcast::channel('concernlogs.{ticketId}', function ($data) {
     return true;
 });
 
