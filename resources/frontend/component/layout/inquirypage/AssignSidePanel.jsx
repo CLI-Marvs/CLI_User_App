@@ -217,14 +217,26 @@ const AssignSidePanel = ({ ticketId }) => {
                                 {selectedAssignees
                                     .slice(0, 4)
                                     .map((assignee) => (
-                                        <span
-                                            key={assignee.name}
-                                            className="bg-custom-lightgreen text-white rounded-full px-3 py-1 text-xs"
-                                        >
-                                            {assignee.name}
-                                        </span>
+                                        <>
+                                            <span
+                                                key={assignee.name}
+                                                className="bg-custom-lightgreen text-white rounded-full px-3 py-1 text-xs flex"
+                                            >
+                                                {assignee.name}
+                                                <button
+                                                    onClick={() =>
+                                                        removeTag(assignee)
+                                                    }
+                                                    className="ml-2 pb-[2px] border border-white text-[15px] text-white bg-custom-lightgreen rounded-full h-5 w-5 flex items-center justify-center"
+                                                >
+                                                    &times;
+                                                </button>
+                                            </span>
+                                           
+                                        </>
+                                       
                                     ))}
-
+                                            
                                 {selectedAssignees.length > 4 && (
                                     <div className="relative group">
                                         <span className="bg-custom-lightgreen text-white rounded-full px-3 py-1 text-xs cursor-pointer">

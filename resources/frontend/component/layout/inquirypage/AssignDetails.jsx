@@ -23,65 +23,65 @@ const AssignDetails = ({ logMessages, ticketId }) => {
             }
         }
     };
-    useEffect(() => {
-        let channel;
-        let newTicketId;
-        if (ticketId) {
-            newTicketId = ticketId.replace("#", "");
-            channel = window.Echo.channel(`concerns.${newTicketId}`);
-            console.log("Channel created:", channel);
+    // useEffect(() => {
+    //     let channel;
+    //     let newTicketId;
+    //     if (ticketId) {
+    //         newTicketId = ticketId.replace("#", "");
+    //         channel = window.Echo.channel(`concerns.${newTicketId}`);
+    //         console.log("Channel created:", channel);
 
-            channel.listen("ConcernMessages", (event) => {
-                console.log("event", event);
-                setConcernMessages((prevMessages) => {
-                    console.log("prevMessages", prevMessages);
+    //         channel.listen("ConcernMessages", (event) => {
+    //             console.log("event", event);
+    //             setConcernMessages((prevMessages) => {
+    //                 console.log("prevMessages", prevMessages);
 
-                    const messagesForTicket = prevMessages[ticketId] || [];
-                    if (
-                        messagesForTicket.find(
-                            (msg) => msg.id === event.data.message.id
-                        )
-                    ) {
-                        return prevMessages;
-                    }
-                    /*   return [
-                        ...prevMessages,
-                        {
-                            id: event.data.message.id,
-                            message: event.data.message.message,
-                            sender_id: event.data.message.sender_id,
-                            firstname: event.data.firstname,
-                            lastname: event.data.lastname,
-                            concernId: event.data.concernId,
-                            created_at: event.data.message.created_at,
-                        },
-                    ]; */
+    //                 const messagesForTicket = prevMessages[ticketId] || [];
+    //                 if (
+    //                     messagesForTicket.find(
+    //                         (msg) => msg.id === event.data.message.id
+    //                     )
+    //                 ) {
+    //                     return prevMessages;
+    //                 }
+    //                 /*   return [
+    //                     ...prevMessages,
+    //                     {
+    //                         id: event.data.message.id,
+    //                         message: event.data.message.message,
+    //                         sender_id: event.data.message.sender_id,
+    //                         firstname: event.data.firstname,
+    //                         lastname: event.data.lastname,
+    //                         concernId: event.data.concernId,
+    //                         created_at: event.data.message.created_at,
+    //                     },
+    //                 ]; */
 
-                    const newMessage = {
-                        id: event.data.message.id,
-                        message: event.data.message.message,
-                        sender_id: event.data.message.sender_id,
-                        firstname: event.data.firstname,
-                        lastname: event.data.lastname,
-                        ticketId: event.data.ticketId,
-                        created_at: event.data.message.created_at,
-                    };
+    //                 const newMessage = {
+    //                     id: event.data.message.id,
+    //                     message: event.data.message.message,
+    //                     sender_id: event.data.message.sender_id,
+    //                     firstname: event.data.firstname,
+    //                     lastname: event.data.lastname,
+    //                     ticketId: event.data.ticketId,
+    //                     created_at: event.data.message.created_at,
+    //                 };
 
-                    return {
-                        ...prevMessages,
-                        [ticketId]: [...messagesForTicket, newMessage],
-                    };
-                });
-            });
-        }
+    //                 return {
+    //                     ...prevMessages,
+    //                     [ticketId]: [...messagesForTicket, newMessage],
+    //                 };
+    //             });
+    //         });
+    //     }
 
-        return () => {
-            if (channel) {
-                channel.stopListening("ConcernMessages");
-                window.Echo.leaveChannel(`concerns.${newTicketId}`);
-            }
-        };
-    }, [ticketId]);
+    //     return () => {
+    //         if (channel) {
+    //             channel.stopListening("ConcernMessages");
+    //             window.Echo.leaveChannel(`concerns.${newTicketId}`);
+    //         }
+    //     };
+    // }, [ticketId]);
 
     const sortedConcernMessages = concernMessages[ticketId]
         ? concernMessages[ticketId].flat().sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
