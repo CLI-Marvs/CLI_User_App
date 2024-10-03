@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\ConcernMessages;
 use App\Events\InquiryAssignedLogs;
 use App\Events\SampleEvent;
 use App\Jobs\JobToPersonnelAssign;
@@ -1329,20 +1330,20 @@ class ConcernController extends Controller
         try {
             $conversation = new Conversations();
             $conversation->sender_id = $request->sender_id;
-            $conversation->ticketId = $request->ticketId;
+            $conversation->ticket_id = $request->ticketId;
             $conversation->message = $request->message;
             $conversation->save();
 
             $user = Employee::find($request->sender_id);
-
+            $newTicketId = str_replace('#', '', $request->ticketId);
             $data = [
                 'message' => $conversation,
                 'firstname' => $user ? $user->firstname : 'Unknown User',
                 'lastname' => $user ? $user->lastname : 'Unknown User',
-                'ticketId' => $request->ticketId,
+                'ticketId' => $newTicketId,
             ];
 
-            SampleEvent::dispatch($data);
+            ConcernMessages::dispatch($data);
 
             return response()->json('Successfully sent');
         } catch (\Exception $e) {
@@ -1352,10 +1353,9 @@ class ConcernController extends Controller
 
     public function retrieveConcernsMessages(Request $request)
     {
-        $concernId = $request->query('concernId');
-
+        $ticketId = $request->query('ticketId');
         try {
-            $conversations = Conversations::where('concern_id', $concernId)
+            $conversations = Conversations::where('ticket_id', $ticketId)
                 ->join('employee', 'employee.id', '=', 'conversations.sender_id')
                 ->select('conversations.*', 'employee.firstname', 'employee.lastname')
                 ->get();

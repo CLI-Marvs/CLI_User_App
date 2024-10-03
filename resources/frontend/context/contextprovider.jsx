@@ -193,14 +193,20 @@ export const ContextProvider = ({ children }) => {
     };
 
     const getConcernMessages = async () => {
+        console.log("ticketId", ticketId);
         if (ticketId) {
             try {
                 const encodedTicketId = encodeURIComponent(ticketId);
 
                 const response = await apiService.get(
-                    `get-concern-messages?ticketId=${encodedTicketId})}`
+                    `get-concern-messages?ticketId=${encodedTicketId}`
                 );
-                setConcernMessages(response.data);
+                const data = response.data;
+                setConcernMessages((prevMessages) => ({
+                    ...prevMessages,
+                    [ticketId]: data,
+                }));
+
             } catch (error) {
                 console.log("error retrieving", error);
             }

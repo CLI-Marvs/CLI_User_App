@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useStateContext } from "../../../context/contextprovider";
+import apiService from "../../servicesApi/apiService";
 
 const AssignDetails = ({ logMessages, ticketId }) => {
     const { user, getConcernMessages, setConcernMessages, concernMessages } = useStateContext();
@@ -21,31 +22,35 @@ const AssignDetails = ({ logMessages, ticketId }) => {
             }
         }
     };
-    // useEffect(() => {
-    //     let channel; 
+    useEffect(() => {
+        let channel; 
+        let newTicketId;
+        if (ticketId) {
+            newTicketId = ticketId.replace('#', '');
+            channel = window.Echo.channel(`concerns.${newTicketId}`);
+            console.log("Channel created:", channel);
     
-    //     if (ticketId) {
-    //         channel = window.Echo.channel(`concerns.${ticketId}`);
-    //         console.log("Channel created:", channel);
-    
-    //         channel.listen("SampleEvent", (event) => {
-    //             console.log("event", event);
-    //             setConcernMessages((prevMessages) => {
-    //                 if (prevMessages.find((msg) => msg.id === event.data.message.id)) {
-    //                     return prevMessages;
-    //                 }
-    //               /*   return [
-    //                     ...prevMessages,
-    //                     {
-    //                         id: event.data.message.id,
-    //                         message: event.data.message.message,
-    //                         sender_id: event.data.message.sender_id,
-    //                         firstname: event.data.firstname,
-    //                         lastname: event.data.lastname,
-    //                         concernId: event.data.concernId,
-    //                         created_at: event.data.message.created_at,
-    //                     },
-    //                 ]; */
+            channel.listen("ConcernMessages", (event) => {
+                console.log("event", event);
+                setConcernMessages((prevMessages) => {
+                    console.log("prevMessages", prevMessages);
+
+                    const messagesForTicket = prevMessages[ticketId] || [];
+                    if (messagesForTicket.find((msg) => msg.id === event.data.message.id)) {
+                        return prevMessages;
+                    }
+                  /*   return [
+                        ...prevMessages,
+                        {
+                            id: event.data.message.id,
+                            message: event.data.message.message,
+                            sender_id: event.data.message.sender_id,
+                            firstname: event.data.firstname,
+                            lastname: event.data.lastname,
+                            concernId: event.data.concernId,
+                            created_at: event.data.message.created_at,
+                        },
+                    ]; */
 
     //                 const newMessage = {
     //                     id: event.data.message.id,
@@ -57,24 +62,35 @@ const AssignDetails = ({ logMessages, ticketId }) => {
     //                     created_at: event.data.message.created_at,
     //                 };
 
-    //                 return [...prevMessages, newMessage].sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
-    //             });
-    //         });
-    //     }
+                    return {
+                        ...prevMessages,
+                        [ticketId]: [...messagesForTicket, newMessage].sort((a, b) => new Date(a.created_at) - new Date(b.created_at)),
+                    };
+                });
+            });
+        }
     
-    //     return () => {
-    //         if (channel) {
-    //             channel.stopListening("SampleEvent"); 
-    //             window.Echo.leaveChannel(`concerns.${ticketId}`); 
-    //         }
-    //     };
-    // }, [ticketId]);
+        return () => {
+            if (channel) {
+                channel.stopListening("ConcernMessages"); 
+                window.Echo.leaveChannel(`concerns.${newTicketId}`); 
+            }
+        };
+    }, [ticketId]);
+
     return (
         <>
+       {concernMessages[ticketId] && concernMessages[ticketId].length > 0 ? (
+            concernMessages[ticketId].map((item, index) => (
+                <div key={index}>{item.message}</div> 
+            ))
+        ) : (
+            <div>No messages available.</div> 
+        )}
             <div className="flex h-[49px] w-full gradient-btn2 p-[2px] rounded-[10px] items-center justify-center my-[16px]">
                 <div className="w-full h-full flex items-center bg-white rounded-[8px] p-[10px]">
-                    <input type="text" className="w-full outline-none" />
-                    <button className="w-[76px] h-[28px] gradient-btn2 rounded-[10px] text-xs text-white">
+                    <input type="text" className="w-full outline-none" onChange={(e) => setMessage(e.target.value)} value={message} />
+                    <button className="w-[76px] h-[28px] gradient-btn2 rounded-[10px] text-xs text-white" onClick={handleSendMessage}>
                         Comment
                     </button>
                 </div>
