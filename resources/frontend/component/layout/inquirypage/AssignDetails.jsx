@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { useStateContext } from "../../../context/contextprovider";
 import apiService from "../../servicesApi/apiService";
+import moment from "moment";
 
 const AssignDetails = ({ logMessages, ticketId }) => {
-    const { user, getConcernMessages, setConcernMessages, concernMessages } = useStateContext();
+    const { user, getConcernMessages, setConcernMessages, concernMessages } =
+        useStateContext();
     const [message, setMessage] = useState("");
     const handleSendMessage = async () => {
         if (message.trim()) {
@@ -16,81 +18,88 @@ const AssignDetails = ({ logMessages, ticketId }) => {
 
                 setMessage("");
                 getConcernMessages();
-
             } catch (error) {
                 console.error("Failed to send message:", error);
             }
         }
     };
-    // useEffect(() => {
-    //     let channel; 
-    //     let newTicketId;
-    //     if (ticketId) {
-    //         newTicketId = ticketId.replace('#', '');
-    //         channel = window.Echo.channel(`concerns.${newTicketId}`);
-    //         console.log("Channel created:", channel);
-    
-    //         channel.listen("ConcernMessages", (event) => {
-    //             console.log("event", event);
-    //             setConcernMessages((prevMessages) => {
-    //                 console.log("prevMessages", prevMessages);
+    useEffect(() => {
+        let channel;
+        let newTicketId;
+        if (ticketId) {
+            newTicketId = ticketId.replace("#", "");
+            channel = window.Echo.channel(`concerns.${newTicketId}`);
+            console.log("Channel created:", channel);
 
-    //                 const messagesForTicket = prevMessages[ticketId] || [];
-    //                 if (messagesForTicket.find((msg) => msg.id === event.data.message.id)) {
-    //                     return prevMessages;
-    //                 }
-    //               /*   return [
-    //                     ...prevMessages,
-    //                     {
-    //                         id: event.data.message.id,
-    //                         message: event.data.message.message,
-    //                         sender_id: event.data.message.sender_id,
-    //                         firstname: event.data.firstname,
-    //                         lastname: event.data.lastname,
-    //                         concernId: event.data.concernId,
-    //                         created_at: event.data.message.created_at,
-    //                     },
-    //                 ]; */
+            channel.listen("ConcernMessages", (event) => {
+                console.log("event", event);
+                setConcernMessages((prevMessages) => {
+                    console.log("prevMessages", prevMessages);
 
-    // //                 const newMessage = {
-    // //                     id: event.data.message.id,
-    // //                     message: event.data.message.message,
-    // //                     sender_id: event.data.message.sender_id,
-    // //                     firstname: event.data.firstname,
-    // //                     lastname: event.data.lastname,
-    // //                     ticketId: event.data.ticketId,
-    // //                     created_at: event.data.message.created_at,
-    // //                 };
+                    const messagesForTicket = prevMessages[ticketId] || [];
+                    if (
+                        messagesForTicket.find(
+                            (msg) => msg.id === event.data.message.id
+                        )
+                    ) {
+                        return prevMessages;
+                    }
+                    /*   return [
+                        ...prevMessages,
+                        {
+                            id: event.data.message.id,
+                            message: event.data.message.message,
+                            sender_id: event.data.message.sender_id,
+                            firstname: event.data.firstname,
+                            lastname: event.data.lastname,
+                            concernId: event.data.concernId,
+                            created_at: event.data.message.created_at,
+                        },
+                    ]; */
 
-    //                 return {
-    //                     ...prevMessages,
-    //                     [ticketId]: [...messagesForTicket, newMessage].sort((a, b) => new Date(a.created_at) - new Date(b.created_at)),
-    //                 };
-    //             });
-    //         });
-    //     }
-    
-    //     return () => {
-    //         if (channel) {
-    //             channel.stopListening("ConcernMessages"); 
-    //             window.Echo.leaveChannel(`concerns.${newTicketId}`); 
-    //         }
-    //     };
-    // }, [ticketId]);
+                    const newMessage = {
+                        id: event.data.message.id,
+                        message: event.data.message.message,
+                        sender_id: event.data.message.sender_id,
+                        firstname: event.data.firstname,
+                        lastname: event.data.lastname,
+                        ticketId: event.data.ticketId,
+                        created_at: event.data.message.created_at,
+                    };
 
+                    return {
+                        ...prevMessages,
+                        [ticketId]: [...messagesForTicket, newMessage],
+                    };
+                });
+            });
+        }
+
+        return () => {
+            if (channel) {
+                channel.stopListening("ConcernMessages");
+                window.Echo.leaveChannel(`concerns.${newTicketId}`);
+            }
+        };
+    }, [ticketId]);
+
+    const sortedConcernMessages = concernMessages[ticketId]
+        ? concernMessages[ticketId].flat().sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+        : [];
     return (
         <>
-       {concernMessages[ticketId] && concernMessages[ticketId].length > 0 ? (
-            concernMessages[ticketId].map((item, index) => (
-                <div key={index}>{item.message}</div> 
-            ))
-        ) : (
-            <div>No messages available.</div> 
-        )}
             <div className="flex h-[49px] w-full gradient-btn2 p-[2px] rounded-[10px] items-center justify-center my-[16px]">
                 <div className="w-full h-full flex items-center bg-white rounded-[8px] p-[10px]">
-                    <input type="text" className="w-full outline-none" onChange={(e) => setMessage(e.target.value)} value={message} />
-                    <button className="w-[76px] h-[28px] gradient-btn2 rounded-[10px] text-xs text-white" onClick={handleSendMessage}>
+                    <input
+                        type="text"
+                        className="w-full outline-none"
+                        onChange={(e) => setMessage(e.target.value)}
+                        value={message}
+                    />
+                    <button
+                        className="w-[76px] h-[28px] gradient-btn2 rounded-[10px] text-xs text-white"
+                        onClick={handleSendMessage}
+                    >
                         Comment
                     </button>
                 </div>
@@ -98,36 +107,65 @@ const AssignDetails = ({ logMessages, ticketId }) => {
             <div className="border border-t-1 border-custom-lightestgreen"></div>
 
             <div className="w-full p-[10px] mt-[12px] flex flex-col gap-[10px]">
+                {sortedConcernMessages && sortedConcernMessages.length > 0 ? (
+                    sortedConcernMessages.map((item, index) => {
+                        const formattedDate = moment(item.created_at).format(
+                            "MMMM D, YYYY"
+                        );
+                        const formattedTime = moment(item.created_at).format(
+                            "hh:mm A"
+                        ); 
+
+                        return (
+                            <div
+                                className="flex flex-col gap-[10px]"
+                                key={index}
+                            >
+                                <div className="flex gap-[10px] text-sm montserrat-medium items-center">
+                                    <div className="flex gap-1 items-center">
+                                        <span className="flex mb-1 text-[25px] text-custom-gray81">
+                                            ⚬
+                                        </span>
+                                        <p className="montserrat-medium text-sm text-custom-gray81">
+                                            {formattedDate}
+                                        </p>
+                                        <span className="montserrat-medium text-custom-blue">
+                                            {formattedTime}
+                                        </span>
+                                        <span className="text-custom-bluegreen">
+                                            |
+                                        </span>
+                                        <p className="montserrat-bold text-custom-bluegreen">
+                                            {item.firstname} {item.lastname}
+                                        </p>
+                                    </div>
+                                    <div className="border-b flex-grow"></div>
+                                </div>
+                                <div className="w-full min-h-[39px] border-[2px] border-custom-grayF1 p-[10px] rounded-[10px]">
+                                    <p className="text-sm">{item.message}</p>
+                                </div>
+                            </div>
+                        );
+                    })
+                ) : (
+                    <div></div>
+                )}
                 <div className="flex flex-col gap-[10px]">
                     <div className="flex gap-[10px] text-sm montserrat-medium items-center">
                         <div className="flex gap-1 items-center">
-                            <span className="flex mb-1 text-[25px] text-custom-gray81">⚬</span>
+                            <span className="flex mb-1 text-[25px] text-custom-gray81">
+                                ⚬
+                            </span>
                             <p className="montserrat-medium text-sm text-custom-gray81">
                                 September 10, 2024
                             </p>
-                            <span className="montserrat-medium text-custom-blue">09:15 AM</span>
+                            <span className="montserrat-medium text-custom-blue">
+                                09:00 AM
+                            </span>
                             <span className="text-custom-bluegreen">|</span>
-                            <p className="montserrat-bold text-custom-bluegreen">Jannet Doe</p>
-                        </div>
-                        <div className="border-b flex-grow"></div>
-                    </div>
-                    <div className="w-full min-h-[39px] border-[2px] border-custom-grayF1 p-[10px] rounded-[10px]">
-                        <p className="text-sm">
-                            Hi Jack, I added you in this inquiry, maybe you can
-                            provide info.
-                        </p>
-                    </div>
-                </div>
-                <div className="flex flex-col gap-[10px]">
-                    <div className="flex gap-[10px] text-sm montserrat-medium items-center">
-                        <div className="flex gap-1 items-center">
-                            <span className="flex mb-1 text-[25px] text-custom-gray81">⚬</span>
-                            <p className="montserrat-medium text-sm text-custom-gray81">
-                                September 10, 2024
+                            <p className="montserrat-bold text-custom-bluegreen">
+                                Jannet Doe
                             </p>
-                            <span className="montserrat-medium text-custom-blue">09:00 AM</span>
-                            <span className="text-custom-bluegreen">|</span>
-                            <p className="montserrat-bold text-custom-bluegreen">Jannet Doe</p>
                         </div>
                         <div className="border-b flex-grow"></div>
                     </div>
@@ -139,14 +177,20 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                 </div>
                 <div className="flex flex-col text-sm montserrat-medium">
                     <div className="flex gap-1 items-center">
-                            <span className="flex mb-1 text-[25px] text-custom-gray81">⚬</span>
-                            <p className="montserrat-medium text-sm text-custom-gray81">
-                                September 6, 2024
-                            </p>
-                            <span className="montserrat-medium text-custom-blue">10:00 AM</span>
-                            <span className="text-custom-lightgreen">|</span>
-                            <p className="montserrat-medium text-sm text-custom-lightgreen">Follow up reply</p>
-                        </div>
+                        <span className="flex mb-1 text-[25px] text-custom-gray81">
+                            ⚬
+                        </span>
+                        <p className="montserrat-medium text-sm text-custom-gray81">
+                            September 6, 2024
+                        </p>
+                        <span className="montserrat-medium text-custom-blue">
+                            10:00 AM
+                        </span>
+                        <span className="text-custom-lightgreen">|</span>
+                        <p className="montserrat-medium text-sm text-custom-lightgreen">
+                            Follow up reply
+                        </p>
+                    </div>
                     <div>
                         <p className="text-custom-solidgreen">by Jack Doe</p>
                     </div>
@@ -158,14 +202,20 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                 </div>
                 <div className="flex flex-col text-sm montserrat-medium">
                     <div className="flex gap-1 items-center">
-                            <span className="flex mb-1 text-[25px] text-custom-gray81">⚬</span>
-                            <p className="montserrat-medium text-sm text-custom-gray81">
-                                September 6, 2024
-                            </p>
-                            <span className="montserrat-medium text-custom-blue">08:00 AM</span>
-                            <span className="text-custom-lightgreen">|</span>
-                            <p className="montserrat-medium text-sm text-custom-lightgreen">CLI Reply</p>
-                        </div>
+                        <span className="flex mb-1 text-[25px] text-custom-gray81">
+                            ⚬
+                        </span>
+                        <p className="montserrat-medium text-sm text-custom-gray81">
+                            September 6, 2024
+                        </p>
+                        <span className="montserrat-medium text-custom-blue">
+                            08:00 AM
+                        </span>
+                        <span className="text-custom-lightgreen">|</span>
+                        <p className="montserrat-medium text-sm text-custom-lightgreen">
+                            CLI Reply
+                        </p>
+                    </div>
                     <div>
                         <p className="text-custom-solidgreen">by Jannet Doe</p>
                     </div>
@@ -177,14 +227,20 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                 </div>
                 <div className="flex flex-col text-sm montserrat-medium">
                     <div className="flex gap-1 items-center">
-                            <span className="flex mb-1 text-[25px] text-custom-gray81">⚬</span>
-                            <p className="montserrat-medium text-sm text-custom-gray81">
-                                September 6, 2024
-                            </p>
-                            <span className="montserrat-medium text-custom-blue">08:00 AM</span>
-                            <span className="text-custom-lightgreen">|</span>
-                            <p className="montserrat-medium text-sm text-custom-lightgreen">CLI Reply</p>
-                        </div>
+                        <span className="flex mb-1 text-[25px] text-custom-gray81">
+                            ⚬
+                        </span>
+                        <p className="montserrat-medium text-sm text-custom-gray81">
+                            September 6, 2024
+                        </p>
+                        <span className="montserrat-medium text-custom-blue">
+                            08:00 AM
+                        </span>
+                        <span className="text-custom-lightgreen">|</span>
+                        <p className="montserrat-medium text-sm text-custom-lightgreen">
+                            CLI Reply
+                        </p>
+                    </div>
                     <div>
                         <p className="text-custom-solidgreen">by Jannet Doe</p>
                     </div>
@@ -196,14 +252,20 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                 </div>
                 <div className="flex flex-col text-sm montserrat-medium">
                     <div className="flex gap-1 items-center">
-                            <span className="flex mb-1 text-[25px] text-custom-gray81">⚬</span>
-                            <p className="montserrat-medium text-sm text-custom-gray81">
-                                September 6, 2024
-                            </p>
-                            <span className="montserrat-medium text-custom-blue">08:00 AM</span>
-                            <span className="text-custom-lightgreen">|</span>
-                            <p className="montserrat-medium text-sm text-custom-lightgreen">CLI Reply</p>
-                        </div>
+                        <span className="flex mb-1 text-[25px] text-custom-gray81">
+                            ⚬
+                        </span>
+                        <p className="montserrat-medium text-sm text-custom-gray81">
+                            September 6, 2024
+                        </p>
+                        <span className="montserrat-medium text-custom-blue">
+                            08:00 AM
+                        </span>
+                        <span className="text-custom-lightgreen">|</span>
+                        <p className="montserrat-medium text-sm text-custom-lightgreen">
+                            CLI Reply
+                        </p>
+                    </div>
                     <div>
                         <p className="text-custom-solidgreen">by Jannet Doe</p>
                     </div>
@@ -215,14 +277,20 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                 </div>
                 <div className="flex flex-col text-sm montserrat-medium">
                     <div className="flex gap-1 items-center">
-                            <span className="flex mb-1 text-[25px] text-custom-gray81">⚬</span>
-                            <p className="montserrat-medium text-sm text-custom-gray81">
-                                September 6, 2024
-                            </p>
-                            <span className="montserrat-medium text-custom-blue">08:00 AM</span>
-                            <span className="text-custom-lightgreen">|</span>
-                            <p className="montserrat-medium text-sm text-custom-lightgreen">CLI Reply</p>
-                        </div>
+                        <span className="flex mb-1 text-[25px] text-custom-gray81">
+                            ⚬
+                        </span>
+                        <p className="montserrat-medium text-sm text-custom-gray81">
+                            September 6, 2024
+                        </p>
+                        <span className="montserrat-medium text-custom-blue">
+                            08:00 AM
+                        </span>
+                        <span className="text-custom-lightgreen">|</span>
+                        <p className="montserrat-medium text-sm text-custom-lightgreen">
+                            CLI Reply
+                        </p>
+                    </div>
                     <div>
                         <p className="text-custom-solidgreen">by Jannet Doe</p>
                     </div>
@@ -235,14 +303,20 @@ const AssignDetails = ({ logMessages, ticketId }) => {
 
                 <div className="flex flex-col text-sm montserrat-medium">
                     <div className="flex gap-1 items-center">
-                            <span className="flex mb-1 text-[25px] text-custom-gray81">⚬</span>
-                            <p className="montserrat-medium text-sm text-custom-gray81">
-                                September 6, 2024
-                            </p>
-                            <span className="montserrat-medium text-custom-blue">08:00 AM</span>
-                            <span className="text-custom-lightgreen">|</span>
-                            <p className="montserrat-medium text-sm text-custom-lightgreen">CLI Reply</p>
-                        </div>
+                        <span className="flex mb-1 text-[25px] text-custom-gray81">
+                            ⚬
+                        </span>
+                        <p className="montserrat-medium text-sm text-custom-gray81">
+                            September 6, 2024
+                        </p>
+                        <span className="montserrat-medium text-custom-blue">
+                            08:00 AM
+                        </span>
+                        <span className="text-custom-lightgreen">|</span>
+                        <p className="montserrat-medium text-sm text-custom-lightgreen">
+                            CLI Reply
+                        </p>
+                    </div>
                     <div>
                         <p className="text-custom-solidgreen">by Jannet Doe</p>
                     </div>
@@ -254,14 +328,20 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                 </div>
                 <div className="flex flex-col text-sm montserrat-medium">
                     <div className="flex gap-1 items-center">
-                            <span className="flex mb-1 text-[25px] text-custom-gray81">⚬</span>
-                            <p className="montserrat-medium text-sm text-custom-gray81">
-                                September 6, 2024
-                            </p>
-                            <span className="montserrat-medium text-custom-blue">08:00 AM</span>
-                            <span className="text-custom-lightgreen">|</span>
-                            <p className="montserrat-medium text-sm text-custom-lightgreen">CLI Reply</p>
-                        </div>
+                        <span className="flex mb-1 text-[25px] text-custom-gray81">
+                            ⚬
+                        </span>
+                        <p className="montserrat-medium text-sm text-custom-gray81">
+                            September 6, 2024
+                        </p>
+                        <span className="montserrat-medium text-custom-blue">
+                            08:00 AM
+                        </span>
+                        <span className="text-custom-lightgreen">|</span>
+                        <p className="montserrat-medium text-sm text-custom-lightgreen">
+                            CLI Reply
+                        </p>
+                    </div>
                     <div>
                         <p className="text-custom-solidgreen">by Jannet Doe</p>
                     </div>
@@ -273,14 +353,20 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                 </div>
                 <div className="flex flex-col text-sm montserrat-medium">
                     <div className="flex gap-1 items-center">
-                            <span className="flex mb-1 text-[25px] text-custom-gray81">⚬</span>
-                            <p className="montserrat-medium text-sm text-custom-gray81">
-                                September 6, 2024
-                            </p>
-                            <span className="montserrat-medium text-custom-blue">08:00 AM</span>
-                            <span className="text-custom-lightgreen">|</span>
-                            <p className="montserrat-medium text-sm text-custom-lightgreen">CLI Reply</p>
-                        </div>
+                        <span className="flex mb-1 text-[25px] text-custom-gray81">
+                            ⚬
+                        </span>
+                        <p className="montserrat-medium text-sm text-custom-gray81">
+                            September 6, 2024
+                        </p>
+                        <span className="montserrat-medium text-custom-blue">
+                            08:00 AM
+                        </span>
+                        <span className="text-custom-lightgreen">|</span>
+                        <p className="montserrat-medium text-sm text-custom-lightgreen">
+                            CLI Reply
+                        </p>
+                    </div>
                     <div>
                         <p className="text-custom-solidgreen">by Jannet Doe</p>
                     </div>
@@ -292,14 +378,20 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                 </div>
                 <div className="flex flex-col text-sm montserrat-medium">
                     <div className="flex gap-1 items-center">
-                            <span className="flex mb-1 text-[25px] text-custom-gray81">⚬</span>
-                            <p className="montserrat-medium text-sm text-custom-gray81">
-                                September 6, 2024
-                            </p>
-                            <span className="montserrat-medium text-custom-blue">08:00 AM</span>
-                            <span className="text-custom-lightgreen">|</span>
-                            <p className="montserrat-medium text-sm text-custom-lightgreen">CLI Reply</p>
-                        </div>
+                        <span className="flex mb-1 text-[25px] text-custom-gray81">
+                            ⚬
+                        </span>
+                        <p className="montserrat-medium text-sm text-custom-gray81">
+                            September 6, 2024
+                        </p>
+                        <span className="montserrat-medium text-custom-blue">
+                            08:00 AM
+                        </span>
+                        <span className="text-custom-lightgreen">|</span>
+                        <p className="montserrat-medium text-sm text-custom-lightgreen">
+                            CLI Reply
+                        </p>
+                    </div>
                     <div>
                         <p className="text-custom-solidgreen">by Jannet Doe</p>
                     </div>
@@ -311,14 +403,20 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                 </div>
                 <div className="flex flex-col text-sm montserrat-medium">
                     <div className="flex gap-1 items-center">
-                            <span className="flex mb-1 text-[25px] text-custom-gray81">⚬</span>
-                            <p className="montserrat-medium text-sm text-custom-gray81">
-                                September 6, 2024
-                            </p>
-                            <span className="montserrat-medium text-custom-blue">08:00 AM</span>
-                            <span className="text-custom-lightgreen">|</span>
-                            <p className="montserrat-medium text-sm text-custom-lightgreen">CLI Reply</p>
-                        </div>
+                        <span className="flex mb-1 text-[25px] text-custom-gray81">
+                            ⚬
+                        </span>
+                        <p className="montserrat-medium text-sm text-custom-gray81">
+                            September 6, 2024
+                        </p>
+                        <span className="montserrat-medium text-custom-blue">
+                            08:00 AM
+                        </span>
+                        <span className="text-custom-lightgreen">|</span>
+                        <p className="montserrat-medium text-sm text-custom-lightgreen">
+                            CLI Reply
+                        </p>
+                    </div>
                     <div>
                         <p className="text-custom-solidgreen">by Jannet Doe</p>
                     </div>
@@ -330,14 +428,20 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                 </div>
                 <div className="flex flex-col text-sm montserrat-medium">
                     <div className="flex gap-1 items-center">
-                            <span className="flex mb-1 text-[25px] text-custom-gray81">⚬</span>
-                            <p className="montserrat-medium text-sm text-custom-gray81">
-                                September 6, 2024
-                            </p>
-                            <span className="montserrat-medium text-custom-blue">08:00 AM</span>
-                            <span className="text-custom-lightgreen">|</span>
-                            <p className="montserrat-medium text-sm text-custom-lightgreen">CLI Reply</p>
-                        </div>
+                        <span className="flex mb-1 text-[25px] text-custom-gray81">
+                            ⚬
+                        </span>
+                        <p className="montserrat-medium text-sm text-custom-gray81">
+                            September 6, 2024
+                        </p>
+                        <span className="montserrat-medium text-custom-blue">
+                            08:00 AM
+                        </span>
+                        <span className="text-custom-lightgreen">|</span>
+                        <p className="montserrat-medium text-sm text-custom-lightgreen">
+                            CLI Reply
+                        </p>
+                    </div>
                     <div>
                         <p className="text-custom-solidgreen">by Jannet Doe</p>
                     </div>
