@@ -199,7 +199,7 @@ const InquiryThread = () => {
     return (
         <>
             <div className="flex h-full bg-custom-grayFA overflow-x-auto">
-                <div className="bg-custom-grayFA w-[601px] px-[20px] pb-[103px]">
+                <div className="bg-custom-grayFA w-[601px] px-[20px] pb-[103px] ">
                     {" "}
                     {/* boxdevref */}
                     <div className="relative flex justify-start gap-3 mb-[12px] mt-[2px]">
@@ -400,6 +400,108 @@ const InquiryThread = () => {
                                 </button>
                             </div>
                         </div>
+                        <div className="mt-2 relative">
+                            {" "}
+                            {/* boxref */}
+                            {/* Container for chat input and attached files */}
+                            <div className="gradient-btn2 rounded-[12px] p-[2px] relative">
+                                <div className="bg-white p-[10px] pr-0 rounded-[10px]">
+                                    {/* Display attached files inside the same container */}
+                                    {attachedFiles.length > 0 && (
+                                        <div className="mb-2 ">
+                                            {attachedFiles.map(
+                                                (file, index) => (
+                                                    <div
+                                                        key={index}
+                                                        className="flex items-center justify-between mb-2 p-2 border bg-white rounded"
+                                                    >
+                                                        <span className="text-sm text-gray-700">
+                                                            {file.name}
+                                                        </span>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() =>
+                                                                removeFile(
+                                                                    file.name
+                                                                )
+                                                            }
+                                                            className="text-red-500"
+                                                        >
+                                                            Remove
+                                                        </button>
+                                                    </div>
+                                                )
+                                            )}
+                                        </div>
+                                    )}
+
+                                    {/* Input field */}
+                                    <div className="h-[101px] w-[668]  ">
+                                         <textarea
+                                          placeholder="Reply..."
+                                            onChange={(e) =>
+                                                setChatMessage(e.target.value)
+                                            }
+                                            value={chatMessage}
+                                            id="chat"
+                                            name="chat"
+                                            rows="4"
+                                            className="h-full w-full pl-2 pr-[123px] border-none  text-sm focus:outline-none"
+                                        ></textarea>
+
+                                        {/* File attachment button */}
+                                        <div className=" absolute bottom-2 right-[115px] items-center hidden">
+                                            <input
+                                                type="file"
+                                                id="fileInput"
+                                                multiple
+                                                style={{ display: "none" }}
+                                                onChange={handleFileAttach}
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() =>
+                                                    document
+                                                        .getElementById(
+                                                            "fileInput"
+                                                        )
+                                                        .click()
+                                                }
+                                            >
+                                                <BsPaperclip className="h-5 w-5 text-custom-solidgreen hover:text-gray-700" />
+                                            </button>
+                                        </div>
+                                        {/* Send button */}
+                                        <div className="absolute bottom-2 right-6 flex items-center">
+                                            <button
+                                                type="button"
+                                                onClick={submitMessage}
+                                                disabled={
+                                                    !chatMessage.trim() ||
+                                                    loading
+                                                }
+                                                className={`flex w-[82px] h-[28px] rounded-[5px] text-white text-xs justify-center items-center gradient-background3 hover:shadow-custom4 ${loading
+                                                        ? "cursor-not-allowed"
+                                                        : ""
+                                                    }`}
+                                            >
+                                                {loading ? (
+                                                    <CircularProgress className="spinnerSize" />
+                                                ) : (
+                                                    <>
+                                                        Send Reply
+                                                    </>
+                                                )}
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="text-[11px] text-[#B54D4D]">
+                                <p>Note: This message will be send to <span className="font-semibold">JOSHUA DOE</span>. Please use the comment section for CLI internal communication.</p>
+                            </div>
+                        </div>
+                        <div className="border my-2 border-t-1 border-custom-lightestgreen"></div>
                         <div className="flex-grow overflow-y-auto max-h-[calc(100vh-400px)]">
                             <div className="">
                                 {conversationMessages.length > 0 &&
@@ -480,107 +582,8 @@ const InquiryThread = () => {
                                 </button>
                             </div>
                         </div> */}
-                        <div className="mt-2 relative">
-                            {" "}
-                            {/* boxref */}
-                            {/* Container for chat input and attached files */}
-                            <div className="gradient-btn2 rounded-[12px] p-[2px] relative">
-                                <div className="bg-white p-[10px] pr-0 rounded-[10px]">
-                                    {/* Display attached files inside the same container */}
-                                    {attachedFiles.length > 0 && (
-                                        <div className="mb-2 ">
-                                            {attachedFiles.map(
-                                                (file, index) => (
-                                                    <div
-                                                        key={index}
-                                                        className="flex items-center justify-between mb-2 p-2 border bg-white rounded"
-                                                    >
-                                                        <span className="text-sm text-gray-700">
-                                                            {file.name}
-                                                        </span>
-                                                        <button
-                                                            type="button"
-                                                            onClick={() =>
-                                                                removeFile(
-                                                                    file.name
-                                                                )
-                                                            }
-                                                            className="text-red-500"
-                                                        >
-                                                            Remove
-                                                        </button>
-                                                    </div>
-                                                )
-                                            )}
-                                        </div>
-                                    )}
-
-                                    {/* Input field */}
-                                    <div className="h-[101px] w-[668]  ">
-                                         <textarea
-                                          placeholder="Reply..."
-                                            onChange={(e) =>
-                                                setChatMessage(e.target.value)
-                                            }
-                                            value={chatMessage}
-                                            id="chat"
-                                            name="chat"
-                                            rows="4"
-                                            className="h-full w-full pl-2 pr-[123px] border-none  text-sm focus:outline-none"
-                                        ></textarea>
-
-                                        {/* File attachment button */}
-                                        <div className=" absolute bottom-2 right-[115px] items-center">
-                                            <input
-                                                type="file"
-                                                id="fileInput"
-                                                multiple
-                                                style={{ display: "none" }}
-                                                onChange={handleFileAttach}
-                                            />
-                                            <button
-                                                type="button"
-                                                onClick={() =>
-                                                    document
-                                                        .getElementById(
-                                                            "fileInput"
-                                                        )
-                                                        .click()
-                                                }
-                                            >
-                                                <BsPaperclip className="h-5 w-5 text-custom-solidgreen hover:text-gray-700" />
-                                            </button>
-                                        </div>
-                                        {/* Send button */}
-                                        <div className="absolute bottom-2 right-6 flex items-center">
-                                            <button
-                                                type="button"
-                                                onClick={submitMessage}
-                                                disabled={
-                                                    !chatMessage.trim() ||
-                                                    loading
-                                                }
-                                                className={`flex w-[82px] h-[28px] rounded-[5px] text-white text-xs justify-center items-center gradient-background3 hover:shadow-custom4 ${loading
-                                                        ? "cursor-not-allowed"
-                                                        : ""
-                                                    }`}
-                                            >
-                                                {loading ? (
-                                                    <CircularProgress className="spinnerSize" />
-                                                ) : (
-                                                    <>
-                                                        Send Reply
-                                                    </>
-                                                )}
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="text-[11px] text-custom-bluegreen">
-                            <p>Note: This message will be send to <span className="font-semibold">JOSHUA DOE</span>. Please use the comment section for CLI internal communication.</p>
-                        </div>
+                        
+                       
                     </div>
                 </div>
                 <div className="flex w-[623px] bg-custom-grayFA gap-3 pb-24">
