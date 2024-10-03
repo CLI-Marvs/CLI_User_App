@@ -209,18 +209,16 @@ const AssignSidePanel = ({ ticketId }) => {
                 </div>
             </div>
             <div className=" w-full bg-white rounded-[10px] py-[16px] px-[20px]">
-                <div className="flex w-full justify-start items-center">
-                    <p className="text-sm text-custom-bluegreen font-semibold">Assignee</p>
-                    <div className="ml-2 flex flex-wrap gap-2">
+                <div className="flex w-full justify-start items-start">
+                    <p className="text-sm text-custom-bluegreen pt-1 font-semibold">Assignee</p>
+                    <div className="ml-2 flex overflow-x-auto gap-2 max-w-full custom-scrollbar">
                         {selectedAssignees.length > 0 ? (
                             <>
-                                {selectedAssignees
-                                    .slice(0, 4)
-                                    .map((assignee) => (
+                                {selectedAssignees.map((assignee) => (
                                         <>
                                             <span
                                                 key={assignee.name}
-                                                className="bg-custom-lightgreen text-white rounded-full px-3 py-1 text-xs flex"
+                                                className="bg-custom-lightgreen text-white rounded-full px-3 py-1 text-xs flex-shrink-0 flex mb-[4px]"
                                             >
                                                 {assignee.name}
                                                 <button
@@ -236,33 +234,9 @@ const AssignSidePanel = ({ ticketId }) => {
                                         </>
                                        
                                     ))}
-                                            
-                                {selectedAssignees.length > 4 && (
-                                    <div className="relative group">
-                                        <span className="bg-custom-lightgreen text-white rounded-full px-3 py-1 text-xs cursor-pointer">
-                                            +{selectedAssignees.length - 4}
-                                        </span>
-
-                                        {/* Tooltip for remaining assignees */}
-                                        <div className="absolute left-0 mt-2 min-w-[120px] hidden group-hover:flex flex-col bg-white text-black p-2 rounded shadow-lg z-10">
-                                            <div className="flex flex-col gap-1">
-                                                {selectedAssignees
-                                                    .slice(4)
-                                                    .map((assignee) => (
-                                                        <span
-                                                            key={assignee.name}
-                                                            className="bg-custom-lightgreen text-white rounded-full px-3 py-1 text-xs"
-                                                        >
-                                                            {assignee.name}
-                                                        </span>
-                                                    ))}
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
                             </>
                         ) : (
-                            <span className="text-sm text-gray-500">
+                            <span className="text-sm text-gray-500 pt-1">
                                 No assignee selected
                             </span>
                         )}

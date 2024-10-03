@@ -126,7 +126,8 @@ const AddInfoModal = ({modalRef}) => {
                                 name="details_message"
                                 placeholder="Write your concern here."
                                 rows="4"
-                                className={` rounded-[5px] bg-white border border-[D6D6D6] w-full pl-2`}
+                                draggable="false"
+                                className={` rounded-[5px] bg-white border border-[D6D6D6] w-full pl-2 outline-none`}
                             ></textarea>
                         </div>
                     </div>
