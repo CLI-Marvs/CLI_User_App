@@ -108,7 +108,7 @@ const Sidebar = () => {
           <div className=' text-sm p-4 h-auto rounded-[10px] text-gray-400 border border-custom-lightestgreen flex flex-col gap-4 cursor-not-allowed'>
             <p>Property & Pricing</p>
             <p>Sales Management</p>
-            <p>Broker Management</p>~
+            <p>Broker Management</p>
             <p className='leading-none'>Transaction <br />Management</p>
             <p className='leading-none'>Document<br /> Management</p>
             <p className='leading-none'>Property<br /> Management</p>
