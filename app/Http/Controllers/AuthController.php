@@ -66,48 +66,49 @@ class AuthController extends Controller
     public function callback(Request $request)
     {   
         $crsUser = ['rosemarie@cebulandmasters.com', 'jdadvincula@cebulandmasters.com', 'mocastillo@cebulandmasters.com'];
-
+    
         try {
             if (!$request->has('code')) {
                 return redirect('/')->with('error', 'Authentication failed. Missing code parameter.');
             }   
-
+    
             $googleUser = Socialite::driver("google")->user();
             $explodeName = explode(' ', $googleUser->getName());
-
-            if (count($explodeName) > 2) {
+    
+            if (count($explodeName) > 1) {
                 $firstName = $explodeName[0];
                 $lastName = $explodeName[count($explodeName) - 1];
-                $name = [$firstName, $lastName];
             } else {
-                $name = $explodeName;
+                $firstName = $explodeName[0];
+                $lastName = null;  
             }
-
+    
             $department = in_array($googleUser->email, $crsUser) ? 'CRS' : null;
-
+    
             $user = Employee::where('google_id', $googleUser->id)->first();
-
+    
             if (!$user) {
                 $user = Employee::create([
                     'google_id' => $googleUser->id,
-                    'firstname' => $name[0] ? $name[0] : null,
-                    'lastname' => $name[1] ? $name[1] : null,
+                    'firstname' => $firstName,
+                    'lastname' => $lastName,  
                     'employee_email' => $googleUser->email,
                     'email_verify_at' => now(),
                     'profile_picture' => $googleUser->avatar,
                     'department' => $department
                 ]);
             }
-
+    
             Auth::login($user);
-
+    
             $token = $user->createToken('authToken')->plainTextToken;
-
+    
             return redirect(config("app.frontend_url") . "/callback?token=" . $token);
         } catch (\Exception $e) {
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
         }
     }
+    
 
 
     public function logout(Request $request)
