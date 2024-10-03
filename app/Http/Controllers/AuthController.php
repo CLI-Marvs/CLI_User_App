@@ -90,8 +90,8 @@ class AuthController extends Controller
             if (!$user) {
                 $user = Employee::create([
                     'google_id' => $googleUser->id,
-                    'firstname' => $name[0],
-                    'lastname' => $name[1],
+                    'firstname' => $name[0] ? $name[0] : null,
+                    'lastname' => $name[1] ? $name[1] : null,
                     'employee_email' => $googleUser->email,
                     'email_verify_at' => now(),
                     'profile_picture' => $googleUser->avatar,
