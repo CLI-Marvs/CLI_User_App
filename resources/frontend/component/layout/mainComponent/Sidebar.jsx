@@ -70,12 +70,14 @@ const Sidebar = () => {
             </ListItem>
           </Link>
           {isInquiryOpen && location.pathname.startsWith('/inquirymanagement') && (
-            <div className="px-[25px] py-[20px] w-[185px] h-[109px] flex flex-col gap-[5px] bg-custom-lightestgreen border-t rounded-t-none rounded-b-[10px] border-custom-solidgreen">
+            <div className="px-[12px] py-[20px] w-[185px] h-[162px] flex flex-col gap-[5px] bg-custom-lightestgreen border-t rounded-t-none rounded-b-[10px] border-custom-solidgreen">
               
-              <button className='h-[38px] w-[161px] gradient-btn5 text-white'>Add Inquiry</button>
+      
+                <button className='h-[38px] w-[161px] gradient-btn5 text-white mb-[15px] text-xs rounded-[10px]'> + Add Inquiry</button>
+          
               <Link to="/inquirymanagement/inquirylist">
                 <ListItem
-                  className={`h-[32px] w-[134px] py-[8px] px-[18px] text-sm rounded-[50px] ${location.pathname === '/inquirymanagement/inquirylist' ? 'bg-white text-custom-solidgreen font-semibold' : 'hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen '}`}
+                  className={`h-[32px] w-full py-[8px] px-[18px] text-sm rounded-[50px] ${location.pathname === '/inquirymanagement/inquirylist' ? 'bg-white text-custom-solidgreen font-semibold' : 'hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen '}`}
                   onClick={() => handleItemClick('/inquirymanagement/inquirylist')}
                 >
                   Inquiries
@@ -83,7 +85,7 @@ const Sidebar = () => {
               </Link>
               <Link to="/inquirymanagement/report">
                 <ListItem
-                  className={`h-[32px] w-[134px] py-[8px] px-[18px] text-sm rounded-[50px] ${location.pathname === '/inquirymanagement/report' ? 'bg-white text-custom-solidgreen font-semibold' : 'hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen '}`}
+                  className={`h-[32px] w-full py-[8px] px-[18px] text-sm rounded-[50px] ${location.pathname === '/inquirymanagement/report' ? 'bg-white text-custom-solidgreen font-semibold' : 'hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen '}`}
                   onClick={() => handleItemClick('/reports')}
                 >
                   Reports
@@ -97,7 +99,7 @@ const Sidebar = () => {
           <div className=' text-sm p-4 h-auto rounded-[10px] text-gray-400 border border-custom-lightestgreen flex flex-col gap-4 cursor-not-allowed'>
             <p>Property & Pricing</p>
             <p>Sales Management</p>
-            <p>Broker Management</p>
+            <p>Broker Management</p>~
             <p className='leading-none'>Transaction <br />Management</p>
             <p className='leading-none'>Document<br /> Management</p>
             <p className='leading-none'>Property<br /> Management</p>
@@ -113,7 +115,7 @@ const Sidebar = () => {
             
               <ListItem className={` h-7 mb-2 pl-5 gap-2 rounded-2xl text-custom-solidgreen hover:bg-custom-lightestgreen hover:font-semibold`}>
                 Broker Management
-              </ListItem>
+              </ListItem>~
               <ListItem className={`h-7 mb-2 pl-5 gap-2 rounded-2xl text-custom-solidgreen hover:bg-custom-lightestgreen hover:font-semibold`}>
                 Transaction Management
               </ListItem>

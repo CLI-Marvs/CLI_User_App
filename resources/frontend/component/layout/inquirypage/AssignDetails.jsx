@@ -6,19 +6,15 @@ const AssignDetails = ({ logMessages }) => {
     return (
         <>
            <div className="w-full p-[10px] mt-[12px] flex flex-col gap-[10px]">
-                <div className="flex gap-[10px] text-custom-bluegreen items-center">
-                    <div className="min-w-[142px]">
-                        <p className="montserrat-semibold text-sm">September 10, 2024</p>
-                        
-                    </div>
-                    <div className="border-b w-full border-custom-bluegreen"></div>
-                </div>
                 <div className="flex flex-col gap-[10px]">
                     <div className="flex gap-1 text-sm montserrat-medium">
-                        <span className="text-custom-gray81">09:15 AM</span><p className="text-custom-bluegreen">Jannet Doe</p>
+                    <p className="montserrat-medium text-sm">September 10, 2024</p>
+                    <span className="text-custom-gray81">09:15 AM</span>
+                    <span>|</span>
+                    <p className="text-custom-bluegreen">Jannet Doe</p>
                     </div>
                     <div className="w-full min-h-[39px] border-[2px] border-custom-grayF1 p-[10px] rounded-[10px]">
-                           <p className="text-sm">Hi Jack, I added you in this inquiry, maybe you can provide info.</p>
+                        <p className="text-sm">Hi Jack, I added you in this inquiry, maybe you can provide info.</p>
                     </div>
                 </div>
                 <div className="flex flex-col gap-[10px]">
