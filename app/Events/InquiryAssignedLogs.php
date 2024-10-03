@@ -10,7 +10,7 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class SampleEvent implements ShouldBroadcast
+class InquiryAssignedLogs implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
@@ -19,10 +19,9 @@ class SampleEvent implements ShouldBroadcast
      */
 
     public $data;
-
     public function __construct($data)
     {
-        \Log::info('Event data:', $data);
+        \Log::info('Event data fromg logs', $data);
         $this->data = $data;
     }
 
@@ -33,25 +32,19 @@ class SampleEvent implements ShouldBroadcast
      */
     public function broadcastOn(): array
     {
-        
         return [
-            new Channel('concerns.' . $this->data['concernId']),
+            new Channel('concernlogs.'. $this->data['concernId'])
         ];
-        
-        
     }
 
-/* 
-    public function broadcastWith()
+
+   /*  public function broadcastWith()
     {
         return [
             'data' => [
-                'message' => $this->data['message'], 
-                'firstname' => $this->data['firstname'],
-                'lastname' => $this->data['lastname'],
-                'concernId' => $this->data['concernId']
+                'logMessage' => $this->data, 
+                'ticketId' => $this->data['ticketId']
             ]
         ];
     } */
-
 }

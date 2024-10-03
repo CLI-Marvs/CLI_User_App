@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\InquiryAssignedLogs;
 use App\Events\SampleEvent;
 use App\Jobs\JobToPersonnelAssign;
 use App\Jobs\ReplyFromAdminJob;
@@ -845,7 +846,6 @@ class ConcernController extends Controller
 
             $concernsQuery->select('concerns.*', \DB::raw('CASE WHEN read_notif_by_user.concern_id IS NULL THEN 0 ELSE 1 END as is_read'));
 
-            $this->notifStatusFilter($status, $concernsQuery);
 
             $concernsResults = $concernsQuery->orderBy('is_read', 'asc')
                 ->orderBy('concerns.created_at', 'desc')
@@ -859,9 +859,12 @@ class ConcernController extends Controller
                 return $item->created_at;
             })->values();
 
+
+            $filteredData = $this->notifStatusFilter($status, $sortedCombinedData);
+
             $perPage = 20;
             $currentPage = LengthAwarePaginator::resolveCurrentPage();
-            $paginatedResults = $this->paginateCollection($sortedCombinedData, $perPage, $currentPage, $request->url());
+            $paginatedResults = $this->paginateCollection($filteredData, $perPage, $currentPage, $request->url());
 
 
             return response()->json($paginatedResults);
@@ -911,14 +914,21 @@ class ConcernController extends Controller
     }
 
 
-    private function notifStatusFilter($status, $query)
+    private function notifStatusFilter($status, $collection)
     {
-        if ($status === 'Unread') {
-            $query->whereNull('read_notif_by_user.concern_id');
-        } else if ($status === 'Read') {
-            $query->whereNotNull('read_notif_by_user.concern_id');
-        }
+        if($status === 'Unread') {
+            return $collection->filter(function($item) {
+                return $item->is_read == 0;
+            });
+        } else if($status === 'Read') {
+            return $collection->filter(function($item) {
+                return $item->is_read == 1;
+            });
+        } 
+
+        return $collection;
     }
+    
 
 
 
@@ -955,34 +965,6 @@ class ConcernController extends Controller
             }
         }
     }
-
-    // public function countUnreadNotifications(Request $request)
-    // {
-    //     try {
-    //         $employee = $request->user();
-    //         $employeeDepartment = $employee->department;
-
-    //         $assignedInquiries = $this->getAssignInquiries($employee->employee_email);
-    //         $ticketIds = $assignedInquiries->pluck('ticket_id')->toArray();
-
-    //         $query = Concerns::query();
-
-    //         if ($employeeDepartment !== "CSR") {
-    //             $query->whereIn('ticket_id', $ticketIds);
-    //         }
-
-    //         $unreadCount = $query->leftJoin('read_notif_by_user', function ($join) use ($employee) {
-    //             $join->on('concerns.id', '=', 'read_notif_by_user.concern_id')
-    //                 ->where('read_notif_by_user.user_id', $employee->id);
-    //         })
-    //             ->whereNull('read_notif_by_user.concern_id')
-    //             ->count();
-
-    //         return response()->json(['unreadCount' => $unreadCount]);
-    //     } catch (\Exception $e) {
-    //         return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
-    //     }
-    // }
 
     public function countUnreadNotifications(Request $request)
     {
@@ -1082,7 +1064,14 @@ class ConcernController extends Controller
 
             $this->inquiryAssigneeLogs($request);
 
-            JobToPersonnelAssign::dispatch($request->email, $emailContent, $request->email);
+            /*   JobToPersonnelAssign::dispatch($request->email, $emailContent, $request->email); */
+
+            $data = [
+                'firstname' => $request->firstname,
+             /*    'ticketId' => str_replace('#', '', $request->ticketId), */
+                'concernId' => $request->concernId,
+            ];
+            InquiryAssignedLogs::dispatch($data);
 
             return response()->json('Successfully assign');
         } catch (\Exception $e) {
@@ -1106,7 +1095,15 @@ class ConcernController extends Controller
             $prevInquiry->save();
 
             $this->inquiryAssigneeLogs($request);
-            JobToPersonnelAssign::dispatch($request->email, $emailContent, $request->email);
+            /*   JobToPersonnelAssign::dispatch($request->email, $emailContent, $request->email); */
+
+            $data = [
+                'firstname' => $request->firstname,
+             /*    'ticketId' => str_replace('#', '', $request->ticketId), */
+                'concernId' => $request->concernId,
+            ];
+            InquiryAssignedLogs::dispatch($data);
+            return response()->json('Successfully reassign');
         } catch (\Exception $e) {
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
         }
@@ -1343,7 +1340,7 @@ class ConcernController extends Controller
                 'message' => $conversation,
                 'firstname' => $user ? $user->firstname : 'Unknown User',
                 'lastname' => $user ? $user->lastname : 'Unknown User',
-                'concernId' => $request->concern_id
+                'concernId' => $request->concern_id,
             ];
 
             SampleEvent::dispatch($data);
@@ -1357,18 +1354,17 @@ class ConcernController extends Controller
     public function retrieveConcernsMessages(Request $request)
     {
         $concernId = $request->query('concernId');
-       /*  dd($request->all()); */
-        try {           
-           $conversations = Conversations::where('concern_id', $concernId)
-                                          ->join('employee', 'employee.id', '=', 'conversations.sender_id')
-                                          ->select('conversations.*', 'employee.firstname', 'employee.lastname')
-                                        /*   ->orderBy('created_at', 'desc') */
-                                          ->get();
 
-           return response()->json($conversations);
+        try {
+            $conversations = Conversations::where('concern_id', $concernId)
+                ->join('employee', 'employee.id', '=', 'conversations.sender_id')
+                ->select('conversations.*', 'employee.firstname', 'employee.lastname')
+                ->get();
+
+            return response()->json($conversations);
         } catch (\Exception $e) {
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
-        }       
+        }
     }
 
     // public function sendMessageConcerns(Request $request)
