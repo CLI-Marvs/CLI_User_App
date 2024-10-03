@@ -7,7 +7,7 @@ import apiService from "../../servicesApi/apiService";
 
 const TicketTable = ({ concernData }) => {
     const [checkedRows, setCheckedRows] = useState([]);
-    const { getMessages, getAllConcerns, user, setData, getInquiryLogs } =
+    const { getMessages, getAllConcerns, user, setData, getInquiryLogs, getConcernMessages } =
         useStateContext();
     const handleCheckboxChange = (index) => {
         setCheckedRows((prevCheckedRows) =>
@@ -35,6 +35,7 @@ const TicketTable = ({ concernData }) => {
         getMessages(items.ticket_id);
         getAllConcerns();
         getInquiryLogs(items.ticket_id);
+        getConcernMessages();
         const encodedTicketId = encodeURIComponent(items.ticket_id);
         navigate(
             `/inquirymanagement/thread/${encodedTicketId}` /* , {

@@ -103,10 +103,6 @@ const AssignSidePanel = ({ ticketId }) => {
         setTicketId(ticketId);
     }, [ticketId, setTicketId]);
 
-    console.log("selectedOptions", selectedOptions);
-    console.log("selectedASsignee", selectedAssignees);
-
-
     return (
         <>
             <div className="mb-3 mt-[4px]">
