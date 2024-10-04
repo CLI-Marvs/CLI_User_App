@@ -205,7 +205,6 @@ const InquiryThread = () => {
 
     const adminMessageChannelFunc = (channel) => {
         channel.listen("AdminMessage", (event) => {
-            console.log("event data", event);
             setMessages((prevMessages) => {
                 const messagesForTicket = prevMessages[ticketId] || [];
                 if (
@@ -239,7 +238,6 @@ const InquiryThread = () => {
         if(ticketId) {
             newTicketId = ticketId.replace("#", "");
             adminMessageChannel = window.Echo.channel(`adminmessage.${newTicketId}`);
-            console.log("channel created of admin message", adminMessageChannel);
             adminMessageChannelFunc(adminMessageChannel);
         }
         return () => {
@@ -250,7 +248,6 @@ const InquiryThread = () => {
         };
     }, [ticketId]);
 
-    console.log("combineThreadMEssages", combineThreadMessages);
     return (
         <>
             <div className="flex h-full bg-custom-grayFA overflow-x-auto">

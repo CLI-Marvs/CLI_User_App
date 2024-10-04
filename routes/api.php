@@ -25,6 +25,7 @@ Route::post('/reassign', [ConcernController::class, 'reassignInquiry']);
 Route::post('/resolve', [ConcernController::class, 'markAsResolve']);
 
 
+
 /* 
 Route::get('/get-concern', [ConcernController::class, 'getAllConcerns']);
 
@@ -46,6 +47,8 @@ Route::post('delete-concerns', [ConcernController::class, 'deleteConcern']);
 
 Route::post('conversation', [ConcernController::class, 'sendMessageConcerns']);
 Route::get('/get-concern-messages', [ConcernController::class, 'retrieveConcernsMessages']);
+Route::get('/personnel-assignee', [ConcernController::class, 'retrieveAssignees']);
+
 
 
 
