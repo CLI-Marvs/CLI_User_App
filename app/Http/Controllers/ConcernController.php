@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\AdminMessage;
+use App\Events\AdminReplyLogs;
 use App\Events\ConcernMessages;
 use App\Events\InquiryAssignedLogs;
 use App\Events\SampleEvent;
@@ -258,14 +260,28 @@ class ConcernController extends Controller
             $messages->save();
 
             $this->inquiryAdminLogs($request);
+            
+            $newTicketId = str_replace('#', '', $messages->ticket_id);
 
+            $data = [
+                'admin_id' => $admin_id,
+                'admin_email' => $admin_email,
+                'attachment' => $attachment,
+                'admin_profile_picture' => $admin_profile_picture,
+                'details_message' => $adminMessage,
+                'admin_name' => $admin_name,
+                'ticketId' => $newTicketId,
+                'id' => $messages->id,
+                'created_at' => $messages->created_at,
+            ];
+
+            AdminMessage::dispatch($data);
 
             if ($files) {
                 Mail::to($buyer_email)->send(new SendReplyFromAdmin($messages->ticket_id, $buyer_email, $adminMessage, $message_id, $allFiles));
             } else {
                 ReplyFromAdminJob::dispatch($messages->ticket_id, $buyer_email, $adminMessage, $message_id, $allFiles);
             }
-
 
             return response()->json("Successfully sent");
         } catch (\Exception $e) {
@@ -472,7 +488,7 @@ class ConcernController extends Controller
     {
         try {
             $message = Messages::where('ticket_id', $ticketId)
-                ->orderBy('created_at', 'desc')
+              /*   ->orderBy('created_at', 'desc') */
                 ->get();
 
             return response()->json($message);
@@ -1163,6 +1179,17 @@ class ConcernController extends Controller
             $inquiry->ticket_id = $request->ticket_id;
             $inquiry->message_log = "Replied by" . ' ' . $request->admin_name;
             $inquiry->save();
+
+            $newTicketId = str_replace('#', '', $request->ticket_id);
+
+            $data = [
+                'admin_reply' => json_encode($logData),
+                'created_at' => $inquiry->created_at,
+                'ticketId' => $newTicketId,
+                'logId' => $inquiry->id,
+            ];
+
+            AdminReplyLogs::dispatch($data);
         } catch (\Exception $e) {
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
         }

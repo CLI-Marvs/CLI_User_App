@@ -3,25 +3,32 @@ import FolderFile from "../../../../../public/Images/folder_file.svg";
 import Kent from "../../../../../public/Images/kent.png";
 import defaultAvatar from "../../../../../public/Images/AdminSilouette.svg";
 import moment from "moment";
+import { useStateContext } from "../../../context/contextprovider";
+import { useParams } from "react-router-dom";
 
 const UserMessages = ({ items }) => {
     const attachmentData = JSON.parse(items.attachment || "[]");
+    const {data} = useStateContext();
 
-    const formatTime = (createdAt) => {
-        return moment(createdAt).fromNow();
-    };
+    const params = useParams();
+    const ticketId = decodeURIComponent(params.id);
+    const formattedDate = moment(items.created_at).format("MMMM D, YYYY");
+    const formattedTime = moment(items.created_at).format("hh:mm A");
 
+    const dataConcern =
+    data?.find((item) => item.ticket_id === ticketId) || {};
+    
     return (
         <div className="w-full">
             <div className="flex w-full mt-[27px] gap-[10px]">
                 <div className="flex flex-col gap-[6px]">
-                    <p className="flex gap-1 font-semibold text-sm text-custom-bluegreen">September 1, 2024 <span>|</span> 11:19 AM</p>
+                    <p className="flex gap-1 font-semibold text-sm text-custom-bluegreen">{formattedDate} <span>|</span> {formattedTime}</p>
                     <p className=" text-sm text-custom-gray81 flex gap-1">
                         <span>
                             From: 
                         </span> 
                         {(() => {
-                            const nameParts = items.buyer_name.split(" ");
+                            const nameParts = dataConcern.buyer_name.split(" ");
                             const lastName = nameParts.pop();
                             const firstName = nameParts.join(" ");
 
@@ -35,7 +42,7 @@ const UserMessages = ({ items }) => {
                         })()}
                     </p>
                     <p className=" text-sm text-custom-gray81 flex gap-1">
-                        josh@gmail.com <span>|</span> 09123123123
+                        {dataConcern.buyer_email} <span>|</span> {dataConcern.mobile_number}
                     </p>
                 </div>
             </div>

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import AdminLogo from "../../../../../public/Images/AdminSilouette.svg";
 import { useStateContext } from "../../../context/contextprovider";
 import FolderFile from "../../../../../public/Images/folder_file.svg";
@@ -8,18 +8,19 @@ const AdminMessages = ({ items }) => {
     const { user } = useStateContext();
     const attachmentData = JSON.parse(items.attachment || "[]");
     
-    const formatTime = (createdAt) => {
-        return moment(createdAt).fromNow();
-    };
 
     const dynamicName =
         user?.id === parseInt(items?.admin_id) ? "You" : `CLI ${user?.department}`;
+  
+    const formattedDate = moment(items.created_at).format("MMMM D, YYYY");
+    const formattedTime = moment(items.created_at).format("hh:mm A");
+
     return (
         <div className="w-full">
             <div className="flex justify-start w-full mt-[27px] gap-2 ">
                 <div className="flex flex-col text-sm gap-[6px]">
                     <p className="font-semibold  text-custom-bluegreen">
-                        September 6, 2024 <span>|</span> 07:16 AM
+                       {formattedDate} <span>|</span> {formattedTime}
                     </p>
                     <p className="flex gap-1 text-custom-gray81">
                         <span>From:</span>{items.admin_name} <span>|</span>

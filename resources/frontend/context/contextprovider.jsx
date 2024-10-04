@@ -193,7 +193,6 @@ export const ContextProvider = ({ children }) => {
     };
 
     const getConcernMessages = async () => {
-        console.log("ticketId", ticketId);
         if (ticketId) {
             try {
                 const encodedTicketId = encodeURIComponent(ticketId);

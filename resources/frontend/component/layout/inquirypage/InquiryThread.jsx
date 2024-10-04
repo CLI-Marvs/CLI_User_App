@@ -41,6 +41,7 @@ const InquiryThread = () => {
         getAllConcerns,
         setSearchFilter,
         data,
+        setMessages
     } = useStateContext();
     const [chatMessage, setChatMessage] = useState("");
     const modalRef = useRef(null);
@@ -57,7 +58,6 @@ const InquiryThread = () => {
     const handleStatus = (e) => {
         setStatus(e.target.value);
     };
-    const conversationMessages = messages[ticketId] || [];
 
     const dataConcern =
         data?.find((items) => items.ticket_id === ticketId) || {};
@@ -140,7 +140,6 @@ const InquiryThread = () => {
                 formData.append("files[]", file);
             });
         }
-        // Append other fields to FormData
         formData.append("admin_email", user?.employee_email || "");
         formData.append("ticket_id", ticketId || "");
         formData.append("details_message", chatMessage || "");
@@ -196,6 +195,55 @@ const InquiryThread = () => {
         };
     }, [isFilterVisible]);
 
+
+    const adminMessageChannelFunc = (channel) => {
+        channel.listen("AdminMessage", (event) => {
+            console.log("event data", event);
+            setMessages((prevMessages) => {
+                const messagesForTicket = prevMessages[ticketId] || [];
+                if (
+                    messagesForTicket.find(
+                        (msg) => msg.id === event.data.id
+                    )
+                ) {
+                    return prevMessages;
+                }
+
+                const newMessage = event.data;
+
+                return {
+                    ...prevMessages,
+                    [ticketId]: [...messagesForTicket, newMessage],
+                };
+            });
+        });
+    };
+   /*  const conversationMessages = messages[ticketId] || []; */
+
+
+   const combineThreadMessages = messages[ticketId]
+   ? messages[ticketId]
+         .flat()
+         .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+   : [];
+    useEffect(() => {
+        let adminMessageChannel;
+        let newTicketId;
+        if(ticketId) {
+            newTicketId = ticketId.replace("#", "");
+            adminMessageChannel = window.Echo.channel(`adminmessage.${newTicketId}`);
+            console.log("channel created of admin message", adminMessageChannel);
+            adminMessageChannelFunc(adminMessageChannel);
+        }
+        return () => {
+            if (adminMessageChannel) {
+                adminMessageChannel.stopListening("AdminMessage");
+                window.Echo.leaveChannel(`adminmessage.${newTicketId}`);
+            }
+        };
+    }, [ticketId]);
+
+    console.log("combineThreadMEssages", combineThreadMessages);
     return (
         <>
             <div className="flex h-full bg-custom-grayFA overflow-x-auto">
@@ -382,7 +430,7 @@ const InquiryThread = () => {
                             />
                             <div className="flex-1 flex flex-wrap">
                                 <p className="space-x-1 text-custom-bluegreen">
-                                    Casa Mira (Transaction) <span>-</span> Ticket # 2400000083
+                                    {dataConcern.property} {dataConcern.details_concern} <span>-</span> {dataConcern.ticket_id}
                                 </p>
                             </div>
                           {/*   {dataConcern.created_by &&
@@ -498,14 +546,14 @@ const InquiryThread = () => {
                                 </div>
                             </div>
                             <div className="text-[11px] text-[#B54D4D]">
-                                <p>Note: This message will be send to <span className="font-semibold">JOSHUA DOE</span>. Please use the comment section for CLI internal communication.</p>
+                                <p>Note: This message will be send to <span className="font-semibold">{dataConcern.buyer_name}</span>. Please use the comment section for CLI internal communication.</p>
                             </div>
                         </div>
                         <div className="border my-2 border-t-1 border-custom-lightestgreen"></div>
                         <div className="flex-grow overflow-y-auto max-h-[calc(100vh-400px)]">
                             <div className="">
-                                {conversationMessages.length > 0 &&
-                                    conversationMessages.map((item, index) =>
+                                {combineThreadMessages.length > 0 &&
+                                    combineThreadMessages.map((item, index) =>
                                         item.buyer_email ? (
                                             <UserMessages
                                                 items={item}
