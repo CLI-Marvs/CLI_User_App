@@ -255,11 +255,7 @@ const AssignSidePanel = ({ ticketId }) => {
                         </>
                     ) : (
                         <>
-                            <div className="absolute w-[623px] min-h-[550px] space-y-2 border-t-0 border-gray-300 p-2 py-[20px] shadow-custom4 rounded-t-non rounded-[10px] bg-custom-grayF1 z-20">
-                               <div className="flex">
-                                <span>No results found</span>
-                               </div>
-                            </div>
+                             <span>No results found</span>
                         </>
                     )}
                 </div>
