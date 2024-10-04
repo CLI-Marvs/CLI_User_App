@@ -30,9 +30,6 @@ const AssignModal = ({ modalRef, employeeData, isAssign }) => {
         }
     };
 
-
-
-
     const reassignInquiry = async () => {
         if(!employeeData || Object.keys(employeeData).length === 0) {
             alert("please select employee first");

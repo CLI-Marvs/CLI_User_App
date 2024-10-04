@@ -4,6 +4,7 @@ import AssignModal from "./AssignModal";
 import { useStateContext } from "../../../context/contextprovider";
 import TextField from "@mui/material/TextField";
 import Autocomplete from "@mui/material/Autocomplete";
+import apiService from "../../servicesApi/apiService";
 
 const AssignSidePanel = ({ ticketId }) => {
     const { setTicketId, logs, allEmployees, user, data, specificInquiry } =
@@ -30,12 +31,21 @@ const AssignSidePanel = ({ ticketId }) => {
         ticketId: ticketId,
     }));
 
-
-    const filteredOptions = employeeOptions.filter(
+    /* const filteredOptions = employeeOptions.filter(
         (option) =>
             option.name.toLowerCase().includes(search.toLowerCase()) ||
             option.email.toLowerCase().includes(search.toLowerCase()) ||
             option.department.toLowerCase().includes(search.toLowerCase())
+    ); */
+
+    const filteredOptions = employeeOptions.filter(
+        (option) =>
+            (option.name &&
+                option.name.toLowerCase().includes(search.toLowerCase())) ||
+            (option.email &&
+                option.email.toLowerCase().includes(search.toLowerCase())) ||
+            (option.department &&
+                option.department.toLowerCase().includes(search.toLowerCase()))
     );
 
     const handleCheckboxChange = (option) => {
@@ -69,7 +79,7 @@ const AssignSidePanel = ({ ticketId }) => {
         }
     };
 
-    const highlightText = (text) => {
+    /*   const highlightText = (text) => {
         if (!search) return text;
         const parts = text.split(new RegExp(`(${search})`, "gi"));
         return (
@@ -85,11 +95,52 @@ const AssignSidePanel = ({ ticketId }) => {
                 )}
             </span>
         );
+    }; */
+
+    const highlightText = (text) => {
+        if (!text) return text;
+        if (!search) return text;
+
+        const parts = text.split(new RegExp(`(${search})`, "gi"));
+
+        return (
+            <span>
+                {parts.map((part, index) =>
+                    part.toLowerCase() === search.toLowerCase() ? (
+                        <span key={index} className="font-semibold">
+                            {part}
+                        </span>
+                    ) : (
+                        part
+                    )
+                )}
+            </span>
+        );
     };
 
-    const handleAssign = () => {
+    const handleAssign = async () => {
+        if (selectedOptions.length === 0) {
+            alert("please select employee first");
+            return;
+        }
+        await saveAssignee();
         setIsDropdownOpen(false);
         setSelectedAssignees(selectedOptions);
+    };
+
+    const saveAssignee = async () => {
+        try {
+            const response = await apiService.post("add-assignee", {
+                selectedOptions,
+                assign_by: user?.firstname + " " + user?.lastname,
+                assign_by_department: user?.department,
+                /*  remarks: remarks, */
+            });
+            /* getInquiryLogs(employeeData.ticketId); */
+            /*  getAllConcerns(); */
+        } catch (error) {
+            console.log("error assigning", error);
+        }
     };
 
     React.useEffect(() => {
@@ -136,7 +187,7 @@ const AssignSidePanel = ({ ticketId }) => {
                     </div>
 
                     {/* Conditionally render the list when dropdown is open */}
-                    {isDropdownOpen && filteredOptions.length > 0 && (
+                    {isDropdownOpen && filteredOptions.length > 0 ? (
                         <>
                             <div className="absolute w-[623px] min-h-[550px] space-y-2 border-t-0 border-gray-300 p-2 py-[20px] shadow-custom4 rounded-t-non rounded-[10px] bg-custom-grayF1 z-20">
                                 <div className="mb-4 flex flex-wrap gap-2 min-h-[26px]">
@@ -158,51 +209,56 @@ const AssignSidePanel = ({ ticketId }) => {
                                     ))}
                                 </div>
                                 <ul className="flex flex-col space-y-2 max-h-[550px] overflow-auto">
-                                    {/* Selected options displayed as tags */}
+                                    {filteredOptions.map((option, index) => (
+                                        <li
+                                            key={index}
+                                            className="flex h-[110px] w-full py-[20px] px-[30px] gap-[18px] bg-custom-lightestgreen rounded-[10px]"
+                                        >
+                                            <div className="flex items-start py-[5px]">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={selectedOptions.some(
+                                                        (selected) =>
+                                                            selected.email ===
+                                                            option.email
+                                                    )}
+                                                    onChange={() =>
+                                                        handleCheckboxChange(
+                                                            option
+                                                        )
+                                                    }
+                                                    className="form-checkbox custom-checkbox accent-custom-lightgreen text-white"
+                                                />
+                                            </div>
 
-                                    {/* Render filtered options */}
-                                    {filteredOptions.map((option,index) => (
-                                          <li
-                                          key={index}
-                                          className="flex h-[110px] w-full py-[20px] px-[30px] gap-[18px] bg-custom-lightestgreen rounded-[10px]"
-                                      >
-                                          <div className="flex items-start py-[5px]">
-                                              <input
-                                                  type="checkbox"
-                                                  checked={selectedOptions.some(
-                                                      (selected) =>
-                                                          selected.email ===
-                                                          option.email
-                                                  )}
-                                                  onChange={() =>
-                                                      handleCheckboxChange(
-                                                          option
-                                                      )
-                                                  }
-                                                  className="form-checkbox custom-checkbox accent-custom-lightgreen text-white"
-                                              />
-                                          </div>
-
-                                          <div>
-                                              <span>
-                                                  {highlightText(option.name)}
-                                              </span>
-                                              <br />
-                                              <span className="text-sm">
-                                                  {highlightText(
-                                                      option.email
-                                                  )}
-                                              </span>
-                                              <br />
-                                              <span className="text-sm">
-                                                  {highlightText(
-                                                      option.department
-                                                  )}
-                                              </span>
-                                          </div>
-                                      </li>
+                                            <div>
+                                                <span>
+                                                    {highlightText(option.name)}
+                                                </span>
+                                                <br />
+                                                <span className="text-sm">
+                                                    {highlightText(
+                                                        option.email
+                                                    )}
+                                                </span>
+                                                <br />
+                                                <span className="text-sm">
+                                                    {highlightText(
+                                                        option.department
+                                                    )}
+                                                </span>
+                                            </div>
+                                        </li>
                                     ))}
                                 </ul>
+                            </div>
+                        </>
+                    ) : (
+                        <>
+                            <div className="absolute w-[623px] min-h-[550px] space-y-2 border-t-0 border-gray-300 p-2 py-[20px] shadow-custom4 rounded-t-non rounded-[10px] bg-custom-grayF1 z-20">
+                               <div className="flex">
+                                <span>No results found</span>
+                               </div>
                             </div>
                         </>
                     )}
@@ -210,30 +266,30 @@ const AssignSidePanel = ({ ticketId }) => {
             </div>
             <div className=" w-full bg-white rounded-[10px] py-[16px] px-[20px]">
                 <div className="flex w-full justify-start items-start">
-                    <p className="text-sm text-custom-bluegreen pt-1 font-semibold">Assignee</p>
+                    <p className="text-sm text-custom-bluegreen pt-1 font-semibold">
+                        Assignee
+                    </p>
                     <div className="ml-2 flex overflow-x-auto gap-2 max-w-full custom-scrollbar">
                         {selectedAssignees.length > 0 ? (
                             <>
                                 {selectedAssignees.map((assignee) => (
-                                        <>
-                                            <span
-                                                key={assignee.name}
-                                                className="bg-custom-lightgreen text-white rounded-full px-3 py-1 text-xs flex-shrink-0 flex mb-[4px]"
+                                    <>
+                                        <span
+                                            key={assignee.name}
+                                            className="bg-custom-lightgreen text-white rounded-full px-3 py-1 text-xs flex-shrink-0 flex mb-[4px]"
+                                        >
+                                            {assignee.name}
+                                            <button
+                                                onClick={() =>
+                                                    removeTag(assignee)
+                                                }
+                                                className="ml-2 pb-[2px] border border-white text-[15px] text-white bg-custom-lightgreen rounded-full h-5 w-5 flex items-center justify-center"
                                             >
-                                                {assignee.name}
-                                                <button
-                                                    onClick={() =>
-                                                        removeTag(assignee)
-                                                    }
-                                                    className="ml-2 pb-[2px] border border-white text-[15px] text-white bg-custom-lightgreen rounded-full h-5 w-5 flex items-center justify-center"
-                                                >
-                                                    &times;
-                                                </button>
-                                            </span>
-                                           
-                                        </>
-                                       
-                                    ))}
+                                                &times;
+                                            </button>
+                                        </span>
+                                    </>
+                                ))}
                             </>
                         ) : (
                             <span className="text-sm text-gray-500 pt-1">
@@ -245,7 +301,10 @@ const AssignSidePanel = ({ ticketId }) => {
 
                 <div className="h-full flex flex-col">
                     <div className=" min-h-[400px]">
-                        <AssignDetails logMessages={logsMessages} ticketId={ticketId} />
+                        <AssignDetails
+                            logMessages={logsMessages}
+                            ticketId={ticketId}
+                        />
                     </div>
                     <div className="border border-t-1 border-custom-lightestgreen flex-shrink-0 mb-[160px] mt-[17px]"></div>
                 </div>
