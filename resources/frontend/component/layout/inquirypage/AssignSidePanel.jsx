@@ -187,7 +187,7 @@ const AssignSidePanel = ({ ticketId }) => {
                     </div>
 
                     {/* Conditionally render the list when dropdown is open */}
-                    {isDropdownOpen && filteredOptions.length > 0 ? (
+                    {isDropdownOpen && filteredOptions.length > 0 && (
                         <>
                             <div className="absolute w-[623px] min-h-[550px] space-y-2 border-t-0 border-gray-300 p-2 py-[20px] shadow-custom4 rounded-t-non rounded-[10px] bg-custom-grayF1 z-20">
                                 <div className="mb-4 flex flex-wrap gap-2 min-h-[26px]">
@@ -253,15 +253,7 @@ const AssignSidePanel = ({ ticketId }) => {
                                 </ul>
                             </div>
                         </>
-                    ) : (
-                        <>
-                            <div className="absolute w-[623px] min-h-[550px] space-y-2 border-t-0 border-gray-300 p-2 py-[20px] shadow-custom4 rounded-t-non rounded-[10px] bg-custom-grayF1 z-20">
-                               <div className="flex">
-                                <span>No results found</span>
-                               </div>
-                            </div>
-                        </>
-                    )}
+                    ) }
                 </div>
             </div>
             <div className=" w-full bg-white rounded-[10px] py-[16px] px-[20px]">
