@@ -31,7 +31,7 @@ const InquiryThread = () => {
     const [ticket, setTicket] = useState("");
     const [status, setStatus] = useState("");
     const [hasAttachments, setHasAttachments] = useState(false);
-
+    const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);    
     const {
         messages,
         setTicketId,
@@ -95,6 +95,12 @@ const InquiryThread = () => {
         }
     };
 
+    const handleConfirmation = () => {
+        if (chatMessage.trim()) {
+            setIsConfirmModalOpen(true); // open confirmation modal
+        }
+    };
+
     const handleBack = () => {
         navigate("/inquirymanagement/inquirylist");
     };
@@ -110,7 +116,7 @@ const InquiryThread = () => {
             name,
             category,
             email,
-            ticket,
+            ticket, 
             startDate,
             status,
             hasAttachments,
@@ -133,6 +139,7 @@ const InquiryThread = () => {
     };
     const submitMessage = async () => {
         setLoading(true);
+        setIsConfirmModalOpen(false);
         const formData = new FormData();
 
         if (attachedFiles && attachedFiles.length > 0) {
@@ -476,7 +483,7 @@ const InquiryThread = () => {
                                         <div className="absolute bottom-2 right-6 flex items-center">
                                             <button
                                                 type="button"
-                                                onClick={submitMessage}
+                                                onClick={handleConfirmation}
                                                 disabled={
                                                     !chatMessage.trim() ||
                                                     loading
@@ -495,6 +502,28 @@ const InquiryThread = () => {
                                                 )}
                                             </button>
                                         </div>
+                                        {isConfirmModalOpen && (
+                                            <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+                                                <div className="bg-white p-4 rounded shadow-lg w-[300px]">
+                                                    <h2 className="text-lg font-semibold">Confirm Action</h2>
+                                                    <p>Are you sure you want to send this message?</p>
+                                                    <div className="flex justify-end mt-4 space-x-2">
+                                                        <button
+                                                            onClick={() => setIsConfirmModalOpen(false)}
+                                                            className="bg-gray-300 text-black px-3 py-1 rounded"
+                                                        >
+                                                            Cancel
+                                                        </button>
+                                                        <button
+                                                            onClick={submitMessage}
+                                                            className="bg-blue-500 text-white px-3 py-1 rounded"
+                                                        >
+                                                            Confirm
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             </div>
