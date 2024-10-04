@@ -31,77 +31,77 @@ const AssignDetails = ({ logMessages, ticketId }) => {
         }
     };
 
-    const concernChannelFunc = (channel) => {
-        channel.listen("ConcernMessages", (event) => {
-            setConcernMessages((prevMessages) => {
-                const messagesForTicket = prevMessages[ticketId] || [];
-                if (
-                    messagesForTicket.find(
-                        (msg) => msg.id === event.data.message.id
-                    )
-                ) {
-                    return prevMessages;
-                }
+    // const concernChannelFunc = (channel) => {
+    //     channel.listen("ConcernMessages", (event) => {
+    //         setConcernMessages((prevMessages) => {
+    //             const messagesForTicket = prevMessages[ticketId] || [];
+    //             if (
+    //                 messagesForTicket.find(
+    //                     (msg) => msg.id === event.data.message.id
+    //                 )
+    //             ) {
+    //                 return prevMessages;
+    //             }
 
-                const newMessage = {
-                    id: event.data.message.id,
-                    message: event.data.message.message,
-                    sender_id: event.data.message.sender_id,
-                    firstname: event.data.firstname,
-                    lastname: event.data.lastname,
-                    ticketId: event.data.ticketId,
-                    created_at: event.data.message.created_at,
-                };
+    //             const newMessage = {
+    //                 id: event.data.message.id,
+    //                 message: event.data.message.message,
+    //                 sender_id: event.data.message.sender_id,
+    //                 firstname: event.data.firstname,
+    //                 lastname: event.data.lastname,
+    //                 ticketId: event.data.ticketId,
+    //                 created_at: event.data.message.created_at,
+    //             };
 
-                return {
-                    ...prevMessages,
-                    [ticketId]: [...messagesForTicket, newMessage],
-                };
-            });
-        });
-    };
+    //             return {
+    //                 ...prevMessages,
+    //                 [ticketId]: [...messagesForTicket, newMessage],
+    //             };
+    //         });
+    //     });
+    // };
 
-    const adminReplyChannelFunc = (channel) => {
-        channel.listen("AdminReplyLogs", (event) => {
-            setLogs((prevLogs) => {
-                const prevLogsReply = prevLogs[ticketId] || [];
-                if (prevLogsReply.find((log) => log.id === event.data.logId)) {
-                    return prevLogs;
-                }
-                const newLog = event.data;
-                return {
-                    ...prevLogs,
-                    [ticketId]: [...prevLogsReply, newLog],
-                };
-            });
-        });
-    };
+    // const adminReplyChannelFunc = (channel) => {
+    //     channel.listen("AdminReplyLogs", (event) => {
+    //         setLogs((prevLogs) => {
+    //             const prevLogsReply = prevLogs[ticketId] || [];
+    //             if (prevLogsReply.find((log) => log.id === event.data.logId)) {
+    //                 return prevLogs;
+    //             }
+    //             const newLog = event.data;
+    //             return {
+    //                 ...prevLogs,
+    //                 [ticketId]: [...prevLogsReply, newLog],
+    //             };
+    //         });
+    //     });
+    // };
 
-    useEffect(() => {
-        let concernChannel;
-        let adminReplyChannel;
-        let newTicketId;
-        if (ticketId) {
-            newTicketId = ticketId.replace("#", "");
-            concernChannel = window.Echo.channel(`concerns.${newTicketId}`);
-            adminReplyChannel = window.Echo.channel(
-                `adminreply.${newTicketId}`
-            );
-            concernChannelFunc(concernChannel);
-            adminReplyChannelFunc(adminReplyChannel);
-        }
+    // useEffect(() => {
+    //     let concernChannel;
+    //     let adminReplyChannel;
+    //     let newTicketId;
+    //     if (ticketId) {
+    //         newTicketId = ticketId.replace("#", "");
+    //         concernChannel = window.Echo.channel(`concerns.${newTicketId}`);
+    //         adminReplyChannel = window.Echo.channel(
+    //             `adminreply.${newTicketId}`
+    //         );
+    //         concernChannelFunc(concernChannel);
+    //         adminReplyChannelFunc(adminReplyChannel);
+    //     }
 
-        return () => {
-            if (concernChannel) {
-                concernChannel.stopListening("ConcernMessages");
-                window.Echo.leaveChannel(`concerns.${newTicketId}`);
-            }
-            if (adminReplyChannel) {
-                adminReplyChannel.stopListening("AdminReplyLogs");
-                window.Echo.leaveChannel(`adminreply.${newTicketId}`);
-            }
-        };
-    }, [ticketId]);
+    //     return () => {
+    //         if (concernChannel) {
+    //             concernChannel.stopListening("ConcernMessages");
+    //             window.Echo.leaveChannel(`concerns.${newTicketId}`);
+    //         }
+    //         if (adminReplyChannel) {
+    //             adminReplyChannel.stopListening("AdminReplyLogs");
+    //             window.Echo.leaveChannel(`adminreply.${newTicketId}`);
+    //         }
+    //     };
+    // }, [ticketId]);
 
     const sortedConcernMessages = concernMessages[ticketId]
         ? concernMessages[ticketId].flat().sort((a, b) => new Date(b.created_at) - new Date(a.created_at))

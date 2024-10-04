@@ -18,6 +18,8 @@ import "react-datepicker/dist/react-datepicker.css";
 import DateLogo from "../../../../../public/Images/Date_range.svg";
 import CircularProgress from "@mui/material/CircularProgress";
 import AddInfoModal from "./AddInfoModal";
+import { AiFillInfoCircle } from "react-icons/ai";
+
 
 const InquiryThread = () => {
     const [attachedFiles, setAttachedFiles] = useState([]);
@@ -203,29 +205,29 @@ const InquiryThread = () => {
     }, [isFilterVisible]);
 
 
-    const adminMessageChannelFunc = (channel) => {
-        channel.listen("AdminMessage", (event) => {
-            console.log("event data", event);
-            setMessages((prevMessages) => {
-                const messagesForTicket = prevMessages[ticketId] || [];
-                if (
-                    messagesForTicket.find(
-                        (msg) => msg.id === event.data.id
-                    )
-                ) {
-                    return prevMessages;
-                }
+//     const adminMessageChannelFunc = (channel) => {
+//         channel.listen("AdminMessage", (event) => {
+//             console.log("event data", event);
+//             setMessages((prevMessages) => {
+//                 const messagesForTicket = prevMessages[ticketId] || [];
+//                 if (
+//                     messagesForTicket.find(
+//                         (msg) => msg.id === event.data.id
+//                     )
+//                 ) {
+//                     return prevMessages;
+//                 }
 
-                const newMessage = event.data;
+//                 const newMessage = event.data;
 
-                return {
-                    ...prevMessages,
-                    [ticketId]: [...messagesForTicket, newMessage],
-                };
-            });
-        });
-    };
-   /*  const conversationMessages = messages[ticketId] || []; */
+//                 return {
+//                     ...prevMessages,
+//                     [ticketId]: [...messagesForTicket, newMessage],
+//                 };
+//             });
+//         });
+//     };
+//    /*  const conversationMessages = messages[ticketId] || []; */
 
 
    const combineThreadMessages = messages[ticketId]
@@ -233,22 +235,22 @@ const InquiryThread = () => {
          .flat()
          .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
    : [];
-    useEffect(() => {
-        let adminMessageChannel;
-        let newTicketId;
-        if(ticketId) {
-            newTicketId = ticketId.replace("#", "");
-            adminMessageChannel = window.Echo.channel(`adminmessage.${newTicketId}`);
-            console.log("channel created of admin message", adminMessageChannel);
-            adminMessageChannelFunc(adminMessageChannel);
-        }
-        return () => {
-            if (adminMessageChannel) {
-                adminMessageChannel.stopListening("AdminMessage");
-                window.Echo.leaveChannel(`adminmessage.${newTicketId}`);
-            }
-        };
-    }, [ticketId]);
+//     useEffect(() => {
+//         let adminMessageChannel;
+//         let newTicketId;
+//         if(ticketId) {
+//             newTicketId = ticketId.replace("#", "");
+//             adminMessageChannel = window.Echo.channel(`adminmessage.${newTicketId}`);
+//             console.log("channel created of admin message", adminMessageChannel);
+//             adminMessageChannelFunc(adminMessageChannel);
+//         }
+//         return () => {
+//             if (adminMessageChannel) {
+//                 adminMessageChannel.stopListening("AdminMessage");
+//                 window.Echo.leaveChannel(`adminmessage.${newTicketId}`);
+//             }
+//         };
+//     }, [ticketId]);
 
     console.log("combineThreadMEssages", combineThreadMessages);
     return (
@@ -552,19 +554,28 @@ const InquiryThread = () => {
                                         </div>
                                         {isConfirmModalOpen && (
                                             <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-                                                <div className="bg-white p-4 rounded shadow-lg w-[300px]">
-                                                    <h2 className="text-lg font-semibold">Confirm Action</h2>
-                                                    <p>Are you sure you want to send this message?</p>
-                                                    <div className="flex justify-end mt-4 space-x-2">
+                                                <div className="bg-white p-[20px] rounded-[10px] shadow-custom5 w-[467px] h-[228px]">
+                                                    <div className="flex justify-center items-center mb-[30px] mt-[10px]">
+                                                        <AiFillInfoCircle className="size-[37px] text-[#5B9BD5]" />
+                                                    </div>
+                                                    <div className="flex justify-center mb-[26px]">
+                                                        <p className="montserrat-medium text-[20px] ">Are you sure about sending this reply?</p>
+                                                    </div>
+                                                    
+                                                    <div className="flex justify-center space-x-[19px]">
                                                         <button
                                                             onClick={() => setIsConfirmModalOpen(false)}
-                                                            className="bg-gray-300 text-black px-3 py-1 rounded"
+                                                            className="gradient-btn2 p-[1px] rounded-[10px] w-[92px] h-[35px]"
                                                         >
-                                                            Cancel
+                                                            <div className="bg-white w-full h-full rounded-[9px] flex justify-center items-center text-sm montserrat-semibold text-custom-solidgreen">
+                                                                <div className="text-base font-bold bg-gradient-to-r from-custom-bluegreen via-custom-solidgreen to-custom-solidgreen bg-clip-text text-transparent">
+                                                                    Cancel
+                                                                </div>
+                                                            </div>
                                                         </button>
                                                         <button
                                                             onClick={submitMessage}
-                                                            className="bg-blue-500 text-white px-3 py-1 rounded"
+                                                            className="gradient-btn2 p-[1px] rounded-[10px] w-[100px] h-[35px] montserrat-semibold text-white text-sm" 
                                                         >
                                                             Confirm
                                                         </button>
