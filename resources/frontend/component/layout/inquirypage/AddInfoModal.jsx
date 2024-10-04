@@ -1,7 +1,7 @@
-import React,{useState} from 'react'
+import React, { useState } from 'react'
 import { IoMdArrowDropdown } from 'react-icons/io'
 
-const AddInfoModal = ({modalRef}) => {
+const AddInfoModal = ({ modalRef }) => {
 
     const [message, setMessage] = useState("");
 
@@ -10,10 +10,10 @@ const AddInfoModal = ({modalRef}) => {
     const handleChangeValue = (e) => {
         const newValue = e.target.value;
         setMessage(newValue);
-       
+
     };
-  return (
-    <dialog id="Resolved" className="modal w-[587px] rounded-[10px] shadow-custom5 backdrop:bg-black/50" ref={modalRef}>
+    return (
+        <dialog id="Resolved" className="modal w-[587px] rounded-[10px] shadow-custom5 backdrop:bg-black/50" ref={modalRef}>
             <div className=" rounded-[10px]">
                 <div className="absolute right-0">
                     <form
@@ -81,15 +81,15 @@ const AddInfoModal = ({modalRef}) => {
                             <div className="relative w-full">
                                 <select
                                     name="property"
-                                /*     value={formData.property}
-                                    onChange={handleChange} */
+                                    /*     value={formData.property}
+                                        onChange={handleChange} */
                                     className="appearance-none w-full px-4 text-sm py-1 bg-white focus:outline-none border-0 mobile:text-xs"
                                 >
-                                     <option value="">property</option>
-                                            <option  value="property1">Property1</option>
+                                    <option value="">property</option>
+                                    <option value="property1">Property1</option>
                                 </select>
                                 <span className="absolute inset-y-0 right-0 flex  items-center pr-3 pl-3 bg-[#EDEDED] text-custom-gray81 pointer-events-none">
-                                    <IoMdArrowDropdown/>
+                                    <IoMdArrowDropdown />
                                 </span>
                             </div>
                         </div>
@@ -126,15 +126,24 @@ const AddInfoModal = ({modalRef}) => {
                                 name="details_message"
                                 placeholder="Write your concern here."
                                 rows="4"
-                                className={` rounded-[5px] bg-white border border-[D6D6D6] w-full pl-2`}
+                                draggable="false"
+                                className={` rounded-[5px] bg-white border border-[D6D6D6] w-full pl-2 outline-none`}
                             ></textarea>
                         </div>
                     </div>
-            </div>
+                    <div className='flex justify-end'>
+                        <form  method="dialog">
+                            <button className='w-[133px] h-[39px] gradient-btn5 font-semibold text-sm text-white rounded-[10px]'>
+                                    Submit
+                            </button>
+                        </form>
+                       
+                    </div>
                 </div>
-               
+            </div>
+
         </dialog>
-  )
+    )
 }
 
 export default AddInfoModal

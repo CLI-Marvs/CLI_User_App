@@ -104,9 +104,7 @@ const AssignDetails = ({ logMessages, ticketId }) => {
     }, [ticketId]);
 
     const sortedConcernMessages = concernMessages[ticketId]
-        ? concernMessages[ticketId]
-              .flat()
-              .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+        ? concernMessages[ticketId].flat().sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
         : [];
 
     const sortedLogs = logs[ticketId] || [];
