@@ -10,7 +10,7 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class AdminReplyLogs implements ShouldBroadcast
+class RetrieveAssignees implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
@@ -22,8 +22,6 @@ class AdminReplyLogs implements ShouldBroadcast
 
     public function __construct($data)
     {
-        \Log::info('Event data reply:', $data);
-
         $this->data = $data;
     }
 
@@ -34,14 +32,11 @@ class AdminReplyLogs implements ShouldBroadcast
      */
     public function broadcastOn(): array
     {
-        $logsType = [];
-        if($this->data['logRef'] === 'admin_reply') {
-            $logsType[] = new Channel('adminreply.' . $this->data['ticketId']);
-        }
-        if($this->data['logRef'] === 'assign_logs') {
-            $logsType[] = new Channel('adminreply.' . $this->data['ticketId']);
-        }
-        return $logsType;        
+        
+        return [
+            new Channel('retrieveassignees.' . $this->data['ticketId']),
+        ];
+        
+        
     }
-
 }

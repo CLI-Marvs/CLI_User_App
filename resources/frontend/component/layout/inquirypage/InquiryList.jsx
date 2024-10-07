@@ -57,7 +57,6 @@ const InquiryList = () => {
         setCurrentPage(selectedPage);
     };
 
-    console.log("searchFilter", searchFilter);
     const handleRefresh = () => {
         if (daysFilter) {
             setDaysFilter(null);
