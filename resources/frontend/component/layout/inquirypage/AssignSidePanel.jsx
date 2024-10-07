@@ -328,9 +328,9 @@ const AssignSidePanel = ({ ticketId }) => {
                     </div>
 
                     {/* Conditionally render the list when dropdown is open */}
-                    {isDropdownOpen && filteredOptions.length > 0 && (
+                    {isDropdownOpen && (
                         <>
-                            <div className="absolute w-[623px] min-h-[550px] space-y-2 border-t-0 border-gray-300 p-2 py-[20px] shadow-custom4 rounded-t-non rounded-[10px] bg-custom-grayF1 z-20">
+                            <div className="absolute w-[623px] min-h-[550px] space-y-2 border-t-0 border-gray-300 p-2 py-[20px] shadow-custom6 rounded-t-none rounded-[10px] bg-custom-grayF1 z-20">
                                 <div className="mb-4 flex flex-wrap gap-2 min-h-[26px]">
                                     {selectedOptions.map((option, index) => (
                                         <div
@@ -418,6 +418,12 @@ const AssignSidePanel = ({ ticketId }) => {
                                             </li>
                                         );
                                     })}
+                                    {filteredOptions.length == 0  && (
+
+                                        <div>
+                                            <p>No results found</p>
+                                        </div>
+                                    )}
                                 </ul>
                             </div>
                         </>
