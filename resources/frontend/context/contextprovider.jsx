@@ -56,6 +56,7 @@ export const ContextProvider = ({ children }) => {
     const [towerPhaseId, setTowerPhaseId] = useState(0);
     const [isLoading, setIsLoading] = useState(false);
     const [concernMessages, setConcernMessages] = useState([]);
+    const [assigneesPersonnel, setAssigneesPersonnel] = useState([]);
     useEffect(() => {
         if (user && user.department && !isDepartmentInitialized) {
             setDepartment(user.department === "CRS" ? "All" : user.department);
@@ -192,6 +193,26 @@ export const ContextProvider = ({ children }) => {
         }
     };
 
+    const getAssigneesPersonnel = async () => {
+        if (ticketId) {
+            try {
+                const encodedTicketId = encodeURIComponent(ticketId);
+
+                const response = await apiService.get(
+                    `personnel-assignee?ticketId=${encodedTicketId}`
+                );
+                const data = response.data;
+
+                setAssigneesPersonnel((prevAssigneesPersonnel) => ({
+                    ...prevAssigneesPersonnel,
+                    [ticketId]: data,
+                }));
+            } catch (error) {
+                console.log("error");
+            }
+        }
+    };
+
     const getConcernMessages = async () => {
         if (ticketId) {
             try {
@@ -205,7 +226,6 @@ export const ContextProvider = ({ children }) => {
                     ...prevMessages,
                     [ticketId]: data,
                 }));
-
             } catch (error) {
                 console.log("error retrieving", error);
             }
@@ -400,7 +420,7 @@ export const ContextProvider = ({ children }) => {
             getMessages(ticketId);
             getInquiryLogs(ticketId);
             getConcernMessages();
-
+            getAssigneesPersonnel();
         }
     }, [ticketId]);
 
@@ -413,8 +433,6 @@ export const ContextProvider = ({ children }) => {
     useEffect(() => {
         getSpecificInquiry();
     }, []);
-
-   
 
     //* For Report Page
     useEffect(() => {
@@ -505,7 +523,10 @@ export const ContextProvider = ({ children }) => {
                 setPropertyFloors,
                 concernMessages,
                 setConcernMessages,
-                getConcernMessages 
+                getConcernMessages,
+                setAssigneesPersonnel,
+                assigneesPersonnel,
+                getAssigneesPersonnel,
             }}
         >
             {children}

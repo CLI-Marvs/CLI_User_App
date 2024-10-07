@@ -63,6 +63,7 @@ const AssignDetails = ({ logMessages, ticketId }) => {
 
     const adminReplyChannelFunc = (channel) => {
         channel.listen("AdminReplyLogs", (event) => {
+            console.log("event data", event.data);
             setLogs((prevLogs) => {
                 const prevLogsReply = prevLogs[ticketId] || [];
                 if (prevLogsReply.find((log) => log.id === event.data.logId)) {
@@ -104,7 +105,9 @@ const AssignDetails = ({ logMessages, ticketId }) => {
     }, [ticketId]);
 
     const sortedConcernMessages = concernMessages[ticketId]
-        ? concernMessages[ticketId].flat().sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+        ? concernMessages[ticketId]
+              .flat()
+              .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
         : [];
 
     const sortedLogs = logs[ticketId] || [];
@@ -116,7 +119,7 @@ const AssignDetails = ({ logMessages, ticketId }) => {
         ...sortedLogs.map((logReply) => ({
             ...logReply,
             type: "log",
-            created_at: logReply.created_at || logReply.details?.created_at,
+            created_at: logReply.created_at,
         })),
     ].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
@@ -130,8 +133,7 @@ const AssignDetails = ({ logMessages, ticketId }) => {
             .join(" ");
     };
 
-
-    const renderDetails = (actionType, details) => {
+    const renderDetails = (actionType, details, inquiry_createdAt) => {
         switch (actionType) {
             case "admin_reply":
                 return (
@@ -141,12 +143,12 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                                 ⚬
                             </span>
                             <p className="montserrat-medium text-sm text-custom-gray81">
-                                {moment(details.created_at).format(
+                                {moment(inquiry_createdAt).format(
                                     "MMMM D, YYYY"
                                 )}
                             </p>
                             <span className="montserrat-medium text-custom-blue">
-                                {moment(details.created_at).format("hh:mm A")}
+                                {moment(inquiry_createdAt).format("hh:mm A")}
                             </span>
                             <span className="text-custom-lightgreen">|</span>
                             <p className="montserrat-medium text-sm text-custom-lightgreen">
@@ -167,6 +169,45 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                         </div>
                     </div>
                 );
+            case "assign_to":
+                return (
+                    <>
+                        <div className="flex flex-col text-sm montserrat-medium">
+                            <div className="flex gap-1 items-center">
+                                <span className="flex mb-1 text-[25px] text-custom-gray81">
+                                    ⚬
+                                </span>
+                                <p className="montserrat-medium text-sm text-custom-gray81">
+                                    {moment(inquiry_createdAt).format(
+                                        "MMMM D, YYYY"
+                                    )}
+                                </p>
+                                <span className="montserrat-medium text-custom-blue">
+                                    {moment(inquiry_createdAt).format(
+                                        "hh:mm A"
+                                    )}
+                                </span>
+                            </div>
+                            <div>
+                                <p className="text-custom-solidgreen mb-1">
+                                    {details.assign_by}
+                                </p>
+                            </div>
+                            <div>
+                                <p className="text-custom-solidgreen mb-1">
+                                    Added assignee:{" "}
+                                    {details.assign_to_name.join(", ")}
+                                </p>
+                            </div>
+                        </div>
+                    </>
+                );
+                case "inquiry_status":
+                    return (
+                        <>
+                          
+                        </>
+                    );
             default:
                 return <p>Unknown log type</p>;
         }
@@ -194,7 +235,7 @@ const AssignDetails = ({ logMessages, ticketId }) => {
 
             <div className="w-full p-[10px] mt-[12px] flex flex-col gap-[10px]">
                 {combinedMessages && combinedMessages.length > 0 ? (
-                    combinedMessages.map((item) => {
+                    combinedMessages.map((item, index) => {
                         if (item.type === "concern") {
                             const formattedDate = moment(
                                 item.created_at
@@ -206,7 +247,7 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                             return (
                                 <div
                                     className="flex flex-col gap-[10px]"
-                                    key={item.id}
+                                    key={index}
                                 >
                                     <div className="flex gap-[10px] text-sm montserrat-medium items-center">
                                         <div className="flex gap-1 items-center">
@@ -243,13 +284,23 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                                 logData = JSON.parse(item.requestor_reply);
                             } else if (item.assign_to) {
                                 logData = JSON.parse(item.assign_to);
+                            } else if (item.inquiry_status) {
+                                logData = JSON.parse(item.inquiry_status);
                             }
 
                             const logType = logData.log_type || "unknown";
                             const details = logData.details || {};
 
                             if (logType !== "unknown") {
-                                return <>{renderDetails(logType, details)}</>;
+                                return (
+                                    <>
+                                        {renderDetails(
+                                            logType,
+                                            details,
+                                            item.created_at
+                                        )}
+                                    </>
+                                );
                             }
                         }
                         return null;

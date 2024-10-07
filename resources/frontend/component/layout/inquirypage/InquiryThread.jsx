@@ -31,7 +31,7 @@ const InquiryThread = () => {
     const [ticket, setTicket] = useState("");
     const [status, setStatus] = useState("");
     const [hasAttachments, setHasAttachments] = useState(false);
-    const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);    
+    const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
     const {
         messages,
         setTicketId,
@@ -41,7 +41,7 @@ const InquiryThread = () => {
         getAllConcerns,
         setSearchFilter,
         data,
-        setMessages
+        setMessages,
     } = useStateContext();
     const [chatMessage, setChatMessage] = useState("");
     const modalRef = useRef(null);
@@ -116,7 +116,7 @@ const InquiryThread = () => {
             name,
             category,
             email,
-            ticket, 
+            ticket,
             startDate,
             status,
             hasAttachments,
@@ -160,7 +160,6 @@ const InquiryThread = () => {
         formData.append("admin_profile_picture", user?.profile_picture || "");
         formData.append("department", user?.department || "");
 
-
         try {
             const response = await apiService.post("send-message", formData, {
                 headers: {
@@ -202,16 +201,11 @@ const InquiryThread = () => {
         };
     }, [isFilterVisible]);
 
-
     const adminMessageChannelFunc = (channel) => {
         channel.listen("AdminMessage", (event) => {
             setMessages((prevMessages) => {
                 const messagesForTicket = prevMessages[ticketId] || [];
-                if (
-                    messagesForTicket.find(
-                        (msg) => msg.id === event.data.id
-                    )
-                ) {
+                if (messagesForTicket.find((msg) => msg.id === event.data.id)) {
                     return prevMessages;
                 }
 
@@ -225,17 +219,19 @@ const InquiryThread = () => {
         });
     };
 
-   const combineThreadMessages = messages[ticketId]
-   ? messages[ticketId]
-         .flat()
-         .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
-   : [];
+    const combineThreadMessages = messages[ticketId]
+        ? messages[ticketId]
+              .flat()
+              .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+        : [];
     useEffect(() => {
         let adminMessageChannel;
         let newTicketId;
-        if(ticketId) {
+        if (ticketId) {
             newTicketId = ticketId.replace("#", "");
-            adminMessageChannel = window.Echo.channel(`adminmessage.${newTicketId}`);
+            adminMessageChannel = window.Echo.channel(
+                `adminmessage.${newTicketId}`
+            );
             adminMessageChannelFunc(adminMessageChannel);
         }
         return () => {
@@ -432,10 +428,12 @@ const InquiryThread = () => {
                             />
                             <div className="flex-1 flex flex-wrap">
                                 <p className="space-x-1 text-custom-bluegreen">
-                                    {dataConcern.property} {dataConcern.details_concern} <span>-</span> {dataConcern.ticket_id}
+                                    {dataConcern.property}{" "}
+                                    {dataConcern.details_concern} <span>-</span>{" "}
+                                    {dataConcern.ticket_id}
                                 </p>
                             </div>
-                          {/*   {dataConcern.created_by &&
+                            {/*   {dataConcern.created_by &&
                                 dataConcern.created_by === user?.id && (
                                     <div className="flex justify-center w-[20px] shrink-0">
                                         <LuTrash2
@@ -445,7 +443,10 @@ const InquiryThread = () => {
                                     </div>
                                 )} */}
                             <div className="flex justify-end shrink-0">
-                                <button onClick={ handleOpenModal} className="w-[85px] h-[29px] rounded-[10px] gradient-btn5 montserrat-medium text-sm text-white hover:shadow-custom4">
+                                <button
+                                    onClick={handleOpenModal}
+                                    className="w-[85px] h-[29px] rounded-[10px] gradient-btn5 montserrat-medium text-sm text-white hover:shadow-custom4"
+                                >
                                     Add Info
                                 </button>
                             </div>
@@ -487,8 +488,8 @@ const InquiryThread = () => {
 
                                     {/* Input field */}
                                     <div className="h-[101px] w-[668]  ">
-                                         <textarea
-                                          placeholder="Reply..."
+                                        <textarea
+                                            placeholder="Reply..."
                                             onChange={(e) =>
                                                 setChatMessage(e.target.value)
                                             }
@@ -531,34 +532,44 @@ const InquiryThread = () => {
                                                     !chatMessage.trim() ||
                                                     loading
                                                 }
-                                                className={`flex w-[82px] h-[28px] rounded-[5px] text-white text-xs justify-center items-center gradient-background3 hover:shadow-custom4 ${loading
+                                                className={`flex w-[82px] h-[28px] rounded-[5px] text-white text-xs justify-center items-center gradient-background3 hover:shadow-custom4 ${
+                                                    loading
                                                         ? "cursor-not-allowed"
                                                         : ""
-                                                    }`}
+                                                }`}
                                             >
                                                 {loading ? (
                                                     <CircularProgress className="spinnerSize" />
                                                 ) : (
-                                                    <>
-                                                        Send Reply
-                                                    </>
+                                                    <>Send Reply</>
                                                 )}
                                             </button>
                                         </div>
                                         {isConfirmModalOpen && (
                                             <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
                                                 <div className="bg-white p-4 rounded shadow-lg w-[300px]">
-                                                    <h2 className="text-lg font-semibold">Confirm Action</h2>
-                                                    <p>Are you sure you want to send this message?</p>
+                                                    <h2 className="text-lg font-semibold">
+                                                        Confirm Action
+                                                    </h2>
+                                                    <p>
+                                                        Are you sure you want to
+                                                        send this message?
+                                                    </p>
                                                     <div className="flex justify-end mt-4 space-x-2">
                                                         <button
-                                                            onClick={() => setIsConfirmModalOpen(false)}
+                                                            onClick={() =>
+                                                                setIsConfirmModalOpen(
+                                                                    false
+                                                                )
+                                                            }
                                                             className="bg-gray-300 text-black px-3 py-1 rounded"
                                                         >
                                                             Cancel
                                                         </button>
                                                         <button
-                                                            onClick={submitMessage}
+                                                            onClick={
+                                                                submitMessage
+                                                            }
                                                             className="bg-blue-500 text-white px-3 py-1 rounded"
                                                         >
                                                             Confirm
@@ -571,7 +582,14 @@ const InquiryThread = () => {
                                 </div>
                             </div>
                             <div className="text-[11px] text-[#B54D4D]">
-                                <p>Note: This message will be send to <span className="font-semibold">{dataConcern.buyer_name}</span>. Please use the comment section for CLI internal communication.</p>
+                                <p>
+                                    Note: This message will be send to{" "}
+                                    <span className="font-semibold">
+                                        {dataConcern.buyer_name}
+                                    </span>
+                                    . Please use the comment section for CLI
+                                    internal communication.
+                                </p>
                             </div>
                         </div>
                         <div className="border my-2 border-t-1 border-custom-lightestgreen"></div>
@@ -655,12 +673,9 @@ const InquiryThread = () => {
                                 </button>
                             </div>
                         </div> */}
-                        
-                       
                     </div>
                 </div>
                 <div className="flex w-[623px] bg-custom-grayFA gap-3 pb-24">
-
                     <div className="w-[623px]">
                         {" "}
                         {/* boxref */}
@@ -669,7 +684,7 @@ const InquiryThread = () => {
                 </div>
             </div>
             <div>
-                <AddInfoModal modalRef={modalRef}/>
+                <AddInfoModal modalRef={modalRef} dataConcern={dataConcern} />
             </div>
         </>
     );
