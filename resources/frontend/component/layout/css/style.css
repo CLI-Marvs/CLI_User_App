@@ -230,3 +230,6 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 textarea {
   resize: none;
 }
+.shrink {
+  transform: scale(0.87); /* Adjust the scale factor as needed */
+}
