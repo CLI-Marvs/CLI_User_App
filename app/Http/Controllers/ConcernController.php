@@ -1321,6 +1321,8 @@ class ConcernController extends Controller
 
         $concern->messages()->where('ticket_id', $ticket_id)->delete();
         $concern->logs()->where('ticket_id', $ticket_id)->delete();
+        $concern->conversations()->where('ticket_id', $ticket_id)->delete();
+        $concern->inquiryAssignee()->where('ticket_id', $ticket_id)->delete();
 
         $concern->delete();
 

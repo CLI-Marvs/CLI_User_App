@@ -557,33 +557,43 @@ const InquiryThread = () => {
                                             </button>
                                         </div>
                                         {isConfirmModalOpen && (
-                                           <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-                                           <div className="bg-white p-[20px] rounded-[10px] shadow-custom5 w-[467px] h-[228]">
-                                               <div className="flex justify-center items-center mt-[14px] ">
-                                                   <AiFillInfoCircle className="size-[37px] text-[#5B9BD5]" />
-                                               </div>
-                                               <div className="flex justify-center mt-[30px]">
-                                                   <p className="montserrat-medium text-[20px]">Are you sure about sending this reply?</p>
-                                               </div>
-                                               <div className="flex justify-center mt-[26px] space-x-[19px]">
-                                                   <button
-                                                       onClick={() => setIsConfirmModalOpen(false)}
-                                                       className="gradient-btn5 p-[1px] w-[92px] h-[35px] rounded-[10px]"
-                                                   >
-                                                       <div className="w-full h-full rounded-[9px] bg-white flex justify-center items-center montserrat-semibold text-sm">
-                                                           <p className="text-base font-bold bg-gradient-to-r from-custom-bluegreen via-custom-solidgreen to-custom-solidgreen bg-clip-text text-transparent">Cancel</p>
-                                                       </div>
-
-                                                   </button>
-                                                   <button
-                                                       onClick={submitMessage}
-                                                       className="gradient-btn5 w-[100px] h-[35px] rounded-[10px] text-sm text-white montserrat-semibold"
-                                                   >
-                                                       Confirm
-                                                   </button>
-                                               </div>
-                                           </div>
-                                       </div>
+                                            <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+                                                <div className="bg-white p-[20px] rounded-[10px] shadow-custom5 w-[467px] h-[228]">
+                                                    <div className="flex justify-center items-center mt-[14px] ">
+                                                        <AiFillInfoCircle className="size-[37px] text-[#5B9BD5]" />
+                                                    </div>
+                                                    <div className="flex justify-center mt-[30px]">
+                                                        <p className="montserrat-medium text-[20px]">
+                                                            Are you sure about
+                                                            sending this reply?
+                                                        </p>
+                                                    </div>
+                                                    <div className="flex justify-center mt-[26px] space-x-[19px]">
+                                                        <button
+                                                            onClick={() =>
+                                                                setIsConfirmModalOpen(
+                                                                    false
+                                                                )
+                                                            }
+                                                            className="gradient-btn5 p-[1px] w-[92px] h-[35px] rounded-[10px]"
+                                                        >
+                                                            <div className="w-full h-full rounded-[9px] bg-white flex justify-center items-center montserrat-semibold text-sm">
+                                                                <p className="text-base font-bold bg-gradient-to-r from-custom-bluegreen via-custom-solidgreen to-custom-solidgreen bg-clip-text text-transparent">
+                                                                    Cancel
+                                                                </p>
+                                                            </div>
+                                                        </button>
+                                                        <button
+                                                            onClick={
+                                                                submitMessage
+                                                            }
+                                                            className="gradient-btn5 w-[100px] h-[35px] rounded-[10px] text-sm text-white montserrat-semibold"
+                                                        >
+                                                            Confirm
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         )}
                                     </div>
                                 </div>
@@ -601,23 +611,27 @@ const InquiryThread = () => {
                         </div>
                         <div className="border my-2 border-t-1 border-custom-lightestgreen"></div>
                         <div className="w-full flex justify-end gap-[13px]">
-                                <FaTrash className="text-[#EB4444] hover:text-red-600 cursor-pointer" />
-                                {isResolved ?
-                                    (
-                                        <div className="flex justify-start items-center w-[122px] font-semibold text-[13px] text-custom-lightgreen space-x-1">
-                                            <p>Ticket Solved</p>
-                                            <IoIosCheckmarkCircle className="size-[18px] text-custom-lightgreen" />
-                                        </div>
-                                    )
-                                    :
-                                    (
-                                        <div onClick={handleOpenResolveModal} className="flex justify-start w-[122px] font-semibold text-[13px] text-[#1A73E8] underline cursor-pointer">
-                                            Mark as resolved
-                                        </div>
-                                    )
-
-                                }
+                            {dataConcern.created_by &&
+                                dataConcern.created_by === user?.id && (
+                                    <FaTrash
+                                        className="text-[#EB4444] hover:text-red-600 cursor-pointer"
+                                        onClick={handleDeleteInquiry}
+                                    />
+                                )}
+                            {isResolved ? (
+                                <div className="flex justify-start items-center w-[122px] font-semibold text-[13px] text-custom-lightgreen space-x-1">
+                                    <p>Ticket Solved</p>
+                                    <IoIosCheckmarkCircle className="size-[18px] text-custom-lightgreen" />
                                 </div>
+                            ) : (
+                                <div
+                                    onClick={handleOpenResolveModal}
+                                    className="flex justify-start w-[122px] font-semibold text-[13px] text-[#1A73E8] underline cursor-pointer"
+                                >
+                                    Mark as resolved
+                                </div>
+                            )}
+                        </div>
                         <div className="flex-grow overflow-y-auto max-h-[calc(100vh-400px)]">
                             <div className="">
                                 {combineThreadMessages.length > 0 &&
@@ -712,7 +726,11 @@ const InquiryThread = () => {
                 <AddInfoModal modalRef={modalRef} dataConcern={dataConcern} />
             </div>
             <div>
-                <ResolveModal modalRef={resolveModalRef} ticketId={ticketId} dataRef={dataConcern} />
+                <ResolveModal
+                    modalRef={resolveModalRef}
+                    ticketId={ticketId}
+                    dataRef={dataConcern}
+                />
             </div>
         </>
     );

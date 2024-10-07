@@ -11,4 +11,11 @@ class Conversations extends Model
 
     protected $table = 'conversations';
     protected $guarded = array();
+
+
+    public function concern()
+    {
+        return $this->belongsTo(Concerns::class, 'ticket_id', 'ticket_id');
+    }
 }
+

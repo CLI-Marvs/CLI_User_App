@@ -31,6 +31,10 @@ Broadcast::channel('retrieveassignees.{ticketId}', function ($data) {
 Broadcast::channel('removeassignees.{ticketId}', function ($data) {
     return true;
 });
+
+Broadcast::channel('followupreply.{ticketId}', function ($data) {
+    return true;
+});
 // Broadcast::channel('concerns.{concernId}', function ($user, $concernId) {
 //     // Implement authorization logic here, like checking if the user has access to this concern
 //     return true; // Or use logic like Concern::find($concernId)->userHasAccess($user)

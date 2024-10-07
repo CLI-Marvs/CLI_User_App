@@ -17,7 +17,7 @@ const AssignSidePanel = ({ ticketId }) => {
         assigneesPersonnel,
         setAssigneesPersonnel,
         getAssigneesPersonnel,
-        getInquiryLogs
+        getInquiryLogs,
     } = useStateContext();
     const [isSelected, setIsSelected] = useState({});
     const [isAssign, setIsAssign] = useState(false);
@@ -52,13 +52,20 @@ const AssignSidePanel = ({ ticketId }) => {
     );
 
     const handleCheckboxChange = (option, matchAssignee = null) => {
-        if(matchAssignee) {
-            if (!selectedOptions.some((selected) => selected.email === matchAssignee.employee_email)) {
-               removeAssignee(ticketId, matchAssignee.employee_email);
+        if (matchAssignee) {
+            if (
+                !selectedOptions.some(
+                    (selected) =>
+                        selected.email === matchAssignee.employee_email
+                )
+            ) {
+                removeAssignee(ticketId, matchAssignee.employee_email);
             }
         } else {
             if (
-                selectedOptions.some((selected) => selected.email === option.email)
+                selectedOptions.some(
+                    (selected) => selected.email === option.email
+                )
             ) {
                 setSelectedOptions((prevSelected) =>
                     prevSelected.filter((item) => item.email !== option.email)
@@ -67,7 +74,6 @@ const AssignSidePanel = ({ ticketId }) => {
                 setSelectedOptions((prevSelected) => [...prevSelected, option]);
             }
         }
-       
     };
 
     const removeTag = (option) => {
@@ -135,14 +141,14 @@ const AssignSidePanel = ({ ticketId }) => {
                         (assignee) => assignee.email === selected.email
                     )
             );
-           /*  return false;    */
+            /*  return false;    */
             if (newAssignees.length > 0) {
                 const response = await apiService.post("add-assignee", {
                     selectedOptions: newAssignees,
                     assign_by: user?.firstname + " " + user?.lastname,
                     assign_by_department: user?.department,
                 });
-                console.log("Assignees saved successfully:", response); 
+                console.log("Assignees saved successfully:", response);
             } else {
                 console.log("No new assignees to save");
             }
@@ -225,13 +231,16 @@ const AssignSidePanel = ({ ticketId }) => {
         /* [assigneesPersonnel[ticketId], */ [assigneesPersonnel[ticketId]]
     );
 
-
     const assigneeChannelFunc = (channel) => {
         channel.listen("RetrieveAssignees", (event) => {
             console.log("event data for assigning", event.data);
             setAssigneesPersonnel((prevAssignees) => {
                 const prevAssigneesTicket = prevAssignees[ticketId] || [];
-                if (prevAssigneesTicket.find((prev) => prev.id === event.data.assigneeId)) {
+                if (
+                    prevAssigneesTicket.find(
+                        (prev) => prev.id === event.data.assigneeId
+                    )
+                ) {
                     return prevAssignees;
                 }
                 const newData = event.data;
@@ -264,8 +273,12 @@ const AssignSidePanel = ({ ticketId }) => {
         let removeChannel;
         if (ticketId) {
             newTicketId = ticketId.replace("#", "");
-            assigneeChannel = window.Echo.channel(`retrieveassignees.${newTicketId}`);
-            removeChannel = window.Echo.channel(`removeassignees.${newTicketId}`);
+            assigneeChannel = window.Echo.channel(
+                `retrieveassignees.${newTicketId}`
+            );
+            removeChannel = window.Echo.channel(
+                `removeassignees.${newTicketId}`
+            );
             assigneeChannelFunc(assigneeChannel);
             removeAChannelFunc(removeChannel);
         }
@@ -275,11 +288,10 @@ const AssignSidePanel = ({ ticketId }) => {
                 assigneeChannel.stopListening("RetrieveAssignees");
                 window.Echo.leaveChannel(`retrieveassignees.${newTicketId}`);
             }
-            if(removeChannel) {
+            if (removeChannel) {
                 removeChannel.stopListening("RemoveAssignees");
                 window.Echo.leaveChannel(`removeassignees.${newTicketId}`);
             }
-           
         };
     }, [ticketId]);
 
@@ -326,14 +338,16 @@ const AssignSidePanel = ({ ticketId }) => {
                                             className="flex justify-between items-center text-xs bg-custom-solidgreen text-white min-w-[99px] h-[26px] rounded-full pr-[10px] pl-[10px]"
                                         >
                                             <span>{option.name}</span>
-                                            <button
-                                                onClick={() =>
-                                                    removeTag(option)
-                                                }
-                                                className="ml-2 pb-[2px] border border-white text-[15px] text-white bg-custom-solidgreen rounded-full h-5 w-5 flex items-center justify-center"
-                                            >
-                                                &times;
-                                            </button>
+                                            {user?.department === "CRS" && (
+                                                <button
+                                                    onClick={() =>
+                                                        removeTag(option)
+                                                    }
+                                                    className="ml-2 pb-[2px] border border-white text-[15px] text-white bg-custom-solidgreen rounded-full h-5 w-5 flex items-center justify-center"
+                                                >
+                                                    &times;
+                                                </button>
+                                            )}
                                         </div>
                                     ))}
                                 </div>
@@ -374,7 +388,7 @@ const AssignSidePanel = ({ ticketId }) => {
                                                         }
                                                         onChange={() =>
                                                             handleCheckboxChange(
-                                                                option, 
+                                                                option,
                                                                 matchAssignee
                                                             )
                                                         }
@@ -425,14 +439,16 @@ const AssignSidePanel = ({ ticketId }) => {
                                             className="bg-custom-lightgreen text-white rounded-full px-3 py-1 text-xs flex-shrink-0 flex mb-[4px]"
                                         >
                                             {assignee.name}
-                                            <button
-                                                onClick={() =>
-                                                    removeTag(assignee)
-                                                }
-                                                className="ml-2 pb-[2px] border border-white text-[15px] text-white bg-custom-lightgreen rounded-full h-5 w-5 flex items-center justify-center"
-                                            >
-                                                &times;
-                                            </button>
+                                            {user?.department === "CRS" && (
+                                                <button
+                                                    onClick={() =>
+                                                        removeTag(assignee)
+                                                    }
+                                                    className="ml-2 pb-[2px] border border-white text-[15px] text-white bg-custom-lightgreen rounded-full h-5 w-5 flex items-center justify-center"
+                                                >
+                                                    &times;
+                                                </button>
+                                            )}
                                         </span>
                                     </>
                                 ))}
