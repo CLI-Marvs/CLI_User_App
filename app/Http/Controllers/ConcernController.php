@@ -2,6 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\AdminMessage;
+use App\Events\AdminReplyLogs;
+use App\Events\ConcernMessages;
+use App\Events\InquiryAssignedLogs;
+use App\Events\RemoveAssignees;
+use App\Events\RetrieveAssignees;
 use App\Events\SampleEvent;
 use App\Jobs\JobToPersonnelAssign;
 use App\Jobs\ReplyFromAdminJob;
@@ -9,29 +15,24 @@ use App\Jobs\ResolveJobToSender;
 use App\Mail\SendReplyFromAdmin;
 use App\Models\BuyerReplyNotif;
 use App\Models\Concerns;
-use App\Models\Employee;
-use App\Models\Messages;
-use App\Events\SampleEvent;
-use App\Models\InquiryLogs;
-use Illuminate\Http\Request;
-use App\Models\Conversations;
-use App\Models\PinnedConcerns;
-use App\Jobs\ReplyFromAdminJob;
-use App\Models\BuyerReplyNotif;
-use App\Models\InquiryAssignee;
-use App\Models\ReadNotifByUser;
-use App\Jobs\ResolveJobToSender;
-use App\Mail\SendReplyFromAdmin;
 use App\Models\ConcernsCreatedBy;
-use App\Jobs\JobToPersonnelAssign;
-use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\DB;
+use App\Models\Conversations;
+use App\Models\Employee;
+use App\Models\InquiryAssignee;
+use App\Models\InquiryLogs;
+use App\Models\Messages;
+use App\Models\PinnedConcerns;
+use App\Models\ReadNotifByUser;
+use Carbon\Carbon;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
+use GuzzleHttp\Client;
 use Google\Cloud\Storage\StorageClient;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 
 
 
@@ -434,32 +435,6 @@ class ConcernController extends Controller
         $createdBy->concern_id = $concernId;
         $createdBy->save();
     }
-    //Sho-original file
-    // public function uploadToGCS($files)
-    // {
-    //     $fileLinks = [];
-    //     if ($files) {
-    //         $storage = new StorageClient([
-    //             'keyFilePath' => storage_path('keys/super-app-anaplan-2cbacd9f0192.json')
-    //         ]);
-    //         $bucket = $storage->bucket('super-app-storage');
-
-    //         foreach ($files as $file) {
-    //             $fileName = uniqid() . '.' . $file->getClientOriginalExtension();
-    //             $filePath = 'concerns/' . $fileName;
-
-    //             $bucket->upload(
-    //                 fopen($file->getPathname(), 'r'),
-    //                 ['name' => $filePath]
-    //             );
-
-    //             $fileLink = $bucket->object($filePath)->signedUrl(new \DateTime('tomorrow'));
-
-    //             $fileLinks[] = $fileLink;
-    //         }
-    //     }
-    //     return $fileLinks;
-    // }
     public function uploadToGCS($files)
     {
         $fileLinks = [];
@@ -486,39 +461,6 @@ class ConcernController extends Controller
         return $fileLinks;
     }
 
-    public function viewFile($filePath)
-    {
-        // Ensure the user is authenticated
-        if (!Auth::check()) {
-            return response()->json(['error' => 'Unauthorized'], 401);
-        }
-
-        // Connect to Google Cloud Storage
-        $storage = new StorageClient([
-            'keyFilePath' => storage_path('keys/super-app-anaplan-2cbacd9f0192.json')
-        ]);
-        $bucket = $storage->bucket('super-app-storage');
-        // $object = $bucket->object($filePath);
-        $object = $bucket->object('concerns/' . $filePath);
-        // Generate a signed URL for file access (valid for 1 day)
-        $signedUrl = $object->signedUrl(new \DateTime('tomorrow'));
-
-        return response()->json(['url' => $signedUrl], 200);
-
-        // // Check if the file exists
-        // if (!$object->exists()) {
-        //     return response()->json(['error' => 'File not found'], 404);
-        // }
-
-        // // Fetch the file content
-        // $stream = $object->downloadAsStream();
-
-        // // Serve the file for viewing (inline instead of attachment)
-        // return response($stream->getContents(), 200, [
-        //     'Content-Type' => $object->info()['contentType'],
-        //     'Content-Disposition' => 'inline; filename="' . basename($filePath) . '"',
-        // ]);
-    }
     // public function uploadToGCS($files)
     // {
     //     $fileLinks = [];
@@ -828,7 +770,7 @@ class ConcernController extends Controller
 
 
             $concernsResults = $concernsQuery/* ->orderBy('is_read', 'asc') */
-                /*  ->orderBy('concerns.created_at', 'desc') */
+               /*  ->orderBy('concerns.created_at', 'desc') */
                 ->get();
 
             $latestBuyerReply = $this->buyerReplyNotifs($employee, $ticketIds, $employeeDepartment);
@@ -867,7 +809,10 @@ class ConcernController extends Controller
         );
     }
 
-    public function assigneeNotify($employee) {}
+    public function assigneeNotify($employee)
+    {
+        
+    }
 
     private function buyerReplyNotifs($employee, $ticketIds, $employeeDepartment)
     {
@@ -1027,8 +972,8 @@ class ConcernController extends Controller
 
             $data = [
                 'created_at' => $inquiry->created_at,
-                'assign_to' => json_encode($logData),
-                'ticketId' => $newTicketId,
+                'assign_to' => json_encode($logData),             
+                'ticketId' => $newTicketId,   
                 'logRef' => 'assign_logs',
                 'logId' => $inquiry->id,
             ];
@@ -1066,8 +1011,8 @@ class ConcernController extends Controller
                 }
             }
             $this->inquiryAssigneeLogs($request, $assignees, $ticketId);
-
-
+            
+           
             return response()->json('Successfully assign');
         } catch (\Exception $e) {
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
@@ -1079,15 +1024,12 @@ class ConcernController extends Controller
         try {
             $assignees = InquiryAssignee::where('ticket_id', $request->ticketId)
                 ->join('employee', 'employee.employee_email', '=', 'inquiry_assignee.email')
-                ->select(
-                    DB::raw(
-                        "CONCAT(employee.firstname,' ',employee.lastname) as name"
-                    ),
-                    "employee.employee_email",
-                    "employee.department",
-                    "inquiry_assignee.ticket_id as ticketId",
-                    'inquiry_assignee.id'
-                )
+                ->select(DB::raw(
+                        "CONCAT(employee.firstname,' ',employee.lastname) as name"),
+                        "employee.employee_email", "employee.department", 
+                        "inquiry_assignee.ticket_id as ticketId",
+                        'inquiry_assignee.id'
+                        )
                 ->get();
             return response()->json($assignees);
         } catch (\Exception $e) {
@@ -1161,7 +1103,7 @@ class ConcernController extends Controller
         try {
             /*    dd($ticketId); */
             $message = InquiryLogs::where('ticket_id', $ticketId)
-                /*  ->orderBy('created_at', 'desc') */
+               /*  ->orderBy('created_at', 'desc') */
                 ->get();
 
             return response()->json($message);
@@ -1415,13 +1357,11 @@ class ConcernController extends Controller
 
     public function retrieveConcernsMessages(Request $request)
     {
-        $concernId = $request->query('concernId');
-        /*  dd($request->all()); */
+        $ticketId = $request->query('ticketId');
         try {
-            $conversations = Conversations::where('concern_id', $concernId)
+            $conversations = Conversations::where('ticket_id', $ticketId)
                 ->join('employee', 'employee.id', '=', 'conversations.sender_id')
                 ->select('conversations.*', 'employee.firstname', 'employee.lastname')
-                /*   ->orderBy('created_at', 'desc') */
                 ->get();
 
             return response()->json($conversations);
