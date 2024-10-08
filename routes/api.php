@@ -27,6 +27,7 @@ Route::post('/reassign', [ConcernController::class, 'reassignInquiry']);
 Route::post('/resolve', [ConcernController::class, 'markAsResolve']);
 
 
+
 /* 
 Route::get('/get-concern', [ConcernController::class, 'getAllConcerns']);
 
@@ -48,8 +49,8 @@ Route::post('delete-concerns', [ConcernController::class, 'deleteConcern']);
 
 Route::post('conversation', [ConcernController::class, 'sendMessageConcerns']);
 Route::get('/get-concern-messages', [ConcernController::class, 'retrieveConcernsMessages']);
-
-
+Route::get('/personnel-assignee', [ConcernController::class, 'retrieveAssignees']);
+Route::put('/update-info', [ConcernController::class, 'updateInfo']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/get-concern', [ConcernController::class, 'getAllConcerns']);
@@ -64,6 +65,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/pin-concern/{id}', [ConcernController::class, 'pinConcern']);
     Route::post('/isread/{concernId}', [ConcernController::class, 'readNotifByUser']);
     Route::get('/specific-assignee', [ConcernController::class, 'getSpecificInquiry']);
+    Route::post('/remove-assignee', [ConcernController::class, 'removeAssignee']);  
+
 
     /* Pricing Master List */
     Route::get('/get-pricing-master-lists', [PriceListMasterController::class, 'getAllPricingMasterLists']);

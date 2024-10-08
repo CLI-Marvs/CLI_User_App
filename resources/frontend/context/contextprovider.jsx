@@ -58,6 +58,7 @@ export const ContextProvider = ({ children }) => {
     const [concernMessages, setConcernMessages] = useState([]);
     const [concernId, setConcernId] = useState(null);
     const [propertyMasterData, setPropertyMasterData] = useState([]);
+    const [assigneesPersonnel, setAssigneesPersonnel] = useState([]);
     useEffect(() => {
         if (user && user.department && !isDepartmentInitialized) {
             setDepartment(user.department === "CRS" ? "All" : user.department);
@@ -194,13 +195,39 @@ export const ContextProvider = ({ children }) => {
         }
     };
 
-    const getConcernMessages = async () => {
-        if (concernId) {
+    const getAssigneesPersonnel = async () => {
+        if (ticketId) {
             try {
+                const encodedTicketId = encodeURIComponent(ticketId);
+
                 const response = await apiService.get(
-                    `get-concern-messages?concernId=${parseInt(concernId)}`
+                    `personnel-assignee?ticketId=${encodedTicketId}`
                 );
-                setConcernMessages(response.data);
+                const data = response.data;
+
+                setAssigneesPersonnel((prevAssigneesPersonnel) => ({
+                    ...prevAssigneesPersonnel,
+                    [ticketId]: data,
+                }));
+            } catch (error) {
+                console.log("error");
+            }
+        }
+    };
+
+    const getConcernMessages = async () => {
+        if (ticketId) {
+            try {
+                const encodedTicketId = encodeURIComponent(ticketId);
+
+                const response = await apiService.get(
+                    `get-concern-messages?ticketId=${encodedTicketId}`
+                );
+                const data = response.data;
+                setConcernMessages((prevMessages) => ({
+                    ...prevMessages,
+                    [ticketId]: data,
+                }));
             } catch (error) {
                 console.log("error retrieving", error);
             }
@@ -426,6 +453,8 @@ export const ContextProvider = ({ children }) => {
         if (ticketId) {
             getMessages(ticketId);
             getInquiryLogs(ticketId);
+            getConcernMessages();
+            getAssigneesPersonnel();
         }
     }, [ticketId]);
 
@@ -438,10 +467,6 @@ export const ContextProvider = ({ children }) => {
     useEffect(() => {
         getSpecificInquiry();
     }, []);
-
-    useEffect(() => {
-        getConcernMessages();
-    }, [concernId]);
 
     //* For Report Page
     useEffect(() => {
@@ -536,6 +561,10 @@ export const ContextProvider = ({ children }) => {
                 setConcernId,
                 getPropertyMaster,
                 getFile,
+                getConcernMessages,
+                setAssigneesPersonnel,
+                assigneesPersonnel,
+                getAssigneesPersonnel,
             }}
         >
             {children}

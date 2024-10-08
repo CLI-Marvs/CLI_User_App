@@ -44,6 +44,7 @@ const Navbar = () => {
       console.log("Error", error);
     }
   };
+
   return (
     <div className="flex h-[100px] pr-16 w-screen bg-custom-grayFA">
       <div className='flex w-full'>
@@ -63,7 +64,7 @@ const Navbar = () => {
           <Stack spacing={2}>
             <Breadcrumbs separator={<FaAngleRight className='text-custom-solidgreen' />} aria-label="breadcrumb">
               {breadcrumbs}
-            </Breadcrumbs>3 
+            </Breadcrumbs>
           </Stack>
         </div>
       </div>
@@ -73,7 +74,7 @@ const Navbar = () => {
             <button className='text-base font-bold bg-gradient-to-r from-custom-bluegreen via-custom-lightgreen to-custom-lightgreen bg-clip-text text-transparent' onClick={handleLogout}>Logout</button>
           </div>
           <div className='flex justify-center w-[67px]'>
-            <img src={user?.profile_picture} alt="image" className='h-[63px] w-[63px] rounded-full border-8' />
+            <img src={user.profile_picture} alt="image" className='h-[63px] w-[63px] rounded-full border-8' />
           </div>
           <div className='flex items-center'>
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-7">

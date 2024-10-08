@@ -1,8 +1,9 @@
 import React from 'react'
 
-const ConcernSelector = ({ concernIdList, concernId, setConcernId }) => {
+const ConcernSelector = () => {
     return (
-        <div className="mb-4">
+      <div>dsads</div>
+       /*  <div className="mb-4">
           <select
             value={concernId}
             onChange={(e) => setConcernId(e.target.value)}
@@ -17,7 +18,7 @@ const ConcernSelector = ({ concernIdList, concernId, setConcernId }) => {
               </option>
             ))}
           </select>
-        </div>
+        </div> */
       );
 }
 

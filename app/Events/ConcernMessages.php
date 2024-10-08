@@ -10,7 +10,7 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class SampleEvent implements ShouldBroadcast
+class ConcernMessages implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
@@ -22,7 +22,6 @@ class SampleEvent implements ShouldBroadcast
 
     public function __construct($data)
     {
-        \Log::info('Event data:', $data);
         $this->data = $data;
     }
 
@@ -35,7 +34,7 @@ class SampleEvent implements ShouldBroadcast
     {
         
         return [
-            new Channel('concerns.' . $this->data['concernId']),
+            new Channel('concerns.' . $this->data['ticketId']),
         ];
         
         

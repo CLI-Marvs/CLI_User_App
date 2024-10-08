@@ -17,13 +17,13 @@ class EmailToPersonnelAssign extends Mailable
 
     protected $emailContent;
 
-    protected $admin_name;
+   /*  protected $admin_name; */
 
-    public function __construct($email, $emailContent, $admin_name)
+    public function __construct($email, $emailContent/* $admin_name */)
     {
         $this->email = $email;
         $this->emailContent = $emailContent;
-        $this->admin_name = $admin_name;
+       /*  $this->admin_name = $admin_name; */
     }
 
     /**

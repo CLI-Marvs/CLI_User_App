@@ -247,13 +247,13 @@ const InquiryFormModal = ({ modalRef }) => {
                     </div>
                     <div className="flex flex-col gap-2">
                         <div
-                             className={`flex items-center border border-custom-grayFA rounded-[5px] overflow-hidden ${
+                             className={`flex items-center border rounded-[5px] overflow-hidden ${
                                 isSubmitted && !formData.fname
-                                    ? resetSuccess ? "border-custombg" : "border-red-500"
-                                    : "border-custombg"
+                                    ? resetSuccess ? "border-custom-bluegreen" : "border-red-500"
+                                    : "border-custom-bluegreen"
                             }`}
                         >
-                            <span className="text-custom-gray81 text-sm bg-custom-grayFA flex pl-3 py-1 w-[240px]">
+                            <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex pl-3 py-1 w-[240px]">
                                 First Name
                             </span>
                             <input
@@ -266,13 +266,13 @@ const InquiryFormModal = ({ modalRef }) => {
                             />
                         </div>
                         <div
-                           className={`flex items-center border border-custom-grayFA rounded-[5px] overflow-hidden ${
+                           className={`flex items-center border  rounded-[5px] overflow-hidden ${
                             isSubmitted && !formData.lname
-                                 ? resetSuccess ? "border-custombg" : "border-red-500"
-                                : "border-custombg"
+                                 ? resetSuccess ? "border-custom-bluegreen" : "border-red-500"
+                                : "border-custom-bluegreen"
                         }`}
                         >
-                            <span className="text-custom-gray81 text-sm bg-custom-grayFA flex w-[240px] pl-3 py-1">
+                            <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex w-[240px] pl-3 py-1">
                                 Last Name
                             </span>
                             <input
@@ -285,13 +285,13 @@ const InquiryFormModal = ({ modalRef }) => {
                             />
                         </div>
                         <div
-                             className={`flex items-center border border-custom-grayFA rounded-[5px] overflow-hidden ${
+                             className={`flex items-center border  rounded-[5px] overflow-hidden ${
                                 isSubmitted && !formData.buyer_email
-                                     ? resetSuccess ? "border-custombg" : "border-red-500"
-                                    : "border-custombg"
+                                     ? resetSuccess ? "border-custom-bluegreen" : "border-red-500"
+                                    : "border-custom-bluegreen"
                             }`}
                         >
-                            <span className="text-custom-gray81 text-sm bg-custom-grayFA flex w-[240px] pl-3 py-1">
+                            <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex w-[240px] pl-3 py-1">
                                 Email
                             </span>
                             <input
@@ -304,13 +304,13 @@ const InquiryFormModal = ({ modalRef }) => {
                             />
                         </div>
                         <div
-                           className={`flex items-center border border-custom-grayFA rounded-[5px] overflow-hidden ${
+                           className={`flex items-center border rounded-[5px] overflow-hidden ${
                             isSubmitted && !formData.mobile_number
-                                ? resetSuccess ? "border-custombg" : "border-red-500"
-                                : "border-custombg"
+                                ? resetSuccess ? "border-custom-bluegreen" : "border-red-500"
+                                : "border-custom-bluegreen"
                             }`}
                         >
-                            <span className="text-custom-gray81 text-sm bg-custom-grayFA flex w-[240px] pl-3 py-1">
+                            <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex w-[240px] pl-3 py-1">
                                 Mobile Number
                             </span>
                             <input
@@ -323,13 +323,13 @@ const InquiryFormModal = ({ modalRef }) => {
                             />
                         </div>
                         <div
-                            className={`flex items-center border border-custom-grayFA rounded-[5px] overflow-hidden ${
+                            className={`flex items-center border rounded-[5px] overflow-hidden ${
                                 isSubmitted && !formData.property
-                                     ? resetSuccess ? "border-custombg" : "border-red-500"
-                                    : "border-custombg"
+                                     ? resetSuccess ? "border-custom-bluegreen" : "border-red-500"
+                                    : "border-custom-bluegreen"
                             }`}
                         >
-                            <span className="text-custom-gray81 text-sm bg-custom-grayFA flex items-center w-[250px] tablet:w-[175px] mobile:w-[270px] mobile:text-xs -mr-3 pl-3 py-1">
+                            <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex items-center w-[250px] tablet:w-[175px] mobile:w-[270px] mobile:text-xs -mr-3 pl-3 py-1">
                                 Property
                             </span>
                             <div className="relative w-full">
@@ -346,17 +346,17 @@ const InquiryFormModal = ({ modalRef }) => {
                                         )
                                     })}
                                 </select>
-                                <span className="absolute inset-y-0 right-0 flex  items-center pr-3 pl-3 bg-custom-grayFA text-custom-gray81 pointer-events-none">
+                                <span className="absolute inset-y-0 right-0 flex  items-center pr-3 pl-3 bg-custom-lightestgreen text-custom-bluegreen pointer-events-none">
                                     <IoMdArrowDropdown/>
                                 </span>
                             </div>
                         </div>
-                        <div className={`flex items-center border border-custom-grayFA rounded-[5px] overflow-hidden ${
+                        <div className={`flex items-center border rounded-[5px] overflow-hidden ${
                                         isSubmitted && !formData.details_concern
-                                             ? resetSuccess ? "border-custombg" : "border-red-500"
-                                            : "border-custombg"
+                                             ? resetSuccess ? "border-custom-bluegreen" : "border-red-500"
+                                            : "border-custom-bluegreen"
                                     }`}>
-                            <span className="text-custom-gray81 text-sm bg-custom-grayFA flex items-center w-[250px] tablet:w-[175px] mobile:w-[270px] mobile:text-xs -mr-3 pl-3 py-1">
+                            <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex items-center w-[250px] tablet:w-[175px] mobile:w-[270px] mobile:text-xs -mr-3 pl-3 py-1">
                                 Concern regarding
                             </span>
                             <div className="relative w-full">
@@ -393,7 +393,7 @@ const InquiryFormModal = ({ modalRef }) => {
                                         Other Concerns
                                     </option>
                                 </select>
-                                <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3 bg-custom-grayFA text-custom-gray81 pointer-events-none">
+                                <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3 bg-custom-lightestgreen text-custom-bluegreen pointer-events-none">
                                     <IoMdArrowDropdown/>
                                 </span>
                             </div>
@@ -404,8 +404,8 @@ const InquiryFormModal = ({ modalRef }) => {
                                 Optional
                             </p>
                         </div>
-                        <div className="flex items-center border border-custom-grayFA rounded-[5px] overflow-hidden">
-                            <span className="text-custom-gray81 text-sm bg-custom-grayFA flex items-center w-[250px] tablet:w-[175px] mobile:w-[270px] mobile:text-xs -mr-4 pl-3 py-1">
+                        <div className="flex items-center border border-custom-bluegreen rounded-[5px] overflow-hidden">
+                            <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex items-center w-[250px] tablet:w-[175px] mobile:w-[270px] mobile:text-xs -mr-4 pl-3 py-1">
                                 I am
                             </span>
                             <div className="relative w-full">
@@ -422,13 +422,13 @@ const InquiryFormModal = ({ modalRef }) => {
                                     <option value="Buyer">Buyer</option>
                                     <option value="Broker">Broker</option>
                                 </select>
-                                <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3  bg-custom-grayFA text-custom-gray81 pointer-events-none">
+                                <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3  bg-custom-lightestgreen text-custom-bluegreen pointer-events-none">
                                    <IoMdArrowDropdown/>
                                 </span>
                             </div>
                         </div>
-                        <div className="flex items-center border border-custom-grayFA rounded-[5px] overflow-hidden">
-                            <span className="text-custom-gray81 text-sm bg-custom-grayFA flex w-[240px] pl-3 py-1">
+                        <div className="flex items-center border border-custom-bluegreen rounded-[5px] overflow-hidden">
+                            <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex w-[240px] pl-3 py-1">
                                 Contract Number
                             </span>
                             <input
@@ -441,8 +441,8 @@ const InquiryFormModal = ({ modalRef }) => {
                             />
                         </div>
                         
-                        <div className="flex items-center border border-custom-grayFA rounded-[5px] overflow-hidden">
-                            <span className="text-custom-gray81 text-sm bg-custom-grayFA flex w-[240px] pl-3 py-1">
+                        <div className="flex items-center border border-custom-bluegreen rounded-[5px] overflow-hidden">
+                            <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex w-[240px] pl-3 py-1">
                                 Unit/Lot Number
                             </span>
                             <input
@@ -457,13 +457,17 @@ const InquiryFormModal = ({ modalRef }) => {
                     </div>
                     <div className="border border-b-1 border-[#D9D9D9] my-2"></div>
                     <div
-                        className={`border-custom-grayFA rounded-[5px] bg-custom-grayFA border`}
+                        className={`${
+                            !isValid
+                                 ? resetSuccess ? "border-custom-bluegreen" : "border-red-500"
+                                : "border-custom-bluegreen" 
+                        } rounded-[5px] bg-custom-lightestgreen border`}
                     >
                         <div className="flex items-center justify-between">
-                            <p className="text-custom-gray81 text-sm bg-custom-grayFA pl-3  montserrat-semibold flex-grow mobile:text-xs mobile:w-[170px]">
+                            <p className="text-custom-bluegreen text-sm bg-custom-lightestgreen pl-3  montserrat-semibold flex-grow mobile:text-xs mobile:w-[170px]">
                                 Details (Required)
                             </p>
-                            <span className="bg-white text-sm2 text-gray-400 font-normal py-3 border border-custom-grayFA pl-2 pr-12 mobile:pr-1 mobile:text-xs ml-auto rounded-r-[4px]">
+                            <span className="bg-white text-sm2 text-gray-400 font-normal py-3 border-l border-custom-bluegreen pl-2 pr-12 mobile:pr-1 mobile:text-xs ml-auto rounded-tr-[4px]">
                                 {" "}
                                 {message.length}/500 characters
                             </span>
@@ -477,11 +481,7 @@ const InquiryFormModal = ({ modalRef }) => {
                                 name="details_message"
                                 placeholder="Write your concern here."
                                 rows="4"
-                                className={`${
-                                    !isValid
-                                         ? resetSuccess ? "border-custombg" : "border-red-500"
-                                        : "border-gray-300" 
-                                } rounded-[5px] bg-custom-grayFA border border-custom-grayFA w-full pl-2`}
+                                className={` border-t border-custom-bluegreen rounded-b-[5px] border-t w-full pl-2 outline-none`}
                             ></textarea>
                         </div>
                     </div>

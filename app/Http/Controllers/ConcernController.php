@@ -2,8 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use Carbon\Carbon;
-use GuzzleHttp\Client;
+use App\Events\SampleEvent;
+use App\Jobs\JobToPersonnelAssign;
+use App\Jobs\ReplyFromAdminJob;
+use App\Jobs\ResolveJobToSender;
+use App\Mail\SendReplyFromAdmin;
+use App\Models\BuyerReplyNotif;
 use App\Models\Concerns;
 use App\Models\Employee;
 use App\Models\Messages;
@@ -258,13 +262,27 @@ class ConcernController extends Controller
 
             $this->inquiryAdminLogs($request);
 
+            $newTicketId = str_replace('#', '', $messages->ticket_id);
+
+            $data = [
+                'admin_id' => $admin_id,
+                'admin_email' => $admin_email,
+                'attachment' => $attachment,
+                'admin_profile_picture' => $admin_profile_picture,
+                'details_message' => $adminMessage,
+                'admin_name' => $admin_name,
+                'ticketId' => $newTicketId,
+                'id' => $messages->id,
+                'created_at' => $messages->created_at,
+            ];
+
+            AdminMessage::dispatch($data);
 
             if ($files) {
                 Mail::to($buyer_email)->send(new SendReplyFromAdmin($messages->ticket_id, $buyer_email, $adminMessage, $message_id, $allFiles));
             } else {
                 ReplyFromAdminJob::dispatch($messages->ticket_id, $buyer_email, $adminMessage, $message_id, $allFiles);
             }
-
 
             return response()->json("Successfully sent");
         } catch (\Exception $e) {
@@ -385,6 +403,25 @@ class ConcernController extends Controller
 
 
             return response()->json('Successfully added');
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function updateInfo(Request $request)
+    {
+        try {
+            $dataId = $request->dataId;
+            $concern = Concerns::where('id', $dataId)->first();
+            $concern->mobile_number = $request->mobile_number;
+            $concern->contract_number = $request->contract_number;
+            $concern->unit_number = $request->unit_number;
+            $concern->buyer_name = $request->name;
+            $concern->buyer_email = $request->buyer_email;
+            $concern->property = $request->property;
+            $concern->save();
+
+            return response()->json('Successfully updated');
         } catch (\Exception $e) {
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
         }
@@ -530,7 +567,7 @@ class ConcernController extends Controller
     {
         try {
             $message = Messages::where('ticket_id', $ticketId)
-                ->orderBy('created_at', 'desc')
+                /*   ->orderBy('created_at', 'desc') */
                 ->get();
 
             return response()->json($message);
@@ -766,122 +803,6 @@ class ConcernController extends Controller
         return $query;
     }
 
-
-    //*Not clean code
-    // public function getAllConcerns(Request $request)
-    // {
-    //     try {
-    //         $employee = $request->user();
-    //         $employeeDepartment = $employee->department;
-    //         $days = $request->query("days", null);
-    //         $status = $request->query("status", null);
-    //         $search = $request->query("search", null);
-
-    //         $assignedInquiries = $this->getAssignInquiries($employee->employee_email);
-    //         $ticketIds = $assignedInquiries->pluck('ticket_id')->toArray();
-
-    //         $pinnedConcerns = PinnedConcerns::where('user_id', $employee->id)
-    //                                         ->pluck('concern_id')
-    //                                         ->toArray();
-
-    //         $query = Concerns::query();
-
-    //         if (!empty($pinnedConcerns)) {
-    //             $query->leftJoin('pinned_concerns', function ($join) use ($employee) {
-    //                 $join->on('concerns.id', '=', 'pinned_concerns.concern_id')
-    //                      ->where('pinned_concerns.user_id', $employee->id);
-    //             })
-    //             ->orderByRaw("CASE WHEN concerns.id IN (" . implode(',', $pinnedConcerns) . ") THEN 0 ELSE 1 END, pinned_concerns.pinned_at DESC");
-    //         } else {
-    //             $query->orderBy('created_at', 'desc');
-    //         }
-
-    //         if ($days !== null) {
-    //             $startOfDay = now()->subDays($days)->startOfDay();
-    //             $endOfDay = now()->subDays($days)->endOfDay();
-    //             $query->whereBetween('concerns.created_at', [$startOfDay, $endOfDay]);
-    //         }
-
-    //         if ($employeeDepartment !== 'CSR') {
-    //             $query->whereIn('concerns.ticket_id', $ticketIds);
-    //         }
-
-    //         if ($status === 'Resolved') {
-    //             $query->where('status', 'Resolved');
-    //         } elseif ($status === 'unresolved') {
-    //             $query->where('status', 'unresolved');
-    //         }
-
-    //         if ($search !== null) {
-    //             $searchParams = json_decode($search, true);
-    //             $query = $this->handleSearchFilter($query, $searchParams);
-
-    //             if (!empty($searchParams) && $searchParams['hasAttachments'] === true) {
-    //                 $query->whereHas('messages', function ($messageQuery) {
-    //                     $messageQuery->whereNotNull('attachment');
-    //                 });
-    //             }
-    //         }
-
-    //         $pinnedSubquery = PinnedConcerns
-    //         ::select('concern_id')
-    //         ->where('user_id', $employee->id);
-
-    //         $latestLogs = InquiryLogs::select('ticket_id', 'message_log')
-    //             ->whereIn('id', function ($subquery) {
-    //                 $subquery->select(DB::raw('MAX(id)'))
-    //                     ->from('inquiry_logs')
-    //                     ->groupBy('ticket_id');
-    //             });
-    //         // $allConcerns = $query->leftJoinSub($latestLogs, 'latest_logs', function ($join) {
-    //         //     $join->on('concerns.ticket_id', '=', 'latest_logs.ticket_id');
-    //         // })->select('concerns.*', 'latest_logs.message_log')
-    //         // ->paginate(20);
-
-    //         $allConcerns = $query->leftJoinSub($latestLogs, 'latest_logs', function ($join) {
-    //             $join->on('concerns.ticket_id', '=', 'latest_logs.ticket_id');
-    //         })
-    //         ->leftJoinSub($pinnedSubquery, 'pinned', function ($join) {
-    //             $join->on('concerns.id', '=', 'pinned.concern_id');
-    //         })
-    //         ->select('concerns.*', 'latest_logs.message_log', DB::raw('CASE WHEN pinned.concern_id IS NOT NULL THEN 1 ELSE 0 END AS isPinned'))
-    //         ->paginate(20);
-
-    //         return response()->json($allConcerns);
-    //     } catch (\Exception $e) {
-    //         return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
-    //     }
-    // }
-
-    // public function handleSearchFilter($query, $searchParams)
-    // {
-
-    //     if (!empty($searchParams['name'])) {
-    //         $query->where('buyer_name', 'ILIKE', '%' . $searchParams['name'] . '%');
-    //     }
-    //     if (!empty($searchParams['category'])) {
-    //         $query->where('details_concern', 'ILIKE', '%' . $searchParams['category'] . '%');
-    //     }
-    //     if (!empty($searchParams['email'])) {
-    //         $query->where('buyer_email', 'ILIKE', '%' . $searchParams['email'] . '%');
-    //     }
-    //     if (!empty($searchParams['ticket'])) {
-    //         $query->where('concerns.ticket_id', 'ILIKE', '%' . $searchParams['ticket'] . '%');
-    //     }
-
-    //     if (!empty($searchParams['status'])) {
-    //         $query->where('message_log', 'ILIKE', '%' . $searchParams['status'] . '%');
-    //     }
-
-    //     if (!empty($searchParams['startDate'])) {
-    //         $startDate = Carbon::parse($searchParams['startDate'])->setTimezone('Asia/Manila');
-    //         $query->whereDate('concerns.created_at', '=', $startDate);
-    //     }
-
-    //     return $query;
-    // }
-
-
     public function listOfNotifications(Request $request)
     {
         try {
@@ -905,10 +826,9 @@ class ConcernController extends Controller
 
             $concernsQuery->select('concerns.*', \DB::raw('CASE WHEN read_notif_by_user.concern_id IS NULL THEN 0 ELSE 1 END as is_read'));
 
-            $this->notifStatusFilter($status, $concernsQuery);
 
-            $concernsResults = $concernsQuery->orderBy('is_read', 'asc')
-                ->orderBy('concerns.created_at', 'desc')
+            $concernsResults = $concernsQuery/* ->orderBy('is_read', 'asc') */
+                /*  ->orderBy('concerns.created_at', 'desc') */
                 ->get();
 
             $latestBuyerReply = $this->buyerReplyNotifs($employee, $ticketIds, $employeeDepartment);
@@ -919,9 +839,12 @@ class ConcernController extends Controller
                 return $item->created_at;
             })->values();
 
+
+            $filteredData = $this->notifStatusFilter($status, $sortedCombinedData);
+
             $perPage = 20;
             $currentPage = LengthAwarePaginator::resolveCurrentPage();
-            $paginatedResults = $this->paginateCollection($sortedCombinedData, $perPage, $currentPage, $request->url());
+            $paginatedResults = $this->paginateCollection($filteredData, $perPage, $currentPage, $request->url());
 
 
             return response()->json($paginatedResults);
@@ -943,6 +866,8 @@ class ConcernController extends Controller
             ['path' => $url]
         );
     }
+
+    public function assigneeNotify($employee) {}
 
     private function buyerReplyNotifs($employee, $ticketIds, $employeeDepartment)
     {
@@ -971,16 +896,20 @@ class ConcernController extends Controller
     }
 
 
-    private function notifStatusFilter($status, $query)
+    private function notifStatusFilter($status, $collection)
     {
         if ($status === 'Unread') {
-            $query->whereNull('read_notif_by_user.concern_id');
+            return $collection->filter(function ($item) {
+                return $item->is_read == 0;
+            });
         } else if ($status === 'Read') {
-            $query->whereNotNull('read_notif_by_user.concern_id');
+            return $collection->filter(function ($item) {
+                return $item->is_read == 1;
+            });
         }
+
+        return $collection;
     }
-
-
 
     public function readNotifByUser(Request $request, $concernId)
     {
@@ -1015,34 +944,6 @@ class ConcernController extends Controller
             }
         }
     }
-
-    // public function countUnreadNotifications(Request $request)
-    // {
-    //     try {
-    //         $employee = $request->user();
-    //         $employeeDepartment = $employee->department;
-
-    //         $assignedInquiries = $this->getAssignInquiries($employee->employee_email);
-    //         $ticketIds = $assignedInquiries->pluck('ticket_id')->toArray();
-
-    //         $query = Concerns::query();
-
-    //         if ($employeeDepartment !== "CSR") {
-    //             $query->whereIn('ticket_id', $ticketIds);
-    //         }
-
-    //         $unreadCount = $query->leftJoin('read_notif_by_user', function ($join) use ($employee) {
-    //             $join->on('concerns.id', '=', 'read_notif_by_user.concern_id')
-    //                 ->where('read_notif_by_user.user_id', $employee->id);
-    //         })
-    //             ->whereNull('read_notif_by_user.concern_id')
-    //             ->count();
-
-    //         return response()->json(['unreadCount' => $unreadCount]);
-    //     } catch (\Exception $e) {
-    //         return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
-    //     }
-    // }
 
     public function countUnreadNotifications(Request $request)
     {
@@ -1100,26 +1001,38 @@ class ConcernController extends Controller
         }
     }
 
-    public function inquiryAssigneeLogs($request)
+    public function inquiryAssigneeLogs($request, $assignees, $ticketId)
     {
         try {
             $inquiry = new InquiryLogs();
+            $formattedAssignees = implode(', ', $assignees);
             $logData = [
                 'log_type' => 'assign_to',
                 'details' => [
                     'message_tag' => 'Assign to',
-                    'assign_to_name' => $request->firstname,
-                    'asiggn_to_department' => $request->department,
+                    'assign_to_name' => $assignees,
+                    /*  'asiggn_to_department' => $request->department, */
                     'assign_by' => $request->assign_by,
                     'assign_by_department' => $request->assign_by_department,
-                    'remarks' => $request->remarks
+                    /*  'remarks' => $request->remarks */
                 ]
             ];
 
             $inquiry->assign_to = json_encode($logData);
-            $inquiry->ticket_id = $request->ticketId;
-            $inquiry->message_log = "Assigned to" . ' ' . $request->firstname . '|' . $request->department;
+            $inquiry->ticket_id = $ticketId;
+            $inquiry->message_log = "Assigned to" . ' ' . $formattedAssignees;
             $inquiry->save();
+
+            $newTicketId = str_replace('#', '', $ticketId);
+
+            $data = [
+                'created_at' => $inquiry->created_at,
+                'assign_to' => json_encode($logData),
+                'ticketId' => $newTicketId,
+                'logRef' => 'assign_logs',
+                'logId' => $inquiry->id,
+            ];
+            AdminReplyLogs::dispatch($data);
         } catch (\Exception $e) {
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
         }
@@ -1128,21 +1041,32 @@ class ConcernController extends Controller
     public function assignInquiryTo(Request $request)
     {
         try {
+            $assignees = [];
+            $ticketId = null;
+            if ($request->has('selectedOptions')) {
+                foreach ($request->selectedOptions as $selectedOption) {
+                    $assignees[] = $selectedOption['name'];
+                    $ticketId = $selectedOption['ticketId'];
+                    $emailContent = "Hi " . $selectedOption['name'] . ", inquiry " . $selectedOption['ticketId'] . " has been assigned to you.";
+                    $assignInquiry = new InquiryAssignee();
+                    $assignInquiry->ticket_id = $selectedOption['ticketId'];
+                    $assignInquiry->email = $selectedOption['email'];
+                    $assignInquiry->save();
 
-            $emailContent = "Hey " . $request->firstname . ", inquiry " . $request->ticketId . " has been assigned to you.";
-            $assignInquiry = new InquiryAssignee();
-            $assignInquiry->ticket_id = $request->ticketId;
-            $assignInquiry->email = $request->email;
-            $assignInquiry->save();
+                    /* JobToPersonnelAssign::dispatch($selectedOption['email'], $emailContent); */
+                    $newTicketId = str_replace('#', '', $ticketId);
+                    $data = [
+                        'ticketId' => $newTicketId,
+                        'assigneeId' => $assignInquiry->id,
+                        'created_at' => $assignInquiry->created_at,
+                        'email' => $assignInquiry['email'],
+                        'name' => $selectedOption['name'],
+                    ];
+                    RetrieveAssignees::dispatch($data);
+                }
+            }
+            $this->inquiryAssigneeLogs($request, $assignees, $ticketId);
 
-            $concern = Concerns::where("ticket_id", $request->ticketId)->first();
-            $concern->resolve_from = $request->department;
-            $concern->assign_to = $request->department;
-            $concern->save();
-
-            $this->inquiryAssigneeLogs($request);
-
-            JobToPersonnelAssign::dispatch($request->email, $emailContent, $request->email);
 
             return response()->json('Successfully assign');
         } catch (\Exception $e) {
@@ -1150,33 +1074,94 @@ class ConcernController extends Controller
         }
     }
 
-    public function reassignInquiry(Request $request)
+    public function retrieveAssignees(Request $request)
     {
         try {
-            $emailContent = "Hey " . $request->firstname . ", inquiry " . $request->ticketId . " has been assigned to you.";
-            $prevInquiry = InquiryAssignee::where('ticket_id', $request->ticketId)->first();
-
-
-            $concern = Concerns::where("ticket_id", $request->ticketId)->first();
-            $concern->resolve_from = $request->department;
-            $concern->assign_to = $request->department;
-            $concern->save();
-
-            $prevInquiry->email = $request->email;
-            $prevInquiry->save();
-
-            $this->inquiryAssigneeLogs($request);
-            JobToPersonnelAssign::dispatch($request->email, $emailContent, $request->email);
+            $assignees = InquiryAssignee::where('ticket_id', $request->ticketId)
+                ->join('employee', 'employee.employee_email', '=', 'inquiry_assignee.email')
+                ->select(
+                    DB::raw(
+                        "CONCAT(employee.firstname,' ',employee.lastname) as name"
+                    ),
+                    "employee.employee_email",
+                    "employee.department",
+                    "inquiry_assignee.ticket_id as ticketId",
+                    'inquiry_assignee.id'
+                )
+                ->get();
+            return response()->json($assignees);
         } catch (\Exception $e) {
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
         }
     }
+
+    public function removeAssignee(Request $request)
+    {
+        try {
+            $user = $request->user();
+            $userDepartment = $user->department;
+
+            if ($userDepartment !== "CRS") {
+                return response()->json(['message' => 'Unauthorized user']);
+            }
+
+            $assignee = InquiryAssignee::where('ticket_id', $request->ticketId)
+                ->where('email', $request->email)
+                ->first();
+
+            if ($assignee) {
+                $assignee->delete();
+                $newTicketId = str_replace('#', '', $request->ticketId);
+                $data = [
+                    'ticketId' => $newTicketId,
+                    'email' => $request->email,
+                ];
+                RemoveAssignees::dispatch($data);
+                return response()->json(['message' => 'Assignee removed successfully']);
+            }
+
+            return response()->json(['message' => 'No assignee found']);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Error.', 'error' => $e->getMessage()], 500);
+        }
+    }
+
+    //*For Reassigning
+    // public function reassignInquiry(Request $request)
+    // {
+    //     try {
+    //         $emailContent = "Hey " . $request->firstname . ", inquiry " . $request->ticketId . " has been assigned to you.";
+    //         $prevInquiry = InquiryAssignee::where('ticket_id', $request->ticketId)->first();
+
+
+    //         $concern = Concerns::where("ticket_id", $request->ticketId)->first();
+    //         $concern->resolve_from = $request->department;
+    //         $concern->assign_to = $request->department;
+    //         $concern->save();
+
+    //         $prevInquiry->email = $request->email;
+    //         $prevInquiry->save();
+
+    //         $this->inquiryAssigneeLogs($request);
+    //         /*   JobToPersonnelAssign::dispatch($request->email, $emailContent, $request->email); */
+
+    //         $data = [
+    //             'firstname' => $request->firstname,
+    //          /*    'ticketId' => str_replace('#', '', $request->ticketId), */
+    //             'concernId' => $request->concernId,
+    //         ];
+    //         InquiryAssignedLogs::dispatch($data);
+    //         return response()->json('Successfully reassign');
+    //     } catch (\Exception $e) {
+    //         return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
+    //     }
+    // }
     public function getInquiryLogs($ticketId)
     {
         try {
             /*    dd($ticketId); */
             $message = InquiryLogs::where('ticket_id', $ticketId)
-                ->orderBy('created_at', 'desc')
+                /*  ->orderBy('created_at', 'desc') */
                 ->get();
 
             return response()->json($message);
@@ -1226,6 +1211,18 @@ class ConcernController extends Controller
             $inquiry->ticket_id = $request->ticket_id;
             $inquiry->message_log = "Replied by" . ' ' . $request->admin_name;
             $inquiry->save();
+
+            $newTicketId = str_replace('#', '', $request->ticket_id);
+
+            $data = [
+                'admin_reply' => json_encode($logData),
+                'created_at' => $inquiry->created_at,
+                'ticketId' => $newTicketId,
+                'logId' => $inquiry->id,
+                'logRef' => 'admin_reply'
+            ];
+
+            AdminReplyLogs::dispatch($data);
         } catch (\Exception $e) {
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
         }
@@ -1382,6 +1379,8 @@ class ConcernController extends Controller
 
         $concern->messages()->where('ticket_id', $ticket_id)->delete();
         $concern->logs()->where('ticket_id', $ticket_id)->delete();
+        $concern->conversations()->where('ticket_id', $ticket_id)->delete();
+        $concern->inquiryAssignee()->where('ticket_id', $ticket_id)->delete();
 
         $concern->delete();
 
@@ -1393,20 +1392,20 @@ class ConcernController extends Controller
         try {
             $conversation = new Conversations();
             $conversation->sender_id = $request->sender_id;
-            $conversation->concern_id = $request->concern_id;
+            $conversation->ticket_id = $request->ticketId;
             $conversation->message = $request->message;
             $conversation->save();
 
             $user = Employee::find($request->sender_id);
-
+            $newTicketId = str_replace('#', '', $request->ticketId);
             $data = [
                 'message' => $conversation,
                 'firstname' => $user ? $user->firstname : 'Unknown User',
                 'lastname' => $user ? $user->lastname : 'Unknown User',
-                'concernId' => $request->concern_id
+                'ticketId' => $newTicketId,
             ];
 
-            SampleEvent::dispatch($data);
+            ConcernMessages::dispatch($data);
 
             return response()->json('Successfully sent');
         } catch (\Exception $e) {
@@ -1430,60 +1429,4 @@ class ConcernController extends Controller
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
         }
     }
-
-    // public function sendMessageConcerns(Request $request)
-    // {
-    //     try {
-    //        /*  dd($request->all()); */
-    //         $conversation = new Conversations();
-    //         $conversation->sender_id = $request->sender_id;
-    //         $conversation->concern_id = $request->concern_id;
-    //         $conversation->message = $request->message;
-    //         $conversation->save();
-
-    //         \Log::info("Count before dispatching event: " . $conversation);
-
-    //         SampleEvent::dispatch($conversation);
-
-    //         return response()->json('Successfully send');
-
-    //     } catch (\Exception $e) {
-    //         return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
-    //     }
-
-    //    /*  try {
-    //         $user = $request->user();
-
-    //         $files = $request->file('files');
-    //         $lastConcern = Concerns::latest()->first();
-    //         $nextId = $lastConcern ? $lastConcern->id + 1 : 1;
-    //         $formattedId = str_pad($nextId, 8, '0', STR_PAD_LEFT);
-
-    //         $ticketId = 'Ticket#24' . $formattedId;
-
-
-    //         $concerns = new Concerns();
-    //         $concerns->details_concern = $request->details_concern;
-    //         $concerns->property = $request->property;
-    //         $concerns->details_message = $request->message;
-    //         $concerns->status = "unresolved";
-    //         $concerns->ticket_id = $ticketId;
-    //         $concerns->user_type = $request->user_type;
-    //         $concerns->buyer_name = $request->fname . ' ' . $request->lname;
-    //         $concerns->mobile_number = $request->mobile_number;
-    //         $concerns->contract_number = $request->contract_number;
-    //         $concerns->unit_number = $request->unit_number;
-    //         $concerns->buyer_email = $request->buyer_email;
-    //         $concerns->inquiry_type = "from_admin";
-    //         $concerns->save();
-
-    //         $count = Concerns::count();
-    //         \Log::info("Count before dispatching event: " . $count);
-    //         SampleEvent::dispatch($count);
-
-    //         return response()->json('Successfully added');
-    //     } catch (\Exception $e) {
-    //         return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
-    //     } */
-    // }
 }

@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import { IoIosArrowDown } from "react-icons/io";
+import { GoPlus } from "react-icons/go";
 import {
   Card,
   Typography,
@@ -15,6 +16,7 @@ import {
 import { Link, useLocation } from 'react-router-dom';
 import apiService from '../../servicesApi/apiService';
 import { useStateContext } from '../../../context/contextprovider';
+import InquiryFormModal from '../inquirypage/InquiryFormModal';
 const Sidebar = () => {
   const { unreadCount, getCount } = useStateContext();
   const [activeItem, setActiveItem] = useState(null);
@@ -27,6 +29,14 @@ const Sidebar = () => {
 
   const handleItemClick = (item) => {
     setActiveItem(item);
+  };
+
+  const modalRef = useRef(null);
+
+  const handleOpenModal = () => {
+      if (modalRef.current) {
+          modalRef.current.showModal();
+      }
   };
 
   useEffect(() => {
@@ -55,7 +65,7 @@ const Sidebar = () => {
           </Link>
           <Link to="inquirymanagement/inquirylist">
               <ListItem
-                className={`h-[35px] w-[185px] text-sm pl-[12px]   
+                className={`h-[35px] w-[185px] text-sm pl-[12px] transition-all duration-300 ease-in-out 
                   ${activeItem === 'inquiry' || location.pathname.startsWith('/inquirymanagement') 
                     ? 'bg-custom-lightestgreen text-custom-solidgreen font-semibold' 
                     : 'hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen '}
@@ -65,15 +75,16 @@ const Sidebar = () => {
               >
               Inquiry Management
               <ListItemSuffix>
-                <IoIosArrowDown className='text-custom-solidgreen' />
+                <IoIosArrowDown className={`text-custom-solidgreen  transition-transform duration-200 ease-in-out ${isInquiryOpen ? 'rotate-180' :''}`} />
               </ListItemSuffix>
             </ListItem>
           </Link>
           {isInquiryOpen && location.pathname.startsWith('/inquirymanagement') && (
-            <div className="px-[25px] py-[20px] w-[185px] h-[109px] flex flex-col gap-[5px] bg-custom-lightestgreen border-t rounded-t-none rounded-b-[10px] border-custom-solidgreen">
+            <div className="px-[12px] py-[20px] w-[185px] min-h-[162px] flex flex-col gap-[5px] bg-custom-lightestgreen border-t rounded-t-none rounded-b-[10px] border-custom-solidgreen transition-all duration-300 ease-in-out">
+                <button onClick={handleOpenModal} className='h-[38px] w-[161px] gradient-btn5 text-white  text-xs rounded-[10px]'> <span className='text-[18px]'>+</span> Add Inquiry</button>
               <Link to="/inquirymanagement/inquirylist">
                 <ListItem
-                  className={`h-[32px] w-[134px] py-[8px] px-[18px] text-sm rounded-[50px] ${location.pathname === '/inquirymanagement/inquirylist' ? 'bg-white text-custom-solidgreen font-semibold' : 'hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen '}`}
+                  className={`h-[32px] w-full py-[8px] px-[18px] mt-[15px] text-sm rounded-[50px] ${location.pathname.startsWith('/inquirymanagement/inquirylist') ||location.pathname.startsWith('/inquirymanagement/thread') ? 'bg-white text-custom-solidgreen font-semibold' : 'hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen '}`}
                   onClick={() => handleItemClick('/inquirymanagement/inquirylist')}
                 >
                   Inquiries
@@ -81,7 +92,7 @@ const Sidebar = () => {
               </Link>
               <Link to="/inquirymanagement/report">
                 <ListItem
-                  className={`h-[32px] w-[134px] py-[8px] px-[18px] text-sm rounded-[50px] ${location.pathname === '/inquirymanagement/report' ? 'bg-white text-custom-solidgreen font-semibold' : 'hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen '}`}
+                  className={`h-[32px] w-full py-[8px] px-[18px] text-sm rounded-[50px] ${location.pathname.startsWith('/inquirymanagement/report') ? 'bg-white text-custom-solidgreen font-semibold' : 'hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen '}`}
                   onClick={() => handleItemClick('/reports')}
                 >
                   Reports
@@ -111,7 +122,7 @@ const Sidebar = () => {
             
               <ListItem className={` h-7 mb-2 pl-5 gap-2 rounded-2xl text-custom-solidgreen hover:bg-custom-lightestgreen hover:font-semibold`}>
                 Broker Management
-              </ListItem>
+              </ListItem>~
               <ListItem className={`h-7 mb-2 pl-5 gap-2 rounded-2xl text-custom-solidgreen hover:bg-custom-lightestgreen hover:font-semibold`}>
                 Transaction Management
               </ListItem>
@@ -182,6 +193,9 @@ const Sidebar = () => {
           </ListItem> */}
         </List>
       </Card>
+      <div>
+        <InquiryFormModal modalRef={modalRef}/>
+      </div>
     </>
   )
 }

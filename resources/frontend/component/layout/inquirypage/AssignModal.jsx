@@ -30,9 +30,6 @@ const AssignModal = ({ modalRef, employeeData, isAssign }) => {
         }
     };
 
-
-
-
     const reassignInquiry = async () => {
         if(!employeeData || Object.keys(employeeData).length === 0) {
             alert("please select employee first");
@@ -47,7 +44,7 @@ const AssignModal = ({ modalRef, employeeData, isAssign }) => {
             });
             getInquiryLogs(employeeData.ticketId);
             getAllConcerns();
-            navigate("/inquirymanagement/inquirylist");
+           /*  navigate("/inquirymanagement/inquirylist"); */
         } catch (error) {
             console.log("error assigning", error);
         }

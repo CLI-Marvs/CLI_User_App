@@ -3,25 +3,32 @@ import FolderFile from "../../../../../public/Images/folder_file.svg";
 import Kent from "../../../../../public/Images/kent.png";
 import defaultAvatar from "../../../../../public/Images/AdminSilouette.svg";
 import moment from "moment";
+import { useStateContext } from "../../../context/contextprovider";
+import { useParams } from "react-router-dom";
 
 const UserMessages = ({ items }) => {
     const attachmentData = JSON.parse(items.attachment || "[]");
+    const {data} = useStateContext();
 
-    const formatTime = (createdAt) => {
-        return moment(createdAt).fromNow();
-    };
+    const params = useParams();
+    const ticketId = decodeURIComponent(params.id);
+    const formattedDate = moment(items.created_at).format("MMMM D, YYYY");
+    const formattedTime = moment(items.created_at).format("hh:mm A");
 
+    const dataConcern =
+    data?.find((item) => item.ticket_id === ticketId) || {};
+    
     return (
         <div className="w-full">
-            <div className="flex w-full mt-10 gap-2">
-                <div className="h-12 w-12">
-                    <img className="rounded-full" src={defaultAvatar} alt="" />
-                </div>
-                <div className="flex flex-col">
-                    <p className="font-bold text-custom-gray81">Buyer</p>
-                    <p className="font-semibold text-custom-bluegreen">
+            <div className="flex w-full mt-[27px] gap-[10px]">
+                <div className="flex flex-col gap-[6px]">
+                    <p className="flex gap-1 font-semibold text-sm text-custom-bluegreen">{formattedDate} <span>|</span> {formattedTime}</p>
+                    <p className=" text-sm text-custom-gray81 flex gap-1">
+                        <span>
+                            From: 
+                        </span> 
                         {(() => {
-                            const nameParts = items.buyer_name.split(" ");
+                            const nameParts = dataConcern.buyer_name.split(" ");
                             const lastName = nameParts.pop();
                             const firstName = nameParts.join(" ");
 
@@ -34,10 +41,13 @@ const UserMessages = ({ items }) => {
                             )}`;
                         })()}
                     </p>
+                    <p className=" text-sm text-custom-gray81 flex gap-1">
+                        {dataConcern.buyer_email} <span>|</span> {dataConcern.mobile_number}
+                    </p>
                 </div>
             </div>
-            <div className="w-full mt-2 pl-12">
-                <div className="w-full h-auto gradient-background1 rounded-b-lg rounded-r-lg  px-8 py-3 text-white">
+            <div className="w-full mt-[10px]">
+                <div className="w-full h-auto gradient-background1 rounded-b-[10px] rounded-r-[10px]  p-[20px] pl-[31px] text-sm text-white">
                     <div>
                         <p>{items.details_message}</p>
                     </div>
@@ -49,7 +59,7 @@ const UserMessages = ({ items }) => {
                                     onClick={() =>
                                         window.open(attachment, "_blank")
                                     }
-                                    className="flex items-center justify-start bg-customnavbar h-12 px-24 pl-4 text-black gap-2 rounded-lg"
+                                    className="flex items-center justify-start bg-customnavbar h-12 px-24 pl-4 text-black gap-2 rounded-[5px]"
                                 >
                                     <img
                                         src={FolderFile}
@@ -59,15 +69,6 @@ const UserMessages = ({ items }) => {
                                 </button>
                             </div>
                         ))}
-                </div>
-                <div className="w-full flex justify-end">
-                    <p className="flex text-custom-gray81 text-sm space-x-1">
-                        {/*   <span>Jul 17, 2024,</span>
-                    <span>11:19 AM</span>
-                    <span>(7 days ago)</span> */}
-
-                        <p>{formatTime(items.created_at)}</p>
-                    </p>
                 </div>
             </div>
         </div>

@@ -10,7 +10,7 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class SampleEvent implements ShouldBroadcast
+class RemoveAssignees implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
@@ -22,7 +22,6 @@ class SampleEvent implements ShouldBroadcast
 
     public function __construct($data)
     {
-        \Log::info('Event data:', $data);
         $this->data = $data;
     }
 
@@ -35,23 +34,9 @@ class SampleEvent implements ShouldBroadcast
     {
         
         return [
-            new Channel('concerns.' . $this->data['concernId']),
+            new Channel('removeassignees.' . $this->data['ticketId']),
         ];
         
         
     }
-
-/* 
-    public function broadcastWith()
-    {
-        return [
-            'data' => [
-                'message' => $this->data['message'], 
-                'firstname' => $this->data['firstname'],
-                'lastname' => $this->data['lastname'],
-                'concernId' => $this->data['concernId']
-            ]
-        ];
-    } */
-
 }
