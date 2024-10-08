@@ -5,26 +5,25 @@ import { useStateContext } from "../../../../../context/contextprovider";
 import CircularProgress from "@mui/material/CircularProgress";
 
 const UploadUnitDetailsModal = ({
-    excelData,
     uploadUnitModalRef,
     fileName,
     selectedExcelHeader,
     fileSelected,
-    propertyId,
     handleFileChange,
 }) => {
-    //state
+    //State
     const [formData, setFormData] = useState({});
     const [loading, setLoading] = useState(false);
     const {
         setTowerPhaseId,
         towerPhaseId,
+        propertyId,
         setPropertyFloors,
         setFloorPremiumsAccordionOpen,
         getPropertyFloors,
     } = useStateContext();
 
-    //hooks
+    //Hooks
     useEffect(() => {
         if (selectedExcelHeader) {
             const initialFormData = selectedExcelHeader.reduce((acc, item) => {
@@ -76,7 +75,7 @@ const UploadUnitDetailsModal = ({
                 },
             });
 
-            setTowerPhaseId(towerPhaseId);
+            //setTowerPhaseId(towerPhaseId);
             if (towerPhaseId) {
                 console.log(
                     "towerPhaseId UploadUnitDetailsModal",
@@ -102,6 +101,11 @@ const UploadUnitDetailsModal = ({
             setLoading(false);
         }
     }; //Handle submit units from excel file
+    const replaceFile = async (event) => {
+        // Trigger the `handleFileChange` function received from BasicPricing
+        await handleFileChange(event);
+        // Optionally, perform additional actions specific to replacing the file
+    };
 
     return (
         <dialog
@@ -122,13 +126,14 @@ const UploadUnitDetailsModal = ({
                 <div className="flex justify-between items-center bg-custom-grayFA h-[54px] px-[15px] mb-3">
                     <div>
                         <p className="underline text-blue-500 cursor-pointer">
-                            {fileName} -{propertyId}-TowerId{towerPhaseId}
+                            {fileName} -TowerId- {towerPhaseId}- PropertyId-{" "}
+                            {propertyId}
                         </p>
                     </div>
                     <div>
                         <label
                             className="flex justify-center items-center w-[64px] h-[24px] bg-white text-xs border text-[#067AC5] border-[#067AC5] rounded-[5px] hover:shadow-custom4"
-                            onClick={handleFileChange}
+                            onClick={replaceFile}
                         >
                             Replace
                             <input type="file" className="hidden" />

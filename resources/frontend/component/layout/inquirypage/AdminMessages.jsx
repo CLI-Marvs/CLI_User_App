@@ -5,15 +5,35 @@ import FolderFile from "../../../../../public/Images/folder_file.svg";
 import moment from "moment";
 
 const AdminMessages = ({ items }) => {
-    const { user } = useStateContext();
+    const { user, getFile } = useStateContext();
     const attachmentData = JSON.parse(items.attachment || "[]");
-    
+
     const formatTime = (createdAt) => {
         return moment(createdAt).fromNow();
     };
 
     const dynamicName =
-        user?.id === parseInt(items?.admin_id) ? "You" : `CLI ${user?.department}`;
+        user?.id === parseInt(items?.admin_id)
+            ? "You"
+            : `CLI ${user?.department}`;
+
+    const handleViewAttachment = async (attachment) => {
+        try {
+            const response = await getFile(attachment);
+            console.log("rsponse handleViewAttachment", response);
+            // if (response.ok) {
+            //     const blob = await response.blob();
+            //     const url = window.URL.createObjectURL(blob);
+            //     window.open(url, "_blank");
+            // } else if (response.status === 401) {
+            //     alert("Unauthorized: Please log in to view this file.");
+            // } else {
+            //     alert("Error fetching file");
+            // }
+        } catch (error) {
+            console.log("Error viewing attachment", error);
+        }
+    };
     return (
         <div className="w-full">
             <div className="flex justify-end w-full mt-10 gap-2 ">
@@ -26,7 +46,11 @@ const AdminMessages = ({ items }) => {
                     </p>
                 </div>
                 <div className="h-12 w-12">
-                    <img className="rounded-full" src={items.admin_profile_picture} alt="Admin Logo" />
+                    <img
+                        className="rounded-full"
+                        src={items.admin_profile_picture}
+                        alt="Admin Logo"
+                    />
                 </div>
             </div>
             <div className="w-full mt-2 mb-5 pr-12">
@@ -39,8 +63,11 @@ const AdminMessages = ({ items }) => {
                         attachmentData.map((attachment, index) => (
                             <div className="mt-4" key={index}>
                                 <button
+                                    // onClick={() =>
+                                    //     window.open(attachment, "_blank")
+                                    // }
                                     onClick={() =>
-                                        window.open(attachment, "_blank")
+                                        handleViewAttachment(attachment)
                                     }
                                     className="flex items-center justify-start bg-customnavbar h-12 px-24 pl-4 text-black gap-2 rounded-lg"
                                 >

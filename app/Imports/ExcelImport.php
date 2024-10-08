@@ -25,54 +25,7 @@ class ExcelImport implements ToModel, WithHeadingRow
         $this->towerPhaseId = $towerPhaseId;
     }
 
-    // Model function to map rows
-    // public function model(array $row)
-    // {
-    //     // Create a mappedData array using headers from the frontend
-    //     $mappedData = [];
 
-    //     foreach ($this->headers as $header) {
-    //         // $dbField = strtolower(str_replace(' ', '_', $header['rowHeader']));
-    //         // $mappedData[$header['rowHeader']] = $row[$dbField] ?? null;
-    //         $dbField = strtolower(str_replace(' ', '_', $header['rowHeader']));
-    //         $mappedData[$header['rowHeader']] = $row[$dbField] ?? null;
-    //     }
-    //     // Additional check to ignore rows with specific invalid values like 'FLOOR' or '#REF!'
-    //     $invalidValues = ['FLOOR', '#REF!', null];
-    //     $hasValidData = false;
-
-    //     foreach ($mappedData as $key => $value) {
-    //         // If the value is not in the list of invalid values and not empty, we have valid data
-    //         if (!in_array($value, $invalidValues, true) && trim($value) !== '') {
-    //             $hasValidData = true;
-    //             break; // No need to continue checking, valid data found
-    //         }
-    //     }
-
-    //     // If the row is empty, return null to skip this row
-    //     if (!$hasValidData) {
-    //         return null;
-    //     }
-    //     try {
-    //         return new Unit([
-    //             'floor' => $mappedData['FLOOR'] ?? null, // the floor and lower case is the database column
-    //             'room_number' => $mappedData['ROOM NUMBER'] ?? null,
-    //             'unit' => $mappedData['UNIT'] ?? null,
-    //             'type' => $mappedData['TYPE'] ?? null,
-    //             'indoor_area' => $mappedData['INDOOR AREA'] ?? null,
-    //             'balcony_area' => $mappedData['BALCONY AREA'] ?? null,
-    //             'garden_area' => $mappedData['GARDEN AREA'] ?? null,
-    //             'total_area' => $mappedData['TOTAL AREA'] ?? null,
-    //             'property_details_id' => $this->propertyId
-    //         ]);
-    //     } catch (\Exception $e) {
-    //         return response()->json([
-    //             'message' => 'Error uploading file.',
-    //             'error' => $e->getMessage(),
-    //             ['mappedData' => $mappedData]
-    //         ], 500);
-    //     }
-    // }
     //this function is already working if straight forward
     public function model(array $row)
     {
@@ -84,7 +37,7 @@ class ExcelImport implements ToModel, WithHeadingRow
             // Generate the database field name from the header
             $dbField = strtolower(str_replace(' ', '_', $header)); // Use the header string directly
             // Find the index of the header in the row array
-            // $headerIndex = array_search($header, $this->headers);
+           
             // Check if the key exists in $row and map it
             $mappedData[$header] = $row[$dbField] ?? null; //  
         }

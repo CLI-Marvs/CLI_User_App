@@ -9,43 +9,49 @@ import FloorPremiums from "./accordion/FloorPremiums";
 import AddPropertyModal from "./modals/AddPropertyModal";
 import { Form, useLocation } from "react-router-dom";
 import UploadUnitDetailsModal from "./modals/UploadUnitDetailsModal";
-import { usePriceListStateContext } from "../../../../context/BasicPricing/PriceListSettingsContext";
+import { usePriceBasicDetailStateContext } from "../../../../context/PriceBasicDetail/PriceBasicContext";
 import { useFloorPremiumStateContext } from "../../../../context/FloorPremium/FloorPremiumContext";
 import { useStateContext } from "../../../../context/contextprovider";
 import apiService from "../../../servicesApi/apiService";
 import expectedHeaders from "../../../../constant/excelHeader";
 import * as XLSX from "xlsx";
-
+import { useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 const BasicPricing = ({ props }) => {
-    //state
+    //State
     const {
-        priceListSettingformData,
-        setPriceListSettingformData,
+        priceBasicDetailsFormData,
+        setPriceBasicDetailsFormData,
         formDataState,
-        propertyFloors,
-        towerPhaseId,
-        getPropertyFloors,
-    } = usePriceListStateContext();
+    } = usePriceBasicDetailStateContext();
     const { floorPremiumFormData } = useFloorPremiumStateContext();
-    const { setTowerPhaseId } = useStateContext();
+    const { propertyId, user, towerPhaseId } = useStateContext();
+
     const modalRef = useRef(null);
     const uploadUnitModalRef = useRef(null);
     const fileInputRef = useRef(null);
     const location = useLocation();
     const { passPropertyDetails = {} } = location.state || {};
 
+    const [localPropertyData, setLocalPropertyData] =
+        useState(passPropertyDetails);
+    const navigate = useNavigate();
     const [fileName, setFileName] = useState("");
     const [fileSelected, setFileSelected] = useState({});
-    const [excelData, setExcelData] = useState({});
     const [selectedExcelHeader, setSelectedExcelHeader] = useState([]);
 
-    //hooks
-    //event handler
+    //Hooks
+    useEffect(() => {
+        setLocalPropertyData(passPropertyDetails);
+    }, []);
+
+    //Event handler
     const handleOpenAddPropertyModal = () => {
         if (modalRef.current) {
             modalRef.current.showModal();
         }
     }; //open the add property modal
+
     const handleOpenUnitUploadModal = () => {
         if (fileInputRef.current) {
             fileInputRef.current.click();
@@ -132,105 +138,75 @@ const BasicPricing = ({ props }) => {
         reader.readAsArrayBuffer(file);
     }; //handles the process of uploading an Excel file, extracting the headers
 
-    // const handleSubmit = async (e, status) => {
-    //     const priceListSettingFormData = new FormData();
-    //     const floorPremiumFormData = new FormData();
-    //     try {
-    //         priceListSettingFormData.append(
-    //             "propertyId",
-    //             passPropertyDetails?.propertyData?.id
-    //         );
-    //         priceListSettingFormData.append(
-    //             "basePrice",
-    //             priceListSettingformData.basePrice
-    //         );
-    //         priceListSettingFormData.append(
-    //             "transferCharge",
-    //             priceListSettingformData.transferCharge
-    //         );
-    //         priceListSettingFormData.append(
-    //             "effectiveBalconyBase",
-    //             priceListSettingformData.effectiveBalconyBase
-    //         );
-    //         priceListSettingFormData.append(
-    //             "vat",
-    //             priceListSettingformData.vat
-    //         );
-    //         priceListSettingFormData.append(
-    //             "vatableListPrice",
-    //             priceListSettingformData.vatableListPrice
-    //         );
-    //         priceListSettingFormData.append(
-    //             "reservationFee",
-    //             priceListSettingformData.reservationFee
-    //         );
-    //         priceListSettingFormData.append("status", status);
-    //         const response = await apiService.post(
-    //             "basic-pricing",
-    //             priceListSettingFormData,
-    //             {
-    //                 headers: {
-    //                     "Content-Type": "application/json",
-    //                 },
-    //             }
-    //         );
-    //         alert(response.data.message);
-
-    //         setPriceListSettingformData(formDataState);
-    //     } catch (e) {
-    //         console.log("error basic pricing", e);
-    //     }
-    // };
     const handleSubmit = async (e, status) => {
-        try {
-            const validFloorPremiums = floorPremiumFormData.floor.filter(
-                (floor) => floor.premiumCost && floor.luckyNumber
-            ); //Filter not to include if premiumCost/luckyNumber is empty
-            const payload = {
-                priceList:buildPriceListPayload(
-                    priceListSettingformData,
-                    status
-                ), // Price list data
-                floorPremiums: buildFloorPremiumPayload(validFloorPremiums), // Floor premium data
-                //Later to add price versions
-                // priceVersion: buildPriceVersionPayload(priceVersionFormData),
-            };
-            console.log("123", payload);
-            const response = await apiService.post("basic-pricing", payload, {
-                headers: {
-                    "Content-Type": "application/json",
-                },
-            });
+        const validFloorPremiums = floorPremiumFormData.floor.filter(
+            (floor) => {
+                return (
+                    floor.premiumCost !== undefined &&
+                    floor.premiumCost !== "" &&
+                    floor.luckyNumber !== undefined
+                ); // Only check if `luckyNumber` is defined
+            }
+        );
 
-            alert(response.data.message);
+        if (
+            validFloorPremiums.length ||
+            priceBasicDetailsFormData.basePrice ||
+            priceBasicDetailsFormData.reservationFee
+        ) {
+            try {
+                console.log("user?.id", user?.id);
+                const payload = {
+                    priceList: buildPriceListPayload(
+                        priceBasicDetailsFormData,
+                        status
+                    ), // Price list data
+                    empId: user?.id,
+                    towerPhaseId: towerPhaseId,
+                    propertyId: propertyId,
+                    floorPremiums: buildFloorPremiumPayload(validFloorPremiums), // Floor premium data
+                    //Later to add price versions
+                    // priceVersion: buildPriceVersionPayload(priceVersionFormData),
+                };
+                console.log("payload", payload);
+                const response = await apiService.post(
+                    "basic-pricing",
+                    payload,
+                    {
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                    }
+                );
 
-            // Reset form data
-           setPriceListSettingformData(formDataState);
-        } catch (e) {
-            console.log("Error in basic pricing submission", e);
+                alert(response.data.message);
+                // Reset form data
+                // setTimeout(() => {
+                //     setPriceBasicDetailsFormData(formDataState);
+                //     navigate("/propertyandpricing/pricingmasterlist");
+                // }, 1000);
+            } catch (error) {
+                console.log("Error in basic pricing submission", e);
+            }
+        } else {
+            console.log("Else run here");
+            // setTimeout(() => {
+            //     navigate("/propertyandpricing/pricingmasterlist");
+            // }, 1000);
         }
-    };
-    //hooks
-    useEffect(() => {
-        if (passPropertyDetails) {
-            const towerId =
-                passPropertyDetails?.propertyData?.tower_phases[0].id;
+    }; //handles in submitting all data in creating price master list
 
-            setTowerPhaseId((prev) => (prev !== towerId ? towerId : prev));
-        }
-    }, [passPropertyDetails]);
-
-    //Helper function-> Logic is specific to the component and won't be reused.
-    const buildPriceListPayload = (priceListData, status) => {
+    //Helper function-> Logic is specific to the component and won't be reused to other component.
+    const buildPriceListPayload = (priceListData, passedStatus) => {
         return {
-            propertyId: passPropertyDetails?.propertyData?.id,
+            propertyId: propertyId,
             basePrice: parseInt(priceListData.basePrice),
             transferCharge: priceListData.transferCharge,
             effectiveBalconyBase: priceListData.effectiveBalconyBase,
             vat: priceListData.vat,
             vatableListPrice: priceListData.vatableListPrice,
             reservationFee: priceListData.reservationFee,
-            status: status,
+            status: passedStatus,
         };
     }; // Helper function to build price list payload
 
@@ -239,29 +215,27 @@ const BasicPricing = ({ props }) => {
             floor: floor.floor,
             premiumCost: parseInt(floor.premiumCost),
             luckyNumber: floor.luckyNumber,
+            excludedUnits: floor.excludedUnits,
         }));
-        // return validFloorPremiums.floor.map((floor) => ({
-        //     floor: floor.floor,
-        //     premiumCost: floor.premiumCost,
-        //     luckyNumber: floor.luckyNumber,
-        // }));
     }; // Helper function to build floor premium payload
+
     return (
         <div className="h-screen max-w-[957px] min-w-[897px] bg-custom-grayFA px-[30px] ">
             {/* button ra if walay pa property */}
             <div className="px-5 mb-7  ">
-                <button
-                    onClick={handleOpenAddPropertyModal}
-                    className="montserrat-semibold text-sm px-2 gradient-btn2 w-[214px] h-[37px] rounded-[10px] text-white hover:shadow-custom4"
-                >
-                    Add Property and Pricing
-                </button>
+                {!passPropertyDetails && (
+                    <button
+                        onClick={handleOpenAddPropertyModal}
+                        className="montserrat-semibold text-sm px-2 gradient-btn2 w-[214px] h-[37px] rounded-[10px] text-white hover:shadow-custom4"
+                    >
+                        Add Property and Pricing
+                    </button>
+                )}
             </div>
             {/* kung naa nay property */}
-            {passPropertyDetails &&
-                Object.keys(passPropertyDetails).length > 0 && (
-                    <ProjectDetails {...passPropertyDetails} />
-                )}
+            {localPropertyData && Object.keys(localPropertyData).length > 0 && (
+                <ProjectDetails localPropertyData={localPropertyData} />
+            )}
 
             <div className="flex gap-[15px] py-5">
                 <button
@@ -295,12 +269,8 @@ const BasicPricing = ({ props }) => {
             />
             <div>
                 <UploadUnitDetailsModal
-                    excelData={excelData}
+                
                     handleFileChange={handleFileChange}
-                    propertyId={passPropertyDetails?.propertyData?.id}
-                    // towerPhaseId={
-                    //     passPropertyDetails?.propertyData?.tower_phases[0].id
-                    // }
                     uploadUnitModalRef={uploadUnitModalRef}
                     fileName={fileName}
                     selectedExcelHeader={selectedExcelHeader}

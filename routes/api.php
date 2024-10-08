@@ -1,10 +1,12 @@
 <?php
 
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\BasicPricingController;
+
 use App\Http\Controllers\ConcernController;
 use App\Http\Controllers\PaymentSchemeController;
-use App\Http\Controllers\PricingMasterListController;
+use App\Http\Controllers\PriceBasicDetailController;
+
+use App\Http\Controllers\PriceListMasterController;
 use App\Http\Controllers\PropertyMasterController;
 use App\Http\Controllers\UnitController;
 use Illuminate\Http\Request;
@@ -64,19 +66,23 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/specific-assignee', [ConcernController::class, 'getSpecificInquiry']);
 
     /* Pricing Master List */
-    Route::get('/get-pricing-master-lists', [PricingMasterListController::class, 'getAllPricingMasterLists']);
+    Route::get('/get-pricing-master-lists', [PriceListMasterController::class, 'getAllPricingMasterLists']);
     /*Basic Pricing */
-    Route::post('/basic-pricing', [BasicPricingController::class, 'storeBasicPricing']);
+    Route::post('/basic-pricing', [PriceBasicDetailController::class, 'storeBasicPricing']);
 
     /*Payment Scheme */
     Route::post('/payment-schemes', [PaymentSchemeController::class, 'storePaymentScheme']);
     Route::get('/get-payment-schemes', [PaymentSchemeController::class, 'getAllPaymentSchemes']);
     /* Property Master */
     Route::post('/property-details', [PropertyMasterController::class, 'storePropertyDetail']);
+    Route::get('/get-property-master/{id}', [PropertyMasterController::class, 'getPropertyMaster']);
 
     /* Unit */
     // Route::post('/units-import', [UnitController::class, 'importUnitsFromExcel']);
     Route::post('/upload-units', [UnitController::class, 'uploadUnits']);
     Route::get('/property-floors/{towerPhaseId}', [UnitController::class, 'countFloors']);
     Route::post('/property-units', [UnitController::class, 'getUnits']);
+
+    /* test for viewing a file  */
+    Route::get('/view-file/{filePath}', [ConcernController::class, 'viewFile']);
 });

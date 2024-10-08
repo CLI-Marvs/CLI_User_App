@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import ReactPaginate from "react-paginate";
 import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md";
 import AddPaymentSchemeModal from "./AddPaymentSchemeModal";
@@ -6,16 +6,18 @@ import { useStateContext } from "../../../../context/contextprovider";
 import moment from "moment";
 
 const PaymentScheme = () => {
-    //-state
-    const { paymentSchemes, setPaymentSchemes } = useStateContext();
+    //State
+    const { paymentSchemes, setPaymentSchemes, getPaymentSchemes } =
+        useStateContext();
     const modalRef = useRef(null);
-
     const handleOpenModal = () => {
         if (modalRef.current) {
             modalRef.current.showModal();
         }
     };
-
+    useEffect(() => {
+        getPaymentSchemes();
+    }, []);
     return (
         <div className="h-screen max-w-[1800px] bg-custom-grayFA px-4">
             <div className="">

@@ -57,6 +57,7 @@ export const ContextProvider = ({ children }) => {
     const [isLoading, setIsLoading] = useState(false);
     const [concernMessages, setConcernMessages] = useState([]);
     const [concernId, setConcernId] = useState(null);
+    const [propertyMasterData, setPropertyMasterData] = useState([]);
     useEffect(() => {
         if (user && user.department && !isDepartmentInitialized) {
             setDepartment(user.department === "CRS" ? "All" : user.department);
@@ -272,31 +273,34 @@ export const ContextProvider = ({ children }) => {
         return validMonths.hasOwnProperty(normalizedMonth);
     };
 
-    const getPricingMasterLists = async () => {
+    const getPricingMasterLists = useCallback(async () => {
         if (token) {
             try {
+                setIsLoading(true);
                 const response = await apiService.get(
                     "get-pricing-master-lists"
                 );
                 setPricingMasterLists(response.data);
             } catch (error) {
                 console.error("Error fetching pricing master lists:", error);
+            } finally {
+                setIsLoading(false);
             }
         }
-    }; //get all pricing master lists data
+    }, []); //get all pricing master lists data
 
-    const getPaymentSchemes = async () => {
+    const getPaymentSchemes = useCallback(async () => {
         if (token) {
             try {
                 const response = await apiService.get("get-payment-schemes");
+
                 setPaymentSchemes(response.data);
             } catch (error) {
                 console.error("Error fetching data:", error);
             }
         }
-    }; //get all payment schemes
-
-    const getPropertyFloors = async (towerPhaseId) => {
+    }, []); //get all payment schemes
+    const getPropertyFloors = useCallback(async (towerPhaseId) => {
         // Check if property floors have already been fetched
         if (!propertyFloors[towerPhaseId] && towerPhaseId && token) {
             try {
@@ -317,9 +321,14 @@ export const ContextProvider = ({ children }) => {
                 setIsLoading(false);
             }
         }
-    }; //get property floors
+    }, []); //get property floors
 
     const getPropertyUnits = async (towerPhaseId, selectedFloor) => {
+        console.log(
+            "selectedFloor getPropertyUnits",
+            selectedFloor,
+            towerPhaseId
+        );
         if (token || selectedFloor || towerPhaseId) {
             try {
                 setIsLoading(true);
@@ -336,14 +345,38 @@ export const ContextProvider = ({ children }) => {
         }
     }; //get property units
 
+    const getPropertyMaster = async (id) => {
+        if (token) {
+            try {
+                setIsLoading(true);
+                const response = await apiService.get(
+                    `get-property-master/${id}`
+                );
+
+                return response.data;
+            } catch (e) {
+                console.error("Error fetching propertymaster data:", error);
+            }
+        }
+    };
+
+    //
+    const getFile = async (attachment) => {
+        try {
+            const response = await apiService.get(`view-file/${attachment}`);
+            console.log("response getFile", response);
+        } catch (e) {
+            console.log("Error fetching file", e);
+        }
+    };
     useEffect(() => {
         getPropertyUnits(towerPhaseId, selectedFloor);
-    }, [token, towerPhaseId, selectedFloor]);
+    }, [towerPhaseId, selectedFloor]);
 
     useEffect(() => {
         getPricingMasterLists();
         getPaymentSchemes();
-    }, [token]);
+    }, []);
 
     useEffect(() => {
         if (towerPhaseId) {
@@ -501,6 +534,8 @@ export const ContextProvider = ({ children }) => {
                 setConcernMessages,
                 concernId,
                 setConcernId,
+                getPropertyMaster,
+                getFile,
             }}
         >
             {children}

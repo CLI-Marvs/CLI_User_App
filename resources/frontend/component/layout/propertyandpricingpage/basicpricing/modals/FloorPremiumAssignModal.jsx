@@ -2,21 +2,23 @@ import React, { useEffect, useRef, useState } from "react";
 import FloorPremiumAddUnitModal from "./FloorPremiumAddUnitModal";
 import { useStateContext } from "../../../../../context/contextprovider";
 import CircularProgress from "@mui/material/CircularProgress";
-
+import { useFloorPremiumStateContext } from "../../../../../context/FloorPremium/FloorPremiumContext";
 const FloorPremiumAssignModal = ({ modalRef }) => {
-    //state
-    const {
-        selectedFloor,
-        propertyUnit,
-        getPropertyUnits,
-        setPropertyId,
-        isLoading,
-    } = useStateContext();
-    // console.log("FloorPremiumAssignModal- propertyUnit",  propertyUnit);
+    //State
+    const { selectedFloor, propertyUnit, isLoading, towerPhaseId } =
+        useStateContext();
+    const { setFloorPremiumFormData } = useFloorPremiumStateContext();
     const modalRef2 = useRef(null);
-    const [isSelectedUnit, setSelectedUnit] = useState();
-    // console.log("FloorPremiumAssignModal- propertyUnit", propertyUnit);
-    //event handler
+    const [selectedUnit, setSelectedUnit] = useState([]);
+
+    //Hooks
+    useEffect(() => {
+        if (propertyUnit) {
+            setSelectedUnit(Object.values(propertyUnit).map((item) => item.id)); // Select all unit IDs
+        }
+    }, [propertyUnit]);
+
+    //Event handler
     const handleOpenModal = () => {
         if (modalRef2.current) {
             modalRef2.current.showModal();
@@ -24,22 +26,44 @@ const FloorPremiumAssignModal = ({ modalRef }) => {
     };
 
     const handleUnitSelect = (id) => {
-        setSelectedUnit(
-            (prevSelectedId) => (prevSelectedId === id ? null : id) // Deselect if already selected, else select the new unit by ID
-        );
+        console.log("id", id);
+        setSelectedUnit((prevSelectedUnits) => {
+            if (prevSelectedUnits.includes(id)) {
+                // Deselect unit if it's already selected
+                return prevSelectedUnits.filter((unitId) => unitId !== id);
+            } else {
+                // Select the new unit by adding its ID
+                return [...prevSelectedUnits, id];
+            }
+        });
+        setFloorPremiumFormData((prevData) => ({
+            // Spread the previous state data to retain all other fields unchanged
+            ...prevData,
+            // Update the 'floor' array, mapping through each 'floorItem'
+            floor: prevData.floor.map((floorItem) => {
+                // Check if the current 'floorItem' matches the selected floor
+                if (floorItem.floor === selectedFloor) {
+                    return {
+                        // Spread the existing 'floorItem' data to retain all other properties unchanged
+                        ...floorItem,
+                        // Check if the 'excludedUnits' array exists, and use an empty array if not
+                        excludedUnits: (floorItem.excludedUnits || []).includes(
+                            id
+                        )
+                            ? // If the unit is already in 'excludedUnits', remove it by filtering out the 'id'
+                              (floorItem.excludedUnits || []).filter(
+                                  (unitId) => unitId !== id
+                              )
+                            : // If the unit is not in 'excludedUnits', add it by appending the 'id'
+                              [...(floorItem.excludedUnits || []), id],
+                    };
+                }
+                // If it's not the selected floor, return the original 'floorItem' unchanged
+                return floorItem;
+            }),
+        }));
     }; // Handle key selection or deselection
 
-    // useEffect(() => {
-    //     // console.log(
-    //     //     "selectedFloor FloorPremiumAssignModal",
-    //     //     selectedFloor,
-    //     //     propertyId
-    //     // );
-    //     if (selectedFloor || propertyId) {
-    //         setPropertyId(propertyId);
-    //         getPropertyUnits(selectedFloor, propertyId);
-    //     }
-    // }, [selectedFloor, propertyId]);
     return (
         <dialog
             className="modal w-[1200px] rounded-lg bg-custom-grayFA backdrop:bg-black/50"
@@ -60,7 +84,9 @@ const FloorPremiumAssignModal = ({ modalRef }) => {
                     <p className="montserrat-bold text-[21px]">
                         Unit Assignment
                     </p>
-                    <p className="montserrat-regular text-[21px]">Floor</p>
+                    <p className="montserrat-regular text-[21px]">
+                        Floor {selectedFloor} - {towerPhaseId}
+                    </p>
                 </div>
                 <div className="flex items-center p-[20px] h-[91px] gap-[22px] border-b-1 border-custom-lightestgreen mb-[30px]">
                     <p className="text-custom-gray81">Legend</p>
@@ -97,7 +123,9 @@ const FloorPremiumAssignModal = ({ modalRef }) => {
                         ) : (
                             propertyUnit &&
                             Object.values(propertyUnit).map((item, key) => {
-                                const isSelected = isSelectedUnit === item?.id;
+                                const isSelected = selectedUnit.includes(
+                                    item?.id
+                                );
 
                                 return (
                                     <div

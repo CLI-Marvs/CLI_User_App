@@ -2,31 +2,32 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
+use GuzzleHttp\Client;
+use App\Models\Concerns;
+use App\Models\Employee;
+use App\Models\Messages;
 use App\Events\SampleEvent;
-use App\Jobs\JobToPersonnelAssign;
+use App\Models\InquiryLogs;
+use Illuminate\Http\Request;
+use App\Models\Conversations;
+use App\Models\PinnedConcerns;
 use App\Jobs\ReplyFromAdminJob;
+use App\Models\BuyerReplyNotif;
+use App\Models\InquiryAssignee;
+use App\Models\ReadNotifByUser;
 use App\Jobs\ResolveJobToSender;
 use App\Mail\SendReplyFromAdmin;
-use App\Models\BuyerReplyNotif;
-use App\Models\Concerns;
 use App\Models\ConcernsCreatedBy;
-use App\Models\Conversations;
-use App\Models\Employee;
-use App\Models\InquiryAssignee;
-use App\Models\InquiryLogs;
-use App\Models\Messages;
-use App\Models\PinnedConcerns;
-use App\Models\ReadNotifByUser;
-use Carbon\Carbon;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
+use App\Jobs\JobToPersonnelAssign;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
-use GuzzleHttp\Client;
 use Google\Cloud\Storage\StorageClient;
 use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Collection;
 
 
 
@@ -396,6 +397,32 @@ class ConcernController extends Controller
         $createdBy->concern_id = $concernId;
         $createdBy->save();
     }
+    //Sho-original file
+    // public function uploadToGCS($files)
+    // {
+    //     $fileLinks = [];
+    //     if ($files) {
+    //         $storage = new StorageClient([
+    //             'keyFilePath' => storage_path('keys/super-app-anaplan-2cbacd9f0192.json')
+    //         ]);
+    //         $bucket = $storage->bucket('super-app-storage');
+
+    //         foreach ($files as $file) {
+    //             $fileName = uniqid() . '.' . $file->getClientOriginalExtension();
+    //             $filePath = 'concerns/' . $fileName;
+
+    //             $bucket->upload(
+    //                 fopen($file->getPathname(), 'r'),
+    //                 ['name' => $filePath]
+    //             );
+
+    //             $fileLink = $bucket->object($filePath)->signedUrl(new \DateTime('tomorrow'));
+
+    //             $fileLinks[] = $fileLink;
+    //         }
+    //     }
+    //     return $fileLinks;
+    // }
     public function uploadToGCS($files)
     {
         $fileLinks = [];
@@ -422,6 +449,39 @@ class ConcernController extends Controller
         return $fileLinks;
     }
 
+    public function viewFile($filePath)
+    {
+        // Ensure the user is authenticated
+        if (!Auth::check()) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        // Connect to Google Cloud Storage
+        $storage = new StorageClient([
+            'keyFilePath' => storage_path('keys/super-app-anaplan-2cbacd9f0192.json')
+        ]);
+        $bucket = $storage->bucket('super-app-storage');
+        // $object = $bucket->object($filePath);
+        $object = $bucket->object('concerns/' . $filePath);
+        // Generate a signed URL for file access (valid for 1 day)
+        $signedUrl = $object->signedUrl(new \DateTime('tomorrow'));
+
+        return response()->json(['url' => $signedUrl], 200);
+
+        // // Check if the file exists
+        // if (!$object->exists()) {
+        //     return response()->json(['error' => 'File not found'], 404);
+        // }
+
+        // // Fetch the file content
+        // $stream = $object->downloadAsStream();
+
+        // // Serve the file for viewing (inline instead of attachment)
+        // return response($stream->getContents(), 200, [
+        //     'Content-Type' => $object->info()['contentType'],
+        //     'Content-Disposition' => 'inline; filename="' . basename($filePath) . '"',
+        // ]);
+    }
     // public function uploadToGCS($files)
     // {
     //     $fileLinks = [];
@@ -1357,18 +1417,18 @@ class ConcernController extends Controller
     public function retrieveConcernsMessages(Request $request)
     {
         $concernId = $request->query('concernId');
-       /*  dd($request->all()); */
-        try {           
-           $conversations = Conversations::where('concern_id', $concernId)
-                                          ->join('employee', 'employee.id', '=', 'conversations.sender_id')
-                                          ->select('conversations.*', 'employee.firstname', 'employee.lastname')
-                                        /*   ->orderBy('created_at', 'desc') */
-                                          ->get();
+        /*  dd($request->all()); */
+        try {
+            $conversations = Conversations::where('concern_id', $concernId)
+                ->join('employee', 'employee.id', '=', 'conversations.sender_id')
+                ->select('conversations.*', 'employee.firstname', 'employee.lastname')
+                /*   ->orderBy('created_at', 'desc') */
+                ->get();
 
-           return response()->json($conversations);
+            return response()->json($conversations);
         } catch (\Exception $e) {
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
-        }       
+        }
     }
 
     // public function sendMessageConcerns(Request $request)
