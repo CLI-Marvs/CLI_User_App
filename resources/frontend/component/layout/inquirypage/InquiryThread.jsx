@@ -301,7 +301,7 @@ const InquiryThread = () => {
                         {isFilterVisible && (
                             <div
                                 ref={filterBoxRef}
-                                className="absolute left-0 mt-12 p-8 bg-white border border-gray-300 shadow-lg rounded-lg z-10 w-[604px]"
+                                className="absolute left-0 mt-12 p-8 bg-white border border-gray-300 shadow-lg rounded-lg z-10 w-[560px]"
                             >
                                 <div className="flex flex-col gap-2">
                                     <div className="flex">
@@ -361,7 +361,7 @@ const InquiryThread = () => {
                                         />
                                     </div>
                                     <div className="flex gap-3">
-                                        <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
+                                        <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[244px]">
                                             Date
                                         </label>
                                         <div className="relative">
@@ -550,11 +550,11 @@ const InquiryThread = () => {
                                                         !chatMessage.trim() ||
                                                         loading
                                                     }
-                                                    className={`flex w-[82px] h-[28px] rounded-[5px] text-white text-xs justify-center items-center gradient-background3 hover:shadow-custom4 ${
-                                                        loading
-                                                            ? "cursor-not-allowed"
-                                                            : ""
-                                                    }`}
+                                                    className={`flex w-[82px] h-[28px] rounded-[5px] text-white text-xs justify-center items-center 
+                                                        ${loading || !chatMessage.trim() 
+                                                            ? 'bg-gray-400 cursor-not-allowed' 
+                                                            : 'gradient-background3 hover:shadow-custom4'} 
+                                                    `}
                                                 >
                                                     {loading ? (
                                                         <CircularProgress className="spinnerSize" />
@@ -574,6 +574,15 @@ const InquiryThread = () => {
                                                                 Are you sure about
                                                                 sending this reply?
                                                             </p>
+                                                        </div>
+                                                        <div className="flex flex-col justify-center items-center text-[12px] text-[#B54D4D] px-[20px]">
+                                                            <p>
+                                                                This message will be sent to
+                                                            </p>
+                                                            <span className="font-semibold text-[13px]">
+                                                                    {dataConcern.buyer_name}
+                                                                    {" "}({dataConcern.buyer_email})
+                                                            </span>
                                                         </div>
                                                         <div className="flex justify-center mt-[26px] space-x-[19px]">
                                                             <button
@@ -607,7 +616,7 @@ const InquiryThread = () => {
                                 </div>
                                 <div className="text-[11px] text-[#B54D4D]">
                                     <p>
-                                        Note: This message will be send to{" "}
+                                        Note: This message will be sent to{" "}
                                         <span className="font-semibold">
                                             {dataConcern.buyer_name}
                                         </span>
@@ -627,7 +636,7 @@ const InquiryThread = () => {
                                     )}
                                 {isResolved ? (
                                     <div className="flex justify-start items-center w-[122px] font-semibold text-[13px] text-custom-lightgreen space-x-1">
-                                        <p>Ticket Solved</p>
+                                        <p>Ticket Resolved</p>
                                         <IoIosCheckmarkCircle className="size-[18px] text-custom-lightgreen" />
                                     </div>
                                 ) : (

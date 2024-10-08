@@ -301,8 +301,13 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                         }}
                     />
                     <button
-                        className="w-[76px] h-[28px] gradient-btn2 rounded-[10px] text-xs text-white"
+                        className={`w-[76px] h-[28px] rounded-[10px] text-xs text-white 
+                            ${!message.trim() 
+                                ? 'bg-gray-400 cursor-not-allowed' // Gray out when input is empty
+                                : 'gradient-btn2'} 
+                            `}
                         onClick={handleSendMessage}
+                        
                     >
                         Comment
                     </button>
