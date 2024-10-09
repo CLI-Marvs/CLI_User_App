@@ -14,6 +14,8 @@ class PropertyMaster extends Model
 {
     use HasFactory;
     protected $guarded = array();
+    protected $table = 'property_masters';
+
 
     public function towerPhases()
     {
