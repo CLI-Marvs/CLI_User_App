@@ -34,11 +34,15 @@ class AdminMessage implements ShouldBroadcast
      */
     public function broadcastOn(): array
     {
+        $channel = [];
+        if($this->data['replyRef'] === 'admin_reply') {
+            $channel[] = new Channel('adminmessage.' . $this->data['ticketId']);
+        }
         
-        return [
-            new Channel('adminmessage.' . $this->data['ticketId']),
-        ];
-        
+        if($this->data['replyRef'] === 'requestor_reply') {
+            $channel[] = new Channel('adminmessage.' . $this->data['ticketId']);
+        }
+        return $channel;
         
     }
 

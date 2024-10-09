@@ -275,6 +275,7 @@ class ConcernController extends Controller
                 'ticketId' => $newTicketId,
                 'id' => $messages->id,
                 'created_at' => $messages->created_at,
+                'replyRef' => 'admin_reply'
             ];
 
             AdminMessage::dispatch($data);
@@ -1425,6 +1426,17 @@ class ConcernController extends Controller
                     $concernsRef->message_id = $message['message_id'];
                     $concernsRef->save();
 
+                    $newTicketId = str_replace('#', '', $message['ticket_id']);
+                    $data = [
+                        'buyer_email' => $message['buyer_email'],
+                        'details_message' => $message['details_message'],
+                        'buyer_name' => $concernsRef->buyer_name,
+                        'ticketId' => $newTicketId,
+                        'id' => $messagesRef->id,
+                        'created_at' => $messagesRef->created_at,
+                        'replyRef' => 'admin_reply'
+                    ];
+                    AdminMessage::dispatch($data);
                     $this->followUpReplylogs($message['ticket_id'], $concernsRef->buyer_name);
                     $this->buyerReplyNotif($message['ticket_id'], $concernsRef->id, $message['details_message']);
 
@@ -1499,11 +1511,23 @@ class ConcernController extends Controller
                     'buyer_name' => $buyerName
                 ]
             ];
+            
 
             $inquiry->requestor_reply = json_encode($logData);
             $inquiry->message_log = 'Follow up reply';
             $inquiry->ticket_id = $ticketId;
             $inquiry->save();
+
+            $newTicketId = str_replace('#', '', $ticketId);
+
+            $data = [
+                'admin_reply' => json_encode($logData),
+                'created_at' => $inquiry->created_at,
+                'ticketId' => $newTicketId,
+                'logId' => $inquiry->id,
+                'logRef' => 'requestor_reply'
+            ];
+            AdminReplyLogs::dispatch($data);
         } catch (\Exception $e) {
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
         }
