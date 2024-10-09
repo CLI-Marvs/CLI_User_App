@@ -375,7 +375,7 @@ const InquiryThread = () => {
                                             <img
                                                 src={DateLogo}
                                                 alt="date"
-                                                className="absolute top-[45%] right-0 transform -translate-y-1/2 text-custom-bluegreen size-6"
+                                                className="absolute top-[45%] right-0 transform -translate-y-1/2 text-custom-bluegreen size-6 cursor-pointer pointer-events-none"
                                             />
                                         </div>
                                         <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
