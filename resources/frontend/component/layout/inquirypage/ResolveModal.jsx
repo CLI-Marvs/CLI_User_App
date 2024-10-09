@@ -16,7 +16,7 @@ const ResolveModal = ({ modalRef, ticketId, dataRef }) => {
         try {
             const response = await apiService.post("resolve", {
                 ticket_id: ticketId,
-                admin_name: user?.firstname,
+                admin_name: `${user?.firstname} ${user?.lastname}`,
                 department: user?.department,
                 buyer_email: dataRef.buyer_email,
                 remarks: remarks,

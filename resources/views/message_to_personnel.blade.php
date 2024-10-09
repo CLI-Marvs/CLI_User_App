@@ -121,6 +121,21 @@
     </style>
 </head>
 
-<body>
-{{ $emailContent }}
+<body style="font-family: Arial, sans-serif; font-size: 14px; color: #333; line-height: 1.6; padding: 20px;">
+
+    <p>Hi <strong>{{ ucwords($data['assignee_name']) }}</strong>,</p>
+
+    <p>You have been assigned a new concern ticket:</p>
+    <ul style="list-style-type: none; padding: 0;">
+        <li><strong>Ticket No:</strong> {{ $data['ticketId'] }}</li>
+        <li><strong>Concern: </strong> {{ $data['details_concern'] }}</li>
+        <li><strong>From:</strong> {{ ucwords($data['buyer_name']) }}</li>
+    </ul>
+
+    <p>Please review the concern in your Masters Admin Dashboard.</p>
+
+    <p>Thank you,<br>
+    <strong>{{ $data['from_user'] }}</strong><br>
+    {{ $data['department'] }}</p>
+
 </body>

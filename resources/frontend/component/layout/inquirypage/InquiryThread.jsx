@@ -634,7 +634,7 @@ const InquiryThread = () => {
                                             onClick={handleDeleteInquiry}
                                         />
                                     )}
-                                {isResolved ? (
+                                {dataConcern.status === "Resolved" ? (
                                     <div className="flex justify-start items-center w-[122px] font-semibold text-[13px] text-custom-lightgreen space-x-1">
                                         <p>Ticket Resolved</p>
                                         <IoIosCheckmarkCircle className="size-[18px] text-custom-lightgreen" />

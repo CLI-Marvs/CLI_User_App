@@ -15,14 +15,14 @@ class EmailToPersonnelAssign extends Mailable
 
     protected $email;
 
-    protected $emailContent;
+    protected $data;
 
    /*  protected $admin_name; */
 
-    public function __construct($email, $emailContent/* $admin_name */)
+    public function __construct($email, $data/* $admin_name */)
     {
         $this->email = $email;
-        $this->emailContent = $emailContent;
+        $this->data = $data;
        /*  $this->admin_name = $admin_name; */
     }
 
@@ -44,7 +44,7 @@ class EmailToPersonnelAssign extends Mailable
         return new Content(
             view: 'message_to_personnel',
             with: [
-                'emailContent' => $this->emailContent
+                'data' => $this->data
             ],
         );
     }
