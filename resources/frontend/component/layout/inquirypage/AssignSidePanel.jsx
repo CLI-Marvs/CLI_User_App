@@ -237,7 +237,6 @@ const AssignSidePanel = ({ ticketId }) => {
                     [ticketId]: [...prevAssigneesTicket, newData],
                 };
             });
-            getAssigneesPersonnel();
         });
     };
 
@@ -254,6 +253,7 @@ const AssignSidePanel = ({ ticketId }) => {
                     [ticketId]: updatedAssignees,
                 };
             });
+            getAssigneesPersonnel();
         });
     };
 
@@ -262,7 +262,6 @@ const AssignSidePanel = ({ ticketId }) => {
         let assigneeChannel;
         let newTicketId;
         let removeChannel;
-        getAssigneesPersonnel();
         if (ticketId) {
             newTicketId = ticketId.replace("#", "");
             assigneeChannel = window.Echo.channel(
