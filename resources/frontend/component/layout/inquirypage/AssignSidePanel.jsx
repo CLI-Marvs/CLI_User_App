@@ -253,11 +253,10 @@ const AssignSidePanel = ({ ticketId }) => {
                     [ticketId]: updatedAssignees,
                 };
             });
-            getAssigneesPersonnel();
         });
+        getAssigneesPersonnel();
     };
 
-    console.log("assignPersonnel", assigneesPersonnel[ticketId]);
     useEffect(() => {
         let assigneeChannel;
         let newTicketId;
