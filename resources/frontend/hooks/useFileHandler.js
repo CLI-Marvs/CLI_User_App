@@ -1,13 +1,11 @@
 import { useRef, useState } from "react";
 import * as XLSX from "xlsx";
-
-const useFileUpload = (expectedHeaders) => {
+import expectedHeaders from "../constant/excelHeader";
+const useFileHandler = (expectedHeaders, uploadUnitModalRef) => {
     console.log("expectedHeaders useFileUpload", expectedHeaders);
-    const [tempUploadedExcelData, setTempUploadedExcelData] = useState([]);
-    const [fileSelected, setFileSelected] = useState(null);
     const [fileName, setFileName] = useState("");
-    const uploadUnitModalRef = useRef(null); // Assuming you'll pass the modal reference
-
+    const [fileSelected, setFileSelected] = useState({});
+    const [selectedExcelHeader, setSelectedExcelHeader] = useState([]);
 
     // open the modal to select an excel file
     // const handleOpenUnitUploadModal = () => {
@@ -85,7 +83,7 @@ const useFileUpload = (expectedHeaders) => {
 
             console.log("reorderedHeaders", reorderedHeaders);
             // Save the formatted headers for further use
-            setTempUploadedExcelData(reorderedHeaders);
+            setSelectedExcelHeader(reorderedHeaders);
 
             // Proceed with your modal display logic
             if (uploadUnitModalRef.current) {
@@ -98,13 +96,11 @@ const useFileUpload = (expectedHeaders) => {
 
     return {
         handleFileChange,
-        tempUploadedExcelData,
-        fileSelected,
         fileName,
-        uploadUnitModalRef,
-         
-       
+
+        fileSelected,
+        selectedExcelHeader,
     };
 };
 
-export default useFileUpload;
+export default useFileHandler;

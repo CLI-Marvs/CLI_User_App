@@ -13,7 +13,7 @@ const formDataState = {
     bankFinancing: "",
 };
 const AddPaymentSchemeModal = ({ modalRef }) => {
-    //state
+    //State
     // const [message, setMessage] = useState("");
     const maxCharacters = 350;
     const [formData, setFormData] = useState(formDataState);
@@ -47,7 +47,7 @@ const AddPaymentSchemeModal = ({ modalRef }) => {
                     "Content-Type": "multipart/form-data",
                 },
             });
-         
+
             alert(response.data.message);
             //Close modal and call callback handler
             if (modalRef.current) {

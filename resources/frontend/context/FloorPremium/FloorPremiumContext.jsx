@@ -2,12 +2,7 @@ import React, { createContext, useState, useContext } from "react";
 export const FloorPremiumFormDataContext = createContext();
  
 const formDataState = {
-    floor: [
-        {
-            premiumCost: "",
-            luckyNumber: "",
-        },
-    ],
+    floor: [{ floor: "", premiumCost: "", luckyNumber: "" ,excludedUnits:[] }],
 };
 const FloorPremiumFormDataProvider = ({ children }) => {
     const [floorPremiumFormData, setFloorPremiumFormData] =

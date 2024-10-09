@@ -8,11 +8,10 @@ const formDataState = {
     propertyName: "",
     type: "",
     towerPhase: "",
- 
 };
 
 const AddPropertyModal = ({ modalRef }) => {
-    //state
+    //State
     const { setFloorPremiumsAccordionOpen } = useStateContext();
     const [formData, setFormData] = useState(formDataState);
     const navigate = useNavigate();
@@ -27,9 +26,18 @@ const AddPropertyModal = ({ modalRef }) => {
             [name]: value,
         }));
     };
-    const handleSubmit = async (e) => {
+    const handleSubmit = async (e, status) => {
         e.preventDefault();
         const form = new FormData();
+
+        if (
+            formData.propertyName === "" ||
+            formData.towerPhase === "" ||
+            formData.type === ""
+        ) {
+            alert("Please fill all the fields");
+            return;
+        }
         try {
             setLoading(true);
 
@@ -37,31 +45,30 @@ const AddPropertyModal = ({ modalRef }) => {
             form.append("propertyName", formData.propertyName);
             form.append("towerPhase", formData.towerPhase);
             form.append("type", formData.type);
-            
+            form.append("status", status);
+
             // API call
             const response = await apiService.post("property-details", form, {
                 headers: {
-                    "Content-Type": "multipart/form-data",
+                    "Content-Type": "application/json",
                 },
             });
-            console.log("response in addProps",response)
-            const passData = response.data;
-           
-             alert(response.data.message);
+            const propertyId = response?.data?.propertyData?.propertyMaster?.id;
+            const passData = response?.data;
+            console.log("passData 50 handleSubmit", passData);
+            alert(response.data.message);
             //Close modal and call callback handler
             if (modalRef.current) {
                 modalRef.current.close();
             }
             setFormData(formDataState);
             setFloorPremiumsAccordionOpen(false);
-            navigate("/propertyandpricing/basicpricing", {
+            navigate(`/propertyandpricing/basicpricing/${propertyId}`, {
                 state: { passPropertyDetails: passData },
             }); //navigate to Basic pricing components   with the property detail data as props
-             
         } catch (error) {
             console.log("Error sending property details", error);
         } finally {
-            
             setLoading(false);
         }
     };
@@ -110,9 +117,9 @@ const AddPropertyModal = ({ modalRef }) => {
                                 value={formData.type}
                             >
                                 <option value="">Select Type</option>
-                                <option value="Type 1">Type 1</option>
-                                <option value="Type 2">Type 2</option>
-                                <option value="Type 3">Type 3</option>
+                                <option value="Vertical">Vertical</option>
+                                <option value="Horizontal">Horizontal</option>
+                                {/* <option value="Type 3">Type 3</option> */}
                             </select>
                             <span className="absolute inset-y-0 right-0 text-custom-gray81 flex items-center pr-3 pl-3 bg-custom-grayFA pointer-events-none">
                                 <IoMdArrowDropdown />
@@ -137,7 +144,7 @@ const AddPropertyModal = ({ modalRef }) => {
                             className={`w-[173px] h-[37px] text-white montserrat-semibold text-sm gradient-btn rounded-[10px] hover:shadow-custom4 ${
                                 loading ? "cursor-not-allowed" : ""
                             }`}
-                            onClick={handleSubmit}
+                            onClick={(e) => handleSubmit(e, "Draft")}
                         >
                             {loading ? (
                                 <CircularProgress className="spinnerSize" />

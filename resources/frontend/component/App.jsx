@@ -18,14 +18,13 @@ import PaymentSchemeView from "./views/pages/PropertyAndPricingViews/PaymentSche
 import PriceVersioningView from "./views/pages/PropertyAndPricingViews/PriceVersioningView";
 import PromotionalPricingView from "./views/pages/PropertyAndPricingViews/PromotionalPricingView";
 import NotificationView from "./views/pages/notificationViews/NotificationView";
-import PriceListSettingFormDataProvider from "../context/BasicPricing/PriceListSettingsContext";
+
 import SalesManagementLayout from "./views/layout/SalesManagementLayout";
 import ReservationListView from "./views/pages/salesViews/ReservationListView";
 import ReservationPageView from "./views/pages/salesViews/ReservationPageView";
 import PaymentMainView from "./views/pages/paymentViews/PaymentMainView";
 import PaymentSectionView from "./views/pages/paymentViews/PaymentSectionView";
 import MainComponent from "./layout/chatComponent/MainComponent";
-
 
 const App = () => {
     const Layout = () => {
@@ -107,7 +106,7 @@ const App = () => {
                             element: <PricingMasterListView />,
                         },
                         {
-                            path: "basicpricing",
+                            path: "basicpricing/:id",
                             element: <BasicPricingView />,
                         },
                         {
@@ -126,29 +125,27 @@ const App = () => {
                 },
                 {
                     path: "salesmanagement",
-                    element: <SalesManagementLayout/>,
+                    element: <SalesManagementLayout />,
                     children: [
                         {
-                            path: "reservationlist", 
-                            element: <ReservationListView/>,
+                            path: "reservationlist",
+                            element: <ReservationListView />,
                         },
                         {
-                            path: "reservationpage", 
-                            element: <ReservationPageView/>,
+                            path: "reservationpage",
+                            element: <ReservationPageView />,
                         },
-                        
                     ],
                 },
-                
             ],
         },
         {
             path: "/paymentmethod",
-            element: <PaymentMainView/>,
+            element: <PaymentMainView />,
         },
         {
             path: "/paymentmethod/payonlinenow",
-            element: <PaymentSectionView/>,
+            element: <PaymentSectionView />,
         },
     ]);
 

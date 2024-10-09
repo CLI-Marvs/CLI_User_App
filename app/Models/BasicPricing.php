@@ -5,7 +5,8 @@ namespace App\Models;
 use App\Models\AdditionalPremium;
 use App\Models\FloorPremium;
 use App\Models\PaymentScheme;
-use App\Models\PriceListSetting;
+use App\Models\PriceBasicDetails;
+use App\Models\PriceListMaster;
 use App\Models\PriceVersion;
 use App\Models\PricingMasterList;
 use App\Models\PropertyDetail;
@@ -14,7 +15,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class BasicPricing extends Model
-{
+{   
     use HasFactory;
 
     protected $guarded = array();
@@ -26,7 +27,7 @@ class BasicPricing extends Model
 
     public function priceListSetting()
     {
-        return $this->hasOne(PriceListSetting::class);
+        return $this->hasOne(PriceBasicDetails::class);
     }
     public function paymentSchemes()
     {
@@ -40,7 +41,7 @@ class BasicPricing extends Model
 
     public function pricingMasterList()
     {
-        return $this->belongsTo(PricingMasterList::class);
+        return $this->belongsTo(PriceListMaster::class);
     }
     public function additionalPremium()
     {

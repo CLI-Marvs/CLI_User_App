@@ -2,18 +2,18 @@ import React, { useState } from "react";
 import { IoIosArrowDown } from "react-icons/io";
 import { IoMdArrowDropdown } from "react-icons/io";
 import { LiaPercentSolid } from "react-icons/lia";
-import { usePriceListStateContext } from "../../../../../context/BasicPricing/PriceListSettingsContext";
+import { usePriceBasicDetailStateContext } from "../../../../../context/PriceBasicDetail/PriceBasicContext";
 
 const PriceListSettings = () => {
-    //state
+    //State
     const [accordionOpen, setAccordionOpen] = useState(false);
-    const { priceListSettingformData, setPriceListSettingformData } =
-        usePriceListStateContext();
-    
+    const { priceBasicDetailsFormData, setPriceBasicDetailsFormData } =
+        usePriceBasicDetailStateContext();
+
     //event handler
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setPriceListSettingformData((prevData) => ({
+        setPriceBasicDetailsFormData((prevData) => ({
             ...prevData,
             [name]: value,
         }));
@@ -77,7 +77,7 @@ const PriceListSettings = () => {
                                     name="basePrice"
                                     type="number"
                                     onChange={handleChange}
-                                    value={priceListSettingformData.basePrice}
+                                    value={priceBasicDetailsFormData.basePrice}
                                     className="w-full px-4 focus:outline-none "
                                     placeholder=""
                                 />
@@ -88,7 +88,9 @@ const PriceListSettings = () => {
                                 </span>
                                 <input
                                     onChange={handleChange}
-                                    value={priceListSettingformData.transferCharge}
+                                    value={
+                                        priceBasicDetailsFormData.transferCharge
+                                    }
                                     name="transferCharge"
                                     type="number"
                                     className="w-full px-4 focus:outline-none"
@@ -105,7 +107,9 @@ const PriceListSettings = () => {
                                     name="effectiveBalconyBase"
                                     type="number"
                                     onChange={handleChange}
-                                    value={priceListSettingformData.effectiveBalconyBase}
+                                    value={
+                                        priceBasicDetailsFormData.effectiveBalconyBase
+                                    }
                                     className="w-full px-4 focus:outline-none"
                                     defaultValue="50"
                                 />
@@ -117,7 +121,7 @@ const PriceListSettings = () => {
                                 <input
                                     name="vat"
                                     onChange={handleChange}
-                                    value={priceListSettingformData.vat}
+                                    value={priceBasicDetailsFormData.vat}
                                     type="number"
                                     className="w-full px-4 focus:outline-none"
                                     defaultValue="12"
@@ -136,7 +140,9 @@ const PriceListSettings = () => {
                                     name="vatableListPrice"
                                     type="number"
                                     onChange={handleChange}
-                                    value={priceListSettingformData.vatableListPrice}
+                                    value={
+                                        priceBasicDetailsFormData.vatableListPrice
+                                    }
                                     className="w-full px-4 focus:outline-none"
                                     defaultValue="3600000"
                                 />
@@ -149,7 +155,9 @@ const PriceListSettings = () => {
                                     name="reservationFee"
                                     type="number"
                                     onChange={handleChange}
-                                    value={priceListSettingformData.reservationFee}
+                                    value={
+                                        priceBasicDetailsFormData.reservationFee
+                                    }
                                     className="w-full px-4 focus:outline-none"
                                     placeholder=""
                                 />

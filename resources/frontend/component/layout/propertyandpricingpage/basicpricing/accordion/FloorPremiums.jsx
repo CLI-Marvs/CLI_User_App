@@ -8,7 +8,7 @@ import { useFloorPremiumStateContext } from "../../../../../context/FloorPremium
 import CircularProgress from "@mui/material/CircularProgress";
 
 const FloorPremiums = ({ propertyId }) => {
-    //state
+    //State
     const {
         towerPhaseId,
         floorPremiumsAccordionOpen,
@@ -23,8 +23,9 @@ const FloorPremiums = ({ propertyId }) => {
     const { floorPremiumFormData, setFloorPremiumFormData } =
         useFloorPremiumStateContext();
     const modalRef = useRef(null);
+    const [newFloor, setNewFloor] = useState(0);
 
-    //hooks
+    //Hooks
     useEffect(() => {
         if (!towerPhaseId) return;
         setTowerPhaseId(towerPhaseId);
@@ -38,33 +39,34 @@ const FloorPremiums = ({ propertyId }) => {
             }));
         };
         // Fetch or use existing floor data
-        console.log("propertyFloors", propertyFloors);
+        if (
+            propertyFloors &&
+            propertyFloors[towerPhaseId] &&
+            propertyFloors[towerPhaseId].floors
+        ) {
+            console.log("it runs here");
+            const floors = propertyFloors[towerPhaseId].floors || [];
 
-   if (
-       propertyFloors &&
-       propertyFloors[towerPhaseId] &&
-       propertyFloors[towerPhaseId].floors
-   ) {
-       const floors = propertyFloors[towerPhaseId].floors || [];
+            // Initialize floor data with the required structure from FloorPremiumContext
+            const initializedFloors = floors.map((floor) => ({
+                floor,
+                premiumCost: "",
+                luckyNumber: false,
+                excludedUnits: [],
+            }));
 
-       // Initialize floor data with the required structure from FloorPremiumContext
-       const initializedFloors = floors.map((floor) => ({
-           floor,
-           premiumCost: "",
-           luckyNumber: "",
-       }));
-       setFloorPremiumFormData((prevData) => ({
-           ...prevData,
-           floor: initializedFloors, // Update floor data in the form context
-       }));
-   } else {
-       // Reset form data if propertyFloors is not available
-       setFloorPremiumFormData((prevData) => ({
-           ...prevData,
-           floor: [], // Reset to an empty array to ensure no value is rendered
-       }));
-       fetchFloorData(); // Fetch data if it's not already available
-   }
+            setFloorPremiumFormData((prevData) => ({
+                ...prevData,
+                floor: initializedFloors, // Update floor data in the form context
+            }));
+        } else {
+            // Reset form data if propertyFloors is not available
+            setFloorPremiumFormData((prevData) => ({
+                ...prevData,
+                floor: [], // Reset to an empty array to ensure no value is rendered
+            }));
+            fetchFloorData(); // Fetch data if it's not already available
+        }
     }, [
         towerPhaseId,
         propertyFloors,
@@ -83,20 +85,38 @@ const FloorPremiums = ({ propertyId }) => {
 
     const handleOnChange = (index, e) => {
         const { name, type, checked, value } = e.target;
+
         setFloorPremiumFormData((prevData) => {
             const updatedFloors = [...prevData.floor];
             updatedFloors[index] = {
                 ...updatedFloors[index],
-
-                [name]: value,
-                luckyNumber: type === "checkbox" ? checked : value,
+                [name]: type === "checkbox" ? checked : value,
             };
+            // console.log("Updated Floors: ", updatedFloors);
             return {
                 ...prevData,
                 floor: updatedFloors, // Update the floors in the context
             };
         });
     };
+
+    const handleAddNewFloor = () => {
+        //const newFloorIsExist=c
+
+        console.log("propertyFloors", JSON.stringify(propertyFloors));
+        if (propertyFloors[towerPhaseId]["count"] == 0) {
+            alert(
+                "You cannot add a floor until you upload an Excel file first."
+            );
+            return;
+        }
+    }; // Handling the button click for adding a new floor
+
+    const handleNewFloorChange = (e) => {
+        const { name, value } = e.target;
+        setNewFloor(value);
+    }; // Handling changes for adding a new floor
+
     return (
         <>
             <div
@@ -152,11 +172,17 @@ const FloorPremiums = ({ propertyId }) => {
                 <div className="bg-white overflow-hidden">
                     <div className="w-full p-5 h-[370px]">
                         <div className="flex justify-center w-full h-[31px] gap-3 mb-4">
-                            <div className="flex items-center border border-custom-grayF1 rounded-[5px] overflow-hidden w-[204px] text-sm">
-                                <span className="text-custom-gray81 bg-custom-grayFA flex items-center w-[120%] font-semibold -mr-3 pl-3 py-1">
+                            <div className="flex items-center border border-custom-grayF1 rounded-[5px] overflow-hidden w-[204px] text-sm  ">
+                                <span className="text-custom-gray81 bg-custom-grayFA  flex items-center w-[120%] font-semibold -mr-3 pl-3 py-1">
                                     Floor
                                 </span>
-                                <div className="relative w-full">
+                                <input
+                                    type="number"
+                                    name="addFloor"
+                                    id="addFloor"
+                                    className="outline-none  -mr-3 pl-3 py-1 bg-custom-grayFA text-custom-gray81 w-full "
+                                />
+                                {/* <div className="relative w-full">
                                     <select
                                         name="transferCharge"
                                         className="appearance-none w-full px-4 py-1 bg-white focus:outline-none border-0"
@@ -173,22 +199,26 @@ const FloorPremiums = ({ propertyId }) => {
                                     <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3 bg-custom-grayFA">
                                         <IoMdArrowDropdown className="text-custom-gray81" />
                                     </span>
-                                </div>
+                                </div> */}
                             </div>
                             <div className="flex items-center border border-custom-grayF1 rounded-[5px] overflow-hidden w-[204px] text-sm">
                                 <span className="text-custom-gray81 bg-custom-grayFA font-semibold flex w-[250px] pl-3 py-1">
                                     Cost (Sq.m)
                                 </span>
                                 <input
+                                    onChange={handleNewFloorChange}
                                     name="basePrice"
-                                    type="text"
+                                    type="number"
                                     className="w-full px-4 focus:outline-none"
                                     placeholder=""
                                 />
                             </div>
                             <div>
                                 <button className="w-[60px] h-[31px] rounded-[7px] gradient-btn2 p-[4px]  text-custom-solidgreen hover:shadow-custom4 text-sm">
-                                    <div className="flex justify-center items-center  bg-white montserrat-bold h-full w-full rounded-[4px] p-[4px]">
+                                    <div
+                                        className="flex justify-center items-center  bg-white montserrat-bold h-full w-full rounded-[4px] p-[4px]"
+                                        onClick={handleAddNewFloor}
+                                    >
                                         ADD
                                     </div>
                                 </button>
@@ -216,62 +246,41 @@ const FloorPremiums = ({ propertyId }) => {
                                     </thead>
                                     <tbody className="">
                                         {isLoading ? (
-                                            <div className="">
+                                            <tr className="">
                                                 <CircularProgress className="spinnerSize " />
-                                            </div>
+                                            </tr>
                                         ) : (
-                                            floorPremiumFormData &&
                                             floorPremiumFormData.floor &&
+                                            floorPremiumFormData.floor.length >
+                                                0 &&
                                             floorPremiumFormData.floor.map(
-                                                (floor, index) => {
-                                                    return (
-                                                        <tr
-                                                            className="h-[46px] bg-white text-sm"
-                                                            key={index}
-                                                        >
-                                                            <td className="text-custom-gray81">
-                                                                {/* {floor} - index{" "} */}
-                                                                {index}
-                                                                {/* <input
-                                                            readOnly
-                                                                type="number"
-                                                                className="text-custom-gray81"
-                                                            /> */}
+                                                (floor, index) => (
+                                                    <tr
+                                                        className="h-[46px] bg-white text-sm"
+                                                        key={index}
+                                                    >
+                                                        <td className="text-custom-gray81">
+                                                            {/* {floor} - index{" "} */}
+                                                            {index}
+
+                                                            <input
+                                                                type="text" // or "number" based on your needs
+                                                                className="text-custom-gray81 bg-white h-[29px] w-[80px]   border-[#D9D9D9] rounded-[5px] px-2 outline-none"
+                                                                defaultValue={
+                                                                    floor.floor
+                                                                }
+                                                                readOnly
+                                                            />
+                                                        </td>
+                                                        <td>
+                                                            <div className="">
                                                                 <input
-                                                                    type="text" // or "number" based on your needs
-                                                                    className="text-custom-gray81 bg-white h-[29px] w-[80px]   border-[#D9D9D9] rounded-[5px] px-2 outline-none"
-                                                                    // value={
-                                                                    //     floor
-                                                                    // }
-                                                                    defaultValue={
-                                                                        floor.floor
+                                                                    type="number"
+                                                                    name="premiumCost"
+                                                                    id="premiumCost"
+                                                                    value={
+                                                                        floor.premiumCost
                                                                     }
-                                                                    readOnly
-                                                                />
-                                                            </td>
-                                                            <td>
-                                                                <div className="">
-                                                                    <input
-                                                                        type="number" // Changed 'numeric' to 'number'
-                                                                        name="premiumCost"
-                                                                        id="premiumCost"
-                                                                        value={
-                                                                            floor.premiumCost
-                                                                        }
-                                                                        onChange={(
-                                                                            e
-                                                                        ) =>
-                                                                            handleOnChange(
-                                                                                index,
-                                                                                e
-                                                                            )
-                                                                        }
-                                                                        className="bg-white h-[29px] w-[120px] border border-[#D9D9D9] rounded-[5px] px-2 outline-none"
-                                                                    />
-                                                                </div>
-                                                            </td>
-                                                            <td>
-                                                                <input
                                                                     onChange={(
                                                                         e
                                                                     ) =>
@@ -280,32 +289,43 @@ const FloorPremiums = ({ propertyId }) => {
                                                                             e
                                                                         )
                                                                     }
-                                                                    checked={
-                                                                        floor.luckyNumber ===
-                                                                        true
-                                                                    }
-                                                                    name="luckyNumber"
-                                                                    id="luckyNumber"
-                                                                    type="checkbox"
-                                                                    className="h-[16px] w-[16px] ml-[16px] rounded-[2px] appearance-none border border-gray-400 checked:bg-transparent flex items-center justify-center checked:before:bg-black checked:before:w-[12px] checked:before:h-[12px] checked:before:block checked:before:content-['']"
+                                                                    className="bg-white h-[29px] w-[120px] border border-[#D9D9D9] rounded-[5px] px-2 outline-none"
                                                                 />
-                                                            </td>
-                                                            <td
-                                                                onClick={() =>
-                                                                    handleOpenModal(
-                                                                        floor
+                                                            </div>
+                                                        </td>
+                                                        <td>
+                                                            <input
+                                                                onChange={(e) =>
+                                                                    handleOnChange(
+                                                                        index,
+                                                                        e
                                                                     )
                                                                 }
-                                                                className="text-blue-500 underline cursor-pointer"
-                                                            >
-                                                                Assign
-                                                            </td>
-                                                            <td>
-                                                                <FaRegTrashAlt className="size-5 text-custom-gray81 hover:text-red-500" />
-                                                            </td>
-                                                        </tr>
-                                                    );
-                                                }
+                                                                checked={
+                                                                    floor.luckyNumber ||
+                                                                    false
+                                                                }
+                                                                name="luckyNumber"
+                                                                id="luckyNumber"
+                                                                type="checkbox"
+                                                                className="h-[16px] w-[16px] ml-[16px] rounded-[2px] appearance-none border border-gray-400 checked:bg-transparent flex items-center justify-center checked:before:bg-black checked:before:w-[12px] checked:before:h-[12px] checked:before:block checked:before:content-['']"
+                                                            />
+                                                        </td>
+                                                        <td
+                                                            onClick={() =>
+                                                                handleOpenModal(
+                                                                    floor.floor
+                                                                )
+                                                            }
+                                                            className="text-blue-500 underline cursor-pointer"
+                                                        >
+                                                            Assign
+                                                        </td>
+                                                        <td>
+                                                            <FaRegTrashAlt className="size-5 text-custom-gray81 hover:text-red-500" />
+                                                        </td>
+                                                    </tr>
+                                                )
                                             )
                                         )}
 
@@ -405,10 +425,7 @@ const FloorPremiums = ({ propertyId }) => {
                 </div>
             </div>
             <div>
-                <FloorPremiumAssignModal
-                    modalRef={modalRef}
-                    propertyId={propertyId}
-                />
+                <FloorPremiumAssignModal modalRef={modalRef} />
             </div>
         </>
     );
