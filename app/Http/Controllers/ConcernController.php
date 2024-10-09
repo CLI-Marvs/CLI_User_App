@@ -988,21 +988,16 @@ class ConcernController extends Controller
         try {
             $assignees = [];
             $ticketId = null;
-            $assigneesWithEmail = [];
             if ($request->has('selectedOptions')) {
                 foreach ($request->selectedOptions as $selectedOption) {
                     $assignees[] = $selectedOption['name'];
                     $ticketId = $selectedOption['ticketId'];
-                 /*    $concernsData = Concerns::where('ticket_id', $ticketId)->first(); */
                     $assignInquiry = new InquiryAssignee();
                     $assignInquiry->ticket_id = $selectedOption['ticketId'];
                     $assignInquiry->email = $selectedOption['email'];
                     $assignInquiry->save();
                     $newTicketId = str_replace('#', '', $ticketId);
                     
-                    
-                /*     $concernsData->assign_to = json_encode($assigneesWithEmail);
-                    $concernsData->save(); */
                     $dataToEmail = [
                         'ticketId' => $ticketId,
                         'details_concern' => $request->details_concern,

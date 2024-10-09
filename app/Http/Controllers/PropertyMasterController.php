@@ -56,7 +56,7 @@ class PropertyMasterController extends Controller
             
             $propertyName = $request->input('POSTU');
             $status = "Draft";
-            $sap_code = $request->input('PSPNR');
+            $sap_code = $request->input('PSPID');
 
             $propertyMaster = $this->createPropertyMaster($propertyName, $status, $sap_code);
 
