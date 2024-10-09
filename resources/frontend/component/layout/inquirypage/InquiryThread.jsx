@@ -440,7 +440,7 @@ const InquiryThread = () => {
                             <div className="flex-1 flex flex-wrap">
                                 <p className="space-x-1 text-custom-bluegreen">
                                     {dataConcern.property}{" "}
-                                    {dataConcern.details_concern} <span>-</span>{" "}
+                                    ({dataConcern.details_concern}) <span>-</span>{" "}
                                     {dataConcern.ticket_id}
                                 </p>
                             </div>

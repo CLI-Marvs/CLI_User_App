@@ -3,27 +3,72 @@ import CLILogo from '../../../../../public/Images/CLILogo.png';
 import Kent from '../../../../../public/Images/kent.png';
 import apiService from '../../servicesApi/apiService';
 import { useStateContext } from '../../../context/contextprovider';
-import { Link } from 'react-router-dom';
+import { Link , useLocation } from 'react-router-dom';
 import Breadcrumbs from '@mui/material/Breadcrumbs';
 import Typography from '@mui/material/Typography';
 import { FaAngleRight } from "react-icons/fa";
 import Stack from '@mui/material/Stack';
+import { startsWith } from 'lodash';
 
 const Navbar = () => {
 
-  const breadcrumbs = [
-    <Link underline="hover" key="1" color="inherit" href="/" className='text-custom-solidgreen'>
-      Inquiry Management
-    </Link>,
-    <Link
-      underline="hover"
-      key="2"
-      color="inherit"
-      href="/material-ui/getting-started/installation/"
-      className='text-custom-solidgreen'
-    >
-      Inquiries
-    </Link>,
+
+  const {data} = useStateContext();
+
+  const location = useLocation();
+
+  const pathnames = location.pathname.split('/').filter((x) => x);
+  
+   const breadcrumbs = [
+    ...pathnames.map((value, index) => {
+      const routeTo = `/${pathnames.slice(0, index + 1).join('/')}`;
+
+     
+       let breadcrumbLabel = decodeURIComponent(value.charAt(0).toUpperCase() + value.slice(1));
+       
+
+      if (value.toLowerCase() === "inquirymanagement") {
+        breadcrumbLabel = "Inquiry Management";
+        // Non-linkable
+        return (
+          <span key={routeTo} className="text-custom-solidgreen cursor-default">
+            {breadcrumbLabel}
+          </span>
+        );
+      }
+
+      if (value.toLowerCase() === "inquirylist") {
+        breadcrumbLabel = "Inquiries";
+      }
+      
+
+      if (value.toLowerCase() === "thread") {
+        breadcrumbLabel = "Inquiries"; 
+        return (
+          <Link key={routeTo} to="/inquirymanagement/inquirylist" className="text-custom-solidgreen">
+            {breadcrumbLabel}
+          </Link>
+        );
+      }
+
+        
+      
+        if (breadcrumbLabel.startsWith("Ticket#")) {
+          const ticketId = breadcrumbLabel
+          const dataProperty = data?.find((item) => item.ticket_id === ticketId) || {};
+
+          return (
+            <span key={routeTo} className="text-custom-solidgreen cursor-default">
+              {dataProperty.property}{" "}({breadcrumbLabel})
+            </span>
+          );
+        }
+      return (
+        <Link key={routeTo} to={routeTo} className="text-custom-solidgreen">
+          {breadcrumbLabel}
+        </Link>
+      );
+    }),
   ];
 
 

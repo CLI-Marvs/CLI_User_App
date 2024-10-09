@@ -107,7 +107,7 @@ const Notification = () => {
                                 notifications.map((item, index) => (
                                     <tr
                                         onClick={() => navigateToThread(item)}
-                                        className={`flex items-center h-[47px] cursor-pointer my-1 ${
+                                        className={`flex items-center min-h-[47px] cursor-pointer my-1 ${
                                             item.is_read === 1
                                                 ? "bg-custom-grayF1"
                                                 : "bg-white"
