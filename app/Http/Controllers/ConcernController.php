@@ -1521,7 +1521,7 @@ class ConcernController extends Controller
             $newTicketId = str_replace('#', '', $ticketId);
 
             $data = [
-                'admin_reply' => json_encode($logData),
+                'requestor_reply' => json_encode($logData),
                 'created_at' => $inquiry->created_at,
                 'ticketId' => $newTicketId,
                 'logId' => $inquiry->id,
