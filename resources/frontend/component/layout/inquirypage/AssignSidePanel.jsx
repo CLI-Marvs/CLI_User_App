@@ -282,10 +282,13 @@ const AssignSidePanel = ({ ticketId }) => {
             });
         });
     };
+
+    console.log("assignPersonnel", assigneesPersonnel[ticketId]);
     useEffect(() => {
         let assigneeChannel;
         let newTicketId;
         let removeChannel;
+        getAssigneesPersonnel();
         if (ticketId) {
             newTicketId = ticketId.replace("#", "");
             assigneeChannel = window.Echo.channel(
