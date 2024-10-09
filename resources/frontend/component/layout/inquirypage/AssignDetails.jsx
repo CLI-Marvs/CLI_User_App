@@ -272,7 +272,7 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                             </div>
                             <div>
                                 <p className="text-[#A5A5A5]">
-                                    by {details.admin_name}
+                                    by {details.buyer_name}
                                 </p>
                             </div>
                         </div>
