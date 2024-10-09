@@ -52,6 +52,8 @@ class PropertyMasterController extends Controller
     public function storePropertyFromSap(Request $request)
     {
         try {
+            \Log::info('From Kyla:', $request->all());
+            
             $propertyName = $request->input('POSTU');
             $status = "Draft";
             $sap_code = $request->input('PSPNR');
