@@ -1434,7 +1434,7 @@ class ConcernController extends Controller
                         'ticketId' => $newTicketId,
                         'id' => $messagesRef->id,
                         'created_at' => $messagesRef->created_at,
-                        'replyRef' => 'admin_reply'
+                        'replyRef' => 'requestor_reply'
                     ];
                     AdminMessage::dispatch($data);
                     $this->followUpReplylogs($message['ticket_id'], $concernsRef->buyer_name);
