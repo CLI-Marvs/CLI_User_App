@@ -29,6 +29,7 @@ const AssignSidePanel = ({ ticketId }) => {
 
     const modalRef = useRef(null);
     const dropdownRef = useRef(null);
+    const dataConcern = data?.find((items) => items.ticket_id === ticketId) || {};
 
     const employeeOptions = allEmployees.map((employee) => ({
         name: `${employee.firstname} ${employee.lastname}`,
@@ -141,12 +142,13 @@ const AssignSidePanel = ({ ticketId }) => {
                         (assignee) => assignee.email === selected.email
                     )
             );
-            /*  return false;    */
             if (newAssignees.length > 0) {
                 const response = await apiService.post("add-assignee", {
                     selectedOptions: newAssignees,
                     assign_by: user?.firstname + " " + user?.lastname,
                     assign_by_department: user?.department,
+                    details_concern: dataConcern.details_concern,
+                    buyer_name: dataConcern.buyer_name
                 });
                 console.log("Assignees saved successfully:", response);
             } else {

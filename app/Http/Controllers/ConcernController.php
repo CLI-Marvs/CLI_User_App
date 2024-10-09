@@ -988,26 +988,38 @@ class ConcernController extends Controller
         try {
             $assignees = [];
             $ticketId = null;
+            $assigneesWithEmail = [];
             if ($request->has('selectedOptions')) {
                 foreach ($request->selectedOptions as $selectedOption) {
                     $assignees[] = $selectedOption['name'];
                     $ticketId = $selectedOption['ticketId'];
-                    $emailContent = "Hi " . $selectedOption['name'] . ", inquiry " . $selectedOption['ticketId'] . " has been assigned to you.";
+                 /*    $concernsData = Concerns::where('ticket_id', $ticketId)->first(); */
                     $assignInquiry = new InquiryAssignee();
                     $assignInquiry->ticket_id = $selectedOption['ticketId'];
                     $assignInquiry->email = $selectedOption['email'];
                     $assignInquiry->save();
-
-                    /* JobToPersonnelAssign::dispatch($selectedOption['email'], $emailContent); */
                     $newTicketId = str_replace('#', '', $ticketId);
+                    
+                    
+                /*     $concernsData->assign_to = json_encode($assigneesWithEmail);
+                    $concernsData->save(); */
+                    $dataToEmail = [
+                        'ticketId' => $ticketId,
+                        'details_concern' => $request->details_concern,
+                        'from_user' => $request->assign_by,
+                        'department' => $request->assign_by_department,
+                        'buyer_name' => $request->buyer_name,
+                        'assignee_name' => $selectedOption['name'],
+                    ];
                     $data = [
                         'ticketId' => $newTicketId,
                         'assigneeId' => $assignInquiry->id,
                         'created_at' => $assignInquiry->created_at,
-                        'email' => $assignInquiry['email'],
+                        'email' => $selectedOption['email'],
                         'name' => $selectedOption['name'],
                     ];
                     RetrieveAssignees::dispatch($data);
+                    JobToPersonnelAssign::dispatch($selectedOption['email'], $dataToEmail);
                 }
             }
             $this->inquiryAssigneeLogs($request, $assignees, $ticketId);
@@ -1204,10 +1216,23 @@ class ConcernController extends Controller
                 ]
             ];
 
+
+            $newTicketId = str_replace('#', '', $request->ticket_id);
+
             $inquiry->inquiry_status = json_encode($logData);
             $inquiry->ticket_id = $request->ticket_id;
             $inquiry->message_log = "Marked as resolved by" . ' ' . $request->admin_name;
             $inquiry->save();
+
+            $data = [
+                'inquiry_status' => json_encode($logData),
+                'created_at' => $inquiry->created_at,
+                'ticketId' => $newTicketId,
+                'logId' => $inquiry->id,
+                'logRef' => 'inquiry_status'
+            ];
+
+            AdminReplyLogs::dispatch($data);
         } catch (\Exception $e) {
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
         }
@@ -1369,4 +1394,5 @@ class ConcernController extends Controller
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
         }
     }
+    
 }

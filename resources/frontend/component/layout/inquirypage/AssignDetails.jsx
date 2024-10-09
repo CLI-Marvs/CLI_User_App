@@ -273,7 +273,7 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                             </div>
                             <div>
                                 <p className="text-[#A5A5A5] mb-1">
-                                    by: {details.assign_by}
+                                    by: {details.resolve_by}
                                 </p>
                             </div>
                         </div>
