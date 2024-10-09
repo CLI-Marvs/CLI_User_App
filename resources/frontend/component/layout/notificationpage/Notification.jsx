@@ -132,7 +132,7 @@ const Notification = () => {
                                                     {item.details_concern}
                                                 </p>
                                                 <p className="text-xs text-custom-grayA5 truncate">
-                                                    {item.details_message}
+                                                    <p dangerouslySetInnerHTML={{ __html: item.details_message }} />
                                                 </p>
                                             </div>
                                         </td>

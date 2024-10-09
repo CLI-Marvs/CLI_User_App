@@ -158,9 +158,10 @@ const InquiryThread = () => {
                 formData.append("files[]", file);
             });
         }
+        const formattedMessage = chatMessage.replace(/\n/g, "<br>");
         formData.append("admin_email", user?.employee_email || "");
         formData.append("ticket_id", ticketId || "");
-        formData.append("details_message", chatMessage || "");
+        formData.append("details_message", formattedMessage || "");
         formData.append(
             "admin_name",
             `${user?.firstname || ""} ${user?.lastname || ""}`
@@ -252,6 +253,8 @@ const InquiryThread = () => {
             }
         };
     }, [ticketId]);
+
+    
 
     return (
         <>
@@ -512,8 +515,8 @@ const InquiryThread = () => {
                                                 draggable="false"
                                                 onKeyDown={(e) => {
                                                     if (e.key === "Enter" && !e.shiftKey) {
-                                                        e.preventDefault(); // Prevents creating a new line
-                                                        handleConfirmation(); // Call your send message function
+                                                        e.preventDefault(); 
+                                                        handleConfirmation();
                                                     }
                                                 }}
                                                 className="h-full w-full pl-2 pr-[123px] border-none  text-sm focus:outline-none"
