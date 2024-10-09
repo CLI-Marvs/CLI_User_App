@@ -21,8 +21,9 @@ class PropertyMasterController extends Controller
             $type = $request->input('type');
             $tower = $request->input('towerPhase');
             $status = $request->input('status');
+            $sap_code = $request->input('sap_code');
             // Create and save property master
-            $propertyMaster = $this->createPropertyMaster($propertyName, $status);
+            $propertyMaster = $this->createPropertyMaster($propertyName, $status, $sap_code);
 
             // Create and save tower phase
             $towerPhase = $this->createTowerPhase($tower, $propertyMaster->id, $status);
