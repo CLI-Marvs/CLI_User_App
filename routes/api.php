@@ -52,7 +52,7 @@ Route::post('conversation', [ConcernController::class, 'sendMessageConcerns']);
 Route::get('/get-concern-messages', [ConcernController::class, 'retrieveConcernsMessages']);
 Route::get('/personnel-assignee', [ConcernController::class, 'retrieveAssignees']);
 Route::put('/update-info', [ConcernController::class, 'updateInfo']);
-Route::post('/property-sap', [PropertyMasterController::class, 'storePropertyFromSap']);
+Route::post('/add-property-sap', [PropertyMasterController::class, 'storePropertyFromSap']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/get-concern', [ConcernController::class, 'getAllConcerns']);
