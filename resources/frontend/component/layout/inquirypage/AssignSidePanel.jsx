@@ -5,6 +5,7 @@ import { useStateContext } from "../../../context/contextprovider";
 import TextField from "@mui/material/TextField";
 import Autocomplete from "@mui/material/Autocomplete";
 import apiService from "../../servicesApi/apiService";
+import { AiFillInfoCircle } from "react-icons/ai";
 
 const AssignSidePanel = ({ ticketId }) => {
     const {
@@ -26,6 +27,9 @@ const AssignSidePanel = ({ ticketId }) => {
     const [selectedOptions, setSelectedOptions] = useState([]);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [selectedAssignees, setSelectedAssignees] = useState([]);
+    const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+
+
 
     const modalRef = useRef(null);
     const dropdownRef = useRef(null);
@@ -101,6 +105,14 @@ const AssignSidePanel = ({ ticketId }) => {
         }
     };
 
+    const handleConfirmation = () => {
+        if (selectedOptions.length === 0) {
+            alert("please select employee first");
+            return;
+        }
+        setIsConfirmModalOpen(true);
+    };
+
     const highlightText = (text) => {
         if (!text) return text;
         if (!search) return text;
@@ -123,6 +135,7 @@ const AssignSidePanel = ({ ticketId }) => {
     };
 
     const handleAssign = async () => {
+        setIsConfirmModalOpen(false);
         if (selectedOptions.length === 0) {
             alert("please select employee first");
             return;
@@ -228,7 +241,7 @@ const AssignSidePanel = ({ ticketId }) => {
                 setSelectedOptions(assignees);
             }
         },
-        /* [assigneesPersonnel[ticketId], */ [assigneesPersonnel[ticketId]]
+        /* [assigneesPersonnel[ticketId], */[assigneesPersonnel[ticketId]]
     );
 
     const assigneeChannelFunc = (channel) => {
@@ -306,11 +319,10 @@ const AssignSidePanel = ({ ticketId }) => {
                             onChange={(e) => setSearch(e.target.value)}
                             placeholder="Assign to..."
                             className={` 
-                            ${
-                                isDropdownOpen
+                            ${isDropdownOpen
                                     ? "rounded-[10px] rounded-b-none"
                                     : "rounded-[10px]"
-                            }
+                                }
                         
                                  h-[47px] px-[20px] pr-[40px] rounded-[10px] bg-custom-grayF1 w-full outline-none`}
                             onFocus={() => setIsDropdownOpen(true)}
@@ -319,11 +331,49 @@ const AssignSidePanel = ({ ticketId }) => {
                         {/* Absolute button inside the input, aligned to the right */}
                         {isDropdownOpen && (
                             <button
-                                onClick={handleAssign} // Close the dropdown when clicked
+                                onClick={handleConfirmation} // Close the dropdown when clicked
                                 className="absolute right-[10px] top-1/2 transform -translate-y-1/2 gradient-btn5 text-white rounded-[10px] w-[80px] h-[31px] flex items-center justify-center"
                             >
                                 Assign
                             </button>
+                        )}
+                        {isConfirmModalOpen && (
+                            <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+                                <div className="bg-white p-[20px] rounded-[10px] shadow-custom5 w-[467px] h-[228]">
+                                    <div className="flex justify-center items-center mt-[14px] ">
+                                        <AiFillInfoCircle className="size-[37px] text-[#5B9BD5]" />
+                                    </div>
+                                    <div className="flex justify-center mt-[30px]">
+                                        <p className="montserrat-medium text-[20px]">
+                                            Are you sure assigning this user?
+                                        </p>
+                                    </div>
+                                    <div className="flex justify-center mt-[26px] space-x-[19px]">
+                                        <button
+                                            onClick={() =>
+                                                setIsConfirmModalOpen(
+                                                    false
+                                                )
+                                            }
+                                            className="gradient-btn5 p-[1px] w-[92px] h-[35px] rounded-[10px]"
+                                        >
+                                            <div className="w-full h-full rounded-[9px] bg-white flex justify-center items-center montserrat-semibold text-sm">
+                                                <p className="text-base font-bold bg-gradient-to-r from-custom-bluegreen via-custom-solidgreen to-custom-solidgreen bg-clip-text text-transparent">
+                                                    Cancel
+                                                </p>
+                                            </div>
+                                        </button>
+                                        <button
+                                            onClick={
+                                                handleAssign
+                                            }
+                                            className="gradient-btn5 w-[100px] h-[35px] rounded-[10px] text-sm text-white montserrat-semibold"
+                                        >
+                                            Confirm
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
                         )}
                     </div>
 
@@ -418,7 +468,7 @@ const AssignSidePanel = ({ ticketId }) => {
                                             </li>
                                         );
                                     })}
-                                    {filteredOptions.length == 0  && (
+                                    {filteredOptions.length == 0 && (
 
                                         <div>
                                             <p>No results found</p>
