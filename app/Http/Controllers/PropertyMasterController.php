@@ -52,9 +52,9 @@ class PropertyMasterController extends Controller
     public function storePropertyFromSap(Request $request)
     {
         try {
-            $propertyName = $request->input('PROJ-POSTU');
+            $propertyName = $request->input('POSTU');
             $status = "Draft";
-            $sap_code = $request->input('PROJ-PSPNR');
+            $sap_code = $request->input('PSPNR');
 
             $propertyMaster = $this->createPropertyMaster($propertyName, $status, $sap_code);
 
