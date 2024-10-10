@@ -6,6 +6,7 @@ use App\Events\AdminMessage;
 use App\Events\AdminReplyLogs;
 use App\Events\ConcernMessages;
 use App\Events\InquiryAssignedLogs;
+use App\Events\MessageID;
 use App\Events\RemoveAssignees;
 use App\Events\RetrieveAssignees;
 use App\Events\SampleEvent;
@@ -1560,6 +1561,12 @@ class ConcernController extends Controller
 
                     $concernsRef->message_id = $message['message_id'];
                     $concernsRef->save();
+
+                    $dataMessage = [
+                        'message_id' => $message['message_id'],
+                        'ticketId' => $message['ticket_id'],
+                    ];
+                    MessageID::dispatch($dataMessage);
 
                     $newTicketId = str_replace('#', '', $message['ticket_id']);
                     $data = [

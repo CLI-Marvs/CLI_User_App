@@ -398,11 +398,15 @@ const InquiryList = () => {
                                             <option value="Replied By">
                                                 Replied By
                                             </option>
-                                            <option value="Assign To">
-                                                Assign To
+                                            <option value="Assigned To">
+                                                Assigned To
                                             </option>
-                                            <option value="Mark as resolved">
-                                                Mark as resolve
+                                            <option value="Marked as resolved">
+                                               Marked as resolved
+
+                                            </option>
+                                            <option value="Follow up reply">
+                                                Follow up reply
                                             </option>
                                         </select>
                                     </div>

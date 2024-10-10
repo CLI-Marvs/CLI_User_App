@@ -35,6 +35,7 @@ const InquiryThread = () => {
     const [status, setStatus] = useState("");
     const [hasAttachments, setHasAttachments] = useState(false);
     const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+    const [emailMessageId, setEmailMessageId] = useState(null);
     const {
         messages,
         setTicketId,
@@ -166,7 +167,7 @@ const InquiryThread = () => {
             "admin_name",
             `${user?.firstname || ""} ${user?.lastname || ""}`
         );
-        formData.append("message_id", messageId || "");
+        formData.append("message_id", dataConcern.message_id || emailMessageId || "");
         formData.append("admin_id", user?.id || "");
         formData.append("buyer_email", dataConcern.buyer_email || "");
         formData.append("admin_profile_picture", user?.profile_picture || "");
@@ -231,6 +232,12 @@ const InquiryThread = () => {
         });
     };
 
+    const messageIdChannelFunc = (channel) => {
+        channel.listen("MessageID", (event) => {
+            setEmailMessageId(event.data.message_id);
+        });
+    };
+
     const combineThreadMessages = messages[ticketId]
         ? messages[ticketId]
               .flat()
@@ -239,21 +246,30 @@ const InquiryThread = () => {
     useEffect(() => {
         let adminMessageChannel;
         let newTicketId;
+        let messageIdChannel;
         if (ticketId) {
             newTicketId = ticketId.replace("#", "");
             adminMessageChannel = window.Echo.channel(
                 `adminmessage.${newTicketId}`
             );
+            messageIdChannel = window.Echo.channel(
+                `messageidref.${newTicketId}`
+            );
+            messageIdChannelFunc(messageIdChannel);
             adminMessageChannelFunc(adminMessageChannel);
         }
         return () => {
             if (adminMessageChannel) {
                 adminMessageChannel.stopListening("AdminMessage");
                 window.Echo.leaveChannel(`adminmessage.${newTicketId}`);
+
+                adminMessageChannel.stopListening("MessageID");
+                window.Echo.leaveChannel(`messageidref.${newTicketId}`);
             }
         };
     }, [ticketId]);
 
+    
     
     const capitalizeWords = (name) => {
         return name
@@ -408,11 +424,14 @@ const InquiryThread = () => {
                                             <option value="Replied By">
                                                 Replied By
                                             </option>
-                                            <option value="Assign To">
-                                                Assign To
+                                            <option value="Assigned To">
+                                                Assigned To
                                             </option>
-                                            <option value="Mark as resolved">
-                                                Mark as resolve
+                                            <option value="Marked as resolved">
+                                                Marked as resolved
+                                            </option>
+                                            <option value="Follow up reply">
+                                               Follow up reply
                                             </option>
                                         </select>
                                     </div>

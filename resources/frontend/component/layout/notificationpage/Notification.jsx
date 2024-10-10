@@ -20,7 +20,6 @@ const Notification = () => {
     const [activeButton, setActiveButton] = useState("All");
     
     const handleClick = (button) => {
-        console.log("button", button);
         setNotifStatus((prev) => (prev === button ? "All" : button));
         setNotifCurrentPage(0);
         setActiveButton((prev) => (prev === button ? "All" : button));
