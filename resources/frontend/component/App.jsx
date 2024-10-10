@@ -25,6 +25,7 @@ import ReservationPageView from "./views/pages/salesViews/ReservationPageView";
 import PaymentMainView from "./views/pages/paymentViews/PaymentMainView";
 import PaymentSectionView from "./views/pages/paymentViews/PaymentSectionView";
 import MainComponent from "./layout/chatComponent/MainComponent";
+import AdminSettingView from "./views/pages/adminsettingsViews/AdminSettingView";
 
 const App = () => {
     const Layout = () => {
@@ -136,6 +137,10 @@ const App = () => {
                             element: <ReservationPageView />,
                         },
                     ],
+                },
+                {
+                    path: "adminsettings",
+                    element: <AdminSettingView />,
                 },
             ],
         },
