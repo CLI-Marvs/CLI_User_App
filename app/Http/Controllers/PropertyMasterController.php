@@ -21,8 +21,9 @@ class PropertyMasterController extends Controller
             $type = $request->input('type');
             $tower = $request->input('towerPhase');
             $status = $request->input('status');
+            $sap_code = $request->input('sap_code');
             // Create and save property master
-            $propertyMaster = $this->createPropertyMaster($propertyName, $status);
+            $propertyMaster = $this->createPropertyMaster($propertyName, $status, $sap_code);
 
             // Create and save tower phase
             $towerPhase = $this->createTowerPhase($tower, $propertyMaster->id, $status);
@@ -47,6 +48,29 @@ class PropertyMasterController extends Controller
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
         }
     }
+
+
+    public function storePropertyFromSap(Request $request)
+    {
+        try {
+            \Log::info('From Kyla:', $request->all());
+            
+            $propertyName = $request->input('POSTU');
+            $status = "Draft";
+            $sap_code = $request->input('PSPID');
+
+            $propertyMaster = $this->createPropertyMaster($propertyName, $status, $sap_code);
+
+            return response()->json([
+                'message' => 'Property details created successfully',
+                'propertyMaster' => $propertyMaster,
+
+            ], 201);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
+        }
+    }
+
 
     //Get a specific property master
     public function getPropertyMaster($id)
@@ -92,10 +116,12 @@ class PropertyMasterController extends Controller
     //     }
     // }
     // Function to create property master
-    private function createPropertyMaster($propertyName, $status)
+    private function createPropertyMaster($propertyName, $status, $sap_code)
     {
         $propertyMaster = new PropertyMaster();
         $propertyMaster->property_name = $propertyName;
+        $propertyMaster->sap_code = $sap_code;
+
         $propertyMaster->status = $status;
         $propertyMaster->save();
         return $propertyMaster;

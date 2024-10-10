@@ -197,33 +197,6 @@ const AssignSidePanel = ({ ticketId }) => {
         }
     };
 
-    // const saveAssignee = async () => {
-    //     try {
-    //         const newAssignees = selectedOptions.filter((selected) => {
-    //             !assigneesPersonnel[ticketId]?.some(
-    //                 (assignee) => assignee.email === selected.email
-    //             )
-    //         });
-    //         if (newAssignees.length > 0) {
-    //             const response = await apiService.post("add-assignee", {
-    //                 selectedOptions: newAssignees,
-    //                 assign_by: user?.firstname + " " + user?.lastname,
-    //                 assign_by_department: user?.department,
-    //             });
-    //             console.log('Assignees saved successfully:', response);
-    //         } else {
-    //             console.log('No new assignees to save');
-    //         }
-
-    //         // Return the newAssignees array
-    //         return newAssignees;
-    //         /* getInquiryLogs(employeeData.ticketId); */
-    //         /*  getAllConcerns(); */
-    //     } catch (error) {
-    //         console.log("error assigning", error);
-    //     }
-    // };
-
     React.useEffect(() => {
         document.addEventListener("mousedown", handleClickOutside);
         return () => {
@@ -281,7 +254,9 @@ const AssignSidePanel = ({ ticketId }) => {
                 };
             });
         });
+        getAssigneesPersonnel();
     };
+
     useEffect(() => {
         let assigneeChannel;
         let newTicketId;

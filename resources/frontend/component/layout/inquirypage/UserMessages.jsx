@@ -49,7 +49,7 @@ const UserMessages = ({ items }) => {
             <div className="w-full mt-[10px]">
                 <div className="w-full h-auto gradient-background1 rounded-b-[10px] rounded-r-[10px]  p-[20px] pl-[31px] text-sm text-white">
                     <div>
-                        <p>{items.details_message}</p>
+                         <p dangerouslySetInnerHTML={{ __html: items.details_message }} />
                     </div>
                     {Array.isArray(attachmentData) &&
                         attachmentData.length > 0 &&

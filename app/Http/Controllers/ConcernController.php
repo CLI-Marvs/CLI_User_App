@@ -275,6 +275,7 @@ class ConcernController extends Controller
                 'ticketId' => $newTicketId,
                 'id' => $messages->id,
                 'created_at' => $messages->created_at,
+                'replyRef' => 'admin_reply'
             ];
 
             AdminMessage::dispatch($data);
@@ -988,21 +989,16 @@ class ConcernController extends Controller
         try {
             $assignees = [];
             $ticketId = null;
-            $assigneesWithEmail = [];
             if ($request->has('selectedOptions')) {
                 foreach ($request->selectedOptions as $selectedOption) {
                     $assignees[] = $selectedOption['name'];
                     $ticketId = $selectedOption['ticketId'];
-                 /*    $concernsData = Concerns::where('ticket_id', $ticketId)->first(); */
                     $assignInquiry = new InquiryAssignee();
                     $assignInquiry->ticket_id = $selectedOption['ticketId'];
                     $assignInquiry->email = $selectedOption['email'];
                     $assignInquiry->save();
                     $newTicketId = str_replace('#', '', $ticketId);
                     
-                    
-                /*     $concernsData->assign_to = json_encode($assigneesWithEmail);
-                    $concernsData->save(); */
                     $dataToEmail = [
                         'ticketId' => $ticketId,
                         'details_concern' => $request->details_concern,
@@ -1394,5 +1390,146 @@ class ConcernController extends Controller
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
         }
     }
+
+   /*  public function getPropertyNames()
+    {
+        try {
+            
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
+        }
+    } */
     
+
+    public function fromAppSript(Request $request)
+    {
+        Log::info('Gikan ni brader john', $request->all());
+
+        $responses = [];
+        try {
+            $requestData = $request->input('data');
+            foreach ($requestData as $message) {
+                Log::info('inside loop', $message);
+                $concernsRef = Concerns::where('ticket_id', $message['ticket_id'])->first();
+
+                if ($concernsRef) {
+                    $messagesRef = new Messages();
+                    $messagesRef->details_message = $message['details_message'];
+                    $messagesRef->ticket_id = $message['ticket_id'];
+                   /*  $fileLinks = $this->uploadToGCSFromScript($message['attachment']); */
+                    $messagesRef->buyer_email = $message['buyer_email'];
+                    /* $messagesRef->attachment = json_encode($fileLinks);  */
+                    $messagesRef->created_at = Carbon::parse(now())->setTimezone('Asia/Manila');
+                    $messagesRef->buyer_name = $concernsRef->buyer_name;
+                    $messagesRef->save();
+
+                    $concernsRef->message_id = $message['message_id'];
+                    $concernsRef->save();
+
+                    $newTicketId = str_replace('#', '', $message['ticket_id']);
+                    $data = [
+                        'buyer_email' => $message['buyer_email'],
+                        'details_message' => $message['details_message'],
+                        'buyer_name' => $concernsRef->buyer_name,
+                        'ticketId' => $newTicketId,
+                        'id' => $messagesRef->id,
+                        'created_at' => $messagesRef->created_at,
+                        'replyRef' => 'requestor_reply'
+                    ];
+                    AdminMessage::dispatch($data);
+                    $this->followUpReplylogs($message['ticket_id'], $concernsRef->buyer_name);
+                    $this->buyerReplyNotif($message['ticket_id'], $concernsRef->id, $message['details_message']);
+
+                    $responses[] = "Posted Successfully " . $message['ticket_id'];
+                } else {
+                    $responses[] = "Posted Unsucessfully " . $message['ticket_id'];
+                }
+            }
+
+            return response()->json($responses);
+        } catch (\Throwable $e) {
+            return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function buyerReplyNotif($ticketId, $concernId, $message) 
+    {
+      try {
+        $reply = new BuyerReplyNotif();
+        $reply->ticket_id = $ticketId;
+        $reply->concern_id = $concernId;
+        $reply->message_log = "Follow up reply";
+        $reply->details_message = $message;
+        $reply->save();
+      } catch (\Throwable $e) {
+        return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
+      }
+    }
+
+
+    public function uploadToGCSFromScript($attachments)
+    {
+        $fileLinks = [];
+        if ($attachments) {
+            $storage = new StorageClient([
+                'keyFilePath' => storage_path('keys/super-app-anaplan-2cbacd9f0192.json')
+            ]);
+            $bucket = $storage->bucket('super-app-storage');
+
+            foreach ($attachments as $fileData) {
+                $fileName = uniqid() . '.' . $fileData['extension']; 
+                $filePath = 'concerns/' . $fileName;
+
+                $fileContent = base64_decode($fileData['URL']);
+                $tempFile = tempnam(sys_get_temp_dir(), 'upload');
+                file_put_contents($tempFile, $fileContent);
+
+                $bucket->upload(
+                    fopen($tempFile, 'r'),
+                    ['name' => $filePath]
+                );
+
+                $fileLink = $bucket->object($filePath)->signedUrl(new \DateTime('tomorrow'));
+
+                $fileLinks[] = $fileLink;
+                unlink($tempFile);
+            }
+        }
+
+        return $fileLinks;
+    }
+
+
+    public function followUpReplylogs($ticketId, $buyerName)
+    {
+        try {
+            $inquiry = new InquiryLogs();
+            $logData = [
+                'log_type' => 'requestor_reply',
+                'details' => [
+                    'message_tag' => 'Follow up reply',
+                    'buyer_name' => $buyerName
+                ]
+            ];
+            
+
+            $inquiry->requestor_reply = json_encode($logData);
+            $inquiry->message_log = 'Follow up reply';
+            $inquiry->ticket_id = $ticketId;
+            $inquiry->save();
+
+            $newTicketId = str_replace('#', '', $ticketId);
+
+            $data = [
+                'requestor_reply' => json_encode($logData),
+                'created_at' => $inquiry->created_at,
+                'ticketId' => $newTicketId,
+                'logId' => $inquiry->id,
+                'logRef' => 'requestor_reply'
+            ];
+            AdminReplyLogs::dispatch($data);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
+        }
+    }
 }

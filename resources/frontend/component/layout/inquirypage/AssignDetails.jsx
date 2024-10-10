@@ -63,7 +63,7 @@ const AssignDetails = ({ logMessages, ticketId }) => {
 
     const adminReplyChannelFunc = (channel) => {
         channel.listen("AdminReplyLogs", (event) => {
-            console.log("event data", event.data);
+            console.log("event reply logs data", event.data);
             setLogs((prevLogs) => {
                 const prevLogsReply = prevLogs[ticketId] || [];
                 if (prevLogsReply.find((log) => log.id === event.data.logId)) {
@@ -173,42 +173,8 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                             </div>
                         </div>
 
-
-                        {/* FOLLOW UP REPLY*/}
-
-                        <div className="flex flex-col text-sm montserrat-medium mb-[20px]">
-                            <div className="flex gap-1 items-center mb-[20px]">
-                                <span className="flex mb-1 text-[25px] text-custom-blue">
-                                    ⚬
-                                </span>
-                                <p className="montserrat-medium text-sm text-custom-blue">
-                                    {moment(inquiry_createdAt).format(
-                                        "MMMM D, YYYY"
-                                    )}
-                                </p>
-                                <span className="montserrat-medium  text-custom-gray81">
-                                    {moment(inquiry_createdAt).format("hh:mm A")}
-                                </span>
-                                <div className="border-b flex-grow border-custom-bluegreen pl-[10px]"></div>
-                            </div>
-                            <div>
-                                <p className="montserrat-medium text-sm text-custom-solidgreen">
-                                    Follow up reply
-                                </p>
-                            </div>
-                            <div>
-                                <p className="text-[#A5A5A5]">
-                                    by {details.admin_name}
-                                </p>
-                            </div>
-                            <div>
-                                <p className="text-[#A5A5A5]">
-                                    {details.department === "CRS"
-                                        ? "Customer Relations Services"
-                                        : details.department}
-                                </p>
-                            </div>
-                        </div>
+                     
+                      
                     </>
                    
                 );
@@ -279,6 +245,39 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                         </div>
                         </>
                     );
+                case "requestor_reply":
+                    return (
+                        <>
+                          {/* FOLLOW UP REPLY*/}
+
+                        <div className="flex flex-col text-sm montserrat-medium mb-[20px]">
+                            <div className="flex gap-1 items-center mb-[20px]">
+                                <span className="flex mb-1 text-[25px] text-custom-blue">
+                                    ⚬
+                                </span>
+                                <p className="montserrat-medium text-sm text-custom-blue">
+                                    {moment(inquiry_createdAt).format(
+                                        "MMMM D, YYYY"
+                                    )}
+                                </p>
+                                <span className="montserrat-medium  text-custom-gray81">
+                                    {moment(inquiry_createdAt).format("hh:mm A")}
+                                </span>
+                                <div className="border-b flex-grow border-custom-bluegreen pl-[10px]"></div>
+                            </div>
+                            <div>
+                                <p className="montserrat-medium text-sm text-custom-solidgreen">
+                                    Follow up reply
+                                </p>
+                            </div>
+                            <div>
+                                <p className="text-[#A5A5A5]">
+                                    by {details.buyer_name}
+                                </p>
+                            </div>
+                        </div>
+                        </>
+                    )
             default:
                 return <p>Unknown log type</p>;
         }

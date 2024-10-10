@@ -44,6 +44,9 @@ class AdminReplyLogs implements ShouldBroadcast
         if($this->data['logRef'] === 'inquiry_status') {
             $logsType[] = new Channel('adminreply.' . $this->data['ticketId']);
         }
+        if($this->data['logRef'] === 'requestor_reply') {
+            $logsType[] = new Channel('adminreply.' . $this->data['ticketId']);
+        }
         return $logsType;        
     }
 
