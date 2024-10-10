@@ -172,11 +172,7 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                                 </p>
                             </div>
                         </div>
-
-                     
-                      
                     </>
-                   
                 );
             case "assign_to":
                 return (
@@ -201,7 +197,7 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                             <div>
                                 <p className="text-custom-solidgreen mb-1">
                                     Added assignee:{" "}
-                                    {details.assign_to_name.join(", ")}
+                                    {capitalizeWords(details.assign_to_name.join(", "))}
                                 </p>
                             </div>
                             <div>

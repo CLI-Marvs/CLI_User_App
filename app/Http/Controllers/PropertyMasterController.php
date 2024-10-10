@@ -160,4 +160,11 @@ class PropertyMasterController extends Controller
         $propertyCommercialDetail->save();
         return $propertyCommercialDetail;
     }
+
+
+    public function getPropertyName()
+    {
+        $property = PropertyMaster::pluck('property_name')->toArray();
+        return response()->json($property);
+    }
 }

@@ -18,6 +18,15 @@ const UserMessages = ({ items }) => {
     const dataConcern =
     data?.find((item) => item.ticket_id === ticketId) || {};
     
+    const capitalizeWords = (name) => {
+        return name
+            .split(" ")
+            .map(
+                (word) =>
+                    word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+            )
+            .join(" ");
+    };
     return (
         <div className="w-full">
             <div className="flex w-full mt-[27px] gap-[10px]">
@@ -27,19 +36,7 @@ const UserMessages = ({ items }) => {
                         <span>
                             From: 
                         </span> 
-                        {(() => {
-                            const nameParts = dataConcern.buyer_name.split(" ");
-                            const lastName = nameParts.pop();
-                            const firstName = nameParts.join(" ");
-
-                            const capitalize = (name) =>
-                                name.charAt(0).toUpperCase() +
-                                name.slice(1).toLowerCase();
-
-                            return `${capitalize(firstName)} ${capitalize(
-                                lastName
-                            )}`;
-                        })()}
+                        {capitalizeWords(dataConcern.buyer_name)}
                     </p>
                     <p className=" text-sm text-custom-gray81 flex gap-1">
                         {dataConcern.buyer_email} <span>|</span> {dataConcern.mobile_number}

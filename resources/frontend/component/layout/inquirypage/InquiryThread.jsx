@@ -255,6 +255,15 @@ const InquiryThread = () => {
     }, [ticketId]);
 
     
+    const capitalizeWords = (name) => {
+        return name
+            .split(" ")
+            .map(
+                (word) =>
+                    word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+            )
+            .join(" ");
+    };
 
     return (
         <>
@@ -583,7 +592,7 @@ const InquiryThread = () => {
                                                                 This message will be sent to
                                                             </p>
                                                             <span className="font-semibold text-[13px]">
-                                                                    {dataConcern.buyer_name}
+                                                                    {capitalizeWords(dataConcern.buyer_name)}
                                                                     {" "}({dataConcern.buyer_email})
                                                             </span>
                                                         </div>

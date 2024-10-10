@@ -59,6 +59,7 @@ export const ContextProvider = ({ children }) => {
     const [concernId, setConcernId] = useState(null);
     const [propertyMasterData, setPropertyMasterData] = useState([]);
     const [assigneesPersonnel, setAssigneesPersonnel] = useState([]);
+    const [propertyNamesList, setPropertyNamesList] = useState([]);
     useEffect(() => {
         if (user && user.department && !isDepartmentInitialized) {
             setDepartment(user.department === "CRS" ? "All" : user.department);
@@ -116,6 +117,17 @@ export const ContextProvider = ({ children }) => {
         }
     };
 
+    
+      const getPropertyNames = async () => {
+        if (token) {
+          try {
+            const response = await apiService.get("property-name");
+            setPropertyNamesList(response.data);
+          } catch (error) {
+            console.log("Error retrieving data", error);
+          }
+        }
+      };
     const fetchDataReport = async () => {
         if (!isDepartmentInitialized) return;
         try {
@@ -430,6 +442,7 @@ export const ContextProvider = ({ children }) => {
                 setAllEmployees(response.data);
             };
             getEmployeeData();
+            getPropertyNames();
         }
     }, [token]);
 
@@ -565,6 +578,7 @@ export const ContextProvider = ({ children }) => {
                 setAssigneesPersonnel,
                 assigneesPersonnel,
                 getAssigneesPersonnel,
+                propertyNamesList
             }}
         >
             {children}

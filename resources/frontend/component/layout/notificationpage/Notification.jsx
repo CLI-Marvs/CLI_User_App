@@ -20,13 +20,14 @@ const Notification = () => {
     const [activeButton, setActiveButton] = useState("All");
     
     const handleClick = (button) => {
-        setNotifStatus(button);
+        console.log("button", button);
+        setNotifStatus((prev) => (prev === button ? "All" : button));
         setNotifCurrentPage(0);
-        setActiveButton((prev) => (prev === button ? null : button));
+        setActiveButton((prev) => (prev === button ? "All" : button));
+        /* if(activeButton === null) {
+            setNotifStatus("All");
+        } */
     };
-
-    console.log("activeButton", activeButton);
-
     const navigate = useNavigate();
     const handlePageClick = (data) => {
         const selectedPage = data.selected;
@@ -51,15 +52,18 @@ const Notification = () => {
 
     const updateIsReadStatus = (item) => {
         try {
-            console.log("item", item);
             const concernId = item.id;
             const messageLog = item.message_log;
-            if (messageLog) {
-                console.log("trigger here");
+            const assigneeId = item.assignee_id;
+            if (messageLog && item.buyer_notif_id) {
                 const response = apiService.post(`isread/${item.buyer_notif_id}`, {
                     buyerReply: true,
                 });
-            } else {
+            } else if(assigneeId) {
+                const response = apiService.post(`isread/${assigneeId}`,{
+                    assigneeNotif: true,
+                });
+            }else {
                 const response = apiService.post(`isread/${concernId}`);
             }
         } catch (error) {
@@ -71,7 +75,6 @@ const Notification = () => {
         getNotifications();
     }, []);
 
-    console.log("notications", notifications);
 
     return (
         <div className=" bg-custom-grayFA ">

@@ -8,6 +8,7 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Mail\Mailables\Headers;
 
 class EmailToPersonnelAssign extends Mailable
 {
@@ -17,13 +18,13 @@ class EmailToPersonnelAssign extends Mailable
 
     protected $data;
 
-   /*  protected $admin_name; */
+    /*  protected $admin_name; */
 
     public function __construct($email, $data/* $admin_name */)
     {
         $this->email = $email;
         $this->data = $data;
-       /*  $this->admin_name = $admin_name; */
+        /*  $this->admin_name = $admin_name; */
     }
 
     /**
@@ -36,6 +37,25 @@ class EmailToPersonnelAssign extends Mailable
         );
     }
 
+
+    public function headers(): Headers
+    {
+
+        $headers = new Headers();
+
+        if ($this->generateMessageId()) {
+            $headers->messageId = $this->generateMessageId();
+            $headers->references = [$this->generateMessageId()];
+        }
+
+        return $headers;
+    }
+
+
+    protected function generateMessageId()
+    {
+        return uniqid() . '@cebulandmasters.com';
+    }
     /**
      * Get the message content definition.
      */

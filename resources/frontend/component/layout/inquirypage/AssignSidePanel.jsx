@@ -43,6 +43,7 @@ const AssignSidePanel = ({ ticketId }) => {
             employee.department === "CRS"
                 ? "Customer Relations Services"
                 : employee.department,
+        abbreviationDep: employee.department,
         ticketId: ticketId,
     }));
 
