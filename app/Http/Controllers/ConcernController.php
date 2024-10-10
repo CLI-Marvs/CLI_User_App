@@ -1561,14 +1561,14 @@ class ConcernController extends Controller
 
                     $concernsRef->message_id = $message['message_id'];
                     $concernsRef->save();
+                    $newTicketId = str_replace('#', '', $message['ticket_id']);
 
                     $dataMessage = [
                         'message_id' => $message['message_id'],
-                        'ticketId' => $message['ticket_id'],
+                        'ticketId' => $newTicketId,
                     ];
                     MessageID::dispatch($dataMessage);
 
-                    $newTicketId = str_replace('#', '', $message['ticket_id']);
                     $data = [
                         'buyer_email' => $message['buyer_email'],
                         'details_message' => $message['details_message'],
