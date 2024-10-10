@@ -234,6 +234,7 @@ const InquiryThread = () => {
 
     const messageIdChannelFunc = (channel) => {
         channel.listen("MessageID", (event) => {
+            console.log("message id event");
             setEmailMessageId(event.data.message_id);
         });
     };
