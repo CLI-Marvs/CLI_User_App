@@ -45,6 +45,8 @@ return [
         ],
     ],
 
-    
+    'gcs' => [
+        'key_json' => env('GCS_KEY_JSON'),
+    ],
 
 ];

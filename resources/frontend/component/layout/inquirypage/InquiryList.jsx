@@ -31,7 +31,7 @@ const InquiryList = () => {
         /*  setHasAttachments,
         hasAttachments */
     } = useStateContext();
-
+    console.log("34", data);
     const [name, setName] = useState("");
     const [category, setCategory] = useState("");
     const [email, setEmail] = useState("");
@@ -532,7 +532,7 @@ const InquiryList = () => {
                                 ))}
                             </div>
                         </div>
-                        <div className="flex justify-end items-center">
+                        <div className="flex justify-end items-center ">
                             <button
                                 className="flex justify-center items-center h-[30px] w-[30px] hover:bg-custom-grayF1 rounded-full text-custom-bluegreen hover:text-custom-lightblue"
                                 onClick={handleRefresh}

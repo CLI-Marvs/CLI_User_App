@@ -363,11 +363,6 @@ export const ContextProvider = ({ children }) => {
     }, []); //get property floors
 
     const getPropertyUnits = async (towerPhaseId, selectedFloor) => {
-        console.log(
-            "selectedFloor getPropertyUnits",
-            selectedFloor,
-            towerPhaseId
-        );
         if (token || selectedFloor || towerPhaseId) {
             try {
                 setIsLoading(true);
@@ -399,15 +394,6 @@ export const ContextProvider = ({ children }) => {
         }
     };
 
-    //
-    const getFile = async (attachment) => {
-        try {
-            const response = await apiService.get(`view-file/${attachment}`);
-            console.log("response getFile", response);
-        } catch (e) {
-            console.log("Error fetching file", e);
-        }
-    };
     useEffect(() => {
         getPropertyUnits(towerPhaseId, selectedFloor);
     }, [towerPhaseId, selectedFloor]);
@@ -573,7 +559,6 @@ export const ContextProvider = ({ children }) => {
                 concernId,
                 setConcernId,
                 getPropertyMaster,
-                getFile,
                 getConcernMessages,
                 setAssigneesPersonnel,
                 assigneesPersonnel,

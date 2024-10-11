@@ -87,7 +87,4 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/upload-units', [UnitController::class, 'uploadUnits']);
     Route::get('/property-floors/{towerPhaseId}', [UnitController::class, 'countFloors']);
     Route::post('/property-units', [UnitController::class, 'getUnits']);
-
-    /* test for viewing a file  */
-    Route::get('/view-file/{filePath}', [ConcernController::class, 'viewFile']);
 });
