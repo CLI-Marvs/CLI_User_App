@@ -1,13 +1,16 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import AdminLogo from "../../../../../public/Images/AdminSilouette.svg";
 import { useStateContext } from "../../../context/contextprovider";
 import FolderFile from "../../../../../public/Images/folder_file.svg";
-import moment from "moment";
 
+import moment from "moment";
+import { useNavigate, Link } from "react-router-dom";
 const AdminMessages = ({ items }) => {
-    const { user, getFile } = useStateContext();
+    //State
+    const { user } = useStateContext();
     const attachmentData = JSON.parse(items.attachment || "[]");
 
+    const navigate = useNavigate();
     const dynamicName =
         user?.id === parseInt(items?.admin_id)
             ? "You"
@@ -39,25 +42,35 @@ const AdminMessages = ({ items }) => {
                     </div>
                     {Array.isArray(attachmentData) &&
                         attachmentData.length > 0 &&
-                        attachmentData.map((attachment, index) => (
-                            <div className="mt-4" key={index}>
-                                <button
-                                    // onClick={() =>
-                                    //     window.open(attachment, "_blank")
-                                    // }
-                                    onClick={() =>
-                                        handleViewAttachment(attachment)
-                                    }
-                                    className="flex items-center justify-start bg-customnavbar h-12 px-24 pl-4 text-black gap-2 rounded-lg"
-                                >
-                                    <img
-                                        src={FolderFile}
-                                        alt="View Attachment"
-                                    />
-                                    View Attachment
-                                </button>
-                            </div>
-                        ))}
+                        attachmentData.map((attachment, index) => {
+                            return (
+                                <div className="mt-4" key={index}>
+                                    <Link
+                                        className="flex items-center justify-start bg-customnavbar h-12 px-24 pl-4 text-black gap-2 rounded-lg"
+                                        to={`/file-viewer/attachment/${items.id}`}
+                                        onClick={(e) => {
+                                            e.preventDefault(); // Prevents the immediate navigation
+                                            console.log("attachment",attachment)
+                                            localStorage.setItem(
+                                                "fileUrlPath",
+                                                JSON.stringify(attachment)
+                                            ); // Store the data
+                                            // Manually navigate to the new page after setting localStorage
+                                            window.open(
+                                                `/file-viewer/attachment/${items.id}`,
+                                                "_blank"
+                                            );
+                                        }}
+                                    >
+                                        <img
+                                            src={FolderFile}
+                                            alt="View Attachment"
+                                        />
+                                        View Attachment
+                                    </Link>
+                                </div>
+                            );
+                        })}
                 </div>
             </div>
         </div>

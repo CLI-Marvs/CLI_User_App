@@ -18,7 +18,7 @@ import PaymentSchemeView from "./views/pages/PropertyAndPricingViews/PaymentSche
 import PriceVersioningView from "./views/pages/PropertyAndPricingViews/PriceVersioningView";
 import PromotionalPricingView from "./views/pages/PropertyAndPricingViews/PromotionalPricingView";
 import NotificationView from "./views/pages/notificationViews/NotificationView";
-
+import FileViewer from "../component/views/pages/fileView/FileViewer";
 import SalesManagementLayout from "./views/layout/SalesManagementLayout";
 import ReservationListView from "./views/pages/salesViews/ReservationListView";
 import ReservationPageView from "./views/pages/salesViews/ReservationPageView";
@@ -98,6 +98,7 @@ const App = () => {
                     path: "inquirymanagement/report",
                     element: <ReportViews />,
                 },
+
                 {
                     path: "propertyandpricing",
                     element: <PropertyAndPricingLayout />,
@@ -147,6 +148,10 @@ const App = () => {
         {
             path: "/paymentmethod",
             element: <PaymentMainView />,
+        },
+        {
+            path: "/file-viewer/attachment/:id",
+            element: <FileViewer />,
         },
         {
             path: "/paymentmethod/payonlinenow",

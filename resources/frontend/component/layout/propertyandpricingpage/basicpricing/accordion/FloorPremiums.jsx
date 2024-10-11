@@ -24,14 +24,17 @@ const FloorPremiums = ({ propertyId }) => {
         useFloorPremiumStateContext();
     const modalRef = useRef(null);
     const [newFloor, setNewFloor] = useState(0);
-
+ 
     //Hooks
     useEffect(() => {
         if (!towerPhaseId) return;
         setTowerPhaseId(towerPhaseId);
+        console.log("propertyFloors", propertyFloors);
+        console.log("towerPhaseId", towerPhaseId);
 
         // Function to fetch floor data
         const fetchFloorData = async () => {
+            console.log("37");
             const response = await getPropertyFloors(towerPhaseId);
             setPropertyFloors((prev) => ({
                 ...prev,
@@ -81,7 +84,7 @@ const FloorPremiums = ({ propertyId }) => {
         if (modalRef.current) {
             modalRef.current.showModal();
         }
-    }; //open modal to assign floor premiums
+    }; //Handle to open modal to assign floor premiums
 
     const handleOnChange = (index, e) => {
         const { name, type, checked, value } = e.target;
@@ -98,11 +101,9 @@ const FloorPremiums = ({ propertyId }) => {
                 floor: updatedFloors, // Update the floors in the context
             };
         });
-    };
+    }; //Handle to input floor premiums data(e.g premium cost)
 
     const handleAddNewFloor = () => {
-        //const newFloorIsExist=c
-
         console.log("propertyFloors", JSON.stringify(propertyFloors));
         if (propertyFloors[towerPhaseId]["count"] == 0) {
             alert(
@@ -110,11 +111,19 @@ const FloorPremiums = ({ propertyId }) => {
             );
             return;
         }
+        if (newFloor) {
+             const newFloorIsExist = propertyFloors.filter(
+                 (header) => !newFloor.includes(header)
+             );
+            console.log("118", newFloorIsExist);
+        }
+       
     }; // Handling the button click for adding a new floor
 
     const handleNewFloorChange = (e) => {
         const { name, value } = e.target;
-        setNewFloor(value);
+        console.log('1',name,value)
+       // setNewFloor(value);
     }; // Handling changes for adding a new floor
 
     return (
@@ -211,6 +220,7 @@ const FloorPremiums = ({ propertyId }) => {
                                     type="number"
                                     className="w-full px-4 focus:outline-none"
                                     placeholder=""
+                                    value={newFloor}
                                 />
                             </div>
                             <div>

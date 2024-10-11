@@ -535,7 +535,9 @@ const InquiryThread = () => {
                                             <textarea
                                                 placeholder="Reply..."
                                                 onChange={(e) =>
-                                                    setChatMessage(e.target.value)
+                                                    setChatMessage(
+                                                        e.target.value
+                                                    )
                                                 }
                                                 value={chatMessage}
                                                 id="chat"
@@ -552,11 +554,12 @@ const InquiryThread = () => {
                                             ></textarea>
 
                                             {/* File attachment button */}
-                                            <div className=" absolute bottom-2 right-[115px] items-center hidden">
+                                            <div className=" absolute bottom-2 right-[115px] items-center  ">
                                                 <input
                                                     type="file"
                                                     id="fileInput"
                                                     multiple
+                                                    accept=".jpg, .jpeg, .png, .pdf, .doc, .docx, .xls, .xlsx"
                                                     style={{ display: "none" }}
                                                     onChange={handleFileAttach}
                                                 />
@@ -583,9 +586,12 @@ const InquiryThread = () => {
                                                         loading
                                                     }
                                                     className={`flex w-[82px] h-[28px] rounded-[5px] text-white text-xs justify-center items-center 
-                                                        ${loading || !chatMessage.trim() 
-                                                            ? 'bg-gray-400 cursor-not-allowed' 
-                                                            : 'gradient-background3 hover:shadow-custom4'} 
+                                                        ${
+                                                            loading ||
+                                                            !chatMessage.trim()
+                                                                ? "bg-gray-400 cursor-not-allowed"
+                                                                : "gradient-background3 hover:shadow-custom4"
+                                                        } 
                                                     `}
                                                 >
                                                     {loading ? (
@@ -603,13 +609,15 @@ const InquiryThread = () => {
                                                         </div>
                                                         <div className="flex justify-center mt-[30px]">
                                                             <p className="montserrat-medium text-[20px]">
-                                                                Are you sure about
-                                                                sending this reply?
+                                                                Are you sure
+                                                                about sending
+                                                                this reply?
                                                             </p>
                                                         </div>
                                                         <div className="flex flex-col justify-center items-center text-[12px] text-[#B54D4D] px-[20px]">
                                                             <p>
-                                                                This message will be sent to
+                                                                This message
+                                                                will be sent to
                                                             </p>
                                                             <span className="font-semibold text-[13px]">
                                                                     {capitalizeWords(dataConcern.buyer_name)}
@@ -683,18 +691,19 @@ const InquiryThread = () => {
                             <div className="flex-grow overflow-y-auto max-h-[calc(100vh-400px)]">
                                 <div className="">
                                     {combineThreadMessages.length > 0 &&
-                                        combineThreadMessages.map((item, index) =>
-                                            item.buyer_email ? (
-                                                <UserMessages
-                                                    items={item}
-                                                    key={index}
-                                                />
-                                            ) : (
-                                                <AdminMessages
-                                                    items={item}
-                                                    key={index}
-                                                />
-                                            )
+                                        combineThreadMessages.map(
+                                            (item, index) =>
+                                                item.buyer_email ? (
+                                                    <UserMessages
+                                                        items={item}
+                                                        key={index}
+                                                    />
+                                                ) : (
+                                                    <AdminMessages
+                                                        items={item}
+                                                        key={index}
+                                                    />
+                                                )
                                         )}
                                 </div>
                             </div>
@@ -761,8 +770,7 @@ const InquiryThread = () => {
                                 </div>
                             </div> */}
                         </div>
-                        </div>
-                        
+                    </div>
                 </div>
                 <div className="flex w-[623px] bg-custom-grayFA gap-3 pb-24">
                     <div className="w-[623px]">
