@@ -1097,6 +1097,7 @@ class ConcernController extends Controller
                         'created_at' => $assignInquiry->created_at,
                         'email' => $selectedOption['email'],
                         'name' => $selectedOption['name'],
+                        'fromEvent' => true,
                     ];
                     RetrieveAssignees::dispatch($data);
                     JobToPersonnelAssign::dispatch($selectedOption['email'], $dataToEmail);
@@ -1201,7 +1202,9 @@ class ConcernController extends Controller
                     'email' => $request->email,
                 ];
 
-                RemoveAssignees::dispatch($data);
+               /*  RemoveAssignees::dispatch($data); */
+
+               broadcast(new RemoveAssignees($data));
 
                 return response()->json(['message' => 'Assignee removed successfully']);
             }

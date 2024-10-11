@@ -83,8 +83,8 @@ const AssignSidePanel = ({ ticketId }) => {
     };
 
     const removeTag = (option) => {
-        if (option.employee_email) {
-            removeAssignee(option.ticketId, option.employee_email);
+        if (option.employee_email || option.fromEvent) {
+            removeAssignee(option.ticketId, option.employee_email || option.email);
         } else {
             setSelectedOptions((prevSelected) =>
                 prevSelected.filter((item) => item !== option)
@@ -178,6 +178,7 @@ const AssignSidePanel = ({ ticketId }) => {
     };
 
     const removeAssignee = async (ticket, email) => {
+        console.log("from remove assignee", email);
         try {
             const response = await apiService.post("remove-assignee", {
                 ticketId: ticket,
@@ -189,7 +190,7 @@ const AssignSidePanel = ({ ticketId }) => {
                 return;
             } else {
                 getAssigneesPersonnel();
-                alert("success");
+                alert("Successfully removed");
             }
 
             console.log("Assignee removed:", response);
@@ -285,6 +286,8 @@ const AssignSidePanel = ({ ticketId }) => {
             }
         };
     }, [ticketId]);
+
+    console.log("assignpersonnel", assigneesPersonnel[ticketId]);
 
     return (
         <>
