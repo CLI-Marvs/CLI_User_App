@@ -16,17 +16,17 @@ class JobToPersonnelAssign implements ShouldQueue
 
     protected $email;
 
-    protected $emailContent;
+    protected $data;
 
-    protected $admin_name;
+    /* protected $admin_name; */
 
 
 
-    public function __construct($email, $emailContent, $admin_name)
+    public function __construct($email, $data /* $admin_name */)
     {
         $this->email = $email;
-        $this->emailContent = $emailContent;
-        $this->admin_name = $admin_name;
+        $this->data = $data;
+       /*  $this->admin_name = $admin_name; */
     }
 
     /**
@@ -35,6 +35,6 @@ class JobToPersonnelAssign implements ShouldQueue
     public function handle(Mailer $mailer): void
     {
         $mailer->to($this->email)
-            ->send(new EmailToPersonnelAssign($this->email, $this->emailContent, $this->admin_name));
+            ->send(new EmailToPersonnelAssign($this->email, $this->data /* $this->admin_name */));
     }
 }

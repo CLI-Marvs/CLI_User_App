@@ -6,7 +6,6 @@ import "./layout/css/style.css";
 import Home from "./layout/Home";
 import Sidebar from "./layout/mainComponent/Sidebar";
 import Navbar from "./layout/mainComponent/Navbar";
-import InquiryManagementLayout from "./views/layout/InquiryManagementLayout";
 import InquiryList from "./layout/inquirypage/InquiryList";
 import InquiryListView from "./views/pages/raiseaconcernViews/InquiryListView";
 import InquiryThreadView from "./views/pages/raiseaconcernViews/InquiryThreadView";
@@ -19,21 +18,27 @@ import PaymentSchemeView from "./views/pages/PropertyAndPricingViews/PaymentSche
 import PriceVersioningView from "./views/pages/PropertyAndPricingViews/PriceVersioningView";
 import PromotionalPricingView from "./views/pages/PropertyAndPricingViews/PromotionalPricingView";
 import NotificationView from "./views/pages/notificationViews/NotificationView";
-import PriceListSettingFormDataProvider from "../context/BasicPricing/PriceListSettingsContext";
+import FileViewer from "../component/views/pages/fileView/FileViewer";
+import SalesManagementLayout from "./views/layout/SalesManagementLayout";
+import ReservationListView from "./views/pages/salesViews/ReservationListView";
+import ReservationPageView from "./views/pages/salesViews/ReservationPageView";
+import PaymentMainView from "./views/pages/paymentViews/PaymentMainView";
+import PaymentSectionView from "./views/pages/paymentViews/PaymentSectionView";
+import MainComponent from "./layout/chatComponent/MainComponent";
+import AdminSettingView from "./views/pages/adminsettingsViews/AdminSettingView";
+
 const App = () => {
     const Layout = () => {
         return (
-            <PriceListSettingFormDataProvider>
-                <div className="bg-white relative max-h-screen flex flex-col h-screen">
-                    <Navbar />
-                    <div className="flex flex-1 overflow-hidden">
-                        <Sidebar />
-                        <div className="flex-1 overflow-y-auto bg-custom-grayFA">
-                            <Outlet />
-                        </div>
+            <div className="bg-white relative max-h-screen flex flex-col h-screen">
+                <Navbar />
+                <div className="flex flex-1 overflow-hidden">
+                    <Sidebar />
+                    <div className="flex-1 overflow-y-auto bg-custom-grayFA ">
+                        <Outlet />
                     </div>
                 </div>
-            </PriceListSettingFormDataProvider>
+            </div>
         );
 
         /*  return (
@@ -66,6 +71,10 @@ const App = () => {
             element: <CallBackView />,
         },
         {
+            path: "/chatbox",
+            element: <MainComponent />,
+        },
+        {
             path: "/",
             element: <Layout />,
             children: [
@@ -78,23 +87,18 @@ const App = () => {
                     element: <NotificationView />,
                 },
                 {
-                    path: "inquirymanagement",
-                    element: <InquiryManagementLayout />,
-                    children: [
-                        {
-                            path: "inquirylist",
-                            element: <InquiryListView />,
-                        },
-                        {
-                            path: "thread/:id",
-                            element: <InquiryThreadView />,
-                        },
-                        {
-                            path: "report",
-                            element: <ReportViews />,
-                        },
-                    ],
+                    path: "inquirymanagement/inquirylist",
+                    element: <InquiryListView />,
                 },
+                {
+                    path: "inquirymanagement/thread/:id",
+                    element: <InquiryThreadView />,
+                },
+                {
+                    path: "inquirymanagement/report",
+                    element: <ReportViews />,
+                },
+
                 {
                     path: "propertyandpricing",
                     element: <PropertyAndPricingLayout />,
@@ -104,7 +108,7 @@ const App = () => {
                             element: <PricingMasterListView />,
                         },
                         {
-                            path: "basicpricing",
+                            path: "basicpricing/:id",
                             element: <BasicPricingView />,
                         },
                         {
@@ -121,7 +125,37 @@ const App = () => {
                         },
                     ],
                 },
+                {
+                    path: "salesmanagement",
+                    element: <SalesManagementLayout />,
+                    children: [
+                        {
+                            path: "reservationlist",
+                            element: <ReservationListView />,
+                        },
+                        {
+                            path: "reservationpage",
+                            element: <ReservationPageView />,
+                        },
+                    ],
+                },
+                {
+                    path: "adminsettings",
+                    element: <AdminSettingView />,
+                },
             ],
+        },
+        {
+            path: "/paymentmethod",
+            element: <PaymentMainView />,
+        },
+        {
+            path: "/file-viewer/attachment/:id",
+            element: <FileViewer />,
+        },
+        {
+            path: "/paymentmethod/payonlinenow",
+            element: <PaymentSectionView />,
         },
     ]);
 

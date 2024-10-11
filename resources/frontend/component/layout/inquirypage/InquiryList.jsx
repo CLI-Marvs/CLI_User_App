@@ -24,14 +24,14 @@ const InquiryList = () => {
         setStatusFilter,
         setSearchFilter,
         statusFilter,
-        searhFilter,
+        searchFilter,
         user,
         setSpecificAssigneeCsr,
         specificAssigneeCsr,
         /*  setHasAttachments,
         hasAttachments */
     } = useStateContext();
-
+    console.log("34", data);
     const [name, setName] = useState("");
     const [category, setCategory] = useState("");
     const [email, setEmail] = useState("");
@@ -63,7 +63,7 @@ const InquiryList = () => {
             setActiveDayButton(null);
         } else if (statusFilter) {
             setStatusFilter("All");
-        } else if (searhFilter) {
+        } else if (searchFilter) {
             setSearchFilter({});
         } else if (specificAssigneeCsr) {
             console.log("if assign only");
@@ -249,17 +249,16 @@ const InquiryList = () => {
     useEffect(() => {
         updateLastActivity();
     }, [
-        searhFilter,
+        searchFilter,
         statusFilter,
         daysFilter,
         specificAssigneeCsr,
         currentPage,
     ]);
 
-
     return (
         <>
-            <div className="h-screen max-w-full bg-custom-grayFA px-4">
+            <div className="h-screen max-w-full bg-custom-grayFA px-[20px]">
                 <div className="bg-custom-grayFA">
                     <div className="relative flex justify-start gap-3 pt-1">
                         <div className="relative w-[604px]">
@@ -399,11 +398,15 @@ const InquiryList = () => {
                                             <option value="Replied By">
                                                 Replied By
                                             </option>
-                                            <option value="Assign To">
-                                                Assign To
+                                            <option value="Assigned To">
+                                                Assigned To
                                             </option>
-                                            <option value="Mark as resolved">
-                                                Mark as resolve
+                                            <option value="Marked as resolved">
+                                               Marked as resolved
+
+                                            </option>
+                                            <option value="Follow up reply">
+                                                Follow up reply
                                             </option>
                                         </select>
                                     </div>
@@ -431,8 +434,8 @@ const InquiryList = () => {
                         )}
                     </div>
                 </div>
-                <div className="max-w-[954px] p-[20px]">
-                    <div className="flex justify-start items-center h-12 mt-[15px] px-6 gap-[60px] bg-white rounded-t-lg mb-1 ">
+                <div className="max-w-[1260px] ">
+                    <div className="flex justify-between items-center h-12 mt-[15px] px-6 bg-white rounded-t-lg mb-1 ">
                         <div className="relative mr-4 ">
                             <button
                                 className="flex text-[20px] w-[130px] items-center gap-3 text-custom-bluegreen font-semibold"
@@ -474,6 +477,7 @@ const InquiryList = () => {
                                 </div>
                             )}
                         </div>
+                        <div className="flex gap-[10px]">
                         <div className="flex gap-2">
                             <div className="flex space-x-2">
                                 {user?.department === "CRS" && (
@@ -528,7 +532,7 @@ const InquiryList = () => {
                                 ))}
                             </div>
                         </div>
-                        <div className="flex justify-end items-center w-full">
+                        <div className="flex justify-end items-center ">
                             <button
                                 className="flex justify-center items-center h-[30px] w-[30px] hover:bg-custom-grayF1 rounded-full text-custom-bluegreen hover:text-custom-lightblue"
                                 onClick={handleRefresh}
@@ -536,8 +540,9 @@ const InquiryList = () => {
                                 <MdRefresh />
                             </button>
                         </div>
+                        </div>
                     </div>
-                    <div className="w-[914px]">
+                    <div className="w-[1260px]">
                         {data && data.length === 0 ? (
                             <p className="text-center text-gray-500 py-4">
                                 No data found

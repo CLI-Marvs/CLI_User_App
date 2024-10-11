@@ -2,6 +2,8 @@ import React, { useRef, useState } from "react";
 import { IoMdArrowDropdown } from "react-icons/io";
 import apiService from "../../../../servicesApi/apiService";
 import { useNavigate } from "react-router-dom";
+import CircularProgress from "@mui/material/CircularProgress";
+import { useStateContext } from "../../../../../context/contextprovider";
 const formDataState = {
     propertyName: "",
     type: "",
@@ -9,9 +11,12 @@ const formDataState = {
 };
 
 const AddPropertyModal = ({ modalRef }) => {
-    //state
+    //State
+    const { setFloorPremiumsAccordionOpen } = useStateContext();
     const [formData, setFormData] = useState(formDataState);
     const navigate = useNavigate();
+    const [loading, setLoading] = useState(false);
+
     //event handler
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -21,33 +26,50 @@ const AddPropertyModal = ({ modalRef }) => {
             [name]: value,
         }));
     };
-    const handleSubmit = async (e) => {
+    const handleSubmit = async (e, status) => {
         e.preventDefault();
         const form = new FormData();
+
+        if (
+            formData.propertyName === "" ||
+            formData.towerPhase === "" ||
+            formData.type === ""
+        ) {
+            alert("Please fill all the fields");
+            return;
+        }
         try {
+            setLoading(true);
+
             // Append form data
             form.append("propertyName", formData.propertyName);
             form.append("towerPhase", formData.towerPhase);
             form.append("type", formData.type);
+            form.append("status", status);
+
             // API call
             const response = await apiService.post("property-details", form, {
                 headers: {
-                    "Content-Type": "multipart/form-data",
+                    "Content-Type": "application/json",
                 },
             });
-            const passData = response.data.propertyData;
-
-             alert(response.data.message);
+            const propertyId = response?.data?.propertyData?.propertyMaster?.id;
+            const passData = response?.data;
+            console.log("passData 50 handleSubmit", passData);
+            alert(response.data.message);
             //Close modal and call callback handler
             if (modalRef.current) {
                 modalRef.current.close();
             }
             setFormData(formDataState);
-            navigate("/propertyandpricing/basicpricing", {
+            setFloorPremiumsAccordionOpen(false);
+            navigate(`/propertyandpricing/basicpricing/${propertyId}`, {
                 state: { passPropertyDetails: passData },
             }); //navigate to Basic pricing components   with the property detail data as props
         } catch (error) {
             console.log("Error sending property details", error);
+        } finally {
+            setLoading(false);
         }
     };
     return (
@@ -95,9 +117,9 @@ const AddPropertyModal = ({ modalRef }) => {
                                 value={formData.type}
                             >
                                 <option value="">Select Type</option>
-                                <option value="Type 1">Type 1</option>
-                                <option value="Type 2">Type 2</option>
-                                <option value="Type 3">Type 3</option>
+                                <option value="Vertical">Vertical</option>
+                                <option value="Horizontal">Horizontal</option>
+                                {/* <option value="Type 3">Type 3</option> */}
                             </select>
                             <span className="absolute inset-y-0 right-0 text-custom-gray81 flex items-center pr-3 pl-3 bg-custom-grayFA pointer-events-none">
                                 <IoMdArrowDropdown />
@@ -110,7 +132,7 @@ const AddPropertyModal = ({ modalRef }) => {
                         </span>
                         <input
                             name="towerPhase"
-                            type="text"
+                            type="number"
                             className="w-full px-4 focus:outline-none"
                             placeholder=""
                             onChange={handleChange}
@@ -119,10 +141,16 @@ const AddPropertyModal = ({ modalRef }) => {
                     </div>
                     <div className="flex justify-center my-3">
                         <button
-                            className="w-[173px] h-[37px] text-white montserrat-semibold text-sm gradient-btn rounded-[10px] hover:shadow-custom4"
-                            onClick={handleSubmit}
+                            className={`w-[173px] h-[37px] text-white montserrat-semibold text-sm gradient-btn rounded-[10px] hover:shadow-custom4 ${
+                                loading ? "cursor-not-allowed" : ""
+                            }`}
+                            onClick={(e) => handleSubmit(e, "Draft")}
                         >
-                            Create Pricing Draft
+                            {loading ? (
+                                <CircularProgress className="spinnerSize" />
+                            ) : (
+                                <> Create Pricing Draft</>
+                            )}
                         </button>
                     </div>
                 </div>

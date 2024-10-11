@@ -13,6 +13,7 @@ export default {
         'custom-solidgreen': '#348017',
         'custom-lightgreen': '#70AD47',
         'custom-lightestgreen': '#D6E4D1',
+        'custom-blue': '#1A73E8',
         'custom-solidblue': '#067ACS',
         'custom-lightblue': '#5B9BD5',
         'custom-gray': '#A5A5A5',
@@ -56,7 +57,7 @@ export default {
         'custom3': '0px 0px 10px rgba(0, 0, 0, 0.30)',
         'custom4': '0px 3px 5px rgba(0, 0, 0, 0.30)',
         'custom5': '0px 0px 5px rgba(0, 0, 0, 0.40)',
-
+        'custom6': '0px 3px 5px rgba(0, 0, 0, 0.30)',
       },
       width: {
         '3/5': '60%',
