@@ -60,7 +60,6 @@ export const ContextProvider = ({ children }) => {
     const [propertyMasterData, setPropertyMasterData] = useState([]);
     const [assigneesPersonnel, setAssigneesPersonnel] = useState([]);
     const [propertyNamesList, setPropertyNamesList] = useState([]);
-    const [sampleState, setSampleState] = useState(false);
     useEffect(() => {
         if (user && user.department && !isDepartmentInitialized) {
             setDepartment(user.department === "CRS" ? "All" : user.department);
