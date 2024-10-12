@@ -96,9 +96,12 @@ const InquiryFormModal = ({ modalRef }) => {
             .toLowerCase()
             .replace(/\b\w/g, (char) => char.toUpperCase());
     };
-    const formattedPropertyNames = ["N/A", ...propertyNamesList.map((item) => 
-        formatFunc(item)
-    )]
+    const formattedPropertyNames = [
+        "N/A",
+        ...(Array.isArray(propertyNamesList) && propertyNamesList.length > 0
+            ? propertyNamesList.map((item) => formatFunc(item))
+            : []),
+    ];
 
     const handleDelete = (fileNameToDelete) => {
         setFiles((prevFiles) =>

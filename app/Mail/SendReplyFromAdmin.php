@@ -91,16 +91,23 @@ class SendReplyFromAdmin extends Mailable
 
         // return $attachments;
 
+        // $attachments = [];
+        // if($this->files) {
+        //     foreach ($this->files as $file) {
+        //         $attachments[] = Attachment::fromData(
+        //             fn() => $file['contents'], // Closure returning file contents
+        //             $file['name'] // File name
+        //         );
+        //     }
+        // }
+
+
         $attachments = [];
-        if($this->files) {
+        if ($this->files) {
             foreach ($this->files as $file) {
-                $attachments[] = Attachment::fromData(
-                    fn() => $file['contents'], // Closure returning file contents
-                    $file['name'] // File name
-                );
+                $attachments[] = Attachment::fromPath($file['path']);
             }
         }
-
         return $attachments;
     }
 }

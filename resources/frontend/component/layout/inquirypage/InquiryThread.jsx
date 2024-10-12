@@ -149,6 +149,7 @@ const InquiryThread = () => {
         navigate("/inquirymanagement/inquirylist");
         getAllConcerns();
     };
+
     const submitMessage = async () => {
         setLoading(true);
         setIsConfirmModalOpen(false);
@@ -179,9 +180,12 @@ const InquiryThread = () => {
                     "Content-Type": "multipart/form-data",
                 },
             });
+            console.log("triger here");
 
-            callBackHandler();
+            setChatMessage("");
             setAttachedFiles([]);
+            setLoading(false);
+            callBackHandler();
         } catch (error) {
             console.log("error sending message", error);
         } finally {
@@ -191,7 +195,6 @@ const InquiryThread = () => {
 
     const callBackHandler = () => {
         getMessages(ticketId);
-        setChatMessage("");
         getInquiryLogs(ticketId);
         getAllConcerns();
     };

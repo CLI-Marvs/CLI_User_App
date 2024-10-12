@@ -232,10 +232,10 @@ class ConcernController extends Controller
             if ($files) {
                 foreach ($files as $file) {
                     $fileName = $file->getClientOriginalName();
-                    $fileContents = $file->get();
+                    $filePath = $file->storeAs('temp', $fileName); 
                     $allFiles[] = [
                         'name' => $fileName,
-                        'contents' => $fileContents,
+                        'path' => storage_path('app/' . $filePath),
                     ];
                 }
             }
@@ -281,11 +281,14 @@ class ConcernController extends Controller
 
             AdminMessage::dispatch($data);
 
-            if ($files) {
+            /* if ($files) {
                 Mail::to($buyer_email)->send(new SendReplyFromAdmin($messages->ticket_id, $buyer_email, $adminMessage, $message_id, $allFiles));
             } else {
                 ReplyFromAdminJob::dispatch($messages->ticket_id, $buyer_email, $adminMessage, $message_id, $allFiles);
-            }
+            } */
+
+            ReplyFromAdminJob::dispatch($messages->ticket_id, $buyer_email, $adminMessage, $message_id, $allFiles);
+
 
             return response()->json("Successfully sent");
         } catch (\Exception $e) {
@@ -1616,8 +1619,8 @@ class ConcernController extends Controller
     {
         $fileLinks = [];
         if ($attachments) {
-            $keyJson = config('services.gcs.key_json');  //Access from services.php
-            $keyArray = json_decode($keyJson, true); // Decode the JSON string to an array
+            $keyJson = config('services.gcs.key_json');  
+            $keyArray = json_decode($keyJson, true); 
             $storage = new StorageClient([
                 'keyFilePath' => $keyArray
             ]);
@@ -1636,7 +1639,7 @@ class ConcernController extends Controller
                     ['name' => $filePath]
                 );
 
-                $fileLink = $bucket->object($filePath)->signedUrl(new \DateTime('tomorrow'));
+                $fileLink = $bucket->object($filePath)->signedUrl(new \DateTime('+10 years'));
 
                 $fileLinks[] = $fileLink;
                 unlink($tempFile);
