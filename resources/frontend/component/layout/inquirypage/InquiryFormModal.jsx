@@ -3,6 +3,7 @@ import ReCAPTCHA from "react-google-recaptcha";
 import { IoIosSend, IoMdArrowDropdown, IoMdTrash } from "react-icons/io";
 import apiService from "../../servicesApi/apiService";
 import { useStateContext } from "../../../context/contextprovider";
+import CircularProgress from "@mui/material/CircularProgress";
 
 const formDataState = {
     fname: "",
@@ -16,56 +17,6 @@ const formDataState = {
     unit_number: "",
 };
 
-const projectList = [
-    "N/A",
-    "38 Park Avenue",
-    "Astra Centre",
-    "Asia Premiere",
-    "Base Line Center Phase 2",
-    "Baseline Center",
-    "Baseline Residences",
-    "Casa Mira Bacolod",
-    "Casa Mira Coast Sibulan",
-    "Casa Mira Homes Butuan",
-    "Casa Mira Iloilo Camalig",
-    "Casa Mira Linao",
-    "Casa Mira Towers CDO",
-    "Casa Mira Towers Guadalupe",
-    "Casa Mira Towers Labangon",
-    "Casa Mira Towers LPU Davao",
-    "Casa Mira Towers Mandaue",
-    "Casamira South",
-    "Calle 104",
-    "Casa Mira Dumaguete",
-    "Casa Mira Towers Bacolod",
-    "Casa Mira Towers Palawan",
-    "Costa Mira Beachtown",
-    "Costa Mira Beachtown Panglao",
-    "Latitude Corporate Center",
-    "Mesaverte Residences",
-    "Mesavirre Garden Residences",
-    "Midori Residences",
-    "Mivela Garden Residences",
-    "Mivesa Garden Residences",
-    "Mandtra Residences",
-    "Midori Plains",
-    "Mindara Residences",
-    "Patria De Cebu",
-    "Park Centrale Tower",
-    "San Jose Maria Village - Balamban",
-    "San Jose Maria Village - Minglanilla",
-    "San Jose Maria Village - Toledo",
-    "San Josemaria Village - Talisay",
-    "Test Project",
-    "The East Village",
-    "Velmiro Greens Bohol",
-    "Velmiro Heights",
-    "Velmiro Heights Uptown",
-    "Velmiro Plains Bacolod",
-    "Villa Casita - Balamban",
-    "Villa Casita - Bogo",
-];
-
 const InquiryFormModal = ({ modalRef }) => {
     const [files, setFiles] = useState([]);
     const [fileName, setFileName] = useState("");
@@ -74,6 +25,7 @@ const InquiryFormModal = ({ modalRef }) => {
     const maxCharacters = 500;
     const [hasErrors, setHasErrors] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
+    const [loading, setLoading] = useState(false);
     const [resetSuccess, setResetSuccess] = useState(false);
     const [isSubmitted, setIsSubmitted] = useState(false);
     const [isValid, setIsValid] = useState(true);
@@ -89,6 +41,8 @@ const InquiryFormModal = ({ modalRef }) => {
                 : file.name
         );
         setFiles(selectedFiles);
+
+        event.target.value = null;
     };
 
     const formatFunc = (name) => {
@@ -162,6 +116,7 @@ const InquiryFormModal = ({ modalRef }) => {
         setIsSubmitted(true);
         if (isFormDataValid && isTextareaValid && !errors.buyer_email) {
             try {
+                setLoading(true);
                 const fileData = new FormData();
                 files.forEach((file) => {
                     fileData.append("files[]", file);
@@ -188,6 +143,7 @@ const InquiryFormModal = ({ modalRef }) => {
                     modalRef.current.close();
                 }
                 callBackHandler();
+                setLoading(false);
             } catch (error) {
                 console.log("error saving concerns", error);
                 setHasErrors(true);
@@ -355,13 +311,18 @@ const InquiryFormModal = ({ modalRef }) => {
                                     className="appearance-none w-full px-4 text-sm py-1 bg-white focus:outline-none border-0 mobile:text-xs"
                                 >
                                     <option value="">(Select)</option>
-                                    {formattedPropertyNames.map((item, index) => {
-                                        return (
-                                            <option key={index} value={item}>
-                                                {item}
-                                            </option>
-                                        );
-                                    })}
+                                    {formattedPropertyNames.map(
+                                        (item, index) => {
+                                            return (
+                                                <option
+                                                    key={index}
+                                                    value={item}
+                                                >
+                                                    {item}
+                                                </option>
+                                            );
+                                        }
+                                    )}
                                 </select>
                                 <span className="absolute inset-y-0 right-0 flex  items-center pr-3 pl-3 bg-custom-lightestgreen text-custom-bluegreen pointer-events-none">
                                     <IoMdArrowDropdown />
@@ -509,10 +470,10 @@ const InquiryFormModal = ({ modalRef }) => {
                         </div>
                     </div>
                     <div className="flex flex-col mt-5 mb-12">
-                        <div className="flex justify-end w-54 tablet:flex-col">
+                        <div className="flex justify-between w-54 tablet:flex-col">
                             <label
                                 htmlFor="attachment"
-                                className="hidden tablet:w-full h-10 px-5 text-sm border montserrat-medium border-custom-solidgreen rounded-lg text-custom-solidgreen flex justify-center items-center gap-1 cursor-pointer hover:shadow-custom"
+                                className="tablet:w-full h-10 px-5 text-sm border montserrat-medium border-custom-solidgreen rounded-lg text-custom-solidgreen flex justify-center items-center gap-1 cursor-pointer hover:shadow-custom"
                             >
                                 <svg
                                     xmlns="http://www.w3.org/2000/svg"
@@ -538,33 +499,47 @@ const InquiryFormModal = ({ modalRef }) => {
                                     onChange={handleFileChange}
                                 />
                             </label>
-                            {files.length > 0 && (
-                                <div className="flex flex-col mt-2">
-                                    {files.map((file, index) => (
-                                        <p
-                                            key={index}
-                                            className="flex items-center text-sm text-gray-600 truncate gap-1"
-                                        >
-                                            {file.name}
-                                            <IoMdTrash
-                                                className="hover:text-red-500"
-                                                onClick={() =>
-                                                    handleDelete(file.name)
-                                                }
-                                            />
-                                        </p>
-                                    ))}
-                                </div>
-                            )}
+
                             <button
-                                type="submit"
                                 onClick={handleSubmit}
-                                className="h-10 text-white px-10 rounded-lg gradient-btn2 flex justify-center items-center gap-2 tablet:w-full hover:shadow-custom4"
+                                disabled={loading}
+                                type="submit"
+                                className={`w-[133px] text-sm montserrat-semibold text-white h-[49px] rounded-[10px] gradient-btn2 flex justify-center items-center gap-2 tablet:w-full hover:shadow-custom4
+                                            ${
+                                                loading
+                                                    ? "cursor-not-allowed"
+                                                    : ""
+                                            }
+                                            `}
                             >
-                                Submit
-                                <IoIosSend />
+                                {loading ? (
+                                    <CircularProgress className="spinnerSize" />
+                                ) : (
+                                    <>
+                                        Submit
+                                        <IoIosSend />
+                                    </>
+                                )}
                             </button>
                         </div>
+                        {files.length > 0 && (
+                            <div className="flex flex-col mt-2">
+                                {files.map((file, index) => (
+                                    <p
+                                        key={index}
+                                        className="flex items-center text-sm text-gray-600 truncate gap-1"
+                                    >
+                                        {file.name}
+                                        <IoMdTrash
+                                            className="hover:text-red-500"
+                                            onClick={() =>
+                                                handleDelete(file.name)
+                                            }
+                                        />
+                                    </p>
+                                ))}
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>

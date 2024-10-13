@@ -74,6 +74,7 @@ const InquiryThread = () => {
     const handleFileAttach = (event) => {
         const files = Array.from(event.target.files);
         setAttachedFiles((prevFiles) => [...prevFiles, ...files]);
+        event.target.value = null;
     };
 
     const removeFile = (fileNameToDelete) => {
