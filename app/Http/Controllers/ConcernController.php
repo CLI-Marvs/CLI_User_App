@@ -1622,7 +1622,7 @@ class ConcernController extends Controller
             $keyJson = config('services.gcs.key_json');  
             $keyArray = json_decode($keyJson, true); 
             $storage = new StorageClient([
-                'keyFilePath' => $keyArray
+                'keyFile' => $keyArray
             ]);
             $bucket = $storage->bucket('super-app-storage');
 
