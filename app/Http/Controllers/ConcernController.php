@@ -232,7 +232,7 @@ class ConcernController extends Controller
             if ($files) {
                 foreach ($files as $file) {
                     $fileName = $file->getClientOriginalName();
-                    $filePath = $file->storeAs('temp', $fileName); 
+                    $filePath = $file->storeAs('temp', $fileName);
                     $allFiles[] = [
                         'name' => $fileName,
                         'path' => storage_path('app/' . $filePath),
@@ -1559,9 +1559,9 @@ class ConcernController extends Controller
                     $messagesRef = new Messages();
                     $messagesRef->details_message = $message['details_message'];
                     $messagesRef->ticket_id = $message['ticket_id'];
-                    /*  $fileLinks = $this->uploadToGCSFromScript($message['attachment']); */
+                    $fileLinks = $this->uploadToGCSFromScript($message['attachment']);
                     $messagesRef->buyer_email = $message['buyer_email'];
-                    /* $messagesRef->attachment = json_encode($fileLinks);  */
+                    $messagesRef->attachment = json_encode($fileLinks);
                     $messagesRef->created_at = Carbon::parse(now())->setTimezone('Asia/Manila');
                     $messagesRef->buyer_name = $concernsRef->buyer_name;
                     $messagesRef->save();
@@ -1619,8 +1619,8 @@ class ConcernController extends Controller
     {
         $fileLinks = [];
         if ($attachments) {
-            $keyJson = config('services.gcs.key_json');  
-            $keyArray = json_decode($keyJson, true); 
+            $keyJson = config('services.gcs.key_json');
+            $keyArray = json_decode($keyJson, true);
             $storage = new StorageClient([
                 'keyFile' => $keyArray
             ]);
