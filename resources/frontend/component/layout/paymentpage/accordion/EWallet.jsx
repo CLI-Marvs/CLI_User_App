@@ -77,4 +77,4 @@ const EWallet = () => {
     );
 }
 
-export default EWallet
+export default EWallets
