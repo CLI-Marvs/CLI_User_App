@@ -11,9 +11,11 @@ const UploadUnitDetailsModal = ({
     fileSelected,
     handleFileChange,
 }) => {
+    
     //State
     const [formData, setFormData] = useState({});
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(false); 
+    const newFileInputRef = useRef();
     const {
         setTowerPhaseId,
         towerPhaseId,
@@ -101,11 +103,11 @@ const UploadUnitDetailsModal = ({
             setLoading(false);
         }
     }; //Handle submit units from excel file
+
     const replaceFile = async (event) => {
         // Trigger the `handleFileChange` function received from BasicPricing
         await handleFileChange(event);
-        // Optionally, perform additional actions specific to replacing the file
-    };
+    }; //Handle in replacing the file
 
     return (
         <dialog
@@ -133,10 +135,18 @@ const UploadUnitDetailsModal = ({
                     <div>
                         <label
                             className="flex justify-center items-center w-[64px] h-[24px] bg-white text-xs border text-[#067AC5] border-[#067AC5] rounded-[5px] hover:shadow-custom4"
-                            onClick={replaceFile}
+                            onClick={() => {
+                                if (newFileInputRef.current) {
+                                    newFileInputRef.current.click();
+                                }
+                            }}
                         >
                             Replace
-                            <input type="file" className="hidden" />
+                            <input
+                                type="file"
+                                className="hidden"
+                                onChange={replaceFile}
+                            />
                         </label>
                     </div>
                 </div>
@@ -325,19 +335,21 @@ const UploadUnitDetailsModal = ({
                     </div> */}
                 </div>
                 <div className="flex justify-center mt-4 mb-8">
-                    <button
-                        className={`w-[177px] h-[37px] text-white montserrat-semibold text-sm gradient-btn2 rounded-[10px] hover:shadow-custom4  ${
-                            loading ? "cursor-not-allowed" : ""
-                        }`}
-                        type="submit"
-                        onClick={handleSubmit}
-                    >
-                        {loading ? (
-                            <CircularProgress className="spinnerSize" />
-                        ) : (
-                            <>Confirm and Upload</>
-                        )}
-                    </button>
+                    {selectedExcelHeader && selectedExcelHeader.length > 0 ? (
+                        <button
+                            className={`w-[177px] h-[37px] text-white montserrat-semibold text-sm gradient-btn2 rounded-[10px] hover:shadow-custom4  ${
+                                loading ? "cursor-not-allowed" : ""
+                            }`}
+                            type="submit"
+                            onClick={handleSubmit}
+                        >
+                            {loading ? (
+                                <CircularProgress className="spinnerSize" />
+                            ) : (
+                                <>Confirm and Upload</>
+                            )}
+                        </button>
+                    ) : null}
                 </div>
             </div>
         </dialog>

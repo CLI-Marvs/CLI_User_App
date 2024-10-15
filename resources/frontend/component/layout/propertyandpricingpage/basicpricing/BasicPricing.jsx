@@ -18,6 +18,7 @@ import * as XLSX from "xlsx";
 import { useNavigate } from "react-router-dom";
 import { useParams } from "react-router-dom";
 const BasicPricing = ({ props }) => {
+
     //State
     const {
         priceBasicDetailsFormData,
@@ -26,13 +27,11 @@ const BasicPricing = ({ props }) => {
     } = usePriceBasicDetailStateContext();
     const { floorPremiumFormData } = useFloorPremiumStateContext();
     const { propertyId, user, towerPhaseId } = useStateContext();
-
     const modalRef = useRef(null);
     const uploadUnitModalRef = useRef(null);
     const fileInputRef = useRef(null);
     const location = useLocation();
     const { passPropertyDetails = {} } = location.state || {};
-
     const [localPropertyData, setLocalPropertyData] =
         useState(passPropertyDetails);
     const navigate = useNavigate();
@@ -43,20 +42,20 @@ const BasicPricing = ({ props }) => {
     //Hooks
     useEffect(() => {
         setLocalPropertyData(passPropertyDetails);
-    }, []);
+    }, []); 
 
     //Event handler
     const handleOpenAddPropertyModal = () => {
         if (modalRef.current) {
             modalRef.current.showModal();
         }
-    }; //open the add property modal
+    }; //Open the add property modal
 
     const handleOpenUnitUploadModal = () => {
         if (fileInputRef.current) {
             fileInputRef.current.click();
         }
-    }; //open the unit upload modal
+    }; //Open the unit upload modal
 
     const handleFileChange = async (event) => {
         const file = event.target.files[0];
@@ -136,7 +135,7 @@ const BasicPricing = ({ props }) => {
         };
 
         reader.readAsArrayBuffer(file);
-    }; //handles the process of uploading an Excel file, extracting the headers
+    }; //Handles the process of uploading an Excel file, extracting the headers
 
     const handleSubmit = async (e, status) => {
         const validFloorPremiums = floorPremiumFormData.floor.filter(
@@ -194,7 +193,7 @@ const BasicPricing = ({ props }) => {
             //     navigate("/propertyandpricing/pricingmasterlist");
             // }, 1000);
         }
-    }; //handles in submitting all data in creating price master list
+    }; //Handles in submitting all data in creating price master list
 
     //Helper function-> Logic is specific to the component and won't be reused to other component.
     const buildPriceListPayload = (priceListData, passedStatus) => {
@@ -269,7 +268,6 @@ const BasicPricing = ({ props }) => {
             />
             <div>
                 <UploadUnitDetailsModal
-                
                     handleFileChange={handleFileChange}
                     uploadUnitModalRef={uploadUnitModalRef}
                     fileName={fileName}
@@ -283,9 +281,6 @@ const BasicPricing = ({ props }) => {
                 <PriceListSettings />
                 <FloorPremiums
                     propertyId={passPropertyDetails?.propertyData?.id}
-                    // towerPhaseId={
-                    //     passPropertyDetails?.propertyData?.tower_phases[0].id
-                    // }
                 />
                 <AdditionalPremiums />
                 <PriceVersions />
