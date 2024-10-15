@@ -83,7 +83,7 @@ class AuthController extends Controller
                 $lastName = null;  
             }
     
-            $department = in_array($googleUser->email, $crsUser) ? 'CRS' : null;
+            $department = in_array($googleUser->email, $crsUser) ? 'CRS' : 'CRS';
     
             $user = Employee::where('google_id', $googleUser->id)->first();
     
