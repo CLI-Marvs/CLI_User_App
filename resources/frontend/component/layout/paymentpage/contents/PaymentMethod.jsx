@@ -2,7 +2,7 @@ import React from 'react'
 import CreditDebitCard from '../accordion/CreditDebitCard'
 import InstallmentCredit from '../accordion/InstallmentCredit'
 import InstallmentNonCredit from '../accordion/InstallmentNonCredit'
-import EWallet from '../accordion/EWallet'
+/* import EWallet from '../accordion/EWallet' */
 import OnlineBankTransfer from '../accordion/OnlineBankTransfer'
 import OverTheCounter from '../accordion/OverTheCounter'
 import CLILogo from '../../../../../../public/Images/CLI_Horizontal.svg'
@@ -21,7 +21,7 @@ const PaymentMethod = () => {
           <CreditDebitCard />
           <InstallmentCredit />
           <InstallmentNonCredit />
-          <EWallet />
+          {/* <EWallet /> */}
           <OnlineBankTransfer />
           <OverTheCounter />
         </div>

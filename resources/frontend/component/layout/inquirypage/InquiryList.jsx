@@ -11,6 +11,7 @@ import DateLogo from "../../../../../public/Images/Date_range.svg";
 import moment from "moment";
 import { MdRefresh } from "react-icons/md";
 import { Alert } from "@mui/material";
+import InquiryFormModal from "./InquiryFormModal";
 
 const InquiryList = () => {
     const {
@@ -189,6 +190,14 @@ const InquiryList = () => {
         }
     };
 
+    const modalRef = useRef(null);
+
+  const handleOpenModal = () => {
+      if (modalRef.current) {
+          modalRef.current.showModal();
+      }
+  };
+
     const updateLastActivity = () => {
         const currentTime = new Date();
         setLastActivity(currentTime);
@@ -299,7 +308,9 @@ const InquiryList = () => {
                                 />
                             </svg>
                         </div>
-
+                        <div className="flex items-center">
+                            <button onClick={handleOpenModal} className='h-[38px] w-[121px] gradient-btn5 text-white  text-xs rounded-[10px]'> <span className='text-[18px]'>+</span> Add Inquiry</button>
+                        </div>
                         {isFilterVisible && (
                             <div
                                 ref={filterBoxRef}
@@ -463,7 +474,7 @@ const InquiryList = () => {
                                                 handleOptionClick("Resolve")
                                             }
                                         >
-                                            Resolve
+                                            Resolved
                                         </li>
                                         <li
                                             className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
@@ -471,7 +482,7 @@ const InquiryList = () => {
                                                 handleOptionClick("Unresolve")
                                             }
                                         >
-                                            Unresolve
+                                            Unresolved
                                         </li>
                                     </ul>
                                 </div>
@@ -586,6 +597,9 @@ const InquiryList = () => {
                         </div>
                     </div>
                 </div>
+            </div>
+            <div>
+                <InquiryFormModal modalRef={modalRef} />
             </div>
         </>
     );

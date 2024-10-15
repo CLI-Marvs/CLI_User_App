@@ -55,7 +55,7 @@ const UserMessages = ({ items }) => {
                     {Array.isArray(attachmentData) &&
                         attachmentData.length > 0 &&
                         attachmentData.map((attachment, index) => (
-                            <div className="mt-4" key={index}>
+                            <div className="mt-4 w-[219px]" key={index}>
                                 <Link
                                     to={`/file-viewer/attachment/${items.id}`}
                                     onClick={(e) => {

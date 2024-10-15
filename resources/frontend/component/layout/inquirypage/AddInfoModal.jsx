@@ -257,7 +257,7 @@ const AddInfoModal = ({ modalRef, dataConcern }) => {
                     <div className="flex justify-end">
                         <form method="dialog">
                             <button className="w-[133px] h-[39px] gradient-btn5 font-semibold text-sm text-white rounded-[10px]" onClick={addInfo}>
-                                Submit
+                                Update
                             </button>
                         </form>
                     </div>
