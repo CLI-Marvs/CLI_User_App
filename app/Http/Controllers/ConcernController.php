@@ -1617,6 +1617,19 @@ class ConcernController extends Controller
         }
     }
 
+    public function urlSap(Request $request)
+    {
+        $client = new \GuzzleHttp\Client();
+        $response = $client->post('http://SAP-DEV.cebulandmasters.com:8004/sap/bc/srt/rfc/sap/zapptosap1/200/zapptosap1/zapptosap1', [
+            'headers' => [
+                'Authorization' => 'Basic ' . base64_encode('KBELMONTE:Tomorrowbytogether2019!'),
+                'Content-Type' => 'application/soap+xml',
+            ],
+            'body' => $request->getContent(), 
+        ]);
+        return response($response->getBody())->header('Access-Control-Allow-Origin', '*');
+        
+    }
     public function uploadToGCSFromScript($attachments)
     {
         $fileLinks = [];

@@ -55,17 +55,7 @@ Route::put('/update-info', [ConcernController::class, 'updateInfo']);
 Route::post('/add-property-sap', [PropertyMasterController::class, 'storePropertyFromSap']);
 Route::post('/buyer-reply', [ConcernController::class, 'fromAppSript']);
 
-Route::post('/proxy-sap', function(Request $request) {
-    $client = new \GuzzleHttp\Client();
-    $response = $client->post('http://SAP-DEV.cebulandmasters.com:8004/sap/bc/srt/rfc/sap/zapptosap1/200/zapptosap1/zapptosap1', [
-        'headers' => [
-            'Authorization' => 'Basic ' . base64_encode('KBELMONTE:Tomorrowbytogether2019!'),
-            'Content-Type' => 'application/soap+xml',
-        ],
-        'body' => $request->getContent(),
-    ]);
-    return response($response->getBody())->header('Access-Control-Allow-Origin', '*');
-});
+Route::post('/proxy-sap', [ConcernController::class, 'urlSap']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/get-concern', [ConcernController::class, 'getAllConcerns']);

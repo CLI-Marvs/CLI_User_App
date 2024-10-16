@@ -306,8 +306,8 @@ const InquiryList = () => {
            <soap:Header/>
            <soap:Body>
               <urn:Zapptosap>
-                 <Ecode>33333333</Ecode>
-                 <Ename>Test12131231</Ename>
+                 <Ecode>111</Ecode>
+                 <Ename>hahaha133131s</Ename>
               </urn:Zapptosap>
            </soap:Body>
         </soap:Envelope>
@@ -325,7 +325,7 @@ const InquiryList = () => {
         };
     
         try {
-            const response = await axios.post("https://admin-dev.cebulandmasters.com/api/proxy-sap", soapBody, config);
+            const response = await axios.post("http://localhost:8001/api/proxy-sap", soapBody, config);
             console.log("Response:", response.data);
         } catch (error) {
             console.error("Error:", error.response ? error.response.data : error.message);
