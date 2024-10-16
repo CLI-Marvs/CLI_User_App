@@ -349,6 +349,9 @@ const InquiryList = () => {
                                 />
                             </svg>
                         </div>
+<<<<<<< HEAD
+                       
+=======
                         <div className="flex items-center">
                             <button
                                 onClick={handleOpenModal}
@@ -363,6 +366,7 @@ const InquiryList = () => {
                             </button>
                         </div>
 
+>>>>>>> 2a67dbb496de44cab0932ecd52ed372434f2f4c1
                         {isFilterVisible && (
                             <div
                                 ref={filterBoxRef}
@@ -380,7 +384,7 @@ const InquiryList = () => {
                                             onChange={(e) =>
                                                 setName(e.target.value)
                                             }
-                                            className="w-full  border-b-1 outline-none"
+                                            className="w-full  border-b-1 outline-none text-sm"
                                         />
                                     </div>
                                     <div className="flex">
@@ -388,14 +392,45 @@ const InquiryList = () => {
                                             {" "}
                                             Category
                                         </label>
-                                        <input
-                                            type="text"
+                                       
+                                      
+                                        <select
+                                            className="w-full border-b-1 outline-none text-sm"
                                             value={category}
                                             onChange={(e) =>
                                                 setCategory(e.target.value)
                                             }
-                                            className="w-full  border-b-1 outline-none"
-                                        />
+                                        >
+                                            <option value="">
+                                                Select Category
+                                            </option>
+                                            <option value="Reservation Documents">
+                                                Reservation Documents
+                                            </option>
+                                            <option value="Payment Issues">
+                                                Payment Issues
+                                            </option>
+                                            <option value="Statement of Account and Billing Statement">
+                                                Statement of Account and Billing
+                                                Statement
+                                            </option>
+                                            <option value="Turnover Status/Unit Concerns">
+                                                Turnover Status/Unit Concerns
+                                            </option>
+                                            <option value="Loan Application">
+                                                Loan Application
+                                            </option>
+                                            <option value="Titile and Other Registration Documents">
+                                                Titile and Other Registration
+                                                Documents
+                                            </option>
+                                            <option value="Commissions">
+                                                Commissions
+                                            </option>
+                                            <option value="Other Concerns">
+                                                Other Concerns
+                                            </option>
+                                        </select>
                                     </div>
                                     <div className="flex">
                                         <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
@@ -408,7 +443,7 @@ const InquiryList = () => {
                                             onChange={(e) =>
                                                 setEmail(e.target.value)
                                             }
-                                            className="w-full  border-b-1 outline-none"
+                                            className="w-full  border-b-1 outline-none text-sm"
                                         />
                                     </div>
                                     <div className="flex">
@@ -422,25 +457,25 @@ const InquiryList = () => {
                                             onChange={(e) =>
                                                 setTicket(e.target.value)
                                             }
-                                            className="w-full  border-b-1 outline-none"
+                                            className="w-full  border-b-1 outline-none text-sm"
                                         />
                                     </div>
                                     <div className="flex gap-3">
-                                        <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
+                                        <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[214px]">
                                             Date
                                         </label>
                                         <div className="relative">
                                             <DatePicker
                                                 selected={startDate}
                                                 onChange={handleDateChange}
-                                                className="border-b-1 outline-none w-[176px]"
+                                                className="border-b-1 outline-none w-[176px] text-sm"
                                                 calendarClassName="custom-calendar"
                                             />
 
                                             <img
                                                 src={DateLogo}
                                                 alt="date"
-                                                className="absolute top-[45%] right-0 transform -translate-y-1/2 text-custom-bluegreen size-6"
+                                                className="absolute top-[45%] right-0 transform -translate-y-1/2 text-custom-bluegreen size-6 cursor-pointer pointer-events-none"
                                             />
                                         </div>
                                         <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
@@ -448,7 +483,7 @@ const InquiryList = () => {
                                             Status
                                         </label>
                                         <select
-                                            className="w-full border-b-1 outline-none"
+                                            className="w-full border-b-1 outline-none text-sm"
                                             onChange={handleStatus}
                                             value={status}
                                         >
@@ -494,6 +529,9 @@ const InquiryList = () => {
                                 </div>
                             </div>
                         )}
+                    </div>
+                    <div className="flex items-center">
+                        <button onClick={handleOpenModal} className='h-[38px] w-[121px] gradient-btn5 text-white  text-xs rounded-[10px]'> <span className='text-[18px]'>+</span> Add Inquiry</button>
                     </div>
                 </div>
                 <div className="max-w-[1260px] ">
@@ -650,10 +688,11 @@ const InquiryList = () => {
                         </div>
                     </div>
                 </div>
+                <div>
+                    <InquiryFormModal modalRef={modalRef} />
+                </div>
             </div>
-            <div>
-                <InquiryFormModal modalRef={modalRef} />
-            </div>
+            
         </>
     );
 };
