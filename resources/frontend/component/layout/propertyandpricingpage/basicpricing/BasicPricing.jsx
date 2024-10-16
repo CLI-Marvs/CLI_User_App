@@ -18,7 +18,6 @@ import * as XLSX from "xlsx";
 import { useNavigate } from "react-router-dom";
 import { useParams } from "react-router-dom";
 const BasicPricing = ({ props }) => {
-
     //State
     const {
         priceBasicDetailsFormData,
@@ -42,21 +41,31 @@ const BasicPricing = ({ props }) => {
     //Hooks
     useEffect(() => {
         setLocalPropertyData(passPropertyDetails);
-    }, []); 
+    }, []);
 
     //Event handler
+
+    /**
+     * Open the add property modal
+     */
     const handleOpenAddPropertyModal = () => {
         if (modalRef.current) {
             modalRef.current.showModal();
         }
-    }; //Open the add property modal
+    };
 
+    /**
+     * Open the unit upload modal
+     */
     const handleOpenUnitUploadModal = () => {
         if (fileInputRef.current) {
             fileInputRef.current.click();
         }
-    }; //Open the unit upload modal
+    };
 
+    /**
+     * Handles the process of uploading an Excel file, extracting the headers
+     */
     const handleFileChange = async (event) => {
         const file = event.target.files[0];
         setFileSelected(file);
@@ -135,8 +144,11 @@ const BasicPricing = ({ props }) => {
         };
 
         reader.readAsArrayBuffer(file);
-    }; //Handles the process of uploading an Excel file, extracting the headers
+    };
 
+    /**
+     * Handles in submitting all data in creating price master list
+     */
     const handleSubmit = async (e, status) => {
         const validFloorPremiums = floorPremiumFormData.floor.filter(
             (floor) => {
@@ -193,9 +205,11 @@ const BasicPricing = ({ props }) => {
             //     navigate("/propertyandpricing/pricingmasterlist");
             // }, 1000);
         }
-    }; //Handles in submitting all data in creating price master list
+    };
 
-    //Helper function-> Logic is specific to the component and won't be reused to other component.
+    /**
+     *Helper function-> This function's logic is tightly coupled with the component's requirements and is not intended for reuse in other components.
+     */
     const buildPriceListPayload = (priceListData, passedStatus) => {
         return {
             propertyId: propertyId,
@@ -207,8 +221,7 @@ const BasicPricing = ({ props }) => {
             reservationFee: priceListData.reservationFee,
             status: passedStatus,
         };
-    }; // Helper function to build price list payload
-
+    }; 
     const buildFloorPremiumPayload = (validFloorPremiums) => {
         return validFloorPremiums.map((floor) => ({
             floor: floor.floor,
@@ -216,7 +229,7 @@ const BasicPricing = ({ props }) => {
             luckyNumber: floor.luckyNumber,
             excludedUnits: floor.excludedUnits,
         }));
-    }; // Helper function to build floor premium payload
+    }; 
 
     return (
         <div className="h-screen max-w-[957px] min-w-[897px] bg-custom-grayFA px-[30px] ">
