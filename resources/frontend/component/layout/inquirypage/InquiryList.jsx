@@ -266,52 +266,73 @@ const InquiryList = () => {
         currentPage,
     ]);
 
-    const sendSoapRequest = async () => {
+   /*  const sendSoapRequest = async () => {
         const soapBody = `
-    <soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:urn="urn:sap-com:document:sap:soap:functions:mc-style">
-   <soap:Header/>
-   <soap:Body>
-      <urn:Zapptosap>
-         <Ecode>5555</Ecode>
-         <Ename>Test</Ename>
-      </urn:Zapptosap>
-   </soap:Body>
-</soap:Envelope>
-    `;
-
+        <soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:urn="urn:sap-com:document:sap:soap:functions:mc-style">
+           <soap:Header/>
+           <soap:Body>
+              <urn:Zapptosap>
+                 <Ecode>5555</Ecode>
+                 <Ename>Test</Ename>
+              </urn:Zapptosap>
+           </soap:Body>
+        </soap:Envelope>
+        `;
+    
         const username = "KBELMONTE";
         const password = "Tomorrowbytogether2019!";
         const authHeader = "Basic " + btoa(`${username}:${password}`);
-
+    
         const config = {
             headers: {
                 "Content-Type": "application/soap+xml",
+                "SOAPAction": "urn:sap-com:document:sap:soap:functions:mc-style",
                 Authorization: authHeader,
             },
         };
+    
         try {
-            /*  const response = await axios.post(
-                "https://sap-dev.cebulandmasters.com:44304/sap/bc/srt/wsdl/flv_10002A111AD1/bndg_url/sap/bc/srt/rfc/sap/zcustomer/200/zcustomer/zcustomer?sap-client=200",
-                soapBody,
-                config
-            ); */
-            const response = await axios.post(
-                "https://admin-dev.cebulandmasters.com/proxy-sap",
-                soapBody,
-                {
-                    headers: {
-                        "Content-Type": "application/soap+xml",
-                        "SOAPAction":
-                            "urn:sap-com:document:sap:soap:functions:mc-style",
-                    },
-                }
-            );
+            const response = await axios.post("http://localhost:8001/proxy-sap", soapBody, config);
+
             console.log("Response:", response.data);
         } catch (error) {
-            console.log("error", error);
+            console.log("Error:", error.response.data);
+        }
+    }; */
+    
+
+    const sendSoapRequest = async () => {
+        const soapBody = `
+        <soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:urn="urn:sap-com:document:sap:soap:functions:mc-style">
+           <soap:Header/>
+           <soap:Body>
+              <urn:Zapptosap>
+                 <Ecode>321312313</Ecode>
+                 <Ename>TestRodfil</Ename>
+              </urn:Zapptosap>
+           </soap:Body>
+        </soap:Envelope>
+        `;
+    
+        const username = "KBELMONTE";
+        const password = "Tomorrowbytogether2019!";
+        const authHeader = "Basic " + btoa(`${username}:${password}`);
+    
+        const config = {
+            headers: {
+                "Content-Type": "application/soap+xml",
+                "Authorization": authHeader,
+            },
+        };
+    
+        try {
+            const response = await axios.post("http://admin-dev.cebulandmasters.com/api/proxy-sap", soapBody, config);
+            console.log("Response:", response.data);
+        } catch (error) {
+            console.error("Error:", error.response ? error.response.data : error.message);
         }
     };
-
+    
     return (
         <>
             <div className="h-screen max-w-full bg-custom-grayFA px-[20px]">

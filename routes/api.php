@@ -57,15 +57,16 @@ Route::post('/buyer-reply', [ConcernController::class, 'fromAppSript']);
 
 Route::post('/proxy-sap', function(Request $request) {
     $client = new \GuzzleHttp\Client();
-    $response = $client->post('https://sap-dev.cebulandmasters.com:44304/sap/bc/srt/wsdl/flv_10002A111AD1/bndg_url/sap/bc/srt/rfc/sap/zcustomer/200/zcustomer/zcustomer?sap-client=200', [
+    $response = $client->post('http://SAP-DEV.cebulandmasters.com:8004/sap/bc/srt/rfc/sap/zapptosap1/200/zapptosap1/zapptosap1', [
         'headers' => [
             'Authorization' => 'Basic ' . base64_encode('KBELMONTE:Tomorrowbytogether2019!'),
             'Content-Type' => 'application/soap+xml',
         ],
         'body' => $request->getContent(),
     ]);
-    return $response->getBody();
+    return response($response->getBody())->header('Access-Control-Allow-Origin', '*');
 });
+
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/get-concern', [ConcernController::class, 'getAllConcerns']);
     Route::post('/add-concern', [ConcernController::class, 'addConcernPublic']);
