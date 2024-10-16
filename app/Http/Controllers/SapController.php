@@ -10,7 +10,7 @@ class SapController extends Controller
     public function urlSap(Request $request)
     {
         $client = new \GuzzleHttp\Client();
-        $response = $client->post('https://sap-dev.cebulandmasters.com:44304/sap/bc/srt/rfc/sap/zinvoices/200/zinvoices/zinvoices', [
+        $response = $client->post('https://sap-dev.cebulandmasters.com:44304/sap/bc/srt/rfc/sap/zinvoice1/200/zinvoice1/zinvoice1', [
             'headers' => [
                 'Authorization' => 'Basic ' . base64_encode('KBELMONTE:Tomorrowbytogether2019!'),
                 'Content-Type' => 'application/soap+xml',
@@ -30,17 +30,15 @@ class SapController extends Controller
             $invoice->contract_number = $request->input('D_RECNNR');  
             $invoice->document_number = $request->input('D_BELNR');  
             $invoice->customer_bp_number = $request->input('D_KUNNR');  
-            $invoice->document_number = $request->input('D_BUZEI');  
-            $invoice->sap_unique_id = $request->input('D_BUKRS'); 
-            $invoice->company_name = $request->input('D_SWENR');  
-            $invoice->project_code = $request->input('D_SGTXT'); 
-            $invoice->customer_name = $request->input('D_DMBTR'); 
-            $invoice->invoice_amount = $request->input('D_CPUDT');  
-            $invoice->entry_date = $request->input('D_ZFBDT'); 
-            $invoice->due_date = $request->input('D_BUDAT'); 
-            
-            // The 'D_NAME1' field remains an input from the request
-            $invoice->description = $request->input('D_NAME1'); 
+            $invoice->sap_unique_id = $request->input('D_BUZEI');  
+            $invoice->company_code = $request->input('D_BUKRS'); 
+            $invoice->project_code = $request->input('D_SWENR');  
+            $invoice->description = $request->input('D_SGTXT'); 
+            $invoice->invoice_amount = $request->input('D_DMBTR'); 
+            $invoice->entry_date = $request->input('D_CPUDT');  
+            $invoice->due_date = $request->input('D_ZFBDT'); 
+            $invoice->post_date = $request->input('D_BUDAT'); 
+            $invoice->customer_name = $request->input('D_NAME1'); 
            /*  $invoice->invoice_status = $request->input('invoice_status'); 
             $invoice->status = $request->input('status');
             $invoice->posting_response = $request->input('posting_response'); */
