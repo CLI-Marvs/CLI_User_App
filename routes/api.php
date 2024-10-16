@@ -57,6 +57,8 @@ Route::post('/add-property-sap', [PropertyMasterController::class, 'storePropert
 Route::post('/buyer-reply', [ConcernController::class, 'fromAppSript']);
 
 Route::post('/proxy-sap', [SapController::class, 'urlSap']);
+Route::post('/posting-invoices', [SapController::class, 'postInvoices']);
+
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/get-concern', [ConcernController::class, 'getAllConcerns']);
