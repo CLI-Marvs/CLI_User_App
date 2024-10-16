@@ -124,13 +124,16 @@ const AssignDetails = ({ logMessages, ticketId }) => {
     ].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
     const capitalizeWords = (name) => {
-        return name
-            .split(" ")
-            .map(
-                (word) =>
-                    word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-            )
-            .join(" ");
+        if (name) {
+            return name
+                .split(" ")
+                .map(
+                    (word) =>
+                        word.charAt(0).toUpperCase() +
+                        word.slice(1).toLowerCase()
+                )
+                .join(" ");
+        }
     };
 
     const renderDetails = (actionType, details, inquiry_createdAt) => {
@@ -150,7 +153,9 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                                     )}
                                 </p>
                                 <span className="montserrat-medium  text-custom-gray81">
-                                    {moment(inquiry_createdAt).format("hh:mm A")}
+                                    {moment(inquiry_createdAt).format(
+                                        "hh:mm A"
+                                    )}
                                 </span>
                                 <div className="border-b flex-grow border-custom-bluegreen pl-[10px]"></div>
                             </div>
@@ -197,7 +202,9 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                             <div>
                                 <p className="text-custom-solidgreen mb-1">
                                     Added assignee:{" "}
-                                    {capitalizeWords(details.assign_to_name.join(", "))}
+                                    {capitalizeWords(
+                                        details.assign_to_name.join(", ")
+                                    )}
                                 </p>
                             </div>
                             <div>
@@ -208,10 +215,10 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                         </div>
                     </>
                 );
-                case "inquiry_status":
-                    return (
-                        <>
-                          <div className="flex flex-col text-sm montserrat-medium">
+            case "inquiry_status":
+                return (
+                    <>
+                        <div className="flex flex-col text-sm montserrat-medium">
                             <div className="flex gap-1 items-center mb-[20px]">
                                 <span className="flex mb-1 text-[25px] text-custom-blue ">
                                     ⚬
@@ -229,9 +236,7 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                                 <div className="border-b flex-grow border-custom-bluegreen"></div>
                             </div>
                             <div className="w-full min-h-[39px] border-[2px] border-custom-grayF1 p-[10px] rounded-[10px] mb-[10px]">
-                                <p className="text-sm">
-                                    {details.remarks}
-                                </p>
+                                <p className="text-sm">{details.remarks}</p>
                             </div>
                             <div>
                                 <p className="text-custom-solidgreen mb-1">
@@ -244,12 +249,12 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                                 </p>
                             </div>
                         </div>
-                        </>
-                    );
-                case "requestor_reply":
-                    return (
-                        <>
-                          {/* FOLLOW UP REPLY*/}
+                    </>
+                );
+            case "requestor_reply":
+                return (
+                    <>
+                        {/* FOLLOW UP REPLY*/}
 
                         <div className="flex flex-col text-sm montserrat-medium mb-[20px]">
                             <div className="flex gap-1 items-center mb-[20px]">
@@ -262,7 +267,9 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                                     )}
                                 </p>
                                 <span className="montserrat-medium  text-custom-gray81">
-                                    {moment(inquiry_createdAt).format("hh:mm A")}
+                                    {moment(inquiry_createdAt).format(
+                                        "hh:mm A"
+                                    )}
                                 </span>
                                 <div className="border-b flex-grow border-custom-bluegreen pl-[10px]"></div>
                             </div>
@@ -277,8 +284,8 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                                 </p>
                             </div>
                         </div>
-                        </>
-                    )
+                    </>
+                );
             default:
                 return <p>Unknown log type</p>;
         }
@@ -294,7 +301,7 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                         onChange={(e) => setMessage(e.target.value)}
                         value={message}
                         onKeyDown={(e) => {
-                            if (e.key === 'Enter') {
+                            if (e.key === "Enter") {
                                 e.preventDefault(); // Prevent default behavior (like submitting a form)
                                 handleSendMessage(); // Call the send message function
                             }
@@ -302,12 +309,13 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                     />
                     <button
                         className={`w-[76px] h-[28px] rounded-[10px] text-xs text-white 
-                            ${!message.trim() 
-                                ? 'bg-gray-400 cursor-not-allowed' // Gray out when input is empty
-                                : 'gradient-btn2'} 
+                            ${
+                                !message.trim()
+                                    ? "bg-gray-400 cursor-not-allowed" // Gray out when input is empty
+                                    : "gradient-btn2"
+                            } 
                             `}
                         onClick={handleSendMessage}
-                        
                     >
                         Comment
                     </button>

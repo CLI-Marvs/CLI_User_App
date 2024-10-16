@@ -18,13 +18,15 @@ const UserMessages = ({ items }) => {
     const dataConcern = data?.find((item) => item.ticket_id === ticketId) || {};
 
     const capitalizeWords = (name) => {
+       if(name) {
         return name
-            .split(" ")
-            .map(
-                (word) =>
-                    word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-            )
-            .join(" ");
+        .split(" ")
+        .map(
+            (word) =>
+                word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+        )
+        .join(" ");
+       }
     };
     return (
         <div className="w-full">
