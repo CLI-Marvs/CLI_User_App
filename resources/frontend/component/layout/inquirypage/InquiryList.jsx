@@ -33,7 +33,6 @@ const InquiryList = () => {
         /*  setHasAttachments,
         hasAttachments */
     } = useStateContext();
-    console.log("34", data);
     const [name, setName] = useState("");
     const [category, setCategory] = useState("");
     const [email, setEmail] = useState("");
@@ -307,8 +306,8 @@ const InquiryList = () => {
            <soap:Header/>
            <soap:Body>
               <urn:Zapptosap>
-                 <Ecode>321312313</Ecode>
-                 <Ename>kaylatest</Ename>
+                 <Ecode>33333333</Ecode>
+                 <Ename>Test12131231</Ename>
               </urn:Zapptosap>
            </soap:Body>
         </soap:Envelope>
@@ -332,6 +331,7 @@ const InquiryList = () => {
             console.error("Error:", error.response ? error.response.data : error.message);
         }
     };
+    
     
     return (
         <>
