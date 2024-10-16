@@ -50,7 +50,7 @@ const AdminMessages = ({ items }) => {
                                         to={`/file-viewer/attachment/${items.id}`}
                                         onClick={(e) => {
                                             e.preventDefault(); // Prevents the immediate navigation
-                                            console.log("attachment",attachment)
+                                           
                                             localStorage.setItem(
                                                 "fileUrlPath",
                                                 JSON.stringify(attachment)
