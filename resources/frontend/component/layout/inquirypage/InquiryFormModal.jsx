@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import ReCAPTCHA from "react-google-recaptcha";
 import { IoIosSend, IoMdArrowDropdown, IoMdTrash } from "react-icons/io";
 import apiService from "../../servicesApi/apiService";
@@ -19,7 +19,8 @@ const formDataState = {
 
 const InquiryFormModal = ({ modalRef }) => {
     const [files, setFiles] = useState([]);
-    const [fileName, setFileName] = useState("");
+    const fileInputRef = useRef();
+    const [fileName, setFileName] = useState([]);
     const [message, setMessage] = useState("");
     const { user, getAllConcerns } = useStateContext();
     const maxCharacters = 500;
@@ -40,9 +41,9 @@ const InquiryFormModal = ({ modalRef }) => {
                       .pop()}`
                 : file.name
         );
+        setFileName(fileNames);
         setFiles(selectedFiles);
-
-        event.target.value = null;
+      
     };
 
     const formatFunc = (name) => {
@@ -58,8 +59,8 @@ const InquiryFormModal = ({ modalRef }) => {
     ];
 
     const handleDelete = (fileNameToDelete) => {
-        setFiles((prevFiles) =>
-            prevFiles.filter((file) => file.name !== fileNameToDelete)
+        setFileName((prevFiles) =>
+            prevFiles.filter((file) => file !== fileNameToDelete)
         );
     };
 
@@ -121,6 +122,7 @@ const InquiryFormModal = ({ modalRef }) => {
                 files.forEach((file) => {
                     fileData.append("files[]", file);
                 });
+               
                 Object.keys(formData).forEach((key) => {
                     fileData.append(key, formData[key]);
                 });
@@ -128,7 +130,7 @@ const InquiryFormModal = ({ modalRef }) => {
                 fileData.append("admin_email", user?.employee_email);
                 fileData.append("admin_id", user?.id);
                 fileData.append("admin_profile_picture", user?.profile_picture);
-
+               
                 const response = await apiService.post(
                     "add-concern",
                     fileData,
@@ -157,6 +159,7 @@ const InquiryFormModal = ({ modalRef }) => {
             console.log("Form validation failed");
         }
     };
+    
     return (
         <dialog
             id="Employment"
@@ -471,9 +474,14 @@ const InquiryFormModal = ({ modalRef }) => {
                     </div>
                     <div className="flex flex-col mt-5 mb-12">
                         <div className="flex justify-between w-54 tablet:flex-col">
-                            <label
+                            {/* <label
                                 htmlFor="attachment"
-                                className="tablet:w-full h-10 px-5 text-sm border montserrat-medium border-custom-solidgreen rounded-lg text-custom-solidgreen flex justify-center items-center gap-1 cursor-pointer hover:shadow-custom"
+                                className="tablet:w-full h-10 px-5 text-sm border montserrat-medium border-custom-solidgreen rounded-lg text-custom-solidgreen flex justify-center items-center gap-1 cursor-pointer hover:shadow-custom bg-red-900"
+                                onClick={() => {
+                                    if (fileInputRef.current) {
+                                        fileInputRef.current.click();
+                                    }
+                                }}
                             >
                                 <svg
                                     xmlns="http://www.w3.org/2000/svg"
@@ -490,16 +498,41 @@ const InquiryFormModal = ({ modalRef }) => {
                                     />
                                 </svg>
                                 Attachments
-                                <input
-                                    type="file"
-                                    id="attachment"
-                                    name="files[]"
-                                    multiple
-                                    className="hidden"
-                                    onChange={handleFileChange}
-                                />
-                            </label>
-
+                            </label> */}
+                            <button
+                                htmlFor="attachment"
+                                className="tablet:w-full h-10 px-5 text-sm border montserrat-medium border-custom-solidgreen rounded-lg text-custom-solidgreen flex justify-center items-center gap-1 cursor-pointer hover:shadow-custom "
+                                onClick={() => {
+                                    if (fileInputRef.current) {
+                                        fileInputRef.current.click();
+                                    }
+                                }}
+                            >
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    strokeWidth="1.5"
+                                    stroke="currentColor"
+                                    className="size-3"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244"
+                                    />
+                                </svg>
+                                Add attachment
+                            </button>
+                            <input
+                                type="file"
+                                id="attachment"
+                                name="files[]"
+                                className="hidden"
+                                ref={fileInputRef}
+                                multiple
+                                onChange={handleFileChange}
+                            />
                             <button
                                 onClick={handleSubmit}
                                 disabled={loading}
@@ -522,24 +555,27 @@ const InquiryFormModal = ({ modalRef }) => {
                                 )}
                             </button>
                         </div>
-                        {files.length > 0 && (
-                            <div className="flex flex-col mt-2">
-                                {files.map((file, index) => (
-                                    <p
-                                        key={index}
-                                        className="flex items-center text-sm text-gray-600 truncate gap-1"
-                                    >
-                                        {file.name}
-                                        <IoMdTrash
-                                            className="hover:text-red-500"
-                                            onClick={() =>
-                                                handleDelete(file.name)
-                                            }
-                                        />
-                                    </p>
-                                ))}
-                            </div>
-                        )}
+
+                        <div className="mt-2">
+                            {fileName && fileName.length > 0
+                                ? fileName.map((item, index) => {
+                                      return (
+                                          <p
+                                              key={index}
+                                              className="flex items-center text-sm text-red-900 truncate gap-1"
+                                          >
+                                              {item}{" "}
+                                              <IoMdTrash
+                                                  className="hover:text-red-500"
+                                                  onClick={() =>
+                                                      handleDelete(item)
+                                                  }
+                                              />
+                                          </p>
+                                      );
+                                  })
+                                : null}
+                        </div>
                     </div>
                 </div>
             </div>
