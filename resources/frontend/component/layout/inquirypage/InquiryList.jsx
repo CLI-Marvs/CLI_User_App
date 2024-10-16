@@ -306,8 +306,8 @@ const InquiryList = () => {
            <soap:Header/>
            <soap:Body>
               <urn:Zapptosap>
-                 <Ecode>111</Ecode>
-                 <Ename>hahaha133131s</Ename>
+                 <Ecode>321321</Ecode>
+                 <Ename>markyboy</Ename>
               </urn:Zapptosap>
            </soap:Body>
         </soap:Envelope>
