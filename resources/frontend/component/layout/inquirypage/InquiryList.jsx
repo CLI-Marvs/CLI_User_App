@@ -349,9 +349,6 @@ const InquiryList = () => {
                                 />
                             </svg>
                         </div>
-<<<<<<< HEAD
-                       
-=======
                         <div className="flex items-center">
                             <button
                                 onClick={handleOpenModal}
@@ -366,7 +363,6 @@ const InquiryList = () => {
                             </button>
                         </div>
 
->>>>>>> 2a67dbb496de44cab0932ecd52ed372434f2f4c1
                         {isFilterVisible && (
                             <div
                                 ref={filterBoxRef}
