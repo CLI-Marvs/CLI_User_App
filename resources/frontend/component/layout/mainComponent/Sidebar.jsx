@@ -31,13 +31,7 @@ const Sidebar = () => {
     setActiveItem(item);
   };
 
-  const modalRef = useRef(null);
-
-  const handleOpenModal = () => {
-      if (modalRef.current) {
-          modalRef.current.showModal();
-      }
-  };
+  
 
   useEffect(() => {
     getCount();
@@ -193,9 +187,7 @@ const Sidebar = () => {
           </ListItem> */}
         </List>
       </Card>
-      <div>
-        <InquiryFormModal modalRef={modalRef}/>
-      </div>
+     
     </>
   )
 }

@@ -504,7 +504,7 @@ const InquiryFormModal = ({ modalRef }) => {
                                 onClick={handleSubmit}
                                 disabled={loading}
                                 type="submit"
-                                className={`w-[133px] text-sm montserrat-semibold text-white h-[49px] rounded-[10px] gradient-btn2 flex justify-center items-center gap-2 tablet:w-full hover:shadow-custom4
+                                className={`w-[133px] text-sm montserrat-semibold text-white h-[40px] rounded-[10px] gradient-btn2 flex justify-center items-center gap-2 tablet:w-full hover:shadow-custom4
                                             ${
                                                 loading
                                                     ? "cursor-not-allowed"

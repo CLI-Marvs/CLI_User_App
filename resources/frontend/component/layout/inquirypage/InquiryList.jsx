@@ -344,9 +344,6 @@ const InquiryList = () => {
                                 />
                             </svg>
                         </div>
-<<<<<<< HEAD
-                       
-=======
                         <div className="flex items-center">
                             <button
                                 onClick={handleOpenModal}
@@ -361,7 +358,6 @@ const InquiryList = () => {
                             </button>
                         </div>
 
->>>>>>> 2a67dbb496de44cab0932ecd52ed372434f2f4c1
                         {isFilterVisible && (
                             <div
                                 ref={filterBoxRef}
@@ -524,9 +520,6 @@ const InquiryList = () => {
                                 </div>
                             </div>
                         )}
-                    </div>
-                    <div className="flex items-center">
-                        <button onClick={handleOpenModal} className='h-[38px] w-[121px] gradient-btn5 text-white  text-xs rounded-[10px]'> <span className='text-[18px]'>+</span> Add Inquiry</button>
                     </div>
                 </div>
                 <div className="max-w-[1260px] ">
