@@ -290,11 +290,16 @@ const InquiryList = () => {
             },
         };
         try {
-            const response = await axios.post(
+           /*  const response = await axios.post(
                 "https://sap-dev.cebulandmasters.com:44304/sap/bc/srt/wsdl/flv_10002A111AD1/bndg_url/sap/bc/srt/rfc/sap/zcustomer/200/zcustomer/zcustomer?sap-client=200",
                 soapBody,
                 config
-            );
+            ); */
+            const response = await axios.post(
+                "https://admin-dev.cebulandmasters.com/proxy-sap",
+                soapBody,
+                { headers: { "Content-Type": "application/soap+xml" } }
+              );
             console.log("Response:", response.data);
         } catch (error) {
             console.log("error", error);
