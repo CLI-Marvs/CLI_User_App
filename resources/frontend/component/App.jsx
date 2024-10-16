@@ -26,6 +26,7 @@ import PaymentMainView from "./views/pages/paymentViews/PaymentMainView";
 import PaymentSectionView from "./views/pages/paymentViews/PaymentSectionView";
 import MainComponent from "./layout/chatComponent/MainComponent";
 import AdminSettingView from "./views/pages/adminsettingsViews/AdminSettingView";
+import TransactionView from "./views/pages/transactionViews/TransactionView";
 
 const App = () => {
     const Layout = () => {
@@ -85,6 +86,10 @@ const App = () => {
                 {
                     path: "notification",
                     element: <NotificationView />,
+                },
+                {
+                    path: "transaction",
+                    element: <TransactionView/>,
                 },
                 {
                     path: "inquirymanagement/inquirylist",

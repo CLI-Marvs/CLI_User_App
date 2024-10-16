@@ -8,6 +8,7 @@ use App\Http\Controllers\PriceBasicDetailController;
 
 use App\Http\Controllers\PriceListMasterController;
 use App\Http\Controllers\PropertyMasterController;
+use App\Http\Controllers\SapController;
 use App\Http\Controllers\UnitController;
 use App\Models\PropertyMaster;
 use Illuminate\Http\Request;
@@ -54,6 +55,8 @@ Route::get('/personnel-assignee', [ConcernController::class, 'retrieveAssignees'
 Route::put('/update-info', [ConcernController::class, 'updateInfo']);
 Route::post('/add-property-sap', [PropertyMasterController::class, 'storePropertyFromSap']);
 Route::post('/buyer-reply', [ConcernController::class, 'fromAppSript']);
+
+Route::post('/proxy-sap', [SapController::class, 'urlSap']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/get-concern', [ConcernController::class, 'getAllConcerns']);

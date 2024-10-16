@@ -33,7 +33,7 @@ const InquiryList = () => {
         /*  setHasAttachments,
         hasAttachments */
     } = useStateContext();
-    console.log("34", data);
+   // console.log("34", data);
     const [name, setName] = useState("");
     const [category, setCategory] = useState("");
     const [email, setEmail] = useState("");
@@ -266,41 +266,74 @@ const InquiryList = () => {
         currentPage,
     ]);
 
-    const sendSoapRequest = async () => {
+   /*  const sendSoapRequest = async () => {
         const soapBody = `
-    <soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:urn="urn:sap-com:document:sap:soap:functions:mc-style">
-   <soap:Header/>
-   <soap:Body>
-      <urn:Zapptosap>
-         <Ecode>5555</Ecode>
-         <Ename>Test</Ename>
-      </urn:Zapptosap>
-   </soap:Body>
-</soap:Envelope>
-    `;
-
+        <soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:urn="urn:sap-com:document:sap:soap:functions:mc-style">
+           <soap:Header/>
+           <soap:Body>
+              <urn:Zapptosap>
+                 <Ecode>5555</Ecode>
+                 <Ename>Test</Ename>
+              </urn:Zapptosap>
+           </soap:Body>
+        </soap:Envelope>
+        `;
+    
         const username = "KBELMONTE";
         const password = "Tomorrowbytogether2019!";
         const authHeader = "Basic " + btoa(`${username}:${password}`);
-
+    
         const config = {
             headers: {
                 "Content-Type": "application/soap+xml",
+                "SOAPAction": "urn:sap-com:document:sap:soap:functions:mc-style",
                 Authorization: authHeader,
             },
         };
+    
         try {
-            const response = await axios.post(
-                "https://sap-dev.cebulandmasters.com:44304/sap/bc/srt/wsdl/flv_10002A111AD1/bndg_url/sap/bc/srt/rfc/sap/zcustomer/200/zcustomer/zcustomer?sap-client=200",
-                soapBody,
-                config
-            );
+            const response = await axios.post("http://localhost:8001/proxy-sap", soapBody, config);
+
             console.log("Response:", response.data);
         } catch (error) {
-            console.log("error", error);
+            console.log("Error:", error.response.data);
+        }
+    }; */
+    
+
+    const sendSoapRequest = async () => {
+        const soapBody = `
+        <soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:urn="urn:sap-com:document:sap:soap:functions:mc-style">
+           <soap:Header/>
+           <soap:Body>
+              <urn:Zapptosap>
+                 <Ecode>321321</Ecode>
+                 <Ename>markyboy12</Ename>
+              </urn:Zapptosap>
+           </soap:Body>
+        </soap:Envelope>
+        `;
+    
+        const username = "KBELMONTE";
+        const password = "Tomorrowbytogether2019!";
+        const authHeader = "Basic " + btoa(`${username}:${password}`);
+    
+        const config = {
+            headers: {
+                "Content-Type": "application/soap+xml",
+                "Authorization": authHeader,
+            },
+        };
+    
+        try {
+            const response = await axios.post("http://localhost:8001/api/proxy-sap", soapBody, config);
+            console.log("Response:", response.data);
+        } catch (error) {
+            console.error("Error:", error.response ? error.response.data : error.message);
         }
     };
-
+    
+    
     return (
         <>
             <div className="h-screen max-w-full bg-custom-grayFA px-[20px]">
@@ -353,9 +386,9 @@ const InquiryList = () => {
                                 <span className="text-[18px]">+</span> Add
                                 Inquiry
                             </button>
-                            <button onClick={sendSoapRequest}>
+                           {/*  <button onClick={sendSoapRequest}>
                                 testUpload
-                            </button>
+                            </button> */}
                         </div>
 
                         {isFilterVisible && (
@@ -383,8 +416,7 @@ const InquiryList = () => {
                                             {" "}
                                             Category
                                         </label>
-                                       
-                                      
+
                                         <select
                                             className="w-full border-b-1 outline-none text-sm"
                                             value={category}
@@ -521,6 +553,9 @@ const InquiryList = () => {
                             </div>
                         )}
                     </div>
+                    {/*  <div className="flex items-center">
+                        <button onClick={handleOpenModal} className='h-[38px] w-[121px] gradient-btn5 text-white  text-xs rounded-[10px]'> <span className='text-[18px]'>+</span> Add Inquiry</button>
+                    </div> */}
                 </div>
                 <div className="max-w-[1260px] ">
                     <div className="flex justify-between items-center h-12 mt-[15px] px-6 bg-white rounded-t-lg mb-1 ">
@@ -680,7 +715,6 @@ const InquiryList = () => {
                     <InquiryFormModal modalRef={modalRef} />
                 </div>
             </div>
-            
         </>
     );
 };
