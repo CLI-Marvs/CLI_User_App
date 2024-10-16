@@ -99,7 +99,7 @@ const InquiryFormModal = ({ modalRef }) => {
 
     const callBackHandler = () => {
         getAllConcerns();
-        ~setFormData(formDataState);
+        setFormData(formDataState);
         setFiles([]);
         setMessage("");
     };
