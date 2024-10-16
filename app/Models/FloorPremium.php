@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 class FloorPremium extends Model
 {
     use HasFactory;
+    protected $table = 'floor_premiums';
     protected $guarded = array();
 
     public function basicPricing()
@@ -17,7 +18,8 @@ class FloorPremium extends Model
         return $this->belongsTo(BasicPricing::class);
     }
 
-    public function unit(){
+    public function unit()
+    {
         return $this->hasOne(Unit::class);
     }
 }

@@ -1,11 +1,16 @@
 <?php
 
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\BasicPricingController;
+
 use App\Http\Controllers\ConcernController;
 use App\Http\Controllers\PaymentSchemeController;
-use App\Http\Controllers\PricingMasterListController;
-use App\Http\Controllers\PropertyDetailController;
+use App\Http\Controllers\PriceBasicDetailController;
+
+use App\Http\Controllers\PriceListMasterController;
+use App\Http\Controllers\PropertyMasterController;
+use App\Http\Controllers\SapController;
+use App\Http\Controllers\UnitController;
+use App\Models\PropertyMaster;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -22,6 +27,7 @@ Route::post('/add-assignee', [ConcernController::class, 'assignInquiryTo']);
 Route::post('/reassign', [ConcernController::class, 'reassignInquiry']);
 
 Route::post('/resolve', [ConcernController::class, 'markAsResolve']);
+
 
 
 /* 
@@ -43,6 +49,15 @@ Route::get('/category-monthly', [ConcernController::class, 'getInquiriesByCatego
 Route::get('/inquiries-property', [ConcernController::class, 'getInquiriesPerProperty']);
 Route::post('delete-concerns', [ConcernController::class, 'deleteConcern']);
 
+Route::post('conversation', [ConcernController::class, 'sendMessageConcerns']);
+Route::get('/get-concern-messages', [ConcernController::class, 'retrieveConcernsMessages']);
+Route::get('/personnel-assignee', [ConcernController::class, 'retrieveAssignees']);
+Route::put('/update-info', [ConcernController::class, 'updateInfo']);
+Route::post('/add-property-sap', [PropertyMasterController::class, 'storePropertyFromSap']);
+Route::post('/buyer-reply', [ConcernController::class, 'fromAppSript']);
+
+Route::post('/proxy-sap', [SapController::class, 'urlSap']);
+
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/get-concern', [ConcernController::class, 'getAllConcerns']);
     Route::post('/add-concern', [ConcernController::class, 'addConcernPublic']);
@@ -56,15 +71,23 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/pin-concern/{id}', [ConcernController::class, 'pinConcern']);
     Route::post('/isread/{concernId}', [ConcernController::class, 'readNotifByUser']);
     Route::get('/specific-assignee', [ConcernController::class, 'getSpecificInquiry']);
-
+    Route::post('/remove-assignee', [ConcernController::class, 'removeAssignee']);  
+    Route::get('/property-name', [PropertyMasterController::class, 'getPropertyName']);
     /* Pricing Master List */
-    Route::get('/get-pricing-master-lists', [PricingMasterListController::class, 'getAllPricingMasterLists']);
+    Route::get('/get-pricing-master-lists', [PriceListMasterController::class, 'getAllPricingMasterLists']);
     /*Basic Pricing */
-    Route::post('/basic-pricing', [BasicPricingController::class, 'storeBasicPricing']);
-    
+    Route::post('/basic-pricing', [PriceBasicDetailController::class, 'storeBasicPricing']);
+
     /*Payment Scheme */
     Route::post('/payment-schemes', [PaymentSchemeController::class, 'storePaymentScheme']);
     Route::get('/get-payment-schemes', [PaymentSchemeController::class, 'getAllPaymentSchemes']);
-    /* Property Detail */
-    Route::post('/property-details', [PropertyDetailController::class, 'storePropertyDetail']);
+    /* Property Master */
+    Route::post('/property-details', [PropertyMasterController::class, 'storePropertyDetail']);
+    Route::get('/get-property-master/{id}', [PropertyMasterController::class, 'getPropertyMaster']);
+
+    /* Unit */
+    // Route::post('/units-import', [UnitController::class, 'importUnitsFromExcel']);
+    Route::post('/upload-units', [UnitController::class, 'uploadUnits']);
+    Route::get('/property-floors/{towerPhaseId}', [UnitController::class, 'countFloors']);
+    Route::post('/property-units', [UnitController::class, 'getUnits']);
 });

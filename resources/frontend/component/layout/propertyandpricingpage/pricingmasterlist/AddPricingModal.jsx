@@ -8,7 +8,7 @@ const formDataState = {
     towerPhase: "",
 };
 const AddPricingModal = ({ modalRef }) => {
-    //state
+    //State
     const [formData, setFormData] = useState(formDataState);
     const navigate = useNavigate();
     //event handler
@@ -44,7 +44,7 @@ const AddPricingModal = ({ modalRef }) => {
             setFormData(formDataState);
             navigate("/propertyandpricing/basicpricing", {
                 state: { passPropertyDetails: passData },
-            });  //navigate to Basic pricing components   with the property detail data as props
+            }); //navigate to Basic pricing components   with the property detail data as props
         } catch (error) {
             console.log("Error sending property details", error);
         }

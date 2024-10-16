@@ -2,16 +2,20 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
 import { ContextProvider } from "../context/contextprovider";
-
-
-const rootElement = document.getElementById('root');
+import PriceBasicDetailsFormDataProvider from "../context/PriceBasicDetail/PriceBasicContext";
+import FloorPremiumFormDataProvider from "../context/FloorPremium/FloorPremiumContext";
+const rootElement = document.getElementById("root");
 
 if (rootElement) {
-  ReactDOM.createRoot(rootElement).render(
-    <React.StrictMode>
-     <ContextProvider>
-        <App />
-      </ContextProvider>
-    </React.StrictMode>,
-  );
+    ReactDOM.createRoot(rootElement).render(
+        <React.StrictMode>
+            <ContextProvider>
+                <PriceBasicDetailsFormDataProvider>
+                    <FloorPremiumFormDataProvider>
+                        <App />
+                    </FloorPremiumFormDataProvider>
+                </PriceBasicDetailsFormDataProvider>
+            </ContextProvider>
+        </React.StrictMode>
+    );
 }

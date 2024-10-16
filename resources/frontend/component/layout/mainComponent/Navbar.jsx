@@ -3,47 +3,123 @@ import CLILogo from '../../../../../public/Images/CLILogo.png';
 import Kent from '../../../../../public/Images/kent.png';
 import apiService from '../../servicesApi/apiService';
 import { useStateContext } from '../../../context/contextprovider';
-import { Link } from 'react-router-dom';
+import { Link , useLocation } from 'react-router-dom';
+import Breadcrumbs from '@mui/material/Breadcrumbs';
+import Typography from '@mui/material/Typography';
+import { FaAngleRight } from "react-icons/fa";
+import Stack from '@mui/material/Stack';
+import { startsWith } from 'lodash';
 
 const Navbar = () => {
-  const {user} = useStateContext();
+
+
+  const {data} = useStateContext();
+
+  const location = useLocation();
+
+  const pathnames = location.pathname.split('/').filter((x) => x);
+  
+   const breadcrumbs = [
+    ...pathnames.map((value, index) => {
+      const routeTo = `/${pathnames.slice(0, index + 1).join('/')}`;
+
+     
+       let breadcrumbLabel = decodeURIComponent(value.charAt(0).toUpperCase() + value.slice(1));
+       
+
+      if (value.toLowerCase() === "inquirymanagement") {
+        breadcrumbLabel = "Inquiry Management";
+        // Non-linkable
+        return (
+          <span key={routeTo} className="text-custom-solidgreen cursor-default">
+            {breadcrumbLabel}
+          </span>
+        );
+      }
+
+      if (value.toLowerCase() === "inquirylist") {
+        breadcrumbLabel = "Inquiries";
+      }
+      
+
+      if (value.toLowerCase() === "thread") {
+        breadcrumbLabel = "Inquiries"; 
+        return (
+          <Link key={routeTo} to="/inquirymanagement/inquirylist" className="text-custom-solidgreen">
+            {breadcrumbLabel}
+          </Link>
+        );
+      }
+
+        
+      
+        if (breadcrumbLabel.startsWith("Ticket#")) {
+          const ticketId = breadcrumbLabel
+          const dataProperty = data?.find((item) => item.ticket_id === ticketId) || {};
+
+          return (
+            <span key={routeTo} className="text-custom-solidgreen cursor-default">
+              {dataProperty.property}{" "}({breadcrumbLabel})
+            </span>
+          );
+        }
+      return (
+        <Link key={routeTo} to={routeTo} className="text-custom-solidgreen">
+          {breadcrumbLabel}
+        </Link>
+      );
+    }),
+  ];
+
+
+  const { user } = useStateContext();
 
   const handleLogout = async () => {
     try {
-        const response = await apiService.post("auth/logout", {});
-        if (response.status === 200) {
-            /*    localStorage.removeItem("selectedUnit");
-            sessionStorage.removeItem("modalAlreadyShown"); */
-            localStorage.removeItem("authToken");
-            window.location.href = "/";
-        } else {
-            console.log("Logout failed");
-        }
+      const response = await apiService.post("auth/logout", {});
+      if (response.status === 200) {
+        /*    localStorage.removeItem("selectedUnit");
+        sessionStorage.removeItem("modalAlreadyShown"); */
+        localStorage.removeItem("authToken");
+        window.location.href = "/";
+      } else {
+        console.log("Logout failed");
+      }
     } catch (error) {
-        console.log("Error", error);
+      console.log("Error", error);
     }
-};
+  };
+
   return (
-    <div className="flex justify-between h-[100px] pr-16 w-screen bg-custom-grayFA">
-      <div className='flex'>
-        <div className="flex justify-center items-center">
-          <img className='h-16 ml-5' src={CLILogo} alt="cli logo" />
+    <div className="flex h-[100px] pr-16 w-screen bg-custom-grayFA">
+      <div className='flex w-full'>
+        <div className='flex'>
+          <div className="flex justify-center items-center">
+            <img className='h-16 ml-5' src={CLILogo} alt="cli logo" />
+          </div>
+          <div className='flex ml-[65px] justify-between items-center'>
+            <Link to="salesmanagement/reservationpage">
+              <div>
+                <button className='w-[130px] h-[45px] rounded-[9px] montserrat-semibold gradient-btn2 text-white hover:shadow-custom4 hidden'>Reserve</button>
+              </div>
+            </Link>
+          </div>
         </div>
-        <div className='flex ml-[65px] justify-between items-center'>
-          <Link to="salesmanagement/reservationpage">
-            <div>
-              <button className='w-[130px] h-[45px] rounded-[9px] montserrat-semibold gradient-btn2 text-white hover:shadow-custom4 hidden'>Reserve</button>
-            </div>
-          </Link>
+        <div className='flex items-center justify-start'>
+          <Stack spacing={2}>
+            <Breadcrumbs separator={<FaAngleRight className='text-custom-solidgreen' />} aria-label="breadcrumb">
+              {breadcrumbs}
+            </Breadcrumbs>
+          </Stack>
         </div>
       </div>
-      <div className="flex items-center justify-center">
-        <div className="flex gap-3">
-          <div className='flex items-center'>
+      <div className="flex items-center justify-end">
+        <div className="flex gap-[7px]">
+          <div className='flex items-center w-[74px] justify-center'>
             <button className='text-base font-bold bg-gradient-to-r from-custom-bluegreen via-custom-lightgreen to-custom-lightgreen bg-clip-text text-transparent' onClick={handleLogout}>Logout</button>
           </div>
-          <div >
-            <img src={user?.profile_picture} alt="image" className='h-14 w-14 rounded-full  border-8' />
+          <div className='flex justify-center w-[67px]'>
+            <img src={user.profile_picture} alt="image" className='h-[63px] w-[63px] rounded-full border-8' />
           </div>
           <div className='flex items-center'>
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-7">

@@ -1,65 +1,76 @@
-import React from "react";
+import React, { useEffect, useState, useRef } from "react";
 import AdminLogo from "../../../../../public/Images/AdminSilouette.svg";
 import { useStateContext } from "../../../context/contextprovider";
 import FolderFile from "../../../../../public/Images/folder_file.svg";
-import moment from "moment";
 
+import moment from "moment";
+import { useNavigate, Link } from "react-router-dom";
 const AdminMessages = ({ items }) => {
+    //State
     const { user } = useStateContext();
     const attachmentData = JSON.parse(items.attachment || "[]");
-    
-    const formatTime = (createdAt) => {
-        return moment(createdAt).fromNow();
-    };
 
+    const navigate = useNavigate();
     const dynamicName =
-        user?.id === parseInt(items?.admin_id) ? "You" : `CLI ${user?.department}`;
+        user?.id === parseInt(items?.admin_id)
+            ? "You"
+            : `CLI ${user?.department}`;
+
+    const formattedDate = moment(items.created_at).format("MMMM D, YYYY");
+    const formattedTime = moment(items.created_at).format("hh:mm A");
+
     return (
         <div className="w-full">
-            <div className="flex justify-end w-full mt-10 gap-2 ">
-                <div className="flex flex-col">
-                    <p className="font-bold text-custom-bluegreen">
-                        {dynamicName}
+            <div className="flex justify-start w-full mt-[27px] gap-2 ">
+                <div className="flex flex-col text-sm gap-[6px]">
+                    <p className="font-semibold  text-custom-bluegreen">
+                        {formattedDate} <span>|</span> {formattedTime}
                     </p>
-                    <p className="font-semibold text-custom-gray81">
-                        {items.admin_name}
+                    <p className="flex gap-1 text-custom-gray81">
+                        <span>From:</span>
+                        {items.admin_name} <span>|</span>
+                        CLI
+                        <span>|</span>
+                        Customer Relations Services
                     </p>
-                </div>
-                <div className="h-12 w-12">
-                    <img className="rounded-full" src={items.admin_profile_picture} alt="Admin Logo" />
                 </div>
             </div>
-            <div className="w-full mt-2 mb-5 pr-12">
-                <div className=" w-full h-auto gradient-background2 rounded-b-lg rounded-l-lg px-8 py-3">
+            <div className="w-full mt-[10px]">
+                <div className=" w-full h-auto gradient-background2 rounded-b-[10px] rounded-r-[10px] p-[20px] pl-[31px] text-sm">
                     <div>
-                        <p>{items.details_message}</p>
+                      <p dangerouslySetInnerHTML={{ __html: items.details_message }} />
                     </div>
                     {Array.isArray(attachmentData) &&
                         attachmentData.length > 0 &&
-                        attachmentData.map((attachment, index) => (
-                            <div className="mt-4" key={index}>
-                                <button
-                                    onClick={() =>
-                                        window.open(attachment, "_blank")
-                                    }
-                                    className="flex items-center justify-start bg-customnavbar h-12 px-24 pl-4 text-black gap-2 rounded-lg"
-                                >
-                                    <img
-                                        src={FolderFile}
-                                        alt="View Attachment"
-                                    />
-                                    View Attachment
-                                </button>
-                            </div>
-                        ))}
-                </div>
-                <div className="w-full flex justify-start">
-                    <p className="flex text-custom-gray81 text-sm space-x-1">
-                        <span>{formatTime(items.created_at)}</span>
-                        {/* <span>Jul 17, 2024,</span>
-                    <span>11:19 AM</span>
-                    <span>(7 days ago)</span> */}
-                    </p>
+                        attachmentData.map((attachment, index) => {
+                            return (
+                                <div className="mt-4" key={index}>
+                                    <Link
+                                        className="flex items-center justify-start bg-customnavbar h-12 px-24 pl-4 text-black gap-2 rounded-lg"
+                                        to={`/file-viewer/attachment/${items.id}`}
+                                        onClick={(e) => {
+                                            e.preventDefault(); // Prevents the immediate navigation
+                                           
+                                            localStorage.setItem(
+                                                "fileUrlPath",
+                                                JSON.stringify(attachment)
+                                            ); // Store the data
+                                            // Manually navigate to the new page after setting localStorage
+                                            window.open(
+                                                `/file-viewer/attachment/${items.id}`,
+                                                "_blank"
+                                            );
+                                        }}
+                                    >
+                                        <img
+                                            src={FolderFile}
+                                            alt="View Attachment"
+                                        />
+                                        View Attachment
+                                    </Link>
+                                </div>
+                            );
+                        })}
                 </div>
             </div>
         </div>

@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import ReCAPTCHA from "react-google-recaptcha";
 import { IoIosSend, IoMdArrowDropdown, IoMdTrash } from "react-icons/io";
 import apiService from "../../servicesApi/apiService";
 import { useStateContext } from "../../../context/contextprovider";
+import CircularProgress from "@mui/material/CircularProgress";
 
 const formDataState = {
     fname: "",
@@ -14,70 +15,23 @@ const formDataState = {
     contract_number: "",
     details_concern: "",
     unit_number: "",
-}
+};
 
-const projectList = [
-    "N/A",
-    "38 Park Avenue",
-    "Astra Centre",
-    "Asia Premiere",
-    "Base Line Center Phase 2",
-    "Baseline Center",
-    "Baseline Residences",
-    "Casa Mira Bacolod",
-    "Casa Mira Coast Sibulan",
-    "Casa Mira Homes Butuan",
-    "Casa Mira Iloilo Camalig",
-    "Casa Mira Linao",
-    "Casa Mira Towers CDO",
-    "Casa Mira Towers Guadalupe",
-    "Casa Mira Towers Labangon",
-    "Casa Mira Towers LPU Davao",
-    "Casa Mira Towers Mandaue",
-    "Casamira South",
-    "Calle 104",
-    "Casa Mira Dumaguete",
-    "Casa Mira Towers Bacolod",
-    "Casa Mira Towers Palawan",
-    "Costa Mira Beachtown",
-    "Costa Mira Beachtown Panglao",
-    "Latitude Corporate Center",
-    "Mesaverte Residences",
-    "Mesavirre Garden Residences",
-    "Midori Residences",
-    "Mivela Garden Residences",
-    "Mivesa Garden Residences",
-    "Mandtra Residences",
-    "Midori Plains",
-    "Mindara Residences",
-    "Patria De Cebu",
-    "Park Centrale Tower",
-    "San Jose Maria Village - Balamban",
-    "San Jose Maria Village - Minglanilla",
-    "San Jose Maria Village - Toledo",
-    "San Josemaria Village - Talisay",
-    "Test Project",
-    "The East Village",
-    "Velmiro Greens Bohol",
-    "Velmiro Heights",
-    "Velmiro Heights Uptown",
-    "Velmiro Plains Bacolod",
-    "Villa Casita - Balamban",
-    "Villa Casita - Bogo",
-  ]
-  
 const InquiryFormModal = ({ modalRef }) => {
     const [files, setFiles] = useState([]);
-    const [fileName, setFileName] = useState("");
+    const fileInputRef = useRef();
+    const [fileName, setFileName] = useState([]);
     const [message, setMessage] = useState("");
     const { user, getAllConcerns } = useStateContext();
     const maxCharacters = 500;
     const [hasErrors, setHasErrors] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
+    const [loading, setLoading] = useState(false);
     const [resetSuccess, setResetSuccess] = useState(false);
     const [isSubmitted, setIsSubmitted] = useState(false);
     const [isValid, setIsValid] = useState(true);
     const [errors, setErrors] = useState({});
+    const { propertyNamesList } = useStateContext();
     const handleFileChange = (event) => {
         const selectedFiles = Array.from(event.target.files);
         const fileNames = selectedFiles.map((file) =>
@@ -87,12 +41,26 @@ const InquiryFormModal = ({ modalRef }) => {
                       .pop()}`
                 : file.name
         );
+        setFileName(fileNames);
         setFiles(selectedFiles);
+      
     };
 
+    const formatFunc = (name) => {
+        return name
+            .toLowerCase()
+            .replace(/\b\w/g, (char) => char.toUpperCase());
+    };
+    const formattedPropertyNames = [
+        "N/A",
+        ...(Array.isArray(propertyNamesList) && propertyNamesList.length > 0
+            ? propertyNamesList.map((item) => formatFunc(item))
+            : []),
+    ];
+
     const handleDelete = (fileNameToDelete) => {
-        setFiles((prevFiles) =>
-            prevFiles.filter((file) => file.name !== fileNameToDelete)
+        setFileName((prevFiles) =>
+            prevFiles.filter((file) => file !== fileNameToDelete)
         );
     };
 
@@ -119,7 +87,6 @@ const InquiryFormModal = ({ modalRef }) => {
 
     const isTextareaValid = message.trim().length > 0;
 
-
     const validateEmail = (email) => {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return emailRegex.test(email);
@@ -132,18 +99,14 @@ const InquiryFormModal = ({ modalRef }) => {
     };
 
     const callBackHandler = () => {
-        getAllConcerns();~
+        getAllConcerns();
         setFormData(formDataState);
         setFiles([]);
         setMessage("");
-    }
+    };
 
-    const {
-        user_type,
-        contract_number,
-        unit_number,
-        ...requiredFields
-    } = formData;
+    const { user_type, contract_number, unit_number, ...requiredFields } =
+        formData;
 
     const isFormDataValid = Object.values(requiredFields).every(
         (value) => value !== ""
@@ -152,42 +115,42 @@ const InquiryFormModal = ({ modalRef }) => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setIsSubmitted(true);
-        if (
-            isFormDataValid &&
-            isTextareaValid &&
-            !errors.buyer_email
-
-        ) {
-        try {
-            const fileData = new FormData();
-            files.forEach((file) => {
-                fileData.append("files[]", file);
-            });
-            Object.keys(formData).forEach((key) => {
-                fileData.append(key, formData[key]);
-            });
-            fileData.append("message", message);
-            fileData.append("admin_email", user?.employee_email);
-            fileData.append("admin_id", user?.id);
-            fileData.append("admin_profile_picture", user?.profile_picture);
-            
-
-
-            const response = await apiService.post("add-concern", fileData, {
-                headers: {
-                    "Content-Type": "multipart/form-data",
-                },
-            });
-            setResetSuccess(true);
-            if(modalRef.current) {
-                modalRef.current.close();
+        if (isFormDataValid && isTextareaValid && !errors.buyer_email) {
+            try {
+                setLoading(true);
+                const fileData = new FormData();
+                files.forEach((file) => {
+                    fileData.append("files[]", file);
+                });
+               
+                Object.keys(formData).forEach((key) => {
+                    fileData.append(key, formData[key]);
+                });
+                fileData.append("message", message);
+                fileData.append("admin_email", user?.employee_email);
+                fileData.append("admin_id", user?.id);
+                fileData.append("admin_profile_picture", user?.profile_picture);
+               
+                const response = await apiService.post(
+                    "add-concern",
+                    fileData,
+                    {
+                        headers: {
+                            "Content-Type": "multipart/form-data",
+                        },
+                    }
+                );
+                setResetSuccess(true);
+                if (modalRef.current) {
+                    modalRef.current.close();
+                }
+                callBackHandler();
+                setLoading(false);
+            } catch (error) {
+                console.log("error saving concerns", error);
+                setHasErrors(true);
+                setResetSuccess(false);
             }
-            callBackHandler();
-        } catch (error) {
-            console.log("error saving concerns", error);
-            setHasErrors(true);
-            setResetSuccess(false);
-        }
         } else {
             setResetSuccess(false);
             if (!isTextareaValid) {
@@ -196,6 +159,7 @@ const InquiryFormModal = ({ modalRef }) => {
             console.log("Form validation failed");
         }
     };
+    
     return (
         <dialog
             id="Employment"
@@ -219,26 +183,26 @@ const InquiryFormModal = ({ modalRef }) => {
                             </p>
                         </div>
                         {hasErrors && (
-                                <div className="w-full flex justify-center items-center h-12 bg-red-100 mb-4 rounded-lg">
-                                    <p className="flex text-[#C42E2E] ">
-                                        Please complete all required fields.
-                                    </p>
-                                </div>
-                            )}
-                             {/*  {isSuccess && (
+                            <div className="w-full flex justify-center items-center h-12 bg-red-100 mb-4 rounded-lg">
+                                <p className="flex text-[#C42E2E] ">
+                                    Please complete all required fields.
+                                </p>
+                            </div>
+                        )}
+                        {/*  {isSuccess && (
                                 <div className="w-full flex justify-center items-center h-12 bg-custom-lightestgreen mb-4 rounded-lg">
                                     <p className="flex text-custom-solidgreen ">
                                        Message sent successfully.
                                     </p>
                                 </div>
                             )} */}
-                            {errors.buyer_email && (
-                                <div className="w-full flex justify-center items-center h-12 bg-red-100 mb-4 rounded-lg">
-                                    <p className="flex text-[#C42E2E] ">
-                                        Invalid email address
-                                    </p>
-                                </div>
-                            )}
+                        {errors.buyer_email && (
+                            <div className="w-full flex justify-center items-center h-12 bg-red-100 mb-4 rounded-lg">
+                                <p className="flex text-[#C42E2E] ">
+                                    Invalid email address
+                                </p>
+                            </div>
+                        )}
                     </div>
                     <div className="mb-3">
                         <p className="text-sm font-semibold mobile:text-xs">
@@ -247,13 +211,15 @@ const InquiryFormModal = ({ modalRef }) => {
                     </div>
                     <div className="flex flex-col gap-2">
                         <div
-                             className={`flex items-center border border-custom-grayFA rounded-[5px] overflow-hidden ${
+                            className={`flex items-center border rounded-[5px] overflow-hidden ${
                                 isSubmitted && !formData.fname
-                                    ? resetSuccess ? "border-custombg" : "border-red-500"
-                                    : "border-custombg"
+                                    ? resetSuccess
+                                        ? "border-custom-bluegreen"
+                                        : "border-red-500"
+                                    : "border-custom-bluegreen"
                             }`}
                         >
-                            <span className="text-custom-gray81 text-sm bg-custom-grayFA flex pl-3 py-1 w-[240px]">
+                            <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex pl-3 py-1 w-[240px]">
                                 First Name
                             </span>
                             <input
@@ -266,13 +232,15 @@ const InquiryFormModal = ({ modalRef }) => {
                             />
                         </div>
                         <div
-                           className={`flex items-center border border-custom-grayFA rounded-[5px] overflow-hidden ${
-                            isSubmitted && !formData.lname
-                                 ? resetSuccess ? "border-custombg" : "border-red-500"
-                                : "border-custombg"
-                        }`}
+                            className={`flex items-center border  rounded-[5px] overflow-hidden ${
+                                isSubmitted && !formData.lname
+                                    ? resetSuccess
+                                        ? "border-custom-bluegreen"
+                                        : "border-red-500"
+                                    : "border-custom-bluegreen"
+                            }`}
                         >
-                            <span className="text-custom-gray81 text-sm bg-custom-grayFA flex w-[240px] pl-3 py-1">
+                            <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex w-[240px] pl-3 py-1">
                                 Last Name
                             </span>
                             <input
@@ -285,13 +253,15 @@ const InquiryFormModal = ({ modalRef }) => {
                             />
                         </div>
                         <div
-                             className={`flex items-center border border-custom-grayFA rounded-[5px] overflow-hidden ${
+                            className={`flex items-center border  rounded-[5px] overflow-hidden ${
                                 isSubmitted && !formData.buyer_email
-                                     ? resetSuccess ? "border-custombg" : "border-red-500"
-                                    : "border-custombg"
+                                    ? resetSuccess
+                                        ? "border-custom-bluegreen"
+                                        : "border-red-500"
+                                    : "border-custom-bluegreen"
                             }`}
                         >
-                            <span className="text-custom-gray81 text-sm bg-custom-grayFA flex w-[240px] pl-3 py-1">
+                            <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex w-[240px] pl-3 py-1">
                                 Email
                             </span>
                             <input
@@ -304,13 +274,15 @@ const InquiryFormModal = ({ modalRef }) => {
                             />
                         </div>
                         <div
-                           className={`flex items-center border border-custom-grayFA rounded-[5px] overflow-hidden ${
-                            isSubmitted && !formData.mobile_number
-                                ? resetSuccess ? "border-custombg" : "border-red-500"
-                                : "border-custombg"
+                            className={`flex items-center border rounded-[5px] overflow-hidden ${
+                                isSubmitted && !formData.mobile_number
+                                    ? resetSuccess
+                                        ? "border-custom-bluegreen"
+                                        : "border-red-500"
+                                    : "border-custom-bluegreen"
                             }`}
                         >
-                            <span className="text-custom-gray81 text-sm bg-custom-grayFA flex w-[240px] pl-3 py-1">
+                            <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex w-[240px] pl-3 py-1">
                                 Mobile Number
                             </span>
                             <input
@@ -323,13 +295,15 @@ const InquiryFormModal = ({ modalRef }) => {
                             />
                         </div>
                         <div
-                            className={`flex items-center border border-custom-grayFA rounded-[5px] overflow-hidden ${
+                            className={`flex items-center border rounded-[5px] overflow-hidden ${
                                 isSubmitted && !formData.property
-                                     ? resetSuccess ? "border-custombg" : "border-red-500"
-                                    : "border-custombg"
+                                    ? resetSuccess
+                                        ? "border-custom-bluegreen"
+                                        : "border-red-500"
+                                    : "border-custom-bluegreen"
                             }`}
                         >
-                            <span className="text-custom-gray81 text-sm bg-custom-grayFA flex items-center w-[250px] tablet:w-[175px] mobile:w-[270px] mobile:text-xs -mr-3 pl-3 py-1">
+                            <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex items-center w-[250px] tablet:w-[175px] mobile:w-[270px] mobile:text-xs -mr-3 pl-3 py-1">
                                 Property
                             </span>
                             <div className="relative w-full">
@@ -339,24 +313,35 @@ const InquiryFormModal = ({ modalRef }) => {
                                     onChange={handleChange}
                                     className="appearance-none w-full px-4 text-sm py-1 bg-white focus:outline-none border-0 mobile:text-xs"
                                 >
-                                     <option value="">(Select)</option>
-                                    {projectList.map((item, index) => {
-                                        return (
-                                            <option key={index} value={item}>{item}</option>
-                                        )
-                                    })}
+                                    <option value="">(Select)</option>
+                                    {formattedPropertyNames.map(
+                                        (item, index) => {
+                                            return (
+                                                <option
+                                                    key={index}
+                                                    value={item}
+                                                >
+                                                    {item}
+                                                </option>
+                                            );
+                                        }
+                                    )}
                                 </select>
-                                <span className="absolute inset-y-0 right-0 flex  items-center pr-3 pl-3 bg-custom-grayFA text-custom-gray81 pointer-events-none">
-                                    <IoMdArrowDropdown/>
+                                <span className="absolute inset-y-0 right-0 flex  items-center pr-3 pl-3 bg-custom-lightestgreen text-custom-bluegreen pointer-events-none">
+                                    <IoMdArrowDropdown />
                                 </span>
                             </div>
                         </div>
-                        <div className={`flex items-center border border-custom-grayFA rounded-[5px] overflow-hidden ${
-                                        isSubmitted && !formData.details_concern
-                                             ? resetSuccess ? "border-custombg" : "border-red-500"
-                                            : "border-custombg"
-                                    }`}>
-                            <span className="text-custom-gray81 text-sm bg-custom-grayFA flex items-center w-[250px] tablet:w-[175px] mobile:w-[270px] mobile:text-xs -mr-3 pl-3 py-1">
+                        <div
+                            className={`flex items-center border rounded-[5px] overflow-hidden ${
+                                isSubmitted && !formData.details_concern
+                                    ? resetSuccess
+                                        ? "border-custom-bluegreen"
+                                        : "border-red-500"
+                                    : "border-custom-bluegreen"
+                            }`}
+                        >
+                            <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex items-center w-[250px] tablet:w-[175px] mobile:w-[270px] mobile:text-xs -mr-3 pl-3 py-1">
                                 Concern regarding
                             </span>
                             <div className="relative w-full">
@@ -393,8 +378,8 @@ const InquiryFormModal = ({ modalRef }) => {
                                         Other Concerns
                                     </option>
                                 </select>
-                                <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3 bg-custom-grayFA text-custom-gray81 pointer-events-none">
-                                    <IoMdArrowDropdown/>
+                                <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3 bg-custom-lightestgreen text-custom-bluegreen pointer-events-none">
+                                    <IoMdArrowDropdown />
                                 </span>
                             </div>
                         </div>
@@ -404,8 +389,8 @@ const InquiryFormModal = ({ modalRef }) => {
                                 Optional
                             </p>
                         </div>
-                        <div className="flex items-center border border-custom-grayFA rounded-[5px] overflow-hidden">
-                            <span className="text-custom-gray81 text-sm bg-custom-grayFA flex items-center w-[250px] tablet:w-[175px] mobile:w-[270px] mobile:text-xs -mr-4 pl-3 py-1">
+                        <div className="flex items-center border border-custom-bluegreen rounded-[5px] overflow-hidden">
+                            <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex items-center w-[250px] tablet:w-[175px] mobile:w-[270px] mobile:text-xs -mr-4 pl-3 py-1">
                                 I am
                             </span>
                             <div className="relative w-full">
@@ -422,27 +407,27 @@ const InquiryFormModal = ({ modalRef }) => {
                                     <option value="Buyer">Buyer</option>
                                     <option value="Broker">Broker</option>
                                 </select>
-                                <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3  bg-custom-grayFA text-custom-gray81 pointer-events-none">
-                                   <IoMdArrowDropdown/>
+                                <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3  bg-custom-lightestgreen text-custom-bluegreen pointer-events-none">
+                                    <IoMdArrowDropdown />
                                 </span>
                             </div>
                         </div>
-                        <div className="flex items-center border border-custom-grayFA rounded-[5px] overflow-hidden">
-                            <span className="text-custom-gray81 text-sm bg-custom-grayFA flex w-[240px] pl-3 py-1">
+                        <div className="flex items-center border border-custom-bluegreen rounded-[5px] overflow-hidden">
+                            <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex w-[240px] pl-3 py-1">
                                 Contract Number
                             </span>
                             <input
                                 name="contract_number"
                                 value={formData.contract_number}
                                 onChange={handleChange}
-                                type="text"
+                                type="number"
                                 className="w-full px-4 text-sm focus:outline-none mobile:text-xs"
                                 placeholder=""
                             />
                         </div>
-                        
-                        <div className="flex items-center border border-custom-grayFA rounded-[5px] overflow-hidden">
-                            <span className="text-custom-gray81 text-sm bg-custom-grayFA flex w-[240px] pl-3 py-1">
+
+                        <div className="flex items-center border border-custom-bluegreen rounded-[5px] overflow-hidden">
+                            <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex w-[240px] pl-3 py-1">
                                 Unit/Lot Number
                             </span>
                             <input
@@ -457,13 +442,19 @@ const InquiryFormModal = ({ modalRef }) => {
                     </div>
                     <div className="border border-b-1 border-[#D9D9D9] my-2"></div>
                     <div
-                        className={`border-custom-grayFA rounded-[5px] bg-custom-grayFA border`}
+                        className={`${
+                            !isValid
+                                ? resetSuccess
+                                    ? "border-custom-bluegreen"
+                                    : "border-red-500"
+                                : "border-custom-bluegreen"
+                        } rounded-[5px] bg-custom-lightestgreen border`}
                     >
                         <div className="flex items-center justify-between">
-                            <p className="text-custom-gray81 text-sm bg-custom-grayFA pl-3  montserrat-semibold flex-grow mobile:text-xs mobile:w-[170px]">
+                            <p className="text-custom-bluegreen text-sm bg-custom-lightestgreen pl-3  montserrat-semibold flex-grow mobile:text-xs mobile:w-[170px]">
                                 Details (Required)
                             </p>
-                            <span className="bg-white text-sm2 text-gray-400 font-normal py-3 border border-custom-grayFA pl-2 pr-12 mobile:pr-1 mobile:text-xs ml-auto rounded-r-[4px]">
+                            <span className="bg-white text-sm2 text-gray-400 font-normal py-3 border-l border-custom-bluegreen pl-2 pr-12 mobile:pr-1 mobile:text-xs ml-auto rounded-tr-[4px]">
                                 {" "}
                                 {message.length}/500 characters
                             </span>
@@ -477,19 +468,20 @@ const InquiryFormModal = ({ modalRef }) => {
                                 name="details_message"
                                 placeholder="Write your concern here."
                                 rows="4"
-                                className={`${
-                                    !isValid
-                                         ? resetSuccess ? "border-custombg" : "border-red-500"
-                                        : "border-gray-300" 
-                                } rounded-[5px] bg-custom-grayFA border border-custom-grayFA w-full pl-2`}
+                                className={` border-t border-custom-bluegreen rounded-b-[5px] border-t w-full pl-2 outline-none`}
                             ></textarea>
                         </div>
                     </div>
                     <div className="flex flex-col mt-5 mb-12">
-                        <div className="flex justify-end w-54 tablet:flex-col">
-                            <label
+                        <div className="flex justify-between w-54 tablet:flex-col">
+                            {/* <label
                                 htmlFor="attachment"
-                                className="hidden tablet:w-full h-10 px-5 text-sm border montserrat-medium border-custom-solidgreen rounded-lg text-custom-solidgreen flex justify-center items-center gap-1 cursor-pointer hover:shadow-custom"
+                                className="tablet:w-full h-10 px-5 text-sm border montserrat-medium border-custom-solidgreen rounded-lg text-custom-solidgreen flex justify-center items-center gap-1 cursor-pointer hover:shadow-custom bg-red-900"
+                                onClick={() => {
+                                    if (fileInputRef.current) {
+                                        fileInputRef.current.click();
+                                    }
+                                }}
                             >
                                 <svg
                                     xmlns="http://www.w3.org/2000/svg"
@@ -506,41 +498,83 @@ const InquiryFormModal = ({ modalRef }) => {
                                     />
                                 </svg>
                                 Attachments
-                                <input
-                                    type="file"
-                                    id="attachment"
-                                    name="files[]"
-                                    multiple
-                                    className="hidden"
-                                    onChange={handleFileChange}
-                                />
-                            </label>
-                            {files.length > 0 && (
-                                <div className="flex flex-col mt-2">
-                                    {files.map((file, index) => (
-                                        <p
-                                            key={index}
-                                            className="flex items-center text-sm text-gray-600 truncate gap-1"
-                                        >
-                                            {file.name}
-                                            <IoMdTrash
-                                                className="hover:text-red-500"
-                                                onClick={() =>
-                                                    handleDelete(file.name)
-                                                }
-                                            />
-                                        </p>
-                                    ))}
-                                </div>
-                            )}
+                            </label> */}
                             <button
-                                type="submit"
-                                onClick={handleSubmit}
-                                className="h-10 text-white px-10 rounded-lg gradient-btn2 flex justify-center items-center gap-2 tablet:w-full hover:shadow-custom4"
+                                htmlFor="attachment"
+                                className="tablet:w-full h-10 px-5 text-sm border montserrat-medium border-custom-solidgreen rounded-lg text-custom-solidgreen flex justify-center items-center gap-1 cursor-pointer hover:shadow-custom "
+                                onClick={() => {
+                                    if (fileInputRef.current) {
+                                        fileInputRef.current.click();
+                                    }
+                                }}
                             >
-                                Submit
-                                <IoIosSend />
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    strokeWidth="1.5"
+                                    stroke="currentColor"
+                                    className="size-3"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244"
+                                    />
+                                </svg>
+                                Add attachment
                             </button>
+                            <input
+                                type="file"
+                                id="attachment"
+                                name="files[]"
+                                className="hidden"
+                                ref={fileInputRef}
+                                multiple
+                                onChange={handleFileChange}
+                            />
+                            <button
+                                onClick={handleSubmit}
+                                disabled={loading}
+                                type="submit"
+                                className={`w-[133px] text-sm montserrat-semibold text-white h-[40px] rounded-[10px] gradient-btn2 flex justify-center items-center gap-2 tablet:w-full hover:shadow-custom4
+                                            ${
+                                                loading
+                                                    ? "cursor-not-allowed"
+                                                    : ""
+                                            }
+                                            `}
+                            >
+                                {loading ? (
+                                    <CircularProgress className="spinnerSize" />
+                                ) : (
+                                    <>
+                                        Submit
+                                        <IoIosSend />
+                                    </>
+                                )}
+                            </button>
+                        </div>
+
+                        <div className="mt-2">
+                            {fileName && fileName.length > 0
+                                ? fileName.map((item, index) => {
+                                      return (
+                                          <p
+                                              key={index}
+                                              className="flex items-center text-sm text-red-900 truncate gap-1"
+                                          >
+                                              {item}{" "}
+                                              <IoMdTrash
+                                                  className="hover:text-red-500"
+                                                  onClick={() =>
+                                                      handleDelete(item)
+                                                  }
+                                              />
+                                          </p>
+                                      );
+                                  })
+                                : null}
                         </div>
                     </div>
                 </div>

@@ -22,5 +22,15 @@ class Concerns extends Model
     {
         return $this->hasMany(InquiryLogs::class, 'ticket_id', 'ticket_id');
     }
+
+    public function conversations()
+    {
+        return $this->hasMany(Conversations::class, 'ticket_id', 'ticket_id');
+    }
+
+    public function inquiryAssignee()
+    {
+        return $this->hasMany(InquiryAssignee::class, 'ticket_id', 'ticket_id');
+    }
     
 }

@@ -32,5 +32,7 @@
 
     @viteReactRefresh
     @vite('resources/frontend/app.js')
+    @vite('resources/js/bootstrap.js')
+
 </body>
 </html>

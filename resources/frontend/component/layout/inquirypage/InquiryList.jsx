@@ -11,6 +11,8 @@ import DateLogo from "../../../../../public/Images/Date_range.svg";
 import moment from "moment";
 import { MdRefresh } from "react-icons/md";
 import { Alert } from "@mui/material";
+import InquiryFormModal from "./InquiryFormModal";
+import axios from "axios";
 
 const InquiryList = () => {
     const {
@@ -31,7 +33,7 @@ const InquiryList = () => {
         /*  setHasAttachments,
         hasAttachments */
     } = useStateContext();
-
+   // console.log("34", data);
     const [name, setName] = useState("");
     const [category, setCategory] = useState("");
     const [email, setEmail] = useState("");
@@ -57,7 +59,6 @@ const InquiryList = () => {
         setCurrentPage(selectedPage);
     };
 
-    console.log("searchFilter", searchFilter);
     const handleRefresh = () => {
         if (daysFilter) {
             setDaysFilter(null);
@@ -190,6 +191,14 @@ const InquiryList = () => {
         }
     };
 
+    const modalRef = useRef(null);
+
+    const handleOpenModal = () => {
+        if (modalRef.current) {
+            modalRef.current.showModal();
+        }
+    };
+
     const updateLastActivity = () => {
         const currentTime = new Date();
         setLastActivity(currentTime);
@@ -257,9 +266,77 @@ const InquiryList = () => {
         currentPage,
     ]);
 
+   /*  const sendSoapRequest = async () => {
+        const soapBody = `
+        <soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:urn="urn:sap-com:document:sap:soap:functions:mc-style">
+           <soap:Header/>
+           <soap:Body>
+              <urn:Zapptosap>
+                 <Ecode>5555</Ecode>
+                 <Ename>Test</Ename>
+              </urn:Zapptosap>
+           </soap:Body>
+        </soap:Envelope>
+        `;
+    
+        const username = "KBELMONTE";
+        const password = "Tomorrowbytogether2019!";
+        const authHeader = "Basic " + btoa(`${username}:${password}`);
+    
+        const config = {
+            headers: {
+                "Content-Type": "application/soap+xml",
+                "SOAPAction": "urn:sap-com:document:sap:soap:functions:mc-style",
+                Authorization: authHeader,
+            },
+        };
+    
+        try {
+            const response = await axios.post("http://localhost:8001/proxy-sap", soapBody, config);
+
+            console.log("Response:", response.data);
+        } catch (error) {
+            console.log("Error:", error.response.data);
+        }
+    }; */
+    
+
+    const sendSoapRequest = async () => {
+        const soapBody = `
+        <soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:urn="urn:sap-com:document:sap:soap:functions:mc-style">
+           <soap:Header/>
+           <soap:Body>
+              <urn:Zapptosap>
+                 <Ecode>321321</Ecode>
+                 <Ename>markyboy12</Ename>
+              </urn:Zapptosap>
+           </soap:Body>
+        </soap:Envelope>
+        `;
+    
+        const username = "KBELMONTE";
+        const password = "Tomorrowbytogether2019!";
+        const authHeader = "Basic " + btoa(`${username}:${password}`);
+    
+        const config = {
+            headers: {
+                "Content-Type": "application/soap+xml",
+                "Authorization": authHeader,
+            },
+        };
+    
+        try {
+            const response = await axios.post("http://localhost:8001/api/proxy-sap", soapBody, config);
+            console.log("Response:", response.data);
+        } catch (error) {
+            console.error("Error:", error.response ? error.response.data : error.message);
+        }
+    };
+    
+    
     return (
         <>
-            <div className="h-screen max-w-full bg-custom-grayFA px-4">
+            <div className="h-screen max-w-full bg-custom-grayFA px-[20px]">
                 <div className="bg-custom-grayFA">
                     <div className="relative flex justify-start gap-3 pt-1">
                         <div className="relative w-[604px]">
@@ -300,6 +377,19 @@ const InquiryList = () => {
                                 />
                             </svg>
                         </div>
+                        <div className="flex items-center">
+                            <button
+                                onClick={handleOpenModal}
+                                className="h-[38px] w-[121px] gradient-btn5 text-white  text-xs rounded-[10px]"
+                            >
+                                {" "}
+                                <span className="text-[18px]">+</span> Add
+                                Inquiry
+                            </button>
+                           {/*  <button onClick={sendSoapRequest}>
+                                testUpload
+                            </button> */}
+                        </div>
 
                         {isFilterVisible && (
                             <div
@@ -318,7 +408,7 @@ const InquiryList = () => {
                                             onChange={(e) =>
                                                 setName(e.target.value)
                                             }
-                                            className="w-full  border-b-1 outline-none"
+                                            className="w-full  border-b-1 outline-none text-sm"
                                         />
                                     </div>
                                     <div className="flex">
@@ -326,14 +416,44 @@ const InquiryList = () => {
                                             {" "}
                                             Category
                                         </label>
-                                        <input
-                                            type="text"
+
+                                        <select
+                                            className="w-full border-b-1 outline-none text-sm"
                                             value={category}
                                             onChange={(e) =>
                                                 setCategory(e.target.value)
                                             }
-                                            className="w-full  border-b-1 outline-none"
-                                        />
+                                        >
+                                            <option value="">
+                                                Select Category
+                                            </option>
+                                            <option value="Reservation Documents">
+                                                Reservation Documents
+                                            </option>
+                                            <option value="Payment Issues">
+                                                Payment Issues
+                                            </option>
+                                            <option value="Statement of Account and Billing Statement">
+                                                Statement of Account and Billing
+                                                Statement
+                                            </option>
+                                            <option value="Turnover Status/Unit Concerns">
+                                                Turnover Status/Unit Concerns
+                                            </option>
+                                            <option value="Loan Application">
+                                                Loan Application
+                                            </option>
+                                            <option value="Titile and Other Registration Documents">
+                                                Titile and Other Registration
+                                                Documents
+                                            </option>
+                                            <option value="Commissions">
+                                                Commissions
+                                            </option>
+                                            <option value="Other Concerns">
+                                                Other Concerns
+                                            </option>
+                                        </select>
                                     </div>
                                     <div className="flex">
                                         <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
@@ -346,7 +466,7 @@ const InquiryList = () => {
                                             onChange={(e) =>
                                                 setEmail(e.target.value)
                                             }
-                                            className="w-full  border-b-1 outline-none"
+                                            className="w-full  border-b-1 outline-none text-sm"
                                         />
                                     </div>
                                     <div className="flex">
@@ -360,25 +480,25 @@ const InquiryList = () => {
                                             onChange={(e) =>
                                                 setTicket(e.target.value)
                                             }
-                                            className="w-full  border-b-1 outline-none"
+                                            className="w-full  border-b-1 outline-none text-sm"
                                         />
                                     </div>
                                     <div className="flex gap-3">
-                                        <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
+                                        <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[214px]">
                                             Date
                                         </label>
                                         <div className="relative">
                                             <DatePicker
                                                 selected={startDate}
                                                 onChange={handleDateChange}
-                                                className="border-b-1 outline-none w-[176px]"
+                                                className="border-b-1 outline-none w-[176px] text-sm"
                                                 calendarClassName="custom-calendar"
                                             />
 
                                             <img
                                                 src={DateLogo}
                                                 alt="date"
-                                                className="absolute top-[45%] right-0 transform -translate-y-1/2 text-custom-bluegreen size-6"
+                                                className="absolute top-[45%] right-0 transform -translate-y-1/2 text-custom-bluegreen size-6 cursor-pointer pointer-events-none"
                                             />
                                         </div>
                                         <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
@@ -386,7 +506,7 @@ const InquiryList = () => {
                                             Status
                                         </label>
                                         <select
-                                            className="w-full border-b-1 outline-none"
+                                            className="w-full border-b-1 outline-none text-sm"
                                             onChange={handleStatus}
                                             value={status}
                                         >
@@ -399,11 +519,14 @@ const InquiryList = () => {
                                             <option value="Replied By">
                                                 Replied By
                                             </option>
-                                            <option value="Assign To">
-                                                Assign To
+                                            <option value="Assigned To">
+                                                Assigned To
                                             </option>
-                                            <option value="Mark as resolved">
-                                                Mark as resolve
+                                            <option value="Marked as resolved">
+                                                Marked as resolved
+                                            </option>
+                                            <option value="Follow up reply">
+                                                Follow up reply
                                             </option>
                                         </select>
                                     </div>
@@ -430,9 +553,12 @@ const InquiryList = () => {
                             </div>
                         )}
                     </div>
+                    {/*  <div className="flex items-center">
+                        <button onClick={handleOpenModal} className='h-[38px] w-[121px] gradient-btn5 text-white  text-xs rounded-[10px]'> <span className='text-[18px]'>+</span> Add Inquiry</button>
+                    </div> */}
                 </div>
-                <div className="max-w-[954px] p-[20px]">
-                    <div className="flex justify-start items-center h-12 mt-[15px] px-6 gap-[60px] bg-white rounded-t-lg mb-1 ">
+                <div className="max-w-[1260px] ">
+                    <div className="flex justify-between items-center h-12 mt-[15px] px-6 bg-white rounded-t-lg mb-1 ">
                         <div className="relative mr-4 ">
                             <button
                                 className="flex text-[20px] w-[130px] items-center gap-3 text-custom-bluegreen font-semibold"
@@ -460,7 +586,7 @@ const InquiryList = () => {
                                                 handleOptionClick("Resolve")
                                             }
                                         >
-                                            Resolve
+                                            Resolved
                                         </li>
                                         <li
                                             className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
@@ -468,76 +594,80 @@ const InquiryList = () => {
                                                 handleOptionClick("Unresolve")
                                             }
                                         >
-                                            Unresolve
+                                            Unresolved
                                         </li>
                                     </ul>
                                 </div>
                             )}
                         </div>
-                        <div className="flex gap-2">
-                            <div className="flex space-x-2">
-                                {user?.department === "CRS" && (
-                                    <button
-                                        onClick={handleAssignedToMeClick}
-                                        className={`flex items-center border text-custom-lightgreen h-[29px] w-[125px] rounded-[55px] p-[2px] ${
-                                            assignedToMeActive
-                                                ? "bglightgreen-btn"
-                                                : "gradient-btn2hover "
-                                        }`}
-                                    >
-                                        <p
-                                            className={`h-full w-full flex justify-center items-center  text-xs montserrat-semibold rounded-[50px]   ${
+                        <div className="flex gap-[10px]">
+                            <div className="flex gap-2">
+                                <div className="flex space-x-2">
+                                    {user?.department === "CRS" && (
+                                        <button
+                                            onClick={handleAssignedToMeClick}
+                                            className={`flex items-center border text-custom-lightgreen h-[29px] w-[125px] rounded-[55px] p-[2px] ${
                                                 assignedToMeActive
                                                     ? "bglightgreen-btn"
-                                                    : "bg-white hover:bg-custom-lightestgreen"
-                                            }
-                                        `}
+                                                    : "gradient-btn2hover "
+                                            }`}
                                         >
-                                            Assigned to me
-                                        </p>
-                                    </button>
-                                )}
-                                {dayButtonLabels.map((label) => (
-                                    <button
-                                        key={label}
-                                        onClick={() => handleDayClick(label)}
-                                        className={`flex justify-center items-center  text-custom-lightgreen h-[25px] rounded-[55px] p-[2px] ${
-                                            activeDayButton === label
-                                                ? "bglightgreen-btn hover:bg-custom-lightgreen"
-                                                : "gradient-btn2hover border-custom-lightgreen"
-                                        } hover:bg-custom-lightestgreen ${
-                                            label === "3+ Days"
-                                                ? "w-[76px]"
-                                                : label === "2 Days"
-                                                ? "w-[69px]"
-                                                : "w-[60px]"
-                                        }`}
-                                    >
-                                        <p
-                                            className={`h-full w-full flex justify-center items-center text-xs montserrat-semibold rounded-[50px]
+                                            <p
+                                                className={`h-full w-full flex justify-center items-center  text-xs montserrat-semibold rounded-[50px]   ${
+                                                    assignedToMeActive
+                                                        ? "bglightgreen-btn"
+                                                        : "bg-white hover:bg-custom-lightestgreen"
+                                                }
+                                        `}
+                                            >
+                                                Assigned to me
+                                            </p>
+                                        </button>
+                                    )}
+                                    {dayButtonLabels.map((label) => (
+                                        <button
+                                            key={label}
+                                            onClick={() =>
+                                                handleDayClick(label)
+                                            }
+                                            className={`flex justify-center items-center  text-custom-lightgreen h-[25px] rounded-[55px] p-[2px] ${
+                                                activeDayButton === label
+                                                    ? "bglightgreen-btn hover:bg-custom-lightgreen"
+                                                    : "gradient-btn2hover border-custom-lightgreen"
+                                            } hover:bg-custom-lightestgreen ${
+                                                label === "3+ Days"
+                                                    ? "w-[76px]"
+                                                    : label === "2 Days"
+                                                    ? "w-[69px]"
+                                                    : "w-[60px]"
+                                            }`}
+                                        >
+                                            <p
+                                                className={`h-full w-full flex justify-center items-center text-xs montserrat-semibold rounded-[50px]
                                             ${
                                                 activeDayButton === label
                                                     ? "bglightgreen-btn"
                                                     : "bg-white hover:bg-custom-lightestgreen"
                                             }
                                             `}
-                                        >
-                                            {label}
-                                        </p>
-                                    </button>
-                                ))}
+                                            >
+                                                {label}
+                                            </p>
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                            <div className="flex justify-end items-center ">
+                                <button
+                                    className="flex justify-center items-center h-[30px] w-[30px] hover:bg-custom-grayF1 rounded-full text-custom-bluegreen hover:text-custom-lightblue"
+                                    onClick={handleRefresh}
+                                >
+                                    <MdRefresh />
+                                </button>
                             </div>
                         </div>
-                        <div className="flex justify-end items-center w-full">
-                            <button
-                                className="flex justify-center items-center h-[30px] w-[30px] hover:bg-custom-grayF1 rounded-full text-custom-bluegreen hover:text-custom-lightblue"
-                                onClick={handleRefresh}
-                            >
-                                <MdRefresh />
-                            </button>
-                        </div>
                     </div>
-                    <div className="w-[914px]">
+                    <div className="w-[1260px]">
                         {data && data.length === 0 ? (
                             <p className="text-center text-gray-500 py-4">
                                 No data found
@@ -580,6 +710,9 @@ const InquiryList = () => {
                             />
                         </div>
                     </div>
+                </div>
+                <div>
+                    <InquiryFormModal modalRef={modalRef} />
                 </div>
             </div>
         </>

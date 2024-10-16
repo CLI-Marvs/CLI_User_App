@@ -121,5 +121,5 @@
 </head>
 
 <body>
-{{ $details_message }}
+    <p>{!! $details_message !!}</p>
 </body>

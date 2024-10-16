@@ -47,12 +47,25 @@ export const ContextProvider = ({ children }) => {
         useState(false);
     const [pricingMasterLists, setPricingMasterLists] = useState([]);
     const [paymentSchemes, setPaymentSchemes] = useState([]);
+    const [propertyId, setPropertyId] = useState(null);
+    const [floorPremiumsAccordionOpen, setFloorPremiumsAccordionOpen] =
+        useState(false);
+    const [propertyFloors, setPropertyFloors] = useState([]);
+    const [selectedFloor, setSelectedFloor] = useState(null);
+    const [propertyUnit, setPropertyUnits] = useState([]);
+    const [towerPhaseId, setTowerPhaseId] = useState(0);
+    const [isLoading, setIsLoading] = useState(false);
+    const [concernMessages, setConcernMessages] = useState([]);
+    const [concernId, setConcernId] = useState(null);
+    const [propertyMasterData, setPropertyMasterData] = useState([]);
+    const [assigneesPersonnel, setAssigneesPersonnel] = useState([]);
+    const [propertyNamesList, setPropertyNamesList] = useState([]);
     useEffect(() => {
         if (user && user.department && !isDepartmentInitialized) {
             setDepartment(user.department === "CRS" ? "All" : user.department);
             setIsDepartmentInitialized(true);
         }
-    }, [user, isDepartmentInitialized]); 
+    }, [user, isDepartmentInitialized]);
 
     const setToken = (token) => {
         _setToken(token);
@@ -104,6 +117,17 @@ export const ContextProvider = ({ children }) => {
         }
     };
 
+    
+      const getPropertyNames = async () => {
+        if (token) {
+          try {
+            const response = await apiService.get("property-name");
+            setPropertyNamesList(response.data);
+          } catch (error) {
+            console.log("Error retrieving data", error);
+          }
+        }
+      };
     const fetchDataReport = async () => {
         if (!isDepartmentInitialized) return;
         try {
@@ -175,9 +199,47 @@ export const ContextProvider = ({ children }) => {
                         notifStatus || ""
                     }`
                 );
-                console.log("response getNotifications", response.data);
                 setNotifications(response.data.data);
                 setNotifPageCount(response.data.last_page);
+            } catch (error) {
+                console.log("error retrieving", error);
+            }
+        }
+    };
+
+    const getAssigneesPersonnel = async () => {
+        if (ticketId) {
+            try {
+                const encodedTicketId = encodeURIComponent(ticketId);
+
+                const response = await apiService.get(
+                    `personnel-assignee?ticketId=${encodedTicketId}`
+                );
+                const data = response.data;
+
+                setAssigneesPersonnel((prevAssigneesPersonnel) => ({
+                    ...prevAssigneesPersonnel,
+                    [ticketId]: data,
+                }));
+            } catch (error) {
+                console.log("error");
+            }
+        }
+    };
+
+    const getConcernMessages = async () => {
+        if (ticketId) {
+            try {
+                const encodedTicketId = encodeURIComponent(ticketId);
+
+                const response = await apiService.get(
+                    `get-concern-messages?ticketId=${encodedTicketId}`
+                );
+                const data = response.data;
+                setConcernMessages((prevMessages) => ({
+                    ...prevMessages,
+                    [ticketId]: data,
+                }));
             } catch (error) {
                 console.log("error retrieving", error);
             }
@@ -250,35 +312,105 @@ export const ContextProvider = ({ children }) => {
         return validMonths.hasOwnProperty(normalizedMonth);
     };
 
-    const getPricingMasterLists = async () => {
+    const getPricingMasterLists = useCallback(async () => {
         if (token) {
             try {
+                setIsLoading(true);
                 const response = await apiService.get(
                     "get-pricing-master-lists"
                 );
-               setPricingMasterLists(response.data);
-                 
+                setPricingMasterLists(response.data);
             } catch (error) {
                 console.error("Error fetching pricing master lists:", error);
+            } finally {
+                setIsLoading(false);
             }
         }
-    }; //get all pricing master lists data
-    const getPaymentSchemes = async () => {
+    }, []); //get all pricing master lists data
+
+    const getPaymentSchemes = useCallback(async () => {
         if (token) {
             try {
                 const response = await apiService.get("get-payment-schemes");
+
                 setPaymentSchemes(response.data);
             } catch (error) {
                 console.error("Error fetching data:", error);
             }
         }
+    }, []); //get all payment schemes
+    const getPropertyFloors = useCallback(async (towerPhaseId) => {
+        // Check if property floors have already been fetched
+        if (!propertyFloors[towerPhaseId] && towerPhaseId && token) {
+            try {
+                setIsLoading(true);
+                const response = await apiService.get(
+                    `property-floors/${towerPhaseId}`
+                );
+                return response.data; // Return the data
+                // Merge the new floors data with existing propertyFloors
+                // setPropertyFloors((prev) => ({
+                //     ...prev,
+                //     [towerPhaseId]: response.data, // Store floors based on towerPhaseId
+                // }));
+            } catch (error) {
+                console.error("Error fetching property floors:", error);
+                return null;
+            } finally {
+                setIsLoading(false);
+            }
+        }
+    }, []); //get property floors
+
+    const getPropertyUnits = async (towerPhaseId, selectedFloor) => {
+        if (token || selectedFloor || towerPhaseId) {
+            try {
+                setIsLoading(true);
+                const response = await apiService.post("property-units", {
+                    towerPhaseId,
+                    selectedFloor,
+                });
+                setPropertyUnits(response.data);
+            } catch (error) {
+                console.error("Error fetching property units:", error);
+            } finally {
+                setIsLoading(false);
+            }
+        }
+    }; //get property units
+
+    const getPropertyMaster = async (id) => {
+        if (token) {
+            try {
+                setIsLoading(true);
+                const response = await apiService.get(
+                    `get-property-master/${id}`
+                );
+
+                return response.data;
+            } catch (e) {
+                console.error("Error fetching propertymaster data:", error);
+            }
+        }
     };
+
+    useEffect(() => {
+        getPropertyUnits(towerPhaseId, selectedFloor);
+    }, [towerPhaseId, selectedFloor]);
+
     useEffect(() => {
         getPricingMasterLists();
-    }, []);
-    useEffect(() => {
         getPaymentSchemes();
-    }, [token]);
+    }, []);
+
+    useEffect(() => {
+        if (towerPhaseId) {
+            getPropertyFloors(towerPhaseId);
+        }
+    }, [towerPhaseId, token]);
+    // useEffect(() => {
+    //     getPaymentSchemes();
+    // }, [token]);
     useEffect(() => {
         if (token) {
             const getData = async () => {
@@ -296,6 +428,7 @@ export const ContextProvider = ({ children }) => {
                 setAllEmployees(response.data);
             };
             getEmployeeData();
+            getPropertyNames();
         }
     }, [token]);
 
@@ -319,6 +452,8 @@ export const ContextProvider = ({ children }) => {
         if (ticketId) {
             getMessages(ticketId);
             getInquiryLogs(ticketId);
+            getConcernMessages();
+            getAssigneesPersonnel();
         }
     }, [ticketId]);
 
@@ -404,6 +539,31 @@ export const ContextProvider = ({ children }) => {
                 getPricingMasterLists,
                 paymentSchemes,
                 getPaymentSchemes,
+                getPropertyFloors,
+                setPropertyId,
+                propertyFloors,
+                propertyId,
+                floorPremiumsAccordionOpen,
+                setFloorPremiumsAccordionOpen,
+                selectedFloor,
+                setSelectedFloor,
+                propertyUnit,
+                setPropertyUnits,
+                getPropertyUnits,
+                towerPhaseId,
+                setTowerPhaseId,
+                isLoading,
+                setPropertyFloors,
+                concernMessages,
+                setConcernMessages,
+                concernId,
+                setConcernId,
+                getPropertyMaster,
+                getConcernMessages,
+                setAssigneesPersonnel,
+                assigneesPersonnel,
+                getAssigneesPersonnel,
+                propertyNamesList
             }}
         >
             {children}
