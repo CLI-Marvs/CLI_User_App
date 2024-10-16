@@ -27,18 +27,20 @@ class SapController extends Controller
                 'request' => $request->all()
             ]);
             $invoice = new Invoices();
-            $invoice->D_RECNNR = $request->input('contract_number');  
-            $invoice->D_BELNR = $request->input('document_number');  
-            $invoice->D_KUNNR = $request->input('customer_bp_number');  
-            $invoice->D_BUZEI = $request->input('document_number');  
-            $invoice->D_BUKRS = $request->input('sap_unique_id'); 
-            $invoice->D_SWENR = $request->input('company_name');  
-            $invoice->D_SGTXT = $request->input('project_code'); 
-            $invoice->D_NAME1 = $request->input('description'); 
-            $invoice->D_DMBTR = $request->input('customer_name'); 
-            $invoice->D_CPUDT = $request->input('invoice_amount');  
-            $invoice->D_ZFBDT = $request->input('entry_date'); 
-            $invoice->D_BUDAT = $request->input('due_date'); 
+            $invoice->contract_number = $request->input('D_RECNNR');  
+            $invoice->document_number = $request->input('D_BELNR');  
+            $invoice->customer_bp_number = $request->input('D_KUNNR');  
+            $invoice->document_number = $request->input('D_BUZEI');  
+            $invoice->sap_unique_id = $request->input('D_BUKRS'); 
+            $invoice->company_name = $request->input('D_SWENR');  
+            $invoice->project_code = $request->input('D_SGTXT'); 
+            $invoice->customer_name = $request->input('D_DMBTR'); 
+            $invoice->invoice_amount = $request->input('D_CPUDT');  
+            $invoice->entry_date = $request->input('D_ZFBDT'); 
+            $invoice->due_date = $request->input('D_BUDAT'); 
+            
+            // The 'D_NAME1' field remains an input from the request
+            $invoice->description = $request->input('D_NAME1'); 
            /*  $invoice->invoice_status = $request->input('invoice_status'); 
             $invoice->status = $request->input('status');
             $invoice->posting_response = $request->input('posting_response'); */
