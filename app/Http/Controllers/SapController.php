@@ -34,7 +34,7 @@ class SapController extends Controller
             $invoice->company_name = $request->input('D_BUKRS'); 
             $invoice->project_code = $request->input('D_SWENR');  
             $invoice->description = $request->input('D_SGTXT'); 
-            $invoice->invoice_amount = $request->input('D_DMBTR'); 
+            $invoice->invoice_amount = $request->input('lv_dmbtr'); 
             $invoice->entry_date = $request->input('D_CPUDT');  
             $invoice->due_date = $request->input('D_ZFBDT'); 
             $invoice->post_date = $request->input('D_BUDAT'); 
