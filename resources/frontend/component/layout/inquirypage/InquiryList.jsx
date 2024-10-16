@@ -290,7 +290,7 @@ const InquiryList = () => {
             },
         };
         try {
-           /*  const response = await axios.post(
+            /*  const response = await axios.post(
                 "https://sap-dev.cebulandmasters.com:44304/sap/bc/srt/wsdl/flv_10002A111AD1/bndg_url/sap/bc/srt/rfc/sap/zcustomer/200/zcustomer/zcustomer?sap-client=200",
                 soapBody,
                 config
@@ -298,8 +298,14 @@ const InquiryList = () => {
             const response = await axios.post(
                 "https://admin-dev.cebulandmasters.com/proxy-sap",
                 soapBody,
-                { headers: { "Content-Type": "application/soap+xml" } }
-              );
+                {
+                    headers: {
+                        "Content-Type": "application/soap+xml",
+                        "SOAPAction":
+                            "urn:sap-com:document:sap:soap:functions:mc-style",
+                    },
+                }
+            );
             console.log("Response:", response.data);
         } catch (error) {
             console.log("error", error);
@@ -388,8 +394,7 @@ const InquiryList = () => {
                                             {" "}
                                             Category
                                         </label>
-                                       
-                                      
+
                                         <select
                                             className="w-full border-b-1 outline-none text-sm"
                                             value={category}
@@ -526,9 +531,9 @@ const InquiryList = () => {
                             </div>
                         )}
                     </div>
-                    <div className="flex items-center">
+                    {/*  <div className="flex items-center">
                         <button onClick={handleOpenModal} className='h-[38px] w-[121px] gradient-btn5 text-white  text-xs rounded-[10px]'> <span className='text-[18px]'>+</span> Add Inquiry</button>
-                    </div>
+                    </div> */}
                 </div>
                 <div className="max-w-[1260px] ">
                     <div className="flex justify-between items-center h-12 mt-[15px] px-6 bg-white rounded-t-lg mb-1 ">
@@ -688,7 +693,6 @@ const InquiryList = () => {
                     <InquiryFormModal modalRef={modalRef} />
                 </div>
             </div>
-            
         </>
     );
 };
