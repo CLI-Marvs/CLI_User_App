@@ -31,7 +31,7 @@ class SapController extends Controller
             $invoice->document_number = $request->input('D_BELNR');  
             $invoice->customer_bp_number = $request->input('D_KUNNR');  
             $invoice->sap_unique_id = $request->input('D_BUZEI');  
-            $invoice->company_code = $request->input('D_BUKRS'); 
+            $invoice->company_name = $request->input('D_BUKRS'); 
             $invoice->project_code = $request->input('D_SWENR');  
             $invoice->description = $request->input('D_SGTXT'); 
             $invoice->invoice_amount = $request->input('D_DMBTR'); 
