@@ -35,7 +35,6 @@ const InquiryThread = () => {
     const [status, setStatus] = useState("");
     const [hasAttachments, setHasAttachments] = useState(false);
     const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
-    const [emailMessageId, setEmailMessageId] = useState(null);
     const {
         messages,
         setTicketId,
@@ -74,7 +73,6 @@ const InquiryThread = () => {
     const handleFileAttach = (event) => {
         const files = Array.from(event.target.files);
         setAttachedFiles((prevFiles) => [...prevFiles, ...files]);
-        event.target.value = null;
     };
 
     const removeFile = (fileNameToDelete) => {
@@ -164,12 +162,12 @@ const InquiryThread = () => {
         const formattedMessage = chatMessage.replace(/\n/g, "<br>");
         formData.append("admin_email", user?.employee_email || "");
         formData.append("ticket_id", ticketId || "");
-        formData.append("details_message", formattedMessage || "");
+        formData.append("details_message", chatMessage || "");
         formData.append(
             "admin_name",
             `${user?.firstname || ""} ${user?.lastname || ""}`
         );
-        formData.append("message_id", dataConcern.message_id || emailMessageId || "");
+        formData.append("message_id", messageId || "");
         formData.append("admin_id", user?.id || "");
         formData.append("buyer_email", dataConcern.buyer_email || "");
         formData.append("admin_profile_picture", user?.profile_picture || "");
@@ -183,7 +181,7 @@ const InquiryThread = () => {
             });
             console.log("triger here");
 
-            setChatMessage("");
+            callBackHandler();
             setAttachedFiles([]);
             setLoading(false);
             callBackHandler();
@@ -196,6 +194,7 @@ const InquiryThread = () => {
 
     const callBackHandler = () => {
         getMessages(ticketId);
+        setChatMessage("");
         getInquiryLogs(ticketId);
         getAllConcerns();
     };
@@ -356,14 +355,43 @@ const InquiryThread = () => {
                                             {" "}
                                             Category
                                         </label>
-                                        <input
-                                            type="text"
-                                            className="w-full  border-b-1 outline-none"
+                                        <select
+                                            className="w-full border-b-1 outline-none text-sm"
                                             value={category}
                                             onChange={(e) =>
                                                 setCategory(e.target.value)
                                             }
-                                        />
+                                        >
+                                            <option value="">
+                                                Select Category
+                                            </option>
+                                            <option value="Reservation Documents">
+                                                Reservation Documents
+                                            </option>
+                                            <option value="Payment Issues">
+                                                Payment Issues
+                                            </option>
+                                            <option value="Statement of Account and Billing Statement">
+                                                Statement of Account and Billing
+                                                Statement
+                                            </option>
+                                            <option value="Turnover Status/Unit Concerns">
+                                                Turnover Status/Unit Concerns
+                                            </option>
+                                            <option value="Loan Application">
+                                                Loan Application
+                                            </option>
+                                            <option value="Titile and Other Registration Documents">
+                                                Titile and Other Registration
+                                                Documents
+                                            </option>
+                                            <option value="Commissions">
+                                                Commissions
+                                            </option>
+                                            <option value="Other Concerns">
+                                                Other Concerns
+                                            </option>
+                                        </select>
                                     </div>
                                     <div className="flex">
                                         <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
@@ -408,7 +436,7 @@ const InquiryThread = () => {
                                             <img
                                                 src={DateLogo}
                                                 alt="date"
-                                                className="absolute top-[45%] right-0 transform -translate-y-1/2 text-custom-bluegreen size-6 cursor-pointer pointer-events-none"
+                                                className="absolute top-[45%] right-0 transform -translate-y-1/2 text-custom-bluegreen size-6  pointer-events-none"
                                             />
                                         </div>
                                         <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
@@ -429,14 +457,11 @@ const InquiryThread = () => {
                                             <option value="Replied By">
                                                 Replied By
                                             </option>
-                                            <option value="Assigned To">
-                                                Assigned To
+                                            <option value="Assign To">
+                                                Assign To
                                             </option>
-                                            <option value="Marked as resolved">
-                                                Marked as resolved
-                                            </option>
-                                            <option value="Follow up reply">
-                                               Follow up reply
+                                            <option value="Mark as resolved">
+                                                Mark as resolve
                                             </option>
                                         </select>
                                     </div>
@@ -494,7 +519,7 @@ const InquiryThread = () => {
                                     onClick={handleOpenModal}
                                     className="w-[85px] h-[29px] rounded-[10px] gradient-btn5 montserrat-medium text-sm text-white hover:shadow-custom4"
                                 >
-                                    Add Info
+                                    More Info
                                 </button>
                             </div>
                         </div>
@@ -539,9 +564,7 @@ const InquiryThread = () => {
                                             <textarea
                                                 placeholder="Reply..."
                                                 onChange={(e) =>
-                                                    setChatMessage(
-                                                        e.target.value
-                                                    )
+                                                    setChatMessage(e.target.value)
                                                 }
                                                 value={chatMessage}
                                                 id="chat"
@@ -550,20 +573,19 @@ const InquiryThread = () => {
                                                 draggable="false"
                                                 onKeyDown={(e) => {
                                                     if (e.key === "Enter" && !e.shiftKey) {
-                                                        e.preventDefault(); 
-                                                        handleConfirmation();
+                                                        e.preventDefault(); // Prevents creating a new line
+                                                        handleConfirmation(); // Call your send message function
                                                     }
                                                 }}
                                                 className="h-full w-full pl-2 pr-[123px] border-none  text-sm focus:outline-none"
                                             ></textarea>
 
                                             {/* File attachment button */}
-                                            <div className=" absolute bottom-2 right-[115px] items-center  ">
+                                            <div className=" absolute bottom-2 right-[115px] items-center hidden">
                                                 <input
                                                     type="file"
                                                     id="fileInput"
                                                     multiple
-                                                    accept=".jpg, .jpeg, .png, .pdf, .doc, .docx, .xls, .xlsx"
                                                     style={{ display: "none" }}
                                                     onChange={handleFileAttach}
                                                 />
@@ -590,12 +612,9 @@ const InquiryThread = () => {
                                                         loading
                                                     }
                                                     className={`flex w-[82px] h-[28px] rounded-[5px] text-white text-xs justify-center items-center 
-                                                        ${
-                                                            loading ||
-                                                            !chatMessage.trim()
-                                                                ? "bg-gray-400 cursor-not-allowed"
-                                                                : "gradient-background3 hover:shadow-custom4"
-                                                        } 
+                                                        ${loading || !chatMessage.trim() 
+                                                            ? 'bg-gray-400 cursor-not-allowed' 
+                                                            : 'gradient-background3 hover:shadow-custom4'} 
                                                     `}
                                                 >
                                                     {loading ? (
@@ -613,18 +632,16 @@ const InquiryThread = () => {
                                                         </div>
                                                         <div className="flex justify-center mt-[30px]">
                                                             <p className="montserrat-medium text-[20px]">
-                                                                Are you sure
-                                                                about sending
-                                                                this reply?
+                                                                Are you sure about
+                                                                sending this reply?
                                                             </p>
                                                         </div>
                                                         <div className="flex flex-col justify-center items-center text-[12px] text-[#B54D4D] px-[20px]">
                                                             <p>
-                                                                This message
-                                                                will be sent to
+                                                                This message will be sent to
                                                             </p>
                                                             <span className="font-semibold text-[13px]">
-                                                                    {capitalizeWords(dataConcern.buyer_name)}
+                                                                    {dataConcern.buyer_name}
                                                                     {" "}({dataConcern.buyer_email})
                                                             </span>
                                                         </div>
@@ -695,19 +712,18 @@ const InquiryThread = () => {
                             <div className="flex-grow overflow-y-auto max-h-[calc(100vh-400px)]">
                                 <div className="">
                                     {combineThreadMessages.length > 0 &&
-                                        combineThreadMessages.map(
-                                            (item, index) =>
-                                                item.buyer_email ? (
-                                                    <UserMessages
-                                                        items={item}
-                                                        key={index}
-                                                    />
-                                                ) : (
-                                                    <AdminMessages
-                                                        items={item}
-                                                        key={index}
-                                                    />
-                                                )
+                                        combineThreadMessages.map((item, index) =>
+                                            item.buyer_email ? (
+                                                <UserMessages
+                                                    items={item}
+                                                    key={index}
+                                                />
+                                            ) : (
+                                                <AdminMessages
+                                                    items={item}
+                                                    key={index}
+                                                />
+                                            )
                                         )}
                                 </div>
                             </div>
@@ -774,7 +790,8 @@ const InquiryThread = () => {
                                 </div>
                             </div> */}
                         </div>
-                    </div>
+                        </div>
+                        
                 </div>
                 <div className="flex w-[623px] bg-custom-grayFA gap-3 pb-24">
                     <div className="w-[623px]">

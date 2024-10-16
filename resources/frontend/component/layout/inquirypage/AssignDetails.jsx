@@ -228,6 +228,11 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                                 </span>
                                 <div className="border-b flex-grow border-custom-bluegreen"></div>
                             </div>
+                            <div className="w-full min-h-[39px] border-[2px] border-custom-grayF1 p-[10px] rounded-[10px] mb-[10px]">
+                                <p className="text-sm">
+                                    {details.remarks}
+                                </p>
+                            </div>
                             <div>
                                 <p className="text-custom-solidgreen mb-1">
                                     Ticket Resolved!
