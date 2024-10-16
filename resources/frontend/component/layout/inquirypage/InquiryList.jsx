@@ -12,6 +12,7 @@ import moment from "moment";
 import { MdRefresh } from "react-icons/md";
 import { Alert } from "@mui/material";
 import InquiryFormModal from "./InquiryFormModal";
+import axios from "axios";
 
 const InquiryList = () => {
     const {
@@ -192,11 +193,11 @@ const InquiryList = () => {
 
     const modalRef = useRef(null);
 
-  const handleOpenModal = () => {
-      if (modalRef.current) {
-          modalRef.current.showModal();
-      }
-  };
+    const handleOpenModal = () => {
+        if (modalRef.current) {
+            modalRef.current.showModal();
+        }
+    };
 
     const updateLastActivity = () => {
         const currentTime = new Date();
@@ -265,6 +266,41 @@ const InquiryList = () => {
         currentPage,
     ]);
 
+    const sendSoapRequest = async () => {
+        const soapBody = `
+    <soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:urn="urn:sap-com:document:sap:soap:functions:mc-style">
+   <soap:Header/>
+   <soap:Body>
+      <urn:Zapptosap>
+         <Ecode>5555</Ecode>
+         <Ename>Test</Ename>
+      </urn:Zapptosap>
+   </soap:Body>
+</soap:Envelope>
+    `;
+
+        const username = "KBELMONTE";
+        const password = "Tomorrowbytogether2019!";
+        const authHeader = "Basic " + btoa(`${username}:${password}`);
+
+        const config = {
+            headers: {
+                "Content-Type": "application/soap+xml",
+                Authorization: authHeader,
+            },
+        };
+        try {
+            const response = await axios.post(
+                "http://SAP-DEV.cebulandmasters.com:8004/sap/bc/srt/rfc/sap/zapptosap1/200/zapptosap1/zapptosap1",
+                soapBody,
+                config
+            );
+            console.log("Response:", response.data);
+        } catch (error) {
+            console.log("error", error);
+        }
+    };
+
     return (
         <>
             <div className="h-screen max-w-full bg-custom-grayFA px-[20px]">
@@ -309,8 +345,19 @@ const InquiryList = () => {
                             </svg>
                         </div>
                         <div className="flex items-center">
-                            <button onClick={handleOpenModal} className='h-[38px] w-[121px] gradient-btn5 text-white  text-xs rounded-[10px]'> <span className='text-[18px]'>+</span> Add Inquiry</button>
+                            <button
+                                onClick={handleOpenModal}
+                                className="h-[38px] w-[121px] gradient-btn5 text-white  text-xs rounded-[10px]"
+                            >
+                                {" "}
+                                <span className="text-[18px]">+</span> Add
+                                Inquiry
+                            </button>
+                            <button onClick={sendSoapRequest}>
+                                testUpload
+                            </button>
                         </div>
+
                         {isFilterVisible && (
                             <div
                                 ref={filterBoxRef}
@@ -413,8 +460,7 @@ const InquiryList = () => {
                                                 Assigned To
                                             </option>
                                             <option value="Marked as resolved">
-                                               Marked as resolved
-
+                                                Marked as resolved
                                             </option>
                                             <option value="Follow up reply">
                                                 Follow up reply
@@ -489,68 +535,70 @@ const InquiryList = () => {
                             )}
                         </div>
                         <div className="flex gap-[10px]">
-                        <div className="flex gap-2">
-                            <div className="flex space-x-2">
-                                {user?.department === "CRS" && (
-                                    <button
-                                        onClick={handleAssignedToMeClick}
-                                        className={`flex items-center border text-custom-lightgreen h-[29px] w-[125px] rounded-[55px] p-[2px] ${
-                                            assignedToMeActive
-                                                ? "bglightgreen-btn"
-                                                : "gradient-btn2hover "
-                                        }`}
-                                    >
-                                        <p
-                                            className={`h-full w-full flex justify-center items-center  text-xs montserrat-semibold rounded-[50px]   ${
+                            <div className="flex gap-2">
+                                <div className="flex space-x-2">
+                                    {user?.department === "CRS" && (
+                                        <button
+                                            onClick={handleAssignedToMeClick}
+                                            className={`flex items-center border text-custom-lightgreen h-[29px] w-[125px] rounded-[55px] p-[2px] ${
                                                 assignedToMeActive
                                                     ? "bglightgreen-btn"
-                                                    : "bg-white hover:bg-custom-lightestgreen"
-                                            }
-                                        `}
+                                                    : "gradient-btn2hover "
+                                            }`}
                                         >
-                                            Assigned to me
-                                        </p>
-                                    </button>
-                                )}
-                                {dayButtonLabels.map((label) => (
-                                    <button
-                                        key={label}
-                                        onClick={() => handleDayClick(label)}
-                                        className={`flex justify-center items-center  text-custom-lightgreen h-[25px] rounded-[55px] p-[2px] ${
-                                            activeDayButton === label
-                                                ? "bglightgreen-btn hover:bg-custom-lightgreen"
-                                                : "gradient-btn2hover border-custom-lightgreen"
-                                        } hover:bg-custom-lightestgreen ${
-                                            label === "3+ Days"
-                                                ? "w-[76px]"
-                                                : label === "2 Days"
-                                                ? "w-[69px]"
-                                                : "w-[60px]"
-                                        }`}
-                                    >
-                                        <p
-                                            className={`h-full w-full flex justify-center items-center text-xs montserrat-semibold rounded-[50px]
+                                            <p
+                                                className={`h-full w-full flex justify-center items-center  text-xs montserrat-semibold rounded-[50px]   ${
+                                                    assignedToMeActive
+                                                        ? "bglightgreen-btn"
+                                                        : "bg-white hover:bg-custom-lightestgreen"
+                                                }
+                                        `}
+                                            >
+                                                Assigned to me
+                                            </p>
+                                        </button>
+                                    )}
+                                    {dayButtonLabels.map((label) => (
+                                        <button
+                                            key={label}
+                                            onClick={() =>
+                                                handleDayClick(label)
+                                            }
+                                            className={`flex justify-center items-center  text-custom-lightgreen h-[25px] rounded-[55px] p-[2px] ${
+                                                activeDayButton === label
+                                                    ? "bglightgreen-btn hover:bg-custom-lightgreen"
+                                                    : "gradient-btn2hover border-custom-lightgreen"
+                                            } hover:bg-custom-lightestgreen ${
+                                                label === "3+ Days"
+                                                    ? "w-[76px]"
+                                                    : label === "2 Days"
+                                                    ? "w-[69px]"
+                                                    : "w-[60px]"
+                                            }`}
+                                        >
+                                            <p
+                                                className={`h-full w-full flex justify-center items-center text-xs montserrat-semibold rounded-[50px]
                                             ${
                                                 activeDayButton === label
                                                     ? "bglightgreen-btn"
                                                     : "bg-white hover:bg-custom-lightestgreen"
                                             }
                                             `}
-                                        >
-                                            {label}
-                                        </p>
-                                    </button>
-                                ))}
+                                            >
+                                                {label}
+                                            </p>
+                                        </button>
+                                    ))}
+                                </div>
                             </div>
-                        </div>
-                        <div className="flex justify-end items-center ">
-                            <button
-                                className="flex justify-center items-center h-[30px] w-[30px] hover:bg-custom-grayF1 rounded-full text-custom-bluegreen hover:text-custom-lightblue"
-                                onClick={handleRefresh}
-                            >
-                                <MdRefresh />
-                            </button>
-                        </div>
+                            <div className="flex justify-end items-center ">
+                                <button
+                                    className="flex justify-center items-center h-[30px] w-[30px] hover:bg-custom-grayF1 rounded-full text-custom-bluegreen hover:text-custom-lightblue"
+                                    onClick={handleRefresh}
+                                >
+                                    <MdRefresh />
+                                </button>
+                            </div>
                         </div>
                     </div>
                     <div className="w-[1260px]">
