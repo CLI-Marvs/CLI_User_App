@@ -307,7 +307,7 @@ const InquiryList = () => {
         <soap:Header/>
         <soap:Body>
             <urn:ZdataWarehouse>
-                <Yearmon>202301</Yearmon>
+                <Yearmon>202410</Yearmon>
             </urn:ZdataWarehouse>
          </soap:Body>
         </soap:Envelope>
@@ -385,9 +385,9 @@ const InquiryList = () => {
                                 <span className="text-[18px]">+</span> Add
                                 Inquiry
                             </button>
-                            <button onClick={sendSoapRequest}>
+                           {/*  <button onClick={sendSoapRequest}>
                                 testUpload
-                            </button>
+                            </button> */}
                         </div>
 
                         {isFilterVisible && (

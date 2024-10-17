@@ -4,19 +4,21 @@ namespace App\Http\Controllers;
 
 use App\Models\Invoices;
 use Illuminate\Http\Request;
+use GuzzleHttp\Client;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx\Rels;
 
 class SapController extends Controller
 {
     public function urlSap(Request $request)
     {
-        $client = new \GuzzleHttp\Client();
-        $response = $client->post('https://sap-dev.cebulandmasters.com:44304/sap/bc/srt/rfc/sap/zinvoice1/200/zinvoice1/zinvoice1', [
+        $client = new Client();
+        $response = $client->post('http://SAP-QAS:8002/sap/bc/srt/rfc/sap/zinvoice1/888/zinvoice1/zinvoice1', [
             'headers' => [
-                'Authorization' => 'Basic ' . base64_encode('KBELMONTE:Tomorrowbytogether2019!'),
+                'Authorization' => 'Basic ' . base64_encode('KBELMONTE:1234567890!Ab'),
                 'Content-Type' => 'application/soap+xml',
             ],
             'body' => $request->getContent(),
-            'timeout' => 60, // Set timeout to 60 seconds
+            'timeout' => 14400, 
         ]);
     }
 
@@ -53,4 +55,18 @@ class SapController extends Controller
         }
     }
     
+
+    public function getInvoices(Request $request)
+    {
+        $query = Invoices::query();
+        $searchParams = $request->has('searchParams');
+        $query->select('contract_number', 'customer_name', 'invoice_amount', 'description', 'due_date');
+        if(!empty($searchParams)) {
+            $query->where('document_number', 'LIKE', '%'.$searchParams['document_number'].'%');
+        }
+        if(!empty($searchParams)) {
+            $query->where('due_date', 'LIKE', '%'.$searchParams['due_date'].'%');
+        }
+        return response()->json($query);
+    }
 }

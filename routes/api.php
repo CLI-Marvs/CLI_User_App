@@ -79,7 +79,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/get-pricing-master-lists', [PriceListMasterController::class, 'getAllPricingMasterLists']);
     /*Basic Pricing */
     Route::post('/basic-pricing', [PriceBasicDetailController::class, 'storeBasicPricing']);
-
     /*Payment Scheme */
     Route::post('/payment-schemes', [PaymentSchemeController::class, 'storePaymentScheme']);
     Route::get('/get-payment-schemes', [PaymentSchemeController::class, 'getAllPaymentSchemes']);
