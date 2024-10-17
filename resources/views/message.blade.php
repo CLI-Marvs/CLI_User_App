@@ -120,6 +120,12 @@
     </style>
 </head>
 
-<body>
-    <p>{!! $details_message !!}</p>
+
+<body style="font-family: Arial, sans-serif; font-size: 14px; color: #333; line-height: 1.6;">
+    <p style="font-size: 16px; font-weight: bold;">Hi {{ ucwords($buyer_name) }},</p>
+
+    <p style="margin-bottom: 5px;">{!! $details_message !!}</p>
+
+    <p style="font-size: 16px;">Sincerely,</p>
+    <p style="font-weight: bold;">{{ ucwords($admin_name) }}</p>
 </body>
