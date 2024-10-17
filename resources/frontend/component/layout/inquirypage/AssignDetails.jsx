@@ -78,7 +78,7 @@ const AssignDetails = ({ logMessages, ticketId }) => {
         });
     };
 
-    useEffect(() => {
+  /*   useEffect(() => {
         let concernChannel;
         let adminReplyChannel;
         let newTicketId;
@@ -102,7 +102,48 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                 window.Echo.leaveChannel(`adminreply.${newTicketId}`);
             }
         };
+    }, [ticketId]); */
+
+    useEffect(() => {
+        let concernChannel;
+        let adminReplyChannel;
+        let newTicketId;
+    
+        // Function to ensure window.Echo is loaded before subscribing
+        const initChannels = () => {
+            if (ticketId && window.Echo) {
+                newTicketId = ticketId.replace("#", "");
+                concernChannel = window.Echo.channel(`concerns.${newTicketId}`);
+                adminReplyChannel = window.Echo.channel(
+                    `adminreply.${newTicketId}`
+                );
+                concernChannelFunc(concernChannel);
+                adminReplyChannelFunc(adminReplyChannel);
+            }
+        };
+    
+        // Wait until the browser (Echo) is ready
+        const checkBrowserReady = setInterval(() => {
+            if (window.Echo) {
+                initChannels();
+                clearInterval(checkBrowserReady); // Stop checking once Echo is ready
+            }
+        }, 100); // Check every 100ms if Echo is initialized
+    
+        return () => {
+            clearInterval(checkBrowserReady); // Clear interval if component unmounts
+    
+            if (concernChannel) {
+                concernChannel.stopListening("ConcernMessages");
+                window.Echo.leaveChannel(`concerns.${newTicketId}`);
+            }
+            if (adminReplyChannel) {
+                adminReplyChannel.stopListening("AdminReplyLogs");
+                window.Echo.leaveChannel(`adminreply.${newTicketId}`);
+            }
+        };
     }, [ticketId]);
+    
 
     const sortedConcernMessages = concernMessages[ticketId]
         ? concernMessages[ticketId]
