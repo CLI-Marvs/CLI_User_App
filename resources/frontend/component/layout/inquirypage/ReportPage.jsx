@@ -50,17 +50,20 @@ const data3 = [
 const barHeight = 20;
 
 
-const COLORS = ["#5B9BD5", "#348017"];
+const COLORS = [
+    "#5B9BD5", "#348017", "#FFB300", "#FF5733", "#8E44AD", "#2ECC71", "#3498DB", 
+    "#E74C3C",
+  ];
 
 const categoryColors = {
-    "Reservation Documents": "#348017",
-    "Payment Issues": "#5B9BD5",
-    "Statement of Account and Billing Statement": "#348017",
-    "Turnover Status/Unit Concerns": "#5B9BD5",
-    "Loan Application": "#348017",
-    "Title and Other Registration Documents": "#5B9BD5",
-    Commissions: "#5B9BD5",
-    "Other Concerns": "#5B9BD5",
+    "Reservation Documents": "#5B9BD5",
+    "Payment Issues": "#348017",
+    "Statement of Account and Billing Statement": "#FFB300",
+    "Turnover Status/Unit Concerns": "#FF5733",
+    "Loan Application": "#8E44AD",
+    "Title and Other Registration Documents": "#2ECC71",
+    "Commissions": "#3498DB",
+    "Other Concerns": "#E74C3C",
 };
 
 const SINGLE_COLOR = "#5B9BD5";
@@ -163,6 +166,7 @@ const ReportPage = () => {
         setMonth(e.target.value);
     };
 
+    console.log("dataToDisplay", dataToDisplay);
     const handleInputChangeProperty = (e) => {
         setPropertyMonth(e.target.value);
     };
@@ -314,14 +318,14 @@ const ReportPage = () => {
                             </div>
                         </div>
                     </div>
-                    <div className="flex">
+                    <div className="flex flex-col">
                         <div>
-                            <PieChart width={230} height={260}>
+                            <PieChart width={430} height={260}>
                                 <Pie
                                     data={dataToDisplay}
                                     cx="50%"
                                     cy="50%"
-                                    outerRadius={100}
+                                    outerRadius={115}
                                     innerRadius={0}
                                     paddingAngle={1}
                                     strokeWidth={5}
@@ -333,8 +337,8 @@ const ReportPage = () => {
                                 >
                                     {dataToDisplay.map((entry, index) => (
                                         <Cell
-                                            key={index}
-                                            fill={COLORS[index % COLORS.length]}
+                                        key={index}
+                                        fill={categoryColors[entry.name] || COLORS[index % COLORS.length]}
                                         />
                                     ))}
                                 </Pie>
@@ -381,11 +385,11 @@ const ReportPage = () => {
                                 </div>
                             </div>
                         </div> */}
-                        <div className="w-full flex justify-start mt-[90px]">
+                        <div className="w-full px-[70px]">
                             <div className="flex flex-col">
                                 {dataToDisplay.map((category, index) => (
                                     <div
-                                        className="flex justify-between"
+                                        className="flex justify-between w-full"
                                         key={index}
                                     >
                                         <div className="flex gap-1 items-center">

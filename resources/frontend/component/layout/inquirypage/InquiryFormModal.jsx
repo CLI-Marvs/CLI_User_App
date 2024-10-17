@@ -51,10 +51,19 @@ const InquiryFormModal = ({ modalRef }) => {
             .toLowerCase()
             .replace(/\b\w/g, (char) => char.toUpperCase());
     };
+
+
+    
     const formattedPropertyNames = [
         "N/A",
         ...(Array.isArray(propertyNamesList) && propertyNamesList.length > 0
-            ? propertyNamesList.map((item) => formatFunc(item))
+            ? propertyNamesList
+            .filter((item) => !item.toLowerCase().includes("phase")) 
+            .map((item) => formatFunc(item)).sort((a, b) => {
+                if (a === "N/A") return -1; 
+                if (b === "N/A") return 1;
+                return a.localeCompare(b); 
+            })
             : []),
     ];
 
@@ -368,8 +377,8 @@ const InquiryFormModal = ({ modalRef }) => {
                                     <option value="Loan Application">
                                         Loan Application
                                     </option>
-                                    <option value="Titile and Other Registration Documents">
-                                        Titile and Other Registration Documents
+                                    <option value="Title and Other Registration Documents">
+                                       Title and Other Registration Documents
                                     </option>
                                     <option value="Commissions">
                                         Commissions

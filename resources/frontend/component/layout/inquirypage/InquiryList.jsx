@@ -39,8 +39,9 @@ const InquiryList = () => {
     const [email, setEmail] = useState("");
     const [ticket, setTicket] = useState("");
     const [status, setStatus] = useState("");
+    const [selectedProperty, setSelectedProperty] = useState("");
     const [hasAttachments, setHasAttachments] = useState(false);
-
+    const { propertyNamesList } = useStateContext();
     const [activeDayButton, setActiveDayButton] = useState(null);
     const [assignedToMeActive, setAssignedToMeActive] = useState(false);
 
@@ -138,8 +139,8 @@ const InquiryList = () => {
         }
     };
 
-    const handleStatus = (e) => {
-        setStatus(e.target.value);
+    const handleSelectProperty = (e) => {
+        setSelectedProperty(e.target.value);
     };
 
     // const handleDayClick = (day) => {
@@ -199,6 +200,25 @@ const InquiryList = () => {
         }
     };
 
+    const formatFunc = (name) => {
+        return name
+            .toLowerCase()
+            .replace(/\b\w/g, (char) => char.toUpperCase());
+    };
+
+    const formattedPropertyNames = [
+        "N/A",
+        ...(Array.isArray(propertyNamesList) && propertyNamesList.length > 0
+            ? propertyNamesList
+            .filter((item) => !item.toLowerCase().includes("phase")) 
+            .map((item) => formatFunc(item)).sort((a, b) => {
+                if (a === "N/A") return -1; 
+                if (b === "N/A") return 1;
+                return a.localeCompare(b); 
+            })
+            : []),
+    ];
+
     const updateLastActivity = () => {
         const currentTime = new Date();
         setLastActivity(currentTime);
@@ -225,8 +245,9 @@ const InquiryList = () => {
             email,
             ticket,
             startDate,
-            status,
+            selectedProperty,
             hasAttachments,
+
         });
         setDaysFilter(null);
         setStatusFilter(null);
@@ -236,7 +257,8 @@ const InquiryList = () => {
         setCategory("");
         setEmail("");
         setTicket("");
-        setStatus("");
+        //setStatus("");
+        setSelectedProperty("")
         setHasAttachments(false);
         setSpecificAssigneeCsr("");
     };
@@ -301,37 +323,7 @@ const InquiryList = () => {
     }; */
     
 
-    const sendSoapRequest = async () => {
-        const soapBody = `
-        <soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:urn="urn:sap-com:document:sap:soap:functions:mc-style">
-        <soap:Header/>
-        <soap:Body>
-            <urn:ZdataWarehouse>
-                <Yearmon>202410</Yearmon>
-            </urn:ZdataWarehouse>
-         </soap:Body>
-        </soap:Envelope>
-        `;
-    
-        const username = "KBELMONTE";
-        const password = "Tomorrowbytogether2019!";
-        const authHeader = "Basic " + btoa(`${username}:${password}`);
-    
-        const config = {
-            headers: {
-                "Content-Type": "application/soap+xml",
-                "Authorization": authHeader,
-            },
-        };
-    
-        try {
-            const response = await axios.post("http://localhost:8001/api/proxy-sap", soapBody, config);
-            console.log("Response:", response.data);
-        } catch (error) {
-            console.error("Error:", error.response ? error.response.data : error.message);
-        }
-    };
-    
+   
     
     return (
         <>
@@ -385,9 +377,6 @@ const InquiryList = () => {
                                 <span className="text-[18px]">+</span> Add
                                 Inquiry
                             </button>
-                           {/*  <button onClick={sendSoapRequest}>
-                                testUpload
-                            </button> */}
                         </div>
 
                         {isFilterVisible && (
@@ -502,31 +491,28 @@ const InquiryList = () => {
                                         </div>
                                         <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
                                             {" "}
-                                            Status
+                                            Property
                                         </label>
                                         <select
                                             className="w-full border-b-1 outline-none text-sm"
-                                            onChange={handleStatus}
-                                            value={status}
+                                            onChange={handleSelectProperty}
+                                            value={selectedProperty}
                                         >
                                             <option value="">
-                                                Select Status
+                                                Select Property
                                             </option>
-                                            <option value="Inquiry Feedback Received">
-                                                Inquiry Feedback Received
-                                            </option>
-                                            <option value="Replied By">
-                                                Replied By
-                                            </option>
-                                            <option value="Assigned To">
-                                                Assigned To
-                                            </option>
-                                            <option value="Marked as resolved">
-                                                Marked as resolved
-                                            </option>
-                                            <option value="Follow up reply">
-                                                Follow up reply
-                                            </option>
+                                            {formattedPropertyNames.map(
+                                                (item, index) => {
+                                                    return (
+                                                        <option
+                                                            key={index}
+                                                            value={item}
+                                                        >
+                                                            {item}
+                                                        </option>
+                                                    );
+                                                }
+                                            )}
                                         </select>
                                     </div>
                                     <div className="mt-5 flex gap-5">
@@ -601,18 +587,18 @@ const InquiryList = () => {
                         </div>
                         <div className="flex gap-[10px]">
                             <div className="flex gap-2">
-                                <div className="flex space-x-2">
+                                <div className="flex items-center space-x-2">
                                     {user?.department === "CRS" && (
                                         <button
                                             onClick={handleAssignedToMeClick}
-                                            className={`flex items-center border text-custom-lightgreen h-[29px] w-[125px] rounded-[55px] p-[2px] ${
+                                            className={`flex items-center text-custom-lightgreen h-[25px] w-[125px] rounded-[55px] p-[2px] ${
                                                 assignedToMeActive
                                                     ? "bglightgreen-btn"
                                                     : "gradient-btn2hover "
                                             }`}
                                         >
                                             <p
-                                                className={`h-full w-full flex justify-center items-center  text-xs montserrat-semibold rounded-[50px]   ${
+                                                className={`h-full w-full flex justify-center items-center text-xs montserrat-semibold rounded-[50px]   ${
                                                     assignedToMeActive
                                                         ? "bglightgreen-btn"
                                                         : "bg-white hover:bg-custom-lightestgreen"
