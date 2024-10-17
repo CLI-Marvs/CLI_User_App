@@ -46,7 +46,7 @@ const UserMessages = ({ items }) => {
                 </div>
             </div>
             <div className="w-full mt-[10px]">
-                <div className="w-full h-auto gradient-background1 rounded-b-[10px] rounded-r-[10px]  p-[20px] pl-[31px] text-sm text-white">
+                <div className="w-full h-auto gradient-background1 rounded-b-[10px] rounded-r-[10px]  p-[20px] pl-[31px] text-xs text-white">
                     <div>
                         <p
                             dangerouslySetInnerHTML={{
@@ -73,7 +73,7 @@ const UserMessages = ({ items }) => {
                                             "_blank"
                                         );
                                     }}
-                                    className="flex items-center justify-start bg-customnavbar h-12 px-24 pl-4 text-black gap-2 rounded-[5px]"
+                                    className="flex items-center justify-start bg-customnavbar h-12 pl-4 text-black gap-2 rounded-[5px]"
                                 >
                                     <img
                                         src={FolderFile}

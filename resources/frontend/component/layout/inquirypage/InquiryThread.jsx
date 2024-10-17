@@ -548,7 +548,7 @@ const InquiryThread = () => {
                             <div className="flex justify-end shrink-0">
                                 <button
                                     onClick={handleOpenModal}
-                                    className="w-[85px] h-[29px] rounded-[10px] gradient-btn5 montserrat-medium text-sm text-white hover:shadow-custom4"
+                                    className="w-[85px] h-[29px] rounded-[10px] gradient-btn5 font-light text-sm text-white hover:shadow-custom4"
                                 >
                                     More Info
                                 </button>
@@ -560,7 +560,7 @@ const InquiryThread = () => {
                                 {/* boxref */}
                                 {/* Container for chat input and attached files */}
                                 <div className="gradient-btn2 rounded-[12px] p-[2px] relative">
-                                    <div className="bg-white p-[10px] pr-0 rounded-[10px]">
+                                    <div className="bg-white p-[10px] rounded-[10px]">
                                         {/* Display attached files inside the same container */}
                                         {attachedFiles.length > 0 && (
                                             <div className="mb-2 ">
