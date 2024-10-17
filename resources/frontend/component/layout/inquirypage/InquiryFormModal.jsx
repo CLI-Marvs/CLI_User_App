@@ -57,7 +57,9 @@ const InquiryFormModal = ({ modalRef }) => {
     const formattedPropertyNames = [
         "N/A",
         ...(Array.isArray(propertyNamesList) && propertyNamesList.length > 0
-            ? propertyNamesList.map((item) => formatFunc(item)).sort((a, b) => {
+            ? propertyNamesList
+            .filter((item) => !item.toLowerCase().includes("phase")) 
+            .map((item) => formatFunc(item)).sort((a, b) => {
                 if (a === "N/A") return -1; 
                 if (b === "N/A") return 1;
                 return a.localeCompare(b); 
