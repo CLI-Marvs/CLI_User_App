@@ -54,7 +54,7 @@ const ResolveModal = ({ modalRef, ticketId, dataRef }) => {
                 <div className=" bg-[#EDEDED] border border-[#D9D9D9]">
                     <div className="flex items-center justify-between">
                         <p className="text-custom-gray81 pl-3 text-sm flex-grow">
-                           Notes/Remarks
+                            CLI Admin Notes
                         </p>
                         <span className="bg-white text-sm2 text-gray-400 font-normal py-3 border border-custom-grayFA pl-2 pr-12 ml-auto">
                             {remarks.length}/500 characters

@@ -40,7 +40,7 @@ const InquiryList = () => {
     const [ticket, setTicket] = useState("");
     const [status, setStatus] = useState("");
     const [hasAttachments, setHasAttachments] = useState(false);
-
+    const { propertyNamesList } = useStateContext();
     const [activeDayButton, setActiveDayButton] = useState(null);
     const [assignedToMeActive, setAssignedToMeActive] = useState(false);
 
@@ -198,6 +198,17 @@ const InquiryList = () => {
             modalRef.current.showModal();
         }
     };
+
+    const formattedPropertyNames = [
+        "N/A",
+        ...(Array.isArray(propertyNamesList) && propertyNamesList.length > 0
+            ? propertyNamesList.map((item) => formatFunc(item)).sort((a, b) => {
+                if (a === "N/A") return -1; 
+                if (b === "N/A") return 1;
+                return a.localeCompare(b); 
+            })
+            : []),
+    ];
 
     const updateLastActivity = () => {
         const currentTime = new Date();
@@ -470,7 +481,7 @@ const InquiryList = () => {
                                         </div>
                                         <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
                                             {" "}
-                                            Status
+                                            Property
                                         </label>
                                         <select
                                             className="w-full border-b-1 outline-none text-sm"
@@ -480,21 +491,18 @@ const InquiryList = () => {
                                             <option value="">
                                                 Select Status
                                             </option>
-                                            <option value="Inquiry Feedback Received">
-                                                Inquiry Feedback Received
-                                            </option>
-                                            <option value="Replied By">
-                                                Replied By
-                                            </option>
-                                            <option value="Assigned To">
-                                                Assigned To
-                                            </option>
-                                            <option value="Marked as resolved">
-                                                Marked as resolved
-                                            </option>
-                                            <option value="Follow up reply">
-                                                Follow up reply
-                                            </option>
+                                            {formattedPropertyNames.map(
+                                                    (item, index) => {
+                                                        return (
+                                                            <option
+                                                                key={index}
+                                                                value={item}
+                                                            >
+                                                                {item}
+                                                            </option>
+                                                        );
+                                                    }
+                                                )}
                                         </select>
                                     </div>
                                     <div className="mt-5 flex gap-5">
