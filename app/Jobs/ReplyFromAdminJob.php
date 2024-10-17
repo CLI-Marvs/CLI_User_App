@@ -44,7 +44,7 @@ class ReplyFromAdminJob implements ShouldQueue
 
         $mailer->to($this->email)
             ->cc('scriptest@cebulandmasters.com')
-            ->send(new SendReplyFromAdmin($this->ticket_id, $this->email, $this->details_message, $this->message_id, $this->files, $admin_name, $buyer_name));
+            ->send(new SendReplyFromAdmin($this->ticket_id, $this->email, $this->details_message, $this->message_id, $this->files, $this->admin_name, $this->buyer_name));
 
         foreach ($this->files as $file) {
             @unlink($file['path']);
