@@ -301,37 +301,7 @@ const InquiryList = () => {
     }; */
     
 
-    const sendSoapRequest = async () => {
-        const soapBody = `
-        <soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:urn="urn:sap-com:document:sap:soap:functions:mc-style">
-        <soap:Header/>
-        <soap:Body>
-            <urn:ZdataWarehouse>
-                <Yearmon>202410</Yearmon>
-            </urn:ZdataWarehouse>
-         </soap:Body>
-        </soap:Envelope>
-        `;
-    
-        const username = "KBELMONTE";
-        const password = "Tomorrowbytogether2019!";
-        const authHeader = "Basic " + btoa(`${username}:${password}`);
-    
-        const config = {
-            headers: {
-                "Content-Type": "application/soap+xml",
-                "Authorization": authHeader,
-            },
-        };
-    
-        try {
-            const response = await axios.post("http://localhost:8001/api/proxy-sap", soapBody, config);
-            console.log("Response:", response.data);
-        } catch (error) {
-            console.error("Error:", error.response ? error.response.data : error.message);
-        }
-    };
-    
+   
     
     return (
         <>
@@ -385,9 +355,7 @@ const InquiryList = () => {
                                 <span className="text-[18px]">+</span> Add
                                 Inquiry
                             </button>
-                           {/*  <button onClick={sendSoapRequest}>
-                                testUpload
-                            </button> */}
+                           
                         </div>
 
                         {isFilterVisible && (

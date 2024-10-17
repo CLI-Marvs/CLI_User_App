@@ -27,6 +27,8 @@ import PaymentSectionView from "./views/pages/paymentViews/PaymentSectionView";
 import MainComponent from "./layout/chatComponent/MainComponent";
 import AdminSettingView from "./views/pages/adminsettingsViews/AdminSettingView";
 import TransactionView from "./views/pages/transactionViews/TransactionView";
+import TransactionSidebar from "./views/pages/transactionViews/TransactionSidebar";
+import BankStatementView from "./views/pages/transactionViews/BankStatementView";
 
 const App = () => {
     const Layout = () => {
@@ -55,6 +57,17 @@ const App = () => {
                 </div>
             </>
         ); */
+    };
+
+    const SecondLayout = () => {
+        return (
+            <>
+                <div className="w-full flex flex-row h-full">
+                    <TransactionSidebar/>
+                    <Outlet/>
+                </div>
+            </>
+        );
     };
 
     const router = createBrowserRouter([
@@ -89,7 +102,17 @@ const App = () => {
                 },
                 {
                     path: "transaction",
-                    element: <TransactionView/>,
+                    element: <SecondLayout />,
+                    children: [
+                        {
+                            path: "invoices",
+                            element: <TransactionView/>,
+                        },
+                        {
+                            path: "bankstatements",
+                            element: <BankStatementView/>,
+                        },
+                    ],
                 },
                 {
                     path: "inquirymanagement/inquirylist",

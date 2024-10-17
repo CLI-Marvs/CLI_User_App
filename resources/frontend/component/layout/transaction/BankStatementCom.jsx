@@ -1,7 +1,7 @@
 import { Card } from "@mui/material";
 import React, { useState } from "react";
 
-const TransactionCom = () => {
+const BankStatementCom = () => {
     const sampleData = [
         { id: 1, name: "John Doe", email: "john@example.com" },
         { id: 2, name: "Jane Smith", email: "jane@example.com" },
@@ -28,49 +28,9 @@ const TransactionCom = () => {
     const handlePageChange = (page) => {
         setCurrentPage(page);
     };
-
-    const sendSoapRequest = async () => {
-        const soapBody = `
-      <soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:urn="urn:sap-com:document:sap:soap:functions:mc-style">
-      <soap:Header/>
-      <soap:Body>
-          <urn:ZdataWarehouse>
-              <Yearmon>202410</Yearmon>
-          </urn:ZdataWarehouse>
-       </soap:Body>
-      </soap:Envelope>
-      `;
-
-        const username = "KBELMONTE";
-        const password = "1234567890!Ab";
-        const authHeader = "Basic " + btoa(`${username}:${password}`);
-
-        const config = {
-            headers: {
-                "Content-Type": "application/soap+xml",
-                Authorization: authHeader,
-            },
-        };
-
-        try {
-            const response = await axios.post(
-                "https://admin-dev.cebulandmasters.com/api/proxy-sap",
-                soapBody,
-                config
-            );
-            console.log("Response:", response.data);
-        } catch (error) {
-            console.error(
-                "Error:",
-                error.response ? error.response.data : error.message
-            );
-        }
-    };
-
     return (
         <div className="flex-grow">
             <Card className="h-full p-10">
-                <button onClick={sendSoapRequest}>testUpload</button>
                 <div className="mb-4">
                     <input
                         type="text"
@@ -89,7 +49,7 @@ const TransactionCom = () => {
                                 ID
                             </th>
                             <th className="py-2 px-4 border border-gray-500">
-                                Name
+                                Namess
                             </th>
                             <th className="py-2 px-4 border border-gray-500">
                                 Email
@@ -138,4 +98,4 @@ const TransactionCom = () => {
     );
 };
 
-export default TransactionCom;
+export default BankStatementCom;

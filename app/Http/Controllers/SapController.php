@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\BankTransaction;
 use App\Models\Invoices;
 use Illuminate\Http\Request;
 use GuzzleHttp\Client;
@@ -76,6 +77,46 @@ class SapController extends Controller
         }
         if(!empty($searchParams['due_date'])) {
             $query->where('due_date', 'LIKE', '%'.$searchParams['due_date'].'%');
+        }
+    }
+
+    public function uploadNotepad(Request $request)
+    {
+        try {
+            $request->validate([
+                'notepadFile' => 'required|mimes:txt|max:2048', 
+            ]);
+    
+            $file = $request->file('notepadFile');
+    
+            $fileContents = file_get_contents($file->getPathName());
+    
+            \Log::info('Notepad file contents: ' . $fileContents);
+            $lines = explode("\n", $fileContents); 
+            \Log::info('Notepad file lines: ' . $lines);
+            return false;
+
+            foreach ($lines as $line) {
+                if (trim($line) == '') {
+                    continue;
+                }
+    
+                $columns = preg_split('/\s+/', trim($line));
+    
+                if (count($columns) >= 3) {
+                    BankTransaction::create([
+                        'column1' => $columns[0],
+                        'column2' => $columns[1],
+                        'column3' => $columns[2],
+                    ]);
+                }
+            }
+    
+            // Optionally, return a success message or the view
+            return redirect()->back()->with('success', 'File uploaded and data saved successfully.');
+        }
+       catch (\Exception $e) {
+            return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
         }
     }
 }
