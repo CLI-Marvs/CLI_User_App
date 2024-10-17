@@ -76,7 +76,7 @@ const InquiryThread = () => {
         const files = Array.from(event.target.files);
         setAttachedFiles((prevFiles) => [...prevFiles, ...files]);
     };
-    
+
     const formatFunc = (name) => {
         return name
             .toLowerCase()
@@ -87,12 +87,12 @@ const InquiryThread = () => {
         "N/A",
         ...(Array.isArray(propertyNamesList) && propertyNamesList.length > 0
             ? propertyNamesList
-            .filter((item) => !item.toLowerCase().includes("phase")) 
-            .map((item) => formatFunc(item)).sort((a, b) => {
-                if (a === "N/A") return -1; 
-                if (b === "N/A") return 1;
-                return a.localeCompare(b); 
-            })
+                .filter((item) => !item.toLowerCase().includes("phase"))
+                .map((item) => formatFunc(item)).sort((a, b) => {
+                    if (a === "N/A") return -1;
+                    if (b === "N/A") return 1;
+                    return a.localeCompare(b);
+                })
             : []),
     ];
 
@@ -163,6 +163,15 @@ const InquiryThread = () => {
         setTicket("");
         setHasAttachments(false);
         navigate("/inquirymanagement/inquirylist");
+    };
+
+    const formatChatMessage = (message) => {
+        return message.split('\n').map((item, index) => (
+            <span key={index}>
+                {item}
+                <br />
+            </span>
+        ));
     };
 
     const handleDeleteInquiry = async () => {
@@ -266,8 +275,8 @@ const InquiryThread = () => {
 
     const combineThreadMessages = messages[ticketId]
         ? messages[ticketId]
-              .flat()
-              .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+            .flat()
+            .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
         : [];
     useEffect(() => {
         let adminMessageChannel;
@@ -295,8 +304,8 @@ const InquiryThread = () => {
         };
     }, [ticketId]);
 
-    
-    
+
+
     const capitalizeWords = (name) => {
         return name
             .split(" ")
@@ -608,7 +617,7 @@ const InquiryThread = () => {
                                             ></textarea>
 
                                             {/* File attachment button */}
-                                            <div className=" absolute bottom-2 right-[115px] items-center">
+                                            <div className=" absolute bottom-[6px] right-[108px] items-center">
                                                 <input
                                                     type="file"
                                                     id="fileInput"
@@ -639,11 +648,10 @@ const InquiryThread = () => {
                                                         loading
                                                     }
                                                     className={`flex w-[82px] h-[28px] rounded-[5px] text-white text-xs justify-center items-center 
-                                                        ${
-                                                            loading ||
+                                                        ${loading ||
                                                             !chatMessage.trim()
-                                                                ? "bg-gray-400 cursor-not-allowed"
-                                                                : "gradient-background3 hover:shadow-custom4"
+                                                            ? "bg-gray-400 cursor-not-allowed"
+                                                            : "gradient-background3 hover:shadow-custom4"
                                                         } 
                                                     `}
                                                 >
@@ -656,56 +664,55 @@ const InquiryThread = () => {
                                             </div>
                                             {isConfirmModalOpen && (
                                                 <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-                                                    <div className="bg-white p-[20px] rounded-[10px] shadow-custom5 w-[467px] h-[228]">
-                                                        <div className="flex justify-center items-center mt-[14px] ">
-                                                            <AiFillInfoCircle className="size-[37px] text-[#5B9BD5]" />
-                                                        </div>
-                                                        <div className="flex justify-center mt-[30px]">
-                                                            <p className="montserrat-medium text-[20px]">
-                                                                Are you sure
-                                                                about sending
-                                                                this reply?
-                                                            </p>
-                                                        </div>
-                                                        <div className="flex flex-col justify-center items-center text-[12px] text-[#B54D4D] px-[20px]">
-                                                            <p>
-                                                                This message
-                                                                will be sent to
-                                                            </p>
-                                                            <span className="font-semibold text-[13px]">
-                                                                {
-                                                                    dataConcern.buyer_name
-                                                                }{" "}
-                                                                (
-                                                                {
-                                                                    dataConcern.buyer_email
-                                                                }
-                                                                )
-                                                            </span>
-                                                        </div>
-                                                        <div className="flex justify-center mt-[26px] space-x-[19px]">
-                                                            <button
-                                                                onClick={() =>
-                                                                    setIsConfirmModalOpen(
-                                                                        false
-                                                                    )
-                                                                }
-                                                                className="gradient-btn5 p-[1px] w-[92px] h-[35px] rounded-[10px]"
-                                                            >
-                                                                <div className="w-full h-full rounded-[9px] bg-white flex justify-center items-center montserrat-semibold text-sm">
-                                                                    <p className="text-base font-bold bg-gradient-to-r from-custom-bluegreen via-custom-solidgreen to-custom-solidgreen bg-clip-text text-transparent">
-                                                                        Cancel
-                                                                    </p>
+                                                    <div className="bg-white p-[20px] rounded-[10px] shadow-custom5 w-[784px] min-h-[442px]">
+                                                        <div className="p-[10px] flex flex-col gap-[26px]">
+                                                            <div className="flex justify-center items-center">
+                                                                <AiFillInfoCircle className="size-[37px] text-[#5B9BD5]" />
+                                                            </div>
+                                                            <div className="flex items-center justify-between  px-[25px] h-[50px] rounded-[4px] bg-custom-lightestgreen">
+                                                                <p className="montserrat-medium text-[20px]">
+                                                                    Are you sure about sending this message?
+                                                                </p>
+                                                                <div>
+                                                                    <div className="flex justify-center space-x-[10px]">
+                                                                        <button
+                                                                            onClick={() =>
+                                                                                setIsConfirmModalOpen(
+                                                                                    false
+                                                                                )
+                                                                            }
+                                                                            className="gradient-btn5 p-[1px] w-[92px] h-[35px] rounded-[10px]"
+                                                                        >
+                                                                            <div className="w-full h-full rounded-[9px] bg-white flex justify-center items-center montserrat-semibold text-sm">
+                                                                                <p className="text-base font-bold bg-gradient-to-r from-custom-bluegreen via-custom-solidgreen to-custom-solidgreen bg-clip-text text-transparent">
+                                                                                    Cancel
+                                                                                </p>
+                                                                            </div>
+                                                                        </button>
+                                                                        <button
+                                                                            onClick={
+                                                                                submitMessage
+                                                                            }
+                                                                            className="gradient-btn5 w-[100px] h-[35px] rounded-[10px] text-sm text-white montserrat-semibold"
+                                                                        >
+                                                                            Confirm
+                                                                        </button>
+                                                                    </div>
                                                                 </div>
-                                                            </button>
-                                                            <button
-                                                                onClick={
-                                                                    submitMessage
-                                                                }
-                                                                className="gradient-btn5 w-[100px] h-[35px] rounded-[10px] text-sm text-white montserrat-semibold"
-                                                            >
-                                                                Confirm
-                                                            </button>
+                                                            </div>
+                                                            <div className="flex items-center h-[22px] text-custom-solidgreen font-semibold">
+                                                                PREVIEW
+                                                            </div>
+                                                            <div className="flex items-center h-[19px] text-sm">
+                                                             Hi{" "}{dataConcern.buyer_name},
+                                                            </div>
+                                                            <div className="w-full p-[10px] border-[2px] rounded-[5px] border-custom-grayF1 text-sm text-custom-gray81">
+                                                            {formatChatMessage(chatMessage)}
+                                                            </div>
+                                                            <div className="text-sm">
+                                                                <p>Sincerely,</p>
+                                                                <p>CLI Support</p>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>

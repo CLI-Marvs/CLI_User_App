@@ -233,7 +233,7 @@ const AddInfoModal = ({ modalRef, dataConcern }) => {
                     >
                         <div className="flex items-center justify-between">
                             <p className="text-custom-gray81 text-sm bg-[#EDEDED] pl-3 flex-grow mobile:text-xs mobile:w-[170px]">
-                                Notes/Remarks
+                                CLI Admin Notes
                             </p>
                             <span className="bg-white text-sm2 text-gray-400 font-normal py-3 border border-[D6D6D6] pl-2 pr-12 mobile:pr-1 mobile:text-xs ml-auto rounded-r-[4px]">
                                 {" "}
@@ -247,7 +247,6 @@ const AddInfoModal = ({ modalRef, dataConcern }) => {
                                 onChange={handleChangeValue}
                                 maxLength={maxCharacters}
                                 name="details_message"
-                                placeholder="Write your concern here."
                                 rows="4"
                                 draggable="false"
                                 className={` rounded-[5px] bg-white border border-[D6D6D6] w-full pl-2 outline-none`}
