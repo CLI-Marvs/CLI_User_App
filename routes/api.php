@@ -57,6 +57,8 @@ Route::post('/add-property-sap', [PropertyMasterController::class, 'storePropert
 Route::post('/buyer-reply', [ConcernController::class, 'fromAppSript']);
 
 Route::post('/proxy-sap', [SapController::class, 'urlSap']);
+Route::post('/posting-invoices', [SapController::class, 'postInvoices']);
+
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/get-concern', [ConcernController::class, 'getAllConcerns']);
@@ -77,7 +79,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/get-pricing-master-lists', [PriceListMasterController::class, 'getAllPricingMasterLists']);
     /*Basic Pricing */
     Route::post('/basic-pricing', [PriceBasicDetailController::class, 'storeBasicPricing']);
-
     /*Payment Scheme */
     Route::post('/payment-schemes', [PaymentSchemeController::class, 'storePaymentScheme']);
     Route::get('/get-payment-schemes', [PaymentSchemeController::class, 'getAllPaymentSchemes']);

@@ -304,13 +304,12 @@ const InquiryList = () => {
     const sendSoapRequest = async () => {
         const soapBody = `
         <soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:urn="urn:sap-com:document:sap:soap:functions:mc-style">
-           <soap:Header/>
-           <soap:Body>
-              <urn:Zapptosap>
-                 <Ecode>321321</Ecode>
-                 <Ename>markyboy12</Ename>
-              </urn:Zapptosap>
-           </soap:Body>
+        <soap:Header/>
+        <soap:Body>
+            <urn:ZdataWarehouse>
+                <Yearmon>202410</Yearmon>
+            </urn:ZdataWarehouse>
+         </soap:Body>
         </soap:Envelope>
         `;
     
