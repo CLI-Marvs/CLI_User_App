@@ -60,6 +60,7 @@ export const ContextProvider = ({ children }) => {
     const [propertyMasterData, setPropertyMasterData] = useState([]);
     const [assigneesPersonnel, setAssigneesPersonnel] = useState([]);
     const [propertyNamesList, setPropertyNamesList] = useState([]);
+    const [invoices, setInvoices] = useState([]);
     useEffect(() => {
         if (user && user.department && !isDepartmentInitialized) {
             setDepartment(user.department === "CRS" ? "All" : user.department);
@@ -166,6 +167,15 @@ export const ContextProvider = ({ children }) => {
             setDataPropery(formattedData);
         } catch (error) {
             console.log("error retrieving", error);
+        }
+    };
+
+    const getInvoices = async () => {
+        try {
+            const response = await apiService.get("get-invoices");
+            setInvoices(response.data);
+        } catch (error) {
+            console.log("error", error);
         }
     };
 
@@ -434,6 +444,7 @@ export const ContextProvider = ({ children }) => {
 
     useEffect(() => {
         getAllConcerns();
+        getInvoices();
     }, [
         currentPage,
         daysFilter,
@@ -563,7 +574,8 @@ export const ContextProvider = ({ children }) => {
                 setAssigneesPersonnel,
                 assigneesPersonnel,
                 getAssigneesPersonnel,
-                propertyNamesList
+                propertyNamesList,
+                invoices
             }}
         >
             {children}
