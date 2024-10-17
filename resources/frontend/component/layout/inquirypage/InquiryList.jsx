@@ -124,13 +124,13 @@ const InquiryList = () => {
             setActiveDayButton(null);
             setSpecificAssigneeCsr("");
             setAssignedToMeActive(false);
-        } else if (option === "Resolve") {
+        } else if (option === "Resolved") {
             setStatusFilter("Resolved");
             setCurrentPage(0);
             setSearchFilter("");
             setSpecificAssigneeCsr("");
             setAssignedToMeActive(false);
-        } else if (option === "Unresolve") {
+        } else if (option === "Unresolved") {
             setStatusFilter("unresolved");
             setCurrentPage(0);
             setSearchFilter("");
@@ -568,7 +568,7 @@ const InquiryList = () => {
                                         <li
                                             className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
                                             onClick={() =>
-                                                handleOptionClick("Resolve")
+                                                handleOptionClick("Resolved")
                                             }
                                         >
                                             Resolved
@@ -576,7 +576,7 @@ const InquiryList = () => {
                                         <li
                                             className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
                                             onClick={() =>
-                                                handleOptionClick("Unresolve")
+                                                handleOptionClick("Unresolved")
                                             }
                                         >
                                             Unresolved
