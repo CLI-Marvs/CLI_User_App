@@ -12,7 +12,7 @@ const TransactionSidebar = () => {
             </Link>
             <Link to="/transaction/bankstatements">
                 <button className="w-full bg-custom-lightgreen text-white rounded-lg py-3 px-5">
-                    Bank Statements
+                    Transaction Records
                 </button>
             </Link>
           </div>

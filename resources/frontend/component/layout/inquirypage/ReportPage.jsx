@@ -51,15 +51,16 @@ const barHeight = 20;
 
 
 const COLORS = [
-    "#5B9BD5", "#348017", "#FFB300", "#FF5733", "#8E44AD", "#2ECC71", "#3498DB", 
+    "#5B9BD5", "#348017", "#FFB300", "#FF5733", "1ABC9C", "#8E44AD", "#2ECC71", "#3498DB", 
     "#E74C3C",
   ];
 
 const categoryColors = {
     "Reservation Documents": "#5B9BD5",
     "Payment Issues": "#348017",
-    "Statement of Account and Billing Statement": "#FFB300",
-    "Turnover Status/Unit Concerns": "#FF5733",
+    "SOA/ Billing Statement/ Buyer's Ledger": "#FFB300",
+    "Turn Over Status": "#FF5733",
+    "Unit Status": "#1ABC9C",
     "Loan Application": "#8E44AD",
     "Title and Other Registration Documents": "#2ECC71",
     "Commissions": "#3498DB",

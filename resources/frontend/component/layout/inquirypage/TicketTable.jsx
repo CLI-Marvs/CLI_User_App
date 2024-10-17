@@ -135,6 +135,7 @@ const TicketTable = ({ concernData }) => {
                                             row.buyer_name.split(" ");
                                         const lastName = nameParts.pop();
                                         const firstName = nameParts.join(" ");
+                                        const middleInitial = row.buyer_middlename ? `${row.buyer_middlename.charAt(0).toUpperCase()}.` : "";
 
                                         // Helper function to capitalize the first letter of a string
                                         const capitalize = (name) =>
@@ -143,7 +144,7 @@ const TicketTable = ({ concernData }) => {
 
                                         return `${capitalize(
                                             lastName
-                                        )}, ${capitalize(firstName)}`;
+                                        )}, ${capitalize(firstName)}, ${middleInitial}`;
                                     })()}
                                 </p>
                             </td>

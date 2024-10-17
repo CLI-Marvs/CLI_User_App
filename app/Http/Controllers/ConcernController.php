@@ -248,6 +248,7 @@ class ConcernController extends Controller
             $admin_name = $request->input('admin_name', '');
             $admin_id = $request->input('admin_id', '');
             $buyer_email = $request->input('buyer_email', '');
+            $buyer_name = $request->input('buyer_name', '');
             $admin_profile_picture = $request->input('admin_profile_picture', '');
 
 
@@ -287,7 +288,7 @@ class ConcernController extends Controller
                 ReplyFromAdminJob::dispatch($messages->ticket_id, $buyer_email, $adminMessage, $message_id, $allFiles);
             } */
 
-            ReplyFromAdminJob::dispatch($messages->ticket_id, $buyer_email, $adminMessage, $message_id, $allFiles);
+            ReplyFromAdminJob::dispatch($messages->ticket_id, $buyer_email, $adminMessage, $message_id, $allFiles, $admin_name, $buyer_name);
 
 
             return response()->json("Successfully sent");
@@ -384,6 +385,7 @@ class ConcernController extends Controller
             $concerns->ticket_id = $ticketId;
             $concerns->user_type = $request->user_type;
             $concerns->buyer_name = $request->fname . ' ' . $request->lname;
+            $concerns->buyer_middlename = $request->mname;
             $concerns->mobile_number = $request->mobile_number;
             $concerns->contract_number = $request->contract_number;
             $concerns->unit_number = $request->unit_number;

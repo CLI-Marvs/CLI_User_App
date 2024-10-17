@@ -21,14 +21,19 @@ class SendReplyFromAdmin extends Mailable
     protected $details_message;
     protected $message_id;
     protected $files;
+    protected $admin_name;
+    protected $buyer_name;
 
-    public function __construct($ticket_id, $email, $details_message, $message_id = null, $files)
+
+    public function __construct($ticket_id, $email, $details_message, $message_id = null, $files, $admin_name, $buyer_name)
     {
         $this->ticket_id = $ticket_id;
         $this->email = $email;
         $this->details_message = $details_message;
         $this->message_id = $message_id;
         $this->files = $files;
+        $this->admin_name = $admin_name;
+        $this->buyer_name = $buyer_name;
     }
 
     /**
@@ -68,7 +73,9 @@ class SendReplyFromAdmin extends Mailable
         return new Content(
             view: 'message',
             with: [
-                'details_message' => $this->details_message
+                'details_message' => $this->details_message,
+                'admin_name' => $this->admin_name,
+                'buyer_name' => $this->buyer_name
             ],
         );
     }
