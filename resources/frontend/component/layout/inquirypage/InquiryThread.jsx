@@ -581,7 +581,7 @@ const InquiryThread = () => {
                                             ></textarea>
 
                                             {/* File attachment button */}
-                                            <div className=" absolute bottom-2 right-[115px] items-center hidden">
+                                            <div className=" absolute bottom-2 right-[115px] items-center">
                                                 <input
                                                     type="file"
                                                     id="fileInput"
