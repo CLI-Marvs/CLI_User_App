@@ -51,6 +51,9 @@ const InquiryFormModal = ({ modalRef }) => {
             .toLowerCase()
             .replace(/\b\w/g, (char) => char.toUpperCase());
     };
+
+
+    
     const formattedPropertyNames = [
         "N/A",
         ...(Array.isArray(propertyNamesList) && propertyNamesList.length > 0

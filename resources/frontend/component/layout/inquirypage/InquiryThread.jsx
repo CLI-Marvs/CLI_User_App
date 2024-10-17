@@ -35,6 +35,7 @@ const InquiryThread = () => {
     const [status, setStatus] = useState("");
     const [hasAttachments, setHasAttachments] = useState(false);
     const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+    const { propertyNamesList } = useStateContext();
     const {
         messages,
         setTicketId,
@@ -74,6 +75,24 @@ const InquiryThread = () => {
         const files = Array.from(event.target.files);
         setAttachedFiles((prevFiles) => [...prevFiles, ...files]);
     };
+    
+    const formatFunc = (name) => {
+        return name
+            .toLowerCase()
+            .replace(/\b\w/g, (char) => char.toUpperCase());
+    };
+
+    const formattedPropertyNames = [
+        "N/A",
+        ...(Array.isArray(propertyNamesList) && propertyNamesList.length > 0
+            ? propertyNamesList.map((item) => formatFunc(item)).sort((a, b) => {
+                if (a === "N/A") return -1; 
+                if (b === "N/A") return 1;
+                return a.localeCompare(b); 
+            })
+            : []),
+    ];
+
 
     const removeFile = (fileNameToDelete) => {
         setAttachedFiles((prevFiles) =>
@@ -343,7 +362,7 @@ const InquiryThread = () => {
                                         </label>
                                         <input
                                             type="text"
-                                            className="w-full  border-b-1 outline-none"
+                                            className="w-full  border-b-1 outline-none text-sm"
                                             value={name}
                                             onChange={(e) =>
                                                 setName(e.target.value)
@@ -400,7 +419,7 @@ const InquiryThread = () => {
                                         </label>
                                         <input
                                             type="text"
-                                            className="w-full  border-b-1 outline-none"
+                                            className="w-full  border-b-1 outline-none text-sm"
                                             value={email}
                                             onChange={(e) =>
                                                 setEmail(e.target.value)
@@ -414,7 +433,7 @@ const InquiryThread = () => {
                                         </label>
                                         <input
                                             type="text"
-                                            className="w-full  border-b-1 outline-none"
+                                            className="w-full  border-b-1 outline-none text-sm"
                                             value={ticket}
                                             onChange={(e) =>
                                                 setTicket(e.target.value)
@@ -429,7 +448,7 @@ const InquiryThread = () => {
                                             <DatePicker
                                                 selected={startDate}
                                                 onChange={handleDateChange}
-                                                className=" border-b-1 outline-none w-[176px]"
+                                                className=" border-b-1 outline-none w-[176px] text-sm"
                                                 calendarClassName="custom-calendar"
                                             />
 
@@ -441,28 +460,28 @@ const InquiryThread = () => {
                                         </div>
                                         <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
                                             {" "}
-                                            Status
+                                            Property
                                         </label>
                                         <select
-                                            className="w-full border-b-1 outline-none"
+                                            className="w-full border-b-1 outline-none text-sm"
                                             onChange={handleStatus}
                                             value={status}
                                         >
                                             <option value="">
-                                                Select Status
+                                                Select Property
                                             </option>
-                                            <option value="Inquiry Feedback Received">
-                                                Inquiry Feedback Received
-                                            </option>
-                                            <option value="Replied By">
-                                                Replied By
-                                            </option>
-                                            <option value="Assign To">
-                                                Assign To
-                                            </option>
-                                            <option value="Mark as resolved">
-                                                Mark as resolve
-                                            </option>
+                                            {formattedPropertyNames.map(
+                                                    (item, index) => {
+                                                        return (
+                                                            <option
+                                                                key={index}
+                                                                value={item}
+                                                            >
+                                                                {item}
+                                                            </option>
+                                                        );
+                                                    }
+                                                )}
                                         </select>
                                     </div>
                                     <div className="mt-5 flex gap-5">

@@ -198,6 +198,12 @@ const InquiryList = () => {
             modalRef.current.showModal();
         }
     };
+    
+    const formatFunc = (name) => {
+        return name
+            .toLowerCase()
+            .replace(/\b\w/g, (char) => char.toUpperCase());
+    };
 
     const formattedPropertyNames = [
         "N/A",
@@ -489,7 +495,7 @@ const InquiryList = () => {
                                             value={status}
                                         >
                                             <option value="">
-                                                Select Status
+                                                Select Property
                                             </option>
                                             {formattedPropertyNames.map(
                                                     (item, index) => {
