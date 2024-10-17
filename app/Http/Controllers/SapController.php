@@ -13,7 +13,7 @@ class SapController extends Controller
     public function urlSap(Request $request)
     {
         $client = new Client();
-        $response = $client->post('http://SAP-QAS:8002/sap/bc/srt/rfc/sap/zinvoice1/888/zinvoice1/zinvoice1', [
+        $response = $client->post('https://SAP-QAS:50200/sap/bc/srt/rfc/sap/zinvoices3/888/zinvoices3/zinvoices3', [
             'headers' => [
                 'Authorization' => 'Basic ' . base64_encode('KBELMONTE:1234567890!Ab'),
                 'Content-Type' => 'application/soap+xml',
