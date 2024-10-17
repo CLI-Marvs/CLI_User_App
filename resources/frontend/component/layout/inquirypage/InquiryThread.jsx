@@ -321,7 +321,7 @@ const InquiryThread = () => {
 
     return (
         <>
-            <div className="flex h-full bg-custom-grayFA overflow-x-auto">
+            <div className="flex h-full bg-custom-grayFA">
                 <div className="bg-custom-grayFA w-[601px] px-[20px] pb-[103px] ">
                     {" "}
                     {/* boxdevref */}
