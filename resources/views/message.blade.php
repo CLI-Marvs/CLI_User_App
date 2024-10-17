@@ -128,4 +128,6 @@
 
     <p style="font-size: 16px;">Sincerely,</p>
     <p style="font-weight: bold;">{{ ucwords($admin_name) }}</p>
+    <p style="font-weight: bold;">CLI - Customer Relations Services</p>
+
 </body>
