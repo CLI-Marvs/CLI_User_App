@@ -51,10 +51,19 @@ const InquiryFormModal = ({ modalRef }) => {
             .toLowerCase()
             .replace(/\b\w/g, (char) => char.toUpperCase());
     };
+
+
+    
     const formattedPropertyNames = [
         "N/A",
         ...(Array.isArray(propertyNamesList) && propertyNamesList.length > 0
-            ? propertyNamesList.map((item) => formatFunc(item))
+            ? propertyNamesList
+            .filter((item) => !item.toLowerCase().includes("phase")) 
+            .map((item) => formatFunc(item)).sort((a, b) => {
+                if (a === "N/A") return -1; 
+                if (b === "N/A") return 1;
+                return a.localeCompare(b); 
+            })
             : []),
     ];
 
@@ -232,6 +241,27 @@ const InquiryFormModal = ({ modalRef }) => {
                             />
                         </div>
                         <div
+                            className={`flex items-center border rounded-[5px] overflow-hidden ${
+                                isSubmitted && !formData.fname
+                                    ? resetSuccess
+                                        ? "border-custom-bluegreen"
+                                        : "border-red-500"
+                                    : "border-custom-bluegreen"
+                            }`}
+                        >
+                            <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex pl-3 py-1 w-[240px]">
+                                Middle Name
+                            </span>
+                            <input
+                                name="fname"
+                                type="text"
+                                className="w-full px-4 text-sm focus:outline-none mobile:text-xs"
+                                placeholder=""
+                                value={formData.fname}
+                                onChange={handleChange}
+                            />
+                        </div>
+                        <div
                             className={`flex items-center border  rounded-[5px] overflow-hidden ${
                                 isSubmitted && !formData.lname
                                     ? resetSuccess
@@ -368,8 +398,8 @@ const InquiryFormModal = ({ modalRef }) => {
                                     <option value="Loan Application">
                                         Loan Application
                                     </option>
-                                    <option value="Titile and Other Registration Documents">
-                                        Titile and Other Registration Documents
+                                    <option value="Title and Other Registration Documents">
+                                       Title and Other Registration Documents
                                     </option>
                                     <option value="Commissions">
                                         Commissions

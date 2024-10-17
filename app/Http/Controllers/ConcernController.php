@@ -742,6 +742,10 @@ class ConcernController extends Controller
         if (!empty($searchParams['status'])) {
             $query->where('message_log', 'ILIKE', '%' . $searchParams['status'] . '%');
         }
+        if (!empty($searchParams['selectedProperty'])) {
+            $query->where('property', 'ILIKE', '%' . $searchParams['selectedProperty'] . '%');
+        }
+
 
         if (!empty($searchParams['startDate'])) {
             $startDate = Carbon::parse($searchParams['startDate'])->setTimezone('Asia/Manila');
