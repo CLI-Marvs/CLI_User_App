@@ -33,6 +33,7 @@ const InquiryThread = () => {
     const [email, setEmail] = useState("");
     const [ticket, setTicket] = useState("");
     const [status, setStatus] = useState("");
+    const [selectedProperty, setSelectedProperty] = useState("");
     const [hasAttachments, setHasAttachments] = useState(false);
     const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
     const { propertyNamesList } = useStateContext();
@@ -61,8 +62,8 @@ const InquiryThread = () => {
         setStartDate(date);
     };
 
-    const handleStatus = (e) => {
-        setStatus(e.target.value);
+    const handleSelectProperty = (e) => {
+        setSelectedProperty(e.target.value);
     };
 
     const dataConcern =
@@ -150,16 +151,16 @@ const InquiryThread = () => {
             email,
             ticket,
             startDate,
-            status,
+            selectedProperty,
             hasAttachments,
         });
         setIsFilterVisible(false);
         /*  setCurrentPage(0); */
+        setSelectedProperty("")
         setName("");
         setCategory("");
         setEmail("");
         setTicket("");
-        setStatus("");
         setHasAttachments(false);
         navigate("/inquirymanagement/inquirylist");
     };
@@ -466,24 +467,24 @@ const InquiryThread = () => {
                                         </label>
                                         <select
                                             className="w-full border-b-1 outline-none text-sm"
-                                            onChange={handleStatus}
-                                            value={status}
+                                            onChange={handleSelectProperty}
+                                            value={selectedProperty}
                                         >
                                             <option value="">
                                                 Select Property
                                             </option>
                                             {formattedPropertyNames.map(
-                                                    (item, index) => {
-                                                        return (
-                                                            <option
-                                                                key={index}
-                                                                value={item}
-                                                            >
-                                                                {item}
-                                                            </option>
-                                                        );
-                                                    }
-                                                )}
+                                                (item, index) => {
+                                                    return (
+                                                        <option
+                                                            key={index}
+                                                            value={item}
+                                                        >
+                                                            {item}
+                                                        </option>
+                                                    );
+                                                }
+                                            )}
                                         </select>
                                     </div>
                                     <div className="mt-5 flex gap-5">
@@ -521,9 +522,9 @@ const InquiryThread = () => {
                             />
                             <div className="flex-1 flex flex-wrap">
                                 <p className="space-x-1 text-custom-bluegreen">
-                                    {dataConcern.property}{" "}
-                                    ({dataConcern.details_concern}) <span>-</span>{" "}
-                                    {dataConcern.ticket_id}
+                                    {dataConcern.property} (
+                                    {dataConcern.details_concern}){" "}
+                                    <span>-</span> {dataConcern.ticket_id}
                                 </p>
                             </div>
                             {/*   {dataConcern.created_by &&
@@ -585,7 +586,9 @@ const InquiryThread = () => {
                                             <textarea
                                                 placeholder="Reply..."
                                                 onChange={(e) =>
-                                                    setChatMessage(e.target.value)
+                                                    setChatMessage(
+                                                        e.target.value
+                                                    )
                                                 }
                                                 value={chatMessage}
                                                 id="chat"
@@ -593,7 +596,10 @@ const InquiryThread = () => {
                                                 rows="4"
                                                 draggable="false"
                                                 onKeyDown={(e) => {
-                                                    if (e.key === "Enter" && !e.shiftKey) {
+                                                    if (
+                                                        e.key === "Enter" &&
+                                                        !e.shiftKey
+                                                    ) {
                                                         e.preventDefault(); // Prevents creating a new line
                                                         handleConfirmation(); // Call your send message function
                                                     }
@@ -633,9 +639,12 @@ const InquiryThread = () => {
                                                         loading
                                                     }
                                                     className={`flex w-[82px] h-[28px] rounded-[5px] text-white text-xs justify-center items-center 
-                                                        ${loading || !chatMessage.trim() 
-                                                            ? 'bg-gray-400 cursor-not-allowed' 
-                                                            : 'gradient-background3 hover:shadow-custom4'} 
+                                                        ${
+                                                            loading ||
+                                                            !chatMessage.trim()
+                                                                ? "bg-gray-400 cursor-not-allowed"
+                                                                : "gradient-background3 hover:shadow-custom4"
+                                                        } 
                                                     `}
                                                 >
                                                     {loading ? (
@@ -653,17 +662,25 @@ const InquiryThread = () => {
                                                         </div>
                                                         <div className="flex justify-center mt-[30px]">
                                                             <p className="montserrat-medium text-[20px]">
-                                                                Are you sure about
-                                                                sending this reply?
+                                                                Are you sure
+                                                                about sending
+                                                                this reply?
                                                             </p>
                                                         </div>
                                                         <div className="flex flex-col justify-center items-center text-[12px] text-[#B54D4D] px-[20px]">
                                                             <p>
-                                                                This message will be sent to
+                                                                This message
+                                                                will be sent to
                                                             </p>
                                                             <span className="font-semibold text-[13px]">
-                                                                    {dataConcern.buyer_name}
-                                                                    {" "}({dataConcern.buyer_email})
+                                                                {
+                                                                    dataConcern.buyer_name
+                                                                }{" "}
+                                                                (
+                                                                {
+                                                                    dataConcern.buyer_email
+                                                                }
+                                                                )
                                                             </span>
                                                         </div>
                                                         <div className="flex justify-center mt-[26px] space-x-[19px]">
@@ -733,18 +750,19 @@ const InquiryThread = () => {
                             <div className="flex-grow overflow-y-auto max-h-[calc(100vh-400px)]">
                                 <div className="">
                                     {combineThreadMessages.length > 0 &&
-                                        combineThreadMessages.map((item, index) =>
-                                            item.buyer_email ? (
-                                                <UserMessages
-                                                    items={item}
-                                                    key={index}
-                                                />
-                                            ) : (
-                                                <AdminMessages
-                                                    items={item}
-                                                    key={index}
-                                                />
-                                            )
+                                        combineThreadMessages.map(
+                                            (item, index) =>
+                                                item.buyer_email ? (
+                                                    <UserMessages
+                                                        items={item}
+                                                        key={index}
+                                                    />
+                                                ) : (
+                                                    <AdminMessages
+                                                        items={item}
+                                                        key={index}
+                                                    />
+                                                )
                                         )}
                                 </div>
                             </div>
@@ -811,8 +829,7 @@ const InquiryThread = () => {
                                 </div>
                             </div> */}
                         </div>
-                        </div>
-                        
+                    </div>
                 </div>
                 <div className="flex w-[623px] bg-custom-grayFA gap-3 pb-24">
                     <div className="w-[623px]">

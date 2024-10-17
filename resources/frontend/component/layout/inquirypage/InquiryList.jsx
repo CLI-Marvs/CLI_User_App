@@ -39,6 +39,7 @@ const InquiryList = () => {
     const [email, setEmail] = useState("");
     const [ticket, setTicket] = useState("");
     const [status, setStatus] = useState("");
+    const [selectedProperty, setSelectedProperty] = useState("");
     const [hasAttachments, setHasAttachments] = useState(false);
     const { propertyNamesList } = useStateContext();
     const [activeDayButton, setActiveDayButton] = useState(null);
@@ -138,8 +139,8 @@ const InquiryList = () => {
         }
     };
 
-    const handleStatus = (e) => {
-        setStatus(e.target.value);
+    const handleSelectProperty = (e) => {
+        setSelectedProperty(e.target.value);
     };
 
     // const handleDayClick = (day) => {
@@ -244,8 +245,9 @@ const InquiryList = () => {
             email,
             ticket,
             startDate,
-            status,
+            selectedProperty,
             hasAttachments,
+
         });
         setDaysFilter(null);
         setStatusFilter(null);
@@ -255,7 +257,8 @@ const InquiryList = () => {
         setCategory("");
         setEmail("");
         setTicket("");
-        setStatus("");
+        //setStatus("");
+        setSelectedProperty("")
         setHasAttachments(false);
         setSpecificAssigneeCsr("");
     };
@@ -374,7 +377,6 @@ const InquiryList = () => {
                                 <span className="text-[18px]">+</span> Add
                                 Inquiry
                             </button>
-                           
                         </div>
 
                         {isFilterVisible && (
@@ -493,24 +495,24 @@ const InquiryList = () => {
                                         </label>
                                         <select
                                             className="w-full border-b-1 outline-none text-sm"
-                                            onChange={handleStatus}
-                                            value={status}
+                                            onChange={handleSelectProperty}
+                                            value={selectedProperty}
                                         >
                                             <option value="">
                                                 Select Property
                                             </option>
                                             {formattedPropertyNames.map(
-                                                    (item, index) => {
-                                                        return (
-                                                            <option
-                                                                key={index}
-                                                                value={item}
-                                                            >
-                                                                {item}
-                                                            </option>
-                                                        );
-                                                    }
-                                                )}
+                                                (item, index) => {
+                                                    return (
+                                                        <option
+                                                            key={index}
+                                                            value={item}
+                                                        >
+                                                            {item}
+                                                        </option>
+                                                    );
+                                                }
+                                            )}
                                         </select>
                                     </div>
                                     <div className="mt-5 flex gap-5">
