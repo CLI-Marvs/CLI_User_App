@@ -58,6 +58,7 @@ Route::post('/buyer-reply', [ConcernController::class, 'fromAppSript']);
 
 Route::post('/proxy-sap', [SapController::class, 'urlSap']);
 Route::post('/posting-invoices', [SapController::class, 'postInvoices']);
+Route::get('/get-invoices', [SapController::class, 'getInvoices']);
 
 
 Route::middleware('auth:sanctum')->group(function () {

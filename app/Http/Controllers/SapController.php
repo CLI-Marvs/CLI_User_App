@@ -41,6 +41,7 @@ class SapController extends Controller
             $invoice->due_date = $request->input('D_ZFBDT'); 
             $invoice->post_date = $request->input('D_BUDAT'); 
             $invoice->customer_name = $request->input('D_NAME1'); 
+            $invoice->flow_type = $request->input('D_VBEWA'); 
            /*  $invoice->invoice_status = $request->input('invoice_status'); 
             $invoice->status = $request->input('status');
             $invoice->posting_response = $request->input('posting_response'); */
@@ -62,11 +63,19 @@ class SapController extends Controller
         $searchParams = $request->has('searchParams');
         $query->select('contract_number', 'customer_name', 'invoice_amount', 'description', 'due_date');
         if(!empty($searchParams)) {
+            $this->filterData($query, $searchParams);
+        }
+        $data = $query->paginate(20);
+        return response()->json($data);
+    }
+
+    private function filterData($query, $searchParams)
+    {
+        if(!empty($searchParams['document_number'])) {
             $query->where('document_number', 'LIKE', '%'.$searchParams['document_number'].'%');
         }
-        if(!empty($searchParams)) {
+        if(!empty($searchParams['due_date'])) {
             $query->where('due_date', 'LIKE', '%'.$searchParams['due_date'].'%');
         }
-        return response()->json($query);
     }
 }
