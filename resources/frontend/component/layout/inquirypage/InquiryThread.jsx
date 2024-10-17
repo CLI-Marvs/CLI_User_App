@@ -281,32 +281,74 @@ const InquiryThread = () => {
               .flat()
               .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
         : [];
+    // useEffect(() => {
+    //     let adminMessageChannel;
+    //     let newTicketId;
+    //     let messageIdChannel;
+    //     if (ticketId) {
+    //         newTicketId = ticketId.replace("#", "");
+    //         adminMessageChannel = window.Echo.channel(
+    //             `adminmessage.${newTicketId}`
+    //         );
+    //         messageIdChannel = window.Echo.channel(
+    //             `messageidref.${newTicketId}`
+    //         );
+    //         messageIdChannelFunc(messageIdChannel);
+    //         adminMessageChannelFunc(adminMessageChannel);
+    //     }
+    //     return () => {
+    //         if (adminMessageChannel) {
+    //             adminMessageChannel.stopListening("AdminMessage");
+    //             window.Echo.leaveChannel(`adminmessage.${newTicketId}`);
+
+    //             adminMessageChannel.stopListening("MessageID");
+    //             window.Echo.leaveChannel(`messageidref.${newTicketId}`);
+    //         }
+    //     };
+    // }, [ticketId]);
+
     useEffect(() => {
         let adminMessageChannel;
-        let newTicketId;
         let messageIdChannel;
-        if (ticketId) {
-            newTicketId = ticketId.replace("#", "");
-            adminMessageChannel = window.Echo.channel(
-                `adminmessage.${newTicketId}`
-            );
-            messageIdChannel = window.Echo.channel(
-                `messageidref.${newTicketId}`
-            );
-            messageIdChannelFunc(messageIdChannel);
-            adminMessageChannelFunc(adminMessageChannel);
-        }
+        let newTicketId;
+    
+        // Function to initialize channels when Echo is ready
+        const initChannels = () => {
+            if (ticketId && window.Echo) {
+                newTicketId = ticketId.replace("#", "");
+                adminMessageChannel = window.Echo.channel(
+                    `adminmessage.${newTicketId}`
+                );
+                messageIdChannel = window.Echo.channel(
+                    `messageidref.${newTicketId}`
+                );
+                messageIdChannelFunc(messageIdChannel);
+                adminMessageChannelFunc(adminMessageChannel);
+            }
+        };
+    
+        // Periodically check if window.Echo is initialized
+        const checkBrowserReady = setInterval(() => {
+            if (window.Echo) {
+                initChannels();
+                clearInterval(checkBrowserReady); // Stop checking once Echo is ready
+            }
+        }, 100); // Check every 100ms if Echo is initialized
+    
         return () => {
+            clearInterval(checkBrowserReady); // Clear interval if component unmounts
+    
             if (adminMessageChannel) {
                 adminMessageChannel.stopListening("AdminMessage");
                 window.Echo.leaveChannel(`adminmessage.${newTicketId}`);
-
-                adminMessageChannel.stopListening("MessageID");
+            }
+            if (messageIdChannel) {
+                messageIdChannel.stopListening("MessageID");
                 window.Echo.leaveChannel(`messageidref.${newTicketId}`);
             }
         };
     }, [ticketId]);
-
+    
     const capitalizeWords = (name) => {
         if(name) {
             return name

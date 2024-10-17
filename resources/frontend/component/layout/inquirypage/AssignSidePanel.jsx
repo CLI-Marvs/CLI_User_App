@@ -259,23 +259,65 @@ const AssignSidePanel = ({ ticketId }) => {
         getAssigneesPersonnel();
     };
 
+    // useEffect(() => {
+    //     let assigneeChannel;
+    //     let newTicketId;
+    //     let removeChannel;
+    //     if (ticketId) {
+    //         newTicketId = ticketId.replace("#", "");
+    //         assigneeChannel = window.Echo.channel(
+    //             `retrieveassignees.${newTicketId}`
+    //         );
+    //         removeChannel = window.Echo.channel(
+    //             `removeassignees.${newTicketId}`
+    //         );
+    //         assigneeChannelFunc(assigneeChannel);
+    //         removeAChannelFunc(removeChannel);
+    //     }
+
+    //     return () => {
+    //         if (assigneeChannel) {
+    //             assigneeChannel.stopListening("RetrieveAssignees");
+    //             window.Echo.leaveChannel(`retrieveassignees.${newTicketId}`);
+    //         }
+    //         if (removeChannel) {
+    //             removeChannel.stopListening("RemoveAssignees");
+    //             window.Echo.leaveChannel(`removeassignees.${newTicketId}`);
+    //         }
+    //     };
+    // }, [ticketId]);
+
     useEffect(() => {
         let assigneeChannel;
-        let newTicketId;
         let removeChannel;
-        if (ticketId) {
-            newTicketId = ticketId.replace("#", "");
-            assigneeChannel = window.Echo.channel(
-                `retrieveassignees.${newTicketId}`
-            );
-            removeChannel = window.Echo.channel(
-                `removeassignees.${newTicketId}`
-            );
-            assigneeChannelFunc(assigneeChannel);
-            removeAChannelFunc(removeChannel);
-        }
-
+        let newTicketId;
+    
+        // Function to initialize the channels when Echo is ready
+        const initChannels = () => {
+            if (ticketId && window.Echo) {
+                newTicketId = ticketId.replace("#", "");
+                assigneeChannel = window.Echo.channel(
+                    `retrieveassignees.${newTicketId}`
+                );
+                removeChannel = window.Echo.channel(
+                    `removeassignees.${newTicketId}`
+                );
+                assigneeChannelFunc(assigneeChannel);
+                removeAChannelFunc(removeChannel);
+            }
+        };
+    
+        // Check if window.Echo is loaded before subscribing
+        const checkBrowserReady = setInterval(() => {
+            if (window.Echo) {
+                initChannels();
+                clearInterval(checkBrowserReady); // Stop checking once Echo is ready
+            }
+        }, 100); // Check every 100ms if Echo is initialized
+    
         return () => {
+            clearInterval(checkBrowserReady); // Clear interval if component unmounts
+    
             if (assigneeChannel) {
                 assigneeChannel.stopListening("RetrieveAssignees");
                 window.Echo.leaveChannel(`retrieveassignees.${newTicketId}`);
@@ -286,7 +328,7 @@ const AssignSidePanel = ({ ticketId }) => {
             }
         };
     }, [ticketId]);
-
+    
     console.log("assignpersonnel", assigneesPersonnel[ticketId]);
 
     return (
