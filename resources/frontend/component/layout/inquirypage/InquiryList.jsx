@@ -587,18 +587,18 @@ const InquiryList = () => {
                         </div>
                         <div className="flex gap-[10px]">
                             <div className="flex gap-2">
-                                <div className="flex space-x-2">
+                                <div className="flex items-center space-x-2">
                                     {user?.department === "CRS" && (
                                         <button
                                             onClick={handleAssignedToMeClick}
-                                            className={`flex items-center border text-custom-lightgreen h-[29px] w-[125px] rounded-[55px] p-[2px] ${
+                                            className={`flex items-center text-custom-lightgreen h-[25px] w-[125px] rounded-[55px] p-[2px] ${
                                                 assignedToMeActive
                                                     ? "bglightgreen-btn"
                                                     : "gradient-btn2hover "
                                             }`}
                                         >
                                             <p
-                                                className={`h-full w-full flex justify-center items-center  text-xs montserrat-semibold rounded-[50px]   ${
+                                                className={`h-full w-full flex justify-center items-center text-xs montserrat-semibold rounded-[50px]   ${
                                                     assignedToMeActive
                                                         ? "bglightgreen-btn"
                                                         : "bg-white hover:bg-custom-lightestgreen"
