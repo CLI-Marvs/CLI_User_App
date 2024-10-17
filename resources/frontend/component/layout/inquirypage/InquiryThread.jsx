@@ -826,7 +826,7 @@ const InquiryThread = () => {
                                     </div>
                                 )}
                             </div>
-                            <div className="flex-grow overflow-y-auto max-h-[calc(100vh-400px)]">
+                            <div className="flex-grow max-h-[calc(100vh-400px)]">
                                 <div className="">
                                     {combineThreadMessages.length > 0 &&
                                         combineThreadMessages.map(
