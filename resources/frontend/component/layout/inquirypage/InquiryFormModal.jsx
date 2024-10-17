@@ -458,7 +458,7 @@ const InquiryFormModal = ({ modalRef }) => {
                         </div>
                         <div className="flex items-center border border-custom-bluegreen rounded-[5px] overflow-hidden">
                             <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex items-center w-[250px] tablet:w-[175px] mobile:w-[270px] mobile:text-xs -mr-4 pl-3 py-1">
-                                I am a
+                                Inquiry From
                             </span>
                             <div className="relative w-full">
                                 <select
@@ -533,7 +533,7 @@ const InquiryFormModal = ({ modalRef }) => {
                                 onChange={handleChangeValue}
                                 maxLength={maxCharacters}
                                 name="details_message"
-                                placeholder="Write your concern here."
+                                placeholder=""
                                 rows="4"
                                 className={` border-t border-custom-bluegreen rounded-b-[5px] border-t w-full pl-2 outline-none`}
                             ></textarea>
