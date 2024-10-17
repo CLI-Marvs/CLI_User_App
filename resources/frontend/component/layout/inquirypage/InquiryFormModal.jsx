@@ -7,6 +7,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 
 const formDataState = {
     fname: "",
+    mname: "",
     lname: "",
     buyer_email: "",
     mobile_number: "",
@@ -242,7 +243,7 @@ const InquiryFormModal = ({ modalRef }) => {
                         </div>
                         <div
                             className={`flex items-center border rounded-[5px] overflow-hidden ${
-                                isSubmitted && !formData.fname
+                                isSubmitted && !formData.mname
                                     ? resetSuccess
                                         ? "border-custom-bluegreen"
                                         : "border-red-500"
@@ -253,11 +254,11 @@ const InquiryFormModal = ({ modalRef }) => {
                                 Middle Name
                             </span>
                             <input
-                                name="fname"
+                                name="mname"
                                 type="text"
                                 className="w-full px-4 text-sm focus:outline-none mobile:text-xs"
                                 placeholder=""
-                                value={formData.fname}
+                                value={formData.mname}
                                 onChange={handleChange}
                             />
                         </div>
