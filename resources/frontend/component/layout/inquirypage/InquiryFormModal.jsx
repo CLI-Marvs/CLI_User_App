@@ -241,6 +241,27 @@ const InquiryFormModal = ({ modalRef }) => {
                             />
                         </div>
                         <div
+                            className={`flex items-center border rounded-[5px] overflow-hidden ${
+                                isSubmitted && !formData.fname
+                                    ? resetSuccess
+                                        ? "border-custom-bluegreen"
+                                        : "border-red-500"
+                                    : "border-custom-bluegreen"
+                            }`}
+                        >
+                            <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex pl-3 py-1 w-[240px]">
+                                Middle Name
+                            </span>
+                            <input
+                                name="fname"
+                                type="text"
+                                className="w-full px-4 text-sm focus:outline-none mobile:text-xs"
+                                placeholder=""
+                                value={formData.fname}
+                                onChange={handleChange}
+                            />
+                        </div>
+                        <div
                             className={`flex items-center border  rounded-[5px] overflow-hidden ${
                                 isSubmitted && !formData.lname
                                     ? resetSuccess
