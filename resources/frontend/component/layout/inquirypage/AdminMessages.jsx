@@ -50,11 +50,11 @@ const AdminMessages = ({ items }) => {
                                         to={`/file-viewer/attachment/${items.id}`}
                                         onClick={(e) => {
                                             e.preventDefault(); // Prevents the immediate navigation
-                                           
                                             localStorage.setItem(
                                                 "fileUrlPath",
                                                 JSON.stringify(attachment)
                                             ); // Store the data
+                                            
                                             // Manually navigate to the new page after setting localStorage
                                             window.open(
                                                 `/file-viewer/attachment/${items.id}`,
