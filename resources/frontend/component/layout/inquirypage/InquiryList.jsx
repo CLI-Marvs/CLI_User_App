@@ -665,7 +665,7 @@ const InquiryList = () => {
                     </div>
 
                     <div className="flex justify-end items-center h-12 px-6 gap-2 bg-white rounded-b-lg">
-                        <p className="text-sm text-gray-400">
+                        <p className="text-sm text-gray-400 hidden">
                             Last account activity: {getTimeDifference()}
                         </p>
                     </div>
