@@ -376,7 +376,7 @@ const InquiryFormModal = ({ modalRef }) => {
                                 Concern regarding
                             </span>
                             <div className="relative w-full">
-                                <select
+                                {/* <select
                                     name="details_concern"
                                     value={formData.details_concern}
                                     onChange={handleChange}
@@ -408,7 +408,43 @@ const InquiryFormModal = ({ modalRef }) => {
                                     <option value="Other Concerns">
                                         Other Concerns
                                     </option>
-                                </select>
+                                </select> */}
+                                  <select
+                                            value={formData.details_concern}
+                                            onChange={handleChange}
+                                            name="details_concern"
+                                            className="appearance-none text-sm w-full px-4 py-1 bg-white focus:outline-none border-0 mobile:text-xs"
+                                        >
+                                            <option value="">(Select)</option>
+                                            <option value="Reservation Documents">
+                                                Reservation Documents
+                                            </option>
+                                            <option value="Payment Issues">
+                                                Payment Issues
+                                            </option>
+                                            <option value="SOA/ Billing Statement/ Buyer's Ledger">
+                                                 SOA/ Billing Statement/ Buyer's Ledger
+                                            </option>
+                                            <option value="Turn Over Status">
+                                                 Turn Over Status
+                                            </option>
+                                            <option value="Unit Status">
+                                                 Unit Status
+                                            </option>
+                                            <option value="Loan Application">
+                                                Loan Application
+                                            </option>
+                                            <option value="Title and Other Registration Documents">
+                                                Title and Other Registration
+                                                Documents
+                                            </option>
+                                            <option value="Commissions">
+                                                Commissions
+                                            </option>
+                                            <option value="Other Concerns">
+                                                Other Concerns
+                                            </option>
+                                        </select>
                                 <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3 bg-custom-lightestgreen text-custom-bluegreen pointer-events-none">
                                     <IoMdArrowDropdown />
                                 </span>
@@ -422,7 +458,7 @@ const InquiryFormModal = ({ modalRef }) => {
                         </div>
                         <div className="flex items-center border border-custom-bluegreen rounded-[5px] overflow-hidden">
                             <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex items-center w-[250px] tablet:w-[175px] mobile:w-[270px] mobile:text-xs -mr-4 pl-3 py-1">
-                                I am
+                                Inquiry From
                             </span>
                             <div className="relative w-full">
                                 <select
@@ -497,7 +533,7 @@ const InquiryFormModal = ({ modalRef }) => {
                                 onChange={handleChangeValue}
                                 maxLength={maxCharacters}
                                 name="details_message"
-                                placeholder="Write your concern here."
+                                placeholder=""
                                 rows="4"
                                 className={` border-t border-custom-bluegreen rounded-b-[5px] border-t w-full pl-2 outline-none`}
                             ></textarea>

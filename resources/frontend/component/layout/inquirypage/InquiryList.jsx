@@ -124,13 +124,13 @@ const InquiryList = () => {
             setActiveDayButton(null);
             setSpecificAssigneeCsr("");
             setAssignedToMeActive(false);
-        } else if (option === "Resolve") {
+        } else if (option === "Resolved") {
             setStatusFilter("Resolved");
             setCurrentPage(0);
             setSearchFilter("");
             setSpecificAssigneeCsr("");
             setAssignedToMeActive(false);
-        } else if (option === "Unresolve") {
+        } else if (option === "Unresolved") {
             setStatusFilter("unresolved");
             setCurrentPage(0);
             setSearchFilter("");
@@ -421,12 +421,14 @@ const InquiryList = () => {
                                             <option value="Payment Issues">
                                                 Payment Issues
                                             </option>
-                                            <option value="Statement of Account and Billing Statement">
-                                                Statement of Account and Billing
-                                                Statement
+                                            <option value="SOA/ Billing Statement/ Buyer's Ledger">
+                                                 SOA/ Billing Statement/ Buyer's Ledger
                                             </option>
-                                            <option value="Turnover Status/Unit Concerns">
-                                                Turnover Status/Unit Concerns
+                                            <option value="Turn Over Status">
+                                                 Turn Over Status
+                                            </option>
+                                            <option value="Unit Status">
+                                                 Unit Status
                                             </option>
                                             <option value="Loan Application">
                                                 Loan Application

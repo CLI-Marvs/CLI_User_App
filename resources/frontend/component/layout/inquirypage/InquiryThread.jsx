@@ -87,15 +87,15 @@ const InquiryThread = () => {
         "N/A",
         ...(Array.isArray(propertyNamesList) && propertyNamesList.length > 0
             ? propertyNamesList
-                .filter((item) => !item.toLowerCase().includes("phase"))
-                .map((item) => formatFunc(item)).sort((a, b) => {
-                    if (a === "N/A") return -1;
-                    if (b === "N/A") return 1;
-                    return a.localeCompare(b);
-                })
+                  .filter((item) => !item.toLowerCase().includes("phase"))
+                  .map((item) => formatFunc(item))
+                  .sort((a, b) => {
+                      if (a === "N/A") return -1;
+                      if (b === "N/A") return 1;
+                      return a.localeCompare(b);
+                  })
             : []),
     ];
-
 
     const removeFile = (fileNameToDelete) => {
         setAttachedFiles((prevFiles) =>
@@ -156,7 +156,7 @@ const InquiryThread = () => {
         });
         setIsFilterVisible(false);
         /*  setCurrentPage(0); */
-        setSelectedProperty("")
+        setSelectedProperty("");
         setName("");
         setCategory("");
         setEmail("");
@@ -166,12 +166,14 @@ const InquiryThread = () => {
     };
 
     const formatChatMessage = (message) => {
-        return message.split('\n').map((item, index) => (
+       if(message) {
+        return message.split("\n").map((item, index) => (
             <span key={index}>
                 {item}
                 <br />
             </span>
         ));
+       }
     };
 
     const handleDeleteInquiry = async () => {
@@ -201,6 +203,7 @@ const InquiryThread = () => {
         formData.append("message_id", messageId || "");
         formData.append("admin_id", user?.id || "");
         formData.append("buyer_email", dataConcern.buyer_email || "");
+        formData.append("buyer_name", dataConcern.buyer_name || "");
         formData.append("admin_profile_picture", user?.profile_picture || "");
         formData.append("department", user?.department || "");
 
@@ -275,50 +278,92 @@ const InquiryThread = () => {
 
     const combineThreadMessages = messages[ticketId]
         ? messages[ticketId]
-            .flat()
-            .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+              .flat()
+              .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
         : [];
+    // useEffect(() => {
+    //     let adminMessageChannel;
+    //     let newTicketId;
+    //     let messageIdChannel;
+    //     if (ticketId) {
+    //         newTicketId = ticketId.replace("#", "");
+    //         adminMessageChannel = window.Echo.channel(
+    //             `adminmessage.${newTicketId}`
+    //         );
+    //         messageIdChannel = window.Echo.channel(
+    //             `messageidref.${newTicketId}`
+    //         );
+    //         messageIdChannelFunc(messageIdChannel);
+    //         adminMessageChannelFunc(adminMessageChannel);
+    //     }
+    //     return () => {
+    //         if (adminMessageChannel) {
+    //             adminMessageChannel.stopListening("AdminMessage");
+    //             window.Echo.leaveChannel(`adminmessage.${newTicketId}`);
+
+    //             adminMessageChannel.stopListening("MessageID");
+    //             window.Echo.leaveChannel(`messageidref.${newTicketId}`);
+    //         }
+    //     };
+    // }, [ticketId]);
+
     useEffect(() => {
         let adminMessageChannel;
-        let newTicketId;
         let messageIdChannel;
-        if (ticketId) {
-            newTicketId = ticketId.replace("#", "");
-            adminMessageChannel = window.Echo.channel(
-                `adminmessage.${newTicketId}`
-            );
-            messageIdChannel = window.Echo.channel(
-                `messageidref.${newTicketId}`
-            );
-            messageIdChannelFunc(messageIdChannel);
-            adminMessageChannelFunc(adminMessageChannel);
-        }
+        let newTicketId;
+    
+        // Function to initialize channels when Echo is ready
+        const initChannels = () => {
+            if (ticketId && window.Echo) {
+                newTicketId = ticketId.replace("#", "");
+                adminMessageChannel = window.Echo.channel(
+                    `adminmessage.${newTicketId}`
+                );
+                messageIdChannel = window.Echo.channel(
+                    `messageidref.${newTicketId}`
+                );
+                messageIdChannelFunc(messageIdChannel);
+                adminMessageChannelFunc(adminMessageChannel);
+            }
+        };
+    
+        // Periodically check if window.Echo is initialized
+        const checkBrowserReady = setInterval(() => {
+            if (window.Echo) {
+                initChannels();
+                clearInterval(checkBrowserReady); // Stop checking once Echo is ready
+            }
+        }, 100); // Check every 100ms if Echo is initialized
+    
         return () => {
+            clearInterval(checkBrowserReady); // Clear interval if component unmounts
+    
             if (adminMessageChannel) {
                 adminMessageChannel.stopListening("AdminMessage");
                 window.Echo.leaveChannel(`adminmessage.${newTicketId}`);
-
-                adminMessageChannel.stopListening("MessageID");
+            }
+            if (messageIdChannel) {
+                messageIdChannel.stopListening("MessageID");
                 window.Echo.leaveChannel(`messageidref.${newTicketId}`);
             }
         };
     }, [ticketId]);
-
-
-
+    
     const capitalizeWords = (name) => {
-        return name
+        if(name) {
+            return name
             .split(" ")
             .map(
                 (word) =>
                     word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
             )
             .join(" ");
+        }
     };
 
     return (
         <>
-            <div className="flex h-full bg-custom-grayFA overflow-x-auto">
+            <div className="flex h-full bg-custom-grayFA">
                 <div className="bg-custom-grayFA w-[601px] px-[20px] pb-[103px] ">
                     {" "}
                     {/* boxdevref */}
@@ -402,12 +447,14 @@ const InquiryThread = () => {
                                             <option value="Payment Issues">
                                                 Payment Issues
                                             </option>
-                                            <option value="Statement of Account and Billing Statement">
-                                                Statement of Account and Billing
-                                                Statement
+                                            <option value="SOA/ Billing Statement/ Buyer's Ledger">
+                                                 SOA/ Billing Statement/ Buyer's Ledger
                                             </option>
-                                            <option value="Turnover Status/Unit Concerns">
-                                                Turnover Status/Unit Concerns
+                                            <option value="Turn Over Status">
+                                                 Turn Over Status
+                                            </option>
+                                            <option value="Unit Status">
+                                                 Unit Status
                                             </option>
                                             <option value="Loan Application">
                                                 Loan Application
@@ -648,10 +695,11 @@ const InquiryThread = () => {
                                                         loading
                                                     }
                                                     className={`flex w-[82px] h-[28px] rounded-[5px] text-white text-xs justify-center items-center 
-                                                        ${loading ||
+                                                        ${
+                                                            loading ||
                                                             !chatMessage.trim()
-                                                            ? "bg-gray-400 cursor-not-allowed"
-                                                            : "gradient-background3 hover:shadow-custom4"
+                                                                ? "bg-gray-400 cursor-not-allowed"
+                                                                : "gradient-background3 hover:shadow-custom4"
                                                         } 
                                                     `}
                                                 >
@@ -663,7 +711,7 @@ const InquiryThread = () => {
                                                 </button>
                                             </div>
                                             {isConfirmModalOpen && (
-                                                <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+                                                <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 overflow-auto">
                                                     <div className="bg-white p-[20px] rounded-[10px] shadow-custom5 w-[784px] min-h-[442px]">
                                                         <div className="p-[10px] flex flex-col gap-[26px]">
                                                             <div className="flex justify-center items-center">
@@ -671,7 +719,10 @@ const InquiryThread = () => {
                                                             </div>
                                                             <div className="flex items-center justify-between  px-[25px] h-[50px] rounded-[4px] bg-custom-lightestgreen">
                                                                 <p className="montserrat-medium text-[20px]">
-                                                                    Are you sure about sending this message?
+                                                                    Are you sure
+                                                                    about
+                                                                    sending this
+                                                                    message?
                                                                 </p>
                                                                 <div>
                                                                     <div className="flex justify-center space-x-[10px]">
@@ -703,28 +754,91 @@ const InquiryThread = () => {
                                                             <div className="flex items-center h-[22px] text-custom-solidgreen font-semibold">
                                                                 PREVIEW
                                                             </div>
+                                                            <div className="flex items-center h-[22px] text-custom-solidgreen font-semibold">
+                                                                <span className="mr-1">
+                                                                    TO:
+                                                                </span>
+                                                                <span className="text-sm">
+                                                                    {
+                                                                        dataConcern.buyer_email
+                                                                    }
+                                                                </span>
+                                                            </div>
+
                                                             <div className="flex items-center h-[19px] text-sm">
-                                                             Hi{" "}{dataConcern.buyer_name},
+                                                                Hi{" "}
+                                                                {capitalizeWords(
+                                                                    dataConcern.buyer_name
+                                                                )}
+                                                                ,
                                                             </div>
                                                             <div className="w-full p-[10px] border-[2px] rounded-[5px] border-custom-grayF1 text-sm text-custom-gray81">
-                                                            {formatChatMessage(chatMessage)}
+                                                                {formatChatMessage(
+                                                                    chatMessage
+                                                                )}
                                                             </div>
                                                             <div className="text-sm">
-                                                                <p>Sincerely,</p>
-                                                                <p>CLI Support</p>
+                                                                <p>
+                                                                    Sincerely,
+                                                                </p>
+                                                                <br />
+                                                                <p>
+                                                                    {
+                                                                        user?.firstname
+                                                                    }{" "}
+                                                                    {
+                                                                        user?.lastname
+                                                                    }
+                                                                </p>
+                                                                <p>
+                                                                    CLI -{" "}
+                                                                    {
+                                                                        user?.department
+                                                                    }
+                                                                </p>
                                                             </div>
                                                         </div>
+                                                        {attachedFiles.length > 0 && (
+                                            <div className="mb-2 ">
+                                                {attachedFiles.map(
+                                                    (file, index) => (
+                                                        <div
+                                                            key={index}
+                                                            className="flex items-center justify-between mb-2 p-2 border bg-white rounded"
+                                                        >
+                                                            <span className="text-sm text-gray-700">
+                                                                {file.name}
+                                                            </span>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() =>
+                                                                    removeFile(
+                                                                        file.name
+                                                                    )
+                                                                }
+                                                                className="text-red-500"
+                                                            >
+                                                                Remove
+                                                            </button>
+                                                        </div>
+                                                    )
+                                                )}
+                                            </div>
+                                        )}
                                                     </div>
                                                 </div>
                                             )}
                                         </div>
                                     </div>
                                 </div>
+                                
                                 <div className="text-[11px] text-[#B54D4D]">
                                     <p>
                                         Note: This message will be sent to{" "}
                                         <span className="font-semibold">
-                                            {dataConcern.buyer_name}
+                                            {capitalizeWords(
+                                                dataConcern.buyer_name
+                                            )}
                                         </span>
                                         . Please use the comment section for CLI
                                         internal communication.
@@ -754,7 +868,7 @@ const InquiryThread = () => {
                                     </div>
                                 )}
                             </div>
-                            <div className="flex-grow overflow-y-auto max-h-[calc(100vh-400px)]">
+                            <div className="flex-grow max-h-[calc(100vh-400px)]">
                                 <div className="">
                                     {combineThreadMessages.length > 0 &&
                                         combineThreadMessages.map(

@@ -1,7 +1,10 @@
 import { Card } from "@mui/material";
 import React, { useState } from "react";
+import { useStateContext } from "../../../context/contextprovider";
+
 
 const TransactionCom = () => {
+   const {invoices} = useStateContext();
     const sampleData = [
         { id: 1, name: "John Doe", email: "john@example.com" },
         { id: 2, name: "Jane Smith", email: "jane@example.com" },
@@ -86,27 +89,39 @@ const TransactionCom = () => {
                     <thead>
                         <tr>
                             <th className="py-2 px-4 border border-gray-500">
-                                ID
+                                Contract No
                             </th>
                             <th className="py-2 px-4 border border-gray-500">
-                                Name
+                                Customer Name
                             </th>
                             <th className="py-2 px-4 border border-gray-500">
-                                Email
+                                Invoice Amount
+                            </th>
+                            <th className="py-2 px-4 border border-gray-500">
+                                Invoice Description
+                            </th>
+                            <th className="py-2 px-4 border border-gray-500">
+                                Invoice Due Date
                             </th>
                         </tr>
                     </thead>
                     <tbody>
-                        {paginatedData.map((item) => (
+                        {invoices.map((item) => (
                             <tr key={item.id}>
                                 <td className="py-2 px-4 border border-gray-500">
-                                    {item.id}
+                                    {item.contract_number}
                                 </td>
                                 <td className="py-2 px-4 border border-gray-500">
-                                    {item.name}
+                                    {item.customer_name}
                                 </td>
                                 <td className="py-2 px-4 border border-gray-500">
-                                    {item.email}
+                                    {item.invoice_amount}
+                                </td>
+                                <td className="py-2 px-4 border border-gray-500">
+                                    {item.description}
+                                </td>
+                                <td className="py-2 px-4 border border-gray-500">
+                                    {item.due_date}
                                 </td>
                             </tr>
                         ))}
