@@ -568,7 +568,7 @@ const InquiryList = () => {
                                         <li
                                             className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
                                             onClick={() =>
-                                                handleOptionClick("Resolve")
+                                                handleOptionClick("Resolved")
                                             }
                                         >
                                             Resolved
@@ -576,7 +576,7 @@ const InquiryList = () => {
                                         <li
                                             className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
                                             onClick={() =>
-                                                handleOptionClick("Unresolve")
+                                                handleOptionClick("Unresolved")
                                             }
                                         >
                                             Unresolved
@@ -663,7 +663,7 @@ const InquiryList = () => {
                     </div>
 
                     <div className="flex justify-end items-center h-12 px-6 gap-2 bg-white rounded-b-lg">
-                        <p className="text-sm text-gray-400">
+                        <p className="text-sm text-gray-400 hidden">
                             Last account activity: {getTimeDifference()}
                         </p>
                     </div>
