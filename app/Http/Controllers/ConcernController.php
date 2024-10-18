@@ -384,7 +384,7 @@ class ConcernController extends Controller
             $concerns->status = "unresolved";
             $concerns->ticket_id = $ticketId;
             $concerns->user_type = $request->user_type;
-            $concerns->buyer_name = $request->fname . ' ' . $request->lname;
+            $concerns->buyer_name = $request->fname . ' ' . $request->mname . ' ' . $request->lname;
             $concerns->buyer_middlename = $request->mname;
             $concerns->mobile_number = $request->mobile_number;
             $concerns->contract_number = $request->contract_number;

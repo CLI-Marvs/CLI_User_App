@@ -134,6 +134,10 @@ const AddInfoModal = ({ modalRef, dataConcern }) => {
                             <input
                                 name="name"
                                 value={dataToUpdate.name || ""}
+                                // value={
+                                //     (dataToUpdate.name || "") +
+                                //     " additional text"
+                                // }
                                 onChange={handleChange}
                                 type="text"
                                 className="w-full px-4 text-sm focus:outline-none mobile:text-xs"
@@ -196,7 +200,7 @@ const AddInfoModal = ({ modalRef, dataConcern }) => {
                             <div className="relative w-full">
                                 <select
                                     name="property"
-                                    value={dataToUpdate.property || ""} 
+                                    value={dataToUpdate.property || ""}
                                     onChange={handleChange}
                                     className="appearance-none w-full px-4 text-sm py-1 bg-white focus:outline-none border-0 mobile:text-xs"
                                 >
@@ -255,7 +259,10 @@ const AddInfoModal = ({ modalRef, dataConcern }) => {
                     </div>
                     <div className="flex justify-end">
                         <form method="dialog">
-                            <button className="w-[133px] h-[39px] gradient-btn5 font-semibold text-sm text-white rounded-[10px]" onClick={addInfo}>
+                            <button
+                                className="w-[133px] h-[39px] gradient-btn5 font-semibold text-sm text-white rounded-[10px]"
+                                onClick={addInfo}
+                            >
                                 Update
                             </button>
                         </form>
