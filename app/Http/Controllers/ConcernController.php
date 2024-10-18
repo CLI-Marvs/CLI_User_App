@@ -689,20 +689,29 @@ class ConcernController extends Controller
     {
         if ($status && $days !== null) {
             if ($days === "3+") {
+                \Log::info("trigger here days and status first");
+
                 $query->where('status', $status)
-                    ->where('concerns.created_at', '<', now()->subDays(3)->startOfDay());
+                    ->where('concerns.created_at', '<', now()->subDays(3)->endOfDay());
             } else {
+                \Log::info("trigger here days and status second");
+
                 $startOfDay = now()->subDays($days)->startOfDay();
                 $endOfDay = now()->subDays($days)->endOfDay();
                 $query->where('status', $status)
                     ->whereBetween('concerns.created_at', [$startOfDay, $endOfDay]);
             }
         } else if ($status) {
+            \Log::info("trigger here status only first");
+
             $query->where('status', $status);
         } else if ($days !== null) {
             if ($days === "3+") {
-                $query->where('concerns.created_at', '<', now()->subDays(3)->startOfDay());
+                \Log::info("trigger here days only first");
+                $query->where('concerns.created_at', '<', now()->subDays(3)->endOfDay());
             } else {
+                \Log::info("trigger here days only second");
+
                 $startOfDay = now()->subDays($days)->startOfDay();
                 $endOfDay = now()->subDays($days)->endOfDay();
                 $query->whereBetween('concerns.created_at', [$startOfDay, $endOfDay]);
