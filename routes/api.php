@@ -56,13 +56,16 @@ Route::put('/update-info', [ConcernController::class, 'updateInfo']);
 Route::post('/add-property-sap', [PropertyMasterController::class, 'storePropertyFromSap']);
 Route::post('/buyer-reply', [ConcernController::class, 'fromAppSript']);
 
+//* For Sap 
 Route::post('/proxy-sap', [SapController::class, 'urlSap']);
 Route::post('/posting-invoices', [SapController::class, 'postInvoices']);
 Route::get('/get-invoices', [SapController::class, 'getInvoices']);
-Route::post('/upload-notepad', [SapController::class, 'uploadNotepad']);
+Route::get('/get-transactions', [SapController::class, 'retrieveTransactions']);
+Route::get('/get-matches', [SapController::class, 'runAutoPosting']);
 
 
 Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/upload-notepad', [SapController::class, 'uploadNotepad']);
     Route::get('/get-concern', [ConcernController::class, 'getAllConcerns']);
     Route::post('/add-concern', [ConcernController::class, 'addConcernPublic']);
     Route::get('/get-message/{ticketId}', [ConcernController::class, 'getMessage']);

@@ -3,9 +3,8 @@ import { Link } from "react-router-dom";
 
 const TransactionSidebar = () => {
     return (
-        <div className="bg-custom-lightestgreen p-5 w-[200px] mr-10">
-          <div className="flex flex-col gap-5">
-          <Link to="/transaction/invoices">
+        <div className="flex flex-col gap-5">
+            <Link to="/transaction/invoices">
                 <button className="w-full bg-custom-lightgreen text-white rounded-lg py-3 px-5">
                     AR Invoices
                 </button>
@@ -15,7 +14,6 @@ const TransactionSidebar = () => {
                     Transaction Records
                 </button>
             </Link>
-          </div>
         </div>
     );
 };

@@ -61,6 +61,13 @@ export const ContextProvider = ({ children }) => {
     const [assigneesPersonnel, setAssigneesPersonnel] = useState([]);
     const [propertyNamesList, setPropertyNamesList] = useState([]);
     const [invoices, setInvoices] = useState([]);
+    const [currentPageTransaction, setCurrentPageTransaction] = useState(0);
+    const [transactionsPageCount, setTransactionsPageCount] = useState(0);
+    const [transactions, setTransactions] = useState([]);
+    const [matchesData, setMatchesData] = useState([]);
+    const [currentPageInvoices, setCurrentPageInvoices] = useState(0);
+    const [invoicesPageCount, setInvoicesPageCount] = useState(0);
+
     useEffect(() => {
         if (user && user.department && !isDepartmentInitialized) {
             setDepartment(user.department === "CRS" ? "All" : user.department);
@@ -98,6 +105,47 @@ export const ContextProvider = ({ children }) => {
             } catch (error) {
                 console.error("Error fetching data: ", error);
             }
+        }
+    };
+
+    const getTransactions = async () => {
+        try {
+            const searchParams = new URLSearchParams({
+              /*   search: JSON.stringify(searchFilter), */
+                page: currentPageTransaction + 1,
+            }).toString();
+            const response = await apiService.get(`get-transactions?${searchParams}`);
+            console.log("response", response.data);
+            setTransactions(response.data.data);
+            setTransactionsPageCount(response.data.last_page);
+           
+        } catch (error) {
+            console.error("Error fetching data: ", error);
+        }
+    };
+
+    const getMatches = async () => {
+       if(token) {
+        try {
+            const response = await apiService.get("get-matches");
+            setMatchesData(response.data);
+        } catch (error) {
+            console.log("error uploading data", error);
+        }
+        }
+    };
+
+    const getInvoices = async () => {
+        try {
+            const searchParams = new URLSearchParams({
+                page: currentPageInvoices,
+            });
+            const response = await apiService.get(`get-invoices?${searchParams}`);
+            console.log("response invoies", response.data);
+            setInvoices(response.data.data);
+            setInvoicesPageCount(response.data.last_page);
+        } catch (error) {
+            console.log("error", error);
         }
     };
 
@@ -167,15 +215,6 @@ export const ContextProvider = ({ children }) => {
             setDataPropery(formattedData);
         } catch (error) {
             console.log("error retrieving", error);
-        }
-    };
-
-    const getInvoices = async () => {
-        try {
-            const response = await apiService.get("get-invoices");
-            setInvoices(response.data);
-        } catch (error) {
-            console.log("error", error);
         }
     };
 
@@ -288,38 +327,6 @@ export const ContextProvider = ({ children }) => {
         } catch (error) {
             console.error("Error fetching messages", error);
         }
-    };
-
-    const isValidMonth = (month) => {
-        const validMonths = {
-            January: "January",
-            Feb: "February",
-            February: "February",
-            Mar: "March",
-            March: "March",
-            Apr: "April",
-            April: "April",
-            May: "May",
-            Jun: "June",
-            June: "June",
-            Jul: "July",
-            July: "July",
-            Aug: "August",
-            August: "August",
-            Sep: "September",
-            September: "September",
-            Oct: "October",
-            October: "October",
-            Nov: "November",
-            November: "November",
-            Dec: "December",
-            December: "December",
-        };
-
-        const normalizedMonth =
-            month.charAt(0).toUpperCase() + month.slice(1).toLowerCase();
-
-        return validMonths.hasOwnProperty(normalizedMonth);
     };
 
     const getPricingMasterLists = useCallback(async () => {
@@ -436,7 +443,7 @@ export const ContextProvider = ({ children }) => {
             const getEmployeeData = async () => {
                 const response = await apiService.get("employee-list");
                 setAllEmployees(response.data);
-            };
+            };  
             getEmployeeData();
             getPropertyNames();
         }
@@ -445,6 +452,7 @@ export const ContextProvider = ({ children }) => {
     useEffect(() => {
         getAllConcerns();
         getInvoices();
+        getTransactions();
     }, [
         currentPage,
         daysFilter,
@@ -453,6 +461,8 @@ export const ContextProvider = ({ children }) => {
         searchFilter,
         hasAttachments,
         specificAssigneeCsr,
+        currentPageTransaction,
+        currentPageInvoices
     ]);
 
     useEffect(() => {
@@ -575,7 +585,18 @@ export const ContextProvider = ({ children }) => {
                 assigneesPersonnel,
                 getAssigneesPersonnel,
                 propertyNamesList,
-                invoices
+                invoices,
+                transactions,
+                currentPageTransaction,
+                setCurrentPageTransaction,
+                transactionsPageCount,
+                getTransactions,
+                getMatches,
+                matchesData,
+                invoicesPageCount,
+                setInvoicesPageCount,
+                currentPageInvoices,
+                setCurrentPageInvoices
             }}
         >
             {children}
