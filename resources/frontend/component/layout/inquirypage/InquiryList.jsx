@@ -70,7 +70,6 @@ const InquiryList = () => {
         } else if (searchFilter) {
             setSearchFilter({});
         } else if (specificAssigneeCsr) {
-            console.log("if assign only");
             setSpecificAssigneeCsr("");
             setAssignedToMeActive(false);
         }
