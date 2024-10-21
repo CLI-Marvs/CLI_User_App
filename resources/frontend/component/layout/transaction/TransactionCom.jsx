@@ -59,7 +59,7 @@ const TransactionCom = () => {
 
         try {
             const response = await axios.post(
-                "https://admin-dev.cebulandmasters.com/api/proxy-sap",
+                "http://34.143.133.180/api/proxy-sap",
                 soapBody,
                 config
             );
