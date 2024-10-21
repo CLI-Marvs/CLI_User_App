@@ -78,37 +78,37 @@ const AssignDetails = ({ logMessages, ticketId }) => {
         });
     };
 
-  /*   useEffect(() => {
-        let concernChannel;
-        let adminReplyChannel;
-        let newTicketId;
-        if (ticketId) {
-            newTicketId = ticketId.replace("#", "");
-            concernChannel = window.Echo.channel(`concerns.${newTicketId}`);
-            adminReplyChannel = window.Echo.channel(
-                `adminreply.${newTicketId}`
-            );
-            concernChannelFunc(concernChannel);
-            adminReplyChannelFunc(adminReplyChannel);
-        }
-
-        return () => {
-            if (concernChannel) {
-                concernChannel.stopListening("ConcernMessages");
-                window.Echo.leaveChannel(`concerns.${newTicketId}`);
-            }
-            if (adminReplyChannel) {
-                adminReplyChannel.stopListening("AdminReplyLogs");
-                window.Echo.leaveChannel(`adminreply.${newTicketId}`);
-            }
-        };
-    }, [ticketId]); */
+    /*   useEffect(() => {
+          let concernChannel;
+          let adminReplyChannel;
+          let newTicketId;
+          if (ticketId) {
+              newTicketId = ticketId.replace("#", "");
+              concernChannel = window.Echo.channel(`concerns.${newTicketId}`);
+              adminReplyChannel = window.Echo.channel(
+                  `adminreply.${newTicketId}`
+              );
+              concernChannelFunc(concernChannel);
+              adminReplyChannelFunc(adminReplyChannel);
+          }
+  
+          return () => {
+              if (concernChannel) {
+                  concernChannel.stopListening("ConcernMessages");
+                  window.Echo.leaveChannel(`concerns.${newTicketId}`);
+              }
+              if (adminReplyChannel) {
+                  adminReplyChannel.stopListening("AdminReplyLogs");
+                  window.Echo.leaveChannel(`adminreply.${newTicketId}`);
+              }
+          };
+      }, [ticketId]); */
 
     useEffect(() => {
         let concernChannel;
         let adminReplyChannel;
         let newTicketId;
-    
+
         // Function to ensure window.Echo is loaded before subscribing
         const initChannels = () => {
             if (ticketId && window.Echo) {
@@ -121,7 +121,7 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                 adminReplyChannelFunc(adminReplyChannel);
             }
         };
-    
+
         // Wait until the browser (Echo) is ready
         const checkBrowserReady = setInterval(() => {
             if (window.Echo) {
@@ -129,10 +129,10 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                 clearInterval(checkBrowserReady); // Stop checking once Echo is ready
             }
         }, 100); // Check every 100ms if Echo is initialized
-    
+
         return () => {
             clearInterval(checkBrowserReady); // Clear interval if component unmounts
-    
+
             if (concernChannel) {
                 concernChannel.stopListening("ConcernMessages");
                 window.Echo.leaveChannel(`concerns.${newTicketId}`);
@@ -143,12 +143,12 @@ const AssignDetails = ({ logMessages, ticketId }) => {
             }
         };
     }, [ticketId]);
-    
+
 
     const sortedConcernMessages = concernMessages[ticketId]
         ? concernMessages[ticketId]
-              .flat()
-              .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+            .flat()
+            .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
         : [];
 
     const sortedLogs = logs[ticketId] || [];
@@ -183,8 +183,8 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                 return (
                     <>
                         {/* CLI REPLY*/}
-                        <div className="flex flex-col text-sm montserrat-medium mb-[20px]">
-                            <div className="flex gap-1 items-center mb-[20px]">
+                        <div>
+                            <div className="flex gap-1 items-center ">
                                 <span className="flex mb-1 text-[25px] text-custom-blue">
                                     ⚬
                                 </span>
@@ -198,7 +198,7 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                                         "hh:mm A"
                                     )}
                                 </span>
-                                <div className="border-b flex-grow border-custom-bluegreen pl-[10px]"></div>
+
                             </div>
                             <div>
                                 <p className="montserrat-medium text-sm text-custom-solidgreen">
@@ -218,13 +218,15 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                                 </p>
                             </div>
                         </div>
+
+
                     </>
                 );
             case "assign_to":
                 return (
                     <>
-                        <div className="flex flex-col text-sm montserrat-medium">
-                            <div className="flex gap-1 items-center mb-[20px]">
+                        <div>
+                            <div className="flex gap-1 items-center ">
                                 <span className="flex mb-1 text-[25px] text-custom-blue ">
                                     ⚬
                                 </span>
@@ -238,10 +240,10 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                                         "hh:mm A"
                                     )}
                                 </span>
-                                <div className="border-b flex-grow border-custom-bluegreen"></div>
+
                             </div>
                             <div>
-                                <p className="text-custom-solidgreen mb-1">
+                                <p className="text-custom-solidgreen">
                                     Added assignee:{" "}
                                     {capitalizeWords(
                                         details.assign_to_name.join(", ")
@@ -254,13 +256,11 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                                 </p>
                             </div>
                         </div>
-                    </>
-                );
-            case "inquiry_status":
-                return (
-                    <>
-                        <div className="flex flex-col text-sm montserrat-medium">
-                            <div className="flex gap-1 items-center mb-[20px]">
+
+
+                        {/* remove assignee */}
+                        <div>
+                            <div className="flex gap-1 items-center  ">
                                 <span className="flex mb-1 text-[25px] text-custom-blue ">
                                     ⚬
                                 </span>
@@ -274,7 +274,45 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                                         "hh:mm A"
                                     )}
                                 </span>
-                                <div className="border-b flex-grow border-custom-bluegreen"></div>
+
+                            </div>
+                            <div>
+                                <p className="text-custom-solidgreen mb-1">
+                                    Removed assignee:{" "}
+                                    {capitalizeWords(
+                                        details.assign_to_name.join(", ")
+                                    )}
+                                </p>
+                            </div>
+                            <div>
+                                <p className="text-[#A5A5A5] mb-1">
+                                    by: {details.assign_by}
+                                </p>
+                            </div>
+                        </div>
+
+
+                    </>
+                );
+            case "inquiry_status":
+                return (
+                    <>
+                        <div>
+                            <div className="flex gap-1 items-center ">
+                                <span className="flex mb-1 text-[25px] text-custom-blue ">
+                                    ⚬
+                                </span>
+                                <p className="montserrat-medium text-sm text-custom-blue ">
+                                    {moment(inquiry_createdAt).format(
+                                        "MMMM D, YYYY"
+                                    )}
+                                </p>
+                                <span className="montserrat-medium text-custom-gray81">
+                                    {moment(inquiry_createdAt).format(
+                                        "hh:mm A"
+                                    )}
+                                </span>
+
                             </div>
                             <div className="w-full min-h-[39px] border-[2px] border-custom-grayF1 p-[10px] rounded-[10px] mb-[10px]">
                                 <p className="text-sm">{details.remarks}</p>
@@ -290,6 +328,8 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                                 </p>
                             </div>
                         </div>
+
+
                     </>
                 );
             case "requestor_reply":
@@ -297,34 +337,34 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                     <>
                         {/* FOLLOW UP REPLY*/}
 
-                        <div className="flex flex-col text-sm montserrat-medium mb-[20px]">
-                            <div className="flex gap-1 items-center mb-[20px]">
-                                <span className="flex mb-1 text-[25px] text-custom-blue">
-                                    ⚬
-                                </span>
-                                <p className="montserrat-medium text-sm text-custom-blue">
-                                    {moment(inquiry_createdAt).format(
-                                        "MMMM D, YYYY"
-                                    )}
-                                </p>
-                                <span className="montserrat-medium  text-custom-gray81">
-                                    {moment(inquiry_createdAt).format(
-                                        "hh:mm A"
-                                    )}
-                                </span>
-                                <div className="border-b flex-grow border-custom-bluegreen pl-[10px]"></div>
-                            </div>
-                            <div>
-                                <p className="montserrat-medium text-sm text-custom-solidgreen">
-                                    Follow up reply
-                                </p>
-                            </div>
-                            <div>
-                                <p className="text-[#A5A5A5]">
-                                    by {capitalizeWords(details.buyer_name)}
-                                </p>
-                            </div>
+
+                        <div className="flex gap-1 items-center ">
+                            <span className="flex mb-1 text-[25px] text-custom-blue">
+                                ⚬
+                            </span>
+                            <p className="montserrat-medium text-sm text-custom-blue">
+                                {moment(inquiry_createdAt).format(
+                                    "MMMM D, YYYY"
+                                )}
+                            </p>
+                            <span className="montserrat-medium  text-custom-gray81">
+                                {moment(inquiry_createdAt).format(
+                                    "hh:mm A"
+                                )}
+                            </span>
+
                         </div>
+                        <div>
+                            <p className="montserrat-medium text-sm text-custom-solidgreen">
+                                Follow up reply
+                            </p>
+                        </div>
+                        <div>
+                            <p className="text-[#A5A5A5]">
+                                by {capitalizeWords(details.buyer_name)}
+                            </p>
+                        </div>
+
                     </>
                 );
             default:
@@ -334,39 +374,42 @@ const AssignDetails = ({ logMessages, ticketId }) => {
 
     return (
         <>
-            <div className="flex h-[49px] w-full gradient-btn2 p-[2px] rounded-[10px] items-center justify-center my-[16px]">
-                <div className="w-full h-full flex items-center bg-white rounded-[8px] p-[10px]">
-                    <input
-                        type="text"
-                        className="w-full outline-none"
-                        onChange={(e) => setMessage(e.target.value)}
-                        value={message}
-                        onKeyDown={(e) => {
-                            if (e.key === "Enter") {
-                                e.preventDefault(); // Prevent default behavior (like submitting a form)
-                                handleSendMessage(); // Call the send message function
-                            }
-                        }}
-                    />
-                    <button
-                        className={`w-[76px] h-[28px] rounded-[10px] text-xs text-white 
-                            ${
-                                !message.trim()
+            <div className="px-[20px]">
+                <div className="flex h-[49px] w-full gradient-btn2 p-[2px] rounded-[10px] items-center justify-center my-[16px] ">
+                    <div className="w-full h-full flex items-center bg-white rounded-[8px] p-[10px]">
+                        <input
+                            type="text"
+                            className="w-full outline-none"
+                            onChange={(e) => setMessage(e.target.value)}
+                            value={message}
+                            onKeyDown={(e) => {
+                                if (e.key === "Enter") {
+                                    e.preventDefault(); // Prevent default behavior (like submitting a form)
+                                    handleSendMessage(); // Call the send message function
+                                }
+                            }}
+                        />
+                        <button
+                            className={`w-[76px] h-[28px] rounded-[10px] text-xs text-white 
+                                ${!message.trim()
                                     ? "bg-gray-400 cursor-not-allowed" // Gray out when input is empty
                                     : "gradient-btn2"
-                            } 
-                            `}
-                        onClick={handleSendMessage}
-                    >
-                        Comment
-                    </button>
+                                } 
+                                `}
+                            onClick={handleSendMessage}
+                        >
+                            Comment
+                        </button>
+                    </div>
                 </div>
             </div>
             <div className="border border-t-1 border-custom-lightestgreen"></div>
-
-            <div className="w-full p-[10px] mt-[12px] flex flex-col gap-[10px]">
+            <div className="w-full py-[10px] mt-[12px] flex flex-col">
                 {combinedMessages && combinedMessages.length > 0 ? (
                     combinedMessages.map((item, index) => {
+
+                        const alternatingBackground = index % 2 === 0 ? "bg-white" : "bg-custom-grayF1";
+
                         if (item.type === "concern") {
                             const formattedDate = moment(
                                 item.created_at
@@ -377,7 +420,7 @@ const AssignDetails = ({ logMessages, ticketId }) => {
 
                             return (
                                 <div
-                                    className="flex flex-col gap-[10px] mb-[20px]"
+                                    className={`flex flex-col gap-[10px] py-[20px] px-[30px] ${alternatingBackground}`}
                                     key={index}
                                 >
                                     <div className="flex gap-[10px] text-sm montserrat-medium items-center">
@@ -398,9 +441,9 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                                                 {item.firstname} {item.lastname}
                                             </p>
                                         </div>
-                                        <div className="border-b flex-grow border-custom-bluegreen"></div>
+
                                     </div>
-                                    <div className="w-full min-h-[39px] border-[2px] border-custom-grayF1 p-[10px] rounded-[10px]">
+                                    <div className="w-full min-h-[39px] border-[2px] border-custom-grayF1 bg-white p-[10px] rounded-[10px]">
                                         <p className="text-sm">
                                             {item.message}
                                         </p>
@@ -425,11 +468,12 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                             if (logType !== "unknown") {
                                 return (
                                     <>
-                                        {renderDetails(
-                                            logType,
-                                            details,
-                                            item.created_at
-                                        )}
+                                        <div
+                                            className={`flex flex-col gap-[10px] py-[20px] px-[30px] ${alternatingBackground}`} // Apply alternating background
+                                            key={index}
+                                        >
+                                            {renderDetails(logType, details, item.created_at)}
+                                        </div>
                                     </>
                                 );
                             }

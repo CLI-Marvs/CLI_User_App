@@ -136,7 +136,7 @@ const AddInfoModal = ({ modalRef, dataConcern }) => {
                                 value={dataToUpdate.name || ""}
                                 onChange={handleChange}
                                 type="text"
-                                className="w-full px-4 text-sm focus:outline-none mobile:text-xs"
+                                className="w-full px-4 text-sm focus:outline-none mobile:text-xs capitalize"
                                 placeholder=""
                             />
                         </div>

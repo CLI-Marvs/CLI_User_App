@@ -7,7 +7,7 @@ import Sho from "../../../../../public/Images/rodfil.png";
 import Kent from "../../../../../public/Images/kent.png";
 import FolderFile from "../../../../../public/Images/folder_file.svg";
 import { BsPaperclip } from "react-icons/bs";
-import { IoIosSend } from "react-icons/io";
+import { IoIosArrowDown, IoIosSend } from "react-icons/io";
 import AssignSidePanel from "./AssignSidePanel";
 import ResolveModal from "./ResolveModal";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
@@ -87,13 +87,13 @@ const InquiryThread = () => {
         "N/A",
         ...(Array.isArray(propertyNamesList) && propertyNamesList.length > 0
             ? propertyNamesList
-                  .filter((item) => !item.toLowerCase().includes("phase"))
-                  .map((item) => formatFunc(item))
-                  .sort((a, b) => {
-                      if (a === "N/A") return -1;
-                      if (b === "N/A") return 1;
-                      return a.localeCompare(b);
-                  })
+                .filter((item) => !item.toLowerCase().includes("phase"))
+                .map((item) => formatFunc(item))
+                .sort((a, b) => {
+                    if (a === "N/A") return -1;
+                    if (b === "N/A") return 1;
+                    return a.localeCompare(b);
+                })
             : []),
     ];
 
@@ -166,14 +166,14 @@ const InquiryThread = () => {
     };
 
     const formatChatMessage = (message) => {
-       if(message) {
-        return message.split("\n").map((item, index) => (
-            <span key={index}>
-                {item}
-                <br />
-            </span>
-        ));
-       }
+        if (message) {
+            return message.split("\n").map((item, index) => (
+                <span key={index}>
+                    {item}
+                    <br />
+                </span>
+            ));
+        }
     };
 
     const handleDeleteInquiry = async () => {
@@ -278,8 +278,8 @@ const InquiryThread = () => {
 
     const combineThreadMessages = messages[ticketId]
         ? messages[ticketId]
-              .flat()
-              .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+            .flat()
+            .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
         : [];
     // useEffect(() => {
     //     let adminMessageChannel;
@@ -311,7 +311,7 @@ const InquiryThread = () => {
         let adminMessageChannel;
         let messageIdChannel;
         let newTicketId;
-    
+
         // Function to initialize channels when Echo is ready
         const initChannels = () => {
             if (ticketId && window.Echo) {
@@ -326,7 +326,7 @@ const InquiryThread = () => {
                 adminMessageChannelFunc(adminMessageChannel);
             }
         };
-    
+
         // Periodically check if window.Echo is initialized
         const checkBrowserReady = setInterval(() => {
             if (window.Echo) {
@@ -334,10 +334,10 @@ const InquiryThread = () => {
                 clearInterval(checkBrowserReady); // Stop checking once Echo is ready
             }
         }, 100); // Check every 100ms if Echo is initialized
-    
+
         return () => {
             clearInterval(checkBrowserReady); // Clear interval if component unmounts
-    
+
             if (adminMessageChannel) {
                 adminMessageChannel.stopListening("AdminMessage");
                 window.Echo.leaveChannel(`adminmessage.${newTicketId}`);
@@ -348,16 +348,16 @@ const InquiryThread = () => {
             }
         };
     }, [ticketId]);
-    
+
     const capitalizeWords = (name) => {
-        if(name) {
+        if (name) {
             return name
-            .split(" ")
-            .map(
-                (word) =>
-                    word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-            )
-            .join(" ");
+                .split(" ")
+                .map(
+                    (word) =>
+                        word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+                )
+                .join(" ");
         }
     };
 
@@ -426,13 +426,13 @@ const InquiryThread = () => {
                                             }
                                         />
                                     </div>
-                                    <div className="flex">
+                                    <div className="flex relative">
                                         <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
                                             {" "}
                                             Category
                                         </label>
                                         <select
-                                            className="w-full border-b-1 outline-none text-sm"
+                                            className="w-full border-b-1 outline-none appearance-none text-sm"
                                             value={category}
                                             onChange={(e) =>
                                                 setCategory(e.target.value)
@@ -448,19 +448,19 @@ const InquiryThread = () => {
                                                 Payment Issues
                                             </option>
                                             <option value="SOA/ Billing Statement/ Buyer's Ledger">
-                                                 SOA/ Billing Statement/ Buyer's Ledger
+                                                SOA/ Billing Statement/ Buyer's Ledger
                                             </option>
                                             <option value="Turn Over Status">
-                                                 Turn Over Status
+                                                Turn Over Status
                                             </option>
                                             <option value="Unit Status">
-                                                 Unit Status
+                                                Unit Status
                                             </option>
                                             <option value="Loan Application">
                                                 Loan Application
                                             </option>
-                                            <option value="Titile and Other Registration Documents">
-                                                Titile and Other Registration
+                                            <option value="Title and Other Registration Documents">
+                                                Title and Other Registration
                                                 Documents
                                             </option>
                                             <option value="Commissions">
@@ -470,6 +470,9 @@ const InquiryThread = () => {
                                                 Other Concerns
                                             </option>
                                         </select>
+                                        <span className="absolute inset-y-0 right-0 flex items-center  pl-3 pointer-events-none">
+                                            <IoIosArrowDown />
+                                        </span>
                                     </div>
                                     <div className="flex">
                                         <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
@@ -500,48 +503,55 @@ const InquiryThread = () => {
                                         />
                                     </div>
                                     <div className="flex gap-3">
-                                        <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[244px]">
-                                            Date
-                                        </label>
-                                        <div className="relative">
-                                            <DatePicker
-                                                selected={startDate}
-                                                onChange={handleDateChange}
-                                                className=" border-b-1 outline-none w-[176px] text-sm"
-                                                calendarClassName="custom-calendar"
-                                            />
+                                        <div className="flex">
+                                            <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[93px]">
+                                                Date
+                                            </label>
+                                            <div className="relative">
+                                                <DatePicker
+                                                    selected={startDate}
+                                                    onChange={handleDateChange}
+                                                    className="border-b-1 outline-none w-[146px] text-sm"
+                                                    calendarClassName="custom-calendar"
+                                                />
 
-                                            <img
-                                                src={DateLogo}
-                                                alt="date"
-                                                className="absolute top-[45%] right-0 transform -translate-y-1/2 text-custom-bluegreen size-6  pointer-events-none"
-                                            />
+                                                <img
+                                                    src={DateLogo}
+                                                    alt="date"
+                                                    className="absolute top-[45%] right-0 transform -translate-y-1/2 text-custom-bluegreen size-6 cursor-pointer pointer-events-none"
+                                                />
+                                            </div>
                                         </div>
-                                        <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
-                                            {" "}
-                                            Property
-                                        </label>
-                                        <select
-                                            className="w-full border-b-1 outline-none text-sm"
-                                            onChange={handleSelectProperty}
-                                            value={selectedProperty}
-                                        >
-                                            <option value="">
-                                                Select Property
-                                            </option>
-                                            {formattedPropertyNames.map(
-                                                (item, index) => {
-                                                    return (
-                                                        <option
-                                                            key={index}
-                                                            value={item}
-                                                        >
-                                                            {item}
-                                                        </option>
-                                                    );
-                                                }
-                                            )}
-                                        </select>
+                                        <div className="flex relative">
+                                            <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[65px]">
+                                                {" "}
+                                                Property
+                                            </label>
+                                            <select
+                                                className="w-[179px] border-b-1 outline-none appearance-none text-sm"
+                                                onChange={handleSelectProperty}
+                                                value={selectedProperty}
+                                            >
+                                                <option value="">
+                                                    Select Property
+                                                </option>
+                                                {formattedPropertyNames.map(
+                                                    (item, index) => {
+                                                        return (
+                                                            <option
+                                                                key={index}
+                                                                value={item}
+                                                            >
+                                                                {item}
+                                                            </option>
+                                                        );
+                                                    }
+                                                )}
+                                            </select>
+                                            <span className="absolute inset-y-0 right-0 flex items-center  pl-3 pointer-events-none">
+                                                <IoIosArrowDown />
+                                            </span>
+                                        </div>
                                     </div>
                                     <div className="mt-5 flex gap-5">
                                         <input
@@ -695,11 +705,10 @@ const InquiryThread = () => {
                                                         loading
                                                     }
                                                     className={`flex w-[82px] h-[28px] rounded-[5px] text-white text-xs justify-center items-center 
-                                                        ${
-                                                            loading ||
+                                                        ${loading ||
                                                             !chatMessage.trim()
-                                                                ? "bg-gray-400 cursor-not-allowed"
-                                                                : "gradient-background3 hover:shadow-custom4"
+                                                            ? "bg-gray-400 cursor-not-allowed"
+                                                            : "gradient-background3 hover:shadow-custom4"
                                                         } 
                                                     `}
                                                 >
@@ -799,39 +808,39 @@ const InquiryThread = () => {
                                                             </div>
                                                         </div>
                                                         {attachedFiles.length > 0 && (
-                                            <div className="mb-2 ">
-                                                {attachedFiles.map(
-                                                    (file, index) => (
-                                                        <div
-                                                            key={index}
-                                                            className="flex items-center justify-between mb-2 p-2 border bg-white rounded"
-                                                        >
-                                                            <span className="text-sm text-gray-700">
-                                                                {file.name}
-                                                            </span>
-                                                            <button
-                                                                type="button"
-                                                                onClick={() =>
-                                                                    removeFile(
-                                                                        file.name
+                                                            <div className="mb-2 ">
+                                                                {attachedFiles.map(
+                                                                    (file, index) => (
+                                                                        <div
+                                                                            key={index}
+                                                                            className="flex items-center justify-between mb-2 p-2 border bg-white rounded"
+                                                                        >
+                                                                            <span className="text-sm text-gray-700">
+                                                                                {file.name}
+                                                                            </span>
+                                                                            <button
+                                                                                type="button"
+                                                                                onClick={() =>
+                                                                                    removeFile(
+                                                                                        file.name
+                                                                                    )
+                                                                                }
+                                                                                className="text-red-500"
+                                                                            >
+                                                                                Remove
+                                                                            </button>
+                                                                        </div>
                                                                     )
-                                                                }
-                                                                className="text-red-500"
-                                                            >
-                                                                Remove
-                                                            </button>
-                                                        </div>
-                                                    )
-                                                )}
-                                            </div>
-                                        )}
+                                                                )}
+                                                            </div>
+                                                        )}
                                                     </div>
                                                 </div>
                                             )}
                                         </div>
                                     </div>
                                 </div>
-                                
+
                                 <div className="text-[11px] text-[#B54D4D]">
                                     <p>
                                         Note: This message will be sent to{" "}
@@ -868,7 +877,7 @@ const InquiryThread = () => {
                                     </div>
                                 )}
                             </div>
-                            <div className="flex-grow max-h-[calc(100vh-400px)]">
+                            <div className="">
                                 <div className="">
                                     {combineThreadMessages.length > 0 &&
                                         combineThreadMessages.map(

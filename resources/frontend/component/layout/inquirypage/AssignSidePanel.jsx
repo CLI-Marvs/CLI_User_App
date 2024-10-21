@@ -109,7 +109,7 @@ const AssignSidePanel = ({ ticketId }) => {
 
     const handleConfirmation = () => {
         if (selectedOptions.length === 0) {
-            alert("please select employee first");
+            /* alert("please select employee first"); */
             return;
         }
         setIsConfirmModalOpen(true);
@@ -139,7 +139,7 @@ const AssignSidePanel = ({ ticketId }) => {
     const handleAssign = async () => {
         setIsConfirmModalOpen(false);
         if (selectedOptions.length === 0) {
-            alert("please select employee first");
+            /* alert("please select employee first"); */
             return;
         }
         await saveAssignee();
@@ -186,11 +186,11 @@ const AssignSidePanel = ({ ticketId }) => {
             });
 
             if (response.data.message === "Unauthorized user") {
-                alert("Unauthorized to remove assignee");
+                /* alert("Unauthorized to remove assignee"); */
                 return;
             } else {
                 getAssigneesPersonnel();
-                alert("Successfully removed");
+                /* alert("Successfully removed"); */
             }
 
             console.log("Assignee removed:", response);
@@ -503,8 +503,8 @@ const AssignSidePanel = ({ ticketId }) => {
                     )}
                 </div>
             </div>
-            <div className=" w-full bg-white rounded-[10px] py-[16px] px-[20px]">
-                <div className="flex w-full justify-start items-start">
+            <div className=" w-full bg-white rounded-[10px] py-[16px]">
+                <div className="flex w-full px-[20px] justify-start items-start">
                     <p className="text-sm text-custom-bluegreen pt-1 font-semibold">
                         Assignee
                     </p>
