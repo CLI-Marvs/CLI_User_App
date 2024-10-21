@@ -65,6 +65,7 @@ Route::get('/get-matches', [SapController::class, 'runAutoPosting']);
 
 
 Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/get-transaction-bank', [SapController::class, 'getTransactionByBankName']);
     Route::post('/upload-notepad', [SapController::class, 'uploadNotepad']);
     Route::get('/get-concern', [ConcernController::class, 'getAllConcerns']);
     Route::post('/add-concern', [ConcernController::class, 'addConcernPublic']);

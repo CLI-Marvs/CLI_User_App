@@ -17,6 +17,9 @@ const BankStatementCom = () => {
         getTransactions,
         getMatches,
         matchesData,
+        bankNames,
+        setBankNames,
+        bankList,
     } = useStateContext();
     const [files, setFiles] = useState([]);
     const modalRef = useRef(null);
@@ -67,6 +70,10 @@ const BankStatementCom = () => {
         }
     };
 
+    const handleBankChange = (e) => {
+        setBankNames(e.target.value);
+    };
+
     const openPostingModal = () => {
         if (modalRef.current) {
             modalRef.current.showModal();
@@ -80,11 +87,24 @@ const BankStatementCom = () => {
         getTransactions();
         getMatches();
     }, [files]);
-    console.log("matchesData", matchesData);
     return (
         <>
             <div className="px-4">
                 <div className="flex mb-4 gap-10">
+                    <select
+                        className="border-b-1 w-[121px] outline-none text-sm"
+                        value={bankNames}
+                        onChange={handleBankChange}
+                    >
+                        <option value="">Select Banks</option>
+                        <option value="All">All</option>
+                        {bankList.length > 0 &&
+                            bankList.map((item, index) => (
+                                <option key={index} value={item}>
+                                    {item}
+                                </option>
+                            ))}
+                    </select>
                     <input
                         type="file"
                         id="fileInput"
@@ -141,36 +161,37 @@ const BankStatementCom = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {transactions.length > 0 && transactions.map((item, index) => (
-                            <tr key={index}>
-                                <td className=" px-4 border border-gray-500">
-                                    {item.transaction_date}
-                                </td>
-                                <td className=" px-4 border border-gray-500">
-                                    {item.bank_name}
-                                </td>
-                                <td className=" px-4 border border-gray-500">
-                                    {item.payment_channel}
-                                </td>
-                                <td className=" px-4 border border-gray-500">
-                                    {item.transact_by}
-                                </td>
-                                <td className=" px-4 border border-gray-500">
-                                    {item.reference_number}
-                                </td>
-                                <td className=" px-4 border border-gray-500">
-                                    {item.status === "not_posted"
-                                        ? "Not Posted"
-                                        : "Posted"}
-                                </td>
-                                <td className=" px-4 border border-gray-500">
-                                    {item.invoice_link}
-                                </td>
-                                <td className=" px-4 border border-gray-500">
-                                    {item.receipt_link}
-                                </td>
-                            </tr>
-                        ))}
+                        {transactions.length > 0 &&
+                            transactions.map((item, index) => (
+                                <tr key={index}>
+                                    <td className=" px-4 border border-gray-500">
+                                        {item.transaction_date}
+                                    </td>
+                                    <td className=" px-4 border border-gray-500">
+                                        {item.bank_name}
+                                    </td>
+                                    <td className=" px-4 border border-gray-500">
+                                        {item.payment_channel}
+                                    </td>
+                                    <td className=" px-4 border border-gray-500">
+                                        {item.transact_by}
+                                    </td>
+                                    <td className=" px-4 border border-gray-500">
+                                        {item.reference_number}
+                                    </td>
+                                    <td className=" px-4 border border-gray-500">
+                                        {item.status === "not_posted"
+                                            ? "Not Posted"
+                                            : "Posted"}
+                                    </td>
+                                    <td className=" px-4 border border-gray-500">
+                                        {item.invoice_link}
+                                    </td>
+                                    <td className=" px-4 border border-gray-500">
+                                        {item.receipt_link}
+                                    </td>
+                                </tr>
+                            ))}
                     </tbody>
                 </table>
 
@@ -222,7 +243,7 @@ const BankStatementCom = () => {
                                                 className="flex justify-between"
                                             >
                                                 {file.name}
-                                               {/*  <button
+                                                {/*  <button
                                                     onClick={() =>
                                                         handleRemoveFile(index)
                                                     }
@@ -275,25 +296,26 @@ const BankStatementCom = () => {
                             <div>These are the data to be posted</div>
                             {matchesData.length > 0 && (
                                 <div className="mt-4">
-                                    {matchesData.map((item, index) => (
-                                        <>
-                                            <div
-                                                key={index}
-                                                className="flex flex-col mb-3"
-                                            >
-                                                <span>
-                                                    <strong>
-                                                        Invoice amount:
-                                                    </strong>{" "}
-                                                    {item.invoice_amount}
-                                                </span>
-                                                <span>
-                                                    <strong>Contract Number:</strong>{" "}
-                                                    {item.contract_number}
-                                                </span>
-                                            </div>
-                                        </>
-                                    ))}
+                                    {matchesData.map((item, index) => {
+                                        return (
+                                            <>
+                                                <div className="flex flex-col mb-3" key={index}>
+                                                    <span>
+                                                        <strong>
+                                                            Invoice amount:
+                                                        </strong>{" "}
+                                                        {item.invoice_amount}
+                                                    </span>
+                                                    <span>
+                                                        <strong>
+                                                            Contract Number:
+                                                        </strong>{" "}
+                                                        {item.contract_number}
+                                                    </span>
+                                                </div>
+                                            </>
+                                        );
+                                    })}
                                 </div>
                             )}
                         </div>
@@ -308,7 +330,7 @@ const BankStatementCom = () => {
                                 Cancel
                             </button>
                             <button
-                              /*   onClick={(e) => handleSubmit(e)} */
+                                /*   onClick={(e) => handleSubmit(e)} */
                                 disabled={loading}
                                 type="submit"
                                 className={`w-[133px] text-sm montserrat-semibold text-white h-[40px] rounded-[10px] gradient-btn2 flex justify-center items-center gap-2 tablet:w-full hover:shadow-custom4

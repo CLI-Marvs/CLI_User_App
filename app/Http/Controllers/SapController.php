@@ -14,15 +14,15 @@ class SapController extends Controller
     public function urlSap(Request $request)
     {
         $client = new Client();
-        $response = $client->post('https://SAP-QAS:50200/sap/bc/srt/rfc/sap/zinvoices3/888/zinvoices3/zinvoices3', [
+        $response = $client->post('https://sap-dev.cebulandmasters.com:44304/sap/bc/srt/rfc/sap/zsendinvoice/200/zsendinvoice/zsendinvoice', [
             'headers' => [
-                'Authorization' => 'Basic ' . base64_encode('KBELMONTE:1234567890!Ab'),
+                'Authorization' => 'Basic ' . base64_encode('KBELMONTE:Tomorrowbytogether2019!'),
                 'Content-Type' => 'application/soap+xml',
             ],
             'body' => $request->getContent(),
             'timeout' => 14400,
         ]);
-       /*  Tomorrowbytogether2019 */
+        /*  Tomorrowbytogether2019 */
     }
 
     public function postInvoices(Request $request)
@@ -264,12 +264,17 @@ class SapController extends Controller
     {
         try {
             $query = BankTransaction::query();
-            $searchParams = $request->input('searchParams');
-            $dataJoin = $query->leftJoin('employee', DB::raw('CAST(bank_transactions.transact_by AS INTEGER)'), '=', 'employee.id')
-                              ->select('bank_transactions.*',DB::raw(
-                                "CONCAT(employee.firstname,' ',employee.lastname) as transact_by"));
 
-            if (!empty($searchParams)) {
+            $searchParams = $request->query('bank_name');
+
+            $dataJoin = $query->leftJoin('employee', DB::raw('CAST(bank_transactions.transact_by AS INTEGER)'), '=', 'employee.id')
+                ->select('bank_transactions.*', DB::raw(
+                    "CONCAT(employee.firstname,' ',employee.lastname) as transact_by"
+                ));
+
+
+            if ($searchParams !== "All") {
+               /*  dd($searchParams); */
                 $this->filterDataTransaction($query, $searchParams);
             }
 
@@ -280,15 +285,26 @@ class SapController extends Controller
         }
     }
 
+    public function getTransactionByBankName()
+    {
+        try {
+            $listOfBanks = BankTransaction::distinct()->pluck('bank_name')->toArray();
+            return response()->json($listOfBanks);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'An error occurred', 'message' => $e->getMessage()], 500);
+        }
+    }
 
     private function filterDataTransaction($query, $searchParams)
     {
-        if (!empty($searchParams['bank_name'])) {
-            $query->where('bank_name', 'LIKE', '%' . $searchParams['bank_name'] . '%');
-        }
-        if (!empty($searchParams['payment_channel'])) {
-            $query->where('payment_channel', 'LIKE', '%' . $searchParams['payment_channel'] . '%');
-        }
+        /* dd($searchParams); */
+        $query->where('bank_name', 'LIKE', '%' . $searchParams . '%');
+
+        /* if ($searchParams === "bank_name") {
+        } */
+        /*  if ($searchParams === "payment_channel") {
+            $query->where('payment_channel', 'LIKE', '%' . $searchParams . '%');
+        } */
     }
 
     public function runAutoPosting()
@@ -298,17 +314,17 @@ class SapController extends Controller
         $matchingInvoices = [];
         foreach ($bankTransactions as $bankTransaction) {
             $invoices = Invoices::where('contract_number', $bankTransaction->reference_number)
-                                ->where('invoice_amount', $bankTransaction->invoice_amount)
-                                ->get();
+                ->where('invoice_amount', $bankTransaction->invoice_amount)
+                ->get();
 
-            if($invoices->isNotEmpty()) {
-               foreach($invoices as $invoice) {
-                $matchingInvoices[] = [
-                    'invoice_amount' => $invoice->invoice_amount,
-                    'contract_number' => $invoice->contract_number
-                ];
-               }
-             }
+            if ($invoices->isNotEmpty()) {
+                foreach ($invoices as $invoice) {
+                    $matchingInvoices[] = [
+                        'invoice_amount' => $invoice->invoice_amount,
+                        'contract_number' => $invoice->contract_number
+                    ];
+                }
+            }
         }
 
         return response()->json($matchingInvoices);

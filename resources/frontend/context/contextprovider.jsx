@@ -67,6 +67,9 @@ export const ContextProvider = ({ children }) => {
     const [matchesData, setMatchesData] = useState([]);
     const [currentPageInvoices, setCurrentPageInvoices] = useState(0);
     const [invoicesPageCount, setInvoicesPageCount] = useState(0);
+    const [bankNames, setBankNames] = useState("All");
+    const [bankList, setBankList] = useState([]);
+
 
     useEffect(() => {
         if (user && user.department && !isDepartmentInitialized) {
@@ -108,11 +111,23 @@ export const ContextProvider = ({ children }) => {
         }
     };
 
+    const getBankName = async () => {
+        try {
+            const response = await apiService.get("get-transaction-bank");
+            console.log("response banks", response.data);
+            setBankList(response.data);
+        } catch (error) {
+            
+        }
+    };
+       
     const getTransactions = async () => {
         try {
+            console.log("banknames", bankNames);
             const searchParams = new URLSearchParams({
               /*   search: JSON.stringify(searchFilter), */
                 page: currentPageTransaction + 1,
+                bank_name: bankNames ? bankNames : null
             }).toString();
             const response = await apiService.get(`get-transactions?${searchParams}`);
             console.log("response", response.data);
@@ -141,7 +156,6 @@ export const ContextProvider = ({ children }) => {
                 page: currentPageInvoices,
             });
             const response = await apiService.get(`get-invoices?${searchParams}`);
-            console.log("response invoies", response.data);
             setInvoices(response.data.data);
             setInvoicesPageCount(response.data.last_page);
         } catch (error) {
@@ -453,6 +467,7 @@ export const ContextProvider = ({ children }) => {
         getAllConcerns();
         getInvoices();
         getTransactions();
+        getBankName();
     }, [
         currentPage,
         daysFilter,
@@ -462,7 +477,8 @@ export const ContextProvider = ({ children }) => {
         hasAttachments,
         specificAssigneeCsr,
         currentPageTransaction,
-        currentPageInvoices
+        currentPageInvoices,
+        bankNames
     ]);
 
     useEffect(() => {
@@ -596,7 +612,10 @@ export const ContextProvider = ({ children }) => {
                 invoicesPageCount,
                 setInvoicesPageCount,
                 currentPageInvoices,
-                setCurrentPageInvoices
+                setCurrentPageInvoices,
+                bankNames,
+                setBankNames,
+                bankList
             }}
         >
             {children}
