@@ -384,7 +384,7 @@ class ConcernController extends Controller
             $concerns->status = "unresolved";
             $concerns->ticket_id = $ticketId;
             $concerns->user_type = $request->user_type;
-            $concerns->buyer_name = $request->fname . ' ' . $request->lname;
+            $concerns->buyer_name = $request->fname . ' ' . $request->mname . ' ' . $request->lname;
             $concerns->buyer_middlename = $request->mname;
             $concerns->mobile_number = $request->mobile_number;
             $concerns->contract_number = $request->contract_number;
@@ -689,20 +689,26 @@ class ConcernController extends Controller
     {
         if ($status && $days !== null) {
             if ($days === "3+") {
+                \Log::info("trigger here days and status first");
                 $query->where('status', $status)
-                    ->where('concerns.created_at', '<', now()->subDays(3)->startOfDay());
+                    ->where('concerns.created_at', '<', now()->subDays(3)->endOfDay());
             } else {
+                \Log::info("trigger here days and status second");
                 $startOfDay = now()->subDays($days)->startOfDay();
                 $endOfDay = now()->subDays($days)->endOfDay();
                 $query->where('status', $status)
                     ->whereBetween('concerns.created_at', [$startOfDay, $endOfDay]);
             }
         } else if ($status) {
+            \Log::info("trigger here status only first");
             $query->where('status', $status);
         } else if ($days !== null) {
             if ($days === "3+") {
-                $query->where('concerns.created_at', '<', now()->subDays(3)->startOfDay());
+                \Log::info("trigger here days only first");
+                $query->where('concerns.created_at', '<', now()->subDays(3)->endOfDay());
             } else {
+                \Log::info("trigger here days only second");
+
                 $startOfDay = now()->subDays($days)->startOfDay();
                 $endOfDay = now()->subDays($days)->endOfDay();
                 $query->whereBetween('concerns.created_at', [$startOfDay, $endOfDay]);
@@ -1557,6 +1563,13 @@ class ConcernController extends Controller
         $responses = [];
         try {
             $requestData = $request->input('data');
+            $buyerData = $request->input('dataFromBuyer');
+            $buyerDataErratum = $request->input('dataFromBuyerErratum');
+
+            if ($buyerData || $buyerDataErratum) {
+                $this->fromBuyerEmail($buyerData, $buyerDataErratum);
+            }
+
             foreach ($requestData as $message) {
                 Log::info('inside loop', $message);
                 $concernsRef = Concerns::where('ticket_id', $message['ticket_id'])->first();
@@ -1606,6 +1619,72 @@ class ConcernController extends Controller
             return response()->json($responses);
         } catch (\Throwable $e) {
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function fromBuyerEmail($buyerData, $buyerDataErratum)
+    {
+        if ($buyerData) {
+            foreach ($buyerData as $buyer) {
+                if ($buyer) {
+                    $lastConcern = Concerns::latest()->first();
+                    $nextId = $lastConcern ? $lastConcern->id + 1 : 1;
+
+                    $formattedId = str_pad($nextId, 8, '0', STR_PAD_LEFT);
+                    $ticketId = 'Ticket#24' . $formattedId;
+
+                    $concerns = new Concerns();
+                    $concerns->details_concern = $buyer['details_concern'];
+                    $concerns->ticket_id = $ticketId;
+                    $concerns->buyer_email = $buyer['buyer_email'];
+                    $concerns->buyer_name = $buyer['buyer_name'];
+                    $concerns->details_message = $buyer['details_message'];
+                    $concerns->created_at = Carbon::parse(now())->setTimezone('Asia/Manila');
+                    $concerns->status = "unresolved";
+                    $concerns->inquiry_type = "from_buyer";
+                    $concerns->save();
+
+
+                    $messagesRef = new Messages();
+                    $messagesRef->details_message = $buyer['details_message'];
+                    $messagesRef->ticket_id = $ticketId;
+                    $fileLinks = $this->uploadToGCSFromScript($buyer['attachment']);
+                    $messagesRef->buyer_email = $buyer['buyer_email'];
+                    $messagesRef->attachment = json_encode($fileLinks);
+                    $messagesRef->created_at = Carbon::parse(now())->setTimezone('Asia/Manila');
+                    $messagesRef->buyer_name = $concerns->buyer_name;
+                    $messagesRef->save();
+
+                    $responses[] = "Saved Successfully " . $buyer['buyer_email'];
+                } else {
+                    $responses[] = "Saved Unsucessfully " . $buyer['buyer_email'];
+                }
+            }
+        }
+        if ($buyerDataErratum) {
+            foreach ($buyerDataErratum as $buyer) {
+                if ($buyer) {
+                    $existingTicket = Messages::where('ticket_id', $buyer['ticket_id'])
+                        ->where('buyer_email', $buyer['buyer_email'])
+                        ->first();
+
+                    if ($existingTicket) {
+                        $messagesRef = new Messages();
+                        $messagesRef->details_message = $buyer['details_message'];
+                        $messagesRef->ticket_id = $ticketId;
+                        $fileLinks = $this->uploadToGCSFromScript($buyer['attachment']);
+                        $messagesRef->buyer_email = $buyer['buyer_email'];
+                        $messagesRef->attachment = json_encode($fileLinks);
+                        $messagesRef->created_at = Carbon::parse(now())->setTimezone('Asia/Manila');
+                        $messagesRef->buyer_name = $concerns->buyer_name;
+                        $messagesRef->save();
+                    }
+
+                    $responses[] = "Send Eratum Successfully " . $buyer['buyer_email'];
+                } else {
+                    $responses[] = "Send Eratum Unsucessfully " . $buyer['buyer_email'];
+                }
+            }
         }
     }
 

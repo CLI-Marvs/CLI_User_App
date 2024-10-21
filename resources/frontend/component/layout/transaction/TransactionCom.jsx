@@ -1,36 +1,38 @@
 import { Card } from "@mui/material";
 import React, { useState } from "react";
 import { useStateContext } from "../../../context/contextprovider";
-
+import DatePicker from "react-datepicker";
+import DateLogo from "../../../../../public/Images/Date_range.svg";
+import ReactPaginate from "react-paginate";
+import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md";
 
 const TransactionCom = () => {
-   const {invoices} = useStateContext();
-    const sampleData = [
-        { id: 1, name: "John Doe", email: "john@example.com" },
-        { id: 2, name: "Jane Smith", email: "jane@example.com" },
-        { id: 3, name: "Alice Johnson", email: "alice@example.com" },
-        { id: 4, name: "Bob Brown", email: "bob@example.com" },
-        { id: 5, name: "Charlie Davis", email: "charlie@example.com" },
-    ];
+    const {
+        invoices,
+        setInvoicesPageCount,
+        currentPageInvoices,
+        invoicesPageCount,
+        setCurrentPageInvoices,
+    } = useStateContext();
 
-    const [filterText, setFilterText] = useState("");
-    const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 3;
-
-    const filteredData = sampleData.filter((item) =>
-        item.name.toLowerCase().includes(filterText.toLowerCase())
-    );
-
-    const totalPages = Math.ceil(filteredData.length / itemsPerPage);
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const paginatedData = filteredData.slice(
-        startIndex,
-        startIndex + itemsPerPage
-    );
-
-    const handlePageChange = (page) => {
-        setCurrentPage(page);
+    const [startDate, setStartDate] = useState(null);
+    const [sapDate, setSapDate] = useState(null);
+    const handlePageChange = (data) => {
+        const selectedPage = data.selected + 1;
+        setCurrentPageInvoices(selectedPage);
     };
+
+    const handleDateChange = (date) => {
+        const year = date.getFullYear(); // Get the full year (e.g., 2024)
+        const month = ("0" + (date.getMonth() + 1)).slice(-2); // Get month (0-11), add 1, and pad with 0 for single digits
+
+        const formattedDate = `${year}${month}`; // Combine year and month as '202410'
+        setStartDate(date); // This will return '202410' for Oct 2024
+        setSapDate(formattedDate)
+
+    };
+
+    console.log("startDate", sapDate);
 
     const sendSoapRequest = async () => {
         const soapBody = `
@@ -38,14 +40,14 @@ const TransactionCom = () => {
       <soap:Header/>
       <soap:Body>
           <urn:ZdataWarehouse>
-              <Yearmon>202410</Yearmon>
+              <Yearmon>${sapDate}</Yearmon>
           </urn:ZdataWarehouse>
        </soap:Body>
       </soap:Envelope>
       `;
 
         const username = "KBELMONTE";
-        const password = "1234567890!Ab";
+        const password = "Tomorrowbytogether2019!";
         const authHeader = "Basic " + btoa(`${username}:${password}`);
 
         const config = {
@@ -70,85 +72,119 @@ const TransactionCom = () => {
         }
     };
 
+    const capitalizeFirstLetter = (name) => {
+        if (name) {
+            return name
+                .split(" ")
+                .map(
+                    (word) =>
+                        word.charAt(0).toUpperCase() +
+                        word.slice(1).toLowerCase()
+                )
+                .join(" ");
+        }
+    };
+
     return (
-        <div className="flex-grow">
-            <Card className="h-full p-10">
-                <button onClick={sendSoapRequest}>testUpload</button>
-                <div className="mb-4">
-                    <input
-                        type="text"
-                        placeholder="Filter by name"
-                        value={filterText}
-                        onChange={(e) => setFilterText(e.target.value)}
-                        className="p-2 border border-gray-500 rounded-lg w-full"
+        <div className="px-4">
+            {/* Table */}
+            <div className="flex mb-4 gap-5">
+                <div className="relative border border-gray-500">
+                    <DatePicker
+                        selected={startDate}
+                        onChange={handleDateChange}
+                        className=" outline-none w-[176px] text-sm"
+                        calendarClassName="custom-calendar"
+                    />
+
+                    <img
+                        src={DateLogo}
+                        alt="date"
+                        className="absolute top-[45%] right-0 transform -translate-y-1/2 text-custom-bluegreen size-6  pointer-events-none"
                     />
                 </div>
-
-                {/* Table */}
-                <table className="min-w-full bg-white border border-gray-500 border-collapse">
-                    <thead>
-                        <tr>
-                            <th className="py-2 px-4 border border-gray-500">
-                                Contract No
-                            </th>
-                            <th className="py-2 px-4 border border-gray-500">
-                                Customer Name
-                            </th>
-                            <th className="py-2 px-4 border border-gray-500">
-                                Invoice Amount
-                            </th>
-                            <th className="py-2 px-4 border border-gray-500">
-                                Invoice Description
-                            </th>
-                            <th className="py-2 px-4 border border-gray-500">
-                                Invoice Due Date
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {invoices.map((item) => (
-                            <tr key={item.id}>
-                                <td className="py-2 px-4 border border-gray-500">
+                <button
+                    /* onClick={sendSoapRequest} */
+                    className="h-[38px] w-[121px] gradient-btn5 text-white  text-xs rounded-[10px]"
+                    onClick={sendSoapRequest}
+                >
+                    {" "}
+                    SAP Sync
+                </button>
+            </div>
+            <table className="min-w-full bg-white border border-gray-500 border-collapse">
+                <thead>
+                    <tr>
+                        <th className=" px-4 border border-gray-500">
+                            Contract No.
+                        </th>
+                        <th className=" px-4 border border-gray-500">
+                            Customer Name
+                        </th>
+                        <th className=" px-4 border border-gray-500">
+                            Invoice Amount
+                        </th>
+                        <th className=" px-4 border border-gray-500">
+                            Invoice Description
+                        </th>
+                        <th className=" px-4 border border-gray-500">
+                            Invoice Due Date
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {invoices.length > 0 &&
+                        invoices.map((item, key) => (
+                            <tr key={key}>
+                                <td className=" px-4 border border-gray-500">
                                     {item.contract_number}
                                 </td>
-                                <td className="py-2 px-4 border border-gray-500">
-                                    {item.customer_name}
+                                <td className=" px-4 border border-gray-500">
+                                    {capitalizeFirstLetter(item.customer_name)}
                                 </td>
-                                <td className="py-2 px-4 border border-gray-500">
+                                <td className=" px-4 border border-gray-500">
                                     {item.invoice_amount}
                                 </td>
-                                <td className="py-2 px-4 border border-gray-500">
+                                <td className=" px-4 border border-gray-500">
                                     {item.description}
                                 </td>
-                                <td className="py-2 px-4 border border-gray-500">
+                                <td className=" px-4 border border-gray-500">
                                     {item.due_date}
                                 </td>
                             </tr>
                         ))}
-                    </tbody>
-                </table>
+                </tbody>
+            </table>
 
-                {/* Pagination */}
-                <div className="flex justify-end items-center mt-4">
-                    <button
-                        className="px-4 py-2 bg-gray-200 text-gray-600 rounded-lg"
-                        onClick={() => handlePageChange(currentPage - 1)}
-                        disabled={currentPage === 1}
-                    >
-                        Previous
-                    </button>
-                    <div>
-                        Page {currentPage} of {totalPages}
-                    </div>
-                    <button
-                        className="px-4 py-2 bg-gray-200 text-gray-600 rounded-lg"
-                        onClick={() => handlePageChange(currentPage + 1)}
-                        disabled={currentPage === totalPages}
-                    >
-                        Next
-                    </button>
+            {/* Pagination */}
+            <div className="flex justify-end mt-4">
+                <div className="flex w-full justify-end mt-3 mb-10">
+                    <ReactPaginate
+                        previousLabel={
+                            <MdKeyboardArrowLeft className="text-[#404B52]" />
+                        }
+                        nextLabel={
+                            <MdKeyboardArrowRight className="text-[#404B52]" />
+                        }
+                        breakLabel={"..."}
+                        pageCount={invoicesPageCount}
+                        marginPagesDisplayed={2}
+                        pageRangeDisplayed={1}
+                        onPageChange={handlePageChange}
+                        containerClassName={"flex gap-2"}
+                        previousClassName="border border-[#EEEEEE] text-custom-bluegreen font-semibold w-[26px] h-[24px] rounded-[4px] flex justify-center items-center hover:text-white hover:bg-custom-lightgreen hover:text-white"
+                        nextClassName="border border-[#EEEEEE] text-custom-bluegreen font-semibold w-[26px] h-[24px] rounded-[4px] flex justify-center items-center hover:text-white hover:bg-custom-lightgreen hover:text-white"
+                        pageClassName=" border border-[#EEEEEE] bg- text-black w-[26px] h-[24px] rounded-[4px] flex justify-center items-center hover:bg-custom-lightgreen text-[12px]"
+                        activeClassName="w-[26px] h-[24px] border border-[#EEEEEE] bg-custom-lightgreen text-[#404B52] rounded-[4px] text-white text-[12px]"
+                        pageLinkClassName="w-full h-full flex justify-center items-center"
+                        activeLinkClassName="w-full h-full flex justify-center items-center"
+                        disabledLinkClassName={
+                            "text-gray-300 cursor-not-allowed"
+                        }
+                        /*       forcePage={currentPageInvoices} */
+                    />
                 </div>
-            </Card>
+            </div>
         </div>
     );
 };

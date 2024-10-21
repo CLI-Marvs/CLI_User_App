@@ -73,7 +73,7 @@ const InquiryThread = () => {
     };
 
     const handleFileAttach = (event) => {
-        const files = Array.from(event.target.files);
+         const files = Array.from(event.target.files);
         setAttachedFiles((prevFiles) => [...prevFiles, ...files]);
     };
 
@@ -448,7 +448,8 @@ const InquiryThread = () => {
                                                 Payment Issues
                                             </option>
                                             <option value="SOA/ Billing Statement/ Buyer's Ledger">
-                                                SOA/ Billing Statement/ Buyer's Ledger
+                                                SOA/ Billing Statement/ Buyer's
+                                                Ledger
                                             </option>
                                             <option value="Turn Over Status">
                                                 Turn Over Status
@@ -807,16 +808,24 @@ const InquiryThread = () => {
                                                                 </p>
                                                             </div>
                                                         </div>
-                                                        {attachedFiles.length > 0 && (
+                                                        {attachedFiles.length >
+                                                            0 && (
                                                             <div className="mb-2 ">
                                                                 {attachedFiles.map(
-                                                                    (file, index) => (
+                                                                    (
+                                                                        file,
+                                                                        index
+                                                                    ) => (
                                                                         <div
-                                                                            key={index}
+                                                                            key={
+                                                                                index
+                                                                            }
                                                                             className="flex items-center justify-between mb-2 p-2 border bg-white rounded"
                                                                         >
                                                                             <span className="text-sm text-gray-700">
-                                                                                {file.name}
+                                                                                {
+                                                                                    file.name
+                                                                                }
                                                                             </span>
                                                                             <button
                                                                                 type="button"
@@ -840,7 +849,6 @@ const InquiryThread = () => {
                                         </div>
                                     </div>
                                 </div>
-
                                 <div className="text-[11px] text-[#B54D4D]">
                                     <p>
                                         Note: This message will be sent to{" "}

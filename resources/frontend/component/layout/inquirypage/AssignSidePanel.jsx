@@ -189,8 +189,8 @@ const AssignSidePanel = ({ ticketId }) => {
                 /* alert("Unauthorized to remove assignee"); */
                 return;
             } else {
+                console.log("192 remove")
                 getAssigneesPersonnel();
-                /* alert("Successfully removed"); */
             }
 
             console.log("Assignee removed:", response);
