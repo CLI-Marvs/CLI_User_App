@@ -73,7 +73,7 @@ const InquiryThread = () => {
     };
 
     const handleFileAttach = (event) => {
-        const files = Array.from(event.target.files);
+         const files = Array.from(event.target.files);
         setAttachedFiles((prevFiles) => [...prevFiles, ...files]);
     };
 
@@ -166,14 +166,14 @@ const InquiryThread = () => {
     };
 
     const formatChatMessage = (message) => {
-       if(message) {
-        return message.split("\n").map((item, index) => (
-            <span key={index}>
-                {item}
-                <br />
-            </span>
-        ));
-       }
+        if (message) {
+            return message.split("\n").map((item, index) => (
+                <span key={index}>
+                    {item}
+                    <br />
+                </span>
+            ));
+        }
     };
 
     const handleDeleteInquiry = async () => {
@@ -311,7 +311,7 @@ const InquiryThread = () => {
         let adminMessageChannel;
         let messageIdChannel;
         let newTicketId;
-    
+
         // Function to initialize channels when Echo is ready
         const initChannels = () => {
             if (ticketId && window.Echo) {
@@ -326,7 +326,7 @@ const InquiryThread = () => {
                 adminMessageChannelFunc(adminMessageChannel);
             }
         };
-    
+
         // Periodically check if window.Echo is initialized
         const checkBrowserReady = setInterval(() => {
             if (window.Echo) {
@@ -334,10 +334,10 @@ const InquiryThread = () => {
                 clearInterval(checkBrowserReady); // Stop checking once Echo is ready
             }
         }, 100); // Check every 100ms if Echo is initialized
-    
+
         return () => {
             clearInterval(checkBrowserReady); // Clear interval if component unmounts
-    
+
             if (adminMessageChannel) {
                 adminMessageChannel.stopListening("AdminMessage");
                 window.Echo.leaveChannel(`adminmessage.${newTicketId}`);
@@ -348,16 +348,17 @@ const InquiryThread = () => {
             }
         };
     }, [ticketId]);
-    
+
     const capitalizeWords = (name) => {
-        if(name) {
+        if (name) {
             return name
-            .split(" ")
-            .map(
-                (word) =>
-                    word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-            )
-            .join(" ");
+                .split(" ")
+                .map(
+                    (word) =>
+                        word.charAt(0).toUpperCase() +
+                        word.slice(1).toLowerCase()
+                )
+                .join(" ");
         }
     };
 
@@ -448,13 +449,14 @@ const InquiryThread = () => {
                                                 Payment Issues
                                             </option>
                                             <option value="SOA/ Billing Statement/ Buyer's Ledger">
-                                                 SOA/ Billing Statement/ Buyer's Ledger
+                                                SOA/ Billing Statement/ Buyer's
+                                                Ledger
                                             </option>
                                             <option value="Turn Over Status">
-                                                 Turn Over Status
+                                                Turn Over Status
                                             </option>
                                             <option value="Unit Status">
-                                                 Unit Status
+                                                Unit Status
                                             </option>
                                             <option value="Loan Application">
                                                 Loan Application
@@ -798,40 +800,47 @@ const InquiryThread = () => {
                                                                 </p>
                                                             </div>
                                                         </div>
-                                                        {attachedFiles.length > 0 && (
-                                            <div className="mb-2 ">
-                                                {attachedFiles.map(
-                                                    (file, index) => (
-                                                        <div
-                                                            key={index}
-                                                            className="flex items-center justify-between mb-2 p-2 border bg-white rounded"
-                                                        >
-                                                            <span className="text-sm text-gray-700">
-                                                                {file.name}
-                                                            </span>
-                                                            <button
-                                                                type="button"
-                                                                onClick={() =>
-                                                                    removeFile(
-                                                                        file.name
+                                                        {attachedFiles.length >
+                                                            0 && (
+                                                            <div className="mb-2 ">
+                                                                {attachedFiles.map(
+                                                                    (
+                                                                        file,
+                                                                        index
+                                                                    ) => (
+                                                                        <div
+                                                                            key={
+                                                                                index
+                                                                            }
+                                                                            className="flex items-center justify-between mb-2 p-2 border bg-white rounded"
+                                                                        >
+                                                                            <span className="text-sm text-gray-700">
+                                                                                {
+                                                                                    file.name
+                                                                                }
+                                                                            </span>
+                                                                            <button
+                                                                                type="button"
+                                                                                onClick={() =>
+                                                                                    removeFile(
+                                                                                        file.name
+                                                                                    )
+                                                                                }
+                                                                                className="text-red-500"
+                                                                            >
+                                                                                Remove
+                                                                            </button>
+                                                                        </div>
                                                                     )
-                                                                }
-                                                                className="text-red-500"
-                                                            >
-                                                                Remove
-                                                            </button>
-                                                        </div>
-                                                    )
-                                                )}
-                                            </div>
-                                        )}
+                                                                )}
+                                                            </div>
+                                                        )}
                                                     </div>
                                                 </div>
                                             )}
                                         </div>
                                     </div>
                                 </div>
-                                
                                 <div className="text-[11px] text-[#B54D4D]">
                                     <p>
                                         Note: This message will be sent to{" "}
