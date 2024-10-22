@@ -274,7 +274,6 @@ class SapController extends Controller
 
 
             if ($searchParams !== "All") {
-               /*  dd($searchParams); */
                 $this->filterDataTransaction($query, $searchParams);
             }
 

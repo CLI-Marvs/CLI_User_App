@@ -674,7 +674,7 @@ class ConcernController extends Controller
         if ($specificAssignCSR !== null && $days !== null) {
             $query->whereIn('concerns.ticket_id', $ticketIds);
             if ($days === "3+") {
-                $query->where('concerns.created_at', '<', now()->subDays(3)->startOfDay());
+                $query->where('concerns.created_at', '<', now()->subDays(3)->endOfDay());
             } else {
                 $startOfDay = now()->subDays($days)->startOfDay();
                 $endOfDay = now()->subDays($days)->endOfDay();
@@ -689,26 +689,20 @@ class ConcernController extends Controller
     {
         if ($status && $days !== null) {
             if ($days === "3+") {
-                \Log::info("trigger here days and status first");
                 $query->where('status', $status)
                     ->where('concerns.created_at', '<', now()->subDays(3)->endOfDay());
             } else {
-                \Log::info("trigger here days and status second");
                 $startOfDay = now()->subDays($days)->startOfDay();
                 $endOfDay = now()->subDays($days)->endOfDay();
                 $query->where('status', $status)
                     ->whereBetween('concerns.created_at', [$startOfDay, $endOfDay]);
             }
         } else if ($status) {
-            \Log::info("trigger here status only first");
             $query->where('status', $status);
         } else if ($days !== null) {
             if ($days === "3+") {
-                \Log::info("trigger here days only first");
                 $query->where('concerns.created_at', '<', now()->subDays(3)->endOfDay());
             } else {
-                \Log::info("trigger here days only second");
-
                 $startOfDay = now()->subDays($days)->startOfDay();
                 $endOfDay = now()->subDays($days)->endOfDay();
                 $query->whereBetween('concerns.created_at', [$startOfDay, $endOfDay]);
@@ -1064,7 +1058,30 @@ class ConcernController extends Controller
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
         }
     }
+    public function removeInquiryAssigneeLog($request)
+    {
+        try {
+            $inquiry = new InquiryLogs();
+            $logData = [
+                'log_type' => 'remove_to',
+                'details' => [
+                    'message_tag' => 'Remove to',
+                    'remove_to_name' => $request->name,
+                    /*  'asiggn_to_department' => $request->department, */
+                    'remove_by' => $request->removedBy,
+                    'remove_by_department' => $request->department,
+                    /*  'remarks' => $request->remarks */
+                ]
+            ];
 
+            $inquiry->removed_assignee = json_encode($logData);
+            $inquiry->ticket_id = $request->ticketId;
+            $inquiry->message_log = "Removed to" . ' ' . $request->name;
+            $inquiry->save();
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
+        }
+    }
     public function assignInquiryTo(Request $request)
     {
         try {
@@ -1122,6 +1139,7 @@ class ConcernController extends Controller
             $this->inquiryAssigneeLogs($request, $assignees, $ticketId);
 
 
+
             return response()->json('Successfully assign');
         } catch (\Exception $e) {
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
@@ -1148,39 +1166,6 @@ class ConcernController extends Controller
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
         }
     }
-
-    // public function removeAssignee(Request $request)
-    // {
-    //     try {
-    //         $user = $request->user();
-    //         $userDepartment = $user->department;
-
-    //         if ($userDepartment !== "CRS") {
-    //             return response()->json(['message' => 'Unauthorized user']);
-    //         }
-
-    //         $assignee = InquiryAssignee::where('ticket_id', $request->ticketId)
-    //             ->where('email', $request->email)
-    //             ->first();
-
-    //         if ($assignee) {
-    //             $assignee->delete();
-    //             $newTicketId = str_replace('#', '', $request->ticketId);
-    //             $data = [
-    //                 'ticketId' => $newTicketId,
-    //                 'email' => $request->email,
-    //             ];
-    //             RemoveAssignees::dispatch($data);
-    //             return response()->json(['message' => 'Assignee removed successfully']);
-    //         }
-
-    //         return response()->json(['message' => 'No assignee found']);
-    //     } catch (\Exception $e) {
-    //         return response()->json(['message' => 'Error.', 'error' => $e->getMessage()], 500);
-    //     }
-    // }
-
-
     public function removeAssignee(Request $request)
     {
         try {
@@ -1217,7 +1202,7 @@ class ConcernController extends Controller
                     'ticketId' => $newTicketId,
                     'email' => $request->email,
                 ];
-
+                $this->removeInquiryAssigneeLog($request);
                 /*  RemoveAssignees::dispatch($data); */
 
                 broadcast(new RemoveAssignees($data));
@@ -1230,6 +1215,39 @@ class ConcernController extends Controller
             return response()->json(['message' => 'Error.', 'error' => $e->getMessage()], 500);
         }
     }
+    // public function removeAssignee(Request $request)
+    // {
+    //     try {
+    //         $user = $request->user();
+    //         $userDepartment = $user->department;
+
+    //         if ($userDepartment !== "CRS") {
+    //             return response()->json(['message' => 'Unauthorized user']);
+    //         }
+
+    //         $assignee = InquiryAssignee::where('ticket_id', $request->ticketId)
+    //             ->where('email', $request->email)
+    //             ->first();
+
+    //         if ($assignee) {
+    //             $assignee->delete();
+    //             $newTicketId = str_replace('#', '', $request->ticketId);
+    //             $data = [
+    //                 'ticketId' => $newTicketId,
+    //                 'email' => $request->email,
+    //             ];
+    //             RemoveAssignees::dispatch($data);
+    //             return response()->json(['message' => 'Assignee removed successfully']);
+    //         }
+
+    //         return response()->json(['message' => 'No assignee found']);
+    //     } catch (\Exception $e) {
+    //         return response()->json(['message' => 'Error.', 'error' => $e->getMessage()], 500);
+    //     }
+    // }
+
+
+
 
     //*For Reassigning
     // public function reassignInquiry(Request $request)
@@ -1634,7 +1652,7 @@ class ConcernController extends Controller
                     $ticketId = 'Ticket#24' . $formattedId;
 
                     $concerns = new Concerns();
-                    $concerns->details_concern = $buyer['details_concern'];
+                    $concerns->email_subject = $buyer['email_subject'];
                     $concerns->ticket_id = $ticketId;
                     $concerns->buyer_email = $buyer['buyer_email'];
                     $concerns->buyer_name = $buyer['buyer_name'];
@@ -1664,19 +1682,19 @@ class ConcernController extends Controller
         if ($buyerDataErratum) {
             foreach ($buyerDataErratum as $buyer) {
                 if ($buyer) {
-                    $existingTicket = Messages::where('ticket_id', $buyer['ticket_id'])
+                    $existingTicket = Concerns::where('email_subject', $buyer['email_subject'])
                         ->where('buyer_email', $buyer['buyer_email'])
                         ->first();
 
                     if ($existingTicket) {
                         $messagesRef = new Messages();
                         $messagesRef->details_message = $buyer['details_message'];
-                        $messagesRef->ticket_id = $ticketId;
+                        $messagesRef->ticket_id = $existingTicket->ticket_id;
                         $fileLinks = $this->uploadToGCSFromScript($buyer['attachment']);
-                        $messagesRef->buyer_email = $buyer['buyer_email'];
+                        $messagesRef->buyer_email = $buyer->buyer_email;
                         $messagesRef->attachment = json_encode($fileLinks);
                         $messagesRef->created_at = Carbon::parse(now())->setTimezone('Asia/Manila');
-                        $messagesRef->buyer_name = $concerns->buyer_name;
+                        $messagesRef->buyer_name = $existingTicket->buyer_name;
                         $messagesRef->save();
                     }
 

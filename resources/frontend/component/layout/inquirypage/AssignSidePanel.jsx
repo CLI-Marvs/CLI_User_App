@@ -29,11 +29,10 @@ const AssignSidePanel = ({ ticketId }) => {
     const [selectedAssignees, setSelectedAssignees] = useState([]);
     const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
 
-
-
     const modalRef = useRef(null);
     const dropdownRef = useRef(null);
-    const dataConcern = data?.find((items) => items.ticket_id === ticketId) || {};
+    const dataConcern =
+        data?.find((items) => items.ticket_id === ticketId) || {};
 
     const employeeOptions = allEmployees.map((employee) => ({
         name: `${employee.firstname} ${employee.lastname}`,
@@ -65,7 +64,18 @@ const AssignSidePanel = ({ ticketId }) => {
                         selected.email === matchAssignee.employee_email
                 )
             ) {
-                removeAssignee(ticketId, matchAssignee.employee_email);
+                console.log("option handleCheckboxChange", option);
+                console.log(
+                    "matchAssignee handleCheckboxChange",
+                    matchAssignee
+                );
+
+                removeAssignee(
+                    ticketId,
+                    matchAssignee.employee_email,
+                    matchAssignee.name,
+                    matchAssignee.department
+                );
             }
         } else {
             if (
@@ -83,8 +93,18 @@ const AssignSidePanel = ({ ticketId }) => {
     };
 
     const removeTag = (option) => {
-        if (option.employee_email || option.fromEvent) {
-            removeAssignee(option.ticketId, option.employee_email || option.email);
+        if (
+            option.employee_email ||
+            option.fromEvent ||
+            option.name ||
+            option.department
+        ) {
+            removeAssignee(
+                option.ticketId,
+                option.employee_email,
+                option.name,
+                option.department
+            );
         } else {
             setSelectedOptions((prevSelected) =>
                 prevSelected.filter((item) => item !== option)
@@ -162,7 +182,7 @@ const AssignSidePanel = ({ ticketId }) => {
                     assign_by: user?.firstname + " " + user?.lastname,
                     assign_by_department: user?.department,
                     details_concern: dataConcern.details_concern,
-                    buyer_name: dataConcern.buyer_name
+                    buyer_name: dataConcern.buyer_name,
                 });
                 console.log("Assignees saved successfully:", response);
             } else {
@@ -177,19 +197,21 @@ const AssignSidePanel = ({ ticketId }) => {
         }
     };
 
-    const removeAssignee = async (ticket, email) => {
-        console.log("from remove assignee", email);
+    const removeAssignee = async (ticket, email, name, department) => {
         try {
             const response = await apiService.post("remove-assignee", {
                 ticketId: ticket,
                 email: email,
+                name: name,
+                department: department,
+                removedBy: user?.firstname + " " + user?.lastname,
             });
 
             if (response.data.message === "Unauthorized user") {
                 /* alert("Unauthorized to remove assignee"); */
                 return;
             } else {
-                console.log("192 remove")
+               getInquiryLogs(ticketId);
                 getAssigneesPersonnel();
             }
 
@@ -218,7 +240,7 @@ const AssignSidePanel = ({ ticketId }) => {
                 setSelectedOptions(assignees);
             }
         },
-        /* [assigneesPersonnel[ticketId], */[assigneesPersonnel[ticketId]]
+        /* [assigneesPersonnel[ticketId], */ [assigneesPersonnel[ticketId]]
     );
 
     const assigneeChannelFunc = (channel) => {
@@ -291,7 +313,7 @@ const AssignSidePanel = ({ ticketId }) => {
         let assigneeChannel;
         let removeChannel;
         let newTicketId;
-    
+
         // Function to initialize the channels when Echo is ready
         const initChannels = () => {
             if (ticketId && window.Echo) {
@@ -306,7 +328,7 @@ const AssignSidePanel = ({ ticketId }) => {
                 removeAChannelFunc(removeChannel);
             }
         };
-    
+
         // Check if window.Echo is loaded before subscribing
         const checkBrowserReady = setInterval(() => {
             if (window.Echo) {
@@ -314,10 +336,10 @@ const AssignSidePanel = ({ ticketId }) => {
                 clearInterval(checkBrowserReady); // Stop checking once Echo is ready
             }
         }, 100); // Check every 100ms if Echo is initialized
-    
+
         return () => {
             clearInterval(checkBrowserReady); // Clear interval if component unmounts
-    
+
             if (assigneeChannel) {
                 assigneeChannel.stopListening("RetrieveAssignees");
                 window.Echo.leaveChannel(`retrieveassignees.${newTicketId}`);
@@ -328,7 +350,7 @@ const AssignSidePanel = ({ ticketId }) => {
             }
         };
     }, [ticketId]);
-    
+
     console.log("assignpersonnel", assigneesPersonnel[ticketId]);
 
     return (
@@ -342,10 +364,11 @@ const AssignSidePanel = ({ ticketId }) => {
                             onChange={(e) => setSearch(e.target.value)}
                             placeholder="Assign to..."
                             className={` 
-                            ${isDropdownOpen
+                            ${
+                                isDropdownOpen
                                     ? "rounded-[10px] rounded-b-none"
                                     : "rounded-[10px]"
-                                }
+                            }
                         
                                  h-[47px] px-[20px] pr-[40px] rounded-[10px] bg-custom-grayF1 w-full outline-none`}
                             onFocus={() => setIsDropdownOpen(true)}
@@ -374,9 +397,7 @@ const AssignSidePanel = ({ ticketId }) => {
                                     <div className="flex justify-center mt-[26px] space-x-[19px]">
                                         <button
                                             onClick={() =>
-                                                setIsConfirmModalOpen(
-                                                    false
-                                                )
+                                                setIsConfirmModalOpen(false)
                                             }
                                             className="gradient-btn5 p-[1px] w-[92px] h-[35px] rounded-[10px]"
                                         >
@@ -387,9 +408,7 @@ const AssignSidePanel = ({ ticketId }) => {
                                             </div>
                                         </button>
                                         <button
-                                            onClick={
-                                                handleAssign
-                                            }
+                                            onClick={handleAssign}
                                             className="gradient-btn5 w-[100px] h-[35px] rounded-[10px] text-sm text-white montserrat-semibold"
                                         >
                                             Confirm
@@ -432,6 +451,7 @@ const AssignSidePanel = ({ ticketId }) => {
                                                     assignee.employee_email ===
                                                     option.email
                                             );
+
                                         return (
                                             <li
                                                 key={index}
@@ -459,12 +479,12 @@ const AssignSidePanel = ({ ticketId }) => {
                                                                     option.email
                                                             )
                                                         }
-                                                        onChange={() =>
+                                                        onChange={() => {
                                                             handleCheckboxChange(
                                                                 option,
                                                                 matchAssignee
-                                                            )
-                                                        }
+                                                            );
+                                                        }}
                                                         className="form-checkbox custom-checkbox accent-custom-lightgreen text-white"
                                                     />
                                                 </div>
@@ -492,7 +512,6 @@ const AssignSidePanel = ({ ticketId }) => {
                                         );
                                     })}
                                     {filteredOptions.length == 0 && (
-
                                         <div>
                                             <p>No results found</p>
                                         </div>
