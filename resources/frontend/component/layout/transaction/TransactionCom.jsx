@@ -13,6 +13,7 @@ const TransactionCom = () => {
         currentPageInvoices,
         invoicesPageCount,
         setCurrentPageInvoices,
+        getInvoices
     } = useStateContext();
 
     const [startDate, setStartDate] = useState(null);
@@ -47,7 +48,7 @@ const TransactionCom = () => {
       `;
 
         const username = "KBELMONTE";
-        const password = "Tomorrowbytogether2019!";
+        const password = "1234567890!Ab";
         const authHeader = "Basic " + btoa(`${username}:${password}`);
 
         const config = {
@@ -64,6 +65,7 @@ const TransactionCom = () => {
                 config
             );
             console.log("Response:", response.data);
+            getInvoices();
         } catch (error) {
             console.error(
                 "Error:",

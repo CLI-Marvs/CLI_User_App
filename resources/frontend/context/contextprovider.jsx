@@ -112,13 +112,15 @@ export const ContextProvider = ({ children }) => {
     };
 
     const getBankName = async () => {
+       if(token) {
         try {
             const response = await apiService.get("get-transaction-bank");
             console.log("response banks", response.data);
             setBankList(response.data);
         } catch (error) {
-            
+            console.log("error retrieving banks", error);
         }
+       }
     };
        
     const getTransactions = async () => {
@@ -465,9 +467,6 @@ export const ContextProvider = ({ children }) => {
 
     useEffect(() => {
         getAllConcerns();
-        getInvoices();
-        getTransactions();
-        getBankName();
     }, [
         currentPage,
         daysFilter,
@@ -476,10 +475,16 @@ export const ContextProvider = ({ children }) => {
         searchFilter,
         hasAttachments,
         specificAssigneeCsr,
-        currentPageTransaction,
-        currentPageInvoices,
-        bankNames
     ]);
+
+    useEffect(() => {
+        getBankName();
+        getTransactions();
+    }, [currentPageTransaction, bankNames]);
+
+    useEffect(() => {
+        getInvoices();
+    }, [currentPageInvoices])
 
     useEffect(() => {
         getNotifications();
@@ -615,7 +620,8 @@ export const ContextProvider = ({ children }) => {
                 setCurrentPageInvoices,
                 bankNames,
                 setBankNames,
-                bankList
+                bankList,
+                getInvoices
             }}
         >
             {children}

@@ -227,7 +227,7 @@ const BankStatementCom = () => {
             </div>
             <dialog
                 id="Employment"
-                className="modal w-[589px] rounded-[10px] shadow-custom5 backdrop:bg-black/50 px-4 py-4"
+                className="modal w-full rounded-[10px] shadow-custom5 backdrop:bg-black/50 px-4 py-4"
                 ref={modalRef}
             >
                 {files && files.length > 0 ? (
@@ -316,6 +316,7 @@ const BankStatementCom = () => {
                                             </>
                                         );
                                     })}
+                                   
                                 </div>
                             )}
                         </div>
