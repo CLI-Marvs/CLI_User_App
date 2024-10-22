@@ -1058,7 +1058,30 @@ class ConcernController extends Controller
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
         }
     }
+    public function removeInquiryAssigneeLog($request)
+    {
+        try {
+            $inquiry = new InquiryLogs();
+            $logData = [
+                'log_type' => 'remove_to',
+                'details' => [
+                    'message_tag' => 'Remove to',
+                    'remove_to_name' => $request->name,
+                    /*  'asiggn_to_department' => $request->department, */
+                    'remove_by' => $request->removedBy,
+                    'remove_by_department' => $request->department,
+                    /*  'remarks' => $request->remarks */
+                ]
+            ];
 
+            $inquiry->removed_assignee = json_encode($logData);
+            $inquiry->ticket_id = $request->ticketId;
+            $inquiry->message_log = "Removed to" . ' ' . $request->name;
+            $inquiry->save();
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
+        }
+    }
     public function assignInquiryTo(Request $request)
     {
         try {
@@ -1116,6 +1139,7 @@ class ConcernController extends Controller
             $this->inquiryAssigneeLogs($request, $assignees, $ticketId);
 
 
+
             return response()->json('Successfully assign');
         } catch (\Exception $e) {
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
@@ -1142,39 +1166,6 @@ class ConcernController extends Controller
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
         }
     }
-
-    // public function removeAssignee(Request $request)
-    // {
-    //     try {
-    //         $user = $request->user();
-    //         $userDepartment = $user->department;
-
-    //         if ($userDepartment !== "CRS") {
-    //             return response()->json(['message' => 'Unauthorized user']);
-    //         }
-
-    //         $assignee = InquiryAssignee::where('ticket_id', $request->ticketId)
-    //             ->where('email', $request->email)
-    //             ->first();
-
-    //         if ($assignee) {
-    //             $assignee->delete();
-    //             $newTicketId = str_replace('#', '', $request->ticketId);
-    //             $data = [
-    //                 'ticketId' => $newTicketId,
-    //                 'email' => $request->email,
-    //             ];
-    //             RemoveAssignees::dispatch($data);
-    //             return response()->json(['message' => 'Assignee removed successfully']);
-    //         }
-
-    //         return response()->json(['message' => 'No assignee found']);
-    //     } catch (\Exception $e) {
-    //         return response()->json(['message' => 'Error.', 'error' => $e->getMessage()], 500);
-    //     }
-    // }
-
-
     public function removeAssignee(Request $request)
     {
         try {
@@ -1211,7 +1202,7 @@ class ConcernController extends Controller
                     'ticketId' => $newTicketId,
                     'email' => $request->email,
                 ];
-
+                $this->removeInquiryAssigneeLog($request);
                 /*  RemoveAssignees::dispatch($data); */
 
                 broadcast(new RemoveAssignees($data));
@@ -1224,6 +1215,39 @@ class ConcernController extends Controller
             return response()->json(['message' => 'Error.', 'error' => $e->getMessage()], 500);
         }
     }
+    // public function removeAssignee(Request $request)
+    // {
+    //     try {
+    //         $user = $request->user();
+    //         $userDepartment = $user->department;
+
+    //         if ($userDepartment !== "CRS") {
+    //             return response()->json(['message' => 'Unauthorized user']);
+    //         }
+
+    //         $assignee = InquiryAssignee::where('ticket_id', $request->ticketId)
+    //             ->where('email', $request->email)
+    //             ->first();
+
+    //         if ($assignee) {
+    //             $assignee->delete();
+    //             $newTicketId = str_replace('#', '', $request->ticketId);
+    //             $data = [
+    //                 'ticketId' => $newTicketId,
+    //                 'email' => $request->email,
+    //             ];
+    //             RemoveAssignees::dispatch($data);
+    //             return response()->json(['message' => 'Assignee removed successfully']);
+    //         }
+
+    //         return response()->json(['message' => 'No assignee found']);
+    //     } catch (\Exception $e) {
+    //         return response()->json(['message' => 'Error.', 'error' => $e->getMessage()], 500);
+    //     }
+    // }
+
+
+
 
     //*For Reassigning
     // public function reassignInquiry(Request $request)
