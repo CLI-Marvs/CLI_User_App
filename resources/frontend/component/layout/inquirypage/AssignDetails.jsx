@@ -10,7 +10,7 @@ const AssignDetails = ({ logMessages, ticketId }) => {
         setConcernMessages,
         concernMessages,
         setLogs,
-        logs,
+        logs,   
     } = useStateContext();
     const [message, setMessage] = useState("");
 
@@ -144,11 +144,10 @@ const AssignDetails = ({ logMessages, ticketId }) => {
         };
     }, [ticketId]);
 
-
     const sortedConcernMessages = concernMessages[ticketId]
         ? concernMessages[ticketId]
-            .flat()
-            .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+              .flat()
+              .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
         : [];
 
     const sortedLogs = logs[ticketId] || [];
@@ -162,8 +161,9 @@ const AssignDetails = ({ logMessages, ticketId }) => {
             type: "log",
             created_at: logReply.created_at,
         })),
+        
     ].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-
+    
     const capitalizeWords = (name) => {
         if (name) {
             return name
@@ -198,7 +198,6 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                                         "hh:mm A"
                                     )}
                                 </span>
-
                             </div>
                             <div>
                                 <p className="montserrat-medium text-sm text-custom-solidgreen">
@@ -218,8 +217,6 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                                 </p>
                             </div>
                         </div>
-
-
                     </>
                 );
             case "assign_to":
@@ -240,7 +237,6 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                                         "hh:mm A"
                                     )}
                                 </span>
-
                             </div>
                             <div>
                                 <p className="text-custom-solidgreen">
@@ -256,8 +252,11 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                                 </p>
                             </div>
                         </div>
-
-
+                    </>
+                );
+            case "remove_to":
+                return (
+                    <>
                         {/* remove assignee */}
                         <div>
                             <div className="flex gap-1 items-center  ">
@@ -274,24 +273,21 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                                         "hh:mm A"
                                     )}
                                 </span>
-
                             </div>
                             <div>
                                 <p className="text-custom-solidgreen mb-1">
                                     Removed assignee:{" "}
                                     {capitalizeWords(
-                                        details.assign_to_name.join(", ")
+                                        details.remove_to_name
                                     )}
                                 </p>
                             </div>
                             <div>
                                 <p className="text-[#A5A5A5] mb-1">
-                                    by: {details.assign_by}
+                                    by: {details.remove_by}
                                 </p>
                             </div>
                         </div>
-
-
                     </>
                 );
             case "inquiry_status":
@@ -312,7 +308,6 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                                         "hh:mm A"
                                     )}
                                 </span>
-
                             </div>
                             <div className="w-full min-h-[39px] border-[2px] border-custom-grayF1 p-[10px] rounded-[10px] mb-[10px]">
                                 <p className="text-sm">{details.remarks}</p>
@@ -328,15 +323,12 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                                 </p>
                             </div>
                         </div>
-
-
                     </>
                 );
             case "requestor_reply":
                 return (
                     <>
                         {/* FOLLOW UP REPLY*/}
-
 
                         <div className="flex gap-1 items-center ">
                             <span className="flex mb-1 text-[25px] text-custom-blue">
@@ -348,11 +340,8 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                                 )}
                             </p>
                             <span className="montserrat-medium  text-custom-gray81">
-                                {moment(inquiry_createdAt).format(
-                                    "hh:mm A"
-                                )}
+                                {moment(inquiry_createdAt).format("hh:mm A")}
                             </span>
-
                         </div>
                         <div>
                             <p className="montserrat-medium text-sm text-custom-solidgreen">
@@ -364,7 +353,6 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                                 by {capitalizeWords(details.buyer_name)}
                             </p>
                         </div>
-
                     </>
                 );
             default:
@@ -392,8 +380,8 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                         <button
                             className={`w-[76px] h-[28px] rounded-[10px] text-xs text-white 
                                 ${!message.trim()
-                                    ? "bg-gray-400 cursor-not-allowed" // Gray out when input is empty
-                                    : "gradient-btn2"
+                                        ? "bg-gray-400 cursor-not-allowed" // Gray out when input is empty
+                                        : "gradient-btn2"
                                 } 
                                 `}
                             onClick={handleSendMessage}
@@ -407,9 +395,7 @@ const AssignDetails = ({ logMessages, ticketId }) => {
             <div className="w-full py-[10px] mt-[12px] flex flex-col">
                 {combinedMessages && combinedMessages.length > 0 ? (
                     combinedMessages.map((item, index) => {
-
                         const alternatingBackground = index % 2 === 0 ? "bg-white" : "bg-custom-grayF1";
-
                         if (item.type === "concern") {
                             const formattedDate = moment(
                                 item.created_at
@@ -441,7 +427,6 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                                                 {item.firstname} {item.lastname}
                                             </p>
                                         </div>
-
                                     </div>
                                     <div className="w-full min-h-[39px] border-[2px] border-custom-grayF1 bg-white p-[10px] rounded-[10px]">
                                         <p className="text-sm">
@@ -460,6 +445,8 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                                 logData = JSON.parse(item.assign_to);
                             } else if (item.inquiry_status) {
                                 logData = JSON.parse(item.inquiry_status);
+                            } else if (item.removed_assignee) {
+                                logData = JSON.parse(item.removed_assignee);
                             }
 
                             const logType = logData.log_type || "unknown";
@@ -472,7 +459,11 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                                             className={`flex flex-col gap-[10px] py-[20px] px-[30px] ${alternatingBackground}`} // Apply alternating background
                                             key={index}
                                         >
-                                            {renderDetails(logType, details, item.created_at)}
+                                            {renderDetails(
+                                                logType,
+                                                details,
+                                                item.created_at
+                                            )}
                                         </div>
                                     </>
                                 );
