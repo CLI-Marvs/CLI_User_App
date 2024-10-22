@@ -48,7 +48,7 @@ const TransactionCom = () => {
       `;
 
         const username = "KBELMONTE";
-        const password = "1234567890!Ab";
+        const password = "Tomorrowbytogether2019!";
         const authHeader = "Basic " + btoa(`${username}:${password}`);
 
         const config = {
