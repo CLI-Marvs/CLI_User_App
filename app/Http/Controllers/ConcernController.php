@@ -367,6 +367,23 @@ class ConcernController extends Controller
     public function addConcernPublic(Request $request)
     {
         try {
+            $validatedData = $request->validate([
+                'fname' =>
+                ['required', 'regex:/^[\pL\s\-\'\.]+$/u', 'max:255'],
+                'lname' =>
+                ['required', 'regex:/^[\pL\s\-\'\.]+$/u', 'max:255'],
+                'mname' =>
+                ['required', 'regex:/^[\pL\s\-\'\.]+$/u', 'max:255'],
+                'details_concern' => 'required|string',
+                'message' => 'required|string|max:500',
+            ], [
+                'fname.regex' => 'The first name field format is invalid.',
+                'fname.required' => 'The first name field is required.',
+                'lname.regex' => 'The last name field format is invalid.',
+                'lname.required' => 'The last name field is required.',
+                'mname.regex' => 'The middle name field format is invalid.',
+                'mname.required' => 'The middle name field is required.',
+            ]);
             $user = $request->user();
 
             $files = $request->file('files');
@@ -380,12 +397,17 @@ class ConcernController extends Controller
             $concerns = new Concerns();
             $concerns->details_concern = $request->details_concern;
             $concerns->property = $request->property;
-            $concerns->details_message = $request->message;
+            $concerns->details_message = $validatedData['message'];
             $concerns->status = "unresolved";
             $concerns->ticket_id = $ticketId;
             $concerns->user_type = $request->user_type;
-            $concerns->buyer_name = $request->fname . ' ' . $request->mname . ' ' . $request->lname;
-            $concerns->buyer_middlename = $request->mname;
+            if ($request->user_type === "Others") {
+                $concerns->user_type = $request->other_user_type;
+            }
+            $concerns->buyer_name
+                = $validatedData['fname'] . ' ' .  $validatedData['mname'] . ' ' .  $validatedData['lname'];
+            $concerns->buyer_middlename =
+                $validatedData['mname'];
             $concerns->mobile_number = $request->mobile_number;
             $concerns->contract_number = $request->contract_number;
             $concerns->unit_number = $request->unit_number;
@@ -412,7 +434,8 @@ class ConcernController extends Controller
 
             return response()->json('Successfully added');
         } catch (\Exception $e) {
-            return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
+            \Log::error("Error occurred: " . $e->getMessage());
+            return response()->json(['message' => 'An error occurred.', 'error' => $e->getMessage()], 500);
         }
     }
 
