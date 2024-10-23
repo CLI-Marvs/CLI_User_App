@@ -5,8 +5,6 @@ const username = "KBELMONTE";
 const password = "Tomorrowbytogether2019!";
 const authHeader = "Basic " + btoa(`${username}:${password}`);
 
-
-
 const apiServiceSap = axios.create({
   baseURL: API_BASE_URL,
   headers: {
