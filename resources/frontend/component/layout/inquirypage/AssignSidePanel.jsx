@@ -24,9 +24,9 @@ const AssignSidePanel = ({ ticketId }) => {
     const [isAssign, setIsAssign] = useState(false);
     const logsMessages = logs[ticketId] || [];
     const [search, setSearch] = useState("");
+    const [selectedAssignees, setSelectedAssignees] = useState([]);
     const [selectedOptions, setSelectedOptions] = useState([]);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-    const [selectedAssignees, setSelectedAssignees] = useState([]);
     const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
 
     const modalRef = useRef(null);
@@ -64,12 +64,6 @@ const AssignSidePanel = ({ ticketId }) => {
                         selected.email === matchAssignee.employee_email
                 )
             ) {
-                console.log("option handleCheckboxChange", option);
-                console.log(
-                    "matchAssignee handleCheckboxChange",
-                    matchAssignee
-                );
-
                 removeAssignee(
                     ticketId,
                     matchAssignee.employee_email,
@@ -93,17 +87,23 @@ const AssignSidePanel = ({ ticketId }) => {
     };
 
     const removeTag = (option) => {
+ 
         if (
-            option.employee_email ||
+            option.email ||
             option.fromEvent ||
             option.name ||
             option.department
         ) {
             removeAssignee(
                 option.ticketId,
-                option.employee_email,
+                option.email,
                 option.name,
                 option.department
+            );
+            setSelectedAssignees((prevAssignees) =>
+                prevAssignees.filter(
+                    (assignee) => assignee.email !== option.email
+                )
             );
         } else {
             setSelectedOptions((prevSelected) =>
@@ -211,7 +211,7 @@ const AssignSidePanel = ({ ticketId }) => {
                 /* alert("Unauthorized to remove assignee"); */
                 return;
             } else {
-               getInquiryLogs(ticketId);
+                getInquiryLogs(ticketId);
                 getAssigneesPersonnel();
             }
 
@@ -350,9 +350,7 @@ const AssignSidePanel = ({ ticketId }) => {
             }
         };
     }, [ticketId]);
-
-    console.log("assignpersonnel", assigneesPersonnel[ticketId]);
-
+    //console.log("assignpersonnel", assigneesPersonnel[ticketId]);
     return (
         <>
             <div className="mb-3 mt-[4px]">
@@ -528,7 +526,7 @@ const AssignSidePanel = ({ ticketId }) => {
                         Assignee
                     </p>
                     <div className="ml-2 flex overflow-x-auto gap-2 max-w-full custom-scrollbar">
-                        {selectedOptions.length > 0 ? (
+                        {/* {selectedOptions.length > 0 ? (
                             <>
                                 {selectedOptions.map((assignee) => (
                                     <>
@@ -551,6 +549,58 @@ const AssignSidePanel = ({ ticketId }) => {
                                     </>
                                 ))}
                             </>
+                        ) : (
+                            <span className="text-sm text-gray-500 pt-1">
+                                No assignee selected
+                            </span>
+                        )} */}
+                        {/* {selectedOptions.length > 0 ? (
+                            <>
+                                {selectedOptions.map((assignee) => (
+                                    <>
+                                        <span
+                                            key={assignee.name}
+                                            className="bg-custom-lightgreen text-white rounded-full px-3 py-1 text-xs flex-shrink-0 flex mb-[4px]"
+                                        >
+                                            {assignee.name}
+                                            {user?.department === "CRS" && (
+                                                <button
+                                                    onClick={() =>
+                                                        removeTag(assignee)
+                                                    }
+                                                    className="ml-2 pb-[2px] border border-white text-[15px] text-white bg-custom-lightgreen rounded-full h-5 w-5 flex items-center justify-center"
+                                                >
+                                                    &times;
+                                                </button>
+                                            )}
+                                        </span>
+                                    </>
+                                ))}
+                            </>
+                        ) : (
+                            <span className="text-sm text-gray-500 pt-1">
+                                No assignee selected
+                            </span>
+                        )} */}
+                        {selectedAssignees && selectedAssignees.length > 0 ? (
+                            <div>
+                                {selectedAssignees.map((item, index) => (
+                                    <span
+                                        key={index}
+                                        className="bg-custom-lightgreen text-white rounded-full px-3 py-1 text-xs flex-shrink-0 flex mb-[4px]"
+                                    >
+                                        {item.name}
+                                        {user?.department === "CRS" && (
+                                            <button
+                                                onClick={() => removeTag(item)}
+                                                className="ml-2 pb-[2px] border border-white text-[15px] text-white bg-custom-lightgreen rounded-full h-5 w-5 flex items-center justify-center"
+                                            >
+                                                &times;
+                                            </button>
+                                        )}
+                                    </span>
+                                ))}
+                            </div>
                         ) : (
                             <span className="text-sm text-gray-500 pt-1">
                                 No assignee selected

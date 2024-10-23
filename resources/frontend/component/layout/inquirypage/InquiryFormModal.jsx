@@ -13,6 +13,7 @@ const formDataState = {
     mobile_number: "",
     property: "",
     user_type: "",
+    other_user_type: "",
     contract_number: "",
     details_concern: "",
     unit_number: "",
@@ -33,6 +34,8 @@ const InquiryFormModal = ({ modalRef }) => {
     const [isValid, setIsValid] = useState(true);
     const [errors, setErrors] = useState({});
     const { propertyNamesList } = useStateContext();
+    const [specificInputErrors, setSpecificInputErrors] = useState({});
+    //console.log("38",specificInputErrors)
     const handleFileChange = (event) => {
         const selectedFiles = Array.from(event.target.files);
         const fileNames = selectedFiles.map((file) =>
@@ -44,7 +47,6 @@ const InquiryFormModal = ({ modalRef }) => {
         );
         setFileName(fileNames);
         setFiles(selectedFiles);
-      
     };
 
     const formatFunc = (name) => {
@@ -53,18 +55,17 @@ const InquiryFormModal = ({ modalRef }) => {
             .replace(/\b\w/g, (char) => char.toUpperCase());
     };
 
-
-    
     const formattedPropertyNames = [
         "N/A",
         ...(Array.isArray(propertyNamesList) && propertyNamesList.length > 0
             ? propertyNamesList
-            .filter((item) => !item.toLowerCase().includes("phase")) 
-            .map((item) => formatFunc(item)).sort((a, b) => {
-                if (a === "N/A") return -1; 
-                if (b === "N/A") return 1;
-                return a.localeCompare(b); 
-            })
+                  .filter((item) => !item.toLowerCase().includes("phase"))
+                  .map((item) => formatFunc(item))
+                  .sort((a, b) => {
+                      if (a === "N/A") return -1;
+                      if (b === "N/A") return 1;
+                      return a.localeCompare(b);
+                  })
             : []),
     ];
 
@@ -115,8 +116,13 @@ const InquiryFormModal = ({ modalRef }) => {
         setMessage("");
     };
 
-    const { user_type, contract_number, unit_number, ...requiredFields } =
-        formData;
+    const {
+        user_type,
+        contract_number,
+        unit_number,
+        other_user_type,
+        ...requiredFields
+    } = formData;
 
     const isFormDataValid = Object.values(requiredFields).every(
         (value) => value !== ""
@@ -124,15 +130,25 @@ const InquiryFormModal = ({ modalRef }) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
         setIsSubmitted(true);
-        if (isFormDataValid && isTextareaValid && !errors.buyer_email) {
+        let isOtherUserTypeValid = true;
+        if (user_type === "Others") {
+            isOtherUserTypeValid = other_user_type.trim().length > 0;
+        }
+        if (
+            isFormDataValid &&
+            isTextareaValid &&
+            !errors.buyer_email &&
+            isOtherUserTypeValid
+        ) {
             try {
                 setLoading(true);
                 const fileData = new FormData();
                 files.forEach((file) => {
                     fileData.append("files[]", file);
                 });
-               
+
                 Object.keys(formData).forEach((key) => {
                     fileData.append(key, formData[key]);
                 });
@@ -140,7 +156,7 @@ const InquiryFormModal = ({ modalRef }) => {
                 fileData.append("admin_email", user?.employee_email);
                 fileData.append("admin_id", user?.id);
                 fileData.append("admin_profile_picture", user?.profile_picture);
-               
+
                 const response = await apiService.post(
                     "add-concern",
                     fileData,
@@ -150,6 +166,7 @@ const InquiryFormModal = ({ modalRef }) => {
                         },
                     }
                 );
+                setSpecificInputErrors([]);
                 setResetSuccess(true);
                 if (modalRef.current) {
                     modalRef.current.close();
@@ -157,9 +174,39 @@ const InquiryFormModal = ({ modalRef }) => {
                 callBackHandler();
                 setLoading(false);
             } catch (error) {
-                console.log("error saving concerns", error);
-                setHasErrors(true);
-                setResetSuccess(false);
+                console.log("error saving concerns", error.response);
+                console.log("178");
+                if (error.response) {
+                    if (error?.response?.status === 422) {
+                        const validationErrors = error.response?.data.error;
+                        // Set the validation errors returned from the backend
+                        //  setSpecificInputErrors(error.response.data.errors);
+                        // const errorMessages = [];
+                        // for (const field in validationErrors) {
+                        //     if (validationErrors.hasOwnProperty(field)) {
+                        //         validationErrors.forEach((error) => {
+                        //             errorMessages.push(error); // Add each error message for the field
+                        //         });
+                        //     }
+                        // }
+                        // console.log(
+                        //     "All Validation Error Messages:",
+                        //     errorMessages
+                        // );
+                        console.log("180", error.response?.data.error);
+                        setHasErrors(false);
+                        setLoading(false);
+                        // setSpecificInputErrors(error.response?.data.error);
+                        // if (topRef.current) {
+                        //     topRef.current.scrollTop = 0;
+                        // }
+                    }
+                }
+                {
+                    console.log("192");
+                    setHasErrors(true);
+                    setResetSuccess(false);
+                }
             }
         } else {
             setResetSuccess(false);
@@ -169,7 +216,7 @@ const InquiryFormModal = ({ modalRef }) => {
             console.log("Form validation failed");
         }
     };
-    
+
     return (
         <dialog
             id="Employment"
@@ -199,6 +246,20 @@ const InquiryFormModal = ({ modalRef }) => {
                                 </p>
                             </div>
                         )}
+
+                        {/* {specificInputErrors &&
+                            Object.entries(specificInputErrors).map(
+                                (item, index) => (
+                                    <div
+                                        className="w-full flex justify-center items-center h-12 bg-red-100 mb-4 rounded-lg"
+                                        key={index}
+                                    >
+                                        <p className="flex text-[#C42E2E] ">
+                                            {item}
+                                        </p>
+                                    </div>
+                                )
+                            )} */}
                         {/*  {isSuccess && (
                                 <div className="w-full flex justify-center items-center h-12 bg-custom-lightestgreen mb-4 rounded-lg">
                                     <p className="flex text-custom-solidgreen ">
@@ -401,7 +462,7 @@ const InquiryFormModal = ({ modalRef }) => {
                                     </option>
                                     <option value="Title and Other Registration Documents">
                                        Title and Other Registration Documents
-                                    </option>
+                                    </option>formDatainqu
                                     <option value="Commissions">
                                         Commissions
                                     </option>
@@ -409,42 +470,41 @@ const InquiryFormModal = ({ modalRef }) => {
                                         Other Concerns
                                     </option>
                                 </select> */}
-                                  <select
-                                            value={formData.details_concern}
-                                            onChange={handleChange}
-                                            name="details_concern"
-                                            className="appearance-none text-sm w-full px-4 py-1 bg-white focus:outline-none border-0 mobile:text-xs"
-                                        >
-                                            <option value="">(Select)</option>
-                                            <option value="Reservation Documents">
-                                                Reservation Documents
-                                            </option>
-                                            <option value="Payment Issues">
-                                                Payment Issues
-                                            </option>
-                                            <option value="SOA/ Billing Statement/ Buyer's Ledger">
-                                                 SOA/ Billing Statement/ Buyer's Ledger
-                                            </option>
-                                            <option value="Turn Over Status">
-                                                 Turn Over Status
-                                            </option>
-                                            <option value="Unit Status">
-                                                 Unit Status
-                                            </option>
-                                            <option value="Loan Application">
-                                                Loan Application
-                                            </option>
-                                            <option value="Title and Other Registration Documents">
-                                                Title and Other Registration
-                                                Documents
-                                            </option>
-                                            <option value="Commissions">
-                                                Commissions
-                                            </option>
-                                            <option value="Other Concerns">
-                                                Other Concerns
-                                            </option>
-                                        </select>
+                                <select
+                                    value={formData.details_concern}
+                                    onChange={handleChange}
+                                    name="details_concern"
+                                    className="appearance-none text-sm w-full px-4 py-1 bg-white focus:outline-none border-0 mobile:text-xs"
+                                >
+                                    <option value="">(Select)</option>
+                                    <option value="Reservation Documents">
+                                        Reservation Documents
+                                    </option>
+                                    <option value="Payment Issues">
+                                        Payment Issues
+                                    </option>
+                                    <option value="SOA/ Billing Statement/ Buyer's Ledger">
+                                        SOA/ Billing Statement/ Buyer's Ledger
+                                    </option>
+                                    <option value="Turn Over Status">
+                                        Turn Over Status
+                                    </option>
+                                    <option value="Unit Status">
+                                        Unit Status
+                                    </option>
+                                    <option value="Loan Application">
+                                        Loan Application
+                                    </option>
+                                    <option value="Title and Other Registration Documents">
+                                        Title and Other Registration Documents
+                                    </option>
+                                    <option value="Commissions">
+                                        Commissions
+                                    </option>
+                                    <option value="Other Concerns">
+                                        Other Concerns
+                                    </option>
+                                </select>
                                 <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3 bg-custom-lightestgreen text-custom-bluegreen pointer-events-none">
                                     <IoMdArrowDropdown />
                                 </span>
@@ -473,11 +533,34 @@ const InquiryFormModal = ({ modalRef }) => {
                                     </option>
                                     <option value="Buyer">Buyer</option>
                                     <option value="Broker">Broker</option>
+                                    <option value="Others">Others</option>
                                 </select>
                                 <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3  bg-custom-lightestgreen text-custom-bluegreen pointer-events-none">
                                     <IoMdArrowDropdown />
                                 </span>
                             </div>
+                        </div>
+                        <div className="flex justify-end">
+                            {formData.user_type === "Others" && (
+                                <div
+                                    className={`flex items-center border rounded-[5px] w-[260px] overflow-hidden ${
+                                        isSubmitted && !formData.other_user_type
+                                            ? resetSuccess
+                                                ? "border-custom-bluegreen"
+                                                : "border-red-500"
+                                            : "border-custom-bluegreen"
+                                    }`}
+                                >
+                                    <input
+                                        name="other_user_type"
+                                        type="text"
+                                        className="w-full px-4 text-sm focus:outline-none mobile:text-xs py-1"
+                                        value={formData.other_user_type}
+                                        onChange={handleChange}
+                                        placeholder=""
+                                    />
+                                </div>
+                            )}
                         </div>
                         <div className="flex items-center border border-custom-bluegreen rounded-[5px] overflow-hidden">
                             <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex w-[240px] pl-3 py-1">
@@ -492,7 +575,6 @@ const InquiryFormModal = ({ modalRef }) => {
                                 placeholder=""
                             />
                         </div>
-
                         <div className="flex items-center border border-custom-bluegreen rounded-[5px] overflow-hidden">
                             <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex w-[240px] pl-3 py-1">
                                 Unit/Lot Number
@@ -568,7 +650,7 @@ const InquiryFormModal = ({ modalRef }) => {
                             </label> */}
                             <button
                                 htmlFor="attachment"
-                                className="tablet:w-full h-10 px-5 text-sm border montserrat-medium border-custom-solidgreen rounded-lg text-custom-solidgreen flex justify-center items-center gap-1 cursor-pointer hover:shadow-custom "
+                                className="tablet:w-full h-10 px-5 text-sm border montserrat-medium border-custom-solidgreen rounded-lg text-custom-solidgreen flex justify-center items-center gap-1 cursor-pointer hover:shadow-custom"
                                 onClick={() => {
                                     if (fileInputRef.current) {
                                         fileInputRef.current.click();
