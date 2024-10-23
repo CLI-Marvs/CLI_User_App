@@ -53,7 +53,7 @@ const TransactionCom = () => {
       </soap:Envelope>
       `;
 
-        /*   const username = "KBELMONTE";
+        const username = "KBELMONTE";
         const password = "Tomorrowbytogether2019!";
         const authHeader = "Basic " + btoa(`${username}:${password}`);
 
@@ -63,12 +63,12 @@ const TransactionCom = () => {
                 Authorization: authHeader,
             },
         };
- */
+
         try {
             const response = await axios.post(
                 "https://admin-dev.cebulandmasters.com/api/proxy-sap",
-                soapBody
-                /* config */
+                soapBody,
+                config
             );
             console.log("Response:", response.data);
             getInvoices();
