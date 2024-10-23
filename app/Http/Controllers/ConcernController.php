@@ -406,8 +406,11 @@ class ConcernController extends Controller
             }
             $concerns->buyer_name
                 = $validatedData['fname'] . ' ' .  $validatedData['mname'] . ' ' .  $validatedData['lname'];
+            $concerns->buyer_firstname = $validatedData['fname'];
             $concerns->buyer_middlename =
                 $validatedData['mname'];
+            $concerns->buyer_lastname = $validatedData['lname'];
+
             $concerns->mobile_number = $request->mobile_number;
             $concerns->contract_number = $request->contract_number;
             $concerns->unit_number = $request->unit_number;
@@ -447,9 +450,17 @@ class ConcernController extends Controller
             $concern->mobile_number = $request->mobile_number;
             $concern->contract_number = $request->contract_number;
             $concern->unit_number = $request->unit_number;
-            $concern->buyer_name = $request->name;
+            $concern->buyer_name = $request->buyer_firstname . ' ' . $request->buyer_middlename . ' ' . $request->buyer_lastname;
+            $concern->buyer_firstname
+                = $request->buyer_firstname;
+            $concern->buyer_middlename
+                = $request->buyer_middlename;
+            $concern->buyer_lastname
+                = $request->buyer_lastname;
+            $concern->user_type = $request->user_type;
             $concern->buyer_email = $request->buyer_email;
             $concern->property = $request->property;
+            $concern->admin_remarks = $request->remarks;
             $concern->save();
 
             return response()->json('Successfully updated');
