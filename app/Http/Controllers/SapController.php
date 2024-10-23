@@ -30,15 +30,40 @@ class SapController extends Controller
     public function postFromAppToSap(Request $request)
     {
         $client = new Client();
-        $response = $client->post('https://SAP-DEV.cebulandmasters.com:44304/sap/bc/srt/rfc/sap/zposted/200/zposted/zposted', [
-            'headers' => [
-                'Authorization' => 'Basic ' . base64_encode('KBELMONTE:Tomorrowbytogether2019!'),
-                'Content-Type' => 'application/soap+xml',
-            ],
-            'body' => $request->getContent(),
-            'timeout' => 14400,
-        ]);
-        /*  Tomorrowbytogether2019 */
+        try {
+            $response = $client->post('https://SAP-DEV.cebulandmasters.com:44304/sap/bc/srt/rfc/sap/zposted/200/zposted/zposted', [
+                'headers' => [
+                    'Authorization' => 'Basic ' . base64_encode('KBELMONTE:Tomorrowbytogether2019!'),
+                    'Content-Type' => 'application/soap+xml',
+                ],
+                'body' => $request->getContent(),
+                'timeout' => 14400,
+            ]);
+        } catch (\Exception $e) {
+            // Log error and response for further analysis
+            \Log::error('SAP Request Error: ', [
+                'error' => $e->getMessage(),
+                'response' => $e->getResponse() ? $e->getResponse()->getBody()->getContents() : 'No response'
+            ]);
+            return response()->json(['error' => 'SAP Server Error'], 500);
+        }
+        
+    }
+
+    public function updateTransctionRecordData(Request $request) {
+        try {
+            $dataMatches = $request->input('dataMatches');
+
+            foreach($dataMatches as $match) {
+                $dataRef = BankTransaction::find('id', $match['id']);
+                $dataRef->update($match);
+
+                return response()->json(['message' => 'success.'], 200);
+            }
+        } catch (\Throwable $e) {
+            return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
+          
+        }
     }
    
 

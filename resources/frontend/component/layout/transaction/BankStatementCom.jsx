@@ -75,17 +75,83 @@ const BankStatementCom = () => {
         }
     };
 
+    const updateRecords = async () => { 
+        try {
+            const response = await apiService.post('update-transaction');    
+        
+        } catch (error) {
+            console.log("error updating", error);
+        }
+    };
+
+    // const handleSubmitSap = async () => {
+    //     console.log("matchesData", matchesData);
+    //     let soapBody = `
+    //     <soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:urn="urn:sap-com:document:sap:soap:functions:mc-style">
+    //     <soap:Header/>
+    //     <soap:Body>
+    //        <urn:ZdataWarehousePosted>
+    //           <LtZcol>`;
+
+    //     matchesData.forEach((item) => {
+    //         soapBody += `
+    //              <item>
+    //                 <Id>${item.ID}</Id>
+    //                 <Bukrs>${item.BUKRS}</Bukrs>
+    //                 <Recnnr>${item.RECNNR}</Recnnr>
+    //                 <Vbewa>${item.VBEWA}</Vbewa>
+    //                 <Belnr>${item.BELNR}</Belnr>
+    //                 <Amt>${item.AMT}</Amt>
+    //                 <Payd>${item.PAYD}</Payd>
+    //              </item>`;
+    //     });
+
+    //     soapBody += `
+    //           </LtZcol>
+    //        </urn:ZdataWarehousePosted>
+    //     </soap:Body>
+    //     </soap:Envelope>`;
+        
+    //     console.log("body", soapBody);
+    //     setLoading(false);
+    //     try {
+    //         const response = await apiServiceSap.post(
+    //             "post-data-sap",
+    //             soapBody
+    //         );
+    //         console.log("Response:", response.data);
+    //         getTransactions();
+    //         setLoading(false);
+    //         toast.success("Data retrieved from SAP successfully!");
+    //     } catch (error) {
+    //         console.error(
+    //             "Error:",
+    //             error.response ? error.response.data : error.message
+    //         );
+    //         setLoading(false);
+    //     }
+    // };
+
+
     const handleSubmitSap = async () => {
-       /*  setLoading(true); */
         console.log("matchesData", matchesData);
-        let soapBody = {};
-        matchesData.forEach((item, index) => {
-           soapBody = `
+        setLoading(true); // Start loading
+    
+        const batchSize = 10; // Number of items per batch
+        const maxRetries = 3; // Max retries for failed requests
+        const resultsLog = []; // Array to log results
+    
+        // Function to send a batch of items
+        const sendBatch = async (batch) => {
+            let soapBody = `
             <soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:urn="urn:sap-com:document:sap:soap:functions:mc-style">
             <soap:Header/>
             <soap:Body>
                <urn:ZdataWarehousePosted>
-                  <LtZcol>
+                  <LtZcol>`;
+                  
+            batch.forEach((item) => {
+                soapBody += `
                      <item>
                         <Id>${item.ID}</Id>
                         <Bukrs>${item.BUKRS}</Bukrs>
@@ -94,30 +160,47 @@ const BankStatementCom = () => {
                         <Belnr>${item.BELNR}</Belnr>
                         <Amt>${item.AMT}</Amt>
                         <Payd>${item.PAYD}</Payd>
-                     </item>
+                     </item>`;
+            });
+    
+            soapBody += `
                   </LtZcol>
                </urn:ZdataWarehousePosted>
             </soap:Body>
-         </soap:Envelope>
-               `;
-        })
-
-        setLoading(false);
-        try {
-            const response = await apiServiceSap.post("post-data-sap", soapBody);
-            console.log("Response:", response.data);
-            getTransactions();
-            setLoading(false);
-            toast.success("Data retrieved from SAP successfully!");
-        } catch (error) {
-            console.error(
-                "Error:",
-                error.response ? error.response.data : error.message
-            );
-            setLoading(false);
+            </soap:Envelope>`;
+            
+            console.log("Sending batch:", soapBody);
+    
+            for (let attempt = 0; attempt < maxRetries; attempt++) {
+                try {
+                    const response = await apiServiceSap.post("post-data-sap", soapBody);
+                    console.log("Response for batch:", response.data);
+                    resultsLog.push({ success: true, data: response.data });
+                    return; // Exit the retry loop on success
+                } catch (error) {
+                    console.error(
+                        `Error on attempt ${attempt + 1}:`,
+                        error.response ? error.response.data : error.message
+                    );
+                    resultsLog.push({ success: false, error: error.response ? error.response.data : error.message });
+                }
+            }
+        };
+    
+        // Loop through matchesData in batches
+        for (let i = 0; i < matchesData.length; i += batchSize) {
+            const batch = matchesData.slice(i, i + batchSize);
+            await sendBatch(batch); // Send the current batch
         }
+    
+        getTransactions();
+        setLoading(false); // End loading
+    
+        // Log results
+        console.log("Batch Processing Results:", resultsLog);
+        toast.success("Data processed successfully!");
     };
-
+    
     const handleBankChange = (e) => {
         setBankNames(e.target.value);
     };
