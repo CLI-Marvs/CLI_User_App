@@ -302,26 +302,33 @@ const InquiryFormModal = ({ modalRef }) => {
                                 onChange={handleChange}
                             />
                         </div>
-                        <div
-                            className={`flex items-center border rounded-[5px] overflow-hidden ${
-                                isSubmitted && !formData.mname
+                        <div className="flex items-center gap-[4px]">
+                            <div
+                                className={`flex items-center border w-[430px] rounded-[5px] overflow-hidden ${
+                                    isSubmitted && !formData.mname
                                     ? resetSuccess
                                         ? "border-custom-bluegreen"
                                         : "border-red-500"
                                     : "border-custom-bluegreen"
-                            }`}
-                        >
-                            <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex pl-3 py-1 w-[240px]">
-                                Middle Name
-                            </span>
-                            <input
-                                name="mname"
-                                type="text"
-                                className="w-full px-4 text-sm focus:outline-none mobile:text-xs"
-                                placeholder=""
-                                value={formData.mname}
-                                onChange={handleChange}
-                            />
+                                }`}
+                            >
+                                <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex w-[259px] pl-3 py-1 tablet:w-[160px] mobile:w-[270px] mobile:text-xs">
+                                    Middle Name
+                                </span>
+                                <input
+                                    name="mname"
+                                    type="text"
+                                    className="w-full px-4 text-sm focus:outline-none mobile:text-xs"
+                                    value={formData.mname}
+                                    onChange={handleChange}
+                                    placeholder=""
+                                />
+                                
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <input type="checkbox" name="checkbox" className="accent-custom-lightgreen" value="checkbox"/>
+                                <p>N/A</p>
+                            </div>
                         </div>
                         <div
                             className={`flex items-center border  rounded-[5px] overflow-hidden ${
