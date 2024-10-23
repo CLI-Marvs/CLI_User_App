@@ -54,10 +54,10 @@ class SapController extends Controller
 
             $invoice->save();
             
-            return response()->json([
+          /*   return response()->json([
                 'message' => 'Invoice posted successfully',
                 'invoice' => $invoice
-            ]);
+            ]); */
            
         } catch (\Throwable $e) {
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
