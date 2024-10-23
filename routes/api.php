@@ -58,6 +58,8 @@ Route::post('/buyer-reply', [ConcernController::class, 'fromAppSript']);
 
 //* For Sap 
 Route::post('/proxy-sap', [SapController::class, 'urlSap']);
+Route::post('/post-data-sap', [SapController::class, 'postFromAppToSap']);
+
 Route::post('/posting-invoices', [SapController::class, 'postInvoices']);
 Route::get('/get-invoices', [SapController::class, 'getInvoices']);
 Route::get('/get-transactions', [SapController::class, 'retrieveTransactions']);

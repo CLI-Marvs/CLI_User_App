@@ -66,6 +66,12 @@ const InquiryThread = () => {
         setSelectedProperty(e.target.value);
     };
 
+    /**
+     * This function retrieves the most recently updated name when the admin modifies the buyer's information (first name, last name, middle name).
+     */
+    useEffect(() => {
+        console.log("this is fetching");
+    }, []);
     const dataConcern =
         data?.find((items) => items.ticket_id === ticketId) || {};
     const toggleFilterBox = () => {
@@ -73,7 +79,7 @@ const InquiryThread = () => {
     };
 
     const handleFileAttach = (event) => {
-         const files = Array.from(event.target.files);
+        const files = Array.from(event.target.files);
         setAttachedFiles((prevFiles) => [...prevFiles, ...files]);
     };
 
@@ -87,13 +93,13 @@ const InquiryThread = () => {
         "N/A",
         ...(Array.isArray(propertyNamesList) && propertyNamesList.length > 0
             ? propertyNamesList
-                .filter((item) => !item.toLowerCase().includes("phase"))
-                .map((item) => formatFunc(item))
-                .sort((a, b) => {
-                    if (a === "N/A") return -1;
-                    if (b === "N/A") return 1;
-                    return a.localeCompare(b);
-                })
+                  .filter((item) => !item.toLowerCase().includes("phase"))
+                  .map((item) => formatFunc(item))
+                  .sort((a, b) => {
+                      if (a === "N/A") return -1;
+                      if (b === "N/A") return 1;
+                      return a.localeCompare(b);
+                  })
             : []),
     ];
 
@@ -278,8 +284,8 @@ const InquiryThread = () => {
 
     const combineThreadMessages = messages[ticketId]
         ? messages[ticketId]
-            .flat()
-            .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+              .flat()
+              .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
         : [];
     // useEffect(() => {
     //     let adminMessageChannel;
@@ -355,7 +361,8 @@ const InquiryThread = () => {
                 .split(" ")
                 .map(
                     (word) =>
-                        word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+                        word.charAt(0).toUpperCase() +
+                        word.slice(1).toLowerCase()
                 )
                 .join(" ");
         }
@@ -706,10 +713,11 @@ const InquiryThread = () => {
                                                         loading
                                                     }
                                                     className={`flex w-[82px] h-[28px] rounded-[5px] text-white text-xs justify-center items-center 
-                                                        ${loading ||
+                                                        ${
+                                                            loading ||
                                                             !chatMessage.trim()
-                                                            ? "bg-gray-400 cursor-not-allowed"
-                                                            : "gradient-background3 hover:shadow-custom4"
+                                                                ? "bg-gray-400 cursor-not-allowed"
+                                                                : "gradient-background3 hover:shadow-custom4"
                                                         } 
                                                     `}
                                                 >

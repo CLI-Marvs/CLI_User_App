@@ -69,6 +69,7 @@ export const ContextProvider = ({ children }) => {
     const [invoicesPageCount, setInvoicesPageCount] = useState(0);
     const [bankNames, setBankNames] = useState("All");
     const [bankList, setBankList] = useState([]);
+    const [filterDueDate, setFilterDueDate] = useState(null);
 
 
     useEffect(() => {
@@ -155,6 +156,7 @@ export const ContextProvider = ({ children }) => {
     const getInvoices = async () => {
         try {
             const searchParams = new URLSearchParams({
+                dueDate: filterDueDate ? filterDueDate : null,
                 page: currentPageInvoices,
             });
             const response = await apiService.get(`get-invoices?${searchParams}`);
@@ -484,7 +486,7 @@ export const ContextProvider = ({ children }) => {
 
     useEffect(() => {
         getInvoices();
-    }, [currentPageInvoices])
+    }, [currentPageInvoices, filterDueDate])
 
     useEffect(() => {
         getNotifications();
@@ -621,7 +623,9 @@ export const ContextProvider = ({ children }) => {
                 bankNames,
                 setBankNames,
                 bankList,
-                getInvoices
+                getInvoices,
+                filterDueDate,
+                setFilterDueDate
             }}
         >
             {children}

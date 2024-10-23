@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\BankTransaction;
 use App\Models\Invoices;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use GuzzleHttp\Client;
 use Illuminate\Support\Facades\DB;
@@ -25,6 +26,20 @@ class SapController extends Controller
         /*  Tomorrowbytogether2019 */
     }
 
+
+    public function postFromAppToSap(Request $request)
+    {
+        $client = new Client();
+        $response = $client->post('https://SAP-DEV.cebulandmasters.com:44304/sap/bc/srt/rfc/sap/zposted/200/zposted/zposted', [
+            'headers' => [
+                'Authorization' => 'Basic ' . base64_encode('KBELMONTE:Tomorrowbytogether2019!'),
+                'Content-Type' => 'application/soap+xml',
+            ],
+            'body' => $request->getContent(),
+            'timeout' => 14400,
+        ]);
+        /*  Tomorrowbytogether2019 */
+    }
    
 
     public function postInvoices(Request $request)
@@ -74,25 +89,22 @@ class SapController extends Controller
     public function getInvoices(Request $request)
     {
         $query = Invoices::query();
-        $searchParams = $request->has('searchParams');
+        $dueDate = $request->query('dueDate', null);
         $query->select('contract_number', 'customer_name', 'invoice_amount', 'description', 'due_date');
-        if (!empty($searchParams)) {
-            $this->filterDataInvoices($query, $searchParams);
-        }
+       /*  if ($dueDate) {
+            $this->filterDataInvoices($query, $dueDate);
+        } */
 
         $data = $query->orderBy('created_at', 'desc')->paginate(30);
         return response()->json($data);
     }
 
-    private function filterDataInvoices($query, $searchParams)
+    private function filterDataInvoices($query, $dueDate)
     {
-        if (!empty($searchParams['document_number'])) {
-            $query->where('document_number', 'LIKE', '%' . $searchParams['document_number'] . '%');
-        }
-        if (!empty($searchParams['due_date'])) {
-            $query->where('due_date', 'LIKE', '%' . $searchParams['due_date'] . '%');
-        }
+        $startDate = Carbon::parse($dueDate)->setTimezone('Asia/Manila');
+            $query->whereDate('due_date', '=', $startDate);
     }
+
     public function uploadNotepad(Request $request)
     {
         $user = $request->user();
@@ -323,8 +335,8 @@ class SapController extends Controller
         try {
             $idRef = $request->input('ID');
             $transactionRef = BankTransaction::find($idRef);
-            $transactionRef->document_number = $request->input('D_BELNR');  
-            $transactionRef->company_code =   $request->input('D_BUKRS');    
+            $transactionRef->document_number = $request->input('BELNR');  
+            $transactionRef->company_code =   $request->input('BUKRS');    
             $transactionRef->save();
 
             return response()->json(['message' => 'Records updated successfully']);
