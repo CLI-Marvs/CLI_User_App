@@ -7,6 +7,7 @@ import { useStateContext } from "../../../context/contextprovider";
 import apiService from "../../servicesApi/apiService";
 import CircularProgress from "@mui/material/CircularProgress";
 import { set } from "lodash";
+import DataMatchTable from "./DataMatchTable";
 
 const BankStatementCom = () => {
     const {
@@ -153,6 +154,9 @@ const BankStatementCom = () => {
                                 Status
                             </th>
                             <th className=" px-4 border border-gray-500">
+                                Document Number
+                            </th>
+                            <th className=" px-4 border border-gray-500">
                                 Invoice Link
                             </th>
                             <th className=" px-4 border border-gray-500">
@@ -183,6 +187,9 @@ const BankStatementCom = () => {
                                         {item.status === "not_posted"
                                             ? "Not Posted"
                                             : "Posted"}
+                                    </td>
+                                    <td className=" px-4 border border-gray-500">
+                                        {item.document_number}
                                     </td>
                                     <td className=" px-4 border border-gray-500">
                                         {item.invoice_link}
@@ -227,7 +234,7 @@ const BankStatementCom = () => {
             </div>
             <dialog
                 id="Employment"
-                className="modal w-full rounded-[10px] shadow-custom5 backdrop:bg-black/50 px-4 py-4"
+                className="modal w-[589px] rounded-[10px] shadow-custom5 backdrop:bg-black/50 px-4 py-4"
                 ref={modalRef}
             >
                 {files && files.length > 0 ? (
@@ -293,32 +300,7 @@ const BankStatementCom = () => {
                 ) : (
                     <>
                         <div className="flex flex-col text-md mb-4">
-                            <div>These are the data to be posted</div>
-                            {matchesData.length > 0 && (
-                                <div className="mt-4">
-                                    {matchesData.map((item, index) => {
-                                        return (
-                                            <>
-                                                <div className="flex flex-col mb-3" key={index}>
-                                                    <span>
-                                                        <strong>
-                                                            Invoice amount:
-                                                        </strong>{" "}
-                                                        {item.invoice_amount}
-                                                    </span>
-                                                    <span>
-                                                        <strong>
-                                                            Contract Number:
-                                                        </strong>{" "}
-                                                        {item.contract_number}
-                                                    </span>
-                                                </div>
-                                            </>
-                                        );
-                                    })}
-                                   
-                                </div>
-                            )}
+                            <DataMatchTable matchesData={matchesData} />
                         </div>
 
                         <div className="flex justify-end gap-3">

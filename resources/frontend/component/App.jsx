@@ -63,13 +63,12 @@ const App = () => {
         return (
             <>
                 <div className="flex w-full overflow-hidden">
-                  {/* <div className="bg-custom-lightestgreen p-5 w-[100px] mr-10">
+                    {/* <div className="bg-custom-lightestgreen p-5 w-[100px] mr-10">
                         <TransactionSidebar/>
                     </div> */}
                     <div className="w-full py-4 px-4">
-                      <Outlet/>
+                        <Outlet />
                     </div>
-
                 </div>
             </>
         );
@@ -107,13 +106,13 @@ const App = () => {
                 },
                 {
                     path: "transactionmanagement/invoices",
-                    element: <TransactionView/>,
+                    element: <TransactionView />,
                 },
                 {
                     path: "transactionmanagement/transactionrecords",
-                    element: <BankStatementView/>,
+                    element: <BankStatementView />,
                 },
-               /*  {
+                /*  {
                     path: "transaction",
                     element: <SecondLayout />,
                     children: [

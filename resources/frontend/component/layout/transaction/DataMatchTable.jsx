@@ -5,55 +5,23 @@ const DataMatchTable = ({ matchesData }) => {
         <table className="min-w-full bg-white border border-gray-500 border-collapse">
             <thead>
                 <tr>
-                    <th className=" px-4 border border-gray-500">Date</th>
-                    <th className=" px-4 border border-gray-500">Bank</th>
                     <th className=" px-4 border border-gray-500">
-                        Payment Channel
+                        Contract Number{" "}
                     </th>
                     <th className=" px-4 border border-gray-500">
-                        Transact By
-                    </th>
-                    <th className=" px-4 border border-gray-500">
-                        Contract No/ Reference No.
-                    </th>
-                    <th className=" px-4 border border-gray-500">Status</th>
-                    <th className=" px-4 border border-gray-500">
-                        Invoice Link
-                    </th>
-                    <th className=" px-4 border border-gray-500">
-                        Receipt Link
+                        Invoice Amount
                     </th>
                 </tr>
             </thead>
             <tbody>
-                {transactions.length > 0 &&
-                    transactions.map((item, index) => (
+                {matchesData.length > 0 &&
+                    matchesData.map((item, index) => (
                         <tr key={index}>
                             <td className=" px-4 border border-gray-500">
-                                {item.transaction_date}
+                                {item.RECNNR}
                             </td>
                             <td className=" px-4 border border-gray-500">
-                                {item.bank_name}
-                            </td>
-                            <td className=" px-4 border border-gray-500">
-                                {item.payment_channel}
-                            </td>
-                            <td className=" px-4 border border-gray-500">
-                                {item.transact_by}
-                            </td>
-                            <td className=" px-4 border border-gray-500">
-                                {item.reference_number}
-                            </td>
-                            <td className=" px-4 border border-gray-500">
-                                {item.status === "not_posted"
-                                    ? "Not Posted"
-                                    : "Posted"}
-                            </td>
-                            <td className=" px-4 border border-gray-500">
-                                {item.invoice_link}
-                            </td>
-                            <td className=" px-4 border border-gray-500">
-                                {item.receipt_link}
+                                {item.AMT}
                             </td>
                         </tr>
                     ))}

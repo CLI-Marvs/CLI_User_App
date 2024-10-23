@@ -62,6 +62,7 @@ Route::post('/posting-invoices', [SapController::class, 'postInvoices']);
 Route::get('/get-invoices', [SapController::class, 'getInvoices']);
 Route::get('/get-transactions', [SapController::class, 'retrieveTransactions']);
 Route::get('/get-matches', [SapController::class, 'runAutoPosting']);
+Route::post('/data-posted', [SapController::class, 'postRecordsFromSap']);
 
 
 Route::middleware('auth:sanctum')->group(function () {

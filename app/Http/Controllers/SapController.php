@@ -25,6 +25,8 @@ class SapController extends Controller
         /*  Tomorrowbytogether2019 */
     }
 
+   
+
     public function postInvoices(Request $request)
     {
         try {
@@ -42,7 +44,7 @@ class SapController extends Controller
                 $invoice->document_number = $request->input('D_BELNR');
                 $invoice->customer_bp_number = $request->input('D_KUNNR');
                 $invoice->sap_unique_id = $request->input('D_BUZEI');
-                $invoice->company_name = $request->input('D_BUKRS');
+                $invoice->company_code = $request->input('D_BUKRS');
                 $invoice->project_code = $request->input('D_SWENR');
                 $invoice->description = $request->input('D_SGTXT');
                 $invoice->invoice_amount = $request->input('lv_dmbtr');
@@ -78,7 +80,7 @@ class SapController extends Controller
             $this->filterDataInvoices($query, $searchParams);
         }
 
-        $data = $query->paginate(30);
+        $data = $query->orderBy('created_at', 'desc')->paginate(30);
         return response()->json($data);
     }
 
@@ -315,6 +317,23 @@ class SapController extends Controller
         } */
     }
 
+   
+    public function postRecordsFromSap(Request $request)
+    {
+        try {
+            $idRef = $request->input('ID');
+            $transactionRef = BankTransaction::find($idRef);
+            $transactionRef->document_number = $request->input('D_BELNR');  
+            $transactionRef->company_code =   $request->input('D_BUKRS');    
+            $transactionRef->save();
+
+            return response()->json(['message' => 'Records updated successfully']);
+
+        } catch (\Throwable $e) {
+            return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
+        }        
+    }
+
     public function runAutoPosting()
     {
         $bankTransactions = BankTransaction::where('status', 'not_posted')->get();
@@ -328,8 +347,13 @@ class SapController extends Controller
             if ($invoices->isNotEmpty()) {
                 foreach ($invoices as $invoice) {
                     $matchingInvoices[] = [
-                        'invoice_amount' => $invoice->invoice_amount,
-                        'contract_number' => $invoice->contract_number
+                        'ID' => $bankTransaction->id,
+                        'BUKRS' => $invoice->company_code,
+                        'RECNNR' => $invoice->contract_number,
+                        'VBEWA' => $invoice->flow_type,
+                        'BELNR' => $invoice->document_number,
+                        'AMT' => $invoice->invoice_amount,
+                        'PAYD' => "Cash",
                     ];
                 }
             }
@@ -337,4 +361,6 @@ class SapController extends Controller
 
         return response()->json($matchingInvoices);
     }
+
+    
 }
