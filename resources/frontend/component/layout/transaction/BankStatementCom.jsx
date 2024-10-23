@@ -9,6 +9,10 @@ import CircularProgress from "@mui/material/CircularProgress";
 import { set } from "lodash";
 import DataMatchTable from "./DataMatchTable";
 
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import apiServiceSap from "../../servicesApi/apiServiceSap";
+
 const BankStatementCom = () => {
     const {
         transactions,
@@ -68,6 +72,49 @@ const BankStatementCom = () => {
             getTransactions();
         } catch (error) {
             console.log("error uploading data", error);
+        }
+    };
+
+    const handleSubmitSap = async () => {
+       /*  setLoading(true); */
+        console.log("matchesData", matchesData);
+        let soapBody = {};
+        matchesData.forEach((item, index) => {
+           soapBody = `
+            <soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:urn="urn:sap-com:document:sap:soap:functions:mc-style">
+            <soap:Header/>
+            <soap:Body>
+               <urn:ZdataWarehousePosted>
+                  <LtZcol>
+                     <item>
+                        <Id>${item.ID}</Id>
+                        <Bukrs>${item.BUKRS}</Bukrs>
+                        <Recnnr>${item.RECNNR}</Recnnr>
+                        <Vbewa>${item.VBEWA}</Vbewa>
+                        <Belnr>${item.BELNR}</Belnr>
+                        <Amt>${item.AMT}</Amt>
+                        <Payd>${item.PAYD}</Payd>
+                     </item>
+                  </LtZcol>
+               </urn:ZdataWarehousePosted>
+            </soap:Body>
+         </soap:Envelope>
+               `;
+        })
+
+        setLoading(false);
+        try {
+            const response = await apiServiceSap.post("post-data-sap", soapBody);
+            console.log("Response:", response.data);
+            getTransactions();
+            setLoading(false);
+            toast.success("Data retrieved from SAP successfully!");
+        } catch (error) {
+            console.error(
+                "Error:",
+                error.response ? error.response.data : error.message
+            );
+            setLoading(false);
         }
     };
 
@@ -313,7 +360,7 @@ const BankStatementCom = () => {
                                 Cancel
                             </button>
                             <button
-                                /*   onClick={(e) => handleSubmit(e)} */
+                                onClick={(e) => handleSubmitSap(e)}
                                 disabled={loading}
                                 type="submit"
                                 className={`w-[133px] text-sm montserrat-semibold text-white h-[40px] rounded-[10px] gradient-btn2 flex justify-center items-center gap-2 tablet:w-full hover:shadow-custom4

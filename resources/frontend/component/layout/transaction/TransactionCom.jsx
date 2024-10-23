@@ -6,10 +6,11 @@ import DateLogo from "../../../../../public/Images/Date_range.svg";
 import ReactPaginate from "react-paginate";
 import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md";
 import "./loader.css";
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import apiServiceSap from "../../servicesApi/apiServiceSap";
 import apiService from "../../servicesApi/apiService";
+import moment from "moment";
 
 const TransactionCom = () => {
     const {
@@ -19,11 +20,14 @@ const TransactionCom = () => {
         invoicesPageCount,
         setCurrentPageInvoices,
         getInvoices,
+        setFilterDueDate,
+        filterDueDate,
     } = useStateContext();
 
     const [startDate, setStartDate] = useState(null);
     const [sapDate, setSapDate] = useState(null);
     const [sapLoader, setSapLoader] = useState(false);
+    const [isDate, setIsDate] = useState(null);
     const handlePageChange = (data) => {
         const selectedPage = data.selected + 1;
         setCurrentPageInvoices(selectedPage);
@@ -40,6 +44,11 @@ const TransactionCom = () => {
         }
     };
 
+    const handleFilterDueDate = (date) => {
+        const formattedDate = moment(date).format("YYYY-MM-DD");
+        setFilterDueDate(formattedDate);
+        setIsDate(date);
+    };
     console.log("startDate", sapDate);
 
     const sendSoapRequest = async () => {
@@ -56,7 +65,7 @@ const TransactionCom = () => {
       `;
 
         try {
-            const response = await apiServiceSap.post('proxy-sap', soapBody);
+            const response = await apiServiceSap.post("proxy-sap", soapBody);
             console.log("Response:", response.data);
             getInvoices();
             setSapLoader(false);
@@ -96,15 +105,41 @@ const TransactionCom = () => {
                     </p>
                 </div>
             )}
-           
+
             <div className="px-4">
                 {/* Table */}
                 <ToastContainer position="top-center" />
-                <div className="flex mb-4 gap-5">
-                    <div className="relative border border-gray-500 z-40">
+                <div className="flex justify-between mb-4 gap-5">
+                    <div className="flex gap-5">
+                        <div className="relative border border-gray-500 z-40">
+                            <DatePicker
+                                selected={startDate}
+                                onChange={handleDateChange}
+                                className=" outline-none w-[176px] text-sm"
+                                calendarClassName="custom-calendar"
+                            />
+
+                            <img
+                                src={DateLogo}
+                                alt="date"
+                                className="absolute top-[45%] right-0 transform -translate-y-1/2 text-custom-bluegreen size-6  pointer-events-none"
+                            />
+                        </div>
+
+                        <button
+                            /* onClick={sendSoapRequest} */
+                            className="h-[38px] w-[121px] gradient-btn5 text-white  text-xs rounded-[10px]"
+                            onClick={sendSoapRequest}
+                        >
+                            {" "}
+                            SAP Sync
+                        </button>
+                    </div>
+
+                    <div className="relative border border-gray-500 z-40 mr-10">
                         <DatePicker
-                            selected={startDate}
-                            onChange={handleDateChange}
+                            selected={isDate}
+                            onChange={handleFilterDueDate}
                             className=" outline-none w-[176px] text-sm"
                             calendarClassName="custom-calendar"
                         />
@@ -115,14 +150,6 @@ const TransactionCom = () => {
                             className="absolute top-[45%] right-0 transform -translate-y-1/2 text-custom-bluegreen size-6  pointer-events-none"
                         />
                     </div>
-                    <button
-                        /* onClick={sendSoapRequest} */
-                        className="h-[38px] w-[121px] gradient-btn5 text-white  text-xs rounded-[10px]"
-                        onClick={sendSoapRequest}
-                    >
-                        {" "}
-                        SAP Sync
-                    </button>
                 </div>
                 <table className="min-w-full bg-white border border-gray-500 border-collapse">
                     <thead>
@@ -146,8 +173,8 @@ const TransactionCom = () => {
                     </thead>
                     <tbody>
                         {invoices.length > 0 &&
-                            invoices.map((item, key) => (
-                                <tr key={key}>
+                            invoices.map((item, index) => (
+                                <tr key={index}>
                                     <td className=" px-4 border border-gray-500">
                                         {item.contract_number}
                                     </td>
@@ -167,6 +194,16 @@ const TransactionCom = () => {
                                     </td>
                                 </tr>
                             ))}
+                        {/*   <>
+                                <tr>
+                                    <td
+                                        className="text-md px-4 py-2 text-center"
+                                        colSpan={5}
+                                    >
+                                        No Data Found
+                                    </td>
+                                </tr>
+                            </> */}
                     </tbody>
                 </table>
 
