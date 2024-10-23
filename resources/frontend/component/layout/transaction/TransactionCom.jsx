@@ -8,6 +8,7 @@ import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md";
 import "./loader.css";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import apiServiceSap from "../../servicesApi/apiServiceSap";
 
 const TransactionCom = () => {
     const {
@@ -53,23 +54,8 @@ const TransactionCom = () => {
       </soap:Envelope>
       `;
 
-        const username = "KBELMONTE";
-        const password = "Tomorrowbytogether2019!";
-        const authHeader = "Basic " + btoa(`${username}:${password}`);
-
-        const config = {
-            headers: {
-                "Content-Type": "application/soap+xml",
-                Authorization: authHeader,
-            },
-        };
-
         try {
-            const response = await axios.post(
-                "https://admin-dev.cebulandmasters.com/api/proxy-sap",
-                soapBody,
-                config
-            );
+            const response = await apiServiceSap.post('proxy-sap', soapBody);
             console.log("Response:", response.data);
             getInvoices();
             setSapLoader(false);

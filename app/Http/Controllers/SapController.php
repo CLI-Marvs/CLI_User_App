@@ -34,30 +34,36 @@ class SapController extends Controller
                 'request' => $request->all()
             ]);
 
-            $invoice = new Invoices();
-            $invoice->contract_number = $request->input('D_RECNNR');
-            $invoice->document_number = $request->input('D_BELNR');
-            $invoice->customer_bp_number = $request->input('D_KUNNR');
-            $invoice->sap_unique_id = $request->input('D_BUZEI');
-            $invoice->company_code = $request->input('D_BUKRS');
-            $invoice->project_code = $request->input('D_SWENR');
-            $invoice->description = $request->input('D_SGTXT');
-            $invoice->invoice_amount = $request->input('lv_dmbtr');
-            $invoice->entry_date = $request->input('D_CPUDT');
-            $invoice->due_date = $request->input('D_ZFBDT');
-            $invoice->post_date = $request->input('D_BUDAT');
-            $invoice->customer_name = $request->input('D_NAME1');
-            $invoice->flow_type = $request->input('D_VBEWA');
-            /*  $invoice->invoice_status = $request->input('invoice_status'); 
-            $invoice->status = $request->input('status');
-            $invoice->posting_response = $request->input('posting_response'); */
-
-            $invoice->save();
-            
-          /*   return response()->json([
-                'message' => 'Invoice posted successfully',
-                'invoice' => $invoice
-            ]); */
+            $existingInvoice = Invoices::where('document_number', $request->input('D_BELNR'))
+                                       ->where('flow_type', $request->input('D_VBEWA'))
+                                       ->first();
+           
+            if(!$existingInvoice) {
+                $invoice = new Invoices();
+                $invoice->contract_number = $request->input('D_RECNNR');
+                $invoice->document_number = $request->input('D_BELNR');
+                $invoice->customer_bp_number = $request->input('D_KUNNR');
+                $invoice->sap_unique_id = $request->input('D_BUZEI');
+                $invoice->company_code = $request->input('D_BUKRS');
+                $invoice->project_code = $request->input('D_SWENR');
+                $invoice->description = $request->input('D_SGTXT');
+                $invoice->invoice_amount = $request->input('lv_dmbtr');
+                $invoice->entry_date = $request->input('D_CPUDT');
+                $invoice->due_date = $request->input('D_ZFBDT');
+                $invoice->post_date = $request->input('D_BUDAT');
+                $invoice->customer_name = $request->input('D_NAME1');
+                $invoice->flow_type = $request->input('D_VBEWA');
+                /*  $invoice->invoice_status = $request->input('invoice_status'); 
+                $invoice->status = $request->input('status');
+                $invoice->posting_response = $request->input('posting_response'); */
+    
+                $invoice->save();
+                
+                return response()->json([
+                    'message' => 'Invoice posted successfully',
+                    'invoice' => $invoice
+                ]);
+            }
            
         } catch (\Throwable $e) {
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
