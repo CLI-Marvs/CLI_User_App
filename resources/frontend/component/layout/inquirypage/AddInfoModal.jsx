@@ -2,17 +2,22 @@ import React, { useEffect, useState } from "react";
 import { IoMdArrowDropdown } from "react-icons/io";
 import apiService from "../../servicesApi/apiService";
 import { data } from "autoprefixer";
+import { useStateContext } from "../../../context/contextprovider";
 
 const AddInfoModal = ({ modalRef, dataConcern }) => {
+    const { getAllConcerns } = useStateContext();
     const [message, setMessage] = useState("");
     const [dataToUpdate, setDataToUpdate] = useState({
         contract_number: dataConcern.contract_number || "",
         unit_number: dataConcern.unit_number || "",
         property: dataConcern.property || "",
-        remarks: dataConcern.details_message || "",
+        remarks: message || "",
         buyer_email: dataConcern.buyer_email || "",
         mobile_number: dataConcern.mobile_number || "",
-        name: dataConcern.buyer_name || "",
+        buyer_firstname: dataConcern.buyer_firstname || "",
+        buyer_middlename: dataConcern.buyer_middlename || "",
+        buyer_lastname: dataConcern.buyer_lastname || "",
+        user_type: dataConcern.user_type || "",
     });
 
     const projectList = [
@@ -55,7 +60,6 @@ const AddInfoModal = ({ modalRef, dataConcern }) => {
         "San Jose Maria Village - Minglanilla",
         "San Jose Maria Village - Toledo",
         "San Josemaria Village - Talisay",
-        "Test Project",
         "The East Village",
         "Velmiro Greens Bohol",
         "Velmiro Heights",
@@ -84,10 +88,11 @@ const AddInfoModal = ({ modalRef, dataConcern }) => {
         try {
             const response = await apiService.put(
                 `update-info?dataId=${dataConcern.id}`,
-                {...dataToUpdate}
+                { ...dataToUpdate }
             );
 
             console.log("response", response);
+            getAllConcerns();
         } catch (error) {
             console.log("error", error);
         }
@@ -99,13 +104,16 @@ const AddInfoModal = ({ modalRef, dataConcern }) => {
                 contract_number: dataConcern.contract_number || "",
                 unit_number: dataConcern.unit_number || "",
                 property: dataConcern.property || "",
-                remarks: dataConcern.details_message || "",
+                remarks: message || "",
                 buyer_email: dataConcern.buyer_email || "",
                 mobile_number: dataConcern.mobile_number || "",
-                name: dataConcern.buyer_name || "",
+                buyer_firstname: dataConcern.buyer_firstname || "",
+                buyer_middlename: dataConcern.buyer_middlename || "",
+                buyer_lastname: dataConcern.buyer_lastname || "",
+                user_type: dataConcern.user_type || "",
             });
         }
-    }, []);
+    }, [dataConcern]);
     return (
         <dialog
             id="Resolved"
@@ -125,19 +133,57 @@ const AddInfoModal = ({ modalRef, dataConcern }) => {
                 </div>
                 <div className=" px-[50px] py-[77px] flex flex-col gap-[40px]">
                     <div className="flex flex-col gap-[10px]">
+                        {/* First name */}
                         <div
                             className={`flex items-center border border-[D6D6D6] rounded-[5px] overflow-hidden`}
                         >
                             <span className="text-custom-gray81 text-sm bg-[#EDEDED] flex pl-3 py-1 w-[300px]">
-                                Name
+                                First Name
                             </span>
                             <input
-                                name="name"
-                                value={dataToUpdate.name || ""}
+                                name="buyer_firstname"
+                                value={dataToUpdate.buyer_firstname || ""}
                                 // value={
                                 //     (dataToUpdate.name || "") +
                                 //     " additional text"
                                 // }
+                                onChange={handleChange}
+                                type="text"
+                                className="w-full px-4 text-sm focus:outline-none mobile:text-xs capitalize"
+                                placeholder=""
+                            />
+                        </div>
+                        {/* Middle name */}
+                        <div
+                            className={`flex items-center border border-[D6D6D6] rounded-[5px] overflow-hidden`}
+                        >
+                            <span className="text-custom-gray81 text-sm bg-[#EDEDED] flex pl-3 py-1 w-[300px]">
+                                Middle Name
+                            </span>
+                            <input
+                                name="buyer_middlename"
+                                value={dataToUpdate.buyer_middlename || ""}
+                                // value={
+                                //     (dataToUpdate.name || "") +
+                                //     " additional text"
+                                // }
+                                onChange={handleChange}
+                                type="text"
+                                className="w-full px-4 text-sm focus:outline-none mobile:text-xs capitalize"
+                                placeholder=""
+                            />
+                        </div>
+                        {/* Last name */}
+
+                        <div
+                            className={`flex items-center border border-[D6D6D6] rounded-[5px] overflow-hidden`}
+                        >
+                            <span className="text-custom-gray81 text-sm bg-[#EDEDED] flex pl-3 py-1 w-[300px]">
+                                Last Name
+                            </span>
+                            <input
+                                name="buyer_lastname"
+                                value={dataToUpdate.buyer_lastname || ""}
                                 onChange={handleChange}
                                 type="text"
                                 className="w-full px-4 text-sm focus:outline-none mobile:text-xs capitalize"
@@ -170,6 +216,22 @@ const AddInfoModal = ({ modalRef, dataConcern }) => {
                                 type="number"
                                 onChange={handleChange}
                                 value={dataToUpdate.mobile_number || ""}
+                                className="w-full px-4 text-sm focus:outline-none mobile:text-xs no-spinner"
+                                placeholder=""
+                            />
+                        </div>
+
+                        <div
+                            className={`flex items-center border border-[D6D6D6] rounded-[5px] overflow-hidden`}
+                        >
+                            <span className="text-custom-gray81 text-sm bg-[#EDEDED] flex pl-3 py-1 w-[300px]">
+                                I am a
+                            </span>
+                            <input
+                                name="user_type"
+                                type="text"
+                                onChange={handleChange}
+                                value={dataToUpdate.user_type || ""}
                                 className="w-full px-4 text-sm focus:outline-none mobile:text-xs no-spinner"
                                 placeholder=""
                             />
