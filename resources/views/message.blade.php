@@ -131,5 +131,7 @@
     <p style="font-weight: bold;">CLI - Customer Relations Services</p>
 
 
-    
+    {{-- <p>
+        <img src="{{ asset('Images/New_ES.png') }}" alt="Company Signature" style="max-width: 200px;">
+    </p> --}}
 </body>
