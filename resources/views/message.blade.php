@@ -130,8 +130,8 @@
     <p style="font-weight: bold;">{{ ucwords($admin_name) }}</p>
     <p style="font-weight: bold;">CLI - Customer Relations Services</p>
 
-
-    {{-- <p>
-        <img src="{{ asset('Images/New_ES.png') }}" alt="Company Signature" style="max-width: 200px;">
-    </p> --}}
+    
+    <p>
+        <img src="/images/New_ES.png" alt="Company Logo" style="width: 200px;">
+    </p>
 </body>
