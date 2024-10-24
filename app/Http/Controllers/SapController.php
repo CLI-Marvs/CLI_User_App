@@ -364,7 +364,7 @@ class SapController extends Controller
             \Log::info('Posting Records from SAP', [
                 $request->all()
             ]);
-            $idRef = $request->input('ID');
+            $idRef = intval($request->input('ID'));
             $attachment = $request->input('file');
             $fileLink = $this->uploadToFile($attachment);
             $transactionRef = BankTransaction::find($idRef);
