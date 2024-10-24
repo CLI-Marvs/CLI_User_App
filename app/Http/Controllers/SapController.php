@@ -31,7 +31,7 @@ class SapController extends Controller
     {
         $client = new Client();
         try {
-            $response = $client->post('https://SAP-DEV.cebulandmasters.com:44304/sap/bc/srt/rfc/sap/zposted/200/zposted/zposted', [
+            $response = $client->post('https://SAP-DEV.cebulandmasters.com:44304/sap/bc/srt/rfc/sap/zpostedcol3/200/zpostedcol3/zpostedcol3', [
                 'headers' => [
                     'Authorization' => 'Basic ' . base64_encode('KBELMONTE:Tomorrowbytogether2019!'),
                     'Content-Type' => 'application/soap+xml',

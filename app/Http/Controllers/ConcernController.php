@@ -248,7 +248,7 @@ class ConcernController extends Controller
             $admin_name = $request->input('admin_name', '');
             $admin_id = $request->input('admin_id', '');
             $buyer_email = $request->input('buyer_email', '');
-            $buyer_name = $request->input('buyer_name', '');
+            $buyer_lastname = $request->input('buyer_lastname', '');
             $admin_profile_picture = $request->input('admin_profile_picture', '');
 
 
@@ -288,7 +288,7 @@ class ConcernController extends Controller
                 ReplyFromAdminJob::dispatch($messages->ticket_id, $buyer_email, $adminMessage, $message_id, $allFiles);
             } */
 
-            ReplyFromAdminJob::dispatch($messages->ticket_id, $buyer_email, $adminMessage, $message_id, $allFiles, $admin_name, $buyer_name);
+            ReplyFromAdminJob::dispatch($messages->ticket_id, $buyer_email, $adminMessage, $message_id, $allFiles, $admin_name, $buyer_lastname);
 
 
             return response()->json("Successfully sent");
@@ -1393,13 +1393,14 @@ class ConcernController extends Controller
             $allFiles = null;
             $messageId = $request->message_id;
             $buyerEmail = $request->buyer_email;
-
+            $admin_name = $request->admin_name;
+            $buyer_lastname = $request->buyer_lastname;
             $concerns->status = "Resolved";
             /*   $concerns->resolve_from = $request->department; */
             $concerns->save();
 
             $this->inquiryResolveLogs($request);
-            ReplyFromAdminJob::dispatch($request->ticket_id, $buyerEmail, $request->remarks, $messageId, $allFiles);
+            ReplyFromAdminJob::dispatch($request->ticket_id, $buyerEmail, $request->remarks, $messageId, $allFiles, $admin_name, $buyer_lastname);
         } catch (\Exception $e) {
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
         }

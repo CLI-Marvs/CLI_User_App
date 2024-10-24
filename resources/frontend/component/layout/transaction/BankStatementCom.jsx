@@ -141,11 +141,10 @@ const BankStatementCom = () => {
         const maxRetries = 3; // Max retries for failed requests
         const resultsLog = []; // Array to log results
     
-        // Function to send a batch of items
         const sendBatch = async (batch) => {
             let soapBody = `
-            <soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:urn="urn:sap-com:document:sap:soap:functions:mc-style">
-            <soap:Header/>
+           <soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:urn="urn:sap-com:document:sap:soap:functions:mc-style">
+   <soap:Header/>
             <soap:Body>
                <urn:ZdataWarehousePosted>
                   <LtZcol>`;
