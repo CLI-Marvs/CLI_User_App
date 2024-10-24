@@ -332,14 +332,18 @@ const BankStatementCom = () => {
                                         {item.invoice_link}
                                     </td>
                                     <td className="px-4 border border-gray-500">
-                                        <a
-                                            href={item.collection_receipt_link}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="cursor-pointer underline"
-                                        >
-                                            View Document
-                                        </a>
+                                        {item.collection_receipt_link ? (
+                                            <a
+                                                href={
+                                                    item.collection_receipt_link
+                                                }
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="cursor-pointer underline"
+                                            >
+                                                View Document
+                                            </a>
+                                        ) : null}
                                     </td>
                                 </tr>
                             ))}
