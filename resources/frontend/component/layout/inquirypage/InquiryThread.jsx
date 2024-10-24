@@ -201,7 +201,7 @@ const InquiryThread = () => {
         const formattedMessage = chatMessage.replace(/\n/g, "<br>");
         formData.append("admin_email", user?.employee_email || "");
         formData.append("ticket_id", ticketId || "");
-        formData.append("details_message", chatMessage || "");
+        formData.append("details_message", formattedMessage || "");
         formData.append(
             "admin_name",
             `${user?.firstname || ""} ${user?.lastname || ""}`
