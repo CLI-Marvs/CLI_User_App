@@ -106,22 +106,25 @@ const BankStatementCom = () => {
                        </urn:ZdataWarehousePosted>
                     </soap:Body>
                     </soap:Envelope>`;
-    
+
                 // Make the API call for the current item
-                const response = await apiServiceSap.post("post-data-sap", soapBody);
-    
+                const response = await apiServiceSap.post(
+                    "post-data-sap",
+                    soapBody
+                );
+
                 // Optionally, handle the response here if needed
                 console.log(`Item ${item.ID} posted:`, response.data);
             }
-    
+
             getMatches();
             getTransactions(); // Call to update transactions after all items are processed
-    
+
             if (modalRef.current) {
                 modalRef.current.close();
             }
             setLoading(false); // End loading
-    
+
             toast.success("All Data Posted Successfully!");
         } catch (error) {
             console.error(
@@ -131,7 +134,7 @@ const BankStatementCom = () => {
             setLoading(false);
         }
     };
-    
+
     //     const handleSubmitSap = async () => {
     //         console.log("matchesData", matchesData);
     //         setLoading(true); // Start loading
@@ -328,8 +331,14 @@ const BankStatementCom = () => {
                                     <td className=" px-4 border border-gray-500">
                                         {item.invoice_link}
                                     </td>
-                                    <td className=" px-4 border border-gray-500">
-                                        {item.receipt_link}
+                                    <td className="px-4 border border-gray-500">
+                                        <a
+                                            href={item.collection_receipt_link}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                        >
+                                            {item.collection_receipt_link}
+                                        </a>
                                     </td>
                                 </tr>
                             ))}
