@@ -19,6 +19,7 @@ const ResolveModal = ({ modalRef, ticketId, dataRef }) => {
                 admin_name: `${user?.firstname} ${user?.lastname}`,
                 department: user?.department,
                 buyer_email: dataRef.buyer_email,
+                buyer_lastname: dataRef.buyer_lastname,
                 remarks: remarks,
                 message_id: messageId
             });
