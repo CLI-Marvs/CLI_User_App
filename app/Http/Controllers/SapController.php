@@ -361,6 +361,9 @@ class SapController extends Controller
     public function postRecordsFromSap(Request $request)
     {
         try {
+            \Log::info('Posting Records from SAP', [
+                $request->all()
+            ]);
             $idRef = $request->input('ID');
             $attachment = $request->input('file');
             $fileLink = $this->uploadToFile($attachment);
