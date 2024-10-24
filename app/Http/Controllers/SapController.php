@@ -363,6 +363,7 @@ class SapController extends Controller
             $transactionRef = BankTransaction::find($idRef);
             $transactionRef->document_number = $request->input('BELNR');  
             $transactionRef->company_code = $request->input('BUKRS');    
+            $transactionRef->collection_receipt_link = $request->input('file');
             $transactionRef->status = "Posted";
             $transactionRef->save();
 

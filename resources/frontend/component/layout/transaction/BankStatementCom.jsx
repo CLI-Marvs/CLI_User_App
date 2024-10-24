@@ -114,6 +114,7 @@ const BankStatementCom = () => {
                 console.log(`Item ${item.ID} posted:`, response.data);
             }
     
+            getMatches();
             getTransactions(); // Call to update transactions after all items are processed
     
             if (modalRef.current) {
@@ -131,7 +132,6 @@ const BankStatementCom = () => {
         }
     };
     
-
     //     const handleSubmitSap = async () => {
     //         console.log("matchesData", matchesData);
     //         setLoading(true); // Start loading
@@ -216,9 +216,11 @@ const BankStatementCom = () => {
         if (files.length > 0 && modalRef.current) {
             modalRef.current.showModal();
         }
-        getTransactions();
         getMatches();
     }, [files]);
+    useEffect(() => {
+        getTransactions();
+    }, []);
     return (
         <>
             <div className="px-4">
@@ -292,7 +294,7 @@ const BankStatementCom = () => {
                                 Invoice Link
                             </th>
                             <th className=" px-4 border border-gray-500">
-                                Receipt Link
+                                Collection Receipt Link
                             </th>
                         </tr>
                     </thead>
