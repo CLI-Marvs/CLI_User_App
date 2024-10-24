@@ -12,7 +12,7 @@ const AdminMessages = ({ items }) => {
     console.log('12')
     const { user } = useStateContext();
     const attachmentData = JSON.parse(items.attachment || "[]");
-    console.log("attachmentData", iteattachmentDatams); 
+    /* console.log("attachmentData", iteattachmentDatams);  */
 
     const navigate = useNavigate();
     const dynamicName =

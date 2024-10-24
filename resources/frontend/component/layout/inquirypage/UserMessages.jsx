@@ -60,8 +60,19 @@ const UserMessages = ({ items }) => {
                         attachmentData.length > 0 &&
                         attachmentData.map((attachment, index) => {
                             console.log("123", attachment.original_file_name);
+
+                            const fileName = attachment?.original_file_name;
+                            if (!fileName) {
+                                // If fileName is undefined or null, return a fallback UI or nothing
+                                return null;
+                            }
+                            const fileType = fileName.split('.').pop(); // Get the file extension
+                            const baseName = fileName.substring(0, fileName.lastIndexOf('.')); // Get the name without extension
+                    
+                            // Truncate the base name to 15 characters
+                            const truncatedName = baseName.length > 15 ? `${baseName.slice(0, 15)}...` : baseName;
                             return (
-                                <div className="mt-4 w-[400px] bg-red-900" key={index}>
+                                <div className="mt-4 w-[219px] overflow-hidden font-light" key={index}>
                                     <Link
                                         to={`/file-viewer/attachment/${items.id}`}
                                         onClick={(e) => {
@@ -86,10 +97,9 @@ const UserMessages = ({ items }) => {
                                             src={FolderFile}
                                             alt="View Attachment"
                                         />
-                                        View Attachment
-                                        <span>{attachment.original_name}</span>
+                                        <span className="w-[200px] h-[20px]"> {truncatedName}.{fileType}</span>
                                     </Link>
-                                    {attachment.original_file_name}
+                                    
                                 </div>
                             );
                         }
