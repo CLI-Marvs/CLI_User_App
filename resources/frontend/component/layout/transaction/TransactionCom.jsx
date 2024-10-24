@@ -69,7 +69,7 @@ const TransactionCom = () => {
             console.log("Response:", response.data);
             getInvoices();
             setSapLoader(false);
-            toast.success("Successfully Posted!");
+            toast.success("Data retrieved from SAP successfully!");
         } catch (error) {
             console.error(
                 "Error:",
