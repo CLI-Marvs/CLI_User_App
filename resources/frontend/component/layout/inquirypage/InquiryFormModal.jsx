@@ -26,6 +26,7 @@ const InquiryFormModal = ({ modalRef }) => {
     const [message, setMessage] = useState("");
     const { user, getAllConcerns } = useStateContext();
     const maxCharacters = 500;
+    const [isChecked, setIsChecked] = useState(false);
     const [hasErrors, setHasErrors] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -95,7 +96,9 @@ const InquiryFormModal = ({ modalRef }) => {
             }));
         }
     };
-
+    const handleCheckboxChange = (event) => {
+        setIsChecked(event.target.checked); // Updates the state based on whether the checkbox is checked
+    };
     const isTextareaValid = message.trim().length > 0;
 
     const validateEmail = (email) => {
@@ -121,6 +124,7 @@ const InquiryFormModal = ({ modalRef }) => {
         contract_number,
         unit_number,
         other_user_type,
+        mname,
         ...requiredFields
     } = formData;
 
@@ -132,6 +136,7 @@ const InquiryFormModal = ({ modalRef }) => {
         e.preventDefault();
 
         setIsSubmitted(true);
+        const isMnameValid = isChecked || mname.trim() !== "";
         let isOtherUserTypeValid = true;
         if (user_type === "Others") {
             isOtherUserTypeValid = other_user_type.trim().length > 0;
@@ -139,6 +144,7 @@ const InquiryFormModal = ({ modalRef }) => {
         if (
             isFormDataValid &&
             isTextareaValid &&
+            isMnameValid &&
             !errors.buyer_email &&
             isOtherUserTypeValid
         ) {
@@ -325,12 +331,17 @@ const InquiryFormModal = ({ modalRef }) => {
                                     placeholder=""
                                 />
                                 <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3 gap-2 text-sm bg-custom-lightestgreen">
-                                    <input type="checkbox" name="checkbox" className="accent-custom-lightgreen" value="checkbox"/>
+                                    <input
+                                        onChange={handleCheckboxChange}
+                                        type="checkbox"
+                                        checked={isChecked}
+                                        name="checkbox"
+                                        className="accent-custom-lightgreen"
+                                        value="checkbox"
+                                    />
                                     <p>N/A</p>
                                 </span>
-                            
                             </div>
-                            
                         </div>
                         <div
                             className={`flex items-center border  rounded-[5px] overflow-hidden ${

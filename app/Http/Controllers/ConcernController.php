@@ -383,8 +383,8 @@ class ConcernController extends Controller
                 'fname' =>
                 ['required', 'regex:/^[\pL\s\-\'\.]+$/u', 'max:255'],
                 'lname' =>
-                ['required', 'regex:/^[\pL\s\-\'\.]+$/u', 'max:255'],
-                'mname' =>
+                // ['required', 'regex:/^[\pL\s\-\'\.]+$/u', 'max:255'],
+                // 'mname' =>
                 ['required', 'regex:/^[\pL\s\-\'\.]+$/u', 'max:255'],
                 'details_concern' => 'required|string',
                 'message' => 'required|string|max:500',
@@ -393,21 +393,21 @@ class ConcernController extends Controller
                 'fname.required' => 'The first name field is required.',
                 'lname.regex' => 'The last name field format is invalid.',
                 'lname.required' => 'The last name field is required.',
-                'mname.regex' => 'The middle name field format is invalid.',
-                'mname.required' => 'The middle name field is required.',
+                // 'mname.regex' => 'The middle name field format is invalid.',
+                // 'mname.required' => 'The middle name field is required.',
             ]);
             $user = $request->user();
             $fileLinks = [];
 
             $files = $request->file('files');
-            foreach ($files as $file) {
-                $originalFileName = $file->getClientOriginalName();
+            // foreach ($files as $file) {
+            //     $originalFileName = $file->getClientOriginalName();
 
-                // $fileLinks[] = [
-                //     'url' => $fileLink,
-                //     'original_file_name' => $originalFileName
-                // ];
-            }
+            //     // $fileLinks[] = [
+            //     //     'url' => $fileLink,
+            //     //     'original_file_name' => $originalFileName
+            //     // ];
+            // }
 
             $lastConcern = Concerns::latest()->first();
             $nextId = $lastConcern ? $lastConcern->id + 1 : 1;
@@ -427,12 +427,11 @@ class ConcernController extends Controller
                 $concerns->user_type = $request->other_user_type;
             }
             $concerns->buyer_name
-                = $validatedData['fname'] . ' ' .  $validatedData['mname'] . ' ' .  $validatedData['lname'];
+                = $validatedData['fname'] . ' ' . $request->mname . ' ' .  $validatedData['lname'];
             $concerns->buyer_firstname = $validatedData['fname'];
             $concerns->buyer_middlename =
-                $validatedData['mname'];
+            $request->mname;
             $concerns->buyer_lastname = $validatedData['lname'];
-
             $concerns->mobile_number = $request->mobile_number;
             $concerns->contract_number = $request->contract_number;
             $concerns->unit_number = $request->unit_number;
@@ -444,10 +443,10 @@ class ConcernController extends Controller
             $this->concernsCreatedBy($user, $concerns->id);
 
             $fileLinks = $this->uploadToGCS($files);
-            $fileLinks[] = [
-                'url' => $fileLinks,
-                'original_file_name' => $originalFileName
-            ];
+            // $fileLinks[] = [
+            //     'url' => $fileLinks,
+            //     'original_file_name' => $originalFileName
+            // ];
             $attachment = !empty($fileLinks) ? json_encode($fileLinks) : null;
             $messages = new Messages();
             $messages->buyer_email = $request->buyer_email;
