@@ -31,7 +31,7 @@ class SapController extends Controller
     {
         $client = new Client();
         try {
-            $response = $client->post('https://SAP-DEV.cebulandmasters.com:44304/sap/bc/srt/rfc/sap/zpostedcol3/200/zpostedcol3/zpostedcol3', [
+            $response = $client->post('https://SAP-DEV.cebulandmasters.com:44304/sap/bc/srt/rfc/sap/zpostedcol4/200/zpostedcol4/zpostedcol4', [
                 'headers' => [
                     'Authorization' => 'Basic ' . base64_encode('KBELMONTE:Tomorrowbytogether2019!'),
                     'Content-Type' => 'application/soap+xml',
@@ -52,6 +52,7 @@ class SapController extends Controller
 
     public function updateTransctionRecordData(Request $request) {
         try {
+            \Log::info('Update Transaction Record Data', [$request->all()]);
             $dataMatches = $request->input('dataMatches');
 
             foreach($dataMatches as $match) {

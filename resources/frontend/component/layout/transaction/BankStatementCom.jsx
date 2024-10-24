@@ -75,10 +75,9 @@ const BankStatementCom = () => {
         }
     };
 
-    const updateRecords = async () => { 
+    const updateRecords = async () => {
         try {
-            const response = await apiService.post('update-transaction');    
-        
+            const response = await apiService.post("update-transaction");
         } catch (error) {
             console.log("error updating", error);
         }
@@ -111,7 +110,7 @@ const BankStatementCom = () => {
     //        </urn:ZdataWarehousePosted>
     //     </soap:Body>
     //     </soap:Envelope>`;
-        
+
     //     console.log("body", soapBody);
     //     setLoading(false);
     //     try {
@@ -132,15 +131,14 @@ const BankStatementCom = () => {
     //     }
     // };
 
-
     const handleSubmitSap = async () => {
         console.log("matchesData", matchesData);
         setLoading(true); // Start loading
-    
+
         const batchSize = 10; // Number of items per batch
         const maxRetries = 3; // Max retries for failed requests
         const resultsLog = []; // Array to log results
-    
+
         const sendBatch = async (batch) => {
             let soapBody = `
            <soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:urn="urn:sap-com:document:sap:soap:functions:mc-style">
@@ -148,7 +146,7 @@ const BankStatementCom = () => {
             <soap:Body>
                <urn:ZdataWarehousePosted>
                   <LtZcol>`;
-                  
+
             batch.forEach((item) => {
                 soapBody += `
                      <item>
@@ -161,18 +159,21 @@ const BankStatementCom = () => {
                         <Payd>${item.PAYD}</Payd>
                      </item>`;
             });
-    
+
             soapBody += `
                   </LtZcol>
                </urn:ZdataWarehousePosted>
             </soap:Body>
             </soap:Envelope>`;
-            
+
             console.log("Sending batch:", soapBody);
-    
+
             for (let attempt = 0; attempt < maxRetries; attempt++) {
                 try {
-                    const response = await apiServiceSap.post("post-data-sap", soapBody);
+                    const response = await apiServiceSap.post(
+                        "post-data-sap",
+                        soapBody
+                    );
                     console.log("Response for batch:", response.data);
                     resultsLog.push({ success: true, data: response.data });
                     return; // Exit the retry loop on success
@@ -181,25 +182,35 @@ const BankStatementCom = () => {
                         `Error on attempt ${attempt + 1}:`,
                         error.response ? error.response.data : error.message
                     );
-                    resultsLog.push({ success: false, error: error.response ? error.response.data : error.message });
+                    resultsLog.push({
+                        success: false,
+                        error: error.response
+                            ? error.response.data
+                            : error.message,
+                    });
                 }
             }
         };
-    
+
         // Loop through matchesData in batches
         for (let i = 0; i < matchesData.length; i += batchSize) {
             const batch = matchesData.slice(i, i + batchSize);
             await sendBatch(batch); // Send the current batch
         }
-    
+
         getTransactions();
+        if (modalRef.current) {
+            modalRef.current.close();
+        }
         setLoading(false); // End loading
-    
+
         // Log results
+        toast.success("Data retrieved from SAP successfully!");
+
         console.log("Batch Processing Results:", resultsLog);
         toast.success("Data processed successfully!");
     };
-    
+
     const handleBankChange = (e) => {
         setBankNames(e.target.value);
     };
@@ -220,6 +231,7 @@ const BankStatementCom = () => {
     return (
         <>
             <div className="px-4">
+                <ToastContainer position="top-center" />
                 <div className="flex mb-4 gap-10">
                     <select
                         className="border-b-1 w-[121px] outline-none text-sm"
