@@ -370,7 +370,7 @@ class SapController extends Controller
             $transactionRef = BankTransaction::find($idRef);
 
             if (!$transactionRef) {
-                return response()->json(['message' => 'Transaction not found.'], 404);
+                \Log::info('transaction not found');
             }
             
 
