@@ -75,131 +75,136 @@ const BankStatementCom = () => {
         }
     };
 
-    const updateRecords = async () => { 
+    const updateRecords = async () => {
         try {
-            const response = await apiService.post('update-transaction');    
-        
+            const response = await apiService.post("update-transaction");
         } catch (error) {
             console.log("error updating", error);
         }
     };
 
-    // const handleSubmitSap = async () => {
-    //     console.log("matchesData", matchesData);
-    //     let soapBody = `
-    //     <soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:urn="urn:sap-com:document:sap:soap:functions:mc-style">
-    //     <soap:Header/>
-    //     <soap:Body>
-    //        <urn:ZdataWarehousePosted>
-    //           <LtZcol>`;
-
-    //     matchesData.forEach((item) => {
-    //         soapBody += `
-    //              <item>
-    //                 <Id>${item.ID}</Id>
-    //                 <Bukrs>${item.BUKRS}</Bukrs>
-    //                 <Recnnr>${item.RECNNR}</Recnnr>
-    //                 <Vbewa>${item.VBEWA}</Vbewa>
-    //                 <Belnr>${item.BELNR}</Belnr>
-    //                 <Amt>${item.AMT}</Amt>
-    //                 <Payd>${item.PAYD}</Payd>
-    //              </item>`;
-    //     });
-
-    //     soapBody += `
-    //           </LtZcol>
-    //        </urn:ZdataWarehousePosted>
-    //     </soap:Body>
-    //     </soap:Envelope>`;
-        
-    //     console.log("body", soapBody);
-    //     setLoading(false);
-    //     try {
-    //         const response = await apiServiceSap.post(
-    //             "post-data-sap",
-    //             soapBody
-    //         );
-    //         console.log("Response:", response.data);
-    //         getTransactions();
-    //         setLoading(false);
-    //         toast.success("Data retrieved from SAP successfully!");
-    //     } catch (error) {
-    //         console.error(
-    //             "Error:",
-    //             error.response ? error.response.data : error.message
-    //         );
-    //         setLoading(false);
-    //     }
-    // };
-
-
     const handleSubmitSap = async () => {
-        console.log("matchesData", matchesData);
-        setLoading(true); // Start loading
-    
-        const batchSize = 10; // Number of items per batch
-        const maxRetries = 3; // Max retries for failed requests
-        const resultsLog = []; // Array to log results
-    
-        const sendBatch = async (batch) => {
-            let soapBody = `
-           <soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:urn="urn:sap-com:document:sap:soap:functions:mc-style">
-   <soap:Header/>
-            <soap:Body>
-               <urn:ZdataWarehousePosted>
-                  <LtZcol>`;
-                  
-            batch.forEach((item) => {
-                soapBody += `
-                     <item>
-                        <Id>${item.ID}</Id>
-                        <Bukrs>${item.BUKRS}</Bukrs>
-                        <Recnnr>${item.RECNNR}</Recnnr>
-                        <Vbewa>${item.VBEWA}</Vbewa>
-                        <Belnr>${item.BELNR}</Belnr>
-                        <Amt>${item.AMT}</Amt>
-                        <Payd>${item.PAYD}</Payd>
-                     </item>`;
-            });
-    
-            soapBody += `
-                  </LtZcol>
-               </urn:ZdataWarehousePosted>
-            </soap:Body>
-            </soap:Envelope>`;
-            
-            console.log("Sending batch:", soapBody);
-    
-            for (let attempt = 0; attempt < maxRetries; attempt++) {
-                try {
-                    const response = await apiServiceSap.post("post-data-sap", soapBody);
-                    console.log("Response for batch:", response.data);
-                    resultsLog.push({ success: true, data: response.data });
-                    return; // Exit the retry loop on success
-                } catch (error) {
-                    console.error(
-                        `Error on attempt ${attempt + 1}:`,
-                        error.response ? error.response.data : error.message
-                    );
-                    resultsLog.push({ success: false, error: error.response ? error.response.data : error.message });
-                }
+        setLoading(true);
+        try {
+            for (const item of matchesData) {
+                let soapBody = `
+                    <soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:urn="urn:sap-com:document:sap:soap:functions:mc-style">
+                    <soap:Header/>
+                    <soap:Body>
+                       <urn:ZdataWarehousePosted>
+                          <LtZcol>
+                             <item>
+                                <Id>${item.ID}</Id>
+                                <Bukrs>${item.BUKRS}</Bukrs>
+                                <Recnnr>${item.RECNNR}</Recnnr>
+                                <Vbewa>${item.VBEWA}</Vbewa>
+                                <Belnr>${item.BELNR}</Belnr>
+                                <Amt>${item.AMT}</Amt>
+                                <Payd>${item.PAYD}</Payd>
+                             </item>
+                          </LtZcol>
+                       </urn:ZdataWarehousePosted>
+                    </soap:Body>
+                    </soap:Envelope>`;
+
+                // Make the API call for the current item
+                const response = await apiServiceSap.post(
+                    "post-data-sap",
+                    soapBody
+                );
+
+                // Optionally, handle the response here if needed
+                console.log(`Item ${item.ID} posted:`, response.data);
             }
-        };
-    
-        // Loop through matchesData in batches
-        for (let i = 0; i < matchesData.length; i += batchSize) {
-            const batch = matchesData.slice(i, i + batchSize);
-            await sendBatch(batch); // Send the current batch
+
+            getMatches();
+            getTransactions(); // Call to update transactions after all items are processed
+
+            if (modalRef.current) {
+                modalRef.current.close();
+            }
+            setLoading(false); // End loading
+
+            toast.success("All Data Posted Successfully!");
+        } catch (error) {
+            console.error(
+                "Error:",
+                error.response ? error.response.data : error.message
+            );
+            setLoading(false);
         }
-    
-        getTransactions();
-        setLoading(false); // End loading
-    
-        // Log results
-        console.log("Batch Processing Results:", resultsLog);
-        toast.success("Data processed successfully!");
     };
-    
+
+    //     const handleSubmitSap = async () => {
+    //         console.log("matchesData", matchesData);
+    //         setLoading(true); // Start loading
+
+    //         const batchSize = 10; // Number of items per batch
+    //         const maxRetries = 3; // Max retries for failed requests
+    //         const resultsLog = []; // Array to log results
+
+    //         const sendBatch = async (batch) => {
+    //             let soapBody = `
+    //            <soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:urn="urn:sap-com:document:sap:soap:functions:mc-style">
+    //    <soap:Header/>
+    //             <soap:Body>
+    //                <urn:ZdataWarehousePosted>
+    //                   <LtZcol>`;
+
+    //             batch.forEach((item) => {
+    //                 soapBody += `
+    //                      <item>
+    //                         <Id>${item.ID}</Id>
+    //                         <Bukrs>${item.BUKRS}</Bukrs>
+    //                         <Recnnr>${item.RECNNR}</Recnnr>
+    //                         <Vbewa>${item.VBEWA}</Vbewa>
+    //                         <Belnr>${item.BELNR}</Belnr>
+    //                         <Amt>${item.AMT}</Amt>
+    //                         <Payd>${item.PAYD}</Payd>
+    //                      </item>`;
+    //             });
+
+    //             soapBody += `
+    //                   </LtZcol>
+    //                </urn:ZdataWarehousePosted>
+    //             </soap:Body>
+    //             </soap:Envelope>`;
+
+    //             console.log("Sending batch:", soapBody);
+
+    //             try {
+    //                 const response = await apiServiceSap.post(
+    //                     "post-data-sap",
+    //                     soapBody
+    //                 );
+    //                 console.log("Response for batch:", response.data);
+    //             } catch (error) {
+    //                 console.error(
+    //                     `Error on attempt ${attempt + 1}:`,
+    //                     error.response ? error.response.data : error.message
+    //                 );
+
+    //             }
+    //         };
+
+    //         // Loop through matchesData in batches
+    //         for (let i = 0; i < matchesData.length; i += batchSize) {
+    //             const batch = matchesData.slice(i, i + batchSize);
+    //             await sendBatch(batch); // Send the current batch
+    //         }
+
+    //         getTransactions();
+    //         if (modalRef.current) {
+    //             modalRef.current.close();
+    //         }
+    //         setLoading(false); // End loading
+
+    //         // Log results
+
+    //         console.log("Batch Processing Results:", resultsLog);
+    //         toast.success("Data Posted Successfully!");
+    //     };
+
     const handleBankChange = (e) => {
         setBankNames(e.target.value);
     };
@@ -214,12 +219,15 @@ const BankStatementCom = () => {
         if (files.length > 0 && modalRef.current) {
             modalRef.current.showModal();
         }
-        getTransactions();
         getMatches();
     }, [files]);
+    useEffect(() => {
+        getTransactions();
+    }, []);
     return (
         <>
             <div className="px-4">
+                <ToastContainer position="top-center" />
                 <div className="flex mb-4 gap-10">
                     <select
                         className="border-b-1 w-[121px] outline-none text-sm"
@@ -289,7 +297,7 @@ const BankStatementCom = () => {
                                 Invoice Link
                             </th>
                             <th className=" px-4 border border-gray-500">
-                                Receipt Link
+                                Collection Receipt Link
                             </th>
                         </tr>
                     </thead>
@@ -323,8 +331,19 @@ const BankStatementCom = () => {
                                     <td className=" px-4 border border-gray-500">
                                         {item.invoice_link}
                                     </td>
-                                    <td className=" px-4 border border-gray-500">
-                                        {item.receipt_link}
+                                    <td className="px-4 border border-gray-500">
+                                        {item.collection_receipt_link ? (
+                                            <a
+                                                href={
+                                                    item.collection_receipt_link
+                                                }
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="cursor-pointer underline"
+                                            >
+                                                View Document
+                                            </a>
+                                        ) : null}
                                     </td>
                                 </tr>
                             ))}

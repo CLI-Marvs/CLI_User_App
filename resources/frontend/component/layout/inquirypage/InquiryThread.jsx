@@ -34,6 +34,7 @@ const InquiryThread = () => {
     const [ticket, setTicket] = useState("");
     const [status, setStatus] = useState("");
     const [selectedProperty, setSelectedProperty] = useState("");
+    const [fileName, setFileName] = useState("");
     const [hasAttachments, setHasAttachments] = useState(false);
     const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
     const { propertyNamesList } = useStateContext();
@@ -198,10 +199,11 @@ const InquiryThread = () => {
                 formData.append("files[]", file);
             });
         }
+        setFileName(attachedFiles[0]?.name);
         const formattedMessage = chatMessage.replace(/\n/g, "<br>");
         formData.append("admin_email", user?.employee_email || "");
         formData.append("ticket_id", ticketId || "");
-        formData.append("details_message", chatMessage || "");
+        formData.append("details_message", formattedMessage || "");
         formData.append(
             "admin_name",
             `${user?.firstname || ""} ${user?.lastname || ""}`
@@ -784,7 +786,7 @@ const InquiryThread = () => {
                                                             </div>
 
                                                             <div className="flex items-center h-[19px] text-sm">
-                                                                Hi{" "}
+                                                                Hi Mr./Ms.{" "}
                                                                 {capitalizeWords(
                                                                     dataConcern.buyer_lastname
                                                                 )}
@@ -907,6 +909,7 @@ const InquiryThread = () => {
                                                     <AdminMessages
                                                         items={item}
                                                         key={index}
+                                                       
                                                     />
                                                 )
                                         )}

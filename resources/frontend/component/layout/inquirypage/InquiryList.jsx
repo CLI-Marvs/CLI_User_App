@@ -34,7 +34,7 @@ const InquiryList = () => {
         /*  setHasAttachments,
         hasAttachments */
     } = useStateContext();
- 
+    
     const [name, setName] = useState("");
     const [category, setCategory] = useState("");
     const [email, setEmail] = useState("");

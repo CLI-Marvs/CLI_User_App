@@ -4,6 +4,7 @@ import apiService from "../../servicesApi/apiService";
 import { AiFillInfoCircle } from "react-icons/ai";
 
 const ResolveModal = ({ modalRef, ticketId, dataRef }) => {
+ 
     const {getAllConcerns, user, getInquiryLogs, data} = useStateContext();
     const [remarks, setRemarks] = useState("");
     const maxCharacters = 500;

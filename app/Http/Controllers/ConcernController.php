@@ -226,6 +226,7 @@ class ConcernController extends Controller
 
     public function sendMessage(Request $request)
     {
+         
         try {
             $allFiles = [];
             $files = $request->file('files');
