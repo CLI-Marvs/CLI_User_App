@@ -34,6 +34,7 @@ const InquiryThread = () => {
     const [ticket, setTicket] = useState("");
     const [status, setStatus] = useState("");
     const [selectedProperty, setSelectedProperty] = useState("");
+    const [fileName, setFileName] = useState("");
     const [hasAttachments, setHasAttachments] = useState(false);
     const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
     const { propertyNamesList } = useStateContext();
@@ -48,6 +49,7 @@ const InquiryThread = () => {
         data,
         setMessages,
     } = useStateContext();
+    console.log("message",messages)
     const [chatMessage, setChatMessage] = useState("");
     const modalRef = useRef(null);
     const resolveModalRef = useRef(null);
@@ -198,6 +200,8 @@ const InquiryThread = () => {
                 formData.append("files[]", file);
             });
         }
+        setFileName(attachedFiles[0]?.name);
+
         const formattedMessage = chatMessage.replace(/\n/g, "<br>");
         formData.append("admin_email", user?.employee_email || "");
         formData.append("ticket_id", ticketId || "");
@@ -287,6 +291,7 @@ const InquiryThread = () => {
               .flat()
               .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
         : [];
+    console.log("combineThreadMessages", combineThreadMessages);
     // useEffect(() => {
     //     let adminMessageChannel;
     //     let newTicketId;
@@ -784,7 +789,7 @@ const InquiryThread = () => {
                                                             </div>
 
                                                             <div className="flex items-center h-[19px] text-sm">
-                                                                Hi{" "}
+                                                                Hi Mr./Ms.{" "}
                                                                 {capitalizeWords(
                                                                     dataConcern.buyer_lastname
                                                                 )}
@@ -907,6 +912,7 @@ const InquiryThread = () => {
                                                     <AdminMessages
                                                         items={item}
                                                         key={index}
+                                                       
                                                     />
                                                 )
                                         )}

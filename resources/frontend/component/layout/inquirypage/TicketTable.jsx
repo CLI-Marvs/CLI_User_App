@@ -201,8 +201,11 @@ const TicketTable = ({ concernData }) => {
                                         {row.ticket_id}
                                     </span>
                                 </p>
-                                <p className="flex-1 truncate overflow-hidden whitespace-nowrap text-sm text-gray-400">
-                                    {row.details_message}
+                                <p className="flex-1 truncate overflow-hidden text-sm text-gray-400">
+                                    {row.details_message.replace(
+                                        /<br\s*\/?>/gi,
+                                        " "
+                                    )}
                                 </p>
                             </td>
                             <td

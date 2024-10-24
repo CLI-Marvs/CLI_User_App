@@ -239,7 +239,7 @@ class ConcernController extends Controller
                     ];
                 }
             }
-
+            
             $fileLinks = $this->uploadToGCS($files);
             $adminMessage = $request->input('details_message', '');
             $message_id = $request->input('message_id', '');
