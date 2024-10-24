@@ -364,7 +364,7 @@ class SapController extends Controller
             \Log::info('Posting Records from SAP', [
                 $request->all()
             ]);
-            $idRef = intval($request->input('ID'));
+            $idRef = $request->input('ID');
             $attachment = $request->input('file');
             $fileLink = null;
             $transactionRef = BankTransaction::find($idRef);
@@ -383,7 +383,7 @@ class SapController extends Controller
             $fileName = uniqid() . '.' . $attachment['extension'];
             $filePath = 'concerns/' . $fileName;
 
-            $fileContent = base64_decode($attachment['URL']);
+            $fileContent = base64_decode($attachment);
             $tempFile = tempnam(sys_get_temp_dir(), 'upload');
             file_put_contents($tempFile, $fileContent);
 
