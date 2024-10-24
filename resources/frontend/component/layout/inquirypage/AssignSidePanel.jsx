@@ -26,6 +26,7 @@ const AssignSidePanel = ({ ticketId }) => {
     const [search, setSearch] = useState("");
     const [selectedAssignees, setSelectedAssignees] = useState([]);
     const [selectedOptions, setSelectedOptions] = useState([]);
+    const [tempSelection, setTempSelection] = useState([]);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
 
@@ -82,47 +83,47 @@ const AssignSidePanel = ({ ticketId }) => {
                 );
             } else {
                 setSelectedOptions((prevSelected) => [...prevSelected, option]);
+                setTempSelection((prev) => [...prev, option]);
             }
         }
     };
 
     const removeTag = (option) => {
- 
         if (
-            option.email ||
+            option.employee_email ||
             option.fromEvent ||
             option.name ||
             option.department
         ) {
             removeAssignee(
                 option.ticketId,
-                option.email,
+                option.employee_email,
                 option.name,
                 option.department
-            );
-            setSelectedAssignees((prevAssignees) =>
-                prevAssignees.filter(
-                    (assignee) => assignee.email !== option.email
-                )
             );
         } else {
             setSelectedOptions((prevSelected) =>
                 prevSelected.filter((item) => item !== option)
             );
-
-            setSelectedAssignees((prevAssignees) =>
-                prevAssignees.filter(
-                    (assignee) => assignee.email !== option.email
-                )
-            );
         }
     };
+    React.useEffect(() => {
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, []);
 
     const handleClickOutside = (event) => {
         if (
             dropdownRef.current &&
             !dropdownRef.current.contains(event.target)
         ) {
+            setSelectedOptions((prevSelected) =>
+                prevSelected.filter(
+                    (item) => item.employee_email !== tempSelection.email
+                )
+            );
             setIsDropdownOpen(false);
         }
     };
@@ -190,6 +191,7 @@ const AssignSidePanel = ({ ticketId }) => {
             }
 
             getInquiryLogs(ticketId);
+
             return newAssignees;
         } catch (error) {
             console.log("Error assigning:", error);
@@ -198,6 +200,7 @@ const AssignSidePanel = ({ ticketId }) => {
     };
 
     const removeAssignee = async (ticket, email, name, department) => {
+        console.log("ticket", ticket, email, name, department);
         try {
             const response = await apiService.post("remove-assignee", {
                 ticketId: ticket,
@@ -221,27 +224,17 @@ const AssignSidePanel = ({ ticketId }) => {
         }
     };
 
-    React.useEffect(() => {
-        document.addEventListener("mousedown", handleClickOutside);
-        return () => {
-            document.removeEventListener("mousedown", handleClickOutside);
-        };
-    }, []);
-
     useEffect(() => {
         setTicketId(ticketId);
         getAssigneesPersonnel();
     }, [ticketId, setTicketId]);
 
-    useEffect(
-        () => {
-            if (assigneesPersonnel[ticketId]) {
-                const assignees = assigneesPersonnel[ticketId]; /* || [] */
-                setSelectedOptions(assignees);
-            }
-        },
-        /* [assigneesPersonnel[ticketId], */ [assigneesPersonnel[ticketId]]
-    );
+    useEffect(() => {
+        if (assigneesPersonnel[ticketId]) {
+            const assignees = assigneesPersonnel[ticketId]; /* || [] */
+            setSelectedOptions(assignees);
+        }
+    }, [assigneesPersonnel[ticketId]]);
 
     const assigneeChannelFunc = (channel) => {
         channel.listen("RetrieveAssignees", (event) => {
@@ -554,7 +547,7 @@ const AssignSidePanel = ({ ticketId }) => {
                                 No assignee selected
                             </span>
                         )} */}
-                        {/* {selectedOptions.length > 0 ? (
+                        {selectedOptions.length > 0 ? (
                             <>
                                 {selectedOptions.map((assignee) => (
                                     <>
@@ -581,8 +574,8 @@ const AssignSidePanel = ({ ticketId }) => {
                             <span className="text-sm text-gray-500 pt-1">
                                 No assignee selected
                             </span>
-                        )} */}
-                        {selectedAssignees && selectedAssignees.length > 0 ? (
+                        )}
+                        {/* {selectedAssignees && selectedAssignees.length > 0 ? (
                             <div>
                                 {selectedAssignees.map((item, index) => (
                                     <span
@@ -605,7 +598,7 @@ const AssignSidePanel = ({ ticketId }) => {
                             <span className="text-sm text-gray-500 pt-1">
                                 No assignee selected
                             </span>
-                        )}
+                        )} */}
                     </div>
                 </div>
 
