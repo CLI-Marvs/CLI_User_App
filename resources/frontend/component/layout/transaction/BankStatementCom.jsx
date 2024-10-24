@@ -336,8 +336,9 @@ const BankStatementCom = () => {
                                             href={item.collection_receipt_link}
                                             target="_blank"
                                             rel="noopener noreferrer"
+                                            className="cursor-pointer underline"
                                         >
-                                            {item.collection_receipt_link}
+                                            View Document
                                         </a>
                                     </td>
                                 </tr>
