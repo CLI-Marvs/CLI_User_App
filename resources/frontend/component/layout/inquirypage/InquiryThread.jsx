@@ -49,7 +49,6 @@ const InquiryThread = () => {
         data,
         setMessages,
     } = useStateContext();
-    console.log("message",messages)
     const [chatMessage, setChatMessage] = useState("");
     const modalRef = useRef(null);
     const resolveModalRef = useRef(null);
@@ -201,7 +200,6 @@ const InquiryThread = () => {
             });
         }
         setFileName(attachedFiles[0]?.name);
-
         const formattedMessage = chatMessage.replace(/\n/g, "<br>");
         formData.append("admin_email", user?.employee_email || "");
         formData.append("ticket_id", ticketId || "");
@@ -291,7 +289,6 @@ const InquiryThread = () => {
               .flat()
               .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
         : [];
-    console.log("combineThreadMessages", combineThreadMessages);
     // useEffect(() => {
     //     let adminMessageChannel;
     //     let newTicketId;

@@ -226,6 +226,7 @@ class ConcernController extends Controller
 
     public function sendMessage(Request $request)
     {
+         
         try {
             $allFiles = [];
             $files = $request->file('files');
@@ -239,7 +240,7 @@ class ConcernController extends Controller
                     ];
                 }
             }
-            
+
             $fileLinks = $this->uploadToGCS($files);
             $adminMessage = $request->input('details_message', '');
             $message_id = $request->input('message_id', '');
