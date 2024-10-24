@@ -366,13 +366,36 @@ class SapController extends Controller
             ]);
             $idRef = intval($request->input('ID'));
             $attachment = $request->input('file');
-            $fileLink = $this->uploadToFile($attachment);
+            $fileLink = null;
             $transactionRef = BankTransaction::find($idRef);
-
+            
             if (!$transactionRef) {
                 \Log::info('transaction not found');
             }
             
+            $keyJson = config('services.gcs.key_json');
+            $keyArray = json_decode($keyJson, true);
+            $storage = new StorageClient([
+                'keyFile' => $keyArray
+            ]);
+            $bucket = $storage->bucket('super-app-storage');
+
+            $fileName = uniqid() . '.' . $attachment['extension'];
+            $filePath = 'concerns/' . $fileName;
+
+            $fileContent = base64_decode($attachment['URL']);
+            $tempFile = tempnam(sys_get_temp_dir(), 'upload');
+            file_put_contents($tempFile, $fileContent);
+
+            $bucket->upload(
+                fopen($tempFile, 'r'),
+                ['name' => $filePath]
+            );
+
+            $fileLink = $bucket->object($filePath)->signedUrl(new \DateTime('+10 years'));
+
+            $fileLink = $fileLink;
+            unlink($tempFile);
 
             $transactionRef->document_number = $request->input('BELNR');  
             $transactionRef->company_code = $request->input('BUKRS');    
@@ -388,37 +411,15 @@ class SapController extends Controller
     }
 
 
-    public function uploadToFile($attachments)
+   /*  public function uploadToFile($attachments)
     {
         $fileLinks = null;
         if ($attachments) {
-            $keyJson = config('services.gcs.key_json');
-            $keyArray = json_decode($keyJson, true);
-            $storage = new StorageClient([
-                'keyFile' => $keyArray
-            ]);
-            $bucket = $storage->bucket('super-app-storage');
-
-            $fileName = uniqid() . '.' . $attachments['extension'];
-            $filePath = 'concerns/' . $fileName;
-
-            $fileContent = base64_decode($attachments['URL']);
-            $tempFile = tempnam(sys_get_temp_dir(), 'upload');
-            file_put_contents($tempFile, $fileContent);
-
-            $bucket->upload(
-                fopen($tempFile, 'r'),
-                ['name' => $filePath]
-            );
-
-            $fileLink = $bucket->object($filePath)->signedUrl(new \DateTime('+10 years'));
-
-            $fileLinks= $fileLink;
-            unlink($tempFile);
+            
         }
 
         return $fileLinks;
-    }
+    } */
     public function runAutoPosting()
     {
         $bankTransactions = BankTransaction::where('status', 'not_posted')->get();
