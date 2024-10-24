@@ -38,13 +38,17 @@ const AdminMessages = ({ items }) => {
             <div className="w-full mt-[10px]">
                 <div className=" w-full h-auto gradient-background2 rounded-b-[10px] rounded-r-[10px] p-[20px] pl-[31px] text-sm">
                     <div>
-                      <p dangerouslySetInnerHTML={{ __html: items.details_message }} />
+                        <p
+                            dangerouslySetInnerHTML={{
+                                __html: items.details_message,
+                            }}
+                        />
                     </div>
                     {Array.isArray(attachmentData) &&
                         attachmentData.length > 0 &&
                         attachmentData.map((attachment, index) => {
                             return (
-                                <div className="mt-4" key={index}>
+                                <div className="mt-4 bg-red-900" key={index}>
                                     <Link
                                         className="flex items-center justify-start bg-customnavbar h-12 px-24 pl-4 text-black gap-2 rounded-lg"
                                         to={`/file-viewer/attachment/${items.id}`}
@@ -54,7 +58,7 @@ const AdminMessages = ({ items }) => {
                                                 "fileUrlPath",
                                                 JSON.stringify(attachment)
                                             ); // Store the data
-                                            
+
                                             // Manually navigate to the new page after setting localStorage
                                             window.open(
                                                 `/file-viewer/attachment/${items.id}`,
@@ -66,7 +70,8 @@ const AdminMessages = ({ items }) => {
                                             src={FolderFile}
                                             alt="View Attachment"
                                         />
-                                        View Attachment
+                                        View Attachment 
+                                       
                                     </Link>
                                 </div>
                             );

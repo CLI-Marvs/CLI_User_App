@@ -152,7 +152,8 @@ const InquiryFormModal = ({ modalRef }) => {
                 Object.keys(formData).forEach((key) => {
                     fileData.append(key, formData[key]);
                 });
-                fileData.append("message", message);
+                const formattedMessage = message.replace(/\n/g, "<br>");
+                fileData.append("message", formattedMessage);
                 fileData.append("admin_email", user?.employee_email);
                 fileData.append("admin_id", user?.id);
                 fileData.append("admin_profile_picture", user?.profile_picture);
@@ -306,10 +307,10 @@ const InquiryFormModal = ({ modalRef }) => {
                             <div
                                 className={`flex items-center border w-[430px] rounded-[5px] overflow-hidden ${
                                     isSubmitted && !formData.mname
-                                    ? resetSuccess
-                                        ? "border-custom-bluegreen"
-                                        : "border-red-500"
-                                    : "border-custom-bluegreen"
+                                        ? resetSuccess
+                                            ? "border-custom-bluegreen"
+                                            : "border-red-500"
+                                        : "border-custom-bluegreen"
                                 }`}
                             >
                                 <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex w-[259px] pl-3 py-1 tablet:w-[160px] mobile:w-[270px] mobile:text-xs">
@@ -323,10 +324,14 @@ const InquiryFormModal = ({ modalRef }) => {
                                     onChange={handleChange}
                                     placeholder=""
                                 />
-                                
                             </div>
                             <div className="flex items-center gap-2">
-                                <input type="checkbox" name="checkbox" className="accent-custom-lightgreen" value="checkbox"/>
+                                <input
+                                    type="checkbox"
+                                    name="checkbox"
+                                    className="accent-custom-lightgreen"
+                                    value="checkbox"
+                                />
                                 <p>N/A</p>
                             </div>
                         </div>
