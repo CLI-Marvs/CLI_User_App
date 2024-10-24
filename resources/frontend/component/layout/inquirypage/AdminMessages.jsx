@@ -44,7 +44,7 @@ const AdminMessages = ({ items }) => {
                         attachmentData.length > 0 &&
                         attachmentData.map((attachment, index) => {
                             return (
-                                <div className="mt-4" key={index}>
+                                <div className="mt-4 w-[219px]" key={index}>
                                     <Link
                                         className="flex items-center justify-start bg-customnavbar h-12 px-24 pl-4 text-black gap-2 rounded-lg"
                                         to={`/file-viewer/attachment/${items.id}`}

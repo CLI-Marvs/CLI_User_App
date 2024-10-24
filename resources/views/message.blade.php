@@ -128,10 +128,10 @@
 
     <p style="font-size: 16px;">Sincerely,</p>
     <p style="font-weight: bold;">{{ ucwords($admin_name) }}</p>
-    <p style="font-weight: bold;">CLI - Customer Relations Services</p>
+    <p style="font-weight: bold; margin-bottom: 10px;">CLI - Customer Relations Services</p>
 
     
-    <p>
-        <img src="/images/New_ES.png" alt="Company Logo" style="width: 200px;">
-    </p>
+    
+    <img src="https://i.imgur.com/MHj4vYz.png" title="source: imgur.com" />
+   
 </body>

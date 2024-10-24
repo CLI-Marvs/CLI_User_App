@@ -304,7 +304,7 @@ const InquiryFormModal = ({ modalRef }) => {
                         </div>
                         <div className="flex items-center gap-[4px]">
                             <div
-                                className={`flex items-center border w-[430px] rounded-[5px] overflow-hidden ${
+                                className={`flex relative items-center border w-[430px] rounded-[5px] overflow-hidden ${
                                     isSubmitted && !formData.mname
                                     ? resetSuccess
                                         ? "border-custom-bluegreen"
@@ -323,12 +323,13 @@ const InquiryFormModal = ({ modalRef }) => {
                                     onChange={handleChange}
                                     placeholder=""
                                 />
-                                
+                                <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3 gap-2 text-sm bg-custom-lightestgreen">
+                                    <input type="checkbox" name="checkbox" className="accent-custom-lightgreen" value="checkbox"/>
+                                    <p>N/A</p>
+                                </span>
+                            
                             </div>
-                            <div className="flex items-center gap-2">
-                                <input type="checkbox" name="checkbox" className="accent-custom-lightgreen" value="checkbox"/>
-                                <p>N/A</p>
-                            </div>
+                            
                         </div>
                         <div
                             className={`flex items-center border  rounded-[5px] overflow-hidden ${
@@ -550,7 +551,7 @@ const InquiryFormModal = ({ modalRef }) => {
                         <div className="flex justify-end">
                             {formData.user_type === "Others" && (
                                 <div
-                                    className={`flex items-center border rounded-[5px] w-[260px] overflow-hidden ${
+                                    className={`flex items-center border rounded-[5px] w-[277px] overflow-hidden ${
                                         isSubmitted && !formData.other_user_type
                                             ? resetSuccess
                                                 ? "border-custom-bluegreen"
