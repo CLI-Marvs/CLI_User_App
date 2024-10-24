@@ -5,7 +5,6 @@ import { data } from "autoprefixer";
 import { useStateContext } from "../../../context/contextprovider";
 
 const AddInfoModal = ({ modalRef, dataConcern }) => {
-    console.log("dataConcern", dataConcern);
     const predefinedUserTypes = ["Property Owner", "Buyer", "Broker","Seller"];
     const { getAllConcerns } = useStateContext();
     const [message, setMessage] = useState("");
@@ -21,7 +20,7 @@ const AddInfoModal = ({ modalRef, dataConcern }) => {
         buyer_lastname: dataConcern.buyer_lastname || "",
         user_type: predefinedUserTypes.includes(dataConcern.user_type)
             ? dataConcern.user_type
-            : "Others", // Set to "Others" for any non-standard user_type
+            : "Others", 
         other_user_type: !predefinedUserTypes.includes(dataConcern.user_type)
             ? dataConcern.user_type
             : "",
@@ -249,22 +248,6 @@ const AddInfoModal = ({ modalRef, dataConcern }) => {
                                 placeholder=""
                             />
                         </div>
-
-                        {/*  <div
-                            className={`flex items-center border border-[D6D6D6] rounded-[5px] overflow-hidden`}
-                        >
-                            <span className="text-custom-gray81 text-sm bg-[#EDEDED] flex pl-3 py-1 w-[300px]">
-                                I am a
-                            </span>
-                            <input
-                                name="user_type"
-                                type="text"
-                                onChange={handleChange}
-                                value={dataToUpdate.user_type || ""}
-                                className="w-full px-4 text-sm focus:outline-none mobile:text-xs no-spinner"
-                                placeholder=""
-                            />
-                        </div> */}
                         <div
                             className={`flex items-center border border-[D6D6D6] rounded-[5px] overflow-hidden`}
                         >
@@ -301,14 +284,6 @@ const AddInfoModal = ({ modalRef, dataConcern }) => {
                                         name="other_user_type"
                                         type="text"
                                         className="w-full px-4 text-sm focus:outline-none mobile:text-xs py-1"
-                                        // value={
-                                        //     dataConcern.user_type &&
-                                        //     !predefinedUserTypes.includes(
-                                        //         dataConcern.user_type
-                                        //     )
-                                        //         ? dataConcern.user_type
-                                        //         : ""
-                                        // }
                                         value={dataToUpdate.other_user_type}
                                         onChange={handleChange}
                                         placeholder=""
