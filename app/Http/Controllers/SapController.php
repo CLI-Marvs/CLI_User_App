@@ -364,8 +364,9 @@ class SapController extends Controller
             \Log::info('Posting Records from SAP', [
                 $request->all()
             ]);
+            
             $idRef = $request->input('ID');
-            $attachment = $request->input('file');
+            $attachment = $request->input('file');  // base64-encoded file
             $fileLink = null;
             $transactionRef = BankTransaction::find($idRef);
             
@@ -373,41 +374,50 @@ class SapController extends Controller
                 \Log::info('transaction not found');
             }
             
+            // Google Cloud Storage setup
             $keyJson = config('services.gcs.key_json');
             $keyArray = json_decode($keyJson, true);
             $storage = new StorageClient([
                 'keyFile' => $keyArray
             ]);
             $bucket = $storage->bucket('super-app-storage');
-
-            $fileName = uniqid() . '.' . $attachment['extension'];
+        
+            // Create a unique file name with .pdf extension
+            $fileName = uniqid() . '.pdf';
             $filePath = 'concerns/' . $fileName;
-
+        
+            // Decode the base64-encoded file content
             $fileContent = base64_decode($attachment);
+        
+            // Temporarily save the decoded file locally
             $tempFile = tempnam(sys_get_temp_dir(), 'upload');
             file_put_contents($tempFile, $fileContent);
-
+        
+            // Upload to the bucket
             $bucket->upload(
                 fopen($tempFile, 'r'),
                 ['name' => $filePath]
             );
-
+        
+            // Get a signed URL for the uploaded file
             $fileLink = $bucket->object($filePath)->signedUrl(new \DateTime('+10 years'));
-
-            $fileLink = $fileLink;
+        
+            // Clean up temporary file
             unlink($tempFile);
-
+        
+            // Update the database record
             $transactionRef->document_number = $request->input('BELNR');  
             $transactionRef->company_code = $request->input('BUKRS');    
             $transactionRef->collection_receipt_link = $fileLink;
             $transactionRef->status = "Posted";
             $transactionRef->save();
-
+        
             return response()->json(['message' => 'Records updated successfully']);
-
+        
         } catch (\Throwable $e) {
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
-        }        
+        }
+           
     }
 
 
