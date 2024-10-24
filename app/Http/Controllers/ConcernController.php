@@ -430,7 +430,7 @@ class ConcernController extends Controller
                 = $validatedData['fname'] . ' ' . $request->mname . ' ' .  $validatedData['lname'];
             $concerns->buyer_firstname = $validatedData['fname'];
             $concerns->buyer_middlename =
-            $request->mname;
+                $request->mname;
             $concerns->buyer_lastname = $validatedData['lname'];
             $concerns->mobile_number = $request->mobile_number;
             $concerns->contract_number = $request->contract_number;
@@ -469,6 +469,7 @@ class ConcernController extends Controller
 
     public function updateInfo(Request $request)
     {
+        // dd($request);
         try {
             $dataId = $request->dataId;
             $concern = Concerns::where('id', $dataId)->first();
@@ -483,6 +484,10 @@ class ConcernController extends Controller
             $concern->buyer_lastname
                 = $request->buyer_lastname;
             $concern->user_type = $request->user_type;
+
+            if ($request->user_type === "Others") {
+                $concern->user_type = $request->other_user_type;
+            }
             $concern->buyer_email = $request->buyer_email;
             $concern->property = $request->property;
             $concern->admin_remarks = $request->remarks;
