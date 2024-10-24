@@ -16,17 +16,18 @@ const UserMessages = ({ items }) => {
     const formattedTime = moment(items.created_at).format("hh:mm A");
 
     const dataConcern = data?.find((item) => item.ticket_id === ticketId) || {};
-
+    console.log("items in USERMESSAGE", items);
     const capitalizeWords = (name) => {
-       if(name) {
-        return name
-        .split(" ")
-        .map(
-            (word) =>
-                word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-        )
-        .join(" ");
-       }
+        if (name) {
+            return name
+                .split(" ")
+                .map(
+                    (word) =>
+                        word.charAt(0).toUpperCase() +
+                        word.slice(1).toLowerCase()
+                )
+                .join(" ");
+        }
     };
     return (
         <div className="w-full">
@@ -48,6 +49,7 @@ const UserMessages = ({ items }) => {
             <div className="w-full mt-[10px]">
                 <div className="w-full h-auto gradient-background1 rounded-b-[10px] rounded-r-[10px]  p-[20px] pl-[31px] text-xs text-white">
                     <div>
+
                         <p
                             dangerouslySetInnerHTML={{
                                 __html: items.details_message,
@@ -56,33 +58,43 @@ const UserMessages = ({ items }) => {
                     </div>
                     {Array.isArray(attachmentData) &&
                         attachmentData.length > 0 &&
-                        attachmentData.map((attachment, index) => (
-                            <div className="mt-4 w-[219px]" key={index}>
-                                <Link
-                                    to={`/file-viewer/attachment/${items.id}`}
-                                    onClick={(e) => {
-                                        e.preventDefault(); // Prevents the immediate navigation
-                                        console.log("attachment", attachment);
-                                        localStorage.setItem(
-                                            "fileUrlPath",
-                                            JSON.stringify(attachment)
-                                        ); // Store the data
-                                        // Manually navigate to the new page after setting localStorage
-                                        window.open(
-                                            `/file-viewer/attachment/${items.id}`,
-                                            "_blank"
-                                        );
-                                    }}
-                                    className="flex items-center justify-start bg-customnavbar h-12 pl-4 text-black gap-2 rounded-[5px]"
-                                >
-                                    <img
-                                        src={FolderFile}
-                                        alt="View Attachment"
-                                    />
-                                    View Attachment
-                                </Link>
-                            </div>
-                        ))}
+                        attachmentData.map((attachment, index) => {
+                            console.log("123", attachment.original_file_name);
+                            return (
+                                <div className="mt-4 w-[400px] bg-red-900" key={index}>
+                                    <Link
+                                        to={`/file-viewer/attachment/${items.id}`}
+                                        onClick={(e) => {
+                                            e.preventDefault(); // Prevents the immediate navigation
+                                            console.log(
+                                                "attachment",
+                                                attachment
+                                            );
+                                            localStorage.setItem(
+                                                "fileUrlPath",
+                                                JSON.stringify(attachment.url)
+                                            ); // Store the data
+                                            // Manually navigate to the new page after setting localStorage
+                                            window.open(
+                                                `/file-viewer/attachment/${items.id}`,
+                                                "_blank"
+                                            );
+                                        }}
+                                        className="flex items-center justify-start bg-customnavbar h-12 pl-4 text-black gap-2 rounded-[5px]"
+                                    >
+                                        <img
+                                            src={FolderFile}
+                                            alt="View Attachment"
+                                        />
+                                        View Attachment
+                                        <span>{attachment.original_name}</span>
+                                    </Link>
+                                    {attachment.original_file_name}
+                                </div>
+                            );
+                        }
+                         
+                        )}
                 </div>
             </div>
         </div>

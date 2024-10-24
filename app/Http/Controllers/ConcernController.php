@@ -226,18 +226,28 @@ class ConcernController extends Controller
 
     public function sendMessage(Request $request)
     {
-         
+
         try {
             $allFiles = [];
             $files = $request->file('files');
+            $all_file_names = [];
+
             if ($files) {
                 foreach ($files as $file) {
                     $fileName = $file->getClientOriginalName();
+                    $originalFileName = $file->getClientOriginalName();
                     $filePath = $file->storeAs('temp', $fileName);
+                    // Store the filename for JSON output
+                    $all_file_names[] = $fileName;
                     $allFiles[] = [
                         'name' => $fileName,
                         'path' => storage_path('app/' . $filePath),
                     ];
+                    // $fileLinks[] = [
+                    //     'url' => $fileLink,
+                    //     'original_file_name' => $originalFileName
+                    // ];
+
                 }
             }
 
@@ -262,6 +272,7 @@ class ConcernController extends Controller
             $messages->admin_profile_picture = $admin_profile_picture;
             $messages->details_message = $adminMessage;
             $messages->admin_name = $admin_name;
+            $messages->file_names = json_encode($all_file_names);
             $messages->save();
 
             $this->inquiryAdminLogs($request);
@@ -386,8 +397,18 @@ class ConcernController extends Controller
                 'mname.required' => 'The middle name field is required.',
             ]);
             $user = $request->user();
+            $fileLinks = [];
 
             $files = $request->file('files');
+            foreach ($files as $file) {
+                $originalFileName = $file->getClientOriginalName();
+
+                // $fileLinks[] = [
+                //     'url' => $fileLink,
+                //     'original_file_name' => $originalFileName
+                // ];
+            }
+
             $lastConcern = Concerns::latest()->first();
             $nextId = $lastConcern ? $lastConcern->id + 1 : 1;
             $formattedId = str_pad($nextId, 8, '0', STR_PAD_LEFT);
@@ -423,6 +444,10 @@ class ConcernController extends Controller
             $this->concernsCreatedBy($user, $concerns->id);
 
             $fileLinks = $this->uploadToGCS($files);
+            $fileLinks[] = [
+                'url' => $fileLinks,
+                'original_file_name' => $originalFileName
+            ];
             $attachment = !empty($fileLinks) ? json_encode($fileLinks) : null;
             $messages = new Messages();
             $messages->buyer_email = $request->buyer_email;

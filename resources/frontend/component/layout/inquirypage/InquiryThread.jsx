@@ -75,6 +75,7 @@ const InquiryThread = () => {
     }, []);
     const dataConcern =
         data?.find((items) => items.ticket_id === ticketId) || {};
+   
     const toggleFilterBox = () => {
         setIsFilterVisible((prev) => !prev);
     };
@@ -199,7 +200,7 @@ const InquiryThread = () => {
                 formData.append("files[]", file);
             });
         }
-        setFileName(attachedFiles[0]?.name);
+     
         const formattedMessage = chatMessage.replace(/\n/g, "<br>");
         formData.append("admin_email", user?.employee_email || "");
         formData.append("ticket_id", ticketId || "");

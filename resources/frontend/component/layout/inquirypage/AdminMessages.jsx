@@ -7,8 +7,12 @@ import moment from "moment";
 import { useNavigate, Link } from "react-router-dom";
 const AdminMessages = ({ items }) => {
     //State
+  
+    console.log("item", items); 
+    console.log('12')
     const { user } = useStateContext();
     const attachmentData = JSON.parse(items.attachment || "[]");
+    console.log("attachmentData", iteattachmentDatams); 
 
     const navigate = useNavigate();
     const dynamicName =
@@ -59,7 +63,7 @@ const AdminMessages = ({ items }) => {
                                                 JSON.stringify(attachment)
                                             ); // Store the data
 
-                                            // Manually navigate to the new page after setting localStorage
+                                            //Manually navigate to the new page after setting localStorage
                                             window.open(
                                                 `/file-viewer/attachment/${items.id}`,
                                                 "_blank"
@@ -70,12 +74,12 @@ const AdminMessages = ({ items }) => {
                                             src={FolderFile}
                                             alt="View Attachment"
                                         />
-                                        View Attachment 
-                                       
+                                        View Attachment
                                     </Link>
                                 </div>
                             );
                         })}
+                  
                 </div>
             </div>
         </div>
