@@ -33,7 +33,7 @@ class SapController extends Controller
     {
         $client = new Client();
         try {
-            $response = $client->post('https://SAP-DEV.cebulandmasters.com:44304/sap/bc/srt/rfc/sap/zcollwithcr/200/zcollwithcr/zcollwithcr', [
+            $response = $client->post('https://SAP-DEV.cebulandmasters.com:44304/sap/bc/srt/rfc/sap/zcolwithcr1/200/zcolwithcr1/zcolwithcr1', [
                 'headers' => [
                     'Authorization' => 'Basic ' . base64_encode('KBELMONTE:Tomorrowbytogether2019!'),
                     'Content-Type' => 'application/soap+xml',
@@ -49,15 +49,15 @@ class SapController extends Controller
             ]);
             return response()->json(['error' => 'SAP Server Error'], 500);
         }
-        
     }
 
-    public function updateTransctionRecordData(Request $request) {
+    public function updateTransctionRecordData(Request $request)
+    {
         try {
             \Log::info('Update Transaction Record Data', [$request->all()]);
             $dataMatches = $request->input('dataMatches');
 
-            foreach($dataMatches as $match) {
+            foreach ($dataMatches as $match) {
                 $dataRef = BankTransaction::find('id', $match['id']);
                 $dataRef->update($match);
 
@@ -65,11 +65,10 @@ class SapController extends Controller
             }
         } catch (\Throwable $e) {
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
-          
         }
     }
-   
-     
+
+
     public function retrieveInvoicesFromSap(Request $request)
     {
         try {
@@ -78,10 +77,10 @@ class SapController extends Controller
             ]);
 
             $existingInvoice = Invoices::where('document_number', $request->input('D_BELNR'))
-                                       ->where('flow_type', $request->input('D_VBEWA'))
-                                       ->first();
-           
-            if(!$existingInvoice) {
+                ->where('flow_type', $request->input('D_VBEWA'))
+                ->first();
+
+            if (!$existingInvoice) {
                 $invoice = new Invoices();
                 $invoice->contract_number = $request->input('D_RECNNR');
                 $invoice->document_number = $request->input('D_BELNR');
@@ -99,15 +98,14 @@ class SapController extends Controller
                 /*  $invoice->invoice_status = $request->input('invoice_status'); 
                 $invoice->status = $request->input('status');
                 $invoice->posting_response = $request->input('posting_response'); */
-    
+
                 $invoice->save();
-                
+
                 return response()->json([
                     'message' => 'Invoice posted successfully',
                     'invoice' => $invoice
                 ]);
             }
-           
         } catch (\Throwable $e) {
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
         }
@@ -119,7 +117,7 @@ class SapController extends Controller
         $query = Invoices::query();
         $dueDate = $request->query('dueDate', null);
         $query->select('contract_number', 'customer_name', 'invoice_amount', 'description', 'due_date');
-       /*  if ($dueDate) {
+        /*  if ($dueDate) {
             $this->filterDataInvoices($query, $dueDate);
         } */
 
@@ -130,7 +128,7 @@ class SapController extends Controller
     private function filterDataInvoices($query, $dueDate)
     {
         $startDate = Carbon::parse($dueDate)->setTimezone('Asia/Manila');
-            $query->whereDate('due_date', '=', $startDate);
+        $query->whereDate('due_date', '=', $startDate);
     }
 
     public function uploadNotepad(Request $request)
@@ -357,79 +355,66 @@ class SapController extends Controller
         } */
     }
 
-   
+
     public function postRecordsFromSap(Request $request)
     {
         try {
             \Log::info('Posting Records from SAP', [
                 $request->all()
             ]);
-            
+
             $idRef = $request->input('ID');
-            $attachment = $request->input('file');  // base64-encoded file
-            $fileLink = null;
+            $attachment = $request->input('file'); 
+            $fileLink = $this->uploadToFile($attachment);
             $transactionRef = BankTransaction::find($idRef);
-            
+
             if (!$transactionRef) {
                 \Log::info('transaction not found');
             }
-            
-            // Google Cloud Storage setup
+
+            $transactionRef->document_number = $request->input('BELNR');
+            $transactionRef->company_code = $request->input('BUKRS');
+            $transactionRef->collection_receipt_link = $fileLink;
+            $transactionRef->status = "Posted";
+            $transactionRef->save();
+
+            return response()->json(['message' => 'Records updated successfully']);
+        } catch (\Throwable $e) {
+            return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
+        }
+    }
+
+
+    public function uploadToFile($attachment)
+    {
+        $fileLink = null;
+        if ($attachment) {
             $keyJson = config('services.gcs.key_json');
             $keyArray = json_decode($keyJson, true);
             $storage = new StorageClient([
                 'keyFile' => $keyArray
             ]);
             $bucket = $storage->bucket('super-app-storage');
-        
-            // Create a unique file name with .pdf extension
+
             $fileName = uniqid() . '.pdf';
             $filePath = 'concerns/' . $fileName;
-        
-            // Decode the base64-encoded file content
+
             $fileContent = base64_decode($attachment);
-        
-            // Temporarily save the decoded file locally
+
             $tempFile = tempnam(sys_get_temp_dir(), 'upload');
             file_put_contents($tempFile, $fileContent);
-        
-            // Upload to the bucket
+
             $bucket->upload(
                 fopen($tempFile, 'r'),
                 ['name' => $filePath]
             );
-        
-            // Get a signed URL for the uploaded file
+
             $fileLink = $bucket->object($filePath)->signedUrl(new \DateTime('+10 years'));
-        
-            // Clean up temporary file
+
             unlink($tempFile);
-        
-            // Update the database record
-            $transactionRef->document_number = $request->input('BELNR');  
-            $transactionRef->company_code = $request->input('BUKRS');    
-            $transactionRef->collection_receipt_link = $fileLink;
-            $transactionRef->status = "Posted";
-            $transactionRef->save();
-        
-            return response()->json(['message' => 'Records updated successfully']);
-        
-        } catch (\Throwable $e) {
-            return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
         }
-           
+        return $fileLink;
     }
-
-
-   /*  public function uploadToFile($attachments)
-    {
-        $fileLinks = null;
-        if ($attachments) {
-            
-        }
-
-        return $fileLinks;
-    } */
     public function runAutoPosting()
     {
         $bankTransactions = BankTransaction::where('status', 'not_posted')->get();
@@ -457,6 +442,4 @@ class SapController extends Controller
 
         return response()->json($matchingInvoices);
     }
-
-    
 }
