@@ -57,14 +57,24 @@ Route::post('/add-property-sap', [PropertyMasterController::class, 'storePropert
 Route::post('/buyer-reply', [ConcernController::class, 'fromAppSript']);
 
 //* For Sap 
-Route::post('/proxy-sap', [SapController::class, 'urlSap']);
+
+//*Post date on sap
+Route::post('/proxy-sap', [SapController::class, 'postDateToSap']);
+
+//*Retrieve invoice from sap upon trigger the date
+Route::post('/posting-invoices', [SapController::class, 'retrieveInvoicesFromSap']);
+
+//*Post document number and other fields to sap
 Route::post('/post-data-sap', [SapController::class, 'postFromAppToSap']);
 
-Route::post('/posting-invoices', [SapController::class, 'postInvoices']);
+//*Retreive document number from SAP
+Route::post('/data-posted', [SapController::class, 'postRecordsFromSap']);
+
+
+//*Display in frontend 
 Route::get('/get-invoices', [SapController::class, 'getInvoices']);
 Route::get('/get-transactions', [SapController::class, 'retrieveTransactions']);
 Route::get('/get-matches', [SapController::class, 'runAutoPosting']);
-Route::post('/data-posted', [SapController::class, 'postRecordsFromSap']);
 
 
 Route::middleware('auth:sanctum')->group(function () {

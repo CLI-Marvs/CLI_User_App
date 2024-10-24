@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\DB;
 
 class SapController extends Controller
 {
-    public function urlSap(Request $request)
+    public function postDateToSap(Request $request)
     {
         $client = new Client();
         $response = $client->post('https://SAP-DEV.cebulandmasters.com:44304/sap/bc/srt/rfc/sap/zsendinvoice/200/zsendinvoice/zsendinvoice', [
@@ -67,8 +67,8 @@ class SapController extends Controller
         }
     }
    
-
-    public function postInvoices(Request $request)
+     
+    public function retrieveInvoicesFromSap(Request $request)
     {
         try {
             \Log::info('Invoice posting request', [
@@ -362,7 +362,8 @@ class SapController extends Controller
             $idRef = $request->input('ID');
             $transactionRef = BankTransaction::find($idRef);
             $transactionRef->document_number = $request->input('BELNR');  
-            $transactionRef->company_code =   $request->input('BUKRS');    
+            $transactionRef->company_code = $request->input('BUKRS');    
+            $transactionRef->status = "Posted";
             $transactionRef->save();
 
             return response()->json(['message' => 'Records updated successfully']);
