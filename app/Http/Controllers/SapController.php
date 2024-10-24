@@ -368,6 +368,12 @@ class SapController extends Controller
             $attachment = $request->input('file');
             $fileLink = $this->uploadToFile($attachment);
             $transactionRef = BankTransaction::find($idRef);
+
+            if (!$transactionRef) {
+                return response()->json(['message' => 'Transaction not found.'], 404);
+            }
+            
+
             $transactionRef->document_number = $request->input('BELNR');  
             $transactionRef->company_code = $request->input('BUKRS');    
             $transactionRef->collection_receipt_link = $fileLink;
