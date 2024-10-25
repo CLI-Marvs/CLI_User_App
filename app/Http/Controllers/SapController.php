@@ -121,7 +121,7 @@ class SapController extends Controller
             $this->filterDataInvoices($query, $dueDate);
         } */
 
-        $data = $query->orderBy('created_at', 'desc')->paginate(30);
+        $data = $query->orderBy('contract_number', 'asc')->paginate(30);
         return response()->json($data);
     }
 
@@ -283,6 +283,7 @@ class SapController extends Controller
                     }
                 }
 
+                \Log::info('Filtered Transactions: ' . json_encode($filteredTransactions));
                 foreach ($filteredTransactions as $transaction) {
                     BankTransaction::create([
                         'reference_number' => $transaction['reference_number'],
@@ -326,7 +327,7 @@ class SapController extends Controller
                 $this->filterDataTransaction($query, $searchParams);
             }
 
-            $data = $dataJoin->paginate(30);
+            $data = $dataJoin->OrderBy('reference_number', 'asc')->paginate(30);
             return response()->json($data);
         } catch (\Exception $e) {
             return response()->json(['error' => 'An error occurred', 'message' => $e->getMessage()], 500);
