@@ -415,7 +415,7 @@ class ConcernController extends Controller
                 foreach ($files as $index => $file) {
                     $fileName  = $file->getClientOriginalName();
                     $filesData[] = [
-                        'url' => $fileLinks[$index], 
+                        'url' => $fileLinks[$index],
                         'original_file_name' => $fileName // Store the original file name
                     ];
                 }
@@ -1805,6 +1805,10 @@ class ConcernController extends Controller
             $bucket = $storage->bucket('super-app-storage');
 
             foreach ($attachments as $fileData) {
+
+
+                $originalFileName =
+                    $fileData->getClientOriginalName();
                 $fileName = uniqid() . '.' . $fileData['extension'];
                 $filePath = 'concerns/' . $fileName;
 
@@ -1819,7 +1823,12 @@ class ConcernController extends Controller
 
                 $fileLink = $bucket->object($filePath)->signedUrl(new \DateTime('+10 years'));
 
-                $fileLinks[] = $fileLink;
+                // $fileLinks[] = $fileLink;
+                $fileLinks[] = [
+                    'url' => $fileLink,
+                    'original_file_name' => $originalFileName
+                ];
+
                 unlink($tempFile);
             }
         }

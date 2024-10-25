@@ -251,7 +251,7 @@ const AddInfoModal = ({ modalRef, dataConcern }) => {
                         <div
                             className={`flex items-center border border-[D6D6D6] rounded-[5px] overflow-hidden`}
                         >
-                            <span className="text-custom-gray81 text-sm bg-[#EDEDED] flex items-center w-[300px] tablet:w-[175px] mobile:w-[270px] mobile:text-xs -mr-3 pl-3 py-1">
+                            <span className="text-custom-gray81 text-sm bg-[#EDEDED] flex items-center w-[308px] tablet:w-[175px] mobile:w-[270px] mobile:text-xs -mr-3 pl-3 py-1">
                                 I am a
                             </span>
                             <div className="relative w-full">
@@ -278,7 +278,7 @@ const AddInfoModal = ({ modalRef, dataConcern }) => {
                         <div className="flex justify-end">
                             {dataToUpdate.user_type === "Others" && (
                                 <div
-                                    className={`flex items-center border rounded-[5px] w-[290px] overflow-hidden`}
+                                    className={`flex items-center border rounded-[5px] w-[305px] overflow-hidden`}
                                 >
                                     <input
                                         name="other_user_type"
@@ -311,7 +311,7 @@ const AddInfoModal = ({ modalRef, dataConcern }) => {
                         <div
                             className={`flex items-center border border-[D6D6D6] rounded-[5px] overflow-hidden`}
                         >
-                            <span className="text-custom-gray81 text-sm bg-[#EDEDED] flex items-center w-[300px] tablet:w-[175px] mobile:w-[270px] mobile:text-xs -mr-3 pl-3 py-1">
+                            <span className="text-custom-gray81 text-sm bg-[#EDEDED] flex items-center w-[308px] tablet:w-[175px] mobile:w-[270px] mobile:text-xs -mr-3 pl-3 py-1">
                                 Property
                             </span>
                             <div className="relative w-full">
