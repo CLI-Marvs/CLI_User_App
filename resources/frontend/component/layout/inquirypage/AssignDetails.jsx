@@ -370,12 +370,6 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                             className="w-full outline-none"
                             onChange={(e) => setMessage(e.target.value)}
                             value={message}
-                            onKeyDown={(e) => {
-                                if (e.key === "Enter") {
-                                    e.preventDefault(); // Prevent default behavior (like submitting a form)
-                                    handleSendMessage(); // Call the send message function
-                                }
-                            }}
                         />
                         <button
                             className={`w-[76px] h-[28px] rounded-[10px] text-xs text-white 
