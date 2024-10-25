@@ -71,9 +71,6 @@ const Sidebar = () => {
         break;
     }
 
-
-
-
   }, [location.pathname]);
 
   return (
@@ -166,7 +163,7 @@ const Sidebar = () => {
               </div>
             )}
 
-          <Link to="/transactionmanagement/invoices">
+          {/* <Link to="/transactionmanagement/invoices">
             <ListItem
               className={`h-[35px] w-[210px] text-sm pl-[12px] transition-all duration-300 ease-in-out 
             ${activeItemTransaction === "invoices" ||
@@ -229,7 +226,7 @@ const Sidebar = () => {
                   </ListItem>
                 </Link>
               </div>
-            )}
+            )} */}
 
           <div className="mt-3 mb-1 px-4">
             <p className="text-[14px] font-bold bg-gradient-to-r from-custom-bluegreen via-custom-lightgreen to-custom-solidgreen bg-clip-text text-transparent">
@@ -240,7 +237,7 @@ const Sidebar = () => {
             <p>Property & Pricing</p>
             <p>Sales Management</p>
             <p>Broker Management</p>
-            {/*   <p className='leading-none'>Transaction <br />Management</p> */}
+              <p className='leading-none'>Transaction <br />Management</p>
             <p className="leading-none">
               Document
               <br /> Management
