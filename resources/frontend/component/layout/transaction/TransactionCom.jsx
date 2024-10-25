@@ -172,11 +172,12 @@ const TransactionCom = () => {
                             <th className=" px-4 border border-gray-500">
                                 Invoice Description
                             </th>
-                            <th className=" px-4 border border-gray-500">
-                                Invoice Link
-                            </th>
+
                             <th className=" px-4 border border-gray-500">
                                 Invoice Due Date
+                            </th>
+                            <th className=" px-4 border border-gray-500">
+                                Invoice Link
                             </th>
                         </tr>
                     </thead>
