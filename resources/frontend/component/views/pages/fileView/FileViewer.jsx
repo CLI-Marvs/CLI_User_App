@@ -107,7 +107,7 @@ const FileViewer = () => {
         setImageDimensions({ width, height });
     };
     return (
-        <div onContextMenu={handleContextMenu}>
+        <div onContextMenu={handleContextMenu} className="bg-black">
             {fileExtension === "jpg" ||
             fileExtension === "png" ||
             fileExtension === "jpeg" ? (

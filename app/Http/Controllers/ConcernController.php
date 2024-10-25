@@ -231,18 +231,28 @@ class ConcernController extends Controller
             $allFiles = [];
             $files = $request->file('files');
             $all_file_names = [];
+            $filesData = [];
 
             if ($files) {
-                foreach ($files as $file) {
-                    $fileName = $file->getClientOriginalName();
-                    $originalFileName = $file->getClientOriginalName();
+                $fileLinks = $this->uploadToGCS($files);
+
+                foreach ($files as $index => $file) {
+                    $fileName  = $file->getClientOriginalName();
+
+
                     $filePath = $file->storeAs('temp', $fileName);
                     // Store the filename for JSON output
-                    $all_file_names[] = $fileName;
+
                     $allFiles[] = [
                         'name' => $fileName,
                         'path' => storage_path('app/' . $filePath),
                     ];
+                    // Create an associative array for each file
+                    $filesData[] = [
+                        'url' => $fileLinks[$index], // Use the corresponding URL from the GCS upload
+                        'original_file_name' => $fileName // Store the original file name
+                    ];
+
                     // $fileLinks[] = [
                     //     'url' => $fileLink,
                     //     'original_file_name' => $originalFileName
@@ -251,7 +261,7 @@ class ConcernController extends Controller
                 }
             }
 
-            $fileLinks = $this->uploadToGCS($files);
+
             $adminMessage = $request->input('details_message', '');
             $message_id = $request->input('message_id', '');
             $admin_email = $request->input('admin_email', '');
@@ -263,7 +273,7 @@ class ConcernController extends Controller
             $admin_profile_picture = $request->input('admin_profile_picture', '');
 
 
-            $attachment = !empty($fileLinks) ? json_encode($fileLinks) : null;
+            $attachment = !empty($filesData) ? json_encode($filesData) : null;
             $messages = new Messages();
             $messages->admin_id = $admin_id;
             $messages->admin_email = $admin_email;
@@ -378,14 +388,15 @@ class ConcernController extends Controller
     //*For Cloud Storage
     public function addConcernPublic(Request $request)
     {
+
         try {
             $validatedData = $request->validate([
                 'fname' =>
                 ['required', 'regex:/^[\pL\s\-\'\.]+$/u', 'max:255'],
                 'lname' =>
-                // ['required', 'regex:/^[\pL\s\-\'\.]+$/u', 'max:255'],
-                // 'mname' =>
                 ['required', 'regex:/^[\pL\s\-\'\.]+$/u', 'max:255'],
+                'mname'
+                => ['regex:/^[\pL\s\-\'\.]+$/u', 'max:255'],
                 'details_concern' => 'required|string',
                 'message' => 'required|string|max:500',
             ], [
@@ -393,22 +404,22 @@ class ConcernController extends Controller
                 'fname.required' => 'The first name field is required.',
                 'lname.regex' => 'The last name field format is invalid.',
                 'lname.required' => 'The last name field is required.',
-                // 'mname.regex' => 'The middle name field format is invalid.',
-                // 'mname.required' => 'The middle name field is required.',
+                'mname.regex' => 'The middle name field format is invalid.',
+
             ]);
             $user = $request->user();
-            $fileLinks = [];
-
+            $filesData = [];
             $files = $request->file('files');
-            // foreach ($files as $file) {
-            //     $originalFileName = $file->getClientOriginalName();
-
-            //     // $fileLinks[] = [
-            //     //     'url' => $fileLink,
-            //     //     'original_file_name' => $originalFileName
-            //     // ];
-            // }
-
+            if ($files) {
+                $fileLinks = $this->uploadToGCS($files);
+                foreach ($files as $index => $file) {
+                    $fileName  = $file->getClientOriginalName();
+                    $filesData[] = [
+                        'url' => $fileLinks[$index], 
+                        'original_file_name' => $fileName // Store the original file name
+                    ];
+                }
+            }
             $lastConcern = Concerns::latest()->first();
             $nextId = $lastConcern ? $lastConcern->id + 1 : 1;
             $formattedId = str_pad($nextId, 8, '0', STR_PAD_LEFT);
@@ -430,7 +441,7 @@ class ConcernController extends Controller
                 = $validatedData['fname'] . ' ' . $request->mname . ' ' .  $validatedData['lname'];
             $concerns->buyer_firstname = $validatedData['fname'];
             $concerns->buyer_middlename =
-            $request->mname;
+                $request->mname;
             $concerns->buyer_lastname = $validatedData['lname'];
             $concerns->mobile_number = $request->mobile_number;
             $concerns->contract_number = $request->contract_number;
@@ -442,12 +453,8 @@ class ConcernController extends Controller
             $this->inquiryReceivedLogs($request, $ticketId);
             $this->concernsCreatedBy($user, $concerns->id);
 
-            $fileLinks = $this->uploadToGCS($files);
-            // $fileLinks[] = [
-            //     'url' => $fileLinks,
-            //     'original_file_name' => $originalFileName
-            // ];
-            $attachment = !empty($fileLinks) ? json_encode($fileLinks) : null;
+
+            $attachment = !empty($filesData) ? json_encode($filesData) : null;
             $messages = new Messages();
             $messages->buyer_email = $request->buyer_email;
             /* $messages->admin_id = $request->admin_id; */
@@ -469,6 +476,7 @@ class ConcernController extends Controller
 
     public function updateInfo(Request $request)
     {
+        // dd($request);
         try {
             $dataId = $request->dataId;
             $concern = Concerns::where('id', $dataId)->first();
@@ -483,6 +491,10 @@ class ConcernController extends Controller
             $concern->buyer_lastname
                 = $request->buyer_lastname;
             $concern->user_type = $request->user_type;
+
+            if ($request->user_type === "Others") {
+                $concern->user_type = $request->other_user_type;
+            }
             $concern->buyer_email = $request->buyer_email;
             $concern->property = $request->property;
             $concern->admin_remarks = $request->remarks;
