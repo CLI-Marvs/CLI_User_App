@@ -61,7 +61,10 @@ const InquiryFormModal = ({ modalRef }) => {
         ...(Array.isArray(propertyNamesList) && propertyNamesList.length > 0
             ? propertyNamesList
                   .filter((item) => !item.toLowerCase().includes("phase"))
-                  .map((item) => formatFunc(item))
+                  .map((item) => {
+                    const formattedItem = formatFunc(item);
+                    return formattedItem === "Casamira South" ? "Casa Mira South" : formattedItem;
+                  })
                   .sort((a, b) => {
                       if (a === "N/A") return -1;
                       if (b === "N/A") return 1;

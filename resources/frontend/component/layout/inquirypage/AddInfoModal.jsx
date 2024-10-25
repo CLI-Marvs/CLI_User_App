@@ -209,7 +209,7 @@ const AddInfoModal = ({ modalRef, dataConcern }) => {
                             className={`flex items-center border border-[D6D6D6] rounded-[5px] overflow-hidden`}
                         >
                             <span className="text-custom-gray81 text-sm bg-[#EDEDED] flex pl-3 py-1 w-[300px]">
-                                Mobile Phone No.
+                                Mobile Number
                             </span>
                             <input
                                 name="mobile_number"
