@@ -101,6 +101,7 @@ class AuthController extends Controller
                     'email_verify_at' => now(),
                     'profile_picture' => $googleUser->avatar,
                     'updated_at' => now(),
+                    'created_at' => now()
                 ]);
             }
             
