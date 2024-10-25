@@ -322,7 +322,7 @@ const InquiryFormModal = ({ modalRef }) => {
                                         : "border-custom-bluegreen"
                                 }`}
                             >
-                                <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex w-[259px] pl-3 py-1 tablet:w-[160px] mobile:w-[270px] mobile:text-xs">
+                                <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex w-[240px] pl-3 py-1 tablet:w-[160px] mobile:w-[270px] mobile:text-xs">
                                     Middle Name
                                 </span>
                                 <input
@@ -540,7 +540,7 @@ const InquiryFormModal = ({ modalRef }) => {
                             </p>
                         </div>
                         <div className="flex items-center border border-custom-bluegreen rounded-[5px] overflow-hidden">
-                            <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex items-center w-[250px] tablet:w-[175px] mobile:w-[270px] mobile:text-xs -mr-4 pl-3 py-1">
+                            <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex items-center w-[255px] tablet:w-[175px] mobile:w-[270px] mobile:text-xs -mr-4 pl-3 py-1">
                                 Inquiry From
                             </span>
                             <div className="relative w-full">
