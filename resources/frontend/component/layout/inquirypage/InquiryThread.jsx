@@ -778,9 +778,9 @@ const InquiryThread = () => {
                                                             </div>
 
                                                             <div className="flex items-center h-[19px] text-sm">
-                                                                Hi Mr./Ms.{" "}
+                                                                Hi {" "}
                                                                 {capitalizeWords(
-                                                                    dataConcern.buyer_lastname
+                                                                    dataConcern.buyer_name
                                                                 )}
                                                                 ,
                                                             </div>
