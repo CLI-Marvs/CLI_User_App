@@ -65,7 +65,6 @@ class AuthController extends Controller
 
     public function callback(Request $request)
     {
-        $crsUser = ['rosemarie@cebulandmasters.com', 'jdadvincula@cebulandmasters.com', 'mocastillo@cebulandmasters.com'];
 
         try {
             $googleUser = Socialite::driver("google")->user();
@@ -78,32 +77,33 @@ class AuthController extends Controller
                 return redirect('/?error=' . urlencode('Authentication failed. You need to use your CLI email.'));
 
             }
+
+            
             $explodeName = explode(' ', $googleUser->getName());
 
-            if (count($explodeName) > 1) {
+            /* if (count($explodeName) > 1) {
                 $firstName = $explodeName[0];
                 $lastName = $explodeName[count($explodeName) - 1];
             } else {
                 $firstName = $explodeName[0];
                 $lastName = null;
-            }
+            } */
 
+            $user = Employee::where('employee_email', $googleUser->email)->first();
 
-
-            $user = Employee::where('google_id', $googleUser->id)->first();
-
+            
             if (!$user) {
-                $user = Employee::create([
+                return redirect('/?error=' . urlencode('Email does not exist'));
+
+            } else {
+                $user->update([
                     'google_id' => $googleUser->id,
-                    'firstname' => $firstName,
-                    'lastname' => $lastName,
-                    'employee_email' => $googleUser->email,
                     'email_verify_at' => now(),
                     'profile_picture' => $googleUser->avatar,
-
+                    'updated_at' => now(),
                 ]);
             }
-
+            
             Auth::login($user);
 
             $token = $user->createToken('authToken')->plainTextToken;
