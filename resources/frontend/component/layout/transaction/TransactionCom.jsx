@@ -173,6 +173,9 @@ const TransactionCom = () => {
                                 Invoice Description
                             </th>
                             <th className=" px-4 border border-gray-500">
+                                Invoice Link
+                            </th>
+                            <th className=" px-4 border border-gray-500">
                                 Invoice Due Date
                             </th>
                         </tr>
@@ -205,6 +208,20 @@ const TransactionCom = () => {
                                     </td>
                                     <td className=" px-4 border border-gray-500">
                                         {item.due_date}
+                                    </td>
+                                    <td className="px-4 border border-gray-500">
+                                        {item.invoice_link ? (
+                                            <a
+                                                href={
+                                                    item.invoice_link
+                                                }
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="cursor-pointer underline"
+                                            >
+                                                View Document
+                                            </a>
+                                        ) : null}
                                     </td>
                                 </tr>
                             ))}
