@@ -35,7 +35,7 @@ const AdminMessages = ({ items }) => {
                         {items.admin_name} <span>|</span>
                         CLI
                         <span>|</span>
-                        Customer Relations Services
+                        Customer Relations - Services
                     </p>
                 </div>
             </div>

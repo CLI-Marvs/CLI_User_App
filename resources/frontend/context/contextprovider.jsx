@@ -74,7 +74,7 @@ export const ContextProvider = ({ children }) => {
 
     useEffect(() => {
         if (user && user.department && !isDepartmentInitialized) {
-            setDepartment(user.department === "Customer Relations - Turnovers" ? "All" : user.department);
+            setDepartment(user.department === "Customer Relations - Services" ? "All" : user.department);
             setIsDepartmentInitialized(true);
         }
     }, [user, isDepartmentInitialized]);
