@@ -36,7 +36,6 @@ const InquiryFormModal = ({ modalRef }) => {
     const [errors, setErrors] = useState({});
     const { propertyNamesList } = useStateContext();
     const [specificInputErrors, setSpecificInputErrors] = useState({});
-    //console.log("38",specificInputErrors)
     const handleFileChange = (event) => {
         const selectedFiles = Array.from(event.target.files);
         const fileNames = selectedFiles.map((file) =>
@@ -101,6 +100,10 @@ const InquiryFormModal = ({ modalRef }) => {
     };
     const handleCheckboxChange = (event) => {
         setIsChecked(event.target.checked); // Updates the state based on whether the checkbox is checked
+         setFormData((prevData) => ({
+             ...prevData,
+             mname: "",
+         }));
     };
     const isTextareaValid = message.trim().length > 0;
 
@@ -120,6 +123,7 @@ const InquiryFormModal = ({ modalRef }) => {
         setFormData(formDataState);
         setFiles([]);
         setMessage("");
+        setIsChecked(false);
     };
 
     const {
@@ -328,6 +332,7 @@ const InquiryFormModal = ({ modalRef }) => {
                                 <input
                                     name="mname"
                                     type="text"
+                                    disabled={isChecked}
                                     className="w-full px-4 text-sm focus:outline-none mobile:text-xs"
                                     value={formData.mname}
                                     onChange={handleChange}

@@ -600,7 +600,7 @@ const InquiryList = () => {
                         <div className="flex gap-[10px]">
                             <div className="flex gap-2">
                                 <div className="flex items-center space-x-2">
-                                    {user?.department === "CRS" && (
+                                    {user?.department === "Customer Relations - Services" && (
                                         <button
                                             onClick={handleAssignedToMeClick}
                                             className={`flex items-center text-custom-lightgreen h-[25px] w-[125px] rounded-[55px] p-[2px] ${

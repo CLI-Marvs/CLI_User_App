@@ -39,8 +39,25 @@ const Navbar = () => {
                 );
             }
 
+            if (value.toLowerCase() === "transactionmanagement") {
+                breadcrumbLabel = "Transaction Management";
+                // Non-linkable
+                return (
+                    <span
+                        key={routeTo}
+                        className="text-custom-solidgreen cursor-default"
+                    >
+                        {breadcrumbLabel}
+                    </span>
+                );
+            }
+
             if (value.toLowerCase() === "inquirylist") {
                 breadcrumbLabel = "Inquiries";
+            }
+
+            if (value.toLowerCase() === "transactionrecords") {
+                breadcrumbLabel = "Transaction Records";
             }
 
             if (value.toLowerCase() === "thread") {

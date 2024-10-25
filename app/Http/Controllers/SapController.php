@@ -17,7 +17,7 @@ class SapController extends Controller
     public function postDateToSap(Request $request)
     {
         $client = new Client();
-        $response = $client->post('https://SAP-DEV.cebulandmasters.com:44304/sap/bc/srt/rfc/sap/zsendinvoice/200/zsendinvoice/zsendinvoice', [
+        $response = $client->post('https://SAP-DEV.cebulandmasters.com:44304/sap/bc/srt/rfc/sap/zdevinvoice/200/zdevinvoice/zdevinvoice', [
             'headers' => [
                 'Authorization' => 'Basic ' . base64_encode('KBELMONTE:Tomorrowbytogether2019!'),
                 'Content-Type' => 'application/soap+xml',
@@ -33,7 +33,7 @@ class SapController extends Controller
     {
         $client = new Client();
         try {
-            $response = $client->post('https://SAP-DEV.cebulandmasters.com:44304/sap/bc/srt/rfc/sap/zcolwithcr1/200/zcolwithcr1/zcolwithcr1', [
+            $response = $client->post('https://SAP-DEV.cebulandmasters.com:44304/sap/bc/srt/rfc/sap/zdevcoll/200/zdevcoll/zdevcoll', [
                 'headers' => [
                     'Authorization' => 'Basic ' . base64_encode('KBELMONTE:Tomorrowbytogether2019!'),
                     'Content-Type' => 'application/soap+xml',
@@ -95,6 +95,7 @@ class SapController extends Controller
                 $invoice->post_date = $request->input('D_BUDAT');
                 $invoice->customer_name = $request->input('D_NAME1');
                 $invoice->flow_type = $request->input('D_VBEWA');
+                $invoice->invoice_status = $request->input('D_STATS');
                 /*  $invoice->invoice_status = $request->input('invoice_status'); 
                 $invoice->status = $request->input('status');
                 $invoice->posting_response = $request->input('posting_response'); */
@@ -116,7 +117,7 @@ class SapController extends Controller
     {
         $query = Invoices::query();
         $dueDate = $request->query('dueDate', null);
-        $query->select('contract_number', 'customer_name', 'invoice_amount', 'description', 'due_date');
+        $query->select('contract_number', 'customer_name', 'invoice_amount', 'description', 'due_date', 'document_number', 'invoice_status');
         /*  if ($dueDate) {
             $this->filterDataInvoices($query, $dueDate);
         } */
@@ -295,7 +296,6 @@ class SapController extends Controller
                         'receiving_branch' => $transaction['receiving_branch'],
                         'transaction_date' => $transactionDate,
                         'bank_name' => $bankName,
-                        'transact_by' => $user->id,
                         'status' => 'not_posted'
                     ]);
                 }
@@ -317,17 +317,11 @@ class SapController extends Controller
 
             $searchParams = $request->query('bank_name');
 
-            $dataJoin = $query->leftJoin('employee', DB::raw('CAST(bank_transactions.transact_by AS INTEGER)'), '=', 'employee.id')
-                ->select('bank_transactions.*', DB::raw(
-                    "CONCAT(employee.firstname,' ',employee.lastname) as transact_by"
-                ));
-
-
             if ($searchParams !== "All") {
                 $this->filterDataTransaction($query, $searchParams);
             }
 
-            $data = $dataJoin->OrderBy('reference_number', 'asc')->paginate(30);
+            $data = $query->OrderBy('reference_number', 'asc')->paginate(30);
             return response()->json($data);
         } catch (\Exception $e) {
             return response()->json(['error' => 'An error occurred', 'message' => $e->getMessage()], 500);
@@ -435,6 +429,7 @@ class SapController extends Controller
                         'VBEWA' => $invoice->flow_type,
                         'BELNR' => $invoice->document_number,
                         'AMT' => $invoice->invoice_amount,
+                        'D_NAME1' => $invoice->customer_name,
                         'PAYD' => "Cash",
                     ];
                 }

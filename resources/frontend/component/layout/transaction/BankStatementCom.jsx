@@ -229,7 +229,7 @@ const BankStatementCom = () => {
             <div className="px-4">
                 <ToastContainer position="top-center" />
                 <div className="flex mb-4 gap-10">
-                    <select
+                    {/*  <select
                         className="border-b-1 w-[121px] outline-none text-sm"
                         value={bankNames}
                         onChange={handleBankChange}
@@ -242,7 +242,7 @@ const BankStatementCom = () => {
                                     {item}
                                 </option>
                             ))}
-                    </select>
+                    </select> */}
                     <input
                         type="file"
                         id="fileInput"
@@ -291,8 +291,12 @@ const BankStatementCom = () => {
                                 Status
                             </th>
                             <th className=" px-4 border border-gray-500">
+                                Invoice Amount
+                            </th>
+                            <th className=" px-4 border border-gray-500">
                                 Document Number
                             </th>
+
                             <th className=" px-4 border border-gray-500">
                                 Invoice Link
                             </th>
@@ -315,7 +319,7 @@ const BankStatementCom = () => {
                                         {item.payment_channel}
                                     </td>
                                     <td className=" px-4 border border-gray-500">
-                                        {item.transact_by}
+                                        {item.payor_name}
                                     </td>
                                     <td className=" px-4 border border-gray-500">
                                         {item.reference_number}
@@ -324,6 +328,14 @@ const BankStatementCom = () => {
                                         {item.status === "not_posted"
                                             ? "Not Posted"
                                             : "Posted"}
+                                    </td>
+                                    <td className=" px-4 border border-gray-500">
+                                        {item.invoice_amount
+                                            ? new Intl.NumberFormat("en-US", {
+                                                  style: "decimal",
+                                                  minimumFractionDigits: 2,
+                                              }).format(item.invoice_amount)
+                                            : null}
                                     </td>
                                     <td className=" px-4 border border-gray-500">
                                         {item.document_number}

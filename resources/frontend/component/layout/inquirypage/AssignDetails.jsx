@@ -211,8 +211,8 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                             </div>
                             <div>
                                 <p className="text-[#A5A5A5]">
-                                    {details.department === "CRS"
-                                        ? "Customer Relations Services"
+                                    {details.department === "Customer Relations - Services"
+                                        ? "Customer Relations - Services"
                                         : details.department}
                                 </p>
                             </div>

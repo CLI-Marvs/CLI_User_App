@@ -40,8 +40,8 @@ const AssignSidePanel = ({ ticketId }) => {
         email: employee.employee_email,
         firstname: employee.firstname,
         department:
-            employee.department === "CRS"
-                ? "Customer Relations Services"
+            employee.department === "Customer Relations - Services"
+                ? "Customer Relations - Services"
                 : employee.department,
         abbreviationDep: employee.department,
         ticketId: ticketId,
@@ -421,7 +421,7 @@ const AssignSidePanel = ({ ticketId }) => {
                                             className="flex justify-between items-center text-xs bg-custom-solidgreen text-white min-w-[99px] h-[26px] rounded-full pr-[10px] pl-[10px]"
                                         >
                                             <span>{option.name}</span>
-                                            {user?.department === "CRS" && (
+                                            {user?.department === "Customer Relations - Services" && (
                                                 <button
                                                     onClick={() =>
                                                         removeTag(option)
@@ -556,7 +556,7 @@ const AssignSidePanel = ({ ticketId }) => {
                                             className="bg-custom-lightgreen text-white rounded-full px-3 py-1 text-xs flex-shrink-0 flex mb-[4px]"
                                         >
                                             {assignee.name}
-                                            {user?.department === "CRS" && (
+                                            {user?.department === "Customer Relations - Services" && (
                                                 <button
                                                     onClick={() =>
                                                         removeTag(assignee)

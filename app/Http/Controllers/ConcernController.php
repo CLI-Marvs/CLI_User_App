@@ -395,8 +395,6 @@ class ConcernController extends Controller
                 ['required', 'regex:/^[\pL\s\-\'\.]+$/u', 'max:255'],
                 'lname' =>
                 ['required', 'regex:/^[\pL\s\-\'\.]+$/u', 'max:255'],
-                'mname'
-                => ['regex:/^[\pL\s\-\'\.]+$/u', 'max:255'],
                 'details_concern' => 'required|string',
                 'message' => 'required|string|max:500',
             ], [
@@ -404,7 +402,7 @@ class ConcernController extends Controller
                 'fname.required' => 'The first name field is required.',
                 'lname.regex' => 'The last name field format is invalid.',
                 'lname.required' => 'The last name field is required.',
-                'mname.regex' => 'The middle name field format is invalid.',
+                //'mname.regex' => 'The middle name field format is invalid.',
 
             ]);
             $user = $request->user();
@@ -415,7 +413,7 @@ class ConcernController extends Controller
                 foreach ($files as $index => $file) {
                     $fileName  = $file->getClientOriginalName();
                     $filesData[] = [
-                        'url' => $fileLinks[$index], 
+                        'url' => $fileLinks[$index],
                         'original_file_name' => $fileName // Store the original file name
                     ];
                 }
@@ -721,7 +719,7 @@ class ConcernController extends Controller
             $query->orderBy('created_at', 'desc');
         }
 
-        if ($employee->department !== 'CRS') {
+        if ($employee->department !== 'Customer Relations - Services') {
             $query->whereIn('concerns.ticket_id', $ticketIds);
         }
 
@@ -840,7 +838,7 @@ class ConcernController extends Controller
             $assignedInquiries = $this->getAssignInquiries($employee->employee_email);
             $ticketIds = $assignedInquiries->pluck('ticket_id')->toArray();
 
-            if ($employeeDepartment !== "CRS") {
+            if ($employeeDepartment !== "Customer Relations - Services") {
                 $concernsQuery->whereIn('ticket_id', $ticketIds);
             }
 
@@ -948,7 +946,7 @@ class ConcernController extends Controller
     {
         $buyerReplyQuery = BuyerReplyNotif::query();
 
-        if ($employeeDepartment !== "CRS") {
+        if ($employeeDepartment !== "Customer Relations - Services") {
             $buyerReplyQuery->whereIn('ticket_id', $ticketIds);
         }
 
@@ -1045,7 +1043,7 @@ class ConcernController extends Controller
             $assignedInquiries = $this->getAssignInquiries($employee->employee_email);
             $ticketIds = $assignedInquiries->pluck('ticket_id')->toArray();
 
-            if ($employeeDepartment !== "CRS") {
+            if ($employeeDepartment !== "Customer Relations - Services") {
                 $concernsQuery->whereIn('ticket_id', $ticketIds);
                 $inquiryAssigneeQuery->whereIn('ticket_id', $ticketIds);
                 $buyerReplyQuery->whereIn('ticket_id', $ticketIds);
@@ -1243,7 +1241,7 @@ class ConcernController extends Controller
             $user = $request->user();
             $userDepartment = $user->department;
 
-            if ($userDepartment !== "CRS") {
+            if ($userDepartment !== "Customer Relations - Services") {
                 return response()->json(['message' => 'Unauthorized user']);
             }
 
@@ -1819,7 +1817,12 @@ class ConcernController extends Controller
 
                 $fileLink = $bucket->object($filePath)->signedUrl(new \DateTime('+10 years'));
 
-                $fileLinks[] = $fileLink;
+                // $fileLinks[] = $fileLink;
+                $fileLinks[] = [
+                    'url' => $fileLink,
+                    'original_file_name' => $fileData['file_name']
+                ];
+
                 unlink($tempFile);
             }
         }
