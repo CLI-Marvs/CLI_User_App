@@ -1805,10 +1805,6 @@ class ConcernController extends Controller
             $bucket = $storage->bucket('super-app-storage');
 
             foreach ($attachments as $fileData) {
-
-
-                $originalFileName =
-                    $fileData->getClientOriginalName();
                 $fileName = uniqid() . '.' . $fileData['extension'];
                 $filePath = 'concerns/' . $fileName;
 
@@ -1826,7 +1822,7 @@ class ConcernController extends Controller
                 // $fileLinks[] = $fileLink;
                 $fileLinks[] = [
                     'url' => $fileLink,
-                    'original_file_name' => $originalFileName
+                    'original_file_name' => $fileData['file_name']
                 ];
 
                 unlink($tempFile);
