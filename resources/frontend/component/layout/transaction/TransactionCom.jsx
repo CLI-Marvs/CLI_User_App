@@ -193,7 +193,7 @@ const TransactionCom = () => {
                                         )}
                                     </td>
                                     <td className=" px-4 border border-gray-500">
-                                        {item.status}
+                                        {item.invoice_status}
                                     </td>
                                     <td className=" px-4 border border-gray-500">
                                     {item.invoice_amount ? (
