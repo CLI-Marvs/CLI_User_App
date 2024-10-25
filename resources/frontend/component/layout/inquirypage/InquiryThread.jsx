@@ -672,15 +672,6 @@ const InquiryThread = () => {
                                                 name="chat"
                                                 rows="4"
                                                 draggable="false"
-                                                onKeyDown={(e) => {
-                                                    if (
-                                                        e.key === "Enter" &&
-                                                        !e.shiftKey
-                                                    ) {
-                                                        e.preventDefault(); // Prevents creating a new line
-                                                        handleConfirmation(); // Call your send message function
-                                                    }
-                                                }}
                                                 className="h-full w-full pl-2 pr-[123px] border-none  text-sm focus:outline-none"
                                             ></textarea>
 
