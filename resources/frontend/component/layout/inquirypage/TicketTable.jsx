@@ -7,8 +7,14 @@ import apiService from "../../servicesApi/apiService";
 
 const TicketTable = ({ concernData }) => {
     const [checkedRows, setCheckedRows] = useState([]);
-    const { getMessages, getAllConcerns, user, setData, getInquiryLogs, getConcernMessages } =
-        useStateContext();
+    const {
+        getMessages,
+        getAllConcerns,
+        user,
+        setData,
+        getInquiryLogs,
+        getConcernMessages,
+    } = useStateContext();
     const handleCheckboxChange = (index) => {
         setCheckedRows((prevCheckedRows) =>
             prevCheckedRows.includes(index)
@@ -129,13 +135,37 @@ const TicketTable = ({ concernData }) => {
                                 }
                                 `}
                             >
-                                <p className={`w-[130px] pr-2 truncate`}>
+                                <p className={`w-[130px] pr-2  truncate`}>
                                     {(() => {
                                         const nameParts =
                                             row.buyer_name.split(" ");
+
+                                        // Check if the middle name exists in the full name and remove it if it does
+                                        if (row.buyer_middlename) {
+                                            const middleName =
+                                                row.buyer_middlename.toLowerCase();
+                                            const middleNameIndex =
+                                                nameParts.findIndex(
+                                                    (part) =>
+                                                        part.toLowerCase() ===
+                                                        middleName
+                                                );
+                                            if (middleNameIndex !== -1) {
+                                                nameParts.splice(
+                                                    middleNameIndex,
+                                                    1
+                                                ); // Remove the middle name from the array
+                                            }
+                                        }
+
                                         const lastName = nameParts.pop();
                                         const firstName = nameParts.join(" ");
-                                        const middleInitial = row.buyer_middlename ? `${row.buyer_middlename.charAt(0).toUpperCase()}.` : "";
+                                        const middleInitial =
+                                            row.buyer_middlename
+                                                ? `${row.buyer_middlename
+                                                      .charAt(0)
+                                                      .toUpperCase()}.`
+                                                : "";
 
                                         // Helper function to capitalize the first letter of a string
                                         const capitalize = (name) =>
@@ -144,7 +174,9 @@ const TicketTable = ({ concernData }) => {
 
                                         return `${capitalize(
                                             lastName
-                                        )}, ${capitalize(firstName)}, ${middleInitial}`;
+                                        )}, ${capitalize(
+                                            firstName
+                                        )}, ${middleInitial}`;
                                     })()}
                                 </p>
                             </td>
@@ -169,8 +201,11 @@ const TicketTable = ({ concernData }) => {
                                         {row.ticket_id}
                                     </span>
                                 </p>
-                                <p className="flex-1 truncate overflow-hidden whitespace-nowrap text-sm text-gray-400">
-                                    {row.details_message}
+                                <p className="flex-1 truncate overflow-hidden text-sm text-gray-400">
+                                    {row.details_message.replace(
+                                        /<br\s*\/?>/gi,
+                                        " "
+                                    )}
                                 </p>
                             </td>
                             <td

@@ -5,29 +5,52 @@ const FileViewer = () => {
     //State
     const [fileUrlPath, setFileUrlPath] = useState(null);
     const { token } = useStateContext();
+    const [imageDimensions, setImageDimensions] = useState({
+        width: 0,
+        height: 100,
+    });
 
     //Hooks
+    /**
+     *  Get the file URL from localStorage when the page loads
+     */
     useEffect(() => {
-        // Get the file URL from localStorage when the page loads
         const storedFileUrlPath = localStorage.getItem("fileUrlPath");
         if (storedFileUrlPath) {
             setFileUrlPath(JSON.parse(storedFileUrlPath));
-            localStorage.removeItem("fileUrlPath"); // Optionally remove it after use
+            localStorage.removeItem("fileUrlPath");
         }
     }, []);
 
+    /**
+     * Check if the user is authenticated, place this function here to early check if the user is authenticated or not
+     */
     if (!token) {
         return (
             <div className="flex items-center justify-center min-h-screen">
                 <h1 className="text-lg font-bold">Unauthorized Access</h1>
             </div>
         );
-    } //Check if the user is authenticated, place this function here to early check if the user is authenticated or not
+    }
 
+    /**
+     * Prevent the default context menu or the inspect element from appearing
+     */
     const handleContextMenu = (event) => {
         event.preventDefault();
-    }; // Prevent the default context menu from appearing
+    };
 
+    /**
+     *  This function handles keydown events to prevent default actions for specific key combinations
+     * that are commonly used to open developer tools or view source.
+     *  The following key combinations are prevented:
+     *  F12 (opens developer tools)
+     *   Ctrl + Shift + I (opens developer tools)
+     *   Ctrl + Shift + C (opens inspect element)
+     *   Ctrl + U (views page source)
+     *    Cmd + I (opens developer tools on macOS)
+     *    Cmd + Shift + C (inspects element on macOS)
+     */
     const handleKeyDown = (event) => {
         if (
             event.key === "F12" ||
@@ -35,14 +58,13 @@ const FileViewer = () => {
                 event.shiftKey &&
                 (event.key === "I" || event.key === "C")) ||
             (event.ctrlKey && event.key === "U") ||
-            (event.metaKey && event.key === "I") || // Cmd + I for macOS
-            (event.metaKey && event.shiftKey && event.key === "C") // Cmd + Shift + C for macOS
+            (event.metaKey && event.key === "I") ||
+            (event.metaKey && event.shiftKey && event.key === "C")
         ) {
-            event.preventDefault(); // Prevent the default action
+            event.preventDefault();
         }
     };
 
-    // Add this event listener in a useEffect hook
     useEffect(() => {
         window.addEventListener("keydown", handleKeyDown);
         return () => {
@@ -50,34 +72,60 @@ const FileViewer = () => {
         };
     }, []);
 
+    /*
+     * Check if fileUrlPath is available before performing operations on it
+     */
     if (!fileUrlPath) {
         return (
             <div className="flex items-center justify-center min-h-screen">
                 <h1 className="text-lg font-bold">No Attachment Found</h1>
             </div>
         );
-    } // Check if fileUrlPath is available before performing operations on it
+    }
 
     // Get the file name including the path after 'concerns/'
     const concernsPathIndex =
         fileUrlPath.indexOf("concerns/") + "concerns/".length;
-    // This gives you everything after 'concerns/'
     const fullFilePath = fileUrlPath.slice(concernsPathIndex);
-
     // Get the full URL and determine the extension
     const fileName = fullFilePath.split("?")[0];
     const fileExtension = fileName.split(".").pop().toLowerCase();
 
+    /**
+     * Function to handle the loading of an image
+     */
+    const handleImageLoad = (e) => {
+        // Destructure the width and height properties from the event target (the loaded image)
+        let { width, height } = e.target;
+        console.log("orig size", width, height);
+        if (width > 1200) {
+            const aspectRatio = width / height; // Calculate the aspect ratio
+            width = 1200; // Set the new width to 1200
+            height = 1200 / aspectRatio; // Set height proportional to the new width
+        }
+        // Update the state with the dimensions of the loaded image
+        setImageDimensions({ width, height });
+    };
     return (
-        <div onContextMenu={handleContextMenu}>
+        <div onContextMenu={handleContextMenu} className="bg-black">
             {fileExtension === "jpg" ||
             fileExtension === "png" ||
             fileExtension === "jpeg" ? (
                 <div className="flex items-center justify-center min-h-screen">
                     <img
+                        onLoad={handleImageLoad}
                         src={fileUrlPath}
                         alt="attachment"
-                        className="w-96 h-96"
+                        width={
+                            imageDimensions.width > 0
+                                ? imageDimensions.width
+                                : undefined
+                        }
+                        height={
+                            imageDimensions.height > 0
+                                ? imageDimensions.height
+                                : undefined
+                        }
                     />
                 </div>
             ) : fileExtension === "pdf" ? (

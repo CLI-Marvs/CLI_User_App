@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import TicketTable from "./TicketTable";
-import { IoIosArrowUp, IoIosArrowDown } from "react-icons/io";
+import { IoIosArrowUp, IoIosArrowDown, IoMdArrowDropdown } from "react-icons/io";
 import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md";
 import ReactPaginate from "react-paginate";
 import { useStateContext } from "../../../context/contextprovider";
@@ -13,6 +13,7 @@ import { MdRefresh } from "react-icons/md";
 import { Alert } from "@mui/material";
 import InquiryFormModal from "./InquiryFormModal";
 import axios from "axios";
+
 
 const InquiryList = () => {
     const {
@@ -33,7 +34,7 @@ const InquiryList = () => {
         /*  setHasAttachments,
         hasAttachments */
     } = useStateContext();
-   // console.log("34", data);
+    
     const [name, setName] = useState("");
     const [category, setCategory] = useState("");
     const [email, setEmail] = useState("");
@@ -69,7 +70,6 @@ const InquiryList = () => {
         } else if (searchFilter) {
             setSearchFilter({});
         } else if (specificAssigneeCsr) {
-            console.log("if assign only");
             setSpecificAssigneeCsr("");
             setAssignedToMeActive(false);
         }
@@ -349,7 +349,7 @@ const InquiryList = () => {
                                 type="text"
                                 readOnly={true}
                                 onClick={toggleFilterBox}
-                                className="h-[47px] w-[606px] rounded-[10px] pl-9 pr-6 text-sm"
+                                className="h-[47px] w-[606px] bg-custom-grayF1 rounded-[10px] pl-9 pr-6 text-sm"
                                 placeholder="Search"
                             />
                             <svg
@@ -399,14 +399,14 @@ const InquiryList = () => {
                                             className="w-full  border-b-1 outline-none text-sm"
                                         />
                                     </div>
-                                    <div className="flex">
+                                    <div className="flex relative">
                                         <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
                                             {" "}
                                             Category
                                         </label>
 
                                         <select
-                                            className="w-full border-b-1 outline-none text-sm"
+                                            className="w-full border-b-1 outline-none appearance-none text-sm"
                                             value={category}
                                             onChange={(e) =>
                                                 setCategory(e.target.value)
@@ -433,8 +433,8 @@ const InquiryList = () => {
                                             <option value="Loan Application">
                                                 Loan Application
                                             </option>
-                                            <option value="Titile and Other Registration Documents">
-                                                Titile and Other Registration
+                                            <option value="Title and Other Registration Documents">
+                                                Title and Other Registration
                                                 Documents
                                             </option>
                                             <option value="Commissions">
@@ -444,6 +444,9 @@ const InquiryList = () => {
                                                 Other Concerns
                                             </option>
                                         </select>
+                                        <span className="absolute inset-y-0 right-0 flex items-center  pl-3 pointer-events-none">
+                                            <IoIosArrowDown />
+                                        </span>
                                     </div>
                                     <div className="flex">
                                         <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
@@ -474,48 +477,55 @@ const InquiryList = () => {
                                         />
                                     </div>
                                     <div className="flex gap-3">
-                                        <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[214px]">
-                                            Date
-                                        </label>
-                                        <div className="relative">
-                                            <DatePicker
-                                                selected={startDate}
-                                                onChange={handleDateChange}
-                                                className="border-b-1 outline-none w-[176px] text-sm"
-                                                calendarClassName="custom-calendar"
-                                            />
+                                        <div className="flex">
+                                            <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[94px]">
+                                                Date
+                                            </label>
+                                            <div className="relative">
+                                                <DatePicker
+                                                    selected={startDate}
+                                                    onChange={handleDateChange}
+                                                    className="border-b-1 outline-none w-[146px] text-sm"
+                                                    calendarClassName="custom-calendar"
+                                                />
 
-                                            <img
-                                                src={DateLogo}
-                                                alt="date"
-                                                className="absolute top-[45%] right-0 transform -translate-y-1/2 text-custom-bluegreen size-6 cursor-pointer pointer-events-none"
-                                            />
+                                                <img
+                                                    src={DateLogo}
+                                                    alt="date"
+                                                    className="absolute top-[45%] right-0 transform -translate-y-1/2 text-custom-bluegreen size-6 cursor-pointer pointer-events-none"
+                                                />
+                                            </div>
                                         </div>
-                                        <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
-                                            {" "}
-                                            Property
-                                        </label>
-                                        <select
-                                            className="w-full border-b-1 outline-none text-sm"
-                                            onChange={handleSelectProperty}
-                                            value={selectedProperty}
-                                        >
-                                            <option value="">
-                                                Select Property
-                                            </option>
-                                            {formattedPropertyNames.map(
-                                                (item, index) => {
-                                                    return (
-                                                        <option
-                                                            key={index}
-                                                            value={item}
-                                                        >
-                                                            {item}
-                                                        </option>
-                                                    );
-                                                }
-                                            )}
-                                        </select>
+                                        <div className="flex relative">
+                                            <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[65px]">
+                                                {" "}
+                                                Property
+                                            </label>
+                                            <select
+                                                className="w-[220px] border-b-1 outline-none appearance-none text-sm"
+                                                onChange={handleSelectProperty}
+                                                value={selectedProperty}
+                                            >
+                                                <option value="">
+                                                    Select Property
+                                                </option>
+                                                {formattedPropertyNames.map(
+                                                    (item, index) => {
+                                                        return (
+                                                            <option
+                                                                key={index}
+                                                                value={item}
+                                                            >
+                                                                {item}
+                                                            </option>
+                                                        );
+                                                    }
+                                                )}
+                                            </select>
+                                            <span className="absolute inset-y-0 right-0 flex items-center  pl-3 pointer-events-none">
+                                            <IoIosArrowDown />
+                                        </span>
+                                        </div>
                                     </div>
                                     <div className="mt-5 flex gap-5">
                                         <input
@@ -590,7 +600,7 @@ const InquiryList = () => {
                         <div className="flex gap-[10px]">
                             <div className="flex gap-2">
                                 <div className="flex items-center space-x-2">
-                                    {user?.department === "CRS" && (
+                                    {user?.department === "Customer Relations - Services" && (
                                         <button
                                             onClick={handleAssignedToMeClick}
                                             className={`flex items-center text-custom-lightgreen h-[25px] w-[125px] rounded-[55px] p-[2px] ${

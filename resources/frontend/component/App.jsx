@@ -62,9 +62,13 @@ const App = () => {
     const SecondLayout = () => {
         return (
             <>
-                <div className="w-full flex flex-row h-full">
-                    <TransactionSidebar/>
-                    <Outlet/>
+                <div className="flex w-full overflow-hidden">
+                    {/* <div className="bg-custom-lightestgreen p-5 w-[100px] mr-10">
+                        <TransactionSidebar/>
+                    </div> */}
+                    <div className="w-full py-4 px-4">
+                        <Outlet />
+                    </div>
                 </div>
             </>
         );
@@ -101,6 +105,14 @@ const App = () => {
                     element: <NotificationView />,
                 },
                 {
+                    path: "transactionmanagement/invoices",
+                    element: <TransactionView />,
+                },
+                {
+                    path: "transactionmanagement/transactionrecords",
+                    element: <BankStatementView />,
+                },
+                /*  {
                     path: "transaction",
                     element: <SecondLayout />,
                     children: [
@@ -113,7 +125,8 @@ const App = () => {
                             element: <BankStatementView/>,
                         },
                     ],
-                },
+
+                }, */
                 {
                     path: "inquirymanagement/inquirylist",
                     element: <InquiryListView />,

@@ -56,13 +56,30 @@ Route::put('/update-info', [ConcernController::class, 'updateInfo']);
 Route::post('/add-property-sap', [PropertyMasterController::class, 'storePropertyFromSap']);
 Route::post('/buyer-reply', [ConcernController::class, 'fromAppSript']);
 
-Route::post('/proxy-sap', [SapController::class, 'urlSap']);
-Route::post('/posting-invoices', [SapController::class, 'postInvoices']);
+//* For Sap 
+
+//*Post date on sap
+Route::post('/proxy-sap', [SapController::class, 'postDateToSap']);
+
+//*Retrieve invoice from sap upon trigger the date
+Route::post('/posting-invoices', [SapController::class, 'retrieveInvoicesFromSap']);
+
+//*Post document number and other fields to sap
+Route::post('/post-data-sap', [SapController::class, 'postFromAppToSap']);
+
+//*Retreive document number from SAP
+Route::post('/data-posted', [SapController::class, 'postRecordsFromSap']);
+
+
+//*Display in frontend 
 Route::get('/get-invoices', [SapController::class, 'getInvoices']);
-Route::post('/upload-notepad', [SapController::class, 'uploadNotepad']);
+Route::get('/get-transactions', [SapController::class, 'retrieveTransactions']);
+Route::get('/get-matches', [SapController::class, 'runAutoPosting']);
 
 
 Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/get-transaction-bank', [SapController::class, 'getTransactionByBankName']);
+    Route::post('/upload-notepad', [SapController::class, 'uploadNotepad']);
     Route::get('/get-concern', [ConcernController::class, 'getAllConcerns']);
     Route::post('/add-concern', [ConcernController::class, 'addConcernPublic']);
     Route::get('/get-message/{ticketId}', [ConcernController::class, 'getMessage']);

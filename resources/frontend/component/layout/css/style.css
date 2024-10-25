@@ -205,7 +205,6 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
 .custom-checkbox:checked::after {
   content: '';
-  position: absolute;
   width: 8px; /* Adjust width */
   height: 8px; /* Adjust height */
   background-color: white; /* Color of the checkmark */

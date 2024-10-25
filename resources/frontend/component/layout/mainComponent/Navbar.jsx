@@ -1,134 +1,197 @@
-import React from 'react'
-import CLILogo from '../../../../../public/Images/CLILogo.png';
-import Kent from '../../../../../public/Images/kent.png';
-import apiService from '../../servicesApi/apiService';
-import { useStateContext } from '../../../context/contextprovider';
-import { Link , useLocation } from 'react-router-dom';
-import Breadcrumbs from '@mui/material/Breadcrumbs';
-import Typography from '@mui/material/Typography';
+import React from "react";
+import CLILogo from "../../../../../public/Images/CLILogo.png";
+import Kent from "../../../../../public/Images/kent.png";
+import apiService from "../../servicesApi/apiService";
+import { useStateContext } from "../../../context/contextprovider";
+import { Link, useLocation } from "react-router-dom";
+import Breadcrumbs from "@mui/material/Breadcrumbs";
+import Typography from "@mui/material/Typography";
 import { FaAngleRight } from "react-icons/fa";
-import Stack from '@mui/material/Stack';
-import { startsWith } from 'lodash';
+import Stack from "@mui/material/Stack";
+import { startsWith } from "lodash";
+import Alert from "@mui/material/Alert";
 
 const Navbar = () => {
+    const { data } = useStateContext();
 
+    const location = useLocation();
 
-  const {data} = useStateContext();
+    const pathnames = location.pathname.split("/").filter((x) => x);
 
-  const location = useLocation();
+    const breadcrumbs = [
+        ...pathnames.map((value, index) => {
+            const routeTo = `/${pathnames.slice(0, index + 1).join("/")}`;
 
-  const pathnames = location.pathname.split('/').filter((x) => x);
-  
-   const breadcrumbs = [
-    ...pathnames.map((value, index) => {
-      const routeTo = `/${pathnames.slice(0, index + 1).join('/')}`;
+            let breadcrumbLabel = decodeURIComponent(
+                value.charAt(0).toUpperCase() + value.slice(1)
+            );
 
-     
-       let breadcrumbLabel = decodeURIComponent(value.charAt(0).toUpperCase() + value.slice(1));
-       
+            if (value.toLowerCase() === "inquirymanagement") {
+                breadcrumbLabel = "Inquiry Management";
+                // Non-linkable
+                return (
+                    <span
+                        key={routeTo}
+                        className="text-custom-solidgreen cursor-default"
+                    >
+                        {breadcrumbLabel}
+                    </span>
+                );
+            }
 
-      if (value.toLowerCase() === "inquirymanagement") {
-        breadcrumbLabel = "Inquiry Management";
-        // Non-linkable
-        return (
-          <span key={routeTo} className="text-custom-solidgreen cursor-default">
-            {breadcrumbLabel}
-          </span>
-        );
-      }
+            if (value.toLowerCase() === "transactionmanagement") {
+                breadcrumbLabel = "Transaction Management";
+                // Non-linkable
+                return (
+                    <span
+                        key={routeTo}
+                        className="text-custom-solidgreen cursor-default"
+                    >
+                        {breadcrumbLabel}
+                    </span>
+                );
+            }
 
-      if (value.toLowerCase() === "inquirylist") {
-        breadcrumbLabel = "Inquiries";
-      }
-      
+            if (value.toLowerCase() === "inquirylist") {
+                breadcrumbLabel = "Inquiries";
+            }
 
-      if (value.toLowerCase() === "thread") {
-        breadcrumbLabel = "Inquiries"; 
-        return (
-          <Link key={routeTo} to="/inquirymanagement/inquirylist" className="text-custom-solidgreen">
-            {breadcrumbLabel}
-          </Link>
-        );
-      }
+            if (value.toLowerCase() === "transactionrecords") {
+                breadcrumbLabel = "Transaction Records";
+            }
 
-        
-      
-        if (breadcrumbLabel.startsWith("Ticket#")) {
-          const ticketId = breadcrumbLabel
-          const dataProperty = data?.find((item) => item.ticket_id === ticketId) || {};
+            if (value.toLowerCase() === "thread") {
+                breadcrumbLabel = "Inquiries";
+                return (
+                    <Link
+                        key={routeTo}
+                        to="/inquirymanagement/inquirylist"
+                        className="text-custom-solidgreen"
+                    >
+                        {breadcrumbLabel}
+                    </Link>
+                );
+            }
 
-          return (
-            <span key={routeTo} className="text-custom-solidgreen cursor-default">
-              {dataProperty.property}{" "}({breadcrumbLabel})
-            </span>
-          );
-        }
-      return (
-        <Link key={routeTo} to={routeTo} className="text-custom-solidgreen">
-          {breadcrumbLabel}
-        </Link>
-      );
-    }),
-  ];
+            if (breadcrumbLabel.startsWith("Ticket#")) {
+                const ticketId = breadcrumbLabel;
+                const dataProperty =
+                    data?.find((item) => item.ticket_id === ticketId) || {};
 
+                return (
+                    <span
+                        key={routeTo}
+                        className="text-custom-solidgreen cursor-default"
+                    >
+                        {dataProperty.property} ({breadcrumbLabel})
+                    </span>
+                );
+            }
+            return (
+                <Link
+                    key={routeTo}
+                    to={routeTo}
+                    className="text-custom-solidgreen"
+                >
+                    {breadcrumbLabel}
+                </Link>
+            );
+        }),
+    ];
 
-  const { user } = useStateContext();
+    const { user } = useStateContext();
 
-  const handleLogout = async () => {
-    try {
-      const response = await apiService.post("auth/logout", {});
-      if (response.status === 200) {
-        /*    localStorage.removeItem("selectedUnit");
+    const handleLogout = async () => {
+        try {
+            const response = await apiService.post("auth/logout", {});
+            if (response.status === 200) {
+                /*    localStorage.removeItem("selectedUnit");
         sessionStorage.removeItem("modalAlreadyShown"); */
-        localStorage.removeItem("authToken");
-        window.location.href = "/";
-      } else {
-        console.log("Logout failed");
-      }
-    } catch (error) {
-      console.log("Error", error);
-    }
-  };
+                localStorage.removeItem("authToken");
+                window.location.href = "/";
+            } else {
+                console.log("Logout failed");
+            }
+        } catch (error) {
+            console.log("Error", error);
+        }
+    };
 
-  return (
-    <div className="flex h-[100px] pr-16 w-screen bg-custom-grayFA">
-      <div className='flex w-full'>
-        <div className='flex'>
-          <div className="flex justify-center items-center">
-            <img className='h-16 ml-5' src={CLILogo} alt="cli logo" />
-          </div>
-          <div className='flex ml-[65px] justify-between items-center'>
-            <Link to="salesmanagement/reservationpage">
-              <div>
-                <button className='w-[130px] h-[45px] rounded-[9px] montserrat-semibold gradient-btn2 text-white hover:shadow-custom4 hidden'>Reserve</button>
-              </div>
-            </Link>
-          </div>
-        </div>
-        <div className='flex items-center justify-start'>
-          <Stack spacing={2}>
-            <Breadcrumbs separator={<FaAngleRight className='text-custom-solidgreen' />} aria-label="breadcrumb">
-              {breadcrumbs}
-            </Breadcrumbs>
-          </Stack>
-        </div>
-      </div>
-      <div className="flex items-center justify-end">
-        <div className="flex gap-[7px]">
-          <div className='flex items-center w-[74px] justify-center'>
-            <button className='text-base font-bold bg-gradient-to-r from-custom-bluegreen via-custom-lightgreen to-custom-lightgreen bg-clip-text text-transparent' onClick={handleLogout}>Logout</button>
-          </div>
-          <div className='flex justify-center w-[67px]'>
-            <img src={user.profile_picture} alt="image" className='h-[63px] w-[63px] rounded-full border-8' />
-          </div>
-          <div className='flex items-center'>
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-7">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M10.343 3.94c.09-.542.56-.94 1.11-.94h1.093c.55 0 1.02.398 1.11.94l.149.894c.07.424.384.764.78.93.398.164.855.142 1.205-.108l.737-.527a1.125 1.125 0 0 1 1.45.12l.773.774c.39.389.44 1.002.12 1.45l-.527.737c-.25.35-.272.806-.107 1.204.165.397.505.71.93.78l.893.15c.543.09.94.559.94 1.109v1.094c0 .55-.397 1.02-.94 1.11l-.894.149c-.424.07-.764.383-.929.78-.165.398-.143.854.107 1.204l.527.738c.32.447.269 1.06-.12 1.45l-.774.773a1.125 1.125 0 0 1-1.449.12l-.738-.527c-.35-.25-.806-.272-1.203-.107-.398.165-.71.505-.781.929l-.149.894c-.09.542-.56.94-1.11.94h-1.094c-.55 0-1.019-.398-1.11-.94l-.148-.894c-.071-.424-.384-.764-.781-.93-.398-.164-.854-.142-1.204.108l-.738.527c-.447.32-1.06.269-1.45-.12l-.773-.774a1.125 1.125 0 0 1-.12-1.45l.527-.737c.25-.35.272-.806.108-1.204-.165-.397-.506-.71-.93-.78l-.894-.15c-.542-.09-.94-.56-.94-1.109v-1.094c0-.55.398-1.02.94-1.11l.894-.149c.424-.07.765-.383.93-.78.165-.398.143-.854-.108-1.204l-.526-.738a1.125 1.125 0 0 1 .12-1.45l.773-.773a1.125 1.125 0 0 1 1.45-.12l.737.527c.35.25.807.272 1.204.107.397-.165.71-.505.78-.929l.15-.894Z" />
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-            </svg>
-          </div>
-          <div>
-            {/*  <svg
+    return (
+        <>
+            <div className="flex h-[100px] pr-16 w-screen bg-custom-grayFA">
+                <div className="flex w-full">
+                    <div className="flex">
+                        <div className="flex justify-center items-center">
+                            <img
+                                className="h-16 ml-5"
+                                src={CLILogo}
+                                alt="cli logo"
+                            />
+                        </div>
+                        <div className="flex ml-[65px] justify-between items-center">
+                            <Link to="salesmanagement/reservationpage">
+                                <div>
+                                    <button className="w-[130px] h-[45px] rounded-[9px] montserrat-semibold gradient-btn2 text-white hover:shadow-custom4 hidden">
+                                        Reserve
+                                    </button>
+                                </div>
+                            </Link>
+                        </div>
+                    </div>
+                    <div className="flex items-center justify-start">
+                        <Stack spacing={2}>
+                            <Breadcrumbs
+                                separator={
+                                    <FaAngleRight className="text-custom-solidgreen" />
+                                }
+                                aria-label="breadcrumb"
+                            >
+                                {breadcrumbs}
+                            </Breadcrumbs>
+                        </Stack>
+                    </div>
+                </div>
+                <div className="flex items-center justify-end">
+                    <div className="flex gap-[7px]">
+                        <div className="flex items-center w-[74px] justify-center">
+                            <button
+                                className="text-base font-bold bg-gradient-to-r from-custom-bluegreen via-custom-lightgreen to-custom-lightgreen bg-clip-text text-transparent"
+                                onClick={handleLogout}
+                            >
+                                Logout
+                            </button>
+                        </div>
+                        <div className="flex justify-center w-[67px]">
+                            <img
+                                src={user.profile_picture}
+                                alt="image"
+                                className="h-[63px] w-[63px] rounded-full border-8"
+                            />
+                        </div>
+                        <div className="flex items-center">
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                strokeWidth={1.5}
+                                stroke="currentColor"
+                                className="size-7"
+                            >
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    d="M10.343 3.94c.09-.542.56-.94 1.11-.94h1.093c.55 0 1.02.398 1.11.94l.149.894c.07.424.384.764.78.93.398.164.855.142 1.205-.108l.737-.527a1.125 1.125 0 0 1 1.45.12l.773.774c.39.389.44 1.002.12 1.45l-.527.737c-.25.35-.272.806-.107 1.204.165.397.505.71.93.78l.893.15c.543.09.94.559.94 1.109v1.094c0 .55-.397 1.02-.94 1.11l-.894.149c-.424.07-.764.383-.929.78-.165.398-.143.854.107 1.204l.527.738c.32.447.269 1.06-.12 1.45l-.774.773a1.125 1.125 0 0 1-1.449.12l-.738-.527c-.35-.25-.806-.272-1.203-.107-.398.165-.71.505-.781.929l-.149.894c-.09.542-.56.94-1.11.94h-1.094c-.55 0-1.019-.398-1.11-.94l-.148-.894c-.071-.424-.384-.764-.781-.93-.398-.164-.854-.142-1.204.108l-.738.527c-.447.32-1.06.269-1.45-.12l-.773-.774a1.125 1.125 0 0 1-.12-1.45l.527-.737c.25-.35.272-.806.108-1.204-.165-.397-.506-.71-.93-.78l-.894-.15c-.542-.09-.94-.56-.94-1.109v-1.094c0-.55.398-1.02.94-1.11l.894-.149c.424-.07.765-.383.93-.78.165-.398.143-.854-.108-1.204l-.526-.738a1.125 1.125 0 0 1 .12-1.45l.773-.773a1.125 1.125 0 0 1 1.45-.12l.737.527c.35.25.807.272 1.204.107.397-.165.71-.505.78-.929l.15-.894Z"
+                                />
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
+                                />
+                            </svg>
+                        </div>
+                        <div>
+                            {/*  <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
               viewBox="0 0 24 24"
@@ -139,11 +202,12 @@ const Navbar = () => {
                 strokeWidth="2"
                 d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z"></path>
             </svg> */}
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </>
+    );
+};
 
-export default Navbar
+export default Navbar;

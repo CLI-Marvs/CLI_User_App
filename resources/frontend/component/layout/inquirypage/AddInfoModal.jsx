@@ -2,17 +2,28 @@ import React, { useEffect, useState } from "react";
 import { IoMdArrowDropdown } from "react-icons/io";
 import apiService from "../../servicesApi/apiService";
 import { data } from "autoprefixer";
+import { useStateContext } from "../../../context/contextprovider";
 
 const AddInfoModal = ({ modalRef, dataConcern }) => {
+    const predefinedUserTypes = ["Property Owner", "Buyer", "Broker","Seller"];
+    const { getAllConcerns } = useStateContext();
     const [message, setMessage] = useState("");
     const [dataToUpdate, setDataToUpdate] = useState({
         contract_number: dataConcern.contract_number || "",
         unit_number: dataConcern.unit_number || "",
         property: dataConcern.property || "",
-        remarks: dataConcern.details_message || "",
+        remarks: message || "",
         buyer_email: dataConcern.buyer_email || "",
         mobile_number: dataConcern.mobile_number || "",
-        name: dataConcern.buyer_name || "",
+        buyer_firstname: dataConcern.buyer_firstname || "",
+        buyer_middlename: dataConcern.buyer_middlename || "",
+        buyer_lastname: dataConcern.buyer_lastname || "",
+        user_type: predefinedUserTypes.includes(dataConcern.user_type)
+            ? dataConcern.user_type
+            : "Others", 
+        other_user_type: !predefinedUserTypes.includes(dataConcern.user_type)
+            ? dataConcern.user_type
+            : "",
     });
 
     const projectList = [
@@ -55,7 +66,6 @@ const AddInfoModal = ({ modalRef, dataConcern }) => {
         "San Jose Maria Village - Minglanilla",
         "San Jose Maria Village - Toledo",
         "San Josemaria Village - Talisay",
-        "Test Project",
         "The East Village",
         "Velmiro Greens Bohol",
         "Velmiro Heights",
@@ -74,20 +84,36 @@ const AddInfoModal = ({ modalRef, dataConcern }) => {
 
     const handleChange = (e) => {
         const newValue = e.target.value;
-        setDataToUpdate({
-            ...dataToUpdate,
-            [e.target.name]: newValue,
-        });
+        const { name, value } = e.target;
+        if (name === "user_type" && value === "Others") {
+            setDataToUpdate((prevState) => ({
+                ...prevState,
+                user_type: "Others",
+                other_user_type: "", // Clear the other_user_type field when selecting Others
+            }));
+        } else if (name === "user_type") {
+            setDataToUpdate((prevState) => ({
+                ...prevState,
+                user_type: value,
+                other_user_type: "", // Clear the other_user_type when predefined type is selected
+            }));
+        } else {
+            setDataToUpdate({
+                ...dataToUpdate,
+                [e.target.name]: newValue,
+            });
+        }
     };
 
     const addInfo = async () => {
         try {
             const response = await apiService.put(
                 `update-info?dataId=${dataConcern.id}`,
-                {...dataToUpdate}
+                { ...dataToUpdate }
             );
 
             console.log("response", response);
+            getAllConcerns();
         } catch (error) {
             console.log("error", error);
         }
@@ -99,13 +125,23 @@ const AddInfoModal = ({ modalRef, dataConcern }) => {
                 contract_number: dataConcern.contract_number || "",
                 unit_number: dataConcern.unit_number || "",
                 property: dataConcern.property || "",
-                remarks: dataConcern.details_message || "",
+                remarks: message || "",
                 buyer_email: dataConcern.buyer_email || "",
                 mobile_number: dataConcern.mobile_number || "",
-                name: dataConcern.buyer_name || "",
+                buyer_firstname: dataConcern.buyer_firstname || "",
+                buyer_middlename: dataConcern.buyer_middlename || "",
+                buyer_lastname: dataConcern.buyer_lastname || "",
+                user_type: predefinedUserTypes.includes(dataConcern.user_type)
+                    ? dataConcern.user_type
+                    : "Others", // Set to "Others" for any non-standard user_type
+                other_user_type: !predefinedUserTypes.includes(
+                    dataConcern.user_type
+                )
+                    ? dataConcern.user_type
+                    : "",
             });
         }
-    }, []);
+    }, [dataConcern]);
     return (
         <dialog
             id="Resolved"
@@ -125,18 +161,60 @@ const AddInfoModal = ({ modalRef, dataConcern }) => {
                 </div>
                 <div className=" px-[50px] py-[77px] flex flex-col gap-[40px]">
                     <div className="flex flex-col gap-[10px]">
+                        {/* First name */}
                         <div
                             className={`flex items-center border border-[D6D6D6] rounded-[5px] overflow-hidden`}
                         >
                             <span className="text-custom-gray81 text-sm bg-[#EDEDED] flex pl-3 py-1 w-[300px]">
-                                Name
+                                First Name
                             </span>
                             <input
-                                name="name"
-                                value={dataToUpdate.name || ""}
+                                name="buyer_firstname"
+                                value={dataToUpdate.buyer_firstname || ""}
+                                // value={
+                                //     (dataToUpdate.name || "") +
+                                //     " additional text"
+                                // }
                                 onChange={handleChange}
                                 type="text"
-                                className="w-full px-4 text-sm focus:outline-none mobile:text-xs"
+                                className="w-full px-4 text-sm focus:outline-none mobile:text-xs capitalize"
+                                placeholder=""
+                            />
+                        </div>
+                        {/* Middle name */}
+                        <div
+                            className={`flex items-center border border-[D6D6D6] rounded-[5px] overflow-hidden`}
+                        >
+                            <span className="text-custom-gray81 text-sm bg-[#EDEDED] flex pl-3 py-1 w-[300px]">
+                                Middle Name
+                            </span>
+                            <input
+                                name="buyer_middlename"
+                                value={dataToUpdate.buyer_middlename || ""}
+                                // value={
+                                //     (dataToUpdate.name || "") +
+                                //     " additional text"
+                                // }
+                                onChange={handleChange}
+                                type="text"
+                                className="w-full px-4 text-sm focus:outline-none mobile:text-xs capitalize"
+                                placeholder=""
+                            />
+                        </div>
+                        {/* Last name */}
+
+                        <div
+                            className={`flex items-center border border-[D6D6D6] rounded-[5px] overflow-hidden`}
+                        >
+                            <span className="text-custom-gray81 text-sm bg-[#EDEDED] flex pl-3 py-1 w-[300px]">
+                                Last Name
+                            </span>
+                            <input
+                                name="buyer_lastname"
+                                value={dataToUpdate.buyer_lastname || ""}
+                                onChange={handleChange}
+                                type="text"
+                                className="w-full px-4 text-sm focus:outline-none mobile:text-xs capitalize"
                                 placeholder=""
                             />
                         </div>
@@ -159,7 +237,7 @@ const AddInfoModal = ({ modalRef, dataConcern }) => {
                             className={`flex items-center border border-[D6D6D6] rounded-[5px] overflow-hidden`}
                         >
                             <span className="text-custom-gray81 text-sm bg-[#EDEDED] flex pl-3 py-1 w-[300px]">
-                                Mobile Phone No.
+                                Mobile Number
                             </span>
                             <input
                                 name="mobile_number"
@@ -169,6 +247,49 @@ const AddInfoModal = ({ modalRef, dataConcern }) => {
                                 className="w-full px-4 text-sm focus:outline-none mobile:text-xs no-spinner"
                                 placeholder=""
                             />
+                        </div>
+                        <div
+                            className={`flex items-center border border-[D6D6D6] rounded-[5px] overflow-hidden`}
+                        >
+                            <span className="text-custom-gray81 text-sm bg-[#EDEDED] flex items-center w-[308px] tablet:w-[175px] mobile:w-[270px] mobile:text-xs -mr-3 pl-3 py-1">
+                                I am a
+                            </span>
+                            <div className="relative w-full">
+                                <select
+                                    name="user_type"
+                                    value={dataToUpdate.user_type || ""}
+                                    onChange={handleChange}
+                                    className="appearance-none w-full px-4 text-sm py-1 bg-white focus:outline-none border-0 mobile:text-xs"
+                                >
+                                    <option value="">(Select)</option>
+                                    <option value="Property Owner">
+                                        Property Owner
+                                    </option>
+                                    <option value="Buyer">Buyer</option>
+                                    <option value="Broker">Broker</option>
+                                    <option value="Seller">Seller</option>
+                                    <option value="Others">Others</option>
+                                </select>
+                                <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3 bg-[#EDEDED] text-custom-gray81 pointer-events-none">
+                                    <IoMdArrowDropdown />
+                                </span>
+                            </div>
+                        </div>
+                        <div className="flex justify-end">
+                            {dataToUpdate.user_type === "Others" && (
+                                <div
+                                    className={`flex items-center border rounded-[5px] w-[305px] overflow-hidden`}
+                                >
+                                    <input
+                                        name="other_user_type"
+                                        type="text"
+                                        className="w-full px-4 text-sm focus:outline-none mobile:text-xs py-1"
+                                        value={dataToUpdate.other_user_type}
+                                        onChange={handleChange}
+                                        placeholder=""
+                                    />
+                                </div>
+                            )}
                         </div>
                     </div>
                     <div className="flex flex-col gap-[10px]">
@@ -190,13 +311,13 @@ const AddInfoModal = ({ modalRef, dataConcern }) => {
                         <div
                             className={`flex items-center border border-[D6D6D6] rounded-[5px] overflow-hidden`}
                         >
-                            <span className="text-custom-gray81 text-sm bg-[#EDEDED] flex items-center w-[300px] tablet:w-[175px] mobile:w-[270px] mobile:text-xs -mr-3 pl-3 py-1">
+                            <span className="text-custom-gray81 text-sm bg-[#EDEDED] flex items-center w-[308px] tablet:w-[175px] mobile:w-[270px] mobile:text-xs -mr-3 pl-3 py-1">
                                 Property
                             </span>
                             <div className="relative w-full">
                                 <select
                                     name="property"
-                                    value={dataToUpdate.property || ""} 
+                                    value={dataToUpdate.property || ""}
                                     onChange={handleChange}
                                     className="appearance-none w-full px-4 text-sm py-1 bg-white focus:outline-none border-0 mobile:text-xs"
                                 >
@@ -255,7 +376,10 @@ const AddInfoModal = ({ modalRef, dataConcern }) => {
                     </div>
                     <div className="flex justify-end">
                         <form method="dialog">
-                            <button className="w-[133px] h-[39px] gradient-btn5 font-semibold text-sm text-white rounded-[10px]" onClick={addInfo}>
+                            <button
+                                className="w-[133px] h-[39px] gradient-btn5 font-semibold text-sm text-white rounded-[10px]"
+                                onClick={addInfo}
+                            >
                                 Update
                             </button>
                         </form>

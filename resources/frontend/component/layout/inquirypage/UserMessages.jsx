@@ -16,17 +16,17 @@ const UserMessages = ({ items }) => {
     const formattedTime = moment(items.created_at).format("hh:mm A");
 
     const dataConcern = data?.find((item) => item.ticket_id === ticketId) || {};
-
     const capitalizeWords = (name) => {
-       if(name) {
-        return name
-        .split(" ")
-        .map(
-            (word) =>
-                word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-        )
-        .join(" ");
-       }
+        if (name) {
+            return name
+                .split(" ")
+                .map(
+                    (word) =>
+                        word.charAt(0).toUpperCase() +
+                        word.slice(1).toLowerCase()
+                )
+                .join(" ");
+        }
     };
     return (
         <div className="w-full">
@@ -56,33 +56,56 @@ const UserMessages = ({ items }) => {
                     </div>
                     {Array.isArray(attachmentData) &&
                         attachmentData.length > 0 &&
-                        attachmentData.map((attachment, index) => (
-                            <div className="mt-4 w-[219px]" key={index}>
-                                <Link
-                                    to={`/file-viewer/attachment/${items.id}`}
-                                    onClick={(e) => {
-                                        e.preventDefault(); // Prevents the immediate navigation
-                                        console.log("attachment", attachment);
-                                        localStorage.setItem(
-                                            "fileUrlPath",
-                                            JSON.stringify(attachment)
-                                        ); // Store the data
-                                        // Manually navigate to the new page after setting localStorage
-                                        window.open(
-                                            `/file-viewer/attachment/${items.id}`,
-                                            "_blank"
-                                        );
-                                    }}
-                                    className="flex items-center justify-start bg-customnavbar h-12 pl-4 text-black gap-2 rounded-[5px]"
+                        attachmentData.map((attachment, index) => {
+                        
+                            const fileName = attachment?.original_file_name;
+                            if (!fileName) {
+                                // If fileName is undefined or null, return a fallback UI or nothing
+                                return null;
+                            }
+                            const fileType = fileName.split(".").pop(); // Get the file extension
+                            const baseName = fileName.substring(
+                                0,
+                                fileName.lastIndexOf(".")
+                            ); // Get the name without extension
+
+                            // Truncate the base name to 15 characters
+                            const truncatedName =
+                                baseName.length > 15
+                                    ? `${baseName.slice(0, 15)}...`
+                                    : baseName;
+                            return (
+                                <div
+                                    className="mt-4 w-[219px] overflow-hidden font-light"
+                                    key={index}
                                 >
-                                    <img
-                                        src={FolderFile}
-                                        alt="View Attachment"
-                                    />
-                                    View Attachment
-                                </Link>
-                            </div>
-                        ))}
+                                    <Link
+                                        to={`/file-viewer/attachment/${items.id}`}
+                                        onClick={(e) => {
+                                            e.preventDefault(); // Prevents the immediate navigation
+                                            localStorage.setItem(
+                                                "fileUrlPath",
+                                                JSON.stringify(attachment.url)
+                                            );
+                                            window.open(
+                                                `/file-viewer/attachment/${items.id}`,
+                                                "_blank"
+                                            );
+                                        }}
+                                        className="flex items-center justify-start bg-customnavbar h-12 pl-4 text-black gap-2 rounded-[5px]"
+                                    >
+                                        <img
+                                            src={FolderFile}
+                                            alt="View Attachment"
+                                        />
+                                        <span className="w-[200px] h-[20px]">
+                                            {" "}
+                                            {truncatedName}.{fileType}
+                                        </span>
+                                    </Link>
+                                </div>
+                            );
+                        })}
                 </div>
             </div>
         </div>

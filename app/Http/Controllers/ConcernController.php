@@ -226,21 +226,42 @@ class ConcernController extends Controller
 
     public function sendMessage(Request $request)
     {
+
         try {
             $allFiles = [];
             $files = $request->file('files');
+            $all_file_names = [];
+            $filesData = [];
+
             if ($files) {
-                foreach ($files as $file) {
-                    $fileName = $file->getClientOriginalName();
+                $fileLinks = $this->uploadToGCS($files);
+
+                foreach ($files as $index => $file) {
+                    $fileName  = $file->getClientOriginalName();
+
+
                     $filePath = $file->storeAs('temp', $fileName);
+                    // Store the filename for JSON output
+
                     $allFiles[] = [
                         'name' => $fileName,
                         'path' => storage_path('app/' . $filePath),
                     ];
+                    // Create an associative array for each file
+                    $filesData[] = [
+                        'url' => $fileLinks[$index], // Use the corresponding URL from the GCS upload
+                        'original_file_name' => $fileName // Store the original file name
+                    ];
+
+                    // $fileLinks[] = [
+                    //     'url' => $fileLink,
+                    //     'original_file_name' => $originalFileName
+                    // ];
+
                 }
             }
 
-            $fileLinks = $this->uploadToGCS($files);
+
             $adminMessage = $request->input('details_message', '');
             $message_id = $request->input('message_id', '');
             $admin_email = $request->input('admin_email', '');
@@ -248,11 +269,11 @@ class ConcernController extends Controller
             $admin_name = $request->input('admin_name', '');
             $admin_id = $request->input('admin_id', '');
             $buyer_email = $request->input('buyer_email', '');
-            $buyer_name = $request->input('buyer_name', '');
+            $buyer_lastname = $request->input('buyer_lastname', '');
             $admin_profile_picture = $request->input('admin_profile_picture', '');
 
 
-            $attachment = !empty($fileLinks) ? json_encode($fileLinks) : null;
+            $attachment = !empty($filesData) ? json_encode($filesData) : null;
             $messages = new Messages();
             $messages->admin_id = $admin_id;
             $messages->admin_email = $admin_email;
@@ -261,6 +282,7 @@ class ConcernController extends Controller
             $messages->admin_profile_picture = $admin_profile_picture;
             $messages->details_message = $adminMessage;
             $messages->admin_name = $admin_name;
+            $messages->file_names = json_encode($all_file_names);
             $messages->save();
 
             $this->inquiryAdminLogs($request);
@@ -288,7 +310,7 @@ class ConcernController extends Controller
                 ReplyFromAdminJob::dispatch($messages->ticket_id, $buyer_email, $adminMessage, $message_id, $allFiles);
             } */
 
-            ReplyFromAdminJob::dispatch($messages->ticket_id, $buyer_email, $adminMessage, $message_id, $allFiles, $admin_name, $buyer_name);
+            ReplyFromAdminJob::dispatch($messages->ticket_id, $buyer_email, $adminMessage, $message_id, $allFiles, $admin_name, $buyer_lastname);
 
 
             return response()->json("Successfully sent");
@@ -366,10 +388,36 @@ class ConcernController extends Controller
     //*For Cloud Storage
     public function addConcernPublic(Request $request)
     {
-        try {
-            $user = $request->user();
 
+        try {
+            $validatedData = $request->validate([
+                'fname' =>
+                ['required', 'regex:/^[\pL\s\-\'\.]+$/u', 'max:255'],
+                'lname' =>
+                ['required', 'regex:/^[\pL\s\-\'\.]+$/u', 'max:255'],
+                'details_concern' => 'required|string',
+                'message' => 'required|string|max:500',
+            ], [
+                'fname.regex' => 'The first name field format is invalid.',
+                'fname.required' => 'The first name field is required.',
+                'lname.regex' => 'The last name field format is invalid.',
+                'lname.required' => 'The last name field is required.',
+                //'mname.regex' => 'The middle name field format is invalid.',
+
+            ]);
+            $user = $request->user();
+            $filesData = [];
             $files = $request->file('files');
+            if ($files) {
+                $fileLinks = $this->uploadToGCS($files);
+                foreach ($files as $index => $file) {
+                    $fileName  = $file->getClientOriginalName();
+                    $filesData[] = [
+                        'url' => $fileLinks[$index],
+                        'original_file_name' => $fileName // Store the original file name
+                    ];
+                }
+            }
             $lastConcern = Concerns::latest()->first();
             $nextId = $lastConcern ? $lastConcern->id + 1 : 1;
             $formattedId = str_pad($nextId, 8, '0', STR_PAD_LEFT);
@@ -380,12 +428,19 @@ class ConcernController extends Controller
             $concerns = new Concerns();
             $concerns->details_concern = $request->details_concern;
             $concerns->property = $request->property;
-            $concerns->details_message = $request->message;
+            $concerns->details_message = $validatedData['message'];
             $concerns->status = "unresolved";
             $concerns->ticket_id = $ticketId;
             $concerns->user_type = $request->user_type;
-            $concerns->buyer_name = $request->fname . ' ' . $request->lname;
-            $concerns->buyer_middlename = $request->mname;
+            if ($request->user_type === "Others") {
+                $concerns->user_type = $request->other_user_type;
+            }
+            $concerns->buyer_name
+                = $validatedData['fname'] . ' ' . $request->mname . ' ' .  $validatedData['lname'];
+            $concerns->buyer_firstname = $validatedData['fname'];
+            $concerns->buyer_middlename =
+                $request->mname;
+            $concerns->buyer_lastname = $validatedData['lname'];
             $concerns->mobile_number = $request->mobile_number;
             $concerns->contract_number = $request->contract_number;
             $concerns->unit_number = $request->unit_number;
@@ -396,8 +451,8 @@ class ConcernController extends Controller
             $this->inquiryReceivedLogs($request, $ticketId);
             $this->concernsCreatedBy($user, $concerns->id);
 
-            $fileLinks = $this->uploadToGCS($files);
-            $attachment = !empty($fileLinks) ? json_encode($fileLinks) : null;
+
+            $attachment = !empty($filesData) ? json_encode($filesData) : null;
             $messages = new Messages();
             $messages->buyer_email = $request->buyer_email;
             /* $messages->admin_id = $request->admin_id; */
@@ -412,21 +467,35 @@ class ConcernController extends Controller
 
             return response()->json('Successfully added');
         } catch (\Exception $e) {
-            return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
+            \Log::error("Error occurred: " . $e->getMessage());
+            return response()->json(['message' => 'An error occurred.', 'error' => $e->getMessage()], 500);
         }
     }
 
     public function updateInfo(Request $request)
     {
+        // dd($request);
         try {
             $dataId = $request->dataId;
             $concern = Concerns::where('id', $dataId)->first();
             $concern->mobile_number = $request->mobile_number;
             $concern->contract_number = $request->contract_number;
             $concern->unit_number = $request->unit_number;
-            $concern->buyer_name = $request->name;
+            $concern->buyer_name = $request->buyer_firstname . ' ' . $request->buyer_middlename . ' ' . $request->buyer_lastname;
+            $concern->buyer_firstname
+                = $request->buyer_firstname;
+            $concern->buyer_middlename
+                = $request->buyer_middlename;
+            $concern->buyer_lastname
+                = $request->buyer_lastname;
+            $concern->user_type = $request->user_type;
+
+            if ($request->user_type === "Others") {
+                $concern->user_type = $request->other_user_type;
+            }
             $concern->buyer_email = $request->buyer_email;
             $concern->property = $request->property;
+            $concern->admin_remarks = $request->remarks;
             $concern->save();
 
             return response()->json('Successfully updated');
@@ -650,7 +719,7 @@ class ConcernController extends Controller
             $query->orderBy('created_at', 'desc');
         }
 
-        if ($employee->department !== 'CRS') {
+        if ($employee->department !== 'Customer Relations - Services') {
             $query->whereIn('concerns.ticket_id', $ticketIds);
         }
 
@@ -674,7 +743,7 @@ class ConcernController extends Controller
         if ($specificAssignCSR !== null && $days !== null) {
             $query->whereIn('concerns.ticket_id', $ticketIds);
             if ($days === "3+") {
-                $query->where('concerns.created_at', '<', now()->subDays(3)->startOfDay());
+                $query->where('concerns.created_at', '<', now()->subDays(3)->endOfDay());
             } else {
                 $startOfDay = now()->subDays($days)->startOfDay();
                 $endOfDay = now()->subDays($days)->endOfDay();
@@ -689,29 +758,20 @@ class ConcernController extends Controller
     {
         if ($status && $days !== null) {
             if ($days === "3+") {
-                \Log::info("trigger here days and status first");
-
                 $query->where('status', $status)
                     ->where('concerns.created_at', '<', now()->subDays(3)->endOfDay());
             } else {
-                \Log::info("trigger here days and status second");
-
                 $startOfDay = now()->subDays($days)->startOfDay();
                 $endOfDay = now()->subDays($days)->endOfDay();
                 $query->where('status', $status)
                     ->whereBetween('concerns.created_at', [$startOfDay, $endOfDay]);
             }
         } else if ($status) {
-            \Log::info("trigger here status only first");
-
             $query->where('status', $status);
         } else if ($days !== null) {
             if ($days === "3+") {
-                \Log::info("trigger here days only first");
                 $query->where('concerns.created_at', '<', now()->subDays(3)->endOfDay());
             } else {
-                \Log::info("trigger here days only second");
-
                 $startOfDay = now()->subDays($days)->startOfDay();
                 $endOfDay = now()->subDays($days)->endOfDay();
                 $query->whereBetween('concerns.created_at', [$startOfDay, $endOfDay]);
@@ -778,7 +838,7 @@ class ConcernController extends Controller
             $assignedInquiries = $this->getAssignInquiries($employee->employee_email);
             $ticketIds = $assignedInquiries->pluck('ticket_id')->toArray();
 
-            if ($employeeDepartment !== "CRS") {
+            if ($employeeDepartment !== "Customer Relations - Services") {
                 $concernsQuery->whereIn('ticket_id', $ticketIds);
             }
 
@@ -886,7 +946,7 @@ class ConcernController extends Controller
     {
         $buyerReplyQuery = BuyerReplyNotif::query();
 
-        if ($employeeDepartment !== "CRS") {
+        if ($employeeDepartment !== "Customer Relations - Services") {
             $buyerReplyQuery->whereIn('ticket_id', $ticketIds);
         }
 
@@ -983,7 +1043,7 @@ class ConcernController extends Controller
             $assignedInquiries = $this->getAssignInquiries($employee->employee_email);
             $ticketIds = $assignedInquiries->pluck('ticket_id')->toArray();
 
-            if ($employeeDepartment !== "CRS") {
+            if ($employeeDepartment !== "Customer Relations - Services") {
                 $concernsQuery->whereIn('ticket_id', $ticketIds);
                 $inquiryAssigneeQuery->whereIn('ticket_id', $ticketIds);
                 $buyerReplyQuery->whereIn('ticket_id', $ticketIds);
@@ -1067,7 +1127,30 @@ class ConcernController extends Controller
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
         }
     }
+    public function removeInquiryAssigneeLog($request)
+    {
+        try {
+            $inquiry = new InquiryLogs();
+            $logData = [
+                'log_type' => 'remove_to',
+                'details' => [
+                    'message_tag' => 'Remove to',
+                    'remove_to_name' => $request->name,
+                    /*  'asiggn_to_department' => $request->department, */
+                    'remove_by' => $request->removedBy,
+                    'remove_by_department' => $request->department,
+                    /*  'remarks' => $request->remarks */
+                ]
+            ];
 
+            $inquiry->removed_assignee = json_encode($logData);
+            $inquiry->ticket_id = $request->ticketId;
+            $inquiry->message_log = "Removed to" . ' ' . $request->name;
+            $inquiry->save();
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
+        }
+    }
     public function assignInquiryTo(Request $request)
     {
         try {
@@ -1125,6 +1208,7 @@ class ConcernController extends Controller
             $this->inquiryAssigneeLogs($request, $assignees, $ticketId);
 
 
+
             return response()->json('Successfully assign');
         } catch (\Exception $e) {
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
@@ -1151,7 +1235,55 @@ class ConcernController extends Controller
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
         }
     }
+    public function removeAssignee(Request $request)
+    {
+        try {
+            $user = $request->user();
+            $userDepartment = $user->department;
 
+            if ($userDepartment !== "Customer Relations - Services") {
+                return response()->json(['message' => 'Unauthorized user']);
+            }
+
+            $assignee = InquiryAssignee::where('ticket_id', $request->ticketId)
+                ->where('email', $request->email)
+                ->first();
+
+            if ($assignee) {
+                $assignee->delete();
+
+                $concernData = Concerns::where('ticket_id', $request->ticketId)->first();
+
+                if ($concernData && $concernData->assign_to) {
+                    $currentAssignTo = json_decode($concernData->assign_to, true);
+
+                    $currentAssignTo = array_filter($currentAssignTo, function ($value) use ($request) {
+                        return $value['email'] !== $request->email;
+                    });
+
+                    $concernData->assign_to = json_encode(array_values($currentAssignTo));
+                    $concernData->resolve_from = json_encode(array_values($currentAssignTo));
+                    $concernData->save();
+                }
+
+                $newTicketId = str_replace('#', '', $request->ticketId);
+                $data = [
+                    'ticketId' => $newTicketId,
+                    'email' => $request->email,
+                ];
+                $this->removeInquiryAssigneeLog($request);
+                /*  RemoveAssignees::dispatch($data); */
+
+                broadcast(new RemoveAssignees($data));
+
+                return response()->json(['message' => 'Assignee removed successfully']);
+            }
+
+            return response()->json(['message' => 'No assignee found']);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Error.', 'error' => $e->getMessage()], 500);
+        }
+    }
     // public function removeAssignee(Request $request)
     // {
     //     try {
@@ -1184,55 +1316,7 @@ class ConcernController extends Controller
     // }
 
 
-    public function removeAssignee(Request $request)
-    {
-        try {
-            $user = $request->user();
-            $userDepartment = $user->department;
 
-            if ($userDepartment !== "CRS") {
-                return response()->json(['message' => 'Unauthorized user']);
-            }
-
-            $assignee = InquiryAssignee::where('ticket_id', $request->ticketId)
-                ->where('email', $request->email)
-                ->first();
-
-            if ($assignee) {
-                $assignee->delete();
-
-                $concernData = Concerns::where('ticket_id', $request->ticketId)->first();
-
-                if ($concernData && $concernData->assign_to) {
-                    $currentAssignTo = json_decode($concernData->assign_to, true);
-
-                    $currentAssignTo = array_filter($currentAssignTo, function ($value) use ($request) {
-                        return $value['email'] !== $request->email;
-                    });
-
-                    $concernData->assign_to = json_encode(array_values($currentAssignTo));
-                    $concernData->resolve_from = json_encode(array_values($currentAssignTo));
-                    $concernData->save();
-                }
-
-                $newTicketId = str_replace('#', '', $request->ticketId);
-                $data = [
-                    'ticketId' => $newTicketId,
-                    'email' => $request->email,
-                ];
-
-                /*  RemoveAssignees::dispatch($data); */
-
-                broadcast(new RemoveAssignees($data));
-
-                return response()->json(['message' => 'Assignee removed successfully']);
-            }
-
-            return response()->json(['message' => 'No assignee found']);
-        } catch (\Exception $e) {
-            return response()->json(['message' => 'Error.', 'error' => $e->getMessage()], 500);
-        }
-    }
 
     //*For Reassigning
     // public function reassignInquiry(Request $request)
@@ -1344,13 +1428,14 @@ class ConcernController extends Controller
             $allFiles = null;
             $messageId = $request->message_id;
             $buyerEmail = $request->buyer_email;
-
+            $admin_name = $request->admin_name;
+            $buyer_lastname = $request->buyer_lastname;
             $concerns->status = "Resolved";
             /*   $concerns->resolve_from = $request->department; */
             $concerns->save();
 
             $this->inquiryResolveLogs($request);
-            ReplyFromAdminJob::dispatch($request->ticket_id, $buyerEmail, $request->remarks, $messageId, $allFiles);
+            ReplyFromAdminJob::dispatch($request->ticket_id, $buyerEmail, $request->remarks, $messageId, $allFiles, $admin_name, $buyer_lastname);
         } catch (\Exception $e) {
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
         }
@@ -1566,6 +1651,13 @@ class ConcernController extends Controller
         $responses = [];
         try {
             $requestData = $request->input('data');
+            $buyerData = $request->input('dataFromBuyer');
+            $buyerDataErratum = $request->input('dataFromBuyerErratum');
+
+            if ($buyerData || $buyerDataErratum) {
+                $this->fromBuyerEmail($buyerData, $buyerDataErratum);
+            }
+
             foreach ($requestData as $message) {
                 Log::info('inside loop', $message);
                 $concernsRef = Concerns::where('ticket_id', $message['ticket_id'])->first();
@@ -1618,6 +1710,72 @@ class ConcernController extends Controller
         }
     }
 
+    public function fromBuyerEmail($buyerData, $buyerDataErratum)
+    {
+        if ($buyerData) {
+            foreach ($buyerData as $buyer) {
+                if ($buyer) {
+                    $lastConcern = Concerns::latest()->first();
+                    $nextId = $lastConcern ? $lastConcern->id + 1 : 1;
+
+                    $formattedId = str_pad($nextId, 8, '0', STR_PAD_LEFT);
+                    $ticketId = 'Ticket#24' . $formattedId;
+
+                    $concerns = new Concerns();
+                    $concerns->email_subject = $buyer['email_subject'];
+                    $concerns->ticket_id = $ticketId;
+                    $concerns->buyer_email = $buyer['buyer_email'];
+                    $concerns->buyer_name = $buyer['buyer_name'];
+                    $concerns->details_message = $buyer['details_message'];
+                    $concerns->created_at = Carbon::parse(now())->setTimezone('Asia/Manila');
+                    $concerns->status = "unresolved";
+                    $concerns->inquiry_type = "from_buyer";
+                    $concerns->save();
+
+
+                    $messagesRef = new Messages();
+                    $messagesRef->details_message = $buyer['details_message'];
+                    $messagesRef->ticket_id = $ticketId;
+                    $fileLinks = $this->uploadToGCSFromScript($buyer['attachment']);
+                    $messagesRef->buyer_email = $buyer['buyer_email'];
+                    $messagesRef->attachment = json_encode($fileLinks);
+                    $messagesRef->created_at = Carbon::parse(now())->setTimezone('Asia/Manila');
+                    $messagesRef->buyer_name = $concerns->buyer_name;
+                    $messagesRef->save();
+
+                    $responses[] = "Saved Successfully " . $buyer['buyer_email'];
+                } else {
+                    $responses[] = "Saved Unsucessfully " . $buyer['buyer_email'];
+                }
+            }
+        }
+        if ($buyerDataErratum) {
+            foreach ($buyerDataErratum as $buyer) {
+                if ($buyer) {
+                    $existingTicket = Concerns::where('email_subject', $buyer['email_subject'])
+                        ->where('buyer_email', $buyer['buyer_email'])
+                        ->first();
+
+                    if ($existingTicket) {
+                        $messagesRef = new Messages();
+                        $messagesRef->details_message = $buyer['details_message'];
+                        $messagesRef->ticket_id = $existingTicket->ticket_id;
+                        $fileLinks = $this->uploadToGCSFromScript($buyer['attachment']);
+                        $messagesRef->buyer_email = $buyer->buyer_email;
+                        $messagesRef->attachment = json_encode($fileLinks);
+                        $messagesRef->created_at = Carbon::parse(now())->setTimezone('Asia/Manila');
+                        $messagesRef->buyer_name = $existingTicket->buyer_name;
+                        $messagesRef->save();
+                    }
+
+                    $responses[] = "Send Eratum Successfully " . $buyer['buyer_email'];
+                } else {
+                    $responses[] = "Send Eratum Unsucessfully " . $buyer['buyer_email'];
+                }
+            }
+        }
+    }
+
     public function buyerReplyNotif($ticketId, $concernId, $message)
     {
         try {
@@ -1659,7 +1817,12 @@ class ConcernController extends Controller
 
                 $fileLink = $bucket->object($filePath)->signedUrl(new \DateTime('+10 years'));
 
-                $fileLinks[] = $fileLink;
+                // $fileLinks[] = $fileLink;
+                $fileLinks[] = [
+                    'url' => $fileLink,
+                    'original_file_name' => $fileData['file_name']
+                ];
+
                 unlink($tempFile);
             }
         }

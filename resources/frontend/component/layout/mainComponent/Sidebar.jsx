@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react'
+import React, { useEffect, useState, useRef } from "react";
 import { IoIosArrowDown } from "react-icons/io";
 import { GoPlus } from "react-icons/go";
 import {
@@ -13,37 +13,78 @@ import {
   AccordionHeader,
   AccordionBody,
 } from "@material-tailwind/react";
-import { Link, useLocation } from 'react-router-dom';
-import apiService from '../../servicesApi/apiService';
-import { useStateContext } from '../../../context/contextprovider';
-import InquiryFormModal from '../inquirypage/InquiryFormModal';
+import { Link, useLocation } from "react-router-dom";
+import apiService from "../../servicesApi/apiService";
+import { useStateContext } from "../../../context/contextprovider";
+import InquiryFormModal from "../inquirypage/InquiryFormModal";
+import { set } from "lodash";
 const Sidebar = () => {
   const { unreadCount, getCount } = useStateContext();
   const [activeItem, setActiveItem] = useState(null);
   const location = useLocation();
   const [isInquiryOpen, setInquiryOpen] = useState(false);
+  const [isInvoiceOpen, setIsInvoiceOpen] = useState(false);
+
+  const [activeItemTransaction, setActiveItemTransaction] = useState(null);
 
   const handleDropdownClick = () => {
     setInquiryOpen(!isInquiryOpen);
   };
 
+  const handleInvoiceDropdownClick = () => {
+    setIsInvoiceOpen((prev) => !prev);
+  };
   const handleItemClick = (item) => {
     setActiveItem(item);
   };
 
-  
+  const handleItemTransactionClick = (item) => {
+    setActiveItemTransaction(item);
+  };
 
   useEffect(() => {
     getCount();
   }, [location]);
+
+  useEffect(() => {
+
+    switch (location.pathname) {
+      case "/transactionmanagement/invoices":
+        setInquiryOpen(false);
+        setIsInvoiceOpen(true);
+        break;
+      case "/transactionmanagement/transactionrecords":
+        setInquiryOpen(false);
+        setIsInvoiceOpen(true);
+        break;
+      case "/inquirymanagement/inquirylist":
+        setIsInvoiceOpen(false);
+        setInquiryOpen(true);
+        break;
+      case "/inquirymanagement/report":
+        setIsInvoiceOpen(false);
+        setInquiryOpen(true);
+        break;
+      default:
+        setInquiryOpen(false);
+        setIsInvoiceOpen(false);
+        break;
+    }
+
+  }, [location.pathname]);
+
   return (
     <>
-      <Card className="shadow-none w-[230px] max-w-[230px] p-[25px] pt-0 rounded-none bg-custom-grayFA relative z-50">
-        <List className='p-0 gap-0'>
+      <Card className="shadow-none w-[230px] max-w-[230px] p-[25px] pr-[20px] pt-0 rounded-none bg-custom-grayFA relative z-30">
+        <List className="p-0 gap-0">
           <Link to="/notification">
             <ListItem
-              className={`flex text-sm items-center w-[185px] h-[36px] pl-[12px] pr-[60px] gap-2 rounded-[10px] ${activeItem === 'notification' && location.pathname.startsWith('/notification') ? 'bg-custom-lightestgreen text-custom-solidgreen font-semibold' : ' hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen '} `}
-              onClick={() => handleItemClick('notification')}
+              className={`flex text-sm items-center w-[185px] h-[36px] pl-[12px] pr-[60px] gap-2 rounded-[10px] ${activeItem === "notification" &&
+                  location.pathname.startsWith("/notification")
+                  ? "bg-custom-lightestgreen text-custom-solidgreen font-semibold"
+                  : " hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
+                } `}
+              onClick={() => handleItemClick("notification")}
             >
               Notifications
               <ListItemSuffix>
@@ -58,54 +99,153 @@ const Sidebar = () => {
             </ListItem>
           </Link>
           <Link to="inquirymanagement/inquirylist">
-              <ListItem
-                className={`h-[35px] w-[185px] text-sm pl-[12px] transition-all duration-300 ease-in-out 
-                  ${activeItem === 'inquiry' || location.pathname.startsWith('/inquirymanagement') 
-                    ? 'bg-custom-lightestgreen text-custom-solidgreen font-semibold' 
-                    : 'hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen '}
-                    ${isInquiryOpen ? 'rounded-[10px] rounded-b-none' :'rounded-[10px]'}
+            <ListItem
+              className={`h-[35px] w-[185px] text-sm pl-[12px] transition-all duration-300 ease-in-out 
+                  ${activeItem === "inquiry" ||
+                  location.pathname.startsWith("/inquirymanagement")
+                  ? "bg-custom-lightestgreen text-custom-solidgreen font-semibold"
+                  : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
+                }
+                    ${isInquiryOpen
+                  ? "rounded-[10px] rounded-b-none"
+                  : "rounded-[10px]"
+                }
                     `}
-                onClick={handleDropdownClick}
-              >
+              onClick={handleDropdownClick}
+            >
               Inquiry Management
               <ListItemSuffix>
-                <IoIosArrowDown className={`text-custom-solidgreen  transition-transform duration-200 ease-in-out ${isInquiryOpen ? 'rotate-180' :''}`} />
+                <IoIosArrowDown
+                  className={`text-custom-solidgreen  transition-transform duration-200 ease-in-out ${isInquiryOpen ? "rotate-180" : ""
+                    }`}
+                />
               </ListItemSuffix>
             </ListItem>
           </Link>
-          {isInquiryOpen && location.pathname.startsWith('/inquirymanagement') && (
-            <div className="px-[12px] py-[20px] w-[185px] min-h-[122px] flex flex-col gap-[5px] bg-custom-lightestgreen border-t rounded-t-none rounded-b-[10px] border-custom-solidgreen transition-all duration-300 ease-in-out">
-                
-              <Link to="/inquirymanagement/inquirylist">
-                <ListItem
-                  className={`h-[32px] w-full py-[8px] px-[18px]  text-sm rounded-[50px] ${location.pathname.startsWith('/inquirymanagement/inquirylist') ||location.pathname.startsWith('/inquirymanagement/thread') ? 'bg-white text-custom-solidgreen font-semibold' : 'hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen '}`}
-                  onClick={() => handleItemClick('/inquirymanagement/inquirylist')}
-                >
-                  Inquiries
-                </ListItem>
-              </Link>
-              <Link to="/inquirymanagement/report">
-                <ListItem
-                  className={`h-[32px] w-full py-[8px] px-[18px] text-sm rounded-[50px] ${location.pathname.startsWith('/inquirymanagement/report') ? 'bg-white text-custom-solidgreen font-semibold' : 'hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen '}`}
-                  onClick={() => handleItemClick('/reports')}
-                >
-                  Reports
-                </ListItem>
-              </Link>
-            </div>
-          )}
-          <div className='mt-3 mb-1 px-4'>
-            <p className='text-[14px] font-bold bg-gradient-to-r from-custom-bluegreen via-custom-lightgreen to-custom-solidgreen bg-clip-text text-transparent'>Coming Soon</p>
+          {isInquiryOpen &&
+            location.pathname.startsWith("/inquirymanagement") && (
+              <div className="px-[12px] py-[20px] w-[185px] min-h-[122px] flex flex-col gap-[5px] bg-custom-lightestgreen border-t rounded-t-none rounded-b-[10px] border-custom-solidgreen transition-all duration-300 ease-in-out">
+                <Link to="/inquirymanagement/inquirylist">
+                  <ListItem
+                    className={`h-[32px] w-full py-[8px] px-[18px]  text-sm rounded-[50px] ${location.pathname.startsWith(
+                      "/inquirymanagement/inquirylist"
+                    ) ||
+                        location.pathname.startsWith(
+                          "/inquirymanagement/thread"
+                        )
+                        ? "bg-white text-custom-solidgreen font-semibold"
+                        : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
+                      }`}
+                    onClick={() =>
+                      handleItemClick(
+                        "/inquirymanagement/inquirylist"
+                      )
+                    }
+                  >
+                    Inquiries
+                  </ListItem>
+                </Link>
+                <Link to="/inquirymanagement/report">
+                  <ListItem
+                    className={`h-[32px] w-full py-[8px] px-[18px] text-sm rounded-[50px] ${location.pathname.startsWith(
+                      "/inquirymanagement/report"
+                    )
+                        ? "bg-white text-custom-solidgreen font-semibold"
+                        : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
+                      }`}
+                    onClick={() =>
+                      handleItemClick("/reports")
+                    }
+                  >
+                    Reports
+                  </ListItem>
+                </Link>
+              </div>
+            )}
+
+          {/* <Link to="/transactionmanagement/invoices">
+            <ListItem
+              className={`h-[35px] w-[210px] text-sm pl-[12px] transition-all duration-300 ease-in-out 
+            ${activeItemTransaction === "invoices" ||
+                        location.pathname.startsWith("/transactionmanagement")
+                        ? "bg-custom-lightestgreen text-custom-solidgreen font-semibold"
+                        : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
+                      }
+              ${isInvoiceOpen ? "rounded-[10px] rounded-b-none" : "rounded-[10px]"}
+            `}
+              onClick={handleInvoiceDropdownClick}
+            >
+              Transaction Management
+              <ListItemSuffix>
+                <IoIosArrowDown
+                  className={`text-custom-solidgreen transition-transform duration-200 ease-in-out ${isInvoiceOpen ? "rotate-180" : ""
+                    }`}
+                />
+              </ListItemSuffix>
+            </ListItem>
+          </Link>
+
+          {isInvoiceOpen &&
+            location.pathname.startsWith(
+              "/transactionmanagement"
+            ) && (
+              <div className="px-[12px] py-[20px] w-[210px] min-h-[122px] flex flex-col gap-[5px] bg-custom-lightestgreen border-t rounded-t-none rounded-b-[10px] border-custom-solidgreen transition-all duration-300 ease-in-out">
+                <Link to="/transactionmanagement/invoices">
+                  <ListItem
+                    className={`h-[32px] w-full py-[8px] px-[18px] text-sm rounded-[50px] ${location.pathname.startsWith(
+                      "/transactionmanagement/invoices"
+                    )
+                        ? "bg-white text-custom-solidgreen font-semibold"
+                        : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
+                      }`}
+                    onClick={() =>
+                      handleItemTransactionClick(
+                        "/invoices"
+                      )
+                    }
+                  >
+                    Invoices
+                  </ListItem>
+                </Link>
+
+                <Link to="/transactionmanagement/transactionrecords">
+                  <ListItem
+                    className={`h-[32px] w-full py-[8px] px-[18px] text-sm rounded-[50px] ${location.pathname.startsWith(
+                      "/transactionmanagement/transactionrecords"
+                    )
+                        ? "bg-white text-custom-solidgreen font-semibold"
+                        : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
+                      }`}
+                    onClick={() =>
+                      handleItemTransactionClick(
+                        "/transactionmanagement/transactionrecords"
+                      )
+                    }
+                  >
+                    Transaction Records
+                  </ListItem>
+                </Link>
+              </div>
+            )} */}
+
+          <div className="mt-3 mb-1 px-4">
+            <p className="text-[14px] font-bold bg-gradient-to-r from-custom-bluegreen via-custom-lightgreen to-custom-solidgreen bg-clip-text text-transparent">
+              Coming Soon
+            </p>
           </div>
-          <div className=' text-sm p-4 h-auto rounded-[10px] text-gray-400 border border-custom-lightestgreen flex flex-col gap-4 cursor-not-allowed'>
+          <div className=" text-sm p-4 h-auto rounded-[10px] text-gray-400 border border-custom-lightestgreen flex flex-col gap-4 cursor-not-allowed">
             <p>Property & Pricing</p>
             <p>Sales Management</p>
             <p>Broker Management</p>
-            <p className='leading-none'>Transaction <br />Management</p>
-            <p className='leading-none'>Document<br /> Management</p>
-            <p className='leading-none'>Property<br /> Management</p>
-
-
+              <p className='leading-none'>Transaction <br />Management</p>
+            <p className="leading-none">
+              Document
+              <br /> Management
+            </p>
+            <p className="leading-none">
+              Property
+              <br /> Management
+            </p>
 
             {/*  <ListItem className={`h-7 mb-2 pl-5 gap-2 rounded-2xl text-custom-solidgreen hover:bg-custom-lightestgreen hover:font-semibold`} >
                 Property & Pricing
@@ -127,10 +267,6 @@ const Sidebar = () => {
                 Property Management
               </ListItem> */}
           </div>
-
-
-
-
 
           {/*  <Accordion
             open={open === 1}
@@ -187,9 +323,8 @@ const Sidebar = () => {
           </ListItem> */}
         </List>
       </Card>
-     
     </>
-  )
-}
+  );
+};
 
-export default Sidebar
+export default Sidebar;
