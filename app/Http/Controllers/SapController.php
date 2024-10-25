@@ -119,7 +119,7 @@ class SapController extends Controller
     {
         $query = Invoices::query();
         $dueDate = $request->query('dueDate', null);
-        $query->select('contract_number', 'customer_name', 'invoice_amount', 'description', 'due_date', 'document_number', 'invoice_status');
+        $query->select('contract_number', 'customer_name', 'invoice_amount', 'description', 'due_date', 'document_number', 'invoice_status', 'invoice_link');
         /*  if ($dueDate) {
             $this->filterDataInvoices($query, $dueDate);
         } */
