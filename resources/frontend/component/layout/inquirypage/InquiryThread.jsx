@@ -75,6 +75,7 @@ const InquiryThread = () => {
     }, []);
     const dataConcern =
         data?.find((items) => items.ticket_id === ticketId) || {};
+   
     const toggleFilterBox = () => {
         setIsFilterVisible((prev) => !prev);
     };
@@ -199,7 +200,7 @@ const InquiryThread = () => {
                 formData.append("files[]", file);
             });
         }
-        setFileName(attachedFiles[0]?.name);
+     
         const formattedMessage = chatMessage.replace(/\n/g, "<br>");
         formData.append("admin_email", user?.employee_email || "");
         formData.append("ticket_id", ticketId || "");
@@ -396,7 +397,7 @@ const InquiryThread = () => {
                                 readOnly={true}
                                 onClick={toggleFilterBox}
                                 type="text"
-                                className="h-[47px] w-full rounded-lg pl-9 pr-6 text-sm bg-custom-grayF1 outline-none"
+                                className="h-[47px] w-full rounded-[10px] pl-9 pr-6 text-sm bg-custom-grayF1 outline-none"
                                 placeholder="Search"
                             />
                             <svg
@@ -586,7 +587,7 @@ const InquiryThread = () => {
                             </div>
                         )}
                     </div>
-                    <div className="p-[16px] shrink-0 bg-white rounded-lg flex flex-col flex-grow min-h-screen">
+                    <div className="p-[16px] shrink-0 bg-white rounded-[10px] shadow-custom7 flex flex-col flex-grow min-h-screen">
                         {" "}
                         {/* boxdevref */}
                         <div className="flex items-center gap-[9px] px-[10px]">

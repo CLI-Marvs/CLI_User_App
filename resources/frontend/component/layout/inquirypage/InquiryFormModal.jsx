@@ -26,6 +26,7 @@ const InquiryFormModal = ({ modalRef }) => {
     const [message, setMessage] = useState("");
     const { user, getAllConcerns } = useStateContext();
     const maxCharacters = 500;
+    const [isChecked, setIsChecked] = useState(false);
     const [hasErrors, setHasErrors] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -60,7 +61,10 @@ const InquiryFormModal = ({ modalRef }) => {
         ...(Array.isArray(propertyNamesList) && propertyNamesList.length > 0
             ? propertyNamesList
                   .filter((item) => !item.toLowerCase().includes("phase"))
-                  .map((item) => formatFunc(item))
+                  .map((item) => {
+                    const formattedItem = formatFunc(item);
+                    return formattedItem === "Casamira South" ? "Casa Mira South" : formattedItem;
+                  })
                   .sort((a, b) => {
                       if (a === "N/A") return -1;
                       if (b === "N/A") return 1;
@@ -95,7 +99,9 @@ const InquiryFormModal = ({ modalRef }) => {
             }));
         }
     };
-
+    const handleCheckboxChange = (event) => {
+        setIsChecked(event.target.checked); // Updates the state based on whether the checkbox is checked
+    };
     const isTextareaValid = message.trim().length > 0;
 
     const validateEmail = (email) => {
@@ -121,6 +127,7 @@ const InquiryFormModal = ({ modalRef }) => {
         contract_number,
         unit_number,
         other_user_type,
+        mname,
         ...requiredFields
     } = formData;
 
@@ -132,6 +139,7 @@ const InquiryFormModal = ({ modalRef }) => {
         e.preventDefault();
 
         setIsSubmitted(true);
+        const isMnameValid = isChecked || mname.trim() !== "";
         let isOtherUserTypeValid = true;
         if (user_type === "Others") {
             isOtherUserTypeValid = other_user_type.trim().length > 0;
@@ -139,6 +147,7 @@ const InquiryFormModal = ({ modalRef }) => {
         if (
             isFormDataValid &&
             isTextareaValid &&
+            isMnameValid &&
             !errors.buyer_email &&
             isOtherUserTypeValid
         ) {
@@ -305,7 +314,7 @@ const InquiryFormModal = ({ modalRef }) => {
                         </div>
                         <div className="flex items-center gap-[4px]">
                             <div
-                                className={`flex items-center border w-[430px] rounded-[5px] overflow-hidden ${
+                                className={`flex relative items-center border w-[430px] rounded-[5px] overflow-hidden ${
                                     isSubmitted && !formData.mname
                                         ? resetSuccess
                                             ? "border-custom-bluegreen"
@@ -324,15 +333,17 @@ const InquiryFormModal = ({ modalRef }) => {
                                     onChange={handleChange}
                                     placeholder=""
                                 />
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <input
-                                    type="checkbox"
-                                    name="checkbox"
-                                    className="accent-custom-lightgreen"
-                                    value="checkbox"
-                                />
-                                <p>N/A</p>
+                                <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3 gap-2 text-sm bg-custom-lightestgreen">
+                                    <input
+                                        onChange={handleCheckboxChange}
+                                        type="checkbox"
+                                        checked={isChecked}
+                                        name="checkbox"
+                                        className="accent-custom-lightgreen"
+                                        value="checkbox"
+                                    />
+                                    <p>N/A</p>
+                                </span>
                             </div>
                         </div>
                         <div
@@ -555,7 +566,7 @@ const InquiryFormModal = ({ modalRef }) => {
                         <div className="flex justify-end">
                             {formData.user_type === "Others" && (
                                 <div
-                                    className={`flex items-center border rounded-[5px] w-[260px] overflow-hidden ${
+                                    className={`flex items-center border rounded-[5px] w-[277px] overflow-hidden ${
                                         isSubmitted && !formData.other_user_type
                                             ? resetSuccess
                                                 ? "border-custom-bluegreen"

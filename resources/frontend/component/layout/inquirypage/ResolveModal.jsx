@@ -51,7 +51,7 @@ const ResolveModal = ({ modalRef, ticketId, dataRef }) => {
                     <AiFillInfoCircle className="size-[37px] text-[#5B9BD5]" />
                 </div>
                 <div className="flex justify-center mt-[30px] mb-[26px]">
-                    <p className="montserrat-medium text-[20px]">Are want to mark this as resolved?</p>
+                    <p className="montserrat-medium text-[20px]">You want to mark this as resolved?</p>
                 </div>
                 <div className=" bg-[#EDEDED] border border-[#D9D9D9]">
                     <div className="flex items-center justify-between">

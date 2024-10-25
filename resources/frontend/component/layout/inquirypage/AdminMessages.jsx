@@ -7,8 +7,12 @@ import moment from "moment";
 import { useNavigate, Link } from "react-router-dom";
 const AdminMessages = ({ items }) => {
     //State
+  
+    console.log("item", items); 
+    console.log('12')
     const { user } = useStateContext();
     const attachmentData = JSON.parse(items.attachment || "[]");
+    /* console.log("attachmentData", iteattachmentDatams);  */
 
     const navigate = useNavigate();
     const dynamicName =
@@ -47,35 +51,56 @@ const AdminMessages = ({ items }) => {
                     {Array.isArray(attachmentData) &&
                         attachmentData.length > 0 &&
                         attachmentData.map((attachment, index) => {
+                             const fileName = attachment?.original_file_name;
+                             if (!fileName) {
+                                 // If fileName is undefined or null, return a fallback UI or nothing
+                                 return null;
+                             }
+                             const fileType = fileName.split(".").pop(); // Get the file extension
+                             const baseName = fileName.substring(
+                                 0,
+                                 fileName.lastIndexOf(".")
+                             ); // Get the name without extension
+
+                             // Truncate the base name to 15 characters
+                             const truncatedName =
+                                 baseName.length > 15
+                                     ? `${baseName.slice(0, 15)}...`
+                                     : baseName;
                             return (
-                                <div className="mt-4 bg-red-900" key={index}>
+                               
+                                <div
+                                    className="mt-4 w-[219px] overflow-hidden font-light"
+                                    key={index}
+                                >
                                     <Link
-                                        className="flex items-center justify-start bg-customnavbar h-12 px-24 pl-4 text-black gap-2 rounded-lg"
                                         to={`/file-viewer/attachment/${items.id}`}
                                         onClick={(e) => {
                                             e.preventDefault(); // Prevents the immediate navigation
                                             localStorage.setItem(
                                                 "fileUrlPath",
-                                                JSON.stringify(attachment)
-                                            ); // Store the data
-
-                                            // Manually navigate to the new page after setting localStorage
+                                                JSON.stringify(attachment.url)
+                                            );
                                             window.open(
                                                 `/file-viewer/attachment/${items.id}`,
                                                 "_blank"
                                             );
                                         }}
+                                        className="flex items-center justify-start bg-customnavbar h-12 pl-4 text-black gap-2 rounded-[5px]"
                                     >
                                         <img
                                             src={FolderFile}
                                             alt="View Attachment"
                                         />
-                                        View Attachment 
-                                       
+                                        <span className="w-[200px] h-[20px]">
+                                            {" "}
+                                            {truncatedName}.{fileType}
+                                        </span>
                                     </Link>
                                 </div>
                             );
                         })}
+                  
                 </div>
             </div>
         </div>

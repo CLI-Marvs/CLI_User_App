@@ -346,7 +346,7 @@ const AssignSidePanel = ({ ticketId }) => {
     //console.log("assignpersonnel", assigneesPersonnel[ticketId]);
     return (
         <>
-            <div className="mb-3 mt-[4px]">
+            <div className="mb-3 mt-[2px]">
                 <div className="relative w-[623px]" ref={dropdownRef}>
                     <div className="relative">
                         <input
@@ -361,7 +361,7 @@ const AssignSidePanel = ({ ticketId }) => {
                                     : "rounded-[10px]"
                             }
                         
-                                 h-[47px] px-[20px] pr-[40px] rounded-[10px] bg-custom-grayF1 w-full outline-none`}
+                                 h-[48px] px-[20px] pr-[40px] rounded-[10px] bg-custom-grayF1 w-full outline-none`}
                             onFocus={() => setIsDropdownOpen(true)}
                         />
 
@@ -513,7 +513,7 @@ const AssignSidePanel = ({ ticketId }) => {
                     )}
                 </div>
             </div>
-            <div className=" w-full bg-white rounded-[10px] py-[16px]">
+            <div className=" w-full bg-white rounded-[10px] py-[16px] shadow-custom7">
                 <div className="flex w-full px-[20px] justify-start items-start">
                     <p className="text-sm text-custom-bluegreen pt-1 font-semibold">
                         Assignee

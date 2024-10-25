@@ -349,7 +349,7 @@ const InquiryList = () => {
                                 type="text"
                                 readOnly={true}
                                 onClick={toggleFilterBox}
-                                className="h-[47px] w-[606px] rounded-[10px] pl-9 pr-6 text-sm"
+                                className="h-[47px] w-[606px] bg-custom-grayF1 rounded-[10px] pl-9 pr-6 text-sm"
                                 placeholder="Search"
                             />
                             <svg
