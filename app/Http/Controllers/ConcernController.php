@@ -721,7 +721,7 @@ class ConcernController extends Controller
             $query->orderBy('created_at', 'desc');
         }
 
-        if ($employee->department !== 'CRS') {
+        if ($employee->department !== 'Customer Relations - Turnovers') {
             $query->whereIn('concerns.ticket_id', $ticketIds);
         }
 
@@ -840,7 +840,7 @@ class ConcernController extends Controller
             $assignedInquiries = $this->getAssignInquiries($employee->employee_email);
             $ticketIds = $assignedInquiries->pluck('ticket_id')->toArray();
 
-            if ($employeeDepartment !== "CRS") {
+            if ($employeeDepartment !== "Customer Relations - Turnovers") {
                 $concernsQuery->whereIn('ticket_id', $ticketIds);
             }
 
@@ -948,7 +948,7 @@ class ConcernController extends Controller
     {
         $buyerReplyQuery = BuyerReplyNotif::query();
 
-        if ($employeeDepartment !== "CRS") {
+        if ($employeeDepartment !== "Customer Relations - Turnovers") {
             $buyerReplyQuery->whereIn('ticket_id', $ticketIds);
         }
 
@@ -1045,7 +1045,7 @@ class ConcernController extends Controller
             $assignedInquiries = $this->getAssignInquiries($employee->employee_email);
             $ticketIds = $assignedInquiries->pluck('ticket_id')->toArray();
 
-            if ($employeeDepartment !== "CRS") {
+            if ($employeeDepartment !== "Customer Relations - Turnovers") {
                 $concernsQuery->whereIn('ticket_id', $ticketIds);
                 $inquiryAssigneeQuery->whereIn('ticket_id', $ticketIds);
                 $buyerReplyQuery->whereIn('ticket_id', $ticketIds);
@@ -1243,7 +1243,7 @@ class ConcernController extends Controller
             $user = $request->user();
             $userDepartment = $user->department;
 
-            if ($userDepartment !== "CRS") {
+            if ($userDepartment !== "Customer Relations - Turnovers") {
                 return response()->json(['message' => 'Unauthorized user']);
             }
 

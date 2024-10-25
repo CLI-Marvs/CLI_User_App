@@ -9,6 +9,9 @@ const DataMatchTable = ({ matchesData }) => {
                         Contract Number{" "}
                     </th>
                     <th className=" px-4 border border-gray-500">
+                        Customer Name{" "}
+                    </th>
+                    <th className=" px-4 border border-gray-500">
                         Invoice Amount
                     </th>
                 </tr>
@@ -19,6 +22,9 @@ const DataMatchTable = ({ matchesData }) => {
                         <tr key={index}>
                             <td className=" px-4 border border-gray-500">
                                 {item.RECNNR}
+                            </td>
+                            <td className=" px-4 border border-gray-500">
+                                {item.D_NAME1}
                             </td>
                             <td className=" px-4 border border-gray-500">
                                 {item.AMT}

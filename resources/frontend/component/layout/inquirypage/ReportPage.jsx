@@ -220,7 +220,7 @@ const ReportPage = () => {
                                     value={department}
                                     onChange={(e) => setDepartment(e.target.value)}
                                 >
-                                    {user?.department === "CRS" ? (
+                                    {user?.department === "Customer Relations - Turnovers" ? (
                                         allDepartment.map((item, index) => (
                                             <option key={index} value={item.key}>
                                                 {item.value}
