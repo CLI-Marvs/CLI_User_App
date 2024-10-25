@@ -74,12 +74,10 @@ class AuthController extends Controller
                 return redirect('/')->with('error', 'Authentication failed. Missing code parameter.');
             }
 
-
             if (strpos($googleUser->email, '@cebulandmasters.com') === false) {
-                //return redirect('/')->with('error', 'Authentication failed. Unauthorized domain.');
-                return redirect('/login?error=Authentication+failed.+Unauthorized+domain.');
-            }
+                return redirect('/?error=' . urlencode('Authentication failed. You need to use your CLI email.'));
 
+            }
             $explodeName = explode(' ', $googleUser->getName());
 
             if (count($explodeName) > 1) {

@@ -123,6 +123,7 @@ const InquiryFormModal = ({ modalRef }) => {
         setFormData(formDataState);
         setFiles([]);
         setMessage("");
+        setIsChecked(false);
     };
 
     const {
