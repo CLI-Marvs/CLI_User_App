@@ -395,8 +395,6 @@ class ConcernController extends Controller
                 ['required', 'regex:/^[\pL\s\-\'\.]+$/u', 'max:255'],
                 'lname' =>
                 ['required', 'regex:/^[\pL\s\-\'\.]+$/u', 'max:255'],
-                'mname'
-                => ['regex:/^[\pL\s\-\'\.]+$/u', 'max:255'],
                 'details_concern' => 'required|string',
                 'message' => 'required|string|max:500',
             ], [
@@ -404,7 +402,7 @@ class ConcernController extends Controller
                 'fname.required' => 'The first name field is required.',
                 'lname.regex' => 'The last name field format is invalid.',
                 'lname.required' => 'The last name field is required.',
-                'mname.regex' => 'The middle name field format is invalid.',
+                //'mname.regex' => 'The middle name field format is invalid.',
 
             ]);
             $user = $request->user();
