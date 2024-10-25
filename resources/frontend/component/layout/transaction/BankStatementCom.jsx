@@ -297,9 +297,9 @@ const BankStatementCom = () => {
                                 Document Number
                             </th>
 
-                            <th className=" px-4 border border-gray-500">
+                           {/*  <th className=" px-4 border border-gray-500">
                                 Invoice Link
-                            </th>
+                            </th> */}
                             <th className=" px-4 border border-gray-500">
                                 Collection Receipt Link
                             </th>
@@ -340,9 +340,9 @@ const BankStatementCom = () => {
                                     <td className=" px-4 border border-gray-500">
                                         {item.document_number}
                                     </td>
-                                    <td className=" px-4 border border-gray-500">
+                                   {/*  <td className=" px-4 border border-gray-500">
                                         {item.invoice_link}
-                                    </td>
+                                    </td> */}
                                     <td className="px-4 border border-gray-500">
                                         {item.collection_receipt_link ? (
                                             <a
