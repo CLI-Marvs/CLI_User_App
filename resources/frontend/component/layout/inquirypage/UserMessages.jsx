@@ -16,7 +16,6 @@ const UserMessages = ({ items }) => {
     const formattedTime = moment(items.created_at).format("hh:mm A");
 
     const dataConcern = data?.find((item) => item.ticket_id === ticketId) || {};
-    console.log("items in USERMESSAGE", items);
     const capitalizeWords = (name) => {
         if (name) {
             return name

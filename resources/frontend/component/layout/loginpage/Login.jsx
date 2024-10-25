@@ -1,11 +1,23 @@
-import React from "react";
+import React, { useEffect } from "react";
 import CLILogo from "../../../../../public/Images/CLI20-Logo.png";
 import GoogleLogo from "../../../../../public/Images/googleLogo.svg";
 import { API_PROVIDER } from "../../servicesApi/apiService";
-
+import { useLocation } from "react-router-dom";
 const Login = () => {
+    const location = useLocation();
+
+    useEffect(() => {
+        // Get the 'error' query parameter
+        const params = new URLSearchParams(location.search);
+        const errorMessage = params.get("error");
+
+        if (errorMessage) {
+            alert(decodeURIComponent(errorMessage)); // Show the alert with the error message
+        }
+    }, [location]);
     const signinGoogle = () => {
-        window.location.href = `${API_PROVIDER}/google/redirect`;
+        const response = window.location.href = `${API_PROVIDER}/google/redirect`;
+        console.log("response", response);
     };
 
     return (
