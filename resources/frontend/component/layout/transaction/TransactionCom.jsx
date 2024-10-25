@@ -158,7 +158,13 @@ const TransactionCom = () => {
                                 Contract No.
                             </th>
                             <th className=" px-4 border border-gray-500">
+                                Invoice Number
+                            </th>
+                            <th className=" px-4 border border-gray-500">
                                 Customer Name
+                            </th>
+                            <th className=" px-4 border border-gray-500">
+                                Status
                             </th>
                             <th className=" px-4 border border-gray-500">
                                 Invoice Amount
@@ -179,12 +185,20 @@ const TransactionCom = () => {
                                         {item.contract_number}
                                     </td>
                                     <td className=" px-4 border border-gray-500">
+                                        {item.document_number}
+                                    </td>
+                                    <td className=" px-4 border border-gray-500">
                                         {capitalizeFirstLetter(
                                             item.customer_name
                                         )}
                                     </td>
                                     <td className=" px-4 border border-gray-500">
-                                        {item.invoice_amount}
+                                        {item.status}
+                                    </td>
+                                    <td className=" px-4 border border-gray-500">
+                                    {item.invoice_amount ? (
+                                        new Intl.NumberFormat('en-US', { style: 'decimal', minimumFractionDigits: 2 }).format(item.invoice_amount)
+                                    ): null}
                                     </td>
                                     <td className=" px-4 border border-gray-500">
                                         {item.description}

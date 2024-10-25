@@ -95,6 +95,7 @@ class SapController extends Controller
                 $invoice->post_date = $request->input('D_BUDAT');
                 $invoice->customer_name = $request->input('D_NAME1');
                 $invoice->flow_type = $request->input('D_VBEWA');
+                $invoice->invoice_status = $request->input('D_STAT');
                 /*  $invoice->invoice_status = $request->input('invoice_status'); 
                 $invoice->status = $request->input('status');
                 $invoice->posting_response = $request->input('posting_response'); */
@@ -295,7 +296,6 @@ class SapController extends Controller
                         'receiving_branch' => $transaction['receiving_branch'],
                         'transaction_date' => $transactionDate,
                         'bank_name' => $bankName,
-                        'transact_by' => $user->id,
                         'status' => 'not_posted'
                     ]);
                 }
