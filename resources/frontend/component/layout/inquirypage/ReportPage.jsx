@@ -150,7 +150,7 @@ const ReportPage = () => {
 
     const allDepartment = [
         { key: "All", value: "All" },
-        { key: "CRS", value: "Customer Relations Services" },
+        { key: "CRS", value: "Customer Relations - Services" },
         { key: "SALES", value: "Sales" },
         { key: "AP", value: "Ap Commission" },
         { key: "PM", value: "Property Management" },

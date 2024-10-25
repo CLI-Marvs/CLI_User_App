@@ -429,6 +429,7 @@ class SapController extends Controller
                         'VBEWA' => $invoice->flow_type,
                         'BELNR' => $invoice->document_number,
                         'AMT' => $invoice->invoice_amount,
+                        'D_NAME1' => $invoice->customer_name,
                         'PAYD' => "Cash",
                     ];
                 }
