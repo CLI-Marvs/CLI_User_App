@@ -1,6 +1,20 @@
 import React from "react";
 
 const DataMatchTable = ({ matchesData }) => {
+
+    const capitalizeFirstLetter = (name) => {
+        if (name) {
+            return name
+                .split(" ")
+                .map(
+                    (word) =>
+                        word.charAt(0).toUpperCase() +
+                        word.slice(1).toLowerCase()
+                )
+                .join(" ");
+        }
+    };
+
     return (
         <table className="min-w-full bg-white border border-gray-500 border-collapse">
             <thead>
@@ -24,7 +38,7 @@ const DataMatchTable = ({ matchesData }) => {
                                 {item.RECNNR}
                             </td>
                             <td className=" px-4 border border-gray-500">
-                                {item.D_NAME1}
+                                {capitalizeFirstLetter(item.D_NAME1)}
                             </td>
                             <td className=" px-4 border border-gray-500">
                                 {item.AMT}
