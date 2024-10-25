@@ -317,17 +317,11 @@ class SapController extends Controller
 
             $searchParams = $request->query('bank_name');
 
-            $dataJoin = $query->leftJoin('employee', DB::raw('CAST(bank_transactions.transact_by AS INTEGER)'), '=', 'employee.id')
-                ->select('bank_transactions.*', DB::raw(
-                    "CONCAT(employee.firstname,' ',employee.lastname) as transact_by"
-                ));
-
-
             if ($searchParams !== "All") {
                 $this->filterDataTransaction($query, $searchParams);
             }
 
-            $data = $dataJoin->OrderBy('reference_number', 'asc')->paginate(30);
+            $data = $query->OrderBy('reference_number', 'asc')->paginate(30);
             return response()->json($data);
         } catch (\Exception $e) {
             return response()->json(['error' => 'An error occurred', 'message' => $e->getMessage()], 500);
