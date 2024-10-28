@@ -41,7 +41,12 @@ const DataMatchTable = ({ matchesData }) => {
                                 {capitalizeFirstLetter(item.D_NAME1)}
                             </td>
                             <td className=" px-4 border border-gray-500">
-                                {item.AMT}
+                            {item.AMT
+                                    ? new Intl.NumberFormat("en-US", {
+                                          style: "decimal",
+                                          minimumFractionDigits: 2,
+                                      }).format(item.AMT)
+                                    : null}
                             </td>
                         </tr>
                     ))}

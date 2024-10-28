@@ -136,7 +136,7 @@ const TransactionCom = () => {
                         </button>
                     </div>
 
-                    <div className="relative border border-gray-500 z-40 mr-10">
+                    {/* <div className="relative border border-gray-500 z-40 mr-10">
                         <DatePicker
                             selected={isDate}
                             onChange={handleFilterDueDate}
@@ -149,7 +149,7 @@ const TransactionCom = () => {
                             alt="date"
                             className="absolute top-[45%] right-0 transform -translate-y-1/2 text-custom-bluegreen size-6  pointer-events-none"
                         />
-                    </div>
+                    </div> */}
                 </div>
                 <table className="min-w-full bg-white border border-gray-500 border-collapse">
                     <thead>
@@ -182,60 +182,64 @@ const TransactionCom = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {invoices.length > 0 &&
+                        {invoices.length > 0 ? (
                             invoices.map((item, index) => (
                                 <tr key={index}>
-                                    <td className=" px-4 border border-gray-500">
-                                        {item.contract_number}
-                                    </td>
-                                    <td className=" px-4 border border-gray-500">
-                                        {item.document_number}
-                                    </td>
-                                    <td className=" px-4 border border-gray-500">
-                                        {capitalizeFirstLetter(
-                                            item.customer_name
-                                        )}
-                                    </td>
-                                    <td className=" px-4 border border-gray-500">
-                                        {item.invoice_status}
-                                    </td>
-                                    <td className=" px-4 border border-gray-500">
-                                    {item.invoice_amount ? (
-                                        new Intl.NumberFormat('en-US', { style: 'decimal', minimumFractionDigits: 2 }).format(item.invoice_amount)
-                                    ): null}
-                                    </td>
-                                    <td className=" px-4 border border-gray-500">
-                                        {item.description}
-                                    </td>
-                                    <td className=" px-4 border border-gray-500">
-                                        {item.due_date}
-                                    </td>
-                                    <td className="px-4 border border-gray-500">
-                                        {item.invoice_link ? (
-                                            <a
-                                                href={
-                                                    item.invoice_link
-                                                }
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="cursor-pointer underline"
-                                            >
-                                                View Document
-                                            </a>
-                                        ) : null}
-                                    </td>
-                                </tr>
-                            ))}
-                        {/*   <>
-                                <tr>
-                                    <td
-                                        className="text-md px-4 py-2 text-center"
-                                        colSpan={5}
-                                    >
-                                        No Data Found
-                                    </td>
-                                </tr>
-                            </> */}
+                                <td className=" px-4 border border-gray-500">
+                                    {item.contract_number}
+                                </td>
+                                <td className=" px-4 border border-gray-500">
+                                    {item.document_number}
+                                </td>
+                                <td className=" px-4 border border-gray-500">
+                                    {capitalizeFirstLetter(
+                                        item.customer_name
+                                    )}
+                                </td>
+                                <td className=" px-4 border border-gray-500">
+                                    {item.invoice_status}
+                                </td>
+                                <td className=" px-4 border border-gray-500">
+                                {item.invoice_amount ? (
+                                    new Intl.NumberFormat('en-US', { style: 'decimal', minimumFractionDigits: 2 }).format(item.invoice_amount)
+                                ): null}
+                                </td>
+                                <td className=" px-4 border border-gray-500">
+                                    {item.description}
+                                </td>
+                                <td className=" px-4 border border-gray-500">
+                                    {item.due_date}
+                                </td>
+                                <td className="px-4 border border-gray-500">
+                                    {item.invoice_link ? (
+                                        <a
+                                            href={
+                                                item.invoice_link
+                                            }
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="cursor-pointer underline"
+                                        >
+                                            View Document
+                                        </a>
+                                    ) : null}
+                                </td>
+                            </tr>
+                            ))
+                        ) : (
+                            <>
+                            <tr>
+                                <td
+                                    className="text-md px-4 py-2 text-center"
+                                    colSpan={8}
+                                >
+                                    No Data to Display
+                                </td>
+                            </tr>
+                        </>
+                        )}
+                         
+                         
                     </tbody>
                 </table>
 

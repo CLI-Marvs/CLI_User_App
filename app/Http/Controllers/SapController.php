@@ -17,7 +17,7 @@ class SapController extends Controller
     public function postDateToSap(Request $request)
     {
         $client = new Client();
-        $response = $client->post('https://SAP-DEV.cebulandmasters.com:44304/sap/bc/srt/rfc/sap/zdevinvoicess/200/zdevinvoicess/zdevinvoicess', [
+        $response = $client->post('https://SAP-DEV.cebulandmasters.com:44304/sap/bc/srt/rfc/sap/zdevposcol/200/zdevposcol/zdevposcol', [
             'headers' => [
                 'Authorization' => 'Basic ' . base64_encode('KBELMONTE:Tomorrowbytogether2019!'),
                 'Content-Type' => 'application/soap+xml',
@@ -361,9 +361,14 @@ class SapController extends Controller
             ]);
 
             $idRef = $request->input('ID');
+            $invoiceIdRef = $request->input('BUKRS');
             $attachment = $request->input('file'); 
             $fileLink = $this->uploadToFile($attachment);
             $transactionRef = BankTransaction::find($idRef);
+            $invoiceRef = Invoices::find($invoiceIdRef);
+
+            $invoiceRef->invoice_status = "Posted";
+            $invoiceRef->save();
 
             if (!$transactionRef) {
                 \Log::info('transaction not found');
@@ -433,6 +438,7 @@ class SapController extends Controller
                         'AMT' => $invoice->invoice_amount,
                         'D_NAME1' => $invoice->customer_name,
                         'PAYD' => "Cash",
+                        'INVID' => $invoice->invoice_id,
                     ];
                 }
             }
