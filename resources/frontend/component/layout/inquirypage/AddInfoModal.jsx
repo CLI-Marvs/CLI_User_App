@@ -5,7 +5,7 @@ import { data } from "autoprefixer";
 import { useStateContext } from "../../../context/contextprovider";
 
 const AddInfoModal = ({ modalRef, dataConcern }) => {
-    const predefinedUserTypes = ["Property Owner", "Buyer", "Broker","Seller"];
+    const predefinedUserTypes = ["Property Owner", "Buyer", "Broker", "Seller"];
     const { getAllConcerns } = useStateContext();
     const [message, setMessage] = useState("");
     const [dataToUpdate, setDataToUpdate] = useState({
@@ -20,13 +20,13 @@ const AddInfoModal = ({ modalRef, dataConcern }) => {
         buyer_lastname: dataConcern.buyer_lastname || "",
         user_type: predefinedUserTypes.includes(dataConcern.user_type)
             ? dataConcern.user_type
-            : "Others", 
+            : "Others",
         other_user_type: !predefinedUserTypes.includes(dataConcern.user_type)
             ? dataConcern.user_type
             : "",
     });
-
-
+ 
+ 
     const projectList = [
         "N/A",
         "38 Park Avenue",
@@ -83,6 +83,9 @@ const AddInfoModal = ({ modalRef, dataConcern }) => {
         setMessage(newValue);
     };
 
+    const handleCloseModal = () => {
+        setDataToUpdate(dataConcern);
+    };
     const handleChange = (e) => {
         const newValue = e.target.value;
         const { name, value } = e.target;
@@ -155,7 +158,10 @@ const AddInfoModal = ({ modalRef, dataConcern }) => {
                         method="dialog"
                         className="pt-3 flex justify-end mr-2"
                     >
-                        <button className="flex justify-center w-10 h-10 items-center rounded-full bg-custom-grayFA text-custom-bluegreen hover:bg-custombg">
+                        <button
+                            className="flex justify-center w-10 h-10 items-center rounded-full bg-custom-grayFA text-custom-bluegreen hover:bg-custombg"
+                            onClick={handleCloseModal}
+                        >
                             ✕
                         </button>
                     </form>
