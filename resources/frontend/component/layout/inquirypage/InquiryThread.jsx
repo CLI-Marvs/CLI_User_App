@@ -212,14 +212,25 @@ const InquiryThread = () => {
                 "mp4",
                 "plain", //handle for .txt file extension
             ];
-            const extension = attachedFiles[0].type;
+            const extension = attachedFiles[0].type.toLowerCase();
+            console.log("extension", extension);
+
             let modifiedExtension = extension.split("/")[1]; //from application/pdf to pdf
             // Special handling for .docx MIME type
+            console.log("2131", modifiedExtension);
+
             if (
                 extension ===
                 "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
             ) {
                 modifiedExtension = "docx"; // Set extension to docx for validation
+            } else if (extension === "application/vnd.ms-excel") {
+                modifiedExtension = "xls";
+            } else if (
+                extension ===
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            ) {
+                modifiedExtension = "xls";
             }
             //  const isFileValid = validFile.includes(extension.split("/")[1]);
             const isFileValid = validFile.includes(modifiedExtension);
