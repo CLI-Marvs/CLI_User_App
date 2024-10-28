@@ -370,7 +370,7 @@ class SapController extends Controller
             ]);
 
             $idRef = $request->input('ID');
-            $invoiceIdRef = $request->input('BUKRS');
+            $invoiceIdRef = $request->input('INVID');
             $attachment = $request->input('file'); 
             $fileLink = $this->uploadToFile($attachment);
             $transactionRef = BankTransaction::find($idRef);
