@@ -247,7 +247,7 @@ const InquiryThread = () => {
         formData.append("message_id", messageId || "");
         formData.append("admin_id", user?.id || "");
         formData.append("buyer_email", dataConcern.buyer_email || "");
-        formData.append("buyer_lastname", dataConcern.buyer_lastname || "");
+        formData.append("buyer_name", dataConcern.buyer_name || "");
         formData.append("admin_profile_picture", user?.profile_picture || "");
         formData.append("department", user?.department || "");
 
