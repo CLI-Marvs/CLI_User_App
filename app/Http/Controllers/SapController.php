@@ -17,7 +17,7 @@ class SapController extends Controller
     public function postDateToSap(Request $request)
     {
         $client = new Client();
-        $response = $client->post('https://SAP-DEV.cebulandmasters.com:44304/sap/bc/srt/rfc/sap/zdevinvoice/200/zdevinvoice/zdevinvoice', [
+        $response = $client->post('https://SAP-DEV.cebulandmasters.com:44304/sap/bc/srt/rfc/sap/zdevinvoicess/200/zdevinvoicess/zdevinvoicess', [
             'headers' => [
                 'Authorization' => 'Basic ' . base64_encode('KBELMONTE:Tomorrowbytogether2019!'),
                 'Content-Type' => 'application/soap+xml',
@@ -79,7 +79,8 @@ class SapController extends Controller
             $existingInvoice = Invoices::where('document_number', $request->input('D_BELNR'))
                 ->where('flow_type', $request->input('D_VBEWA'))
                 ->first();
-
+            $attachment = $request->input('D_INVDOC');
+            $fileLink = $this->uploadToFile($attachment);
             if (!$existingInvoice) {
                 $invoice = new Invoices();
                 $invoice->contract_number = $request->input('D_RECNNR');
@@ -96,6 +97,7 @@ class SapController extends Controller
                 $invoice->customer_name = $request->input('D_NAME1');
                 $invoice->flow_type = $request->input('D_VBEWA');
                 $invoice->invoice_status = $request->input('D_STATS');
+                $invoice->invoice_link = $fileLink;
                 /*  $invoice->invoice_status = $request->input('invoice_status'); 
                 $invoice->status = $request->input('status');
                 $invoice->posting_response = $request->input('posting_response'); */
@@ -117,7 +119,7 @@ class SapController extends Controller
     {
         $query = Invoices::query();
         $dueDate = $request->query('dueDate', null);
-        $query->select('contract_number', 'customer_name', 'invoice_amount', 'description', 'due_date', 'document_number', 'invoice_status');
+        $query->select('contract_number', 'customer_name', 'invoice_amount', 'description', 'due_date', 'document_number', 'invoice_status', 'invoice_link');
         /*  if ($dueDate) {
             $this->filterDataInvoices($query, $dueDate);
         } */

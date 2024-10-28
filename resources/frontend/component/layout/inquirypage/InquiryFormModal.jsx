@@ -61,8 +61,10 @@ const InquiryFormModal = ({ modalRef }) => {
             ? propertyNamesList
                   .filter((item) => !item.toLowerCase().includes("phase"))
                   .map((item) => {
-                    const formattedItem = formatFunc(item);
-                    return formattedItem === "Casamira South" ? "Casa Mira South" : formattedItem;
+                      const formattedItem = formatFunc(item);
+                      return formattedItem === "Casamira South"
+                          ? "Casa Mira South"
+                          : formattedItem;
                   })
                   .sort((a, b) => {
                       if (a === "N/A") return -1;
@@ -99,11 +101,14 @@ const InquiryFormModal = ({ modalRef }) => {
         }
     };
     const handleCheckboxChange = (event) => {
-        setIsChecked(event.target.checked); // Updates the state based on whether the checkbox is checked
-         setFormData((prevData) => ({
-             ...prevData,
-             mname: "",
-         }));
+        setIsChecked(event.target.checked); 
+        setFormData((prevData) => ({
+            ...prevData,
+            mname: isChecked ? "" : prevData.mname,
+        }));
+        // setHasErrors(false);
+        setResetSuccess(true);
+        setIsSubmitted(false);
     };
     const isTextareaValid = message.trim().length > 0;
 
@@ -227,6 +232,12 @@ const InquiryFormModal = ({ modalRef }) => {
             if (!isTextareaValid) {
                 setIsValid(false);
             }
+            if (!isChecked) {
+                //setIsValid(false);
+                setResetSuccess(false);
+                setHasErrors(false);
+            }
+            // console.log("(!isChecked", isChecked);
             console.log("Form validation failed");
         }
     };
@@ -318,11 +329,16 @@ const InquiryFormModal = ({ modalRef }) => {
                         </div>
                         <div className="flex items-center gap-[4px]">
                             <div
+                                // className={`flex relative items-center border w-[430px] rounded-[5px] overflow-hidden ${
+                                //     isSubmitted && !formData.mname
+                                //         ? resetSuccess
+                                //             ? "border-custom-bluegreen"
+                                //             : "border-red-500"
+                                //         : "border-custom-bluegreen"
+                                // }`}
                                 className={`flex relative items-center border w-[430px] rounded-[5px] overflow-hidden ${
-                                    isSubmitted && !formData.mname
-                                        ? resetSuccess
-                                            ? "border-custom-bluegreen"
-                                            : "border-red-500"
+                                    isSubmitted && !formData.mname && !isChecked
+                                        ? "border-red-500" 
                                         : "border-custom-bluegreen"
                                 }`}
                             >
