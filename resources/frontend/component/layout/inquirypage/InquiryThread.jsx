@@ -75,7 +75,7 @@ const InquiryThread = () => {
     }, []);
     const dataConcern =
         data?.find((items) => items.ticket_id === ticketId) || {};
-   
+
     const toggleFilterBox = () => {
         setIsFilterVisible((prev) => !prev);
     };
@@ -196,11 +196,46 @@ const InquiryThread = () => {
         const formData = new FormData();
 
         if (attachedFiles && attachedFiles.length > 0) {
+            const validFile = [
+                "pdf",
+                "png",
+                "bmp",
+                "jpg",
+                "jpeg",
+                "xls",
+                "xlsx",
+                "xlsm",
+                "xml",
+                "csv",
+                "doc",
+                "docx",
+                "mp4",
+                "plain", //handle for .txt file extension
+            ];
+            const extension = attachedFiles[0].type;
+            let modifiedExtension = extension.split("/")[1]; //from application/pdf to pdf
+            // Special handling for .docx MIME type
+            if (
+                extension ===
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            ) {
+                modifiedExtension = "docx"; // Set extension to docx for validation
+            }
+            //  const isFileValid = validFile.includes(extension.split("/")[1]);
+            const isFileValid = validFile.includes(modifiedExtension);
+
+            if (!isFileValid) {
+                alert(`${modifiedExtension} is not allow.`);
+                setLoading(false);
+                return;
+            }
+        }
+        if (attachedFiles && attachedFiles.length > 0) {
             attachedFiles.forEach((file) => {
                 formData.append("files[]", file);
             });
         }
-     
+
         const formattedMessage = chatMessage.replace(/\n/g, "<br>");
         formData.append("admin_email", user?.employee_email || "");
         formData.append("ticket_id", ticketId || "");
@@ -212,7 +247,7 @@ const InquiryThread = () => {
         formData.append("message_id", messageId || "");
         formData.append("admin_id", user?.id || "");
         formData.append("buyer_email", dataConcern.buyer_email || "");
-        formData.append("buyer_lastname", dataConcern.buyer_lastname || "");
+        formData.append("buyer_name", dataConcern.buyer_name || "");
         formData.append("admin_profile_picture", user?.profile_picture || "");
         formData.append("department", user?.department || "");
 
@@ -778,7 +813,7 @@ const InquiryThread = () => {
                                                             </div>
 
                                                             <div className="flex items-center h-[19px] text-sm">
-                                                                Hi {" "}
+                                                                Hi{" "}
                                                                 {capitalizeWords(
                                                                     dataConcern.buyer_name
                                                                 )}
@@ -901,7 +936,6 @@ const InquiryThread = () => {
                                                     <AdminMessages
                                                         items={item}
                                                         key={index}
-                                                       
                                                     />
                                                 )
                                         )}
