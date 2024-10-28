@@ -4,6 +4,7 @@ import { useStateContext } from "../../../../context/contextprovider";
 const FileViewer = () => {
     //State
     const [fileUrlPath, setFileUrlPath] = useState(null);
+
     const { token } = useStateContext();
     const [imageDimensions, setImageDimensions] = useState({
         width: 0,
@@ -33,6 +34,7 @@ const FileViewer = () => {
         );
     }
 
+    //Event Handlers
     /**
      * Prevent the default context menu or the inspect element from appearing
      */
@@ -109,6 +111,7 @@ const FileViewer = () => {
     return (
         <div onContextMenu={handleContextMenu} className="bg-black">
             {fileExtension === "jpg" ||
+            fileExtension === "bmp" ||
             fileExtension === "png" ||
             fileExtension === "jpeg" ? (
                 <div className="flex items-center justify-center min-h-screen">
@@ -128,24 +131,32 @@ const FileViewer = () => {
                         }
                     />
                 </div>
-            ) : fileExtension === "pdf" ? (
+            ) : fileExtension === "pdf" || fileExtension === "txt" ? (
                 <iframe
                     onContextMenu={(e) => e.preventDefault()}
                     src={fileUrlPath}
                     width="100%"
                     className="min-h-screen "
                 ></iframe>
-            ) : fileExtension === "xlsx" ||
-              fileExtension === "xls" ||
+            ) : fileExtension === "xls" ||
+              fileExtension === "xlsx" ||
               fileExtension === "xlsm" ||
-              fileExtension === ".xml" ? (
-                <div className="flex items-center justify-center min-h-screen">
+              fileExtension === ".xml" ||
+              fileExtension === "doc" ||
+              fileExtension === "docx" ||
+              fileExtension === ".csv" ? (
+                <div className="flex items-center justify-center min-h-screen text-white">
                     <a href={fileUrlPath} download>
-                        Download Excel File
+                        Download File
                     </a>
                 </div>
             ) : (
-                <a href={fileUrlPath} target="_blank" rel="noopener noreferrer">
+                <a
+                    href={fileUrlPath}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-white"
+                >
                     Download File
                 </a>
             )}
