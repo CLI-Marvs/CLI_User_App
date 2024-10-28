@@ -145,20 +145,19 @@ const FileViewer = () => {
               fileExtension === "doc" ||
               fileExtension === "docx" ||
               fileExtension === ".csv" ? (
-                <div className="flex items-center justify-center min-h-screen text-white">
-                    <a href={fileUrlPath} download>
+                <div className="flex flex-col items-center justify-center min-h-screen text-white">
+                    <p>Only images, text documents and pdf are viewable.</p>
+                    <button className="w-[133px] h-[39px] gradient-btn5 font-semibold text-sm text-white rounded-[10px] mt-4">
                         Download File
-                    </a>
+                    </button>
                 </div>
             ) : (
-                <a
-                    href={fileUrlPath}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-white"
-                >
-                    Download File
-                </a>
+                <div className="flex flex-col items-center justify-center min-h-screen text-white">
+                    <p>Only images, text documents and pdf are viewable.</p>
+                    <button className="w-[133px] h-[39px] gradient-btn5 font-semibold text-sm text-white rounded-[10px] mt-4">
+                        Download File
+                    </button>
+                </div>
             )}
         </div>
     );
