@@ -233,7 +233,7 @@ const TransactionCom = () => {
                                     className="text-md px-4 py-2 text-center"
                                     colSpan={8}
                                 >
-                                    No Data to Display
+                                    No data to show
                                 </td>
                             </tr>
                         </>

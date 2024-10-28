@@ -16,8 +16,9 @@ class SapController extends Controller
 {
     public function postDateToSap(Request $request)
     {
+       try {
         $client = new Client();
-        $response = $client->post('https://SAP-DEV.cebulandmasters.com:44304/sap/bc/srt/rfc/sap/zdevposcol/200/zdevposcol/zdevposcol', [
+        $response = $client->post('https://SAP-DEV.cebulandmasters.com:44304/sap/bc/srt/rfc/sap/zdevginvoice/200/zdevginvoice/zdevginvoice', [
             'headers' => [
                 'Authorization' => 'Basic ' . base64_encode('KBELMONTE:Tomorrowbytogether2019!'),
                 'Content-Type' => 'application/soap+xml',
@@ -25,6 +26,14 @@ class SapController extends Controller
             'body' => $request->getContent(),
             'timeout' => 14400,
         ]);
+       } catch (\Throwable $th) {
+        \Log::error('SAP Request Error: ', [
+            'error' => $e->getMessage(),
+            'response' => $e->getResponse() ? $e->getResponse()->getBody()->getContents() : 'No response'
+        ]);
+        return response()->json(['error' => 'SAP Server Error'], 500);
+       }
+        
         /*  Tomorrowbytogether2019 */
     }
 
@@ -33,7 +42,7 @@ class SapController extends Controller
     {
         $client = new Client();
         try {
-            $response = $client->post('https://SAP-DEV.cebulandmasters.com:44304/sap/bc/srt/rfc/sap/zdevginvoice/200/zdevginvoice/zdevginvoice', [
+            $response = $client->post('https://SAP-DEV.cebulandmasters.com:44304/sap/bc/srt/rfc/sap/zdevposcol/200/zdevposcol/zdevposcol', [
                 'headers' => [
                     'Authorization' => 'Basic ' . base64_encode('KBELMONTE:Tomorrowbytogether2019!'),
                     'Content-Type' => 'application/soap+xml',
