@@ -447,7 +447,7 @@ class SapController extends Controller
                         'AMT' => $invoice->invoice_amount,
                         'D_NAME1' => $invoice->customer_name,
                         'PAYD' => "Cash",
-                        'INVID' => $invoice->invoice_id,
+                        'INVID' => $invoice->id,
                     ];
                 }
             }

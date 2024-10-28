@@ -12,6 +12,7 @@ import DataMatchTable from "./DataMatchTable";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import apiServiceSap from "../../servicesApi/apiServiceSap";
+import { data } from "autoprefixer";
 
 const BankStatementCom = () => {
     const {
@@ -83,6 +84,7 @@ const BankStatementCom = () => {
         }
     };
 
+    console.log("datamatches", matchesData);
     const handleSubmitSap = async () => {
         setLoading(true);
         try {
