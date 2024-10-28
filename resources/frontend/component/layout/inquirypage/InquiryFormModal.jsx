@@ -153,6 +153,42 @@ const InquiryFormModal = ({ modalRef }) => {
         if (user_type === "Others") {
             isOtherUserTypeValid = other_user_type.trim().length > 0;
         }
+
+          if (files && files.length > 0) {
+              const validFile = [
+                  "pdf",
+                  "png",
+                  "bmp",
+                  "jpg",
+                  "jpeg",
+                  "xls",
+                  "xlsx",
+                  "xlsm",
+                  "xml",
+                  "csv",
+                  "doc",
+                  "docx",
+                  "mp4",
+                  "plain", //handle for .txt file extension
+              ];
+              const extension = files[0].type;
+              let modifiedExtension = extension.split("/")[1]; //from application/pdf to pdf
+              // Special handling for .docx MIME type
+              if (
+                  extension ===
+                  "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+              ) {
+                  modifiedExtension = "docx"; // Set extension to docx for validation
+              }
+              //  const isFileValid = validFile.includes(extension.split("/")[1]);
+              const isFileValid = validFile.includes(modifiedExtension);
+
+              if (!isFileValid) {
+                  alert(`${modifiedExtension} is not allow.`);
+                  setLoading(false);
+                  return;
+              }
+          }
         if (
             isFormDataValid &&
             isTextareaValid &&

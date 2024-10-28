@@ -57,7 +57,6 @@ const UserMessages = ({ items }) => {
                     {Array.isArray(attachmentData) &&
                         attachmentData.length > 0 &&
                         attachmentData.map((attachment, index) => {
-                        
                             const fileName = attachment?.original_file_name;
                             if (!fileName) {
                                 // If fileName is undefined or null, return a fallback UI or nothing

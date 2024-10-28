@@ -8,11 +8,10 @@ import { useNavigate, Link } from "react-router-dom";
 const AdminMessages = ({ items }) => {
     //State
   
-    console.log("item", items); 
-    console.log('12')
+
     const { user } = useStateContext();
     const attachmentData = JSON.parse(items.attachment || "[]");
-    /* console.log("attachmentData", iteattachmentDatams);  */
+    // /* console.log("attachmentData", iteattachmentDatams);  */
 
     const navigate = useNavigate();
     const dynamicName =
@@ -68,7 +67,6 @@ const AdminMessages = ({ items }) => {
                                      ? `${baseName.slice(0, 15)}...`
                                      : baseName;
                             return (
-                               
                                 <div
                                     className="mt-4 w-[219px] overflow-hidden font-light"
                                     key={index}
@@ -77,6 +75,7 @@ const AdminMessages = ({ items }) => {
                                         to={`/file-viewer/attachment/${items.id}`}
                                         onClick={(e) => {
                                             e.preventDefault(); // Prevents the immediate navigation
+                                          
                                             localStorage.setItem(
                                                 "fileUrlPath",
                                                 JSON.stringify(attachment.url)

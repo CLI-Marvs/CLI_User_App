@@ -226,7 +226,7 @@ class ConcernController extends Controller
 
     public function sendMessage(Request $request)
     {
-
+       
         try {
             $allFiles = [];
             $files = $request->file('files');
@@ -269,7 +269,7 @@ class ConcernController extends Controller
             $admin_name = $request->input('admin_name', '');
             $admin_id = $request->input('admin_id', '');
             $buyer_email = $request->input('buyer_email', '');
-            $buyer_lastname = $request->input('buyer_lastname', '');
+            $buyer_name = $request->input('buyer_name', '');
             $admin_profile_picture = $request->input('admin_profile_picture', '');
 
 
@@ -310,7 +310,7 @@ class ConcernController extends Controller
                 ReplyFromAdminJob::dispatch($messages->ticket_id, $buyer_email, $adminMessage, $message_id, $allFiles);
             } */
 
-            ReplyFromAdminJob::dispatch($messages->ticket_id, $buyer_email, $adminMessage, $message_id, $allFiles, $admin_name, $buyer_lastname);
+            ReplyFromAdminJob::dispatch($messages->ticket_id, $buyer_email, $adminMessage, $message_id, $allFiles, $admin_name, $buyer_name);
 
 
             return response()->json("Successfully sent");

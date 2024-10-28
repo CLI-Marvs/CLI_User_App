@@ -111,7 +111,7 @@ class AuthController extends Controller
 
             return redirect(config("app.frontend_url") . "/callback?token=" . $token);
         } catch (\Exception $e) {
-            return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
+            return redirect('/')->with('error', 'Authentication failed. Missing code parameter.');
         }
     }
 
