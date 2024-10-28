@@ -26,6 +26,7 @@ const AddInfoModal = ({ modalRef, dataConcern }) => {
             : "",
     });
 
+
     const projectList = [
         "N/A",
         "38 Park Avenue",
