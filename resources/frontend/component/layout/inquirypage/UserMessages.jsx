@@ -47,7 +47,7 @@ const UserMessages = ({ items }) => {
             </div>
             <div className="w-full mt-[10px]">
                 <div className="w-full h-auto gradient-background1 rounded-b-[10px] rounded-r-[10px]  p-[20px] pl-[31px] text-xs text-white">
-                    <div>
+                    <div className="break-words whitespace-pre-wrap">
                         <p
                             dangerouslySetInnerHTML={{
                                 __html: items.details_message,

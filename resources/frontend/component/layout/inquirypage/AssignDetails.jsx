@@ -310,7 +310,7 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                                 </span>
                             </div>
                             <div className="w-full h-auto min-h-[39px] border-[2px] border-custom-grayF1 bg-white p-[10px] rounded-[10px] mb-[10px]">
-                                <p className="text-sm break-words">{details.remarks}</p>
+                                <p className="text-sm break-words whitespace-pre-wrap">{details.remarks}</p>
                             </div>
                             <div>
                                 <p className="text-custom-solidgreen mb-1">
@@ -364,11 +364,12 @@ const AssignDetails = ({ logMessages, ticketId }) => {
         <>
             <div className="px-[20px]">
                 <div className="flex h-[49px] w-full gradient-btn2 p-[2px] rounded-[10px] items-center justify-center my-[16px] ">
-                    <div className="w-full h-full flex items-center bg-white rounded-[8px] p-[10px]">
+                    <div className="w-full h-full flex gap-2 items-center bg-white rounded-[8px] p-[10px] ">
                         <input
                             type="text"
                             className="w-full outline-none"
                             onChange={(e) => setMessage(e.target.value)}
+                            maxLength={250}
                             value={message}
                         />
                         <button
@@ -423,7 +424,7 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                                         </div>
                                     </div>
                                     <div className="w-full min-h-[39px] border-[2px] border-custom-grayF1 bg-white p-[10px] rounded-[10px]">
-                                        <p className="text-sm">
+                                        <p className="text-sm break-words whitespace-pre-wrap">
                                             {item.message}
                                         </p>
                                     </div>
