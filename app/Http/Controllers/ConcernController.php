@@ -1856,7 +1856,6 @@ class ConcernController extends Controller
             }
         }
 
-        return $responses;
     }
 
     public function buyerReplyNotif($ticketId, $concernId, $message)
