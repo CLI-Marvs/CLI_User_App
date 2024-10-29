@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
@@ -10,6 +10,7 @@
         href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap"
         rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;700&display=swap" rel="stylesheet">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <style>
         @font-face {
             font-family: 'Barlow';
@@ -17,6 +18,7 @@
             font-weight: 400;
             font-style: normal;
         }
+
 
 
         p {
@@ -120,18 +122,17 @@
     </style>
 </head>
 
-
-<body style="font-family: Arial, sans-serif; font-size: 14px; color: #333; line-height: 1.6;">
-    <p style="font-size: 16px; font-weight: bold;">Hi Mr./Ms. {{ ucwords($buyer_lname) }},</p>
-
-    <p>{!! $details_message !!}</p>
-
-    <p style="font-size: 16px;">Sincerely,</p>
-    <p style="font-weight: bold;">{{ ucwords($admin_name) }}</p>
-    <p style="font-weight: bold; margin-bottom: 10px;">CLI - Customer Relations Services</p>
-
-    
-    
-    <img src="https://i.imgur.com/MHj4vYz.png" title="source: imgur.com" />
-   
+<body style="font-family: Arial, sans-serif; font-size: 14px; color: #333; line-height: 1.6; padding: 10px;">
+    <div class="container">
+        <h1>Hi {{ ucwords($data['assignee_name']) }},</h1>
+        <p>An inquiry ticket that is assigned to you is marked as resolved by {{ $data['admin_name'] }}.
+        </p>
+        <p><strong>Ticket info:</strong> {{ $data['ticket_id'] , $data['details_concern'], $data['buyer_name']}}</p>
+        <div class="footer">
+            Best regards,
+            CLI SuperApp Admin
+        </div>
+    </div>
 </body>
+
+</html>

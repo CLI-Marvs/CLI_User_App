@@ -20,6 +20,7 @@ const AssignSidePanel = ({ ticketId }) => {
         getAssigneesPersonnel,
         getInquiryLogs,
     } = useStateContext();
+ 
     const [isSelected, setIsSelected] = useState({});
     const [isAssign, setIsAssign] = useState(false);
     const logsMessages = logs[ticketId] || [];
