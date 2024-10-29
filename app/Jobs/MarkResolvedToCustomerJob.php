@@ -16,26 +16,17 @@ class MarkResolvedToCustomerJob implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
     protected $email;
     protected $ticket_id;
-    protected $details_message;
+    protected $buyer_lastname;
     protected $message_id;
-    protected $files;
-    protected $admin_name;
-    protected $buyer_lname;
-    protected $department;
-
-    /**
+ /**
      * Create a new job instance.
      */
-    public function __construct($ticket_id, $email, $details_message, $message_id = null, $files, $admin_name, $buyer_lname,$department)
+    public function __construct($ticket_id, $email, $buyer_lastname, $message_id)
     {
         $this->email = $email;
         $this->ticket_id = $ticket_id;
-        $this->details_message = $details_message;
+        $this->buyer_lastname = $buyer_lastname;
         $this->message_id = $message_id;
-        $this->files = $files;
-        $this->admin_name = $admin_name;
-        $this->buyer_lname = $buyer_lname;
-        $this->department = $department;
     }
 
     /**
@@ -44,11 +35,10 @@ class MarkResolvedToCustomerJob implements ShouldQueue
     public function handle(Mailer $mailer): void
     {
         $mailer->to($this->email)
-            ->cc('scriptest@cebulandmasters.com')
-            ->send(new ResolvedTicketToCustomerMail($this->ticket_id, $this->email, $this->details_message, $this->message_id, $this->files, $this->admin_name, $this->buyer_lname,$this->department));
+            ->send(new ResolvedTicketToCustomerMail($this->ticket_id, $this->email, $this->buyer_lastname, $this->message_id));
 
-        foreach ($this->files as $file) {
+       /*  foreach ($this->files as $file) {
             @unlink($file['path']);
-        }
+        } */
     }
 }

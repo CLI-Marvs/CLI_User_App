@@ -127,8 +127,8 @@
     <p>{!! $details_message !!}</p>
 
     <p style="font-size: 16px;">Sincerely,</p>
-    <p style="font-weight: bold;">{{ ucwords($admin_name) }}</p>
-    <p style="font-weight: bold; margin-bottom: 10px;">CLI - Customer Relations Services</p>
+   {{--  <p style="font-weight: bold;">{{ ucwords($admin_name) }}</p>
+    <p style="font-weight: bold; margin-bottom: 10px;">CLI - Customer Relations Services</p> --}}
 
     
     

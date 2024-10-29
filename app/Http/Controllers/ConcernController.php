@@ -1449,7 +1449,8 @@ class ConcernController extends Controller
     {
         //  dd($request);
         try {
-            $assignees = [];
+           /*  dd($request->all()); */
+            $assignees = $request->assignees;
             $concerns = Concerns::where('ticket_id', $request->ticket_id)->first();
 
             $allFiles = null;
@@ -1457,67 +1458,32 @@ class ConcernController extends Controller
             $buyerEmail = $request->buyer_email;
             $admin_name = $request->admin_name;
             $department= $request->department;
-            $buyer_lastname = $request->buyer_lastname;
+            $details_concern = $request->details_concern;
+            $buyer_name = $request->buyer_name;
             $concerns->status = "Resolved";
-            /*   $concerns->resolve_from = $request->department; */
-            // dd($request->employee_email);
-            $assignedCliUser = $this->getAssignInquiries($request->employee_email);
-            // $assignedCliUser = $this->getAssignInquiries(implode(', ', array_column($request->assignees_info, 'assignees_email')));
-            //dd($assignedCliUser);
-            // $assigneesEmails = array_column($request->assignees_info, 'assignees_email'); // Extract emails from assignees_info
-            // dd($assignedCliUser);
-            if ($assignedCliUser) {
-                // Log::info('Dispatching NotifyAssignedCliOfResolvedInquiryJob', [
-                //     'ticket_id' => $request->ticket_id,
-                //     'buyer_name' => $request->buyer_name,
-                //     'admin_name' => $request->admin_name,
-                //     'employee_email' => $request->employee_email,
-                //     'message_id' => $messageId,
-                // ]);
-                $dataToEmail = [
-                    'ticket_id'
-                    => $request->ticket_id,
-                    'buyer_name' => $request->buyer_name,
-                    'admin_name' => $request->admin_name,
-                    'details_concern' => $request->details_concern,
-                    'assignee_name' => $request->assignee_name, // Combine names as a comma-separated string
-                    'assignee_email' =>
-                    $request->assignee_email,
-                    // 'assignee_email' => implode(', ', array_column($request->assignees_info, 'assignees_email')), // Combine emails as a comma-separated string
+            $buyer_lastname = $request->buyer_lastname;
+            $message_id = $request->message_id;
+            $concerns->save();
+
+            foreach($assignees as $assignee) {
+                $data = [
+                    'ticket_id' => $request->ticket_id,
+                    'buyer_name' => $buyer_name,
+                    'admin_name' => $admin_name,
+                    'details_concern' => $details_concern
                 ];
-                // $dataToEmail = [
-                //     'ticket_id'
-                //     => $request->ticket_id,
-                //     'buyer_name' => $request->buyer_name,
-                //     'admin_name' => $request->admin_name,
-                //     'details_concern' => $request->details_concern,
-                //     'assignee_name' => implode(', ', array_column($request->assignees_info, 'assignees_name')), // Combine names as a comma-separated string
-                //     'assignee_email' => implode(', ', $assigneesEmails),
-                //     // 'assignee_email' => implode(', ', array_column($request->assignees_info, 'assignees_email')), // Combine emails as a comma-separated string
-                // ];
-                // NotifyAssignedCliOfResolvedInquiryJob::dispatch(
-                //     implode(', ', array_column($request->assignees_info, 'assignees_email')), // Pass emails as a single string
-                //     $dataToEmail
-                // );
-                // NotifyAssignedCliOfResolvedInquiryJob::dispatch(
-                //     array_column($request->assignees_info, 'assignees_email'), // Pass emails as an array
-                //     $dataToEmail
-                // );
-                // dd($assigneesEmails);
-                // NotifyAssignedCliOfResolvedInquiryJob::dispatch(
-                //     $assigneesEmails, // Pass emails as an array
-                //     $dataToEmail
-                // );
                 NotifyAssignedCliOfResolvedInquiryJob::dispatch(
-                    $request->assignee_email, // Pass emails as an array
-                    $dataToEmail
+                   $assignee['employee_email'],
+                   $assignee['name'],
+                   $data
+                 
+
                 );
             }
-            $concerns->save();
 
             $this->inquiryResolveLogs($request);
             // ReplyFromAdminJob::dispatch($request->ticket_id, $buyerEmail, $request->remarks, $messageId, $allFiles, $admin_name, $buyer_lastname);
-            MarkResolvedToCustomerJob::dispatch($request->ticket_id, $buyerEmail, $request->remarks, $messageId, $allFiles, $admin_name, $buyer_lastname, $department);
+            MarkResolvedToCustomerJob::dispatch($request->ticket_id, $buyerEmail, $buyer_lastname, $message_id);
         } catch (\Exception $e) {
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
         }

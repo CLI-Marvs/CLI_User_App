@@ -12,6 +12,19 @@ const ResolveModal = ({ modalRef, ticketId, dataRef }) => {
         data?.find((items) => items.ticket_id === ticketId) || {};
     const messageId = dataConcern?.message_id || null;
 
+    console.log("assigneesPersonnle", assigneesPersonnel);
+    const capitalizeWords = (name) => {
+        if (name) {
+            return name
+                .split(" ")
+                .map(
+                    (word) =>
+                        word.charAt(0).toUpperCase() +
+                        word.slice(1).toLowerCase()
+                )
+                .join(" ");
+        }
+    };
     const updateStatus = async () => {
         try {
             const response = await apiService.post("resolve", {
@@ -20,18 +33,10 @@ const ResolveModal = ({ modalRef, ticketId, dataRef }) => {
                 department: user?.department,
                 buyer_email: dataRef.buyer_email,
                 buyer_lastname: dataRef.buyer_lastname,
+                buyer_name: `${capitalizeWords(`${dataRef.buyer_firstname} ${dataRef.buyer_lastname}`)}`,
                 details_concern: dataRef.details_concern,
                 remarks: remarks,
-                assignee_email: Array.isArray(assigneesPersonnel[ticketId])
-                    ? assigneesPersonnel[ticketId]
-                          .map((person) => person.employee_email)
-                          .join(", ")
-                    : "",
-                assignee_name: Array.isArray(assigneesPersonnel[ticketId])
-                    ? assigneesPersonnel[ticketId]
-                          .map((person) => person.name)
-                          .join(", ")
-                    : "",
+                assignees: assigneesPersonnel[ticketId],
                 // assignees_info: Array.isArray(assigneesPersonnel[ticketId])
                 //     ? assigneesPersonnel[ticketId].map((person) => ({
                 //           assignees_email: person.employee_email,

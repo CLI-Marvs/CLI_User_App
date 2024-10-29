@@ -8,6 +8,7 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Headers;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Mail\Mailables\Envelope;
+use Illuminate\Mail\Mailables\Address;
 use Illuminate\Contracts\Queue\ShouldQueue;
 
 class ResolvedTicketToCustomerMail extends Mailable
@@ -15,27 +16,17 @@ class ResolvedTicketToCustomerMail extends Mailable
     use Queueable, SerializesModels;
     protected $ticket_id;
     protected $email;
-    protected $details_message;
     protected $message_id;
-    protected $files;
-    protected $admin_name;
-    protected $buyer_lname;
-    protected $department;
-
+    protected $buyer_lastname;
     /**
      * Create a new message instance.
      */
-    public function __construct($ticket_id, $email, $details_message, $message_id = null, $files, $admin_name, $buyer_lname, $department)
+    public function __construct($ticket_id, $email, $buyer_lastname,$message_id)
     {
         $this->ticket_id = $ticket_id;
-        $this->email = $email;
-        $this->details_message = $details_message;
+        $this->email = $email;  
         $this->message_id = $message_id;
-        $this->files = $files;
-        $this->admin_name = $admin_name;
-        $this->buyer_lname = $buyer_lname;
-        $this->department = $department;
-        
+        $this->buyer_lastname = $buyer_lastname;
     }
 
 
@@ -45,6 +36,7 @@ class ResolvedTicketToCustomerMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
+            from: new Address('ask@cebulandmasters.com', 'Cebu Landmasters Inc.'),
             subject: "[CLI Inquiry] Transaction {$this->ticket_id}",
         );
     }
@@ -73,13 +65,10 @@ class ResolvedTicketToCustomerMail extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'resolve_inquiry_customer.blade',
+            view: 'resolve_inquiry_customer',
             with: [
-                'details_message' => $this->details_message,
-                'admin_name' => $this->admin_name,
-                'buyer_lname' => $this->buyer_lname,
+                'buyer_lname' => $this->buyer_lastname,
                 'ticket_id' => $this->ticket_id,
-                'department' => $this->department
             ],
         );
     }

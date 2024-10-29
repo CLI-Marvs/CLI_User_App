@@ -120,6 +120,26 @@
     </style>
 </head>
 
-<body>
-{{ $remarks }}
+<body style="font-family: Arial, sans-serif; font-size: 14px; color: #333; line-height: 1.6;">
+    <p style="font-size: 16px; font-weight: bold;">Hi Mr./Ms. {{ $buyer_lname }},</p>
+
+    <p style="margin-bottom: 5px;">
+        We are pleased to inform you that your feedback ticket {{ $ticket_id }} has been resolved. 
+        Thank you for bringing this matter to our attention and for your patience as we addressed it.
+    </p>
+
+    <p>
+        If you have any further questions or need additional assistance, please don't hesitate to contact us.
+    </p>
+
+    <p>
+        Thank you for choosing Cebu Landmasters. We build with you in mind.
+    </p>
+
+
+    {{-- <p>Thank you for reaching out to us; we build with you in mind.</p> --}}
+
+    <p style="font-size: 16px;">Best regards,</p>
+    <p style="font-weight: bold;">Cebu Landmasters Inc.</p>
+    <img src="https://i.imgur.com/MHj4vYz.png" title="source: imgur.com" />
 </body>

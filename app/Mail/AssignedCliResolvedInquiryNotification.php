@@ -10,42 +10,29 @@ use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Mail\Mailables\Headers;
+use Illuminate\Mail\Mailables\Address;
+
 
 class AssignedCliResolvedInquiryNotification extends Mailable
 {
     use Queueable, SerializesModels;
-    // protected $buyer_name;
-    // protected $ticket_id;
-    // protected $admin_name;
-    // protected $employee_email;
+   
+    protected $employee_email;
+    protected $assignee_name;
     protected $data;
-    protected $email;
+ 
     /**
      * Create a new message instance.
      */
-    public function __construct($email, $data)
+    public function __construct($employee_email, $assignee_name, $data)
     {
+        \Log::info('data', [
+            'data' => $data
+        ]);
+        $this->employee_email = $employee_email;
+        $this->assignee_name = $assignee_name;
         $this->data = $data;
-       // dd('29', $data);
-        $this->email = $email;
-        // $this->buyer_name = $buyer_name;
-        // $this->ticket_id = $ticket_id;
-        // $this->admin_name = $admin_name;
-        // $this->employee_email = $employee_email;
-        // Log::info('AssignedCliResolvedInquiryNotification constructed', [
-        //     'ticket_id' => $this->ticket_id,
-        //     'buyer_name' => $this->buyer_name,
-        //     'admin_name' => $this->admin_name,
-        //     'employee_email' => $this->employee_email,
-        // ]);
-
-        // Log to check values of local parameters
-        // Log::info('AssignedCliResolvedInquiryNotification constructed1', [
-        //     'ticket_id' => $ticket_id,
-        //     'buyer_name' => $buyer_name,
-        //     'admin_name' => $admin_name,
-        //     'employee_email' => $employee_email,
-        // ]);
+        
     }
 
     /**
@@ -57,7 +44,8 @@ class AssignedCliResolvedInquiryNotification extends Mailable
             'subject' => "[CLI Inquiry] Transaction {$this->data['ticket_id']}"
         ]);
         return new Envelope(
-            subject: "Resolve [{$this->data['ticket_id']}]"
+            from: new Address('noreply@cebulandmasters.com', 'noreply@cebulandmasters.com'),
+            subject: "Resolved [{$this->data['ticket_id']}]"
 
         );
     }
@@ -93,11 +81,11 @@ class AssignedCliResolvedInquiryNotification extends Mailable
         return new Content(
             view: 'assigned_cli_resolved_inquiry',
             with: [
-                // 'buyer_name' => $this->data['buyer_name'],
-                // 'ticket_id' => $this->data['ticket_id'],
-                // 'admin_name' => $this->data['admin-name'],
-                // 'details_concern' => $this->data['details_concern']
-                'data' => $this->data
+                'assignee_name' => $this->assignee_name,
+                'buyer_name' => $this->data['buyer_name'],
+                'ticket_id' => $this->data['ticket_id'],
+                'admin_name' => $this->data['admin_name'],
+                'details_concern' => $this->data['details_concern']
 
             ],
         );

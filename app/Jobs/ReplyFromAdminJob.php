@@ -36,6 +36,8 @@ class ReplyFromAdminJob implements ShouldQueue
         $this->admin_name = $admin_name;
         $this->buyer_lname = $buyer_lname;
 
+        \Log::info('lastname', ['lastname' => $this->buyer_lname]);
+
         Log::info('Files being sentsssss', ['files' => $this->files]);
     }
 

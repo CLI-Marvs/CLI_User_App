@@ -124,10 +124,15 @@
 
 <body style="font-family: Arial, sans-serif; font-size: 14px; color: #333; line-height: 1.6; padding: 10px;">
     <div class="container">
-        <h1>Hi {{ ucwords($data['assignee_name']) }},</h1>
-        <p>An inquiry ticket that is assigned to you is marked as resolved by {{ $data['admin_name'] }}.
+        <h1>Hi {{ $assignee_name }},</h1>
+        <p>An inquiry ticket that is assigned to you is marked as resolved by {{ $admin_name }}.
         </p>
-        <p><strong>Ticket info:</strong> {{ $data['ticket_id'] , $data['details_concern'], $data['buyer_name']}}</p>
+        <p><strong>Ticket info:</strong></p>
+        <ul style="list-style-type: none; padding: 0;">
+            <li><strong>Ticket No:</strong> {{ $ticket_id }}</li>
+            <li><strong>Concern: </strong> {{ $details_concern }}</li>
+            <li><strong>From:</strong> {{ ucwords($buyer_name) }}</li>
+        </ul>
         <div class="footer">
             Best regards,
             CLI SuperApp Admin
