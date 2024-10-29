@@ -135,7 +135,7 @@
     <p>Please review the concern in your Masters Admin Dashboard.</p>
 
     <p>Thank you,<br>
-    <strong>{{ $data['from_user'] }}</strong><br>
-    {{ $data['department'] }}</p>
+    <strong>CLI Super App Admin</strong><br>
+  
 
 </body>

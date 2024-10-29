@@ -9,6 +9,8 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Mail\Mailables\Headers;
+use Illuminate\Mail\Mailables\Address;
+
 
 class EmailToPersonnelAssign extends Mailable
 {
@@ -33,6 +35,7 @@ class EmailToPersonnelAssign extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
+            from: new Address('noreply@cebulandmasters.com', 'donotreply@cebulandmasters.com'),
             subject: 'Inquiry has been assign to you',
         );
     }

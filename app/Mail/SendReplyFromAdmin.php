@@ -11,6 +11,8 @@ use Illuminate\Mail\Mailables\Headers;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Mail\Mailables\Attachment;
+use Illuminate\Mail\Mailables\Address;
+
 
 class SendReplyFromAdmin extends Mailable
 {
@@ -43,6 +45,7 @@ class SendReplyFromAdmin extends Mailable
     {
 
         return new Envelope(
+            from: new Address('ask@cebulandmasters.com', 'Cebu Landmasters Inc.'),
             subject: "[CLI Inquiry] Transaction {$this->ticket_id}",
         );
     }

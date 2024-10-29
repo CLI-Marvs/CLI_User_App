@@ -71,7 +71,6 @@ class NotifyAssignedCliOfResolvedInquiryJob implements ShouldQueue
             //         ->send(new AssignedCliResolvedInquiryNotification($this->data, $this->email));
             // }
             $mailer->to($this->email)
-                ->cc('scriptest@cebulandmasters.com')
                 ->send(new AssignedCliResolvedInquiryNotification($this->data, $this->email));
             // Log::info('Emails sent successfully', ['emails' => $this->email]);
         } catch (\Exception $e) {
