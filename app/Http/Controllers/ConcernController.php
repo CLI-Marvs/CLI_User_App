@@ -1797,6 +1797,10 @@ class ConcernController extends Controller
 
     public function fromBuyerEmail($buyerData, $buyerDataErratum, $responses)
     {
+        Log::info('Gikan ni brader john', [
+            'response' => $responses
+        ]);
+
         if ($buyerData) {
             foreach ($buyerData as $buyer) {
                 if ($buyer) {
