@@ -198,7 +198,7 @@ const InquiryFormModal = ({ modalRef }) => {
                  const isFileValid = validFile.includes(modifiedExtension);
 
                  if (!isFileValid) {
-                     alert(`${modifiedExtension} is not allow.`);
+                     alert(`${modifiedExtension} is not allowed.`);
                      setLoading(false);
                      return;
                  }
