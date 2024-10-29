@@ -92,8 +92,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/pin-concern/{id}', [ConcernController::class, 'pinConcern']);
     Route::post('/isread/{concernId}', [ConcernController::class, 'readNotifByUser']);
     Route::get('/specific-assignee', [ConcernController::class, 'getSpecificInquiry']);
-    Route::post('/remove-assignee', [ConcernController::class, 'removeAssignee']);  
+    Route::post('/remove-assignee', [ConcernController::class, 'removeAssignee']);
     Route::get('/property-name', [PropertyMasterController::class, 'getPropertyName']);
+    /* Download the file attachment */
+    Route::post('/download-file', [ConcernController::class, 'downloadFileFromGCS']);
     /* Pricing Master List */
     Route::get('/get-pricing-master-lists', [PriceListMasterController::class, 'getAllPricingMasterLists']);
     /*Basic Pricing */
