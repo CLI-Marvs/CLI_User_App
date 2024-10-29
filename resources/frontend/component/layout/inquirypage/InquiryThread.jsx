@@ -212,9 +212,8 @@ const InquiryThread = () => {
                 "mp4",
                 "plain", //handle for .txt file extension
             ];
-            const extension = attachedFiles[0].type.toLowerCase();
+            const extension = attachedFiles[0].type;
             console.log("extension", extension);
-
             let modifiedExtension = extension.split("/")[1]; //from application/pdf to pdf
             // Special handling for .docx MIME type
             if (
@@ -222,16 +221,20 @@ const InquiryThread = () => {
                 "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
             ) {
                 modifiedExtension = "docx"; // Set extension to docx for validation
+            } else if (extension === "application/msword") {
+                modifiedExtension = "doc";
+            } else if (
+                extension === "application/vnd.ms-excel.sheet.macroEnabled.12"
+            ) {
+                modifiedExtension = "xlsm";
             } else if (extension === "application/vnd.ms-excel") {
                 modifiedExtension = "xls";
-            } else if (
-                extension ===
-                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-            ) {
-                modifiedExtension = "xls";
+            } else if (extension === "application/x-zip-compressed") {
+                alert("Zip is not allowed.");
+                setLoading(false);
+                return;
             }
 
-            //  const isFileValid = validFile.includes(extension.split("/")[1]);
             const isFileValid = validFile.includes(modifiedExtension);
 
             if (!isFileValid) {
@@ -679,27 +682,57 @@ const InquiryThread = () => {
                                         {attachedFiles.length > 0 && (
                                             <div className="mb-2 ">
                                                 {attachedFiles.map(
-                                                    (file, index) => (
-                                                        <div
-                                                            key={index}
-                                                            className="flex items-center justify-between mb-2 p-2 border bg-white rounded"
-                                                        >
-                                                            <span className="text-sm text-gray-700">
-                                                                {file.name}
-                                                            </span>
-                                                            <button
-                                                                type="button"
-                                                                onClick={() =>
-                                                                    removeFile(
-                                                                        file.name
-                                                                    )
-                                                                }
-                                                                className="text-red-500"
+                                                    (file, index) => {
+                                                        const fileName =
+                                                            file.name;
+                                                        console.log(
+                                                            "123",
+                                                            fileName
+                                                        );
+                                                        const fileExtension =
+                                                            fileName.slice(
+                                                                fileName.lastIndexOf(
+                                                                    "."
+                                                                )
+                                                            );
+                                                        const baseName =
+                                                            fileName.slice(
+                                                                0,
+                                                                fileName.lastIndexOf(
+                                                                    "."
+                                                                )
+                                                            );
+                                                        const truncatedName =
+                                                            baseName.length > 30
+                                                                ? baseName.slice(
+                                                                      0,
+                                                                      30
+                                                                  ) + "..."
+                                                                : baseName;
+                                                        return (
+                                                            <div
+                                                                key={index}
+                                                                className="flex items-center justify-between mb-2 p-2 border bg-white rounded "
                                                             >
-                                                                Remove
-                                                            </button>
-                                                        </div>
-                                                    )
+                                                                <span className="text-sm text-gray-700">
+                                                                    {/* {file.name} */}
+                                                                    {truncatedName +
+                                                                        fileExtension}
+                                                                </span>
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() =>
+                                                                        removeFile(
+                                                                            file.name
+                                                                        )
+                                                                    }
+                                                                    className="text-red-500"
+                                                                >
+                                                                    Remove
+                                                                </button>
+                                                            </div>
+                                                        );
+                                                    }
                                                 )}
                                             </div>
                                         )}

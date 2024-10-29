@@ -1,6 +1,10 @@
 import React, { useEffect, useState, useRef } from "react";
 import TicketTable from "./TicketTable";
-import { IoIosArrowUp, IoIosArrowDown, IoMdArrowDropdown } from "react-icons/io";
+import {
+    IoIosArrowUp,
+    IoIosArrowDown,
+    IoMdArrowDropdown,
+} from "react-icons/io";
 import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md";
 import ReactPaginate from "react-paginate";
 import { useStateContext } from "../../../context/contextprovider";
@@ -13,7 +17,6 @@ import { MdRefresh } from "react-icons/md";
 import { Alert } from "@mui/material";
 import InquiryFormModal from "./InquiryFormModal";
 import axios from "axios";
-
 
 const InquiryList = () => {
     const {
@@ -34,7 +37,7 @@ const InquiryList = () => {
         /*  setHasAttachments,
         hasAttachments */
     } = useStateContext();
-    
+
     const [name, setName] = useState("");
     const [category, setCategory] = useState("");
     const [email, setEmail] = useState("");
@@ -210,12 +213,13 @@ const InquiryList = () => {
         "N/A",
         ...(Array.isArray(propertyNamesList) && propertyNamesList.length > 0
             ? propertyNamesList
-            .filter((item) => !item.toLowerCase().includes("phase")) 
-            .map((item) => formatFunc(item)).sort((a, b) => {
-                if (a === "N/A") return -1; 
-                if (b === "N/A") return 1;
-                return a.localeCompare(b); 
-            })
+                  .filter((item) => !item.toLowerCase().includes("phase"))
+                  .map((item) => formatFunc(item))
+                  .sort((a, b) => {
+                      if (a === "N/A") return -1;
+                      if (b === "N/A") return 1;
+                      return a.localeCompare(b);
+                  })
             : []),
     ];
 
@@ -247,7 +251,6 @@ const InquiryList = () => {
             startDate,
             selectedProperty,
             hasAttachments,
-
         });
         setDaysFilter(null);
         setStatusFilter(null);
@@ -258,7 +261,7 @@ const InquiryList = () => {
         setEmail("");
         setTicket("");
         //setStatus("");
-        setSelectedProperty("")
+        setSelectedProperty("");
         setHasAttachments(false);
         setSpecificAssigneeCsr("");
     };
@@ -288,7 +291,7 @@ const InquiryList = () => {
         currentPage,
     ]);
 
-   /*  const sendSoapRequest = async () => {
+    /*  const sendSoapRequest = async () => {
         const soapBody = `
         <soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:urn="urn:sap-com:document:sap:soap:functions:mc-style">
            <soap:Header/>
@@ -321,10 +324,7 @@ const InquiryList = () => {
             console.log("Error:", error.response.data);
         }
     }; */
-    
 
-   
-    
     return (
         <>
             <div className="h-screen max-w-full bg-custom-grayFA px-[20px]">
@@ -404,31 +404,36 @@ const InquiryList = () => {
                                             {" "}
                                             Category
                                         </label>
-
+                                        {/* 
                                         <select
-                                            className="w-full border-b-1 outline-none appearance-none text-sm"
+                                            className="w-full border-b-1 outline-none appearance-none text-sm   "
                                             value={category}
                                             onChange={(e) =>
                                                 setCategory(e.target.value)
                                             }
                                         >
-                                            <option value="">
-                                                Select Category
+                                            <option value=" ">
+                                                 Select Category
                                             </option>
-                                            <option value="Reservation Documents">
-                                                Reservation Documents
+                                            <option
+                                                value="Reservation Documents"
+                                                className="bg-red-900"
+                                            >
+                                                &nbsp;&nbsp;Reservation
+                                                Documents
                                             </option>
                                             <option value="Payment Issues">
                                                 Payment Issues
                                             </option>
                                             <option value="SOA/ Billing Statement/ Buyer's Ledger">
-                                                 SOA/ Billing Statement/ Buyer's Ledger
+                                                SOA/ Billing Statement/ Buyer's
+                                                Ledger
                                             </option>
                                             <option value="Turn Over Status">
-                                                 Turn Over Status
+                                                Turn Over Status
                                             </option>
                                             <option value="Unit Status">
-                                                 Unit Status
+                                                Unit Status
                                             </option>
                                             <option value="Loan Application">
                                                 Loan Application
@@ -443,7 +448,59 @@ const InquiryList = () => {
                                             <option value="Other Concerns">
                                                 Other Concerns
                                             </option>
-                                        </select>
+                                        </select> */}
+                                        <div className="flex bg-red-900 justify-start w-full relative">
+                                            <label
+                                                htmlFor=""
+                                                className="w-full border-b-2"
+                                            >
+                                                {""}
+                                            </label>
+                                            <select
+                                                className="w-full border-b-1 outline-none appearance-none text-sm absolute px-[4px]"
+                                                value={category}
+                                                onChange={(e) =>
+                                                    setCategory(e.target.value)
+                                                }
+                                            >
+                                                <option value=" ">
+                                                    Select Category
+                                                </option>
+                                                <option
+                                                    value="Reservation Documents"
+                                                    className="bg-red-900"
+                                                >
+                                                    Reservation Documents
+                                                </option>
+                                                <option value="Payment Issues">
+                                                    Payment Issues
+                                                </option>
+                                                <option value="SOA/ Billing Statement/ Buyer's Ledger">
+                                                    SOA/ Billing Statement/
+                                                    Buyer's Ledger
+                                                </option>
+                                                <option value="Turn Over Status">
+                                                    Turn Over Status
+                                                </option>
+                                                <option value="Unit Status">
+                                                    Unit Status
+                                                </option>
+                                                <option value="Loan Application">
+                                                    Loan Application
+                                                </option>
+                                                <option value="Title and Other Registration Documents">
+                                                    Title and Other Registration
+                                                    Documents
+                                                </option>
+                                                <option value="Commissions">
+                                                    Commissions
+                                                </option>
+                                                <option value="Other Concerns">
+                                                    Other Concerns
+                                                </option>
+                                            </select>
+                                        </div>
+
                                         <span className="absolute inset-y-0 right-0 flex items-center  pl-3 pointer-events-none">
                                             <IoIosArrowDown />
                                         </span>
@@ -502,7 +559,7 @@ const InquiryList = () => {
                                                 Property
                                             </label>
                                             <select
-                                                className="w-[220px] border-b-1 outline-none appearance-none text-sm"
+                                                className="w-[220px] border-b-1 outline-none appearance-none text-sm px-[4px]"
                                                 onChange={handleSelectProperty}
                                                 value={selectedProperty}
                                             >
@@ -523,8 +580,8 @@ const InquiryList = () => {
                                                 )}
                                             </select>
                                             <span className="absolute inset-y-0 right-0 flex items-center  pl-3 pointer-events-none">
-                                            <IoIosArrowDown />
-                                        </span>
+                                                <IoIosArrowDown />
+                                            </span>
                                         </div>
                                     </div>
                                     <div className="mt-5 flex gap-5">
@@ -600,7 +657,8 @@ const InquiryList = () => {
                         <div className="flex gap-[10px]">
                             <div className="flex gap-2">
                                 <div className="flex items-center space-x-2">
-                                    {user?.department === "Customer Relations - Services" && (
+                                    {user?.department ===
+                                        "Customer Relations - Services" && (
                                         <button
                                             onClick={handleAssignedToMeClick}
                                             className={`flex items-center text-custom-lightgreen h-[25px] w-[125px] rounded-[55px] p-[2px] ${

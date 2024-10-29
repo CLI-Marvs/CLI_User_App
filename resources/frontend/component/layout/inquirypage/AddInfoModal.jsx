@@ -85,6 +85,7 @@ const AddInfoModal = ({ modalRef, dataConcern }) => {
 
     const handleCloseModal = () => {
         setDataToUpdate(dataConcern);
+        setMessage('')
     };
     const handleChange = (e) => {
         const newValue = e.target.value;
