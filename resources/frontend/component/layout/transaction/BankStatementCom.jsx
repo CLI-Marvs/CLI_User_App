@@ -103,7 +103,7 @@ const BankStatementCom = () => {
                                 <Belnr>${item.BELNR}</Belnr>
                                 <Amt>${item.AMT}</Amt>
                                 <Payd>${item.PAYD}</Payd>
-                               <InvId>${item.INVID}</InvId>
+                                <InvId>${item.INVID}</InvId>
                              </item>
                           </LtZcol>
                        </urn:ZdataWarehousePosted>
