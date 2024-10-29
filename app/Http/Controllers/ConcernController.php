@@ -540,6 +540,42 @@ class ConcernController extends Controller
         return $fileLinks;
     }
 
+    /**
+     * Function to handle download of the file from the google cloud 
+     */
+    public function downloadFileFromGCS(Request $request)
+    {
+        try {
+            $fileUrlPath = $request->fileUrlPath;
+            if (!$fileUrlPath) {
+                return response()->json(['message' => 'File path is required.'], 400);
+            }
+
+            $keyJson = config('services.gcs.key_json');  //Access from services.php
+            $keyArray = json_decode($keyJson, true); // Decode the JSON string to an array
+            $storage = new StorageClient([
+                'keyFile' => $keyArray
+            ]);
+
+            $bucket = $storage->bucket('super-app-storage');
+            $filePath = 'concerns/' . $fileUrlPath;
+            $object = $bucket->object($filePath);
+            if (!$object->exists()) {
+                return response()->json(['message' => 'File not found in cloud storage.'], 404);
+            }
+
+            // Get the file content from GCS
+            $fileContent = $object->downloadAsStream()->getContents();
+
+            return response($fileContent)
+                ->header('Content-Type', $object->info()['contentType'] ?? 'application/octet-stream')
+                ->header('Content-Disposition', 'attachment; filename="' . basename($fileUrlPath) . '"');
+            return response()->download($object);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
+        }
+    }
+
     // public function uploadToGCS($files)
     // {
     //     $fileLinks = [];
@@ -1476,8 +1512,6 @@ class ConcernController extends Controller
                    $assignee['employee_email'],
                    $assignee['name'],
                    $data
-                 
-
                 );
             }
 
