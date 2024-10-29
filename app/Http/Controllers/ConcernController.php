@@ -1736,7 +1736,7 @@ class ConcernController extends Controller
             $buyerDataErratum = $request->input('dataFromBuyerErratum');
 
             if ($buyerData || $buyerDataErratum) {
-                $this->fromBuyerEmail($buyerData, $buyerDataErratum, $responses);
+                $responses = array_merge($responses,$this->fromBuyerEmail($buyerData, $buyerDataErratum));
             }
 
             foreach ($requestData as $message) {
@@ -1795,12 +1795,13 @@ class ConcernController extends Controller
         }
     }
 
-    public function fromBuyerEmail($buyerData, $buyerDataErratum, $responses)
+    public function fromBuyerEmail($buyerData, $buyerDataErratum)
     {
-        Log::info('Gikan ni brader john', [
-            'response' => $responses
-        ]);
+   
 
+        $responses  = [];
+        
+        
         if ($buyerData) {
             foreach ($buyerData as $buyer) {
                 if ($buyer) {
@@ -1837,6 +1838,10 @@ class ConcernController extends Controller
                     $responses[] = "Saved Unsuccessfully " . $buyer['buyer_email'];
                 }
             }
+            Log::info('Gikan ni brader john', [
+                'response' => $responses
+            ]);
+            return $responses;
         }
         if ($buyerDataErratum) {
             foreach ($buyerDataErratum as $buyer) {
