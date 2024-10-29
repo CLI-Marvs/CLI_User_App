@@ -1809,6 +1809,8 @@ class ConcernController extends Controller
         if (!empty($buyerData)) {
             foreach ($buyerData as $buyer) {
                 if ($buyer) {
+                Log::info('inside buyerData');
+
                     $lastConcern = Concerns::latest()->first();
                     $nextId = $lastConcern ? $lastConcern->id + 1 : 1;
 
@@ -1850,6 +1852,7 @@ class ConcernController extends Controller
         if (!empty($buyerDataErratum)) {
             foreach ($buyerDataErratum as $buyer) {
                 if ($buyer) {
+                Log::info('inside buyerDataErratum');
                     $existingTicket = Concerns::where('email_subject', $buyer['email_subject'])
                         ->where('buyer_email', $buyer['buyer_email'])
                         ->first();
