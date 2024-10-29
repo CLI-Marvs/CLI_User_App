@@ -1739,6 +1739,7 @@ class ConcernController extends Controller
                 $responses = array_merge($responses,$this->fromBuyerEmail($buyerData, $buyerDataErratum));
             }
 
+           if(!empty($requestData)) {
             foreach ($requestData as $message) {
                 Log::info('inside loop', $message);
                 $concernsRef = Concerns::where('ticket_id', $message['ticket_id'])->first();
@@ -1784,6 +1785,7 @@ class ConcernController extends Controller
                     $responses[] = "Posted Unsuccessfully " . $message['ticket_id'];
                 }
             }
+           }
 
         Log::info('Gikan ni brader john', [
             'response' => $responses
@@ -1802,7 +1804,7 @@ class ConcernController extends Controller
         $responses  = [];
         
         
-        if ($buyerData) {
+        if (!empty($buyerData)) {
             foreach ($buyerData as $buyer) {
                 if ($buyer) {
                     $lastConcern = Concerns::latest()->first();
@@ -1843,7 +1845,7 @@ class ConcernController extends Controller
             ]);
             return $responses;
         }
-        if ($buyerDataErratum) {
+        if (!empty($buyerDataErratum)) {
             foreach ($buyerDataErratum as $buyer) {
                 if ($buyer) {
                     $existingTicket = Concerns::where('email_subject', $buyer['email_subject'])
