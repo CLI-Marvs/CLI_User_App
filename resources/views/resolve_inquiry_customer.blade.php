@@ -124,14 +124,23 @@
 <body style="font-family: Arial, sans-serif; font-size: 14px; color: #333; line-height: 1.6;">
     <p style="font-size: 16px; font-weight: bold;">Hi Mr./Ms. {{ ucwords($buyer_lname) }},</p>
 
-    <p>{!! $details_message !!}</p>
+    <p>We are pleased to inform you that your feedback ticket {{$ticket_id}} has been resolved. Thank you for bringing this
+    matter to our attention and for your patience as we addressed it.
+    </p>
 
-    <p style="font-size: 16px;">Sincerely,</p>
+    <p>
+        If you have any further questions or need additional assistance, please don't hesitate to contact us.
+    </p>
+    <p>Thank you for choosing Cebu Landmasters. We build with you in mind.</p>
+{{-- {!! $details_message !!} --}}
+    {{-- <p style="font-size: 16px;">Sincerely,</p>
     <p style="font-weight: bold;">{{ ucwords($admin_name) }}</p>
-    <p style="font-weight: bold; margin-bottom: 10px;">CLI - Customer Relations Services</p>
+    <p style="font-weight: bold; margin-bottom: 10px;">CLI - Customer Relations Services</p> --}}
 
-    
-    
+    <p style="font-size: 16px;">Best regards,</p>
+    <p style="font-weight: bold;">{{ ucwords($admin_name) }}</p>
+    <p style="font-weight: bold;">CLI - {{$department}}</p>
+
     <img src="https://i.imgur.com/MHj4vYz.png" title="source: imgur.com" />
-   
+
 </body>
