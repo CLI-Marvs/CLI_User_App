@@ -1866,7 +1866,7 @@ class ConcernController extends Controller
                         $messagesRef->details_message = $buyer['details_message'];
                         $messagesRef->ticket_id = $existingTicket->ticket_id;
                         $fileLinks = $this->uploadToGCSFromScript($buyer['attachment']);
-                        $messagesRef->buyer_email = $buyer->buyer_email;
+                        $messagesRef->buyer_email = $buyer['buyer_email'];
                         $messagesRef->attachment = json_encode($fileLinks);
                         $messagesRef->created_at = Carbon::parse(now())->setTimezone('Asia/Manila');
                         $messagesRef->buyer_name = $existingTicket->buyer_name;
