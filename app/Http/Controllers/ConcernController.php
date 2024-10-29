@@ -1849,7 +1849,6 @@ class ConcernController extends Controller
             Log::info('Gikan ni brader john', [
                 'response' => $responses
             ]);
-            return $responses;
         }
         if (!empty($buyerDataErratum)) {
             foreach ($buyerDataErratum as $buyer) {
@@ -1879,6 +1878,8 @@ class ConcernController extends Controller
                 }
             }
         }
+
+        return $responses;
 
     }
 
