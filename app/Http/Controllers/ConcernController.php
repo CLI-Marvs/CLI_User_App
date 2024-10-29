@@ -1733,8 +1733,8 @@ class ConcernController extends Controller
         try {
             $allData = $request->input('allData');
         
-            $requestData = $allData['data'] ?? []; // Access "data"
-            $buyerData = $allData['dataFromBuyer'] ?? []; // Access "dataFromBuyer"
+            $requestData = $allData['data'] ?? [];
+            $buyerData = $allData['dataFromBuyer'] ?? [];
             $buyerDataErratum = $allData['dataFromBuyerErratum'] ?? [];
 
             if (!empty($buyerData) || !empty($buyerDataErratum)) {
@@ -1743,7 +1743,6 @@ class ConcernController extends Controller
 
            if(!empty($requestData)) {
             foreach ($requestData as $message) {
-                Log::info('inside loop', $message);
                 $concernsRef = Concerns::where('ticket_id', $message['ticket_id'])->first();
 
                 if ($concernsRef) {
@@ -1788,11 +1787,6 @@ class ConcernController extends Controller
                 }
             }
            }
-
-        Log::info('Gikan ni brader john', [
-            'response' => $responses
-        ]);
-
             return response()->json($responses);
         } catch (\Throwable $e) {
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
@@ -1801,18 +1795,12 @@ class ConcernController extends Controller
 
     public function fromBuyerEmail($buyerData, $buyerDataErratum)
     {
-   
 
         $responses  = [];
-        
         
         if (!empty($buyerData)) {
             foreach ($buyerData as $buyer) {
                 if ($buyer) {
-                Log::info('inside buyerData', [
-                    'buyerData' => $buyer
-                ]);
-
                     $lastConcern = Concerns::latest()->first();
                     $nextId = $lastConcern ? $lastConcern->id + 1 : 1;
 
@@ -1846,16 +1834,10 @@ class ConcernController extends Controller
                     $responses[] = "Posted Unsuccessfully " . $buyer['buyer_email'];
                 }
             }
-            Log::info('Gikan ni brader john', [
-                'response' => $responses
-            ]);
         }
         if (!empty($buyerDataErratum)) {
             foreach ($buyerDataErratum as $buyer) {
                 if ($buyer) {
-                    Log::info('inside buyerDataErratum', [
-                        'buyerDataErratum' => $buyer
-                    ]);
                     $existingTicket = Concerns::where('email_subject', $buyer['email_subject'])
                         ->where('buyer_email', $buyer['buyer_email'])
                         ->first();
