@@ -1735,8 +1735,8 @@ class ConcernController extends Controller
             $buyerData = $request->input('dataFromBuyer');
             $buyerDataErratum = $request->input('dataFromBuyerErratum');
 
-            if ($buyerData || $buyerDataErratum) {
-                $responses = array_merge($responses,$this->fromBuyerEmail($buyerData, $buyerDataErratum));
+            if (!empty($buyerData) || !empty($buyerDataErratum)) {
+                $responses = array_merge($responses, $this->fromBuyerEmail($buyerData, $buyerDataErratum));
             }
 
            if(!empty($requestData)) {
