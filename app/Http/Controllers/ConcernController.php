@@ -2,38 +2,40 @@
 
 namespace App\Http\Controllers;
 
-use App\Events\AdminMessage;
-use App\Events\AdminReplyLogs;
-use App\Events\ConcernMessages;
-use App\Events\InquiryAssignedLogs;
+use Carbon\Carbon;
+use GuzzleHttp\Client;
+use App\Models\Concerns;
+use App\Models\Employee;
+use App\Models\Messages;
 use App\Events\MessageID;
-use App\Events\RemoveAssignees;
-use App\Events\RetrieveAssignees;
 use App\Events\SampleEvent;
-use App\Jobs\JobToPersonnelAssign;
+use App\Models\InquiryLogs;
+use App\Events\AdminMessage;
+use Illuminate\Http\Request;
+use App\Models\Conversations;
+use App\Events\AdminReplyLogs;
+use App\Models\PinnedConcerns;
+use App\Events\ConcernMessages;
+use App\Events\RemoveAssignees;
 use App\Jobs\ReplyFromAdminJob;
+use App\Models\BuyerReplyNotif;
+use App\Models\InquiryAssignee;
+use App\Models\ReadNotifByUser;
 use App\Jobs\ResolveJobToSender;
 use App\Mail\SendReplyFromAdmin;
-use App\Models\BuyerReplyNotif;
-use App\Models\Concerns;
+use App\Events\RetrieveAssignees;
 use App\Models\ConcernsCreatedBy;
-use App\Models\Conversations;
-use App\Models\Employee;
-use App\Models\InquiryAssignee;
-use App\Models\InquiryLogs;
-use App\Models\Messages;
-use App\Models\PinnedConcerns;
-use App\Models\ReadNotifByUser;
-use Carbon\Carbon;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
+use App\Jobs\JobToPersonnelAssign;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use App\Events\InquiryAssignedLogs;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
-use GuzzleHttp\Client;
+use App\Jobs\MarkResolvedToCustomerJob;
 use Google\Cloud\Storage\StorageClient;
 use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Collection;
+use App\Jobs\NotifyAssignedCliOfResolvedInquiryJob;
 
 
 
@@ -226,7 +228,7 @@ class ConcernController extends Controller
 
     public function sendMessage(Request $request)
     {
-       
+
         try {
             $allFiles = [];
             $files = $request->file('files');
@@ -269,7 +271,7 @@ class ConcernController extends Controller
             $admin_name = $request->input('admin_name', '');
             $admin_id = $request->input('admin_id', '');
             $buyer_email = $request->input('buyer_email', '');
-            $buyer_name = $request->input('buyer_name', '');
+            $buyer_lname = $request->input('buyer_lastname', '');
             $admin_profile_picture = $request->input('admin_profile_picture', '');
 
 
@@ -310,7 +312,7 @@ class ConcernController extends Controller
                 ReplyFromAdminJob::dispatch($messages->ticket_id, $buyer_email, $adminMessage, $message_id, $allFiles);
             } */
 
-            ReplyFromAdminJob::dispatch($messages->ticket_id, $buyer_email, $adminMessage, $message_id, $allFiles, $admin_name, $buyer_name);
+            ReplyFromAdminJob::dispatch($messages->ticket_id, $buyer_email, $adminMessage, $message_id, $allFiles, $admin_name, $buyer_lname);
 
 
             return response()->json("Successfully sent");
@@ -1420,27 +1422,106 @@ class ConcernController extends Controller
         }
     }
 
+    //Sho codes
+    // public function markAsResolve(Request $request)
+    // {
+
+    //     try {
+    //         $concerns = Concerns::where('ticket_id', $request->ticket_id)->first();
+
+    //         $allFiles = null;
+    //         $messageId = $request->message_id;
+    //         $buyerEmail = $request->buyer_email;
+    //         $admin_name = $request->admin_name;
+    //         $buyer_name = $request->buyer_name;
+    //         $concerns->status = "Resolved";
+    //         /*   $concerns->resolve_from = $request->department; */
+    //         $concerns->save();
+
+    //         $this->inquiryResolveLogs($request);
+    //         ReplyFromAdminJob::dispatch($request->ticket_id, $buyerEmail, $request->remarks, $messageId, $allFiles, $admin_name, $buyer_name);
+    //     } catch (\Exception $e) {
+    //         return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
+    //     }
+    // }
+
     public function markAsResolve(Request $request)
     {
+        //  dd($request);
         try {
+            $assignees = [];
             $concerns = Concerns::where('ticket_id', $request->ticket_id)->first();
 
             $allFiles = null;
             $messageId = $request->message_id;
             $buyerEmail = $request->buyer_email;
             $admin_name = $request->admin_name;
+            $department= $request->department;
             $buyer_lastname = $request->buyer_lastname;
             $concerns->status = "Resolved";
             /*   $concerns->resolve_from = $request->department; */
+            // dd($request->employee_email);
+            $assignedCliUser = $this->getAssignInquiries($request->employee_email);
+            // $assignedCliUser = $this->getAssignInquiries(implode(', ', array_column($request->assignees_info, 'assignees_email')));
+            //dd($assignedCliUser);
+            // $assigneesEmails = array_column($request->assignees_info, 'assignees_email'); // Extract emails from assignees_info
+            // dd($assignedCliUser);
+            if ($assignedCliUser) {
+                // Log::info('Dispatching NotifyAssignedCliOfResolvedInquiryJob', [
+                //     'ticket_id' => $request->ticket_id,
+                //     'buyer_name' => $request->buyer_name,
+                //     'admin_name' => $request->admin_name,
+                //     'employee_email' => $request->employee_email,
+                //     'message_id' => $messageId,
+                // ]);
+                $dataToEmail = [
+                    'ticket_id'
+                    => $request->ticket_id,
+                    'buyer_name' => $request->buyer_name,
+                    'admin_name' => $request->admin_name,
+                    'details_concern' => $request->details_concern,
+                    'assignee_name' => $request->assignee_name, // Combine names as a comma-separated string
+                    'assignee_email' =>
+                    $request->assignee_email,
+                    // 'assignee_email' => implode(', ', array_column($request->assignees_info, 'assignees_email')), // Combine emails as a comma-separated string
+                ];
+                // $dataToEmail = [
+                //     'ticket_id'
+                //     => $request->ticket_id,
+                //     'buyer_name' => $request->buyer_name,
+                //     'admin_name' => $request->admin_name,
+                //     'details_concern' => $request->details_concern,
+                //     'assignee_name' => implode(', ', array_column($request->assignees_info, 'assignees_name')), // Combine names as a comma-separated string
+                //     'assignee_email' => implode(', ', $assigneesEmails),
+                //     // 'assignee_email' => implode(', ', array_column($request->assignees_info, 'assignees_email')), // Combine emails as a comma-separated string
+                // ];
+                // NotifyAssignedCliOfResolvedInquiryJob::dispatch(
+                //     implode(', ', array_column($request->assignees_info, 'assignees_email')), // Pass emails as a single string
+                //     $dataToEmail
+                // );
+                // NotifyAssignedCliOfResolvedInquiryJob::dispatch(
+                //     array_column($request->assignees_info, 'assignees_email'), // Pass emails as an array
+                //     $dataToEmail
+                // );
+                // dd($assigneesEmails);
+                // NotifyAssignedCliOfResolvedInquiryJob::dispatch(
+                //     $assigneesEmails, // Pass emails as an array
+                //     $dataToEmail
+                // );
+                NotifyAssignedCliOfResolvedInquiryJob::dispatch(
+                    $request->assignee_email, // Pass emails as an array
+                    $dataToEmail
+                );
+            }
             $concerns->save();
 
             $this->inquiryResolveLogs($request);
-            ReplyFromAdminJob::dispatch($request->ticket_id, $buyerEmail, $request->remarks, $messageId, $allFiles, $admin_name, $buyer_lastname);
+            // ReplyFromAdminJob::dispatch($request->ticket_id, $buyerEmail, $request->remarks, $messageId, $allFiles, $admin_name, $buyer_lastname);
+            MarkResolvedToCustomerJob::dispatch($request->ticket_id, $buyerEmail, $request->remarks, $messageId, $allFiles, $admin_name, $buyer_lastname, $department);
         } catch (\Exception $e) {
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
         }
     }
-
     public function inquiryResolveLogs($request)
     {
         try {

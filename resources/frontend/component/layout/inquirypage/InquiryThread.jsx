@@ -212,7 +212,9 @@ const InquiryThread = () => {
                 "mp4",
                 "plain", //handle for .txt file extension
             ];
-            const extension = attachedFiles[0].type;
+            const extension = attachedFiles[0].type.toLowerCase();
+            console.log("extension", extension);
+
             let modifiedExtension = extension.split("/")[1]; //from application/pdf to pdf
             // Special handling for .docx MIME type
             if (
@@ -220,7 +222,15 @@ const InquiryThread = () => {
                 "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
             ) {
                 modifiedExtension = "docx"; // Set extension to docx for validation
+            } else if (extension === "application/vnd.ms-excel") {
+                modifiedExtension = "xls";
+            } else if (
+                extension ===
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            ) {
+                modifiedExtension = "xls";
             }
+
             //  const isFileValid = validFile.includes(extension.split("/")[1]);
             const isFileValid = validFile.includes(modifiedExtension);
 
@@ -247,7 +257,7 @@ const InquiryThread = () => {
         formData.append("message_id", messageId || "");
         formData.append("admin_id", user?.id || "");
         formData.append("buyer_email", dataConcern.buyer_email || "");
-        formData.append("buyer_name", dataConcern.buyer_name || "");
+        formData.append("buyer_lastname", dataConcern.buyer_lastname || "");
         formData.append("admin_profile_picture", user?.profile_picture || "");
         formData.append("department", user?.department || "");
 
@@ -813,9 +823,9 @@ const InquiryThread = () => {
                                                             </div>
 
                                                             <div className="flex items-center h-[19px] text-sm">
-                                                                Hi{" "}
+                                                                Hi Mr./Ms.{" "}
                                                                 {capitalizeWords(
-                                                                    dataConcern.buyer_name
+                                                                    dataConcern.buyer_lastname
                                                                 )}
                                                                 ,
                                                             </div>
