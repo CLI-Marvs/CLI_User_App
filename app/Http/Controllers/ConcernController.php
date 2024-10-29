@@ -1736,7 +1736,7 @@ class ConcernController extends Controller
             $buyerDataErratum = $request->input('dataFromBuyerErratum');
 
             if ($buyerData || $buyerDataErratum) {
-                $this->fromBuyerEmail($buyerData, $buyerDataErratum);
+                $this->fromBuyerEmail($buyerData, $buyerDataErratum, $responses);
             }
 
             foreach ($requestData as $message) {
@@ -1791,9 +1791,8 @@ class ConcernController extends Controller
         }
     }
 
-    public function fromBuyerEmail($buyerData, $buyerDataErratum)
+    public function fromBuyerEmail($buyerData, $buyerDataErratum, $responses)
     {
-        $responses = [];
         if ($buyerData) {
             foreach ($buyerData as $buyer) {
                 if ($buyer) {
