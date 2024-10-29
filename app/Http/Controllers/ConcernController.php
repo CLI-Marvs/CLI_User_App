@@ -1732,10 +1732,10 @@ class ConcernController extends Controller
         $responses = [];
         try {
             $allData = $request->input('allData');
-            $decodedData = json_decode($allData,true);
-            $requestData = $decodedData['data'];
-            $buyerData = $decodedData['dataFromBuyer'];
-            $buyerDataErratum = $decodedData['dataFromBuyerErratum'];
+        
+            $requestData = $allData['data'] ?? []; // Access "data"
+            $buyerData = $allData['dataFromBuyer'] ?? []; // Access "dataFromBuyer"
+            $buyerDataErratum = $allData['dataFromBuyerErratum'] ?? [];
 
             if (!empty($buyerData) || !empty($buyerDataErratum)) {
                 $responses = array_merge($responses, $this->fromBuyerEmail($buyerData, $buyerDataErratum));
