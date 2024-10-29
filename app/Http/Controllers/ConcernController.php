@@ -1793,6 +1793,29 @@ class ConcernController extends Controller
         }
     }
 
+
+    public function inquiryLogsFromBuyer($ticketId)
+    {
+        try {
+            $inquiry = new InquiryLogs();
+            $logData = [
+                'log_type' => 'client_inquiry',
+                'details' => [
+                    'message_tag' => "Inquiry Feedback Received",
+                   /*  'buyer_name' => $request->fname . ' ' . $request->lname,
+                    'buyer_email' => $request->buyer_email,
+                    'contact_no' => $request->mobile_number */
+                ]
+            ];
+
+            $inquiry->received_inquiry = json_encode($logData);
+            $inquiry->ticket_id = $ticketId;
+            $inquiry->message_log = "Inquiry Feedback Received";
+            $inquiry->save();
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
+        }
+    }
     public function fromBuyerEmail($buyerData, $buyerDataErratum)
     {
 
@@ -1828,6 +1851,8 @@ class ConcernController extends Controller
                     $messagesRef->created_at = Carbon::parse(now())->setTimezone('Asia/Manila');
                     $messagesRef->buyer_name = $concerns->buyer_name;
                     $messagesRef->save();
+
+                    $this->inquiryLogsFromBuyer($concerns->ticket_id);
 
                     $responses[] = "Posted Successfully " . $buyer['buyer_email'];
                 } else {
