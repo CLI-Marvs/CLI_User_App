@@ -1826,7 +1826,7 @@ class ConcernController extends Controller
 
                     $responses[] = "Saved Successfully " . $buyer['buyer_email'];
                 } else {
-                    $responses[] = "Saved Unsucessfully " . $buyer['buyer_email'];
+                    $responses[] = "Saved Unsuccessfully " . $buyer['buyer_email'];
                 }
             }
         }
@@ -1851,7 +1851,7 @@ class ConcernController extends Controller
 
                     $responses[] = "Send Eratum Successfully " . $buyer['buyer_email'];
                 } else {
-                    $responses[] = "Send Eratum Unsucessfully " . $buyer['buyer_email'];
+                    $responses[] = "Send Eratum Unsuccessfully " . $buyer['buyer_email'];
                 }
             }
         }
