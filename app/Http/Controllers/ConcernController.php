@@ -1785,6 +1785,10 @@ class ConcernController extends Controller
                 }
             }
 
+        Log::info('Gikan ni brader john', [
+            'response' => $responses
+        ]);
+
             return response()->json($responses);
         } catch (\Throwable $e) {
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
