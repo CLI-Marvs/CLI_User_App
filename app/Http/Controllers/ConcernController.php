@@ -1781,7 +1781,7 @@ class ConcernController extends Controller
 
                     $responses[] = "Posted Successfully " . $message['ticket_id'];
                 } else {
-                    $responses[] = "Posted Unsucessfully " . $message['ticket_id'];
+                    $responses[] = "Posted Unsuccessfully " . $message['ticket_id'];
                 }
             }
 
@@ -1833,9 +1833,9 @@ class ConcernController extends Controller
                     $messagesRef->buyer_name = $concerns->buyer_name;
                     $messagesRef->save();
 
-                    $responses[] = "Saved Successfully " . $buyer['buyer_email'];
+                    $responses[] = "Posted Successfully " . $buyer['buyer_email'];
                 } else {
-                    $responses[] = "Saved Unsuccessfully " . $buyer['buyer_email'];
+                    $responses[] = "Posted Unsuccessfully " . $buyer['buyer_email'];
                 }
             }
             Log::info('Gikan ni brader john', [
@@ -1862,9 +1862,9 @@ class ConcernController extends Controller
                         $messagesRef->save();
                     }
 
-                    $responses[] = "Send Eratum Successfully " . $buyer['buyer_email'];
+                    $responses[] = "Posted Successfully " . $buyer['buyer_email'];
                 } else {
-                    $responses[] = "Send Eratum Unsuccessfully " . $buyer['buyer_email'];
+                    $responses[] = "Posted Unsuccessfully " . $buyer['buyer_email'];
                 }
             }
         }
