@@ -1793,6 +1793,7 @@ class ConcernController extends Controller
 
     public function fromBuyerEmail($buyerData, $buyerDataErratum)
     {
+        $responses = [];
         if ($buyerData) {
             foreach ($buyerData as $buyer) {
                 if ($buyer) {
@@ -1855,6 +1856,8 @@ class ConcernController extends Controller
                 }
             }
         }
+
+        return $responses;
     }
 
     public function buyerReplyNotif($ticketId, $concernId, $message)
