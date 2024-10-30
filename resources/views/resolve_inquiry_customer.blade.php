@@ -141,6 +141,6 @@
    {{--  <p style="font-weight: bold;">{{ ucwords($admin_name) }}</p>
     <p style="font-weight: bold;">CLI - {{$department}}</p> --}}
 
-    <img src="https://i.imgur.com/MHj4vYz.png" title="source: imgur.com" />
+    <img src="https://storage.googleapis.com/super-app-storage/concerns/67219913be745.png?GoogleAccessId=799945112092-compute%40developer.gserviceaccount.com&Expires=2045787925&Signature=jFO35R%2FXsNkbJuLeOC%2FIkTP4HoKW9EHSEmhQzOoH9EJ6ow0jxEHPifLml4EIbphiuZW3LKeuNpfPP8JudaGGdMqrF8ijgZZzVXt6xVbhnh%2BznrXb6IRXHZvaGk0v8LHocceTNjBVS2dZxIfP5OyCHlv9szVZLDTIzu7rn3UfSqma2NzY7uOWYZs%2FbhIF3nGSsD%2B6UeV367KQhR19IXDeCzQE%2FyrdBrIKr6Uco3GWw8cXlZXTfAN5Lb%2Flj8XUUsVg9NGYnvM02B%2Brz7v6E9PTuYE1wuTocgpGTLgFs0E8fxS2TrtGtR0n9PRvQlr4Cq1gBhkJjReks49af5puutsqqQ%3D%3D" title="clisignature" />
 
 </body>
