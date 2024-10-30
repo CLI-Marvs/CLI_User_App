@@ -390,7 +390,7 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                 </div>
             </div>
             <div className="border border-t-1 border-custom-lightestgreen"></div>
-            <div className="w-full py-[10px] mt-[12px] flex flex-col">
+            <div className="w-full  mt-[12px] flex flex-col">
                 {combinedMessages && combinedMessages.length > 0 ? (
                     combinedMessages.map((item, index) => {
                         const alternatingBackground = index % 2 === 0 ? "bg-white" : "bg-custom-grayF1";
