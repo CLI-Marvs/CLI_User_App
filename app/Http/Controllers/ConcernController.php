@@ -1204,7 +1204,7 @@ class ConcernController extends Controller
                     $assignInquiry->email = $selectedOption['email'];
                     $assignInquiry->save();
                     $newTicketId = str_replace('#', '', $ticketId);
-
+                    $modifiedTicketId = str_replace('Ticket#', '', $ticketId);
                     $concernData = Concerns::where('ticket_id', $ticketId)->first();
 
                     $assigneeData = [
@@ -1225,7 +1225,7 @@ class ConcernController extends Controller
                     $concernData->resolve_from = json_encode($currentAssignTo);
                     $concernData->save();
                     $dataToEmail = [
-                        'ticketId' => $ticketId,
+                        'ticketId' => $modifiedTicketId,
                         'details_concern' => $request->details_concern,
                         'from_user' => $request->assign_by,
                         'department' => $request->assign_by_department,
@@ -1486,15 +1486,16 @@ class ConcernController extends Controller
     {
         //  dd($request);
         try {
-           /*  dd($request->all()); */
+            /*  dd($request->all()); */
             $assignees = $request->assignees;
             $concerns = Concerns::where('ticket_id', $request->ticket_id)->first();
 
             $allFiles = null;
             $messageId = $request->message_id;
+            $modifiedTicketId = str_replace('Ticket#', '', $request->ticket_id);
             $buyerEmail = $request->buyer_email;
             $admin_name = $request->admin_name;
-            $department= $request->department;
+            $department = $request->department;
             $details_concern = $request->details_concern;
             $buyer_name = $request->buyer_name;
             $concerns->status = "Resolved";
@@ -1502,18 +1503,18 @@ class ConcernController extends Controller
             $message_id = $request->message_id;
             $concerns->save();
 
-            if(!empty($assignees)) {
-                foreach($assignees as $assignee) {
+            if (!empty($assignees)) {
+                foreach ($assignees as $assignee) {
                     $data = [
-                        'ticket_id' => $request->ticket_id,
+                        'ticket_id' => $modifiedTicketId,
                         'buyer_name' => $buyer_name,
                         'admin_name' => $admin_name,
                         'details_concern' => $details_concern
                     ];
                     NotifyAssignedCliOfResolvedInquiryJob::dispatch(
-                       $assignee['employee_email'],
-                       $assignee['name'],
-                       $data
+                        $assignee['employee_email'],
+                        $assignee['name'],
+                        $data
                     );
                 }
             }
@@ -1703,8 +1704,8 @@ class ConcernController extends Controller
                 'commenter_name' => $request->admin_name,
 
             ];
-            if(!empty($assigness)) {
-                foreach($assigness as $assignee) {
+            if (!empty($assigness)) {
+                foreach ($assigness as $assignee) {
                     CommentNotifJob::dispatch($assignee['employee_email'], $assignee['name'], $dataToComment);
                 }
             }
@@ -1748,7 +1749,7 @@ class ConcernController extends Controller
         $responses = [];
         try {
             $allData = $request->input('allData');
-        
+
             $requestData = $allData['data'] ?? [];
             $buyerData = $allData['dataFromBuyer'] ?? [];
             $buyerDataErratum = $allData['dataFromBuyerErratum'] ?? [];
@@ -1757,52 +1758,52 @@ class ConcernController extends Controller
                 $responses = array_merge($responses, $this->fromBuyerEmail($buyerData, $buyerDataErratum));
             }
 
-           if(!empty($requestData)) {
-            foreach ($requestData as $message) {
-                $concernsRef = Concerns::where('ticket_id', $message['ticket_id'])->first();
+            if (!empty($requestData)) {
+                foreach ($requestData as $message) {
+                    $concernsRef = Concerns::where('ticket_id', $message['ticket_id'])->first();
 
-                if ($concernsRef) {
-                    $messagesRef = new Messages();
-                    $messagesRef->details_message = $message['details_message'];
-                    $messagesRef->ticket_id = $message['ticket_id'];
-                    $fileLinks = $this->uploadToGCSFromScript($message['attachment']);
-                    $messagesRef->buyer_email = $message['buyer_email'];
-                    $messagesRef->attachment = json_encode($fileLinks);
-                    $messagesRef->created_at = Carbon::parse(now())->setTimezone('Asia/Manila');
-                    $messagesRef->buyer_name = $concernsRef->buyer_name;
-                    $messagesRef->save();
+                    if ($concernsRef) {
+                        $messagesRef = new Messages();
+                        $messagesRef->details_message = $message['details_message'];
+                        $messagesRef->ticket_id = $message['ticket_id'];
+                        $fileLinks = $this->uploadToGCSFromScript($message['attachment']);
+                        $messagesRef->buyer_email = $message['buyer_email'];
+                        $messagesRef->attachment = json_encode($fileLinks);
+                        $messagesRef->created_at = Carbon::parse(now())->setTimezone('Asia/Manila');
+                        $messagesRef->buyer_name = $concernsRef->buyer_name;
+                        $messagesRef->save();
 
-                    $concernsRef->message_id = $message['message_id'];
-                    $concernsRef->save();
-                    $newTicketId = str_replace('#', '', $message['ticket_id']);
+                        $concernsRef->message_id = $message['message_id'];
+                        $concernsRef->save();
+                        $newTicketId = str_replace('#', '', $message['ticket_id']);
 
-                    $dataMessage = [
-                        'message_id' => $message['message_id'],
-                        'ticketId' => $newTicketId,
-                    ];
-                    MessageID::dispatch($dataMessage);
+                        $dataMessage = [
+                            'message_id' => $message['message_id'],
+                            'ticketId' => $newTicketId,
+                        ];
+                        MessageID::dispatch($dataMessage);
 
-                    $data = [
-                        'buyer_email' => $message['buyer_email'],
-                        'details_message' => $message['details_message'],
-                        'buyer_name' => $concernsRef->buyer_name,
-                        'ticketId' => $newTicketId,
-                        'id' => $messagesRef->id,
-                        'created_at' => $messagesRef->created_at,
-                        'replyRef' => 'requestor_reply',
-                        'attachment' => $messagesRef->attachment
+                        $data = [
+                            'buyer_email' => $message['buyer_email'],
+                            'details_message' => $message['details_message'],
+                            'buyer_name' => $concernsRef->buyer_name,
+                            'ticketId' => $newTicketId,
+                            'id' => $messagesRef->id,
+                            'created_at' => $messagesRef->created_at,
+                            'replyRef' => 'requestor_reply',
+                            'attachment' => $messagesRef->attachment
 
-                    ];
-                    AdminMessage::dispatch($data);
-                    $this->followUpReplylogs($message['ticket_id'], $concernsRef->buyer_name);
-                    $this->buyerReplyNotif($message['ticket_id'], $concernsRef->id, $message['details_message']);
+                        ];
+                        AdminMessage::dispatch($data);
+                        $this->followUpReplylogs($message['ticket_id'], $concernsRef->buyer_name);
+                        $this->buyerReplyNotif($message['ticket_id'], $concernsRef->id, $message['details_message']);
 
-                    $responses[] = "Posted Successfully " . $message['ticket_id'];
-                } else {
-                    $responses[] = "Posted Unsuccessfully " . $message['ticket_id'];
+                        $responses[] = "Posted Successfully " . $message['ticket_id'];
+                    } else {
+                        $responses[] = "Posted Unsuccessfully " . $message['ticket_id'];
+                    }
                 }
             }
-           }
             return response()->json($responses);
         } catch (\Throwable $e) {
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
@@ -1818,7 +1819,7 @@ class ConcernController extends Controller
                 'log_type' => 'client_inquiry',
                 'details' => [
                     'message_tag' => "Inquiry Feedback Received",
-                   /*  'buyer_name' => $request->fname . ' ' . $request->lname,
+                    /*  'buyer_name' => $request->fname . ' ' . $request->lname,
                     'buyer_email' => $request->buyer_email,
                     'contact_no' => $request->mobile_number */
                 ]
@@ -1836,7 +1837,7 @@ class ConcernController extends Controller
     {
 
         $responses  = [];
-        
+
         if (!empty($buyerData)) {
             foreach ($buyerData as $buyer) {
                 if ($buyer) {
@@ -1903,7 +1904,6 @@ class ConcernController extends Controller
         }
 
         return $responses;
-
     }
 
     public function buyerReplyNotif($ticketId, $concernId, $message)
