@@ -4,6 +4,7 @@ import {
     createBrowserRouter,
     Navigate,
 } from "react-router-dom";
+import { useEffect } from 'react';
 import DasboardView from "../views/Dashboard/DasboardView";
 import LoginView from "./views/pages/loginViews/LoginView";
 import "./layout/css/font.css";
@@ -35,7 +36,29 @@ import TransactionView from "./views/pages/transactionViews/TransactionView";
 import TransactionSidebar from "./views/pages/transactionViews/TransactionSidebar";
 import BankStatementView from "./views/pages/transactionViews/BankStatementView";
 
+// PrivateRoute component to check authentication
+const PrivateRoute = () => {
+    const authToken = localStorage.getItem("authToken");
+    return authToken ? <Outlet /> : <Navigate to="/" replace />;
+};
 const App = () => {
+    /**
+     * Implement storage event listener to handle authToken changes across tabs
+     */
+    useEffect(() => {
+        //Listen to localStorage changes in other tabs
+        const handleStorageChange = (event) => {
+            if (event.key === "authToken" && event.newValue === null) {
+                window.location.href = "/";
+            }
+        };
+
+        window.addEventListener("storage", handleStorageChange);
+        return () => {
+            window.removeEventListener("storage", handleStorageChange);
+        };
+    }, []);
+
     const Layout = () => {
         return (
             <div className="bg-white relative max-h-screen flex flex-col h-screen">
@@ -79,11 +102,6 @@ const App = () => {
         );
     };
 
-    // PrivateRoute component to check authentication
-    const PrivateRoute = () => {
-        const authToken = localStorage.getItem("authToken");
-        return authToken ? <Outlet /> : <Navigate to="/" replace />;
-    };
     // const router = createBrowserRouter([
     //     {
     //         path: "/",
