@@ -975,13 +975,14 @@ const InquiryThread = () => {
                             </div>
                             <div className="border my-2 border-t-1 border-custom-lightestgreen"></div>
                             <div className="w-full flex justify-end gap-[13px]">
-                                {dataConcern.created_by &&
+                                {/* {dataConcern.created_by &&
                                     dataConcern.created_by === user?.id && (
-                                        <FaTrash
-                                            className="text-[#EB4444] hover:text-red-600 cursor-pointer"
-                                            onClick={handleDeleteInquiry}
-                                        />
-                                    )}
+                                     
+                                    )} */}
+                                <FaTrash
+                                    className="text-[#EB4444] hover:text-red-600 cursor-pointer"
+                                    onClick={handleDeleteInquiry}
+                                />
                                 {dataConcern.status === "Resolved" ? (
                                     <div className="flex justify-start items-center w-[122px] font-semibold text-[13px] text-custom-lightgreen space-x-1">
                                         <p>Ticket Resolved</p>
