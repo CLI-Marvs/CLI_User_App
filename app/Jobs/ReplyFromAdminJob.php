@@ -38,7 +38,6 @@ class ReplyFromAdminJob implements ShouldQueue
         $this->department = $department;
 
 
-        Log::info('Files being sentsssss', ['files' => $this->files]);
     }
 
     public function handle(Mailer $mailer)

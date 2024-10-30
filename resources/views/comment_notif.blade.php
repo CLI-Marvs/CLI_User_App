@@ -139,7 +139,7 @@
     <p style="font-weight: bold; margin-bottom: 10px;">CLI - Customer Relations Services</p> --}}
 
     <p style="font-size: 16px;">Thank you,</p>
-    <p style="font-size: 16px;">CLI SuperApp Admin</p>
+    <p style="font-size: 16px;">Cebu Landmasters Inc.</p>
 
 
    {{--  <p style="font-weight: bold;">{{ ucwords($admin_name) }}</p>

@@ -13,19 +13,17 @@ use App\Mail\CommentNotifEmail;
 class CommentNotifJob implements ShouldQueue
 {
     use Queueable, InteractsWithQueue, Queueable, SerializesModels;
-    
+
     protected $employee_email;
     protected $assignee_name;
     protected $data;
 
-      public function __construct($employee_email, $assignee_name, $data)
+    public function __construct($employee_email, $assignee_name, $data)
     {
-        \Log::info('employee email', [
-            'employee_email', $employee_email
-        ]);
+
         $this->employee_email = $employee_email;
         $this->assignee_name = $assignee_name;
-        $this->data = $data;   
+        $this->data = $data;
     }
     public function handle(Mailer $mailer)
     {

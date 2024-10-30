@@ -26,9 +26,6 @@ class AssignedCliResolvedInquiryNotification extends Mailable
      */
     public function __construct($employee_email, $assignee_name, $data)
     {
-        \Log::info('data', [
-            'data' => $data
-        ]);
         $this->employee_email = $employee_email;
         $this->assignee_name = $assignee_name;
         $this->data = $data;
@@ -40,9 +37,6 @@ class AssignedCliResolvedInquiryNotification extends Mailable
      */
     public function envelope(): Envelope
     {
-        Log::info('AssignedCliResolvedInquiryNotification envelope created', [
-            'subject' => "[CLI Inquiry] Transaction {$this->data['ticket_id']}"
-        ]);
         return new Envelope(
             from: new Address('noreply@cebulandmasters.com', 'noreply@cebulandmasters.com'),
             subject: "Resolved [{$this->data['ticket_id']}]"
@@ -74,10 +68,6 @@ class AssignedCliResolvedInquiryNotification extends Mailable
 
     public function content(): Content
     {
-        Log::info('AssignedCliResolvedInquiryNotification content prepared', [
-
-            'data' => $this->data
-        ]);
         return new Content(
             view: 'assigned_cli_resolved_inquiry',
             with: [
