@@ -12,19 +12,20 @@ use Illuminate\Mail\Mailables\Headers;
 use Illuminate\Mail\Mailables\Address;
 
 
-class EmailToPersonnelAssign extends Mailable
+class CommentNotifEmail extends Mailable
 {
     use Queueable, SerializesModels;
 
-    protected $email;
-
+    protected $employee_email;
+    protected $assignee_name;
     protected $data;
 
     /*  protected $admin_name; */
 
-    public function __construct($email, $data/* $admin_name */)
+    public function __construct($employee_email, $assignee_name, $data)
     {
-        $this->email = $email;
+        $this->employee_email = $employee_email;
+        $this->assignee_name = $assignee_name;
         $this->data = $data;
         /*  $this->admin_name = $admin_name; */
     }
@@ -36,7 +37,7 @@ class EmailToPersonnelAssign extends Mailable
     {
         return new Envelope(
             from: new Address('noreply@cebulandmasters.com', 'noreply@cebulandmasters.com'),
-            subject: 'New Inquiry Assigned to You',
+            subject: "New Comment from Ticket#{$this->data['ticket_id']}",
         );
     }
 
@@ -65,9 +66,12 @@ class EmailToPersonnelAssign extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'message_to_personnel',
+            view: 'comment_notif',
             with: [
-                'data' => $this->data
+                'ticket_id' => $this->data['ticket_id'],
+                'commenter_name' => $this->data['commenter_name'],
+                'assignee_name' => $this->assignee_name,
+                'commenter_message' => $this->data['commenter_message']
             ],
         );
     }

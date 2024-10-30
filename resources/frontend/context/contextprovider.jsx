@@ -60,9 +60,21 @@ export const ContextProvider = ({ children }) => {
     const [propertyMasterData, setPropertyMasterData] = useState([]);
     const [assigneesPersonnel, setAssigneesPersonnel] = useState([]);
     const [propertyNamesList, setPropertyNamesList] = useState([]);
+    const [invoices, setInvoices] = useState([]);
+    const [currentPageTransaction, setCurrentPageTransaction] = useState(0);
+    const [transactionsPageCount, setTransactionsPageCount] = useState(0);
+    const [transactions, setTransactions] = useState([]);
+    const [matchesData, setMatchesData] = useState([]);
+    const [currentPageInvoices, setCurrentPageInvoices] = useState(0);
+    const [invoicesPageCount, setInvoicesPageCount] = useState(0);
+    const [bankNames, setBankNames] = useState("All");
+    const [bankList, setBankList] = useState([]);
+    const [filterDueDate, setFilterDueDate] = useState(null);
+
+
     useEffect(() => {
         if (user && user.department && !isDepartmentInitialized) {
-            setDepartment(user.department === "CRS" ? "All" : user.department);
+            setDepartment(user.department === "Customer Relations - Services" ? "All" : user.department);
             setIsDepartmentInitialized(true);
         }
     }, [user, isDepartmentInitialized]);
@@ -97,6 +109,61 @@ export const ContextProvider = ({ children }) => {
             } catch (error) {
                 console.error("Error fetching data: ", error);
             }
+        }
+    };
+
+    const getBankName = async () => {
+       if(token) {
+        try {
+            const response = await apiService.get("get-transaction-bank");
+            console.log("response banks", response.data);
+            setBankList(response.data);
+        } catch (error) {
+            console.log("error retrieving banks", error);
+        }
+       }
+    };
+       
+    const getTransactions = async () => {
+        try {
+            console.log("banknames", bankNames);
+            const searchParams = new URLSearchParams({
+              /*   search: JSON.stringify(searchFilter), */
+                page: currentPageTransaction + 1,
+                bank_name: bankNames ? bankNames : null
+            }).toString();
+            const response = await apiService.get(`get-transactions?${searchParams}`);
+            console.log("response", response.data);
+            setTransactions(response.data.data);
+            setTransactionsPageCount(response.data.last_page);
+           
+        } catch (error) {
+            console.error("Error fetching data: ", error);
+        }
+    };
+
+    const getMatches = async () => {
+       if(token) {
+        try {
+            const response = await apiService.get("get-matches");
+            setMatchesData(response.data);
+        } catch (error) {
+            console.log("error uploading data", error);
+        }
+        }
+    };
+
+    const getInvoices = async () => {
+        try {
+            const searchParams = new URLSearchParams({
+                dueDate: filterDueDate ? filterDueDate : null,
+                page: currentPageInvoices,
+            });
+            const response = await apiService.get(`get-invoices?${searchParams}`);
+            setInvoices(response.data.data);
+            setInvoicesPageCount(response.data.last_page);
+        } catch (error) {
+            console.log("error", error);
         }
     };
 
@@ -280,38 +347,6 @@ export const ContextProvider = ({ children }) => {
         }
     };
 
-    const isValidMonth = (month) => {
-        const validMonths = {
-            January: "January",
-            Feb: "February",
-            February: "February",
-            Mar: "March",
-            March: "March",
-            Apr: "April",
-            April: "April",
-            May: "May",
-            Jun: "June",
-            June: "June",
-            Jul: "July",
-            July: "July",
-            Aug: "August",
-            August: "August",
-            Sep: "September",
-            September: "September",
-            Oct: "October",
-            October: "October",
-            Nov: "November",
-            November: "November",
-            Dec: "December",
-            December: "December",
-        };
-
-        const normalizedMonth =
-            month.charAt(0).toUpperCase() + month.slice(1).toLowerCase();
-
-        return validMonths.hasOwnProperty(normalizedMonth);
-    };
-
     const getPricingMasterLists = useCallback(async () => {
         if (token) {
             try {
@@ -426,7 +461,7 @@ export const ContextProvider = ({ children }) => {
             const getEmployeeData = async () => {
                 const response = await apiService.get("employee-list");
                 setAllEmployees(response.data);
-            };
+            };  
             getEmployeeData();
             getPropertyNames();
         }
@@ -443,6 +478,15 @@ export const ContextProvider = ({ children }) => {
         hasAttachments,
         specificAssigneeCsr,
     ]);
+
+    useEffect(() => {
+        getBankName();
+        getTransactions();
+    }, [currentPageTransaction, bankNames]);
+
+    useEffect(() => {
+        getInvoices();
+    }, [currentPageInvoices, filterDueDate])
 
     useEffect(() => {
         getNotifications();
@@ -563,7 +607,25 @@ export const ContextProvider = ({ children }) => {
                 setAssigneesPersonnel,
                 assigneesPersonnel,
                 getAssigneesPersonnel,
-                propertyNamesList
+                propertyNamesList,
+                invoices,
+                transactions,
+                currentPageTransaction,
+                setCurrentPageTransaction,
+                transactionsPageCount,
+                getTransactions,
+                getMatches,
+                matchesData,
+                invoicesPageCount,
+                setInvoicesPageCount,
+                currentPageInvoices,
+                setCurrentPageInvoices,
+                bankNames,
+                setBankNames,
+                bankList,
+                getInvoices,
+                filterDueDate,
+                setFilterDueDate
             }}
         >
             {children}

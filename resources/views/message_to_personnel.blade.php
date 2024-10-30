@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html>
 
@@ -135,7 +136,7 @@
     <p>Please review the concern in your Masters Admin Dashboard.</p>
 
     <p>Thank you,<br>
-    <strong>{{ $data['from_user'] }}</strong><br>
-    {{ $data['department'] }}</p>
+    <strong>Cebu Landmasters Inc,</strong><br>
+  
 
 </body>

@@ -20,28 +20,29 @@ const AssignSidePanel = ({ ticketId }) => {
         getAssigneesPersonnel,
         getInquiryLogs,
     } = useStateContext();
+ 
     const [isSelected, setIsSelected] = useState({});
     const [isAssign, setIsAssign] = useState(false);
     const logsMessages = logs[ticketId] || [];
     const [search, setSearch] = useState("");
-    const [selectedOptions, setSelectedOptions] = useState([]);
-    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [selectedAssignees, setSelectedAssignees] = useState([]);
+    const [selectedOptions, setSelectedOptions] = useState([]);
+    const [tempSelection, setTempSelection] = useState([]);
+    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
-
-
 
     const modalRef = useRef(null);
     const dropdownRef = useRef(null);
-    const dataConcern = data?.find((items) => items.ticket_id === ticketId) || {};
+    const dataConcern =
+        data?.find((items) => items.ticket_id === ticketId) || {};
 
     const employeeOptions = allEmployees.map((employee) => ({
         name: `${employee.firstname} ${employee.lastname}`,
         email: employee.employee_email,
         firstname: employee.firstname,
         department:
-            employee.department === "CRS"
-                ? "Customer Relations Services"
+            employee.department === "Customer Relations - Services"
+                ? "Customer Relations - Services"
                 : employee.department,
         abbreviationDep: employee.department,
         ticketId: ticketId,
@@ -65,7 +66,12 @@ const AssignSidePanel = ({ ticketId }) => {
                         selected.email === matchAssignee.employee_email
                 )
             ) {
-                removeAssignee(ticketId, matchAssignee.employee_email);
+                removeAssignee(
+                    ticketId,
+                    matchAssignee.employee_email,
+                    matchAssignee.name,
+                    matchAssignee.department
+                );
             }
         } else {
             if (
@@ -78,38 +84,54 @@ const AssignSidePanel = ({ ticketId }) => {
                 );
             } else {
                 setSelectedOptions((prevSelected) => [...prevSelected, option]);
+                setTempSelection((prev) => [...prev, option]);
             }
         }
     };
 
     const removeTag = (option) => {
-        if (option.employee_email || option.fromEvent) {
-            removeAssignee(option.ticketId, option.employee_email || option.email);
+        if (
+            option.employee_email ||
+            option.fromEvent ||
+            option.name ||
+            option.department
+        ) {
+            removeAssignee(
+                option.ticketId,
+                option.employee_email,
+                option.name,
+                option.department
+            );
         } else {
             setSelectedOptions((prevSelected) =>
                 prevSelected.filter((item) => item !== option)
             );
-
-            setSelectedAssignees((prevAssignees) =>
-                prevAssignees.filter(
-                    (assignee) => assignee.email !== option.email
-                )
-            );
         }
     };
+    React.useEffect(() => {
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, []);
 
     const handleClickOutside = (event) => {
         if (
             dropdownRef.current &&
             !dropdownRef.current.contains(event.target)
         ) {
+            setSelectedOptions((prevSelected) =>
+                prevSelected.filter(
+                    (item) => item.employee_email !== tempSelection.email
+                )
+            );
             setIsDropdownOpen(false);
         }
     };
 
     const handleConfirmation = () => {
         if (selectedOptions.length === 0) {
-            alert("please select employee first");
+            /* alert("please select employee first"); */
             return;
         }
         setIsConfirmModalOpen(true);
@@ -139,7 +161,7 @@ const AssignSidePanel = ({ ticketId }) => {
     const handleAssign = async () => {
         setIsConfirmModalOpen(false);
         if (selectedOptions.length === 0) {
-            alert("please select employee first");
+            /* alert("please select employee first"); */
             return;
         }
         await saveAssignee();
@@ -162,7 +184,7 @@ const AssignSidePanel = ({ ticketId }) => {
                     assign_by: user?.firstname + " " + user?.lastname,
                     assign_by_department: user?.department,
                     details_concern: dataConcern.details_concern,
-                    buyer_name: dataConcern.buyer_name
+                    buyer_name: dataConcern.buyer_name,
                 });
                 console.log("Assignees saved successfully:", response);
             } else {
@@ -170,6 +192,7 @@ const AssignSidePanel = ({ ticketId }) => {
             }
 
             getInquiryLogs(ticketId);
+
             return newAssignees;
         } catch (error) {
             console.log("Error assigning:", error);
@@ -177,20 +200,23 @@ const AssignSidePanel = ({ ticketId }) => {
         }
     };
 
-    const removeAssignee = async (ticket, email) => {
-        console.log("from remove assignee", email);
+    const removeAssignee = async (ticket, email, name, department) => {
+        console.log("ticket", ticket, email, name, department);
         try {
             const response = await apiService.post("remove-assignee", {
                 ticketId: ticket,
                 email: email,
+                name: name,
+                department: department,
+                removedBy: user?.firstname + " " + user?.lastname,
             });
 
             if (response.data.message === "Unauthorized user") {
-                alert("Unauthorized to remove assignee");
+                /* alert("Unauthorized to remove assignee"); */
                 return;
             } else {
+                getInquiryLogs(ticketId);
                 getAssigneesPersonnel();
-                alert("Successfully removed");
             }
 
             console.log("Assignee removed:", response);
@@ -199,27 +225,17 @@ const AssignSidePanel = ({ ticketId }) => {
         }
     };
 
-    React.useEffect(() => {
-        document.addEventListener("mousedown", handleClickOutside);
-        return () => {
-            document.removeEventListener("mousedown", handleClickOutside);
-        };
-    }, []);
-
     useEffect(() => {
         setTicketId(ticketId);
         getAssigneesPersonnel();
     }, [ticketId, setTicketId]);
 
-    useEffect(
-        () => {
-            if (assigneesPersonnel[ticketId]) {
-                const assignees = assigneesPersonnel[ticketId]; /* || [] */
-                setSelectedOptions(assignees);
-            }
-        },
-        /* [assigneesPersonnel[ticketId], */[assigneesPersonnel[ticketId]]
-    );
+    useEffect(() => {
+        if (assigneesPersonnel[ticketId]) {
+            const assignees = assigneesPersonnel[ticketId]; /* || [] */
+            setSelectedOptions(assignees);
+        }
+    }, [assigneesPersonnel[ticketId]]);
 
     const assigneeChannelFunc = (channel) => {
         channel.listen("RetrieveAssignees", (event) => {
@@ -259,23 +275,65 @@ const AssignSidePanel = ({ ticketId }) => {
         getAssigneesPersonnel();
     };
 
+    // useEffect(() => {
+    //     let assigneeChannel;
+    //     let newTicketId;
+    //     let removeChannel;
+    //     if (ticketId) {
+    //         newTicketId = ticketId.replace("#", "");
+    //         assigneeChannel = window.Echo.channel(
+    //             `retrieveassignees.${newTicketId}`
+    //         );
+    //         removeChannel = window.Echo.channel(
+    //             `removeassignees.${newTicketId}`
+    //         );
+    //         assigneeChannelFunc(assigneeChannel);
+    //         removeAChannelFunc(removeChannel);
+    //     }
+
+    //     return () => {
+    //         if (assigneeChannel) {
+    //             assigneeChannel.stopListening("RetrieveAssignees");
+    //             window.Echo.leaveChannel(`retrieveassignees.${newTicketId}`);
+    //         }
+    //         if (removeChannel) {
+    //             removeChannel.stopListening("RemoveAssignees");
+    //             window.Echo.leaveChannel(`removeassignees.${newTicketId}`);
+    //         }
+    //     };
+    // }, [ticketId]);
+
     useEffect(() => {
         let assigneeChannel;
-        let newTicketId;
         let removeChannel;
-        if (ticketId) {
-            newTicketId = ticketId.replace("#", "");
-            assigneeChannel = window.Echo.channel(
-                `retrieveassignees.${newTicketId}`
-            );
-            removeChannel = window.Echo.channel(
-                `removeassignees.${newTicketId}`
-            );
-            assigneeChannelFunc(assigneeChannel);
-            removeAChannelFunc(removeChannel);
-        }
+        let newTicketId;
+
+        // Function to initialize the channels when Echo is ready
+        const initChannels = () => {
+            if (ticketId && window.Echo) {
+                newTicketId = ticketId.replace("#", "");
+                assigneeChannel = window.Echo.channel(
+                    `retrieveassignees.${newTicketId}`
+                );
+                removeChannel = window.Echo.channel(
+                    `removeassignees.${newTicketId}`
+                );
+                assigneeChannelFunc(assigneeChannel);
+                removeAChannelFunc(removeChannel);
+            }
+        };
+
+        // Check if window.Echo is loaded before subscribing
+        const checkBrowserReady = setInterval(() => {
+            if (window.Echo) {
+                initChannels();
+                clearInterval(checkBrowserReady); // Stop checking once Echo is ready
+            }
+        }, 100); // Check every 100ms if Echo is initialized
 
         return () => {
+            clearInterval(checkBrowserReady); // Clear interval if component unmounts
+
             if (assigneeChannel) {
                 assigneeChannel.stopListening("RetrieveAssignees");
                 window.Echo.leaveChannel(`retrieveassignees.${newTicketId}`);
@@ -286,12 +344,10 @@ const AssignSidePanel = ({ ticketId }) => {
             }
         };
     }, [ticketId]);
-
-    console.log("assignpersonnel", assigneesPersonnel[ticketId]);
-
+    //console.log("assignpersonnel", assigneesPersonnel[ticketId]);
     return (
         <>
-            <div className="mb-3 mt-[4px]">
+            <div className="mb-3 mt-[2px]">
                 <div className="relative w-[623px]" ref={dropdownRef}>
                     <div className="relative">
                         <input
@@ -300,12 +356,13 @@ const AssignSidePanel = ({ ticketId }) => {
                             onChange={(e) => setSearch(e.target.value)}
                             placeholder="Assign to..."
                             className={` 
-                            ${isDropdownOpen
+                            ${
+                                isDropdownOpen
                                     ? "rounded-[10px] rounded-b-none"
                                     : "rounded-[10px]"
-                                }
+                            }
                         
-                                 h-[47px] px-[20px] pr-[40px] rounded-[10px] bg-custom-grayF1 w-full outline-none`}
+                                 h-[48px] px-[20px] pr-[40px] rounded-[10px] bg-custom-grayF1 w-full outline-none`}
                             onFocus={() => setIsDropdownOpen(true)}
                         />
 
@@ -332,9 +389,7 @@ const AssignSidePanel = ({ ticketId }) => {
                                     <div className="flex justify-center mt-[26px] space-x-[19px]">
                                         <button
                                             onClick={() =>
-                                                setIsConfirmModalOpen(
-                                                    false
-                                                )
+                                                setIsConfirmModalOpen(false)
                                             }
                                             className="gradient-btn5 p-[1px] w-[92px] h-[35px] rounded-[10px]"
                                         >
@@ -345,9 +400,7 @@ const AssignSidePanel = ({ ticketId }) => {
                                             </div>
                                         </button>
                                         <button
-                                            onClick={
-                                                handleAssign
-                                            }
+                                            onClick={handleAssign}
                                             className="gradient-btn5 w-[100px] h-[35px] rounded-[10px] text-sm text-white montserrat-semibold"
                                         >
                                             Confirm
@@ -369,7 +422,7 @@ const AssignSidePanel = ({ ticketId }) => {
                                             className="flex justify-between items-center text-xs bg-custom-solidgreen text-white min-w-[99px] h-[26px] rounded-full pr-[10px] pl-[10px]"
                                         >
                                             <span>{option.name}</span>
-                                            {user?.department === "CRS" && (
+                                            {user?.department === "Customer Relations - Services" && (
                                                 <button
                                                     onClick={() =>
                                                         removeTag(option)
@@ -390,6 +443,7 @@ const AssignSidePanel = ({ ticketId }) => {
                                                     assignee.employee_email ===
                                                     option.email
                                             );
+
                                         return (
                                             <li
                                                 key={index}
@@ -417,12 +471,12 @@ const AssignSidePanel = ({ ticketId }) => {
                                                                     option.email
                                                             )
                                                         }
-                                                        onChange={() =>
+                                                        onChange={() => {
                                                             handleCheckboxChange(
                                                                 option,
                                                                 matchAssignee
-                                                            )
-                                                        }
+                                                            );
+                                                        }}
                                                         className="form-checkbox custom-checkbox accent-custom-lightgreen text-white"
                                                     />
                                                 </div>
@@ -450,7 +504,6 @@ const AssignSidePanel = ({ ticketId }) => {
                                         );
                                     })}
                                     {filteredOptions.length == 0 && (
-
                                         <div>
                                             <p>No results found</p>
                                         </div>
@@ -461,13 +514,13 @@ const AssignSidePanel = ({ ticketId }) => {
                     )}
                 </div>
             </div>
-            <div className=" w-full bg-white rounded-[10px] py-[16px] px-[20px]">
-                <div className="flex w-full justify-start items-start">
+            <div className=" w-full bg-white rounded-[10px] py-[16px] shadow-custom7">
+                <div className="flex w-full px-[20px] justify-start items-start">
                     <p className="text-sm text-custom-bluegreen pt-1 font-semibold">
                         Assignee
                     </p>
                     <div className="ml-2 flex overflow-x-auto gap-2 max-w-full custom-scrollbar">
-                        {selectedOptions.length > 0 ? (
+                        {/* {selectedOptions.length > 0 ? (
                             <>
                                 {selectedOptions.map((assignee) => (
                                     <>
@@ -494,7 +547,59 @@ const AssignSidePanel = ({ ticketId }) => {
                             <span className="text-sm text-gray-500 pt-1">
                                 No assignee selected
                             </span>
+                        )} */}
+                        {selectedOptions.length > 0 ? (
+                            <>
+                                {selectedOptions.map((assignee) => (
+                                    <>
+                                        <span
+                                            key={assignee.name}
+                                            className="bg-custom-lightgreen text-white rounded-full px-3 py-1 text-xs flex-shrink-0 flex mb-[4px]"
+                                        >
+                                            {assignee.name}
+                                            {user?.department === "Customer Relations - Services" && (
+                                                <button
+                                                    onClick={() =>
+                                                        removeTag(assignee)
+                                                    }
+                                                    className="ml-2 pb-[2px] border border-white text-[15px] text-white bg-custom-lightgreen rounded-full h-5 w-5 flex items-center justify-center"
+                                                >
+                                                    &times;
+                                                </button>
+                                            )}
+                                        </span>
+                                    </>
+                                ))}
+                            </>
+                        ) : (
+                            <span className="text-sm text-gray-500 pt-1">
+                                No assignee selected
+                            </span>
                         )}
+                        {/* {selectedAssignees && selectedAssignees.length > 0 ? (
+                            <div>
+                                {selectedAssignees.map((item, index) => (
+                                    <span
+                                        key={index}
+                                        className="bg-custom-lightgreen text-white rounded-full px-3 py-1 text-xs flex-shrink-0 flex mb-[4px]"
+                                    >
+                                        {item.name}
+                                        {user?.department === "CRS" && (
+                                            <button
+                                                onClick={() => removeTag(item)}
+                                                className="ml-2 pb-[2px] border border-white text-[15px] text-white bg-custom-lightgreen rounded-full h-5 w-5 flex items-center justify-center"
+                                            >
+                                                &times;
+                                            </button>
+                                        )}
+                                    </span>
+                                ))}
+                            </div>
+                        ) : (
+                            <span className="text-sm text-gray-500 pt-1">
+                                No assignee selected
+                            </span>
+                        )} */}
                     </div>
                 </div>
 

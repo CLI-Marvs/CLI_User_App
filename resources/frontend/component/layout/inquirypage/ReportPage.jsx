@@ -50,17 +50,21 @@ const data3 = [
 const barHeight = 20;
 
 
-const COLORS = ["#5B9BD5", "#348017"];
+const COLORS = [
+    "#5B9BD5", "#348017", "#FFB300", "#FF5733", "1ABC9C", "#8E44AD", "#2ECC71", "#3498DB",
+    "#E74C3C",
+];
 
 const categoryColors = {
-    "Reservation Documents": "#348017",
-    "Payment Issues": "#5B9BD5",
-    "Statement of Account and Billing Statement": "#348017",
-    "Turnover Status/Unit Concerns": "#5B9BD5",
-    "Loan Application": "#348017",
-    "Title and Other Registration Documents": "#5B9BD5",
-    Commissions: "#5B9BD5",
-    "Other Concerns": "#5B9BD5",
+    "Reservation Documents": "#5B9BD5",
+    "Payment Issues": "#348017",
+    "SOA/ Billing Statement/ Buyer's Ledger": "#FFB300",
+    "Turn Over Status": "#FF5733",
+    "Unit Status": "#1ABC9C",
+    "Loan Application": "#8E44AD",
+    "Title and Other Registration Documents": "#2ECC71",
+    "Commissions": "#3498DB",
+    "Other Concerns": "#E74C3C",
 };
 
 const SINGLE_COLOR = "#5B9BD5";
@@ -126,7 +130,8 @@ const ReportPage = () => {
         department,
         setDepartment,
         dataSet,
-        fetchDataReport
+        fetchDataReport,
+        allEmployees
     } = useStateContext();
 
     const defaultData = [{ name: "No Data" }];
@@ -135,22 +140,31 @@ const ReportPage = () => {
 
     const getCurrentMonth = () => {
         const months = [
-          'january', 'february', 'march', 'april', 'may', 'june',
-          'july', 'august', 'september', 'october', 'november', 'december'
+            'january', 'february', 'march', 'april', 'may', 'june',
+            'july', 'august', 'september', 'october', 'november', 'december'
         ];
-        const currentMonthIndex = new Date().getMonth(); 
+        const currentMonthIndex = new Date().getMonth();
         return months[currentMonthIndex];
-      };
-    
+    };
+
     const chartHeight = dataProperty.length * (barHeight + 60);
 
-    const allDepartment = [
+    const allDepartment = allEmployees 
+    ? ["All", ...Array.from(new Set(allEmployees
+        .map((employee) => employee.department)
+        .filter((department) => department !== null && department !== undefined && department !== "PM")
+      ))]
+    : ["All"];
+  
+  
+  
+   /*  const allDepartment = [
         { key: "All", value: "All" },
-        { key: "CRS", value: "Customer Relations Services" },
+        { key: "Customer Relations - Services", value: "Customer Relations - Services" },
         { key: "SALES", value: "Sales" },
         { key: "AP", value: "Ap Commission" },
         { key: "PM", value: "Property Management" },
-    ];
+    ]; */
 
 
     // const getCurrentMonth = () => {
@@ -163,6 +177,7 @@ const ReportPage = () => {
         setMonth(e.target.value);
     };
 
+    console.log("dataToDisplay", dataToDisplay);
     const handleInputChangeProperty = (e) => {
         setPropertyMonth(e.target.value);
     };
@@ -183,7 +198,7 @@ const ReportPage = () => {
     //     setMonth(currentMonth);
     //     setPropertyMonth(currentMonth);
     // }, []);
-  
+
     useEffect(() => {
         fetchCategory();
         getInquiriesPerProperty();
@@ -191,44 +206,70 @@ const ReportPage = () => {
     }, []);
 
     useEffect(() => {
-        setMonth(getCurrentMonth()); 
+        setMonth(getCurrentMonth());
         setPropertyMonth(getCurrentMonth());
-      }, []);
+    }, []);
 
+    console.log("department", department);
 
     return (
         <div className="h-screen bg-custom-grayFA p-4">
             <div className="bg-white p-4 rounded-[10px]">
-                <div className="w-[300px] mb-2">
+                <div className=" mb-2">
                     <p className="text-lg montserrat-bold">
                         Resolved vs. Unresolved Chart
                     </p>
-                    <div className="flex items-center border rounded-md overflow-hidden">
-                        <span className="text-custom-gray81 bg-custom-grayFA flex items-center w-44 -mr-3 pl-3 py-1">
-                            Department
-                        </span>
-                        <div className="relative w-full">
-                            <select
-                                name="concern"
-                                className="appearance-none w-full px-4 py-1 bg-white focus:outline-none border-0"
-                                value={department}
-                                onChange={(e) => setDepartment(e.target.value)}
-                            >
-                                {user?.department === "CRS" ? (
-                                    allDepartment.map((item, index) => (
-                                        <option key={index} value={item.key}>
-                                            {item.value}
-                                        </option>
-                                    ))
-                                ) : (
-                                    <option value={user?.department}>
-                                        {user?.department}
-                                    </option>
-                                )}
-                            </select>
-                            <span className="absolute inset-y-0 right-0 flex items-center text-custom-gray81 pr-3 pl-3 bg-custom-grayFA pointer-events-none">
-                                <IoMdArrowDropdown />
+                    <div className="flex gap-[10px]">
+                        <div className="flex w-[300px] items-center border rounded-md overflow-hidden">
+                            <span className="text-custom-gray81 bg-custom-grayFA flex items-center w-44 -mr-3 pl-3 py-1">
+                                Department
                             </span>
+                            <div className="relative w-full">
+                                <select
+                                    name="concern"
+                                    className="appearance-none w-full px-4 py-1 bg-white focus:outline-none border-0"
+                                    value={department}
+                                    onChange={(e) => setDepartment(e.target.value)}
+                                >
+                                    {user?.department === "Customer Relations - Services" ? (
+                                        allDepartment.map((item, index) => (
+                                            <option key={index} value={item}>
+                                                {item}
+                                            </option>
+                                        ))
+                                    ) : (
+                                        <option value={user?.department}>
+                                            {user?.department}
+                                        </option>
+                                    )}
+                                </select>
+                                <span className="absolute inset-y-0 right-0 flex items-center text-custom-gray81 pr-3 pl-3 bg-custom-grayFA pointer-events-none">
+                                    <IoMdArrowDropdown />
+                                </span>
+                            </div>
+                        </div>
+                        <div className="flex w-[95px] items-center border rounded-md overflow-hidden">
+                            <div className="relative w-full">
+                                <select
+                                    name="year"
+                                    className="appearance-none w-[100px] px-4 py-1 bg-white focus:outline-none border-0"
+                                   /*  value={department} */
+                                    /* onChange={(e) => setDepartment(e.target.value)} */
+                                >
+                                       {/*  <option value="2023">
+                                            2023
+                                        </option> */}
+                                        <option value="2024">
+                                            2024
+                                        </option>
+                                       {/*  <option value="2025">
+                                            2025
+                                        </option> */}
+                                </select>
+                                <span className="absolute inset-y-0 right-0 flex items-center text-custom-gray81 pr-3 pl-3 bg-custom-grayFA pointer-events-none">
+                                    <IoMdArrowDropdown />
+                                </span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -278,51 +319,76 @@ const ReportPage = () => {
                 </div>
             </div>
             <div className="flex gap-3 mt-4 bg-custom-grayFA items-start">
-                <div className="w-[418px] pb-7 min-h-[335px] flex-grow-1 bg-white rounded-lg">
+                <div className="w-[547px] pb-7 min-h-[335px] flex-grow-1 bg-white rounded-lg">
                     <p className="p-4 text-base montserrat-bold">
                         Inquiries per category
                     </p>
                     <div className="border border-t-1"></div>
-                    <div className="mt-4 w-[300px]">
-                        <div className="flex items-center border rounded-md overflow-hidden">
-                            <span className="text-custom-gray81 bg-custom-grayFA flex items-center text-sm w-[150px] -mr-3 pl-3 py-1">
-                                For the month of
-                            </span>
-                            <div className="relative w-[159px]">
-                                <select
-                                    name="concern"
-                                    className="appearance-none w-full px-4 py-1 bg-white focus:outline-none border-0"
-                                    value={month}
-                                    onChange={(e) => setMonth(e.target.value)}
-                                >
-                                    <option value="january">January</option>
-                                    <option value="february">February</option>
-                                    <option value="march">March</option>
-                                    <option value="april">April</option>
-                                    <option value="may">May</option>
-                                    <option value="june">June</option>
-                                    <option value="july">July</option>
-                                    <option value="august">August</option>
-                                    <option value="september">September</option>
-                                    <option value="october">October</option>
-                                    <option value="november">November</option>
-                                    <option value="december">December</option>
-                                </select>
-                                <span className="absolute inset-y-0 right-0 flex items-center text-custom-gray81 pr-3 pl-3 bg-custom-grayFA pointer-events-none">
-                                    <IoMdArrowDropdown />
+                    <div className="mt-4">
+                        <div className="flex gap-[10px]">
+                            <div className="flex  w-[300px] items-center border rounded-md overflow-hidden">
+                                <span className="text-custom-gray81 bg-custom-grayFA flex items-center text-sm w-[150px] -mr-3 pl-3 py-1">
+                                    For the month of
                                 </span>
+                                <div className="relative w-[159px]">
+                                    <select
+                                        name="concern"
+                                        className="appearance-none w-full px-4 py-1 bg-white focus:outline-none border-0"
+                                        value={month}
+                                        onChange={(e) => setMonth(e.target.value)}
+                                    >
+                                        <option value="january">January</option>
+                                        <option value="february">February</option>
+                                        <option value="march">March</option>
+                                        <option value="april">April</option>
+                                        <option value="may">May</option>
+                                        <option value="june">June</option>
+                                        <option value="july">July</option>
+                                        <option value="august">August</option>
+                                        <option value="september">September</option>
+                                        <option value="october">October</option>
+                                        <option value="november">November</option>
+                                        <option value="december">December</option>
+                                    </select>
+                                    <span className="absolute inset-y-0 right-0 flex items-center text-custom-gray81 pr-3 pl-3 bg-custom-grayFA pointer-events-none">
+                                        <IoMdArrowDropdown />
+                                    </span>
+                                </div>
+                            </div>
+                            <div className="flex w-[95px] items-center border rounded-md overflow-hidden">
+                                <div className="relative w-full">
+                                    <select
+                                        name="year"
+                                        className="appearance-none w-[100px] px-4 py-1 bg-white focus:outline-none border-0"
+                                    /*  value={department} */
+                                        /* onChange={(e) => setDepartment(e.target.value)} */
+                                    >
+                                           {/*  <option value="2023">
+                                                2023
+                                            </option> */}
+                                            <option value="2024">
+                                                2024
+                                            </option>
+                                            {/* <option value="2025">
+                                                2025
+                                            </option> */}
+                                    </select>
+                                    <span className="absolute inset-y-0 right-0 flex items-center text-custom-gray81 pr-3 pl-3 bg-custom-grayFA pointer-events-none">
+                                        <IoMdArrowDropdown />
+                                    </span>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    <div className="flex">
+                        </div>
+                    <div className="flex flex-col">
                         <div>
-                            <PieChart width={230} height={260}>
+                            <PieChart width={430} height={260}>
                                 <Pie
                                     data={dataToDisplay}
                                     cx="50%"
                                     cy="50%"
-                                    outerRadius={100}
-                                    innerRadius={0}
+                                    outerRadius={115}
+                                    innerRadius={1}
                                     paddingAngle={1}
                                     strokeWidth={5}
                                     cornerRadius={0}
@@ -334,7 +400,7 @@ const ReportPage = () => {
                                     {dataToDisplay.map((entry, index) => (
                                         <Cell
                                             key={index}
-                                            fill={COLORS[index % COLORS.length]}
+                                            fill={categoryColors[entry.name] || COLORS[index % COLORS.length]}
                                         />
                                     ))}
                                 </Pie>
@@ -381,11 +447,11 @@ const ReportPage = () => {
                                 </div>
                             </div>
                         </div> */}
-                        <div className="w-full flex justify-start mt-[90px]">
+                        <div className="w-full px-[70px]">
                             <div className="flex flex-col">
                                 {dataToDisplay.map((category, index) => (
                                     <div
-                                        className="flex justify-between"
+                                        className="flex justify-between w-full"
                                         key={index}
                                     >
                                         <div className="flex gap-1 items-center">
@@ -417,41 +483,66 @@ const ReportPage = () => {
                         </div>
                     </div>
                 </div>
-                <div className=" bg-white rounded-[10px]  w-[500px] flex flex-col overflow-y-auto">
+                <div className=" bg-white rounded-[10px]  w-[579px] flex flex-col overflow-y-auto">
                     <p className="p-4  text-base montserrat-bold">
                         Inquiries per property
                     </p>
                     <div className="border border-t-1"></div>
-                    <div className="mt-4 w-[300px]">
-                        <div className="flex items-center border rounded-md overflow-hidden">
-                            <span className="text-custom-gray81 bg-custom-grayFA flex items-center text-sm w-[150px] -mr-3 pl-3 py-1">
-                                For the month of
-                            </span>
-                            <div className="relative w-[159px]">
-                                <select
-                                    name="concern"
-                                    className="appearance-none w-full px-4 py-1 bg-white focus:outline-none border-0"
-                                    onChange={(e) => setPropertyMonth(e.target.value)}
-                                    value={propertyMonth}
-                                >
-                                    <option value="january">January</option>
-                                    <option value="february">February</option>
-                                    <option value="march">March</option>
-                                    <option value="april">April</option>
-                                    <option value="may">May</option>
-                                    <option value="june">June</option>
-                                    <option value="july">July</option>
-                                    <option value="august">August</option>
-                                    <option value="september">September</option>
-                                    <option value="october">October</option>
-                                    <option value="november">November</option>
-                                    <option value="december">December</option>
-                                </select>
-                                <span className="absolute inset-y-0 right-0 flex items-center text-custom-gray81 pr-3 pl-3 bg-custom-grayFA pointer-events-none">
-                                    <IoMdArrowDropdown />
+                    <div className="mt-4 ">
+                        <div className="flex gap-[10px]">
+                            <div className="flex w-[300px] items-center border rounded-md overflow-hidden">
+                                <span className="text-custom-gray81 bg-custom-grayFA flex items-center text-sm w-[150px] -mr-3 pl-3 py-1">
+                                    For the month of
                                 </span>
+                                <div className="relative w-[159px]">
+                                    <select
+                                        name="concern"
+                                        className="appearance-none w-full px-4 py-1 bg-white focus:outline-none border-0"
+                                        onChange={(e) => setPropertyMonth(e.target.value)}
+                                        value={propertyMonth}
+                                    >
+                                        <option value="january">January</option>
+                                        <option value="february">February</option>
+                                        <option value="march">March</option>
+                                        <option value="april">April</option>
+                                        <option value="may">May</option>
+                                        <option value="june">June</option>
+                                        <option value="july">July</option>
+                                        <option value="august">August</option>
+                                        <option value="september">September</option>
+                                        <option value="october">October</option>
+                                        <option value="november">November</option>
+                                        <option value="december">December</option>
+                                    </select>
+                                    <span className="absolute inset-y-0 right-0 flex items-center text-custom-gray81 pr-3 pl-3 bg-custom-grayFA pointer-events-none">
+                                        <IoMdArrowDropdown />
+                                    </span>
+                                </div>
                             </div>
-                        </div>
+                            <div className="flex w-[95px] items-center border rounded-md overflow-hidden">
+                                <div className="relative w-full">
+                                    <select
+                                        name="year"
+                                        className="appearance-none w-[100px] px-4 py-1 bg-white focus:outline-none border-0"
+                                    /*  value={department} */
+                                        /* onChange={(e) => setDepartment(e.target.value)} */
+                                    >
+                                            {/* <option value="2023">
+                                                2023
+                                            </option> */}
+                                            <option value="2024">
+                                                2024
+                                            </option>
+                                           {/*  <option value="2025">
+                                                2025
+                                            </option> */}
+                                    </select>
+                                    <span className="absolute inset-y-0 right-0 flex items-center text-custom-gray81 pr-3 pl-3 bg-custom-grayFA pointer-events-none">
+                                        <IoMdArrowDropdown />
+                                    </span>
+                                </div>
+                            </div>
+                        </div>     
                     </div>
                     <div className="flex-grow">
 

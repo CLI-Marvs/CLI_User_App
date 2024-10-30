@@ -1,84 +1,43 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import ReCAPTCHA from "react-google-recaptcha";
 import { IoIosSend, IoMdArrowDropdown, IoMdTrash } from "react-icons/io";
 import apiService from "../../servicesApi/apiService";
 import { useStateContext } from "../../../context/contextprovider";
+import CircularProgress from "@mui/material/CircularProgress";
 
 const formDataState = {
     fname: "",
+    mname: "",
     lname: "",
     buyer_email: "",
     mobile_number: "",
     property: "",
     user_type: "",
+    other_user_type: "",
     contract_number: "",
     details_concern: "",
     unit_number: "",
 };
 
-const projectList = [
-    "N/A",
-    "38 Park Avenue",
-    "Astra Centre",
-    "Asia Premiere",
-    "Base Line Center Phase 2",
-    "Baseline Center",
-    "Baseline Residences",
-    "Casa Mira Bacolod",
-    "Casa Mira Coast Sibulan",
-    "Casa Mira Homes Butuan",
-    "Casa Mira Iloilo Camalig",
-    "Casa Mira Linao",
-    "Casa Mira Towers CDO",
-    "Casa Mira Towers Guadalupe",
-    "Casa Mira Towers Labangon",
-    "Casa Mira Towers LPU Davao",
-    "Casa Mira Towers Mandaue",
-    "Casamira South",
-    "Calle 104",
-    "Casa Mira Dumaguete",
-    "Casa Mira Towers Bacolod",
-    "Casa Mira Towers Palawan",
-    "Costa Mira Beachtown",
-    "Costa Mira Beachtown Panglao",
-    "Latitude Corporate Center",
-    "Mesaverte Residences",
-    "Mesavirre Garden Residences",
-    "Midori Residences",
-    "Mivela Garden Residences",
-    "Mivesa Garden Residences",
-    "Mandtra Residences",
-    "Midori Plains",
-    "Mindara Residences",
-    "Patria De Cebu",
-    "Park Centrale Tower",
-    "San Jose Maria Village - Balamban",
-    "San Jose Maria Village - Minglanilla",
-    "San Jose Maria Village - Toledo",
-    "San Josemaria Village - Talisay",
-    "Test Project",
-    "The East Village",
-    "Velmiro Greens Bohol",
-    "Velmiro Heights",
-    "Velmiro Heights Uptown",
-    "Velmiro Plains Bacolod",
-    "Villa Casita - Balamban",
-    "Villa Casita - Bogo",
-];
-
 const InquiryFormModal = ({ modalRef }) => {
     const [files, setFiles] = useState([]);
-    const [fileName, setFileName] = useState("");
+    const fileInputRef = useRef();
+    const [fileName, setFileName] = useState([]);
     const [message, setMessage] = useState("");
     const { user, getAllConcerns } = useStateContext();
     const maxCharacters = 500;
+    const [isChecked, setIsChecked] = useState(false);
     const [hasErrors, setHasErrors] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
+    const [loading, setLoading] = useState(false);
     const [resetSuccess, setResetSuccess] = useState(false);
     const [isSubmitted, setIsSubmitted] = useState(false);
     const [isValid, setIsValid] = useState(true);
     const [errors, setErrors] = useState({});
     const { propertyNamesList } = useStateContext();
+    const [specificInputErrors, setSpecificInputErrors] = useState({});
+    
+    
     const handleFileChange = (event) => {
         const selectedFiles = Array.from(event.target.files);
         const fileNames = selectedFiles.map((file) =>
@@ -88,6 +47,9 @@ const InquiryFormModal = ({ modalRef }) => {
                       .pop()}`
                 : file.name
         );
+        
+        /* setFileName(fileNames); */
+        setFileName((prevFiles) => [...prevFiles, ...fileNames]);
         setFiles(selectedFiles);
     };
 
@@ -96,13 +58,29 @@ const InquiryFormModal = ({ modalRef }) => {
             .toLowerCase()
             .replace(/\b\w/g, (char) => char.toUpperCase());
     };
-    const formattedPropertyNames = ["N/A", ...propertyNamesList.map((item) => 
-        formatFunc(item)
-    )]
+
+    const formattedPropertyNames = [
+        "N/A",
+        ...(Array.isArray(propertyNamesList) && propertyNamesList.length > 0
+            ? propertyNamesList
+                  .filter((item) => !item.toLowerCase().includes("phase"))
+                  .map((item) => {
+                      const formattedItem = formatFunc(item);
+                      return formattedItem === "Casamira South"
+                          ? "Casa Mira South"
+                          : formattedItem;
+                  })
+                  .sort((a, b) => {
+                      if (a === "N/A") return -1;
+                      if (b === "N/A") return 1;
+                      return a.localeCompare(b);
+                  })
+            : []),
+    ];
 
     const handleDelete = (fileNameToDelete) => {
-        setFiles((prevFiles) =>
-            prevFiles.filter((file) => file.name !== fileNameToDelete)
+        setFileName((prevFiles) =>
+            prevFiles.filter((file) => file !== fileNameToDelete)
         );
     };
 
@@ -126,7 +104,16 @@ const InquiryFormModal = ({ modalRef }) => {
             }));
         }
     };
-
+    const handleCheckboxChange = (event) => {
+        setIsChecked(event.target.checked);
+        setFormData((prevData) => ({
+            ...prevData,
+            mname: isChecked ? "" : "",
+        }));
+        // setHasErrors(false);
+        setResetSuccess(true);
+        setIsSubmitted(false);
+    };
     const isTextareaValid = message.trim().length > 0;
 
     const validateEmail = (email) => {
@@ -142,13 +129,20 @@ const InquiryFormModal = ({ modalRef }) => {
 
     const callBackHandler = () => {
         getAllConcerns();
-        ~setFormData(formDataState);
+        setFormData(formDataState);
         setFiles([]);
         setMessage("");
+        setIsChecked(false);
     };
 
-    const { user_type, contract_number, unit_number, ...requiredFields } =
-        formData;
+    const {
+        user_type,
+        contract_number,
+        unit_number,
+        other_user_type,
+        mname,
+        ...requiredFields
+    } = formData;
 
     const isFormDataValid = Object.values(requiredFields).every(
         (value) => value !== ""
@@ -156,17 +150,86 @@ const InquiryFormModal = ({ modalRef }) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
         setIsSubmitted(true);
-        if (isFormDataValid && isTextareaValid && !errors.buyer_email) {
+        const isMnameValid = isChecked || mname.trim() !== "";
+        let isOtherUserTypeValid = true;
+        if (user_type === "Others") {
+            isOtherUserTypeValid = other_user_type.trim().length > 0;
+        }
+
+        if (files && files.length > 0) {
+            const validFile = [
+                "pdf",
+                "png",
+                "bmp",
+                "jpg",
+                "jpeg",
+                "xls",
+                "xlsx",
+                "xlsm",
+                "xml",
+                "csv",
+                "doc",
+                "docx",
+                "mp4",
+                "plain", //handle for .txt file extension
+            ];
+            const extension = files[0].type;
+            console.log("extension", extension);
+            let modifiedExtension = extension.split("/")[1]; //from application/pdf to pdf
+            // Special handling for .docx MIME type
+            if (
+                extension ===
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            ) {
+                modifiedExtension = "docx"; // Set extension to docx for validation
+            } else if (extension === "application/msword") {
+                modifiedExtension = "doc";
+            } else if (
+                extension === "application/vnd.ms-excel.sheet.macroEnabled.12"
+            ) {
+                modifiedExtension = "xlsm";
+            } else if (extension === "application/vnd.ms-excel") {
+                modifiedExtension = "xls";
+            } else if (
+                extension ===
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            ) {
+                modifiedExtension = "xlsx";
+            } else if (extension === "application/x-zip-compressed") {
+                alert("Zip is not allowed.");
+                setLoading(false);
+                return;
+            }
+
+            const isFileValid = validFile.includes(modifiedExtension);
+
+            if (!isFileValid) {
+                alert(`${modifiedExtension} is not allowed.`);
+                setLoading(false);
+                return;
+            }
+        }
+        if (
+            isFormDataValid &&
+            isTextareaValid &&
+            isMnameValid &&
+            !errors.buyer_email &&
+            isOtherUserTypeValid
+        ) {
             try {
+                setLoading(true);
                 const fileData = new FormData();
                 files.forEach((file) => {
                     fileData.append("files[]", file);
                 });
+
                 Object.keys(formData).forEach((key) => {
                     fileData.append(key, formData[key]);
                 });
-                fileData.append("message", message);
+                const formattedMessage = message.replace(/\n/g, "<br>");
+                fileData.append("message", formattedMessage);
                 fileData.append("admin_email", user?.employee_email);
                 fileData.append("admin_id", user?.id);
                 fileData.append("admin_profile_picture", user?.profile_picture);
@@ -180,24 +243,63 @@ const InquiryFormModal = ({ modalRef }) => {
                         },
                     }
                 );
+                setSpecificInputErrors([]);
                 setResetSuccess(true);
                 if (modalRef.current) {
                     modalRef.current.close();
                 }
                 callBackHandler();
+                setLoading(false);
             } catch (error) {
-                console.log("error saving concerns", error);
-                setHasErrors(true);
-                setResetSuccess(false);
+                console.log("error saving concerns", error.response);
+                console.log("178");
+                if (error.response) {
+                    if (error?.response?.status === 422) {
+                        const validationErrors = error.response?.data.error;
+                        // Set the validation errors returned from the backend
+                        //  setSpecificInputErrors(error.response.data.errors);
+                        // const errorMessages = [];
+                        // for (const field in validationErrors) {
+                        //     if (validationErrors.hasOwnProperty(field)) {
+                        //         validationErrors.forEach((error) => {
+                        //             errorMessages.push(error); // Add each error message for the field
+                        //         });
+                        //     }
+                        // }
+                        // console.log(
+                        //     "All Validation Error Messages:",
+                        //     errorMessages
+                        // );
+                        console.log("180", error.response?.data.error);
+                        setHasErrors(false);
+                        setLoading(false);
+                        // setSpecificInputErrors(error.response?.data.error);
+                        // if (topRef.current) {
+                        //     topRef.current.scrollTop = 0;
+                        // }
+                    }
+                }
+                {
+                    console.log("192");
+                    setHasErrors(true);
+                    setResetSuccess(false);
+                }
             }
         } else {
             setResetSuccess(false);
             if (!isTextareaValid) {
                 setIsValid(false);
             }
+            if (!isChecked) {
+                //setIsValid(false);
+                setResetSuccess(false);
+                setHasErrors(false);
+            }
+            // console.log("(!isChecked", isChecked);
             console.log("Form validation failed");
         }
     };
+
     return (
         <dialog
             id="Employment"
@@ -227,6 +329,20 @@ const InquiryFormModal = ({ modalRef }) => {
                                 </p>
                             </div>
                         )}
+
+                        {/* {specificInputErrors &&
+                            Object.entries(specificInputErrors).map(
+                                (item, index) => (
+                                    <div
+                                        className="w-full flex justify-center items-center h-12 bg-red-100 mb-4 rounded-lg"
+                                        key={index}
+                                    >
+                                        <p className="flex text-[#C42E2E] ">
+                                            {item}
+                                        </p>
+                                    </div>
+                                )
+                            )} */}
                         {/*  {isSuccess && (
                                 <div className="w-full flex justify-center items-center h-12 bg-custom-lightestgreen mb-4 rounded-lg">
                                     <p className="flex text-custom-solidgreen ">
@@ -268,6 +384,46 @@ const InquiryFormModal = ({ modalRef }) => {
                                 value={formData.fname}
                                 onChange={handleChange}
                             />
+                        </div>
+                        <div className="flex items-center gap-[4px]">
+                            <div
+                                // className={`flex relative items-center border w-[430px] rounded-[5px] overflow-hidden ${
+                                //     isSubmitted && !formData.mname
+                                //         ? resetSuccess
+                                //             ? "border-custom-bluegreen"
+                                //             : "border-red-500"
+                                //         : "border-custom-bluegreen"
+                                // }`}
+                                className={`flex relative items-center border w-[430px] rounded-[5px] overflow-hidden ${
+                                    isSubmitted && !formData.mname && !isChecked
+                                        ? "border-red-500"
+                                        : "border-custom-bluegreen"
+                                }`}
+                            >
+                                <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex w-[240px] pl-3 py-1 tablet:w-[160px] mobile:w-[270px] mobile:text-xs">
+                                    Middle Name
+                                </span>
+                                <input
+                                    name="mname"
+                                    type="text"
+                                    disabled={isChecked}
+                                    className="w-full px-4 text-sm focus:outline-none mobile:text-xs"
+                                    value={formData.mname}
+                                    onChange={handleChange}
+                                    placeholder=""
+                                />
+                                <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3 gap-2 text-sm bg-custom-lightestgreen">
+                                    <input
+                                        onChange={handleCheckboxChange}
+                                        type="checkbox"
+                                        checked={isChecked}
+                                        name="checkbox"
+                                        className="accent-custom-lightgreen"
+                                        value="checkbox"
+                                    />
+                                    <p>N/A</p>
+                                </span>
+                            </div>
                         </div>
                         <div
                             className={`flex items-center border  rounded-[5px] overflow-hidden ${
@@ -352,13 +508,18 @@ const InquiryFormModal = ({ modalRef }) => {
                                     className="appearance-none w-full px-4 text-sm py-1 bg-white focus:outline-none border-0 mobile:text-xs"
                                 >
                                     <option value="">(Select)</option>
-                                    {formattedPropertyNames.map((item, index) => {
-                                        return (
-                                            <option key={index} value={item}>
-                                                {item}
-                                            </option>
-                                        );
-                                    })}
+                                    {formattedPropertyNames.map(
+                                        (item, index) => {
+                                            return (
+                                                <option
+                                                    key={index}
+                                                    value={item}
+                                                >
+                                                    {item}
+                                                </option>
+                                            );
+                                        }
+                                    )}
                                 </select>
                                 <span className="absolute inset-y-0 right-0 flex  items-center pr-3 pl-3 bg-custom-lightestgreen text-custom-bluegreen pointer-events-none">
                                     <IoMdArrowDropdown />
@@ -378,7 +539,7 @@ const InquiryFormModal = ({ modalRef }) => {
                                 Concern regarding
                             </span>
                             <div className="relative w-full">
-                                <select
+                                {/* <select
                                     name="details_concern"
                                     value={formData.details_concern}
                                     onChange={handleChange}
@@ -401,8 +562,43 @@ const InquiryFormModal = ({ modalRef }) => {
                                     <option value="Loan Application">
                                         Loan Application
                                     </option>
-                                    <option value="Titile and Other Registration Documents">
-                                        Titile and Other Registration Documents
+                                    <option value="Title and Other Registration Documents">
+                                       Title and Other Registration Documents
+                                    </option>formDatainqu
+                                    <option value="Commissions">
+                                        Commissions
+                                    </option>
+                                    <option value="Other Concerns">
+                                        Other Concerns
+                                    </option>
+                                </select> */}
+                                <select
+                                    value={formData.details_concern}
+                                    onChange={handleChange}
+                                    name="details_concern"
+                                    className="appearance-none text-sm w-full px-4 py-1 bg-white focus:outline-none border-0 mobile:text-xs"
+                                >
+                                    <option value="">(Select)</option>
+                                    <option value="Reservation Documents">
+                                        Reservation Documents
+                                    </option>
+                                    <option value="Payment Issues">
+                                        Payment Issues
+                                    </option>
+                                    <option value="SOA/ Billing Statement/ Buyer's Ledger">
+                                        SOA/ Billing Statement/ Buyer's Ledger
+                                    </option>
+                                    <option value="Turn Over Status">
+                                        Turn Over Status
+                                    </option>
+                                    <option value="Unit Status">
+                                        Unit Status
+                                    </option>
+                                    <option value="Loan Application">
+                                        Loan Application
+                                    </option>
+                                    <option value="Title and Other Registration Documents">
+                                        Title and Other Registration Documents
                                     </option>
                                     <option value="Commissions">
                                         Commissions
@@ -423,8 +619,8 @@ const InquiryFormModal = ({ modalRef }) => {
                             </p>
                         </div>
                         <div className="flex items-center border border-custom-bluegreen rounded-[5px] overflow-hidden">
-                            <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex items-center w-[250px] tablet:w-[175px] mobile:w-[270px] mobile:text-xs -mr-4 pl-3 py-1">
-                                I am
+                            <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex items-center w-[255px] tablet:w-[175px] mobile:w-[270px] mobile:text-xs -mr-4 pl-3 py-1">
+                                Inquiry From
                             </span>
                             <div className="relative w-full">
                                 <select
@@ -439,11 +635,34 @@ const InquiryFormModal = ({ modalRef }) => {
                                     </option>
                                     <option value="Buyer">Buyer</option>
                                     <option value="Broker">Broker</option>
+                                    <option value="Others">Others</option>
                                 </select>
                                 <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3  bg-custom-lightestgreen text-custom-bluegreen pointer-events-none">
                                     <IoMdArrowDropdown />
                                 </span>
                             </div>
+                        </div>
+                        <div className="flex justify-end">
+                            {formData.user_type === "Others" && (
+                                <div
+                                    className={`flex items-center border rounded-[5px] w-[277px] overflow-hidden ${
+                                        isSubmitted && !formData.other_user_type
+                                            ? resetSuccess
+                                                ? "border-custom-bluegreen"
+                                                : "border-red-500"
+                                            : "border-custom-bluegreen"
+                                    }`}
+                                >
+                                    <input
+                                        name="other_user_type"
+                                        type="text"
+                                        className="w-full px-4 text-sm focus:outline-none mobile:text-xs py-1"
+                                        value={formData.other_user_type}
+                                        onChange={handleChange}
+                                        placeholder=""
+                                    />
+                                </div>
+                            )}
                         </div>
                         <div className="flex items-center border border-custom-bluegreen rounded-[5px] overflow-hidden">
                             <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex w-[240px] pl-3 py-1">
@@ -458,7 +677,6 @@ const InquiryFormModal = ({ modalRef }) => {
                                 placeholder=""
                             />
                         </div>
-
                         <div className="flex items-center border border-custom-bluegreen rounded-[5px] overflow-hidden">
                             <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex w-[240px] pl-3 py-1">
                                 Unit/Lot Number
@@ -499,17 +717,22 @@ const InquiryFormModal = ({ modalRef }) => {
                                 onChange={handleChangeValue}
                                 maxLength={maxCharacters}
                                 name="details_message"
-                                placeholder="Write your concern here."
+                                placeholder=""
                                 rows="4"
                                 className={` border-t border-custom-bluegreen rounded-b-[5px] border-t w-full pl-2 outline-none`}
                             ></textarea>
                         </div>
                     </div>
                     <div className="flex flex-col mt-5 mb-12">
-                        <div className="flex justify-end w-54 tablet:flex-col">
-                            <label
+                        <div className="flex justify-between w-54 tablet:flex-col">
+                            {/* <label
                                 htmlFor="attachment"
-                                className="hidden tablet:w-full h-10 px-5 text-sm border montserrat-medium border-custom-solidgreen rounded-lg text-custom-solidgreen flex justify-center items-center gap-1 cursor-pointer hover:shadow-custom"
+                                className="tablet:w-full h-10 px-5 text-sm border montserrat-medium border-custom-solidgreen rounded-lg text-custom-solidgreen flex justify-center items-center gap-1 cursor-pointer hover:shadow-custom bg-red-900"
+                                onClick={() => {
+                                    if (fileInputRef.current) {
+                                        fileInputRef.current.click();
+                                    }
+                                }}
                             >
                                 <svg
                                     xmlns="http://www.w3.org/2000/svg"
@@ -526,41 +749,83 @@ const InquiryFormModal = ({ modalRef }) => {
                                     />
                                 </svg>
                                 Attachments
-                                <input
-                                    type="file"
-                                    id="attachment"
-                                    name="files[]"
-                                    multiple
-                                    className="hidden"
-                                    onChange={handleFileChange}
-                                />
-                            </label>
-                            {files.length > 0 && (
-                                <div className="flex flex-col mt-2">
-                                    {files.map((file, index) => (
-                                        <p
-                                            key={index}
-                                            className="flex items-center text-sm text-gray-600 truncate gap-1"
-                                        >
-                                            {file.name}
-                                            <IoMdTrash
-                                                className="hover:text-red-500"
-                                                onClick={() =>
-                                                    handleDelete(file.name)
-                                                }
-                                            />
-                                        </p>
-                                    ))}
-                                </div>
-                            )}
+                            </label> */}
                             <button
-                                type="submit"
-                                onClick={handleSubmit}
-                                className="h-10 text-white px-10 rounded-lg gradient-btn2 flex justify-center items-center gap-2 tablet:w-full hover:shadow-custom4"
+                                htmlFor="attachment"
+                                className="tablet:w-full h-10 px-5 text-sm border montserrat-medium border-custom-solidgreen rounded-lg text-custom-solidgreen flex justify-center items-center gap-1 cursor-pointer hover:shadow-custom"
+                                onClick={() => {
+                                    if (fileInputRef.current) {
+                                        fileInputRef.current.click();
+                                    }
+                                }}
                             >
-                                Submit
-                                <IoIosSend />
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    strokeWidth="1.5"
+                                    stroke="currentColor"
+                                    className="size-3"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244"
+                                    />
+                                </svg>
+                                Add attachment
                             </button>
+                            <input
+                                type="file"
+                                id="attachment"
+                                name="files[]"
+                                className="hidden"
+                                ref={fileInputRef}
+                                multiple
+                                onChange={handleFileChange}
+                            />
+                            <button
+                                onClick={handleSubmit}
+                                disabled={loading}
+                                type="submit"
+                                className={`w-[133px] text-sm montserrat-semibold text-white h-[40px] rounded-[10px] gradient-btn2 flex justify-center items-center gap-2 tablet:w-full hover:shadow-custom4
+                                            ${
+                                                loading
+                                                    ? "cursor-not-allowed"
+                                                    : ""
+                                            }
+                                            `}
+                            >
+                                {loading ? (
+                                    <CircularProgress className="spinnerSize" />
+                                ) : (
+                                    <>
+                                        Submit
+                                        <IoIosSend />
+                                    </>
+                                )}
+                            </button>
+                        </div>
+
+                        <div className="mt-2">
+                            {fileName && fileName.length > 0
+                                ? fileName.map((item, index) => {
+                                      return (
+                                          <p
+                                              key={index}
+                                              className="flex items-center text-sm text-red-900 truncate gap-1"
+                                          >
+                                              {item}{" "}
+                                              <IoMdTrash
+                                                  className="hover:text-red-500"
+                                                  onClick={() =>
+                                                      handleDelete(item)
+                                                  }
+                                              />
+                                          </p>
+                                      );
+                                  })
+                                : null}
                         </div>
                     </div>
                 </div>

@@ -8,25 +8,28 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Mail\Mailables\Headers;
 use Illuminate\Mail\Mailables\Address;
 
 
-class EmailToPersonnelAssign extends Mailable
+class AssignedCliResolvedInquiryNotification extends Mailable
 {
     use Queueable, SerializesModels;
-
-    protected $email;
-
+   
+    protected $employee_email;
+    protected $assignee_name;
     protected $data;
-
-    /*  protected $admin_name; */
-
-    public function __construct($email, $data/* $admin_name */)
+ 
+    /**
+     * Create a new message instance.
+     */
+    public function __construct($employee_email, $assignee_name, $data)
     {
-        $this->email = $email;
+        $this->employee_email = $employee_email;
+        $this->assignee_name = $assignee_name;
         $this->data = $data;
-        /*  $this->admin_name = $admin_name; */
+        
     }
 
     /**
@@ -36,10 +39,14 @@ class EmailToPersonnelAssign extends Mailable
     {
         return new Envelope(
             from: new Address('noreply@cebulandmasters.com', 'noreply@cebulandmasters.com'),
-            subject: 'New Inquiry Assigned to You',
+            subject: "Resolved [{$this->data['ticket_id']}]"
+
         );
     }
 
+    /**
+     * Get the message content definition.
+     */
 
     public function headers(): Headers
     {
@@ -54,20 +61,22 @@ class EmailToPersonnelAssign extends Mailable
         return $headers;
     }
 
-
     protected function generateMessageId()
     {
         return uniqid() . '@cebulandmasters.com';
     }
-    /**
-     * Get the message content definition.
-     */
+
     public function content(): Content
     {
         return new Content(
-            view: 'message_to_personnel',
+            view: 'assigned_cli_resolved_inquiry',
             with: [
-                'data' => $this->data
+                'assignee_name' => $this->assignee_name,
+                'buyer_name' => $this->data['buyer_name'],
+                'ticket_id' => $this->data['ticket_id'],
+                'admin_name' => $this->data['admin_name'],
+                'details_concern' => $this->data['details_concern']
+
             ],
         );
     }

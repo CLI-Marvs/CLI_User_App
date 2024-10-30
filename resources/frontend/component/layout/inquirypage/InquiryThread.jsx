@@ -7,7 +7,7 @@ import Sho from "../../../../../public/Images/rodfil.png";
 import Kent from "../../../../../public/Images/kent.png";
 import FolderFile from "../../../../../public/Images/folder_file.svg";
 import { BsPaperclip } from "react-icons/bs";
-import { IoIosSend } from "react-icons/io";
+import { IoIosArrowDown, IoIosSend } from "react-icons/io";
 import AssignSidePanel from "./AssignSidePanel";
 import ResolveModal from "./ResolveModal";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
@@ -33,9 +33,11 @@ const InquiryThread = () => {
     const [email, setEmail] = useState("");
     const [ticket, setTicket] = useState("");
     const [status, setStatus] = useState("");
+    const [selectedProperty, setSelectedProperty] = useState("");
+    const [fileName, setFileName] = useState("");
     const [hasAttachments, setHasAttachments] = useState(false);
     const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
-    const [emailMessageId, setEmailMessageId] = useState(null);
+    const { propertyNamesList } = useStateContext();
     const {
         messages,
         setTicketId,
@@ -61,12 +63,19 @@ const InquiryThread = () => {
         setStartDate(date);
     };
 
-    const handleStatus = (e) => {
-        setStatus(e.target.value);
+    const handleSelectProperty = (e) => {
+        setSelectedProperty(e.target.value);
     };
 
+    /**
+     * This function retrieves the most recently updated name when the admin modifies the buyer's information (first name, last name, middle name).
+     */
+    useEffect(() => {
+        console.log("this is fetching");
+    }, []);
     const dataConcern =
         data?.find((items) => items.ticket_id === ticketId) || {};
+
     const toggleFilterBox = () => {
         setIsFilterVisible((prev) => !prev);
     };
@@ -75,6 +84,26 @@ const InquiryThread = () => {
         const files = Array.from(event.target.files);
         setAttachedFiles((prevFiles) => [...prevFiles, ...files]);
     };
+
+    const formatFunc = (name) => {
+        return name
+            .toLowerCase()
+            .replace(/\b\w/g, (char) => char.toUpperCase());
+    };
+
+    const formattedPropertyNames = [
+        "N/A",
+        ...(Array.isArray(propertyNamesList) && propertyNamesList.length > 0
+            ? propertyNamesList
+                  .filter((item) => !item.toLowerCase().includes("phase"))
+                  .map((item) => formatFunc(item))
+                  .sort((a, b) => {
+                      if (a === "N/A") return -1;
+                      if (b === "N/A") return 1;
+                      return a.localeCompare(b);
+                  })
+            : []),
+    ];
 
     const removeFile = (fileNameToDelete) => {
         setAttachedFiles((prevFiles) =>
@@ -130,18 +159,29 @@ const InquiryThread = () => {
             email,
             ticket,
             startDate,
-            status,
+            selectedProperty,
             hasAttachments,
         });
         setIsFilterVisible(false);
         /*  setCurrentPage(0); */
+        setSelectedProperty("");
         setName("");
         setCategory("");
         setEmail("");
         setTicket("");
-        setStatus("");
         setHasAttachments(false);
         navigate("/inquirymanagement/inquirylist");
+    };
+
+    const formatChatMessage = (message) => {
+        if (message) {
+            return message.split("\n").map((item, index) => (
+                <span key={index}>
+                    {item}
+                    <br />
+                </span>
+            ));
+        }
     };
 
     const handleDeleteInquiry = async () => {
@@ -149,16 +189,71 @@ const InquiryThread = () => {
         navigate("/inquirymanagement/inquirylist");
         getAllConcerns();
     };
+
     const submitMessage = async () => {
         setLoading(true);
         setIsConfirmModalOpen(false);
         const formData = new FormData();
 
         if (attachedFiles && attachedFiles.length > 0) {
+            const validFile = [
+                "pdf",
+                "png",
+                "bmp",
+                "jpg",
+                "jpeg",
+                "xls",
+                "xlsx",
+                "xlsm",
+                "xml",
+                "csv",
+                "doc",
+                "docx",
+                "mp4",
+                "plain", //handle for .txt file extension
+            ];
+            const extension = attachedFiles[0].type;
+            console.log("extension", extension);
+            let modifiedExtension = extension.split("/")[1]; //from application/pdf to pdf
+            // Special handling for .docx MIME type
+            if (
+                extension ===
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            ) {
+                modifiedExtension = "docx"; // Set extension to docx for validation
+            } else if (extension === "application/msword") {
+                modifiedExtension = "doc";
+            } else if (
+                extension === "application/vnd.ms-excel.sheet.macroEnabled.12"
+            ) {
+                modifiedExtension = "xlsm";
+            } else if (extension === "application/vnd.ms-excel") {
+                modifiedExtension = "xls";
+            } else if (
+                extension ===
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            ) {
+                modifiedExtension = "xlsx";
+            } else if (extension === "application/x-zip-compressed") {
+                alert("Zip is not allowed.");
+                setLoading(false);
+                return;
+            }
+
+            const isFileValid = validFile.includes(modifiedExtension);
+
+            if (!isFileValid) {
+                alert(`${modifiedExtension} is not allowed.`);
+                setLoading(false);
+                return;
+            }
+        }
+        if (attachedFiles && attachedFiles.length > 0) {
             attachedFiles.forEach((file) => {
                 formData.append("files[]", file);
             });
         }
+
         const formattedMessage = chatMessage.replace(/\n/g, "<br>");
         formData.append("admin_email", user?.employee_email || "");
         formData.append("ticket_id", ticketId || "");
@@ -167,9 +262,10 @@ const InquiryThread = () => {
             "admin_name",
             `${user?.firstname || ""} ${user?.lastname || ""}`
         );
-        formData.append("message_id", dataConcern.message_id || emailMessageId || "");
+        formData.append("message_id", messageId || "");
         formData.append("admin_id", user?.id || "");
         formData.append("buyer_email", dataConcern.buyer_email || "");
+        formData.append("buyer_lastname", dataConcern.buyer_lastname || "");
         formData.append("admin_profile_picture", user?.profile_picture || "");
         formData.append("department", user?.department || "");
 
@@ -179,9 +275,12 @@ const InquiryThread = () => {
                     "Content-Type": "multipart/form-data",
                 },
             });
+            console.log("triger here");
 
             callBackHandler();
             setAttachedFiles([]);
+            setLoading(false);
+            callBackHandler();
         } catch (error) {
             console.log("error sending message", error);
         } finally {
@@ -244,47 +343,90 @@ const InquiryThread = () => {
               .flat()
               .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
         : [];
+    // useEffect(() => {
+    //     let adminMessageChannel;
+    //     let newTicketId;
+    //     let messageIdChannel;
+    //     if (ticketId) {
+    //         newTicketId = ticketId.replace("#", "");
+    //         adminMessageChannel = window.Echo.channel(
+    //             `adminmessage.${newTicketId}`
+    //         );
+    //         messageIdChannel = window.Echo.channel(
+    //             `messageidref.${newTicketId}`
+    //         );
+    //         messageIdChannelFunc(messageIdChannel);
+    //         adminMessageChannelFunc(adminMessageChannel);
+    //     }
+    //     return () => {
+    //         if (adminMessageChannel) {
+    //             adminMessageChannel.stopListening("AdminMessage");
+    //             window.Echo.leaveChannel(`adminmessage.${newTicketId}`);
+
+    //             adminMessageChannel.stopListening("MessageID");
+    //             window.Echo.leaveChannel(`messageidref.${newTicketId}`);
+    //         }
+    //     };
+    // }, [ticketId]);
+
     useEffect(() => {
         let adminMessageChannel;
-        let newTicketId;
         let messageIdChannel;
-        if (ticketId) {
-            newTicketId = ticketId.replace("#", "");
-            adminMessageChannel = window.Echo.channel(
-                `adminmessage.${newTicketId}`
-            );
-            messageIdChannel = window.Echo.channel(
-                `messageidref.${newTicketId}`
-            );
-            messageIdChannelFunc(messageIdChannel);
-            adminMessageChannelFunc(adminMessageChannel);
-        }
+        let newTicketId;
+
+        // Function to initialize channels when Echo is ready
+        const initChannels = () => {
+            if (ticketId && window.Echo) {
+                newTicketId = ticketId.replace("#", "");
+                adminMessageChannel = window.Echo.channel(
+                    `adminmessage.${newTicketId}`
+                );
+                messageIdChannel = window.Echo.channel(
+                    `messageidref.${newTicketId}`
+                );
+                messageIdChannelFunc(messageIdChannel);
+                adminMessageChannelFunc(adminMessageChannel);
+            }
+        };
+
+        // Periodically check if window.Echo is initialized
+        const checkBrowserReady = setInterval(() => {
+            if (window.Echo) {
+                initChannels();
+                clearInterval(checkBrowserReady); // Stop checking once Echo is ready
+            }
+        }, 100); // Check every 100ms if Echo is initialized
+
         return () => {
+            clearInterval(checkBrowserReady); // Clear interval if component unmounts
+
             if (adminMessageChannel) {
                 adminMessageChannel.stopListening("AdminMessage");
                 window.Echo.leaveChannel(`adminmessage.${newTicketId}`);
-
-                adminMessageChannel.stopListening("MessageID");
+            }
+            if (messageIdChannel) {
+                messageIdChannel.stopListening("MessageID");
                 window.Echo.leaveChannel(`messageidref.${newTicketId}`);
             }
         };
     }, [ticketId]);
 
-    
-    
     const capitalizeWords = (name) => {
-        return name
-            .split(" ")
-            .map(
-                (word) =>
-                    word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-            )
-            .join(" ");
+        if (name) {
+            return name
+                .split(" ")
+                .map(
+                    (word) =>
+                        word.charAt(0).toUpperCase() +
+                        word.slice(1).toLowerCase()
+                )
+                .join(" ");
+        }
     };
 
     return (
         <>
-            <div className="flex h-full bg-custom-grayFA overflow-x-auto">
+            <div className="flex h-full bg-custom-grayFA">
                 <div className="bg-custom-grayFA w-[601px] px-[20px] pb-[103px] ">
                     {" "}
                     {/* boxdevref */}
@@ -308,7 +450,7 @@ const InquiryThread = () => {
                                 readOnly={true}
                                 onClick={toggleFilterBox}
                                 type="text"
-                                className="h-[47px] w-full rounded-lg pl-9 pr-6 text-sm bg-custom-grayF1 outline-none"
+                                className="h-[47px] w-full rounded-[10px] pl-9 pr-6 text-sm bg-custom-grayF1 outline-none"
                                 placeholder="Search"
                             />
                             <svg
@@ -340,26 +482,61 @@ const InquiryThread = () => {
                                         </label>
                                         <input
                                             type="text"
-                                            className="w-full  border-b-1 outline-none"
+                                            className="w-full  border-b-1 outline-none text-sm px-[8px]"
                                             value={name}
                                             onChange={(e) =>
                                                 setName(e.target.value)
                                             }
                                         />
                                     </div>
-                                    <div className="flex">
+                                    <div className="flex relative">
                                         <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
                                             {" "}
                                             Category
                                         </label>
-                                        <input
-                                            type="text"
-                                            className="w-full  border-b-1 outline-none"
+                                        <select
+                                            className="w-full border-b-1 outline-none appearance-none text-sm px-[8px]"
                                             value={category}
                                             onChange={(e) =>
                                                 setCategory(e.target.value)
                                             }
-                                        />
+                                        >
+                                            <option value="">
+                                                Select Category
+                                            </option>
+                                            <option value="Reservation Documents">
+                                                Reservation Documents
+                                            </option>
+                                            <option value="Payment Issues">
+                                                Payment Issues
+                                            </option>
+                                            <option value="SOA/ Billing Statement/ Buyer's Ledger">
+                                                SOA/ Billing Statement/ Buyer's
+                                                Ledger
+                                            </option>
+                                            <option value="Turn Over Status">
+                                                Turn Over Status
+                                            </option>
+                                            <option value="Unit Status">
+                                                Unit Status
+                                            </option>
+                                            <option value="Loan Application">
+                                                Loan Application
+                                            </option>
+                                            <option value="Title and Other Registration Documents">
+                                                Title and Other Registration
+                                                Documents
+                                            </option>
+                                            <option value="Commissions">
+                                                Commissions
+                                            </option>
+                                            <option value="Other Concerns">
+                                                Other Concerns
+                                            </option>
+                                        </select>
+                                        <span className="absolute inset-y-0 right-0 flex items-center  pl-3 pointer-events-none">
+                                            <IoIosArrowDown />
+                                        </span>
                                     </div>
                                     <div className="flex">
                                         <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
@@ -368,7 +545,7 @@ const InquiryThread = () => {
                                         </label>
                                         <input
                                             type="text"
-                                            className="w-full  border-b-1 outline-none"
+                                            className="w-full  border-b-1 outline-none text-sm px-[8px]"
                                             value={email}
                                             onChange={(e) =>
                                                 setEmail(e.target.value)
@@ -382,7 +559,7 @@ const InquiryThread = () => {
                                         </label>
                                         <input
                                             type="text"
-                                            className="w-full  border-b-1 outline-none"
+                                            className="w-full  border-b-1 outline-none text-sm px-[8px]"
                                             value={ticket}
                                             onChange={(e) =>
                                                 setTicket(e.target.value)
@@ -390,51 +567,55 @@ const InquiryThread = () => {
                                         />
                                     </div>
                                     <div className="flex gap-3">
-                                        <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[244px]">
-                                            Date
-                                        </label>
-                                        <div className="relative">
-                                            <DatePicker
-                                                selected={startDate}
-                                                onChange={handleDateChange}
-                                                className=" border-b-1 outline-none w-[176px]"
-                                                calendarClassName="custom-calendar"
-                                            />
+                                        <div className="flex">
+                                            <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[93px]">
+                                                Date
+                                            </label>
+                                            <div className="relative">
+                                                <DatePicker
+                                                    selected={startDate}
+                                                    onChange={handleDateChange}
+                                                    className="border-b-1 outline-none w-[146px] text-sm px-[8px]"
+                                                    calendarClassName="custom-calendar"
+                                                />
 
-                                            <img
-                                                src={DateLogo}
-                                                alt="date"
-                                                className="absolute top-[45%] right-0 transform -translate-y-1/2 text-custom-bluegreen size-6 cursor-pointer pointer-events-none"
-                                            />
+                                                <img
+                                                    src={DateLogo}
+                                                    alt="date"
+                                                    className="absolute top-[45%] right-0 transform -translate-y-1/2 text-custom-bluegreen size-6 cursor-pointer pointer-events-none"
+                                                />
+                                            </div>
                                         </div>
-                                        <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
-                                            {" "}
-                                            Status
-                                        </label>
-                                        <select
-                                            className="w-full border-b-1 outline-none"
-                                            onChange={handleStatus}
-                                            value={status}
-                                        >
-                                            <option value="">
-                                                Select Status
-                                            </option>
-                                            <option value="Inquiry Feedback Received">
-                                                Inquiry Feedback Received
-                                            </option>
-                                            <option value="Replied By">
-                                                Replied By
-                                            </option>
-                                            <option value="Assigned To">
-                                                Assigned To
-                                            </option>
-                                            <option value="Marked as resolved">
-                                                Marked as resolved
-                                            </option>
-                                            <option value="Follow up reply">
-                                               Follow up reply
-                                            </option>
-                                        </select>
+                                        <div className="flex relative">
+                                            <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[65px]">
+                                                {" "}
+                                                Property
+                                            </label>
+                                            <select
+                                                className="w-[179px] border-b-1 outline-none appearance-none text-sm px-[8px]"
+                                                onChange={handleSelectProperty}
+                                                value={selectedProperty}
+                                            >
+                                                <option value="">
+                                                    Select Property
+                                                </option>
+                                                {formattedPropertyNames.map(
+                                                    (item, index) => {
+                                                        return (
+                                                            <option
+                                                                key={index}
+                                                                value={item}
+                                                            >
+                                                                {item}
+                                                            </option>
+                                                        );
+                                                    }
+                                                )}
+                                            </select>
+                                            <span className="absolute inset-y-0 right-0 flex items-center  pl-3 pointer-events-none">
+                                                <IoIosArrowDown />
+                                            </span>
+                                        </div>
                                     </div>
                                     <div className="mt-5 flex gap-5">
                                         <input
@@ -459,7 +640,7 @@ const InquiryThread = () => {
                             </div>
                         )}
                     </div>
-                    <div className="p-[16px] shrink-0 bg-white rounded-lg flex flex-col flex-grow min-h-screen">
+                    <div className="p-[16px] shrink-0 bg-white rounded-[10px] shadow-custom7 flex flex-col flex-grow min-h-screen">
                         {" "}
                         {/* boxdevref */}
                         <div className="flex items-center gap-[9px] px-[10px]">
@@ -471,9 +652,10 @@ const InquiryThread = () => {
                             />
                             <div className="flex-1 flex flex-wrap">
                                 <p className="space-x-1 text-custom-bluegreen">
-                                    {dataConcern.property}{" "}
-                                    ({dataConcern.details_concern}) <span>-</span>{" "}
-                                    {dataConcern.ticket_id}
+                                    {dataConcern.property} (
+                                    {dataConcern.details_concern ??
+                                        dataConcern.email_subject}
+                                    ) <span>-</span> {dataConcern.ticket_id}
                                 </p>
                             </div>
                             {/*   {dataConcern.created_by &&
@@ -488,9 +670,9 @@ const InquiryThread = () => {
                             <div className="flex justify-end shrink-0">
                                 <button
                                     onClick={handleOpenModal}
-                                    className="w-[85px] h-[29px] rounded-[10px] gradient-btn5 montserrat-medium text-sm text-white hover:shadow-custom4"
+                                    className="w-[85px] h-[29px] rounded-[10px] gradient-btn5 font-light text-sm text-white hover:shadow-custom4"
                                 >
-                                    Add Info
+                                    More Info
                                 </button>
                             </div>
                         </div>
@@ -500,32 +682,62 @@ const InquiryThread = () => {
                                 {/* boxref */}
                                 {/* Container for chat input and attached files */}
                                 <div className="gradient-btn2 rounded-[12px] p-[2px] relative">
-                                    <div className="bg-white p-[10px] pr-0 rounded-[10px]">
+                                    <div className="bg-white p-[10px] rounded-[10px]">
                                         {/* Display attached files inside the same container */}
                                         {attachedFiles.length > 0 && (
                                             <div className="mb-2 ">
                                                 {attachedFiles.map(
-                                                    (file, index) => (
-                                                        <div
-                                                            key={index}
-                                                            className="flex items-center justify-between mb-2 p-2 border bg-white rounded"
-                                                        >
-                                                            <span className="text-sm text-gray-700">
-                                                                {file.name}
-                                                            </span>
-                                                            <button
-                                                                type="button"
-                                                                onClick={() =>
-                                                                    removeFile(
-                                                                        file.name
-                                                                    )
-                                                                }
-                                                                className="text-red-500"
+                                                    (file, index) => {
+                                                        const fileName =
+                                                            file.name;
+                                                        console.log(
+                                                            "123",
+                                                            fileName
+                                                        );
+                                                        const fileExtension =
+                                                            fileName.slice(
+                                                                fileName.lastIndexOf(
+                                                                    "."
+                                                                )
+                                                            );
+                                                        const baseName =
+                                                            fileName.slice(
+                                                                0,
+                                                                fileName.lastIndexOf(
+                                                                    "."
+                                                                )
+                                                            );
+                                                        const truncatedName =
+                                                            baseName.length > 30
+                                                                ? baseName.slice(
+                                                                      0,
+                                                                      30
+                                                                  ) + "..."
+                                                                : baseName;
+                                                        return (
+                                                            <div
+                                                                key={index}
+                                                                className="flex items-center justify-between mb-2 p-2 border bg-white rounded "
                                                             >
-                                                                Remove
-                                                            </button>
-                                                        </div>
-                                                    )
+                                                                <span className="text-sm text-gray-700">
+                                                                    {/* {file.name} */}
+                                                                    {truncatedName +
+                                                                        fileExtension}
+                                                                </span>
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() =>
+                                                                        removeFile(
+                                                                            file.name
+                                                                        )
+                                                                    }
+                                                                    className="text-red-500"
+                                                                >
+                                                                    Remove
+                                                                </button>
+                                                            </div>
+                                                        );
+                                                    }
                                                 )}
                                             </div>
                                         )}
@@ -544,22 +756,15 @@ const InquiryThread = () => {
                                                 name="chat"
                                                 rows="4"
                                                 draggable="false"
-                                                onKeyDown={(e) => {
-                                                    if (e.key === "Enter" && !e.shiftKey) {
-                                                        e.preventDefault(); 
-                                                        handleConfirmation();
-                                                    }
-                                                }}
                                                 className="h-full w-full pl-2 pr-[123px] border-none  text-sm focus:outline-none"
                                             ></textarea>
 
                                             {/* File attachment button */}
-                                            <div className=" absolute bottom-2 right-[115px] items-center  ">
+                                            <div className=" absolute bottom-[6px] right-[108px] items-center">
                                                 <input
                                                     type="file"
                                                     id="fileInput"
                                                     multiple
-                                                    accept=".jpg, .jpeg, .png, .pdf, .doc, .docx, .xls, .xlsx"
                                                     style={{ display: "none" }}
                                                     onChange={handleFileAttach}
                                                 />
@@ -602,52 +807,128 @@ const InquiryThread = () => {
                                                 </button>
                                             </div>
                                             {isConfirmModalOpen && (
-                                                <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-                                                    <div className="bg-white p-[20px] rounded-[10px] shadow-custom5 w-[467px] h-[228]">
-                                                        <div className="flex justify-center items-center mt-[14px] ">
-                                                            <AiFillInfoCircle className="size-[37px] text-[#5B9BD5]" />
-                                                        </div>
-                                                        <div className="flex justify-center mt-[30px]">
-                                                            <p className="montserrat-medium text-[20px]">
-                                                                Are you sure
-                                                                about sending
-                                                                this reply?
-                                                            </p>
-                                                        </div>
-                                                        <div className="flex flex-col justify-center items-center text-[12px] text-[#B54D4D] px-[20px]">
-                                                            <p>
-                                                                This message
-                                                                will be sent to
-                                                            </p>
-                                                            <span className="font-semibold text-[13px]">
-                                                                    {capitalizeWords(dataConcern.buyer_name)}
-                                                                    {" "}({dataConcern.buyer_email})
-                                                            </span>
-                                                        </div>
-                                                        <div className="flex justify-center mt-[26px] space-x-[19px]">
-                                                            <button
-                                                                onClick={() =>
-                                                                    setIsConfirmModalOpen(
-                                                                        false
-                                                                    )
-                                                                }
-                                                                className="gradient-btn5 p-[1px] w-[92px] h-[35px] rounded-[10px]"
-                                                            >
-                                                                <div className="w-full h-full rounded-[9px] bg-white flex justify-center items-center montserrat-semibold text-sm">
-                                                                    <p className="text-base font-bold bg-gradient-to-r from-custom-bluegreen via-custom-solidgreen to-custom-solidgreen bg-clip-text text-transparent">
-                                                                        Cancel
-                                                                    </p>
+                                                <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 overflow-auto">
+                                                    <div className="bg-white p-[20px] rounded-[10px] shadow-custom5 w-[784px] min-h-[442px]">
+                                                        <div className="p-[10px] flex flex-col gap-[26px]">
+                                                            <div className="flex justify-center items-center">
+                                                                <AiFillInfoCircle className="size-[37px] text-[#5B9BD5]" />
+                                                            </div>
+                                                            <div className="flex items-center justify-between  px-[25px] h-[50px] rounded-[4px] bg-custom-lightestgreen">
+                                                                <p className="montserrat-medium text-[20px]">
+                                                                    Are you sure
+                                                                    about
+                                                                    sending this
+                                                                    message?
+                                                                </p>
+                                                                <div>
+                                                                    <div className="flex justify-center space-x-[10px]">
+                                                                        <button
+                                                                            onClick={() =>
+                                                                                setIsConfirmModalOpen(
+                                                                                    false
+                                                                                )
+                                                                            }
+                                                                            className="gradient-btn5 p-[1px] w-[92px] h-[35px] rounded-[10px]"
+                                                                        >
+                                                                            <div className="w-full h-full rounded-[9px] bg-white flex justify-center items-center montserrat-semibold text-sm">
+                                                                                <p className="text-base font-bold bg-gradient-to-r from-custom-bluegreen via-custom-solidgreen to-custom-solidgreen bg-clip-text text-transparent">
+                                                                                    Cancel
+                                                                                </p>
+                                                                            </div>
+                                                                        </button>
+                                                                        <button
+                                                                            onClick={
+                                                                                submitMessage
+                                                                            }
+                                                                            className="gradient-btn5 w-[100px] h-[35px] rounded-[10px] text-sm text-white montserrat-semibold"
+                                                                        >
+                                                                            Confirm
+                                                                        </button>
+                                                                    </div>
                                                                 </div>
-                                                            </button>
-                                                            <button
-                                                                onClick={
-                                                                    submitMessage
-                                                                }
-                                                                className="gradient-btn5 w-[100px] h-[35px] rounded-[10px] text-sm text-white montserrat-semibold"
-                                                            >
-                                                                Confirm
-                                                            </button>
+                                                            </div>
+                                                            <div className="flex items-center h-[22px] text-custom-solidgreen font-semibold">
+                                                                PREVIEW
+                                                            </div>
+                                                            <div className="flex items-center h-[22px] text-custom-solidgreen font-semibold">
+                                                                <span className="mr-1">
+                                                                    TO:
+                                                                </span>
+                                                                <span className="text-sm">
+                                                                    {
+                                                                        dataConcern.buyer_email
+                                                                    }
+                                                                </span>
+                                                            </div>
+
+                                                            <div className="flex items-center h-[19px] text-sm">
+                                                                Hi Mr./Ms.{" "}
+                                                                {capitalizeWords(
+                                                                    dataConcern.buyer_lastname
+                                                                )}
+                                                                ,
+                                                            </div>
+                                                            <div className="w-full p-[10px] border-[2px] rounded-[5px] border-custom-grayF1 text-sm text-custom-gray81">
+                                                                {formatChatMessage(
+                                                                    chatMessage
+                                                                )}
+                                                            </div>
+                                                            <div className="text-sm">
+                                                                <p>
+                                                                    Sincerely,
+                                                                </p>
+                                                                <br />
+                                                                <p>
+                                                                    {
+                                                                        user?.firstname
+                                                                    }{" "}
+                                                                    {
+                                                                        user?.lastname
+                                                                    }
+                                                                </p>
+                                                                <p>
+                                                                    CLI -{" "}
+                                                                    {
+                                                                        user?.department
+                                                                    }
+                                                                </p>
+                                                            </div>
                                                         </div>
+                                                        {attachedFiles.length >
+                                                            0 && (
+                                                            <div className="mb-2 ">
+                                                                {attachedFiles.map(
+                                                                    (
+                                                                        file,
+                                                                        index
+                                                                    ) => (
+                                                                        <div
+                                                                            key={
+                                                                                index
+                                                                            }
+                                                                            className="flex items-center justify-between mb-2 p-2 border bg-white rounded"
+                                                                        >
+                                                                            <span className="text-sm text-gray-700">
+                                                                                {
+                                                                                    file.name
+                                                                                }
+                                                                            </span>
+                                                                            <button
+                                                                                type="button"
+                                                                                onClick={() =>
+                                                                                    removeFile(
+                                                                                        file.name
+                                                                                    )
+                                                                                }
+                                                                                className="text-red-500"
+                                                                            >
+                                                                                Remove
+                                                                            </button>
+                                                                        </div>
+                                                                    )
+                                                                )}
+                                                            </div>
+                                                        )}
                                                     </div>
                                                 </div>
                                             )}
@@ -658,7 +939,9 @@ const InquiryThread = () => {
                                     <p>
                                         Note: This message will be sent to{" "}
                                         <span className="font-semibold">
-                                            {dataConcern.buyer_name}
+                                            {capitalizeWords(
+                                                dataConcern.buyer_name
+                                            )}
                                         </span>
                                         . Please use the comment section for CLI
                                         internal communication.
@@ -688,7 +971,7 @@ const InquiryThread = () => {
                                     </div>
                                 )}
                             </div>
-                            <div className="flex-grow overflow-y-auto max-h-[calc(100vh-400px)]">
+                            <div className="">
                                 <div className="">
                                     {combineThreadMessages.length > 0 &&
                                         combineThreadMessages.map(

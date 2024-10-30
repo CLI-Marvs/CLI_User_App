@@ -1,4 +1,9 @@
-import { Outlet, RouterProvider, createBrowserRouter } from "react-router-dom";
+import {
+    Outlet,
+    RouterProvider,
+    createBrowserRouter,
+    Navigate,
+} from "react-router-dom";
 import DasboardView from "../views/Dashboard/DasboardView";
 import LoginView from "./views/pages/loginViews/LoginView";
 import "./layout/css/font.css";
@@ -26,6 +31,9 @@ import PaymentMainView from "./views/pages/paymentViews/PaymentMainView";
 import PaymentSectionView from "./views/pages/paymentViews/PaymentSectionView";
 import MainComponent from "./layout/chatComponent/MainComponent";
 import AdminSettingView from "./views/pages/adminsettingsViews/AdminSettingView";
+import TransactionView from "./views/pages/transactionViews/TransactionView";
+import TransactionSidebar from "./views/pages/transactionViews/TransactionSidebar";
+import BankStatementView from "./views/pages/transactionViews/BankStatementView";
 
 const App = () => {
     const Layout = () => {
@@ -56,6 +64,163 @@ const App = () => {
         ); */
     };
 
+    const SecondLayout = () => {
+        return (
+            <>
+                <div className="flex w-full overflow-hidden">
+                    {/* <div className="bg-custom-lightestgreen p-5 w-[100px] mr-10">
+                        <TransactionSidebar/>
+                    </div> */}
+                    <div className="w-full py-4 px-4">
+                        <Outlet />
+                    </div>
+                </div>
+            </>
+        );
+    };
+
+    // PrivateRoute component to check authentication
+    const PrivateRoute = () => {
+        const authToken = localStorage.getItem("authToken");
+        return authToken ? <Outlet /> : <Navigate to="/" replace />;
+    };
+    // const router = createBrowserRouter([
+    //     {
+    //         path: "/",
+    //         element: <LoginView />,
+    //     },
+    //     {
+    //         path: "/login",
+    //         element: <LoginView />,
+    //     },
+
+    //     {
+    //         path: "/callback",
+    //         element: <CallBackView />,
+    //     },
+    //     {
+    //         path: "/chatbox",
+    //         element: <MainComponent />,
+    //     },
+    //     {
+    //         path: "/",
+    //         element: <Layout />,
+    //         children: [
+    //             {
+    //                 path: "home",
+    //                 element: <Home />,
+    //             },
+    //             {
+    //                 path: "notification",
+    //                 element: <NotificationView />,
+    //             },
+    //             {
+    //                 path: "transactionmanagement/invoices",
+    //                 element: <TransactionView />,
+    //             },
+    //             {
+    //                 path: "transactionmanagement/transactionrecords",
+    //                 element: <BankStatementView />,
+    //             },
+    //             /*  {
+    //                 path: "transaction",
+    //                 element: <SecondLayout />,
+    //                 children: [
+    //                     {
+    //                         path: "invoices",
+    //                         element: <TransactionView/>,
+    //                     },
+    //                     {
+    //                         path: "bankstatements",
+    //                         element: <BankStatementView/>,
+    //                     },
+    //                 ],
+
+    //             }, */
+    //             {
+    //                 path: "inquirymanagement/inquirylist",
+    //                 element: <InquiryListView />,
+    //             },
+    //             {
+    //                 path: "inquirymanagement/thread/:id",
+    //                 element: <InquiryThreadView />,
+    //             },
+    //             {
+    //                 path: "inquirymanagement/report",
+    //                 element: <ReportViews />,
+    //             },
+
+    //             {
+    //                 path: "propertyandpricing",
+    //                 element: <PropertyAndPricingLayout />,
+    //                 children: [
+    //                     {
+    //                         path: "pricingmasterlist",
+    //                         element: <PricingMasterListView />,
+    //                     },
+    //                     {
+    //                         path: "basicpricing/:id",
+    //                         element: <BasicPricingView />,
+    //                     },
+    //                     {
+    //                         path: "paymentscheme",
+    //                         element: <PaymentSchemeView />,
+    //                     },
+    //                     {
+    //                         path: "priceversioning",
+    //                         element: <PriceVersioningView />,
+    //                     },
+    //                     {
+    //                         path: "promotionalPricing",
+    //                         element: <PromotionalPricingView />,
+    //                     },
+    //                 ],
+    //             },
+    //             {
+    //                 path: "salesmanagement",
+    //                 element: <SalesManagementLayout />,
+    //                 children: [
+    //                     {
+    //                         path: "reservationlist",
+    //                         element: <ReservationListView />,
+    //                     },
+    //                     {
+    //                         path: "reservationpage",
+    //                         element: <ReservationPageView />,
+    //                     },
+    //                 ],
+    //             },
+    //             {
+    //                 path: "adminsettings",
+    //                 element: <AdminSettingView />,
+    //             },
+    //         ],
+    //     },
+    //     {
+    //         path: "/paymentmethod",
+    //         element: <PaymentMainView />,
+    //     },
+    //     {
+    //         path: "/file-viewer/attachment/:id",
+    //         element: <FileViewer />,
+    //     },
+    //     {
+    //         path: "/paymentmethod/payonlinenow",
+    //         element: <PaymentSectionView />,
+    //     },
+
+    // ]);
+    // router.beforeEach((to, from, next) => {
+    //     if (to.meta.requiresAuth && !localStorage.getItem("authToken")) {
+    //         router.replace({ name: "/" });
+    //     } else if (to.meta.requiresAuth && localStorage.getItem("authToken")) {
+    //         UserApi.check_authorization().then((callback) => {
+    //             if (callback.result) next();
+    //         });
+    //     } else {
+    //         next();
+    //     }
+    // });
     const router = createBrowserRouter([
         {
             path: "/",
@@ -65,7 +230,6 @@ const App = () => {
             path: "/login",
             element: <LoginView />,
         },
-
         {
             path: "/callback",
             element: <CallBackView />,
@@ -76,72 +240,85 @@ const App = () => {
         },
         {
             path: "/",
-            element: <Layout />,
+            element: <PrivateRoute />, // Protected routes wrapper
             children: [
                 {
-                    path: "home",
-                    element: <Home />,
-                },
-                {
-                    path: "notification",
-                    element: <NotificationView />,
-                },
-                {
-                    path: "inquirymanagement/inquirylist",
-                    element: <InquiryListView />,
-                },
-                {
-                    path: "inquirymanagement/thread/:id",
-                    element: <InquiryThreadView />,
-                },
-                {
-                    path: "inquirymanagement/report",
-                    element: <ReportViews />,
-                },
-
-                {
-                    path: "propertyandpricing",
-                    element: <PropertyAndPricingLayout />,
+                    path: "/",
+                    element: <Layout />,
                     children: [
                         {
-                            path: "pricingmasterlist",
-                            element: <PricingMasterListView />,
+                            path: "home",
+                            element: <Home />,
                         },
                         {
-                            path: "basicpricing/:id",
-                            element: <BasicPricingView />,
+                            path: "notification",
+                            element: <NotificationView />,
                         },
                         {
-                            path: "paymentscheme",
-                            element: <PaymentSchemeView />,
+                            path: "transactionmanagement/invoices",
+                            element: <TransactionView />,
                         },
                         {
-                            path: "priceversioning",
-                            element: <PriceVersioningView />,
+                            path: "transactionmanagement/transactionrecords",
+                            element: <BankStatementView />,
                         },
                         {
-                            path: "promotionalPricing",
-                            element: <PromotionalPricingView />,
+                            path: "inquirymanagement/inquirylist",
+                            element: <InquiryListView />,
+                        },
+                        {
+                            path: "inquirymanagement/thread/:id",
+                            element: <InquiryThreadView />,
+                        },
+                        {
+                            path: "inquirymanagement/report",
+                            element: <ReportViews />,
+                        },
+                        {
+                            path: "propertyandpricing",
+                            element: <PropertyAndPricingLayout />,
+                            children: [
+                                {
+                                    path: "pricingmasterlist",
+                                    element: <PricingMasterListView />,
+                                },
+                                {
+                                    path: "basicpricing/:id",
+                                    element: <BasicPricingView />,
+                                },
+                                {
+                                    path: "paymentscheme",
+                                    element: <PaymentSchemeView />,
+                                },
+                                {
+                                    path: "priceversioning",
+                                    element: <PriceVersioningView />,
+                                },
+                                {
+                                    path: "promotionalPricing",
+                                    element: <PromotionalPricingView />,
+                                },
+                            ],
+                        },
+                        {
+                            path: "salesmanagement",
+                            element: <SalesManagementLayout />,
+                            children: [
+                                {
+                                    path: "reservationlist",
+                                    element: <ReservationListView />,
+                                },
+                                {
+                                    path: "reservationpage",
+                                    element: <ReservationPageView />,
+                                },
+                            ],
+                        },
+                        {
+                            path: "adminsettings",
+                            element: <AdminSettingView />,
                         },
                     ],
-                },
-                {
-                    path: "salesmanagement",
-                    element: <SalesManagementLayout />,
-                    children: [
-                        {
-                            path: "reservationlist",
-                            element: <ReservationListView />,
-                        },
-                        {
-                            path: "reservationpage",
-                            element: <ReservationPageView />,
-                        },
-                    ],
-                },
-                {
-                    path: "adminsettings",
-                    element: <AdminSettingView />,
                 },
             ],
         },
@@ -151,7 +328,13 @@ const App = () => {
         },
         {
             path: "/file-viewer/attachment/:id",
-            element: <FileViewer />,
+            element: <PrivateRoute />,
+            children: [
+                {
+                    path: "/file-viewer/attachment/:id",
+                    element: <FileViewer />,
+                },
+            ],
         },
         {
             path: "/paymentmethod/payonlinenow",

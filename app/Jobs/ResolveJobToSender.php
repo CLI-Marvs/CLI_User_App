@@ -27,7 +27,6 @@ class ResolveJobToSender implements ShouldQueue
         $this->remarks = $remarks;
         $this->messageId = $messageId;
 
-        Log::info('Files being sent', ['buyer_email' => $this->buyer_email]);
 
     }
 

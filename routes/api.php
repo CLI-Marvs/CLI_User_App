@@ -8,6 +8,7 @@ use App\Http\Controllers\PriceBasicDetailController;
 
 use App\Http\Controllers\PriceListMasterController;
 use App\Http\Controllers\PropertyMasterController;
+use App\Http\Controllers\SapController;
 use App\Http\Controllers\UnitController;
 use App\Models\PropertyMaster;
 use Illuminate\Http\Request;
@@ -55,7 +56,30 @@ Route::put('/update-info', [ConcernController::class, 'updateInfo']);
 Route::post('/add-property-sap', [PropertyMasterController::class, 'storePropertyFromSap']);
 Route::post('/buyer-reply', [ConcernController::class, 'fromAppSript']);
 
+//* For Sap 
+
+//*Post date on sap
+Route::post('/proxy-sap', [SapController::class, 'postDateToSap']);
+
+//*Retrieve invoice from sap upon trigger the date
+Route::post('/posting-invoices', [SapController::class, 'retrieveInvoicesFromSap']);
+
+//*Post document number and other fields to sap
+Route::post('/post-data-sap', [SapController::class, 'postFromAppToSap']);
+
+//*Retreive document number from SAP
+Route::post('/data-posted', [SapController::class, 'postRecordsFromSap']);
+
+
+//*Display in frontend 
+Route::get('/get-invoices', [SapController::class, 'getInvoices']);
+Route::get('/get-transactions', [SapController::class, 'retrieveTransactions']);
+Route::get('/get-matches', [SapController::class, 'runAutoPosting']);
+
+
 Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/get-transaction-bank', [SapController::class, 'getTransactionByBankName']);
+    Route::post('/upload-notepad', [SapController::class, 'uploadNotepad']);
     Route::get('/get-concern', [ConcernController::class, 'getAllConcerns']);
     Route::post('/add-concern', [ConcernController::class, 'addConcernPublic']);
     Route::get('/get-message/{ticketId}', [ConcernController::class, 'getMessage']);
@@ -68,13 +92,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/pin-concern/{id}', [ConcernController::class, 'pinConcern']);
     Route::post('/isread/{concernId}', [ConcernController::class, 'readNotifByUser']);
     Route::get('/specific-assignee', [ConcernController::class, 'getSpecificInquiry']);
-    Route::post('/remove-assignee', [ConcernController::class, 'removeAssignee']);  
+    Route::post('/remove-assignee', [ConcernController::class, 'removeAssignee']);
     Route::get('/property-name', [PropertyMasterController::class, 'getPropertyName']);
+    /* Download the file attachment */
+    Route::post('/download-file', [ConcernController::class, 'downloadFileFromGCS']);
     /* Pricing Master List */
     Route::get('/get-pricing-master-lists', [PriceListMasterController::class, 'getAllPricingMasterLists']);
     /*Basic Pricing */
     Route::post('/basic-pricing', [PriceBasicDetailController::class, 'storeBasicPricing']);
-
     /*Payment Scheme */
     Route::post('/payment-schemes', [PaymentSchemeController::class, 'storePaymentScheme']);
     Route::get('/get-payment-schemes', [PaymentSchemeController::class, 'getAllPaymentSchemes']);

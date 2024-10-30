@@ -23,14 +23,16 @@ const FloorPremiums = ({ propertyId }) => {
     const { floorPremiumFormData, setFloorPremiumFormData } =
         useFloorPremiumStateContext();
     const modalRef = useRef(null);
-    const [newFloor, setNewFloor] = useState(0);
- 
+    const [newFloor, setNewFloor] = useState("");
+    const [newPremiumCost, setNewPremiumCost] = useState("");
+
     //Hooks
+    /**
+     * This hooks retrieves the floor data associated with the specified tower phase ID. It checks if the data already exists in the propertyFloors state; if it does, it initializes the floor premium form data with the necessary structure. If the data is not available, it resets the form data and initiates a fetch request to obtain the floor information. This ensures that the component has the most up-to-date floor data while maintaining the appropriate structure for further processing.
+     */
     useEffect(() => {
         if (!towerPhaseId) return;
         setTowerPhaseId(towerPhaseId);
-        console.log("propertyFloors", propertyFloors);
-        console.log("towerPhaseId", towerPhaseId);
 
         // Function to fetch floor data
         const fetchFloorData = async () => {
@@ -41,6 +43,7 @@ const FloorPremiums = ({ propertyId }) => {
                 [towerPhaseId]: response,
             }));
         };
+
         // Fetch or use existing floor data
         if (
             propertyFloors &&
@@ -66,7 +69,7 @@ const FloorPremiums = ({ propertyId }) => {
             // Reset form data if propertyFloors is not available
             setFloorPremiumFormData((prevData) => ({
                 ...prevData,
-                floor: [], // Reset to an empty array to ensure no value is rendered
+                floor: [],
             }));
             fetchFloorData(); // Fetch data if it's not already available
         }
@@ -75,17 +78,23 @@ const FloorPremiums = ({ propertyId }) => {
         propertyFloors,
         setFloorPremiumFormData,
         getPropertyFloors,
-    ]); // Only set the floor if floors are available
+    ]);
 
     //Event handler
+    /**
+     * Handle to open modal to assign floor premiums
+     */
     const handleOpenModal = (floor) => {
         setSelectedFloor(floor);
         setTowerPhaseId(towerPhaseId);
         if (modalRef.current) {
             modalRef.current.showModal();
         }
-    }; //Handle to open modal to assign floor premiums
+    }; 
 
+    /*
+    Handle to input floor premiums data(e.g premium cost)
+    */
     const handleOnChange = (index, e) => {
         const { name, type, checked, value } = e.target;
 
@@ -101,30 +110,66 @@ const FloorPremiums = ({ propertyId }) => {
                 floor: updatedFloors, // Update the floors in the context
             };
         });
-    }; //Handle to input floor premiums data(e.g premium cost)
+    };
 
+    /*
+     Handling changes for adding  new floor
+    */
+    function handleNewFloorChange(e) {
+        const { name, value } = e.target;
+        if (name === "newFloor") {
+            setNewFloor(value);
+        } else if (name === "premiumCost") {
+            setNewPremiumCost(value);
+        }
+    }
+
+    /*
+    Handling the button click for adding a new floor 
+    */
     const handleAddNewFloor = () => {
-        console.log("propertyFloors", JSON.stringify(propertyFloors));
-        if (propertyFloors[towerPhaseId]["count"] == 0) {
+        // Check if propertyFloors and towerPhaseId are defined before accessing them
+        if (
+            propertyFloors[towerPhaseId] &&
+            propertyFloors[towerPhaseId]["count"] === 0
+        ) {
             alert(
                 "You cannot add a floor until you upload an Excel file first."
             );
             return;
         }
-        if (newFloor) {
-             const newFloorIsExist = propertyFloors.filter(
-                 (header) => !newFloor.includes(header)
-             );
-            console.log("118", newFloorIsExist);
-        }
-       
-    }; // Handling the button click for adding a new floor
 
-    const handleNewFloorChange = (e) => {
-        const { name, value } = e.target;
-        console.log('1',name,value)
-       // setNewFloor(value);
-    }; // Handling changes for adding a new floor
+        if (newFloor && newPremiumCost) {
+            // Check if the new floor already exists in the form data
+            const newFloorIsExist = floorPremiumFormData.floor.some(
+                (floorData) => parseInt(floorData.floor) === parseInt(newFloor)
+            );
+            if (newFloorIsExist) {
+                alert("This floor already exists.");
+                return;
+            }
+
+            // Add the new floor and premium cost to the floorPremiumFormData
+            setFloorPremiumFormData((prevData) => ({
+                ...prevData,
+                floor: [
+                    ...prevData.floor,
+                    {
+                        floor: parseInt(newFloor),
+                        premiumCost: parseInt(newPremiumCost),
+                        luckyNumber: "",
+                        excludedUnits: [],
+                    },
+                ],
+            }));
+
+            //Reset inputs after adding
+            setNewFloor("");
+            setNewPremiumCost("");
+        } else {
+            alert("Please fill in both floor and premium cost.");
+        }
+    };
 
     return (
         <>
@@ -186,9 +231,10 @@ const FloorPremiums = ({ propertyId }) => {
                                     Floor
                                 </span>
                                 <input
+                                    onChange={handleNewFloorChange}
                                     type="number"
-                                    name="addFloor"
-                                    id="addFloor"
+                                    name="newFloor"
+                                    value={newFloor}
                                     className="outline-none  -mr-3 pl-3 py-1 bg-custom-grayFA text-custom-gray81 w-full "
                                 />
                                 {/* <div className="relative w-full">
@@ -216,11 +262,11 @@ const FloorPremiums = ({ propertyId }) => {
                                 </span>
                                 <input
                                     onChange={handleNewFloorChange}
-                                    name="basePrice"
+                                    name="premiumCost"
                                     type="number"
-                                    className="w-full px-4 focus:outline-none"
+                                    className="w-full px-4 focus:outline-none "
                                     placeholder=""
-                                    value={newFloor}
+                                    value={newPremiumCost}
                                 />
                             </div>
                             <div>
