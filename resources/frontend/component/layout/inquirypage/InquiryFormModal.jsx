@@ -617,6 +617,9 @@ const InquiryFormModal = ({ modalRef }) => {
                                     <option value="Commissions">
                                         Commissions
                                     </option>
+                                    <option value="Leasing">
+                                        Leasing
+                                    </option>
                                     <option value="Other Concerns">
                                         Other Concerns
                                     </option>
