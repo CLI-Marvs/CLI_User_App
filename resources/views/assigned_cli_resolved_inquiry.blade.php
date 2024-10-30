@@ -125,7 +125,7 @@
 <body style="font-family: Arial, sans-serif; font-size: 14px; color: #333; line-height: 1.6; padding: 10px;">
     <div class="container">
         <h1>Hi {{ $assignee_name }},</h1>
-        <p>An inquiry ticket that is assigned to you is marked as resolved by {{ $admin_name }}.
+        <p>An feedback ticket that is assigned to you is marked as resolved by {{ $admin_name }}.
         </p>
         <p><strong>Ticket info:</strong></p>
         <ul style="list-style-type: none; padding: 0;">
@@ -133,10 +133,14 @@
             <li><strong>Concern: </strong> {{ $details_concern }}</li>
             <li><strong>From:</strong> {{ ucwords($buyer_name) }}</li>
         </ul>
-        <div class="footer">
+        {{-- <div class="footer">
             Best regards,
-            CLI SuperApp Admin
-        </div>
+            Cebu Landmasters, Inc.
+        </div> --}}
+
+        <p style="font-size: 16px; margin-top:10px;"><strong>Best Regards, </strong> </p>
+        <p style=""> Cebu Landmasters, Inc. </p>
+        {{-- <p style="font-weight: bold;">CLI - {{$department}}</p> --}}
     </div>
 </body>
 
