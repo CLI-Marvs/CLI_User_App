@@ -24,6 +24,9 @@
 @vite('resources/css/app.css')
 
 <body>
+  
+    <div id="root"></div>
+
     @viteReactRefresh
     @vite('resources/frontend/app.js')
     @vite('resources/js/bootstrap.js')
