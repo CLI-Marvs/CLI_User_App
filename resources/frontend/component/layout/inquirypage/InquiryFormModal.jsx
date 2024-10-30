@@ -36,6 +36,8 @@ const InquiryFormModal = ({ modalRef }) => {
     const [errors, setErrors] = useState({});
     const { propertyNamesList } = useStateContext();
     const [specificInputErrors, setSpecificInputErrors] = useState({});
+    
+    
     const handleFileChange = (event) => {
         const selectedFiles = Array.from(event.target.files);
         const fileNames = selectedFiles.map((file) =>
@@ -45,7 +47,9 @@ const InquiryFormModal = ({ modalRef }) => {
                       .pop()}`
                 : file.name
         );
-        setFileName(fileNames);
+        
+        /* setFileName(fileNames); */
+        setFileName((prevFiles) => [...prevFiles, ...fileNames]);
         setFiles(selectedFiles);
     };
 
@@ -101,10 +105,10 @@ const InquiryFormModal = ({ modalRef }) => {
         }
     };
     const handleCheckboxChange = (event) => {
-        setIsChecked(event.target.checked); 
+        setIsChecked(event.target.checked);
         setFormData((prevData) => ({
             ...prevData,
-            mname: isChecked ? "" : prevData.mname,
+            mname: isChecked ? "" : "",
         }));
         // setHasErrors(false);
         setResetSuccess(true);
@@ -154,55 +158,59 @@ const InquiryFormModal = ({ modalRef }) => {
             isOtherUserTypeValid = other_user_type.trim().length > 0;
         }
 
-             if (files && files.length > 0) {
-                 const validFile = [
-                     "pdf",
-                     "png",
-                     "bmp",
-                     "jpg",
-                     "jpeg",
-                     "xls",
-                     "xlsx",
-                     "xlsm",
-                     "xml",
-                     "csv",
-                     "doc",
-                     "docx",
-                     "mp4",
-                     "plain", //handle for .txt file extension
-                 ];
-                 const extension = files[0].type;
-                 console.log("extension", extension);
-                 let modifiedExtension = extension.split("/")[1]; //from application/pdf to pdf
-                 // Special handling for .docx MIME type
-                 if (
-                     extension ===
-                     "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                 ) {
-                     modifiedExtension = "docx"; // Set extension to docx for validation
-                 } else if (extension === "application/msword") {
-                     modifiedExtension = "doc";
-                 } else if (
-                     extension ===
-                     "application/vnd.ms-excel.sheet.macroEnabled.12"
-                 ) {
-                     modifiedExtension = "xlsm";
-                 } else if (extension === "application/vnd.ms-excel") {
-                     modifiedExtension = "xls";
-                 } else if (extension === "application/x-zip-compressed") {
-                     alert("Zip is not allowed.");
-                     setLoading(false);
-                     return;
-                 }
+        if (files && files.length > 0) {
+            const validFile = [
+                "pdf",
+                "png",
+                "bmp",
+                "jpg",
+                "jpeg",
+                "xls",
+                "xlsx",
+                "xlsm",
+                "xml",
+                "csv",
+                "doc",
+                "docx",
+                "mp4",
+                "plain", //handle for .txt file extension
+            ];
+            const extension = files[0].type;
+            console.log("extension", extension);
+            let modifiedExtension = extension.split("/")[1]; //from application/pdf to pdf
+            // Special handling for .docx MIME type
+            if (
+                extension ===
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            ) {
+                modifiedExtension = "docx"; // Set extension to docx for validation
+            } else if (extension === "application/msword") {
+                modifiedExtension = "doc";
+            } else if (
+                extension === "application/vnd.ms-excel.sheet.macroEnabled.12"
+            ) {
+                modifiedExtension = "xlsm";
+            } else if (extension === "application/vnd.ms-excel") {
+                modifiedExtension = "xls";
+            } else if (
+                extension ===
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            ) {
+                modifiedExtension = "xlsx";
+            } else if (extension === "application/x-zip-compressed") {
+                alert("Zip is not allowed.");
+                setLoading(false);
+                return;
+            }
 
-                 const isFileValid = validFile.includes(modifiedExtension);
+            const isFileValid = validFile.includes(modifiedExtension);
 
-                 if (!isFileValid) {
-                     alert(`${modifiedExtension} is not allowed.`);
-                     setLoading(false);
-                     return;
-                 }
-             }
+            if (!isFileValid) {
+                alert(`${modifiedExtension} is not allowed.`);
+                setLoading(false);
+                return;
+            }
+        }
         if (
             isFormDataValid &&
             isTextareaValid &&
@@ -388,7 +396,7 @@ const InquiryFormModal = ({ modalRef }) => {
                                 // }`}
                                 className={`flex relative items-center border w-[430px] rounded-[5px] overflow-hidden ${
                                     isSubmitted && !formData.mname && !isChecked
-                                        ? "border-red-500" 
+                                        ? "border-red-500"
                                         : "border-custom-bluegreen"
                                 }`}
                             >
