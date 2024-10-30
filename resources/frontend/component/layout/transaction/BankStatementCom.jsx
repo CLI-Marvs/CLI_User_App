@@ -12,6 +12,7 @@ import DataMatchTable from "./DataMatchTable";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import apiServiceSap from "../../servicesApi/apiServiceSap";
+import { data } from "autoprefixer";
 
 const BankStatementCom = () => {
     const {
@@ -83,6 +84,7 @@ const BankStatementCom = () => {
         }
     };
 
+    console.log("datamatches", matchesData);
     const handleSubmitSap = async () => {
         setLoading(true);
         try {
@@ -101,6 +103,7 @@ const BankStatementCom = () => {
                                 <Belnr>${item.BELNR}</Belnr>
                                 <Amt>${item.AMT}</Amt>
                                 <Payd>${item.PAYD}</Payd>
+                                <InvId>${item.INVID}</InvId>
                              </item>
                           </LtZcol>
                        </urn:ZdataWarehousePosted>
@@ -131,7 +134,13 @@ const BankStatementCom = () => {
                 "Error:",
                 error.response ? error.response.data : error.message
             );
+             if (modalRef.current) {
+                modalRef.current.close();
+            }
             setLoading(false);
+            toast.error("Sometine went wrong. Please refresh the page");
+            
+
         }
     };
 
@@ -297,68 +306,76 @@ const BankStatementCom = () => {
                                 Document Number
                             </th>
 
-                            <th className=" px-4 border border-gray-500">
+                            {/*  <th className=" px-4 border border-gray-500">
                                 Invoice Link
-                            </th>
+                            </th> */}
                             <th className=" px-4 border border-gray-500">
                                 Collection Receipt Link
                             </th>
                         </tr>
                     </thead>
                     <tbody>
-                        {transactions.length > 0 &&
-                            transactions.map((item, index) => (
-                                <tr key={index}>
-                                    <td className=" px-4 border border-gray-500">
-                                        {item.transaction_date}
-                                    </td>
-                                    <td className=" px-4 border border-gray-500">
-                                        {item.bank_name}
-                                    </td>
-                                    <td className=" px-4 border border-gray-500">
-                                        {item.payment_channel}
-                                    </td>
-                                    <td className=" px-4 border border-gray-500">
-                                        {item.payor_name}
-                                    </td>
-                                    <td className=" px-4 border border-gray-500">
-                                        {item.reference_number}
-                                    </td>
-                                    <td className=" px-4 border border-gray-500">
-                                        {item.status === "not_posted"
-                                            ? "Not Posted"
-                                            : "Posted"}
-                                    </td>
-                                    <td className=" px-4 border border-gray-500">
-                                        {item.invoice_amount
-                                            ? new Intl.NumberFormat("en-US", {
-                                                  style: "decimal",
-                                                  minimumFractionDigits: 2,
-                                              }).format(item.invoice_amount)
-                                            : null}
-                                    </td>
-                                    <td className=" px-4 border border-gray-500">
-                                        {item.document_number}
-                                    </td>
-                                    <td className=" px-4 border border-gray-500">
-                                        {item.invoice_link}
-                                    </td>
-                                    <td className="px-4 border border-gray-500">
-                                        {item.collection_receipt_link ? (
-                                            <a
-                                                href={
-                                                    item.collection_receipt_link
-                                                }
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="cursor-pointer underline"
-                                            >
-                                                View Document
-                                            </a>
-                                        ) : null}
-                                    </td>
-                                </tr>
-                            ))}
+                        {transactions.length > 0 ? (
+                          transactions.map((item, index) => (
+                            <tr key={index}>
+                            <td className=" px-4 border border-gray-500">
+                                {item.transaction_date}
+                            </td>
+                            <td className=" px-4 border border-gray-500">
+                                {item.bank_name}
+                            </td>
+                            <td className=" px-4 border border-gray-500">
+                                {item.payment_channel}
+                            </td>
+                            <td className=" px-4 border border-gray-500">
+                                {item.payor_name}
+                            </td>
+                            <td className=" px-4 border border-gray-500">
+                                {item.reference_number}
+                            </td>
+                            <td className=" px-4 border border-gray-500">
+                                {item.status === "not_posted"
+                                    ? "Not Posted"
+                                    : "Posted"}
+                            </td>
+                            <td className=" px-4 border border-gray-500">
+                                {item.invoice_amount
+                                    ? new Intl.NumberFormat("en-US", {
+                                          style: "decimal",
+                                          minimumFractionDigits: 2,
+                                      }).format(item.invoice_amount)
+                                    : null}
+                            </td>
+                            <td className=" px-4 border border-gray-500">
+                                {item.document_number}
+                            </td>
+                            {/*  <td className=" px-4 border border-gray-500">
+                               {item.invoice_link}
+                           </td> */}
+                            <td className="px-4 border border-gray-500">
+                                {item.collection_receipt_link ? (
+                                    <a
+                                        href={item.collection_receipt_link}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="cursor-pointer underline"
+                                    >
+                                        View Document
+                                    </a>
+                                ) : null}
+                            </td>
+                        </tr>
+                          ))
+                        ) : (
+                            <tr>
+                                <td
+                                    className="text-md px-4 py-2 text-center"
+                                    colSpan={9}
+                                >
+                                    No data to show
+                                </td>
+                            </tr>
+                        )}
                     </tbody>
                 </table>
 

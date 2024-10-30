@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from "react";
+import apiService from "../../../servicesApi/apiService";
+import CircularProgress from "@mui/material/CircularProgress";
 
 import { useStateContext } from "../../../../context/contextprovider";
 const FileViewer = () => {
     //State
     const [fileUrlPath, setFileUrlPath] = useState(null);
+    const [loading, setLoading] = useState(false);
     const { token } = useStateContext();
     const [imageDimensions, setImageDimensions] = useState({
         width: 0,
@@ -33,6 +36,7 @@ const FileViewer = () => {
         );
     }
 
+    //Event Handlers
     /**
      * Prevent the default context menu or the inspect element from appearing
      */
@@ -87,6 +91,7 @@ const FileViewer = () => {
     const concernsPathIndex =
         fileUrlPath.indexOf("concerns/") + "concerns/".length;
     const fullFilePath = fileUrlPath.slice(concernsPathIndex);
+
     // Get the full URL and determine the extension
     const fileName = fullFilePath.split("?")[0];
     const fileExtension = fileName.split(".").pop().toLowerCase();
@@ -106,9 +111,47 @@ const FileViewer = () => {
         // Update the state with the dimensions of the loaded image
         setImageDimensions({ width, height });
     };
+
+    /**
+     * Function to handle download of the file from the google
+     */
+    const handleDownloadFile = async (fileName) => {
+        try {
+            setLoading(true);
+            //Set responseType to 'blob' to receive the file as a binary blob
+            const response = await apiService.post(
+                "download-file",
+                { fileUrlPath: fileName },
+                { responseType: "blob" }
+            );
+            // Convert the response data to a blob
+            const blob = new Blob([response.data], {
+                type: response.headers["content-type"],
+            });
+            const url = window.URL.createObjectURL(blob);
+
+            // Create a link element and trigger a download
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = fileName; // Use the actual file name here
+            link.click();
+
+            // Clean up URL object
+            window.URL.revokeObjectURL(url);
+        } catch (error) {
+            console.log("Error in downloading file", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
-        <div onContextMenu={handleContextMenu} className="bg-black">
+        <div
+            onContextMenu={handleContextMenu}
+            className={`${fileExtension === "txt" ? "bg-white" : "bg-black"}`}
+        >
             {fileExtension === "jpg" ||
+            fileExtension === "bmp" ||
             fileExtension === "png" ||
             fileExtension === "jpeg" ? (
                 <div className="flex items-center justify-center min-h-screen">
@@ -128,26 +171,55 @@ const FileViewer = () => {
                         }
                     />
                 </div>
-            ) : fileExtension === "pdf" ? (
+            ) : fileExtension === "pdf" || fileExtension === "txt" ? (
                 <iframe
                     onContextMenu={(e) => e.preventDefault()}
                     src={fileUrlPath}
                     width="100%"
                     className="min-h-screen "
                 ></iframe>
-            ) : fileExtension === "xlsx" ||
-              fileExtension === "xls" ||
+            ) : fileExtension === "xls" ||
+              fileExtension === "xlsx" ||
               fileExtension === "xlsm" ||
-              fileExtension === ".xml" ? (
-                <div className="flex items-center justify-center min-h-screen">
-                    <a href={fileUrlPath} download>
-                        Download Excel File
-                    </a>
+              fileExtension === "xml" ||
+              fileExtension === "doc" ||
+              fileExtension === "docx" ||
+              fileExtension === "csv" ? (
+                <div className="flex flex-col items-center justify-center min-h-screen text-white">
+                    <p>Only images, text documents and pdf are viewable.</p>
+                    <button
+                        onClick={() => handleDownloadFile(fileName)}
+                        disabled={loading}
+                        type="submit"
+                        className={` mt-4 w-[133px] text-sm montserrat-semibold text-white h-[49px] rounded-[10px] gradient-btn2 flex justify-center items-center gap-2 tablet:w-full hover:shadow-custom4  ${
+                            loading ? "cursor-not-allowed" : ""
+                        }`}
+                    >
+                        {loading ? (
+                            <CircularProgress className="spinnerSize" />
+                        ) : (
+                            <>Download File</>
+                        )}
+                    </button>
                 </div>
             ) : (
-                <a href={fileUrlPath} target="_blank" rel="noopener noreferrer">
-                    Download File
-                </a>
+                <div className="flex flex-col items-center justify-center min-h-screen text-white">
+                    <p>Only images, text documents and pdf are viewable.</p>
+                    <button
+                        onClick={() => handleDownloadFile(fileName)}
+                        disabled={loading}
+                        type="submit"
+                        className={` mt-4 w-[133px] text-sm montserrat-semibold text-white h-[49px] rounded-[10px] gradient-btn2 flex justify-center items-center gap-2 tablet:w-full hover:shadow-custom4  ${
+                            loading ? "cursor-not-allowed" : ""
+                        }`}
+                    >
+                        {loading ? (
+                            <CircularProgress className="spinnerSize" />
+                        ) : (
+                            <>Download File</>
+                        )}
+                    </button>
+                </div>
             )}
         </div>
     );

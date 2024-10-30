@@ -47,7 +47,7 @@ const UserMessages = ({ items }) => {
             </div>
             <div className="w-full mt-[10px]">
                 <div className="w-full h-auto gradient-background1 rounded-b-[10px] rounded-r-[10px]  p-[20px] pl-[31px] text-xs text-white">
-                    <div>
+                    <div className="break-words whitespace-pre-wrap">
                         <p
                             dangerouslySetInnerHTML={{
                                 __html: items.details_message,
@@ -57,7 +57,6 @@ const UserMessages = ({ items }) => {
                     {Array.isArray(attachmentData) &&
                         attachmentData.length > 0 &&
                         attachmentData.map((attachment, index) => {
-                        
                             const fileName = attachment?.original_file_name;
                             if (!fileName) {
                                 // If fileName is undefined or null, return a fallback UI or nothing
@@ -87,6 +86,7 @@ const UserMessages = ({ items }) => {
                                                 "fileUrlPath",
                                                 JSON.stringify(attachment.url)
                                             );
+                                            console.log("attachment", attachment.url)
                                             window.open(
                                                 `/file-viewer/attachment/${items.id}`,
                                                 "_blank"

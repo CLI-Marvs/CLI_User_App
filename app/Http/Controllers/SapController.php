@@ -16,8 +16,9 @@ class SapController extends Controller
 {
     public function postDateToSap(Request $request)
     {
+       try {
         $client = new Client();
-        $response = $client->post('https://SAP-DEV.cebulandmasters.com:44304/sap/bc/srt/rfc/sap/zdevinvoice/200/zdevinvoice/zdevinvoice', [
+        $response = $client->post('https://SAP-DEV.cebulandmasters.com:44304/sap/bc/srt/rfc/sap/zdevginvoice/200/zdevginvoice/zdevginvoice', [
             'headers' => [
                 'Authorization' => 'Basic ' . base64_encode('KBELMONTE:Tomorrowbytogether2019!'),
                 'Content-Type' => 'application/soap+xml',
@@ -25,6 +26,14 @@ class SapController extends Controller
             'body' => $request->getContent(),
             'timeout' => 14400,
         ]);
+       } catch (\Throwable $th) {
+        \Log::error('SAP Request Error: ', [
+            'error' => $e->getMessage(),
+            'response' => $e->getResponse() ? $e->getResponse()->getBody()->getContents() : 'No response'
+        ]);
+        return response()->json(['error' => 'SAP Server Error'], 500);
+       }
+        
         /*  Tomorrowbytogether2019 */
     }
 
@@ -33,7 +42,7 @@ class SapController extends Controller
     {
         $client = new Client();
         try {
-            $response = $client->post('https://SAP-DEV.cebulandmasters.com:44304/sap/bc/srt/rfc/sap/zdevcoll/200/zdevcoll/zdevcoll', [
+            $response = $client->post('https://SAP-DEV.cebulandmasters.com:44304/sap/bc/srt/rfc/sap/zdevposcol/200/zdevposcol/zdevposcol', [
                 'headers' => [
                     'Authorization' => 'Basic ' . base64_encode('KBELMONTE:Tomorrowbytogether2019!'),
                     'Content-Type' => 'application/soap+xml',
@@ -79,7 +88,8 @@ class SapController extends Controller
             $existingInvoice = Invoices::where('document_number', $request->input('D_BELNR'))
                 ->where('flow_type', $request->input('D_VBEWA'))
                 ->first();
-
+            $attachment = $request->input('D_INVDOC');
+            $fileLink = $this->uploadToFile($attachment);
             if (!$existingInvoice) {
                 $invoice = new Invoices();
                 $invoice->contract_number = $request->input('D_RECNNR');
@@ -96,6 +106,7 @@ class SapController extends Controller
                 $invoice->customer_name = $request->input('D_NAME1');
                 $invoice->flow_type = $request->input('D_VBEWA');
                 $invoice->invoice_status = $request->input('D_STATS');
+                $invoice->invoice_link = $fileLink;
                 /*  $invoice->invoice_status = $request->input('invoice_status'); 
                 $invoice->status = $request->input('status');
                 $invoice->posting_response = $request->input('posting_response'); */
@@ -117,7 +128,7 @@ class SapController extends Controller
     {
         $query = Invoices::query();
         $dueDate = $request->query('dueDate', null);
-        $query->select('contract_number', 'customer_name', 'invoice_amount', 'description', 'due_date', 'document_number', 'invoice_status');
+        $query->select('contract_number', 'customer_name', 'invoice_amount', 'description', 'due_date', 'document_number', 'invoice_status', 'invoice_link');
         /*  if ($dueDate) {
             $this->filterDataInvoices($query, $dueDate);
         } */
@@ -359,9 +370,14 @@ class SapController extends Controller
             ]);
 
             $idRef = $request->input('ID');
+            $invoiceIdRef = $request->input('INVID');
             $attachment = $request->input('file'); 
             $fileLink = $this->uploadToFile($attachment);
             $transactionRef = BankTransaction::find($idRef);
+            $invoiceRef = Invoices::find($invoiceIdRef);
+
+            $invoiceRef->invoice_status = "Posted";
+            $invoiceRef->save();
 
             if (!$transactionRef) {
                 \Log::info('transaction not found');
@@ -431,6 +447,7 @@ class SapController extends Controller
                         'AMT' => $invoice->invoice_amount,
                         'D_NAME1' => $invoice->customer_name,
                         'PAYD' => "Cash",
+                        'INVID' => $invoice->id,
                     ];
                 }
             }

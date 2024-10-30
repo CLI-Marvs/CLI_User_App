@@ -36,6 +36,8 @@ const InquiryFormModal = ({ modalRef }) => {
     const [errors, setErrors] = useState({});
     const { propertyNamesList } = useStateContext();
     const [specificInputErrors, setSpecificInputErrors] = useState({});
+    
+    
     const handleFileChange = (event) => {
         const selectedFiles = Array.from(event.target.files);
         const fileNames = selectedFiles.map((file) =>
@@ -45,7 +47,9 @@ const InquiryFormModal = ({ modalRef }) => {
                       .pop()}`
                 : file.name
         );
-        setFileName(fileNames);
+        
+        /* setFileName(fileNames); */
+        setFileName((prevFiles) => [...prevFiles, ...fileNames]);
         setFiles(selectedFiles);
     };
 
@@ -61,8 +65,10 @@ const InquiryFormModal = ({ modalRef }) => {
             ? propertyNamesList
                   .filter((item) => !item.toLowerCase().includes("phase"))
                   .map((item) => {
-                    const formattedItem = formatFunc(item);
-                    return formattedItem === "Casamira South" ? "Casa Mira South" : formattedItem;
+                      const formattedItem = formatFunc(item);
+                      return formattedItem === "Casamira South"
+                          ? "Casa Mira South"
+                          : formattedItem;
                   })
                   .sort((a, b) => {
                       if (a === "N/A") return -1;
@@ -99,11 +105,14 @@ const InquiryFormModal = ({ modalRef }) => {
         }
     };
     const handleCheckboxChange = (event) => {
-        setIsChecked(event.target.checked); // Updates the state based on whether the checkbox is checked
-         setFormData((prevData) => ({
-             ...prevData,
-             mname: "",
-         }));
+        setIsChecked(event.target.checked);
+        setFormData((prevData) => ({
+            ...prevData,
+            mname: isChecked ? "" : "",
+        }));
+        // setHasErrors(false);
+        setResetSuccess(true);
+        setIsSubmitted(false);
     };
     const isTextareaValid = message.trim().length > 0;
 
@@ -147,6 +156,60 @@ const InquiryFormModal = ({ modalRef }) => {
         let isOtherUserTypeValid = true;
         if (user_type === "Others") {
             isOtherUserTypeValid = other_user_type.trim().length > 0;
+        }
+
+        if (files && files.length > 0) {
+            const validFile = [
+                "pdf",
+                "png",
+                "bmp",
+                "jpg",
+                "jpeg",
+                "xls",
+                "xlsx",
+                "xlsm",
+                "xml",
+                "csv",
+                "doc",
+                "docx",
+                "mp4",
+                "plain", //handle for .txt file extension
+            ];
+            const extension = files[0].type;
+            console.log("extension", extension);
+            let modifiedExtension = extension.split("/")[1]; //from application/pdf to pdf
+            // Special handling for .docx MIME type
+            if (
+                extension ===
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            ) {
+                modifiedExtension = "docx"; // Set extension to docx for validation
+            } else if (extension === "application/msword") {
+                modifiedExtension = "doc";
+            } else if (
+                extension === "application/vnd.ms-excel.sheet.macroEnabled.12"
+            ) {
+                modifiedExtension = "xlsm";
+            } else if (extension === "application/vnd.ms-excel") {
+                modifiedExtension = "xls";
+            } else if (
+                extension ===
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            ) {
+                modifiedExtension = "xlsx";
+            } else if (extension === "application/x-zip-compressed") {
+                alert("Zip is not allowed.");
+                setLoading(false);
+                return;
+            }
+
+            const isFileValid = validFile.includes(modifiedExtension);
+
+            if (!isFileValid) {
+                alert(`${modifiedExtension} is not allowed.`);
+                setLoading(false);
+                return;
+            }
         }
         if (
             isFormDataValid &&
@@ -227,6 +290,12 @@ const InquiryFormModal = ({ modalRef }) => {
             if (!isTextareaValid) {
                 setIsValid(false);
             }
+            if (!isChecked) {
+                //setIsValid(false);
+                setResetSuccess(false);
+                setHasErrors(false);
+            }
+            // console.log("(!isChecked", isChecked);
             console.log("Form validation failed");
         }
     };
@@ -318,11 +387,16 @@ const InquiryFormModal = ({ modalRef }) => {
                         </div>
                         <div className="flex items-center gap-[4px]">
                             <div
+                                // className={`flex relative items-center border w-[430px] rounded-[5px] overflow-hidden ${
+                                //     isSubmitted && !formData.mname
+                                //         ? resetSuccess
+                                //             ? "border-custom-bluegreen"
+                                //             : "border-red-500"
+                                //         : "border-custom-bluegreen"
+                                // }`}
                                 className={`flex relative items-center border w-[430px] rounded-[5px] overflow-hidden ${
-                                    isSubmitted && !formData.mname
-                                        ? resetSuccess
-                                            ? "border-custom-bluegreen"
-                                            : "border-red-500"
+                                    isSubmitted && !formData.mname && !isChecked
+                                        ? "border-red-500"
                                         : "border-custom-bluegreen"
                                 }`}
                             >

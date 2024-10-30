@@ -75,7 +75,7 @@ const InquiryThread = () => {
     }, []);
     const dataConcern =
         data?.find((items) => items.ticket_id === ticketId) || {};
-   
+
     const toggleFilterBox = () => {
         setIsFilterVisible((prev) => !prev);
     };
@@ -196,11 +196,64 @@ const InquiryThread = () => {
         const formData = new FormData();
 
         if (attachedFiles && attachedFiles.length > 0) {
+            const validFile = [
+                "pdf",
+                "png",
+                "bmp",
+                "jpg",
+                "jpeg",
+                "xls",
+                "xlsx",
+                "xlsm",
+                "xml",
+                "csv",
+                "doc",
+                "docx",
+                "mp4",
+                "plain", //handle for .txt file extension
+            ];
+            const extension = attachedFiles[0].type;
+            console.log("extension", extension);
+            let modifiedExtension = extension.split("/")[1]; //from application/pdf to pdf
+            // Special handling for .docx MIME type
+            if (
+                extension ===
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            ) {
+                modifiedExtension = "docx"; // Set extension to docx for validation
+            } else if (extension === "application/msword") {
+                modifiedExtension = "doc";
+            } else if (
+                extension === "application/vnd.ms-excel.sheet.macroEnabled.12"
+            ) {
+                modifiedExtension = "xlsm";
+            } else if (extension === "application/vnd.ms-excel") {
+                modifiedExtension = "xls";
+            } else if (
+                extension ===
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            ) {
+                modifiedExtension = "xlsx";
+            } else if (extension === "application/x-zip-compressed") {
+                alert("Zip is not allowed.");
+                setLoading(false);
+                return;
+            }
+
+            const isFileValid = validFile.includes(modifiedExtension);
+
+            if (!isFileValid) {
+                alert(`${modifiedExtension} is not allowed.`);
+                setLoading(false);
+                return;
+            }
+        }
+        if (attachedFiles && attachedFiles.length > 0) {
             attachedFiles.forEach((file) => {
                 formData.append("files[]", file);
             });
         }
-     
+
         const formattedMessage = chatMessage.replace(/\n/g, "<br>");
         formData.append("admin_email", user?.employee_email || "");
         formData.append("ticket_id", ticketId || "");
@@ -429,7 +482,7 @@ const InquiryThread = () => {
                                         </label>
                                         <input
                                             type="text"
-                                            className="w-full  border-b-1 outline-none text-sm"
+                                            className="w-full  border-b-1 outline-none text-sm px-[8px]"
                                             value={name}
                                             onChange={(e) =>
                                                 setName(e.target.value)
@@ -442,7 +495,7 @@ const InquiryThread = () => {
                                             Category
                                         </label>
                                         <select
-                                            className="w-full border-b-1 outline-none appearance-none text-sm"
+                                            className="w-full border-b-1 outline-none appearance-none text-sm px-[8px]"
                                             value={category}
                                             onChange={(e) =>
                                                 setCategory(e.target.value)
@@ -492,7 +545,7 @@ const InquiryThread = () => {
                                         </label>
                                         <input
                                             type="text"
-                                            className="w-full  border-b-1 outline-none text-sm"
+                                            className="w-full  border-b-1 outline-none text-sm px-[8px]"
                                             value={email}
                                             onChange={(e) =>
                                                 setEmail(e.target.value)
@@ -506,7 +559,7 @@ const InquiryThread = () => {
                                         </label>
                                         <input
                                             type="text"
-                                            className="w-full  border-b-1 outline-none text-sm"
+                                            className="w-full  border-b-1 outline-none text-sm px-[8px]"
                                             value={ticket}
                                             onChange={(e) =>
                                                 setTicket(e.target.value)
@@ -522,7 +575,7 @@ const InquiryThread = () => {
                                                 <DatePicker
                                                     selected={startDate}
                                                     onChange={handleDateChange}
-                                                    className="border-b-1 outline-none w-[146px] text-sm"
+                                                    className="border-b-1 outline-none w-[146px] text-sm px-[8px]"
                                                     calendarClassName="custom-calendar"
                                                 />
 
@@ -539,7 +592,7 @@ const InquiryThread = () => {
                                                 Property
                                             </label>
                                             <select
-                                                className="w-[179px] border-b-1 outline-none appearance-none text-sm"
+                                                className="w-[179px] border-b-1 outline-none appearance-none text-sm px-[8px]"
                                                 onChange={handleSelectProperty}
                                                 value={selectedProperty}
                                             >
@@ -600,8 +653,9 @@ const InquiryThread = () => {
                             <div className="flex-1 flex flex-wrap">
                                 <p className="space-x-1 text-custom-bluegreen">
                                     {dataConcern.property} (
-                                    {dataConcern.details_concern}){" "}
-                                    <span>-</span> {dataConcern.ticket_id}
+                                    {dataConcern.details_concern ??
+                                        dataConcern.email_subject}
+                                    ) <span>-</span> {dataConcern.ticket_id}
                                 </p>
                             </div>
                             {/*   {dataConcern.created_by &&
@@ -633,27 +687,57 @@ const InquiryThread = () => {
                                         {attachedFiles.length > 0 && (
                                             <div className="mb-2 ">
                                                 {attachedFiles.map(
-                                                    (file, index) => (
-                                                        <div
-                                                            key={index}
-                                                            className="flex items-center justify-between mb-2 p-2 border bg-white rounded"
-                                                        >
-                                                            <span className="text-sm text-gray-700">
-                                                                {file.name}
-                                                            </span>
-                                                            <button
-                                                                type="button"
-                                                                onClick={() =>
-                                                                    removeFile(
-                                                                        file.name
-                                                                    )
-                                                                }
-                                                                className="text-red-500"
+                                                    (file, index) => {
+                                                        const fileName =
+                                                            file.name;
+                                                        console.log(
+                                                            "123",
+                                                            fileName
+                                                        );
+                                                        const fileExtension =
+                                                            fileName.slice(
+                                                                fileName.lastIndexOf(
+                                                                    "."
+                                                                )
+                                                            );
+                                                        const baseName =
+                                                            fileName.slice(
+                                                                0,
+                                                                fileName.lastIndexOf(
+                                                                    "."
+                                                                )
+                                                            );
+                                                        const truncatedName =
+                                                            baseName.length > 30
+                                                                ? baseName.slice(
+                                                                      0,
+                                                                      30
+                                                                  ) + "..."
+                                                                : baseName;
+                                                        return (
+                                                            <div
+                                                                key={index}
+                                                                className="flex items-center justify-between mb-2 p-2 border bg-white rounded "
                                                             >
-                                                                Remove
-                                                            </button>
-                                                        </div>
-                                                    )
+                                                                <span className="text-sm text-gray-700">
+                                                                    {/* {file.name} */}
+                                                                    {truncatedName +
+                                                                        fileExtension}
+                                                                </span>
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() =>
+                                                                        removeFile(
+                                                                            file.name
+                                                                        )
+                                                                    }
+                                                                    className="text-red-500"
+                                                                >
+                                                                    Remove
+                                                                </button>
+                                                            </div>
+                                                        );
+                                                    }
                                                 )}
                                             </div>
                                         )}
@@ -901,7 +985,6 @@ const InquiryThread = () => {
                                                     <AdminMessages
                                                         items={item}
                                                         key={index}
-                                                       
                                                     />
                                                 )
                                         )}
