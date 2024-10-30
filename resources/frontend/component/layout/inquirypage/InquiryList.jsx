@@ -468,7 +468,7 @@ const InquiryList = () => {
                                                 </option>
                                                 <option
                                                     value="Reservation Documents"
-                                                    className="bg-red-900"
+                                                    className=""
                                                 >
                                                     Reservation Documents
                                                 </option>
