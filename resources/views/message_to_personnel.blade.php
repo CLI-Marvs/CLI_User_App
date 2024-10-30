@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html>
 
@@ -19,7 +18,7 @@
             font-style: normal;
         }
 
-       
+
 
         p {
             font-family: 'Barlow', sans-serif;
@@ -133,10 +132,10 @@
         <li><strong>From:</strong> {{ ucwords($data['buyer_name']) }}</li>
     </ul>
 
-    <p>Please review the concern in your Masters Admin Dashboard.</p>
+    <p>Please review the concern in your <span> <a href="https://admin-uat.cebulandmasters.com/">Masters Admin Dashboard.</a> </span> </p>
 
     <p>Thank you,<br>
-    <strong>Cebu Landmasters, Inc.</strong><br>
-  
+        <strong>Cebu Landmasters, Inc.</strong><br>
+
 
 </body>
