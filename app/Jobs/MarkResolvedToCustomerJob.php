@@ -18,10 +18,12 @@ class MarkResolvedToCustomerJob implements ShouldQueue
     protected $ticket_id;
     protected $buyer_lastname;
     protected $message_id;
+    protected $admin_name;
+    protected $department;
     /**
      * Create a new job instance.
      */
-    public function __construct($ticket_id, $email, $buyer_lastname, $message_id)
+    public function __construct($ticket_id, $email, $buyer_lastname, $message_id, $admin_name, $department)
     {
         $this->email = $email;
         //Ticket_id: Ticket#241234 remove the 'Ticket'
@@ -29,6 +31,9 @@ class MarkResolvedToCustomerJob implements ShouldQueue
         $this->ticket_id = $newTicketId;
         $this->buyer_lastname = $buyer_lastname;
         $this->message_id = $message_id;
+        $this->admin_name = $admin_name;
+        $this->department = $department;
+        
     }
 
     /**
@@ -36,9 +41,9 @@ class MarkResolvedToCustomerJob implements ShouldQueue
      */
     public function handle(Mailer $mailer): void
     {
-
+        // dd($this->ticket_id, $this->email, $this->buyer_lastname, $this->message_id, $this->admin_name, $this->department);
         $mailer->to($this->email)
-            ->send(new ResolvedTicketToCustomerMail($this->ticket_id, $this->email, $this->buyer_lastname, $this->message_id));
+            ->send(new ResolvedTicketToCustomerMail($this->ticket_id, $this->email, $this->buyer_lastname, $this->message_id, $this->admin_name, $this->department));
 
         /*  foreach ($this->files as $file) {
             @unlink($file['path']);
