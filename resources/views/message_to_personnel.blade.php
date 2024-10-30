@@ -126,7 +126,7 @@
 
     <p>Hi <strong>{{ ucwords($data['assignee_name']) }}</strong>,</p>
 
-    <p>You have been assigned a new concern ticket:</p>
+    <p>You have been assigned a new feedback ticket:</p>
     <ul style="list-style-type: none; padding: 0;">
         <li><strong>Ticket No:</strong> {{ $data['ticketId'] }}</li>
         <li><strong>Concern: </strong> {{ $data['details_concern'] }}</li>
@@ -136,7 +136,7 @@
     <p>Please review the concern in your Masters Admin Dashboard.</p>
 
     <p>Thank you,<br>
-    <strong>Cebu Landmasters Inc,</strong><br>
+    <strong>Cebu Landmasters, Inc.</strong><br>
   
 
 </body>
