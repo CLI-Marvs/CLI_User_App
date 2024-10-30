@@ -48,7 +48,6 @@ const InquiryList = () => {
     const { propertyNamesList } = useStateContext();
     const [activeDayButton, setActiveDayButton] = useState(null);
     const [assignedToMeActive, setAssignedToMeActive] = useState(false);
-
     const [startDate, setStartDate] = useState(null);
     const [isFilterVisible, setIsFilterVisible] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
@@ -81,6 +80,8 @@ const InquiryList = () => {
             setSpecificAssigneeCsr("");
             setAssignedToMeActive(false);
         }
+        setStartDate(null);
+
         if (specificAssigneeCsr !== "" && daysFilter !== null) {
             setSpecificAssigneeCsr("");
             setAssignedToMeActive(false);
@@ -218,13 +219,13 @@ const InquiryList = () => {
         "N/A",
         ...(Array.isArray(propertyNamesList) && propertyNamesList.length > 0
             ? propertyNamesList
-                .filter((item) => !item.toLowerCase().includes("phase"))
-                .map((item) => formatFunc(item))
-                .sort((a, b) => {
-                    if (a === "N/A") return -1;
-                    if (b === "N/A") return 1;
-                    return a.localeCompare(b);
-                })
+                  .filter((item) => !item.toLowerCase().includes("phase"))
+                  .map((item) => formatFunc(item))
+                  .sort((a, b) => {
+                      if (a === "N/A") return -1;
+                      if (b === "N/A") return 1;
+                      return a.localeCompare(b);
+                  })
             : []),
     ];
 
@@ -468,16 +469,18 @@ const InquiryList = () => {
                                                     setCategory(e.target.value)
                                                 }
                                             >
-                                               
-                                                <option value=" ">Select Category</option>
-                                                <option value="Reservation Documents" >
-                                                   Reservation Documents
+                                                <option value=" ">
+                                                    Select Category
+                                                </option>
+                                                <option value="Reservation Documents">
+                                                    Reservation Documents
                                                 </option>
                                                 <option value="Payment Issues">
                                                     Payment Issues
                                                 </option>
-                                                <option value="SOA/ Billing Statement/ Buyer's Ledger" >
-                                                    SOA/ Billing Statement/ Buyer's Ledger
+                                                <option value="SOA/ Billing Statement/ Buyer's Ledger">
+                                                    SOA/ Billing Statement/
+                                                    Buyer's Ledger
                                                 </option>
                                                 <option value="Turn Over Status">
                                                     Turn Over Status
@@ -489,7 +492,8 @@ const InquiryList = () => {
                                                     Loan Application
                                                 </option>
                                                 <option value="Title and Other Registration Documents">
-                                                    Title and Other Registration Documents
+                                                    Title and Other Registration
+                                                    Documents
                                                 </option>
                                                 <option value="Commissions">
                                                     Commissions
@@ -658,46 +662,51 @@ const InquiryList = () => {
                                 <div className="flex items-center space-x-2">
                                     {user?.department ===
                                         "Customer Relations - Services" && (
-                                            <button
-                                                onClick={handleAssignedToMeClick}
-                                                className={`flex items-center text-custom-lightgreen h-[25px] w-[125px] rounded-[55px] p-[2px] ${assignedToMeActive
+                                        <button
+                                            onClick={handleAssignedToMeClick}
+                                            className={`flex items-center text-custom-lightgreen h-[25px] w-[125px] rounded-[55px] p-[2px] ${
+                                                assignedToMeActive
+                                                    ? "bglightgreen-btn"
+                                                    : "gradient-btn2hover "
+                                            }`}
+                                        >
+                                            <p
+                                                className={`h-full w-full flex justify-center items-center text-xs montserrat-semibold rounded-[50px]   ${
+                                                    assignedToMeActive
                                                         ? "bglightgreen-btn"
-                                                        : "gradient-btn2hover "
-                                                    }`}
-                                            >
-                                                <p
-                                                    className={`h-full w-full flex justify-center items-center text-xs montserrat-semibold rounded-[50px]   ${assignedToMeActive
-                                                            ? "bglightgreen-btn"
-                                                            : "bg-white hover:bg-custom-lightestgreen"
-                                                        }
+                                                        : "bg-white hover:bg-custom-lightestgreen"
+                                                }
                                         `}
-                                                >
-                                                    Assigned to me
-                                                </p>
-                                            </button>
-                                        )}
+                                            >
+                                                Assigned to me
+                                            </p>
+                                        </button>
+                                    )}
                                     {dayButtonLabels.map((label) => (
                                         <button
                                             key={label}
                                             onClick={() =>
                                                 handleDayClick(label)
                                             }
-                                            className={`flex justify-center items-center  text-custom-lightgreen h-[25px] rounded-[55px] p-[2px] ${activeDayButton === label
+                                            className={`flex justify-center items-center  text-custom-lightgreen h-[25px] rounded-[55px] p-[2px] ${
+                                                activeDayButton === label
                                                     ? "bglightgreen-btn hover:bg-custom-lightgreen"
                                                     : "gradient-btn2hover border-custom-lightgreen"
-                                                } hover:bg-custom-lightestgreen ${label === "3+ Days"
+                                            } hover:bg-custom-lightestgreen ${
+                                                label === "3+ Days"
                                                     ? "w-[76px]"
                                                     : label === "2 Days"
-                                                        ? "w-[69px]"
-                                                        : "w-[60px]"
-                                                }`}
+                                                    ? "w-[69px]"
+                                                    : "w-[60px]"
+                                            }`}
                                         >
                                             <p
                                                 className={`h-full w-full flex justify-center items-center text-xs montserrat-semibold rounded-[50px]
-                                            ${activeDayButton === label
-                                                        ? "bglightgreen-btn"
-                                                        : "bg-white hover:bg-custom-lightestgreen"
-                                                    }
+                                            ${
+                                                activeDayButton === label
+                                                    ? "bglightgreen-btn"
+                                                    : "bg-white hover:bg-custom-lightestgreen"
+                                            }
                                             `}
                                             >
                                                 {label}
