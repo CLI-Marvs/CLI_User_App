@@ -26,9 +26,6 @@ class AssignedCliResolvedInquiryNotification extends Mailable
      */
     public function __construct($employee_email, $assignee_name, $data)
     {
-        \Log::info('data', [
-            'data' => $data
-        ]);
         $this->employee_email = $employee_email;
         $this->assignee_name = $assignee_name;
         $this->data = $data;
