@@ -1485,7 +1485,7 @@ class ConcernController extends Controller
 
     public function markAsResolve(Request $request)
     {
-        //  dd($request);
+
         try {
             /*  dd($request->all()); */
             $assignees = $request->assignees;
@@ -1522,7 +1522,8 @@ class ConcernController extends Controller
 
             $this->inquiryResolveLogs($request);
             // ReplyFromAdminJob::dispatch($request->ticket_id, $buyerEmail, $request->remarks, $messageId, $allFiles, $admin_name, $buyer_lastname);
-            MarkResolvedToCustomerJob::dispatch($request->ticket_id, $buyerEmail, $buyer_lastname, $message_id);
+            // dd($request->ticket_id, $buyerEmail, $buyer_lastname, $message_id, $admin_name, $department);
+            MarkResolvedToCustomerJob::dispatch($request->ticket_id, $buyerEmail, $buyer_lastname, $message_id, $admin_name, $department);
         } catch (\Exception $e) {
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
         }

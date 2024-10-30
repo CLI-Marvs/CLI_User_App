@@ -18,15 +18,19 @@ class ResolvedTicketToCustomerMail extends Mailable
     protected $email;
     protected $message_id;
     protected $buyer_lastname;
+    protected $admin_name;
+    protected $department;
     /**
      * Create a new message instance.
      */
-    public function __construct($ticket_id, $email, $buyer_lastname,$message_id)
+    public function __construct($ticket_id, $email, $buyer_lastname,$message_id,$admin_name,$department)
     {
         $this->ticket_id = $ticket_id;
         $this->email = $email;  
         $this->message_id = $message_id;
         $this->buyer_lastname = $buyer_lastname;
+        $this->admin_name = $admin_name;
+        $this->department = $department;
     }
 
 
@@ -69,6 +73,8 @@ class ResolvedTicketToCustomerMail extends Mailable
             with: [
                 'buyer_lname' => $this->buyer_lastname,
                 'ticket_id' => $this->ticket_id,
+                'admin_name' => $this->admin_name,
+                'department' => $this->department
             ],
         );
     }

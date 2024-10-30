@@ -229,6 +229,11 @@ const InquiryThread = () => {
                 modifiedExtension = "xlsm";
             } else if (extension === "application/vnd.ms-excel") {
                 modifiedExtension = "xls";
+            } else if (
+                extension ===
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            ) {
+                modifiedExtension = "xlsx";
             } else if (extension === "application/x-zip-compressed") {
                 alert("Zip is not allowed.");
                 setLoading(false);
