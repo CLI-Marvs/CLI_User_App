@@ -27,15 +27,7 @@ class NotifyAssignedCliOfResolvedInquiryJob implements ShouldQueue
     }
     public function handle(Mailer $mailer)
     {
-        try {
-            $mailer->to($this->employee_email)
-                ->send(new AssignedCliResolvedInquiryNotification($this->employee_email, $this->assignee_name, $this->data));
-            // Log::info('Emails sent successfully', ['emails' => $this->email]);
-        } catch (\Exception $e) {
-            Log::error('Error in handle function of NotifyAssignedCliOfResolvedInquiryJob', [
-                'error' => $e->getMessage(),
-                'stack' => $e->getTraceAsString(),
-            ]);
-        }
+        $mailer->to($this->employee_email)
+        ->send(new AssignedCliResolvedInquiryNotification($this->employee_email, $this->assignee_name, $this->data));
     }
 }
