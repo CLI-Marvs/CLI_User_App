@@ -86,6 +86,7 @@ const UserMessages = ({ items }) => {
                                                 "fileUrlPath",
                                                 JSON.stringify(attachment.url)
                                             );
+                                            console.log("attachment", attachment.url)
                                             window.open(
                                                 `/file-viewer/attachment/${items.id}`,
                                                 "_blank"
