@@ -130,7 +130,8 @@ const ReportPage = () => {
         department,
         setDepartment,
         dataSet,
-        fetchDataReport
+        fetchDataReport,
+        allEmployees
     } = useStateContext();
 
     const defaultData = [{ name: "No Data" }];
@@ -148,13 +149,22 @@ const ReportPage = () => {
 
     const chartHeight = dataProperty.length * (barHeight + 60);
 
-    const allDepartment = [
+    const allDepartment = allEmployees 
+    ? ["All", ...Array.from(new Set(allEmployees
+        .map((employee) => employee.department)
+        .filter((department) => department !== null && department !== undefined && department !== "PM")
+      ))]
+    : ["All"];
+  
+  
+  
+   /*  const allDepartment = [
         { key: "All", value: "All" },
         { key: "Customer Relations - Services", value: "Customer Relations - Services" },
         { key: "SALES", value: "Sales" },
         { key: "AP", value: "Ap Commission" },
         { key: "PM", value: "Property Management" },
-    ];
+    ]; */
 
 
     // const getCurrentMonth = () => {
@@ -200,6 +210,7 @@ const ReportPage = () => {
         setPropertyMonth(getCurrentMonth());
     }, []);
 
+    console.log("department", department);
 
     return (
         <div className="h-screen bg-custom-grayFA p-4">
@@ -222,8 +233,8 @@ const ReportPage = () => {
                                 >
                                     {user?.department === "Customer Relations - Services" ? (
                                         allDepartment.map((item, index) => (
-                                            <option key={index} value={item.key}>
-                                                {item.value}
+                                            <option key={index} value={item}>
+                                                {item}
                                             </option>
                                         ))
                                     ) : (
@@ -245,9 +256,9 @@ const ReportPage = () => {
                                    /*  value={department} */
                                     /* onChange={(e) => setDepartment(e.target.value)} */
                                 >
-                                        <option value="2023">
+                                       {/*  <option value="2023">
                                             2023
-                                        </option>
+                                        </option> */}
                                         <option value="2024">
                                             2024
                                         </option>
@@ -352,9 +363,9 @@ const ReportPage = () => {
                                     /*  value={department} */
                                         /* onChange={(e) => setDepartment(e.target.value)} */
                                     >
-                                            <option value="2023">
+                                           {/*  <option value="2023">
                                                 2023
-                                            </option>
+                                            </option> */}
                                             <option value="2024">
                                                 2024
                                             </option>
@@ -516,9 +527,9 @@ const ReportPage = () => {
                                     /*  value={department} */
                                         /* onChange={(e) => setDepartment(e.target.value)} */
                                     >
-                                            <option value="2023">
+                                            {/* <option value="2023">
                                                 2023
-                                            </option>
+                                            </option> */}
                                             <option value="2024">
                                                 2024
                                             </option>
