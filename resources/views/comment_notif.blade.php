@@ -130,7 +130,7 @@
     <p>
         If you have any further questions or need additional assistance, please don't hesitate to contact us.
     </p>
-    <p><strong>By</strong>{{ $commenter_name }}</p>
+    <p><strong style="margin-right: 5px;">By</strong>{{ $commenter_name }}</p>
     <p><strong>Comment:</strong> {{ $commenter_message }}</p>
 
 {{-- {!! $details_message !!} --}}
