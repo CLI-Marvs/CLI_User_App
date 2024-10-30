@@ -138,8 +138,8 @@
             Cebu Landmasters, Inc.
         </div> --}}
 
-        <p style="font-size: 16px; margin-top:10px;"><strong>Best Regards, </strong> </p>
-        <p style=""> Cebu Landmasters, Inc. </p>
+        <p style="font-size: 16px; margin-top:10px;">Best Regards,  </p>
+        <p style="font-weight: bold;"> Cebu Landmasters, Inc. </p>
         {{-- <p style="font-weight: bold;">CLI - {{$department}}</p> --}}
     </div>
 </body>
