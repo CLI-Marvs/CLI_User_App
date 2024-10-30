@@ -18,13 +18,15 @@ class MarkResolvedToCustomerJob implements ShouldQueue
     protected $ticket_id;
     protected $buyer_lastname;
     protected $message_id;
- /**
+    /**
      * Create a new job instance.
      */
     public function __construct($ticket_id, $email, $buyer_lastname, $message_id)
     {
         $this->email = $email;
-        $this->ticket_id = $ticket_id;
+        //Ticket_id: Ticket#241234 remove the 'Ticket'
+        $newTicketId = str_replace('Ticket', '', $ticket_id);
+        $this->ticket_id = $newTicketId;
         $this->buyer_lastname = $buyer_lastname;
         $this->message_id = $message_id;
     }
@@ -34,10 +36,11 @@ class MarkResolvedToCustomerJob implements ShouldQueue
      */
     public function handle(Mailer $mailer): void
     {
+
         $mailer->to($this->email)
             ->send(new ResolvedTicketToCustomerMail($this->ticket_id, $this->email, $this->buyer_lastname, $this->message_id));
 
-       /*  foreach ($this->files as $file) {
+        /*  foreach ($this->files as $file) {
             @unlink($file['path']);
         } */
     }
