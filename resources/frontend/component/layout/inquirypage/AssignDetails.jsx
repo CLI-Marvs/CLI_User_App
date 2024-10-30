@@ -10,7 +10,8 @@ const AssignDetails = ({ logMessages, ticketId }) => {
         setConcernMessages,
         concernMessages,
         setLogs,
-        logs,   
+        logs, 
+        assigneesPersonnel  
     } = useStateContext();
     const [message, setMessage] = useState("");
 
@@ -21,6 +22,8 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                     sender_id: user?.id,
                     ticketId: ticketId,
                     message,
+                    assignees: assigneesPersonnel[ticketId],
+                    admin_name: `${user?.firstname} ${user?.lastname}`
                 });
 
                 setMessage("");

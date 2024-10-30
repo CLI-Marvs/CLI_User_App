@@ -29,6 +29,7 @@ use App\Jobs\JobToPersonnelAssign;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use App\Events\InquiryAssignedLogs;
+use App\Jobs\CommentNotifJob;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
@@ -1501,18 +1502,20 @@ class ConcernController extends Controller
             $message_id = $request->message_id;
             $concerns->save();
 
-            foreach($assignees as $assignee) {
-                $data = [
-                    'ticket_id' => $request->ticket_id,
-                    'buyer_name' => $buyer_name,
-                    'admin_name' => $admin_name,
-                    'details_concern' => $details_concern
-                ];
-                NotifyAssignedCliOfResolvedInquiryJob::dispatch(
-                   $assignee['employee_email'],
-                   $assignee['name'],
-                   $data
-                );
+            if(!empty($assignees)) {
+                foreach($assignees as $assignee) {
+                    $data = [
+                        'ticket_id' => $request->ticket_id,
+                        'buyer_name' => $buyer_name,
+                        'admin_name' => $admin_name,
+                        'details_concern' => $details_concern
+                    ];
+                    NotifyAssignedCliOfResolvedInquiryJob::dispatch(
+                       $assignee['employee_email'],
+                       $assignee['name'],
+                       $data
+                    );
+                }
             }
 
             $this->inquiryResolveLogs($request);
@@ -1677,6 +1680,7 @@ class ConcernController extends Controller
     public function sendMessageConcerns(Request $request)
     {
         try {
+            $assigness = $request->assignees;
             $conversation = new Conversations();
             $conversation->sender_id = $request->sender_id;
             $conversation->ticket_id = $request->ticketId;
@@ -1685,6 +1689,7 @@ class ConcernController extends Controller
 
             $user = Employee::find($request->sender_id);
             $newTicketId = str_replace('#', '', $request->ticketId);
+            $ticketIdEmail = str_replace('Ticket#', '', $request->ticketId);
             $data = [
                 'message' => $conversation,
                 'firstname' => $user ? $user->firstname : 'Unknown User',
@@ -1692,6 +1697,17 @@ class ConcernController extends Controller
                 'ticketId' => $newTicketId,
             ];
 
+            $dataToComment = [
+                'ticket_id' => $ticketIdEmail,
+                'commenter_message' => $conversation->message,
+                'commenter_name' => $request->admin_name,
+
+            ];
+            if(!empty($assigness)) {
+                foreach($assigness as $assignee) {
+                    CommentNotifJob::dispatch($assignee['employee_email'], $assignee['name'], $dataToComment);
+                }
+            }
             ConcernMessages::dispatch($data);
 
             return response()->json('Successfully sent');
