@@ -48,7 +48,7 @@ class SendReplyFromAdmin extends Mailable
 
         return new Envelope(
             from: new Address('ask@cebulandmasters.com', 'Cebu Landmasters Inc.'),
-            subject: "[CLI Inquiry] Transaction {$this->ticket_id}",
+            subject: "[CLI Inquiry SML] Transaction {$this->ticket_id}",
         );
     }
 
