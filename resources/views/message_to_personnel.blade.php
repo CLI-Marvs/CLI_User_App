@@ -136,7 +136,7 @@
     <p>Please review the concern in your Masters Admin Dashboard.</p>
 
     <p>Thank you,<br>
-    <strong>CLI Super App Admin</strong><br>
+    <strong>Cebu Landmasters Inc,</strong><br>
   
 
 </body>
