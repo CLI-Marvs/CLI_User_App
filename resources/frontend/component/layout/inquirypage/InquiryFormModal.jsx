@@ -36,6 +36,8 @@ const InquiryFormModal = ({ modalRef }) => {
     const [errors, setErrors] = useState({});
     const { propertyNamesList } = useStateContext();
     const [specificInputErrors, setSpecificInputErrors] = useState({});
+    
+    
     const handleFileChange = (event) => {
         const selectedFiles = Array.from(event.target.files);
         const fileNames = selectedFiles.map((file) =>
@@ -45,7 +47,9 @@ const InquiryFormModal = ({ modalRef }) => {
                       .pop()}`
                 : file.name
         );
-        setFileName(fileNames);
+        
+        /* setFileName(fileNames); */
+        setFileName((prevFiles) => [...prevFiles, ...fileNames]);
         setFiles(selectedFiles);
     };
 
