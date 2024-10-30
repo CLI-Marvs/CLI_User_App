@@ -40,17 +40,31 @@ const InquiryFormModal = ({ modalRef }) => {
     
     const handleFileChange = (event) => {
         const selectedFiles = Array.from(event.target.files);
-        const fileNames = selectedFiles.map((file) =>
-            file.name.length > 15
-                ? `${file.name.substring(0, 12)}... .${file.name
-                      .split(".")
-                      .pop()}`
-                : file.name
-        );
-        
-        /* setFileName(fileNames); */
-        setFileName((prevFiles) => [...prevFiles, ...fileNames]);
-        setFiles(selectedFiles);
+    
+        setFiles((prevFiles) => {
+            const prevFileNames = prevFiles.map((file) => file.name);
+            
+            // Add only unique files
+            const uniqueFiles = selectedFiles.filter(
+                (file) => !prevFileNames.includes(file.name)
+            );
+    
+            return [...prevFiles, ...uniqueFiles];
+        });
+    
+        setFileName((prevFileNames) => {
+            const uniqueFileNames = selectedFiles
+                .map((file) =>
+                    file.name.length > 15
+                        ? `${file.name.substring(0, 12)}... .${file.name.split(".").pop()}`
+                        : file.name
+                )
+                .filter((name) => !prevFileNames.includes(name));
+    
+            return [...prevFileNames, ...uniqueFileNames];
+        });
+    
+        event.target.value = null;
     };
 
     const formatFunc = (name) => {
@@ -602,6 +616,9 @@ const InquiryFormModal = ({ modalRef }) => {
                                     </option>
                                     <option value="Commissions">
                                         Commissions
+                                    </option>
+                                    <option value="Leasing">
+                                        Leasing
                                     </option>
                                     <option value="Other Concerns">
                                         Other Concerns

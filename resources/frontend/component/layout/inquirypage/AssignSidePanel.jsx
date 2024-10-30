@@ -610,7 +610,7 @@ const AssignSidePanel = ({ ticketId }) => {
                             ticketId={ticketId}
                         />
                     </div>
-                    <div className="border border-t-1 border-custom-lightestgreen flex-shrink-0 mb-[160px] mt-[17px]"></div>
+                    <div className="border border-t-1 border-custom-lightestgreen flex-shrink-0"></div>
                 </div>
             </div>
             <div>
