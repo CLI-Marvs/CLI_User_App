@@ -477,7 +477,7 @@ const InquiryThread = () => {
                                         </label>
                                         <input
                                             type="text"
-                                            className="w-full  border-b-1 outline-none text-sm"
+                                            className="w-full  border-b-1 outline-none text-sm px-[8px]"
                                             value={name}
                                             onChange={(e) =>
                                                 setName(e.target.value)
@@ -490,7 +490,7 @@ const InquiryThread = () => {
                                             Category
                                         </label>
                                         <select
-                                            className="w-full border-b-1 outline-none appearance-none text-sm"
+                                            className="w-full border-b-1 outline-none appearance-none text-sm px-[8px]"
                                             value={category}
                                             onChange={(e) =>
                                                 setCategory(e.target.value)
@@ -540,7 +540,7 @@ const InquiryThread = () => {
                                         </label>
                                         <input
                                             type="text"
-                                            className="w-full  border-b-1 outline-none text-sm"
+                                            className="w-full  border-b-1 outline-none text-sm px-[8px]"
                                             value={email}
                                             onChange={(e) =>
                                                 setEmail(e.target.value)
@@ -554,7 +554,7 @@ const InquiryThread = () => {
                                         </label>
                                         <input
                                             type="text"
-                                            className="w-full  border-b-1 outline-none text-sm"
+                                            className="w-full  border-b-1 outline-none text-sm px-[8px]"
                                             value={ticket}
                                             onChange={(e) =>
                                                 setTicket(e.target.value)
@@ -570,7 +570,7 @@ const InquiryThread = () => {
                                                 <DatePicker
                                                     selected={startDate}
                                                     onChange={handleDateChange}
-                                                    className="border-b-1 outline-none w-[146px] text-sm"
+                                                    className="border-b-1 outline-none w-[146px] text-sm px-[8px]"
                                                     calendarClassName="custom-calendar"
                                                 />
 
@@ -587,7 +587,7 @@ const InquiryThread = () => {
                                                 Property
                                             </label>
                                             <select
-                                                className="w-[179px] border-b-1 outline-none appearance-none text-sm"
+                                                className="w-[179px] border-b-1 outline-none appearance-none text-sm px-[8px]"
                                                 onChange={handleSelectProperty}
                                                 value={selectedProperty}
                                             >

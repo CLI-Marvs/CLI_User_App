@@ -55,7 +55,12 @@ const InquiryList = () => {
     const [selectedOption, setSelectedOption] = useState("All");
     const [lastActivity, setLastActivity] = useState(null);
     const filterBoxRef = useRef(null);
+    const [isOpenSelect, setIsOpenSelect] = useState(false);
 
+    const handleSelect = (option) => {
+        onChange(option);
+        setIsOpenSelect(false);
+    };
     const handleCheckboxChange = () => {
         setHasAttachments(!hasAttachments);
     };
@@ -213,13 +218,13 @@ const InquiryList = () => {
         "N/A",
         ...(Array.isArray(propertyNamesList) && propertyNamesList.length > 0
             ? propertyNamesList
-                  .filter((item) => !item.toLowerCase().includes("phase"))
-                  .map((item) => formatFunc(item))
-                  .sort((a, b) => {
-                      if (a === "N/A") return -1;
-                      if (b === "N/A") return 1;
-                      return a.localeCompare(b);
-                  })
+                .filter((item) => !item.toLowerCase().includes("phase"))
+                .map((item) => formatFunc(item))
+                .sort((a, b) => {
+                    if (a === "N/A") return -1;
+                    if (b === "N/A") return 1;
+                    return a.localeCompare(b);
+                })
             : []),
     ];
 
@@ -396,7 +401,7 @@ const InquiryList = () => {
                                             onChange={(e) =>
                                                 setName(e.target.value)
                                             }
-                                            className="w-full  border-b-1 outline-none text-sm"
+                                            className="w-full  border-b-1 outline-none text-sm px-[8px]"
                                         />
                                     </div>
                                     <div className="flex relative">
@@ -457,27 +462,22 @@ const InquiryList = () => {
                                                 {""}
                                             </label>
                                             <select
-                                                className="w-full border-b-1 outline-none appearance-none text-sm absolute px-[4px]"
+                                                className="w-full border-b-1 outline-none appearance-none text-sm absolute px-[8px]"
                                                 value={category}
                                                 onChange={(e) =>
                                                     setCategory(e.target.value)
                                                 }
                                             >
-                                                <option value=" ">
-                                                    Select Category
-                                                </option>
-                                                <option
-                                                    value="Reservation Documents"
-                                                    className=""
-                                                >
-                                                    Reservation Documents
+                                               
+                                                <option value=" ">Select Category</option>
+                                                <option value="Reservation Documents" >
+                                                   Reservation Documents
                                                 </option>
                                                 <option value="Payment Issues">
                                                     Payment Issues
                                                 </option>
-                                                <option value="SOA/ Billing Statement/ Buyer's Ledger">
-                                                    SOA/ Billing Statement/
-                                                    Buyer's Ledger
+                                                <option value="SOA/ Billing Statement/ Buyer's Ledger" >
+                                                    SOA/ Billing Statement/ Buyer's Ledger
                                                 </option>
                                                 <option value="Turn Over Status">
                                                     Turn Over Status
@@ -489,8 +489,7 @@ const InquiryList = () => {
                                                     Loan Application
                                                 </option>
                                                 <option value="Title and Other Registration Documents">
-                                                    Title and Other Registration
-                                                    Documents
+                                                    Title and Other Registration Documents
                                                 </option>
                                                 <option value="Commissions">
                                                     Commissions
@@ -516,7 +515,7 @@ const InquiryList = () => {
                                             onChange={(e) =>
                                                 setEmail(e.target.value)
                                             }
-                                            className="w-full  border-b-1 outline-none text-sm"
+                                            className="w-full  border-b-1 outline-none text-sm px-[8px]"
                                         />
                                     </div>
                                     <div className="flex">
@@ -530,7 +529,7 @@ const InquiryList = () => {
                                             onChange={(e) =>
                                                 setTicket(e.target.value)
                                             }
-                                            className="w-full  border-b-1 outline-none text-sm"
+                                            className="w-full  border-b-1 outline-none text-sm px-[8px]"
                                         />
                                     </div>
                                     <div className="flex gap-3">
@@ -542,7 +541,7 @@ const InquiryList = () => {
                                                 <DatePicker
                                                     selected={startDate}
                                                     onChange={handleDateChange}
-                                                    className="border-b-1 outline-none w-[146px] text-sm"
+                                                    className="border-b-1 outline-none w-[146px] text-sm px-[8px]"
                                                     calendarClassName="custom-calendar"
                                                 />
 
@@ -559,7 +558,7 @@ const InquiryList = () => {
                                                 Property
                                             </label>
                                             <select
-                                                className="w-[220px] border-b-1 outline-none appearance-none text-sm px-[4px]"
+                                                className="w-[220px] border-b-1 outline-none appearance-none text-sm px-[8px]"
                                                 onChange={handleSelectProperty}
                                                 value={selectedProperty}
                                             >
@@ -659,51 +658,46 @@ const InquiryList = () => {
                                 <div className="flex items-center space-x-2">
                                     {user?.department ===
                                         "Customer Relations - Services" && (
-                                        <button
-                                            onClick={handleAssignedToMeClick}
-                                            className={`flex items-center text-custom-lightgreen h-[25px] w-[125px] rounded-[55px] p-[2px] ${
-                                                assignedToMeActive
-                                                    ? "bglightgreen-btn"
-                                                    : "gradient-btn2hover "
-                                            }`}
-                                        >
-                                            <p
-                                                className={`h-full w-full flex justify-center items-center text-xs montserrat-semibold rounded-[50px]   ${
-                                                    assignedToMeActive
+                                            <button
+                                                onClick={handleAssignedToMeClick}
+                                                className={`flex items-center text-custom-lightgreen h-[25px] w-[125px] rounded-[55px] p-[2px] ${assignedToMeActive
                                                         ? "bglightgreen-btn"
-                                                        : "bg-white hover:bg-custom-lightestgreen"
-                                                }
-                                        `}
+                                                        : "gradient-btn2hover "
+                                                    }`}
                                             >
-                                                Assigned to me
-                                            </p>
-                                        </button>
-                                    )}
+                                                <p
+                                                    className={`h-full w-full flex justify-center items-center text-xs montserrat-semibold rounded-[50px]   ${assignedToMeActive
+                                                            ? "bglightgreen-btn"
+                                                            : "bg-white hover:bg-custom-lightestgreen"
+                                                        }
+                                        `}
+                                                >
+                                                    Assigned to me
+                                                </p>
+                                            </button>
+                                        )}
                                     {dayButtonLabels.map((label) => (
                                         <button
                                             key={label}
                                             onClick={() =>
                                                 handleDayClick(label)
                                             }
-                                            className={`flex justify-center items-center  text-custom-lightgreen h-[25px] rounded-[55px] p-[2px] ${
-                                                activeDayButton === label
+                                            className={`flex justify-center items-center  text-custom-lightgreen h-[25px] rounded-[55px] p-[2px] ${activeDayButton === label
                                                     ? "bglightgreen-btn hover:bg-custom-lightgreen"
                                                     : "gradient-btn2hover border-custom-lightgreen"
-                                            } hover:bg-custom-lightestgreen ${
-                                                label === "3+ Days"
+                                                } hover:bg-custom-lightestgreen ${label === "3+ Days"
                                                     ? "w-[76px]"
                                                     : label === "2 Days"
-                                                    ? "w-[69px]"
-                                                    : "w-[60px]"
-                                            }`}
+                                                        ? "w-[69px]"
+                                                        : "w-[60px]"
+                                                }`}
                                         >
                                             <p
                                                 className={`h-full w-full flex justify-center items-center text-xs montserrat-semibold rounded-[50px]
-                                            ${
-                                                activeDayButton === label
-                                                    ? "bglightgreen-btn"
-                                                    : "bg-white hover:bg-custom-lightestgreen"
-                                            }
+                                            ${activeDayButton === label
+                                                        ? "bglightgreen-btn"
+                                                        : "bg-white hover:bg-custom-lightestgreen"
+                                                    }
                                             `}
                                             >
                                                 {label}
