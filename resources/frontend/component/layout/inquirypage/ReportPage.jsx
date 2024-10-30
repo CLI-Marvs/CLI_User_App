@@ -262,9 +262,9 @@ const ReportPage = () => {
                                         <option value="2024">
                                             2024
                                         </option>
-                                        <option value="2025">
+                                       {/*  <option value="2025">
                                             2025
-                                        </option>
+                                        </option> */}
                                 </select>
                                 <span className="absolute inset-y-0 right-0 flex items-center text-custom-gray81 pr-3 pl-3 bg-custom-grayFA pointer-events-none">
                                     <IoMdArrowDropdown />
@@ -369,9 +369,9 @@ const ReportPage = () => {
                                             <option value="2024">
                                                 2024
                                             </option>
-                                            <option value="2025">
+                                            {/* <option value="2025">
                                                 2025
-                                            </option>
+                                            </option> */}
                                     </select>
                                     <span className="absolute inset-y-0 right-0 flex items-center text-custom-gray81 pr-3 pl-3 bg-custom-grayFA pointer-events-none">
                                         <IoMdArrowDropdown />
@@ -533,9 +533,9 @@ const ReportPage = () => {
                                             <option value="2024">
                                                 2024
                                             </option>
-                                            <option value="2025">
+                                           {/*  <option value="2025">
                                                 2025
-                                            </option>
+                                            </option> */}
                                     </select>
                                     <span className="absolute inset-y-0 right-0 flex items-center text-custom-gray81 pr-3 pl-3 bg-custom-grayFA pointer-events-none">
                                         <IoMdArrowDropdown />

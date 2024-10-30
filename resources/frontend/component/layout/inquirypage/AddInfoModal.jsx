@@ -6,7 +6,7 @@ import { useStateContext } from "../../../context/contextprovider";
 
 const AddInfoModal = ({ modalRef, dataConcern }) => {
     const predefinedUserTypes = ["Property Owner", "Buyer", "Broker", "Seller"];
-    const { getAllConcerns } = useStateContext();
+    const { getAllConcerns, propertyNamesList } = useStateContext();
     const [message, setMessage] = useState("");
     const [dataToUpdate, setDataToUpdate] = useState({
         contract_number: dataConcern.contract_number || "",
@@ -26,54 +26,29 @@ const AddInfoModal = ({ modalRef, dataConcern }) => {
             : "",
     });
  
- 
-    const projectList = [
+    const formatFunc = (name) => {
+        return name
+            .toLowerCase()
+            .replace(/\b\w/g, (char) => char.toUpperCase());
+    };
+
+    const formattedPropertyNames = [
         "N/A",
-        "38 Park Avenue",
-        "Astra Centre",
-        "Asia Premiere",
-        "Base Line Center Phase 2",
-        "Baseline Center",
-        "Baseline Residences",
-        "Casa Mira Bacolod",
-        "Casa Mira Coast Sibulan",
-        "Casa Mira Homes Butuan",
-        "Casa Mira Iloilo Camalig",
-        "Casa Mira Linao",
-        "Casa Mira Towers CDO",
-        "Casa Mira Towers Guadalupe",
-        "Casa Mira Towers Labangon",
-        "Casa Mira Towers LPU Davao",
-        "Casa Mira Towers Mandaue",
-        "Casamira South",
-        "Calle 104",
-        "Casa Mira Dumaguete",
-        "Casa Mira Towers Bacolod",
-        "Casa Mira Towers Palawan",
-        "Costa Mira Beachtown",
-        "Costa Mira Beachtown Panglao",
-        "Latitude Corporate Center",
-        "Mesaverte Residences",
-        "Mesavirre Garden Residences",
-        "Midori Residences",
-        "Mivela Garden Residences",
-        "Mivesa Garden Residences",
-        "Mandtra Residences",
-        "Midori Plains",
-        "Mindara Residences",
-        "Patria De Cebu",
-        "Park Centrale Tower",
-        "San Jose Maria Village - Balamban",
-        "San Jose Maria Village - Minglanilla",
-        "San Jose Maria Village - Toledo",
-        "San Josemaria Village - Talisay",
-        "The East Village",
-        "Velmiro Greens Bohol",
-        "Velmiro Heights",
-        "Velmiro Heights Uptown",
-        "Velmiro Plains Bacolod",
-        "Villa Casita - Balamban",
-        "Villa Casita - Bogo",
+        ...(Array.isArray(propertyNamesList) && propertyNamesList.length > 0
+            ? propertyNamesList
+                  .filter((item) => !item.toLowerCase().includes("phase"))
+                  .map((item) => {
+                      const formattedItem = formatFunc(item);
+                      return formattedItem === "Casamira South"
+                          ? "Casa Mira South"
+                          : formattedItem;
+                  })
+                  .sort((a, b) => {
+                      if (a === "N/A") return -1;
+                      if (b === "N/A") return 1;
+                      return a.localeCompare(b);
+                  })
+            : []),
     ];
 
     const maxCharacters = 500;
@@ -330,11 +305,13 @@ const AddInfoModal = ({ modalRef, dataConcern }) => {
                                     className="appearance-none w-full px-4 text-sm py-1 bg-white focus:outline-none border-0 mobile:text-xs"
                                 >
                                     <option value="">(Please Select)</option>
-                                    {projectList.map((project, index) => (
-                                        <option key={index} value={project}>
-                                            {project}
-                                        </option>
-                                    ))}
+                                    {formattedPropertyNames.map(
+                                        (project, index) => (
+                                            <option key={index} value={project}>
+                                                {project}
+                                            </option>
+                                        )
+                                    )}
                                 </select>
                                 <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3 bg-[#EDEDED] text-custom-gray81 pointer-events-none">
                                     <IoMdArrowDropdown />

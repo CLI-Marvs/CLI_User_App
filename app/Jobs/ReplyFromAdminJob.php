@@ -23,9 +23,9 @@ class ReplyFromAdminJob implements ShouldQueue
     protected $files;
     protected $admin_name;
     protected $buyer_lname;
+    protected $department;
 
-
-    public function __construct($ticket_id, $email, $details_message, $message_id = null, $files, $admin_name, $buyer_lname)
+    public function __construct($ticket_id, $email, $details_message, $message_id = null, $files, $admin_name, $buyer_lname, $department)
     {
 
         $this->email = $email;
@@ -35,8 +35,8 @@ class ReplyFromAdminJob implements ShouldQueue
         $this->files = $files;
         $this->admin_name = $admin_name;
         $this->buyer_lname = $buyer_lname;
+        $this->department = $department;
 
-        \Log::info('lastname', ['lastname' => $this->buyer_lname]);
 
         Log::info('Files being sentsssss', ['files' => $this->files]);
     }
@@ -45,7 +45,7 @@ class ReplyFromAdminJob implements ShouldQueue
     {
     
         $mailer->to($this->email)
-            ->send(new SendReplyFromAdmin($this->ticket_id, $this->email, $this->details_message, $this->message_id, $this->files, $this->admin_name, $this->buyer_lname));
+            ->send(new SendReplyFromAdmin($this->ticket_id, $this->email, $this->details_message, $this->message_id, $this->files, $this->admin_name, $this->buyer_lname, $this->department));
 
         foreach ($this->files as $file) {
             @unlink($file['path']);

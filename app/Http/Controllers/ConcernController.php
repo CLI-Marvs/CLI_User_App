@@ -274,6 +274,7 @@ class ConcernController extends Controller
             $buyer_email = $request->input('buyer_email', '');
             $buyer_lname = $request->input('buyer_lastname', '');
             $admin_profile_picture = $request->input('admin_profile_picture', '');
+            $department = $request->input('department', '');
 
 
             $attachment = !empty($filesData) ? json_encode($filesData) : null;
@@ -313,7 +314,7 @@ class ConcernController extends Controller
                 ReplyFromAdminJob::dispatch($messages->ticket_id, $buyer_email, $adminMessage, $message_id, $allFiles);
             } */
 
-            ReplyFromAdminJob::dispatch($messages->ticket_id, $buyer_email, $adminMessage, $message_id, $allFiles, $admin_name, $buyer_lname);
+            ReplyFromAdminJob::dispatch($messages->ticket_id, $buyer_email, $adminMessage, $message_id, $allFiles, $admin_name, $buyer_lname, $department);
 
 
             return response()->json("Successfully sent");
