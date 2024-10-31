@@ -21,6 +21,7 @@ const formDataState = {
 
 const InquiryFormModal = ({ modalRef }) => {
     const [files, setFiles] = useState([]);
+ 
     const fileInputRef = useRef();
     const [fileName, setFileName] = useState([]);
     const [message, setMessage] = useState("");
@@ -36,34 +37,35 @@ const InquiryFormModal = ({ modalRef }) => {
     const [errors, setErrors] = useState({});
     const { propertyNamesList } = useStateContext();
     const [specificInputErrors, setSpecificInputErrors] = useState({});
-    
-    
+
     const handleFileChange = (event) => {
         const selectedFiles = Array.from(event.target.files);
-    
+
         setFiles((prevFiles) => {
             const prevFileNames = prevFiles.map((file) => file.name);
-            
+
             // Add only unique files
             const uniqueFiles = selectedFiles.filter(
                 (file) => !prevFileNames.includes(file.name)
             );
-    
+
             return [...prevFiles, ...uniqueFiles];
         });
-    
+
         setFileName((prevFileNames) => {
             const uniqueFileNames = selectedFiles
                 .map((file) =>
                     file.name.length > 15
-                        ? `${file.name.substring(0, 12)}... .${file.name.split(".").pop()}`
+                        ? `${file.name.substring(0, 12)}... .${file.name
+                              .split(".")
+                              .pop()}`
                         : file.name
                 )
                 .filter((name) => !prevFileNames.includes(name));
-    
+
             return [...prevFileNames, ...uniqueFileNames];
         });
-    
+
         event.target.value = null;
     };
 
@@ -93,6 +95,11 @@ const InquiryFormModal = ({ modalRef }) => {
     ];
 
     const handleDelete = (fileNameToDelete) => {
+    
+        // setFiles((prevFiles) =>
+        //     prevFiles.filter((file) => file !== fileNameToDelete)
+        // );
+       // setFiles([]);
         setFileName((prevFiles) =>
             prevFiles.filter((file) => file !== fileNameToDelete)
         );
@@ -186,18 +193,28 @@ const InquiryFormModal = ({ modalRef }) => {
                 "csv",
                 "doc",
                 "docx",
-                "mp4",
-                "plain", //handle for .txt file extension
+                "mp4", // MPEG-4
+                "m4v", // MPEG-4 with DRM
+                "mov", // Apple QuickTime
+                "avi", // Audio Video Interleave
+                "wmv", // Windows Media Video
+                "flv", // Flash Video
+                "mkv", // Matroska Video
+                "webm", // WebM format
+                "3gp", // 3GPP format for mobile
+                "3g2", // 3GPP2 format for mobile
+                "plain", // Handle for .txt file extension
             ];
+
             const extension = files[0].type;
-            console.log("extension", extension);
+         
             let modifiedExtension = extension.split("/")[1]; //from application/pdf to pdf
             // Special handling for .docx MIME type
             if (
                 extension ===
                 "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
             ) {
-                modifiedExtension = "docx"; // Set extension to docx for validation
+                modifiedExtension = "docx";
             } else if (extension === "application/msword") {
                 modifiedExtension = "doc";
             } else if (
@@ -211,14 +228,72 @@ const InquiryFormModal = ({ modalRef }) => {
                 "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             ) {
                 modifiedExtension = "xlsx";
+            } else if (extension === "application/pdf") {
+                modifiedExtension = "pdf";
+            } else if (extension === "image/jpeg") {
+                modifiedExtension = "jpeg";
+            } else if (extension === "image/png") {
+                modifiedExtension = "png";
+            } else if (extension === "image/bmp") {
+                modifiedExtension = "bmp";
+            } else if (extension === "text/plain") {
+                modifiedExtension = "txt";
+            } else if (extension === "video/mp4") {
+                modifiedExtension = "mp4";
+            } else if (
+                extension === "video/x-m4v" ||
+                extension === "video/m4v"
+            ) {
+                modifiedExtension = "m4v";
+            } else if (
+                extension === "video/x-msvideo" ||
+                extension === "video/avi"
+            ) {
+                modifiedExtension = "avi";
+            } else if (
+                extension === "video/x-ms-wmv" ||
+                extension === "video/wmv"
+            ) {
+                modifiedExtension = "wmv";
+            } else if (
+                extension === "video/x-flv" ||
+                extension === "video/flv"
+            ) {
+                modifiedExtension = "flv";
+            } else if (
+                extension === "video/x-matroska" ||
+                extension === "video/mkv"
+            ) {
+                modifiedExtension = "mkv";
+            } else if (extension === "video/webm") {
+                modifiedExtension = "webm";
+            } else if (
+                extension === "video/3gpp" ||
+                extension === "video/3gp"
+            ) {
+                modifiedExtension = "3gp";
+            } else if (
+                extension === "video/3gpp2" ||
+                extension === "video/3g2"
+            ) {
+                modifiedExtension = "3g2";
             } else if (extension === "application/x-zip-compressed") {
-                alert("Zip is not allowed.");
+                alert("Zip files are not allowed.");
+                setLoading(false);
+                return;
+            } else {
+                alert("File type not supported.");
                 setLoading(false);
                 return;
             }
 
             const isFileValid = validFile.includes(modifiedExtension);
-
+            if (files[0].size > 100 * 1024 * 1024) {
+                // 100 MB
+                setLoading(false);
+                alert("File size must be 100MB or less.");
+                return;
+            }
             if (!isFileValid) {
                 alert(`${modifiedExtension} is not allowed.`);
                 setLoading(false);
@@ -266,7 +341,7 @@ const InquiryFormModal = ({ modalRef }) => {
                 setLoading(false);
             } catch (error) {
                 console.log("error saving concerns", error.response);
-                console.log("178");
+      
                 if (error.response) {
                     if (error?.response?.status === 422) {
                         const validationErrors = error.response?.data.error;
@@ -326,7 +401,15 @@ const InquiryFormModal = ({ modalRef }) => {
                         method="dialog"
                         className="pt-1 flex justify-end -mr-[75px]"
                     >
-                        <button className="flex justify-center w-10 h-10 items-center rounded-full text-custom-bluegreen hover:bg-custombg">
+                        <button
+                            className="flex justify-center w-10 h-10 items-center rounded-full text-custom-bluegreen hover:bg-custombg"
+                            onClick={() => {
+                                setFormData(formDataState);
+                                setMessage("");
+                                setFiles([]);
+                                setFileName('')
+                            }}
+                        >
                             ✕
                         </button>
                     </form>
@@ -618,9 +701,7 @@ const InquiryFormModal = ({ modalRef }) => {
                                     <option value="Commissions">
                                         Commissions
                                     </option>
-                                    <option value="Leasing">
-                                        Leasing
-                                    </option>
+                                    <option value="Leasing">Leasing</option>
                                     <option value="Other Concerns">
                                         Other Concerns
                                     </option>

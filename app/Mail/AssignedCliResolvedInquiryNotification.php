@@ -75,7 +75,8 @@ class AssignedCliResolvedInquiryNotification extends Mailable
                 'buyer_name' => $this->data['buyer_name'],
                 'ticket_id' => $this->data['ticket_id'],
                 'admin_name' => $this->data['admin_name'],
-                'details_concern' => $this->data['details_concern']
+                'details_concern' => $this->data['details_concern'],
+                'modifiedTicketId' => $this->data['modifiedTicketId']
 
             ],
         );

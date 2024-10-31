@@ -229,10 +229,14 @@ class ConcernController extends Controller
 
     public function sendMessage(Request $request)
     {
+        $validatedData = $request->validate([
+            'files.*' => 'file|max:102400',
+        ]);
 
         try {
             $allFiles = [];
-            $files = $request->file('files');
+            $files = $request->file('files'); 
+            //$files = $validatedData['files'];
             $all_file_names = [];
             $filesData = [];
 
@@ -401,6 +405,8 @@ class ConcernController extends Controller
                 ['required', 'regex:/^[\pL\s\-\'\.]+$/u', 'max:255'],
                 'details_concern' => 'required|string',
                 'message' => 'required|string|max:500',
+                'files.*' => 'file|max:102400',
+
             ], [
                 'fname.regex' => 'The first name field format is invalid.',
                 'fname.required' => 'The first name field is required.',
@@ -411,7 +417,9 @@ class ConcernController extends Controller
             ]);
             $user = $request->user();
             $filesData = [];
+            // $files = $validatedData['files'];
             $files = $request->file('files');
+
             if ($files) {
                 $fileLinks = $this->uploadToGCS($files);
                 foreach ($files as $index => $file) {
@@ -1507,10 +1515,11 @@ class ConcernController extends Controller
             if (!empty($assignees)) {
                 foreach ($assignees as $assignee) {
                     $data = [
-                        'ticket_id' => $modifiedTicketId,
+                        'ticket_id' => $request->ticket_id,
                         'buyer_name' => $buyer_name,
                         'admin_name' => $admin_name,
-                        'details_concern' => $details_concern
+                        'details_concern' => $details_concern,
+                        'modifiedTicketId' => $modifiedTicketId
                     ];
                     NotifyAssignedCliOfResolvedInquiryJob::dispatch(
                         $assignee['employee_email'],
@@ -1523,7 +1532,7 @@ class ConcernController extends Controller
             $this->inquiryResolveLogs($request);
             // ReplyFromAdminJob::dispatch($request->ticket_id, $buyerEmail, $request->remarks, $messageId, $allFiles, $admin_name, $buyer_lastname);
             // dd($request->ticket_id, $buyerEmail, $buyer_lastname, $message_id, $admin_name, $department);
-            MarkResolvedToCustomerJob::dispatch($request->ticket_id, $buyerEmail, $buyer_lastname, $message_id, $admin_name, $department);
+            MarkResolvedToCustomerJob::dispatch($request->ticket_id, $buyerEmail, $buyer_lastname, $message_id, $admin_name, $department, $modifiedTicketId);
         } catch (\Exception $e) {
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
         }
