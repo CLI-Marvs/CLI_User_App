@@ -291,7 +291,6 @@ const InquiryFormModal = ({ modalRef }) => {
                     draggable: true,
                     progress: undefined,
                     theme: "dark",
-
                     transition: Bounce,
                 });
                 setLoading(false);
@@ -312,7 +311,6 @@ const InquiryFormModal = ({ modalRef }) => {
                     draggable: true,
                     progress: undefined,
                     theme: "dark",
-
                     transition: Bounce,
                 });
                 return;

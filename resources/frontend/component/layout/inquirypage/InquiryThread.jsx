@@ -19,6 +19,7 @@ import DateLogo from "../../../../../public/Images/Date_range.svg";
 import CircularProgress from "@mui/material/CircularProgress";
 import { AiFillInfoCircle } from "react-icons/ai";
 import { IoIosCheckmarkCircle } from "react-icons/io";
+import { toast, ToastContainer, Bounce } from "react-toastify";
 
 import AddInfoModal from "./AddInfoModal";
 
@@ -294,9 +295,20 @@ const InquiryThread = () => {
             ) {
                 modifiedExtension = "3g2";
             } else if (extension === "application/x-zip-compressed") {
-                  modifiedExtension = "zip";
+                modifiedExtension = "zip";
             } else {
-                alert("File type not supported.");
+                // alert("File type not supported.");
+                toast("File type not supported.", {
+                    position: "top-right",
+                    autoClose: 1000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "dark",
+                    transition: Bounce,
+                });
                 setLoading(false);
                 return;
             }
@@ -305,11 +317,32 @@ const InquiryThread = () => {
             if (attachedFiles[0].size > 100 * 1024 * 1024) {
                 // 100 MB
                 setLoading(false);
-                alert("File size must be 100MB or less.");
+                toast(`File size must be 100MB or less.`, {
+                    position: "top-right",
+                    autoClose: 1000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "dark",
+                    transition: Bounce,
+                });
                 return;
             }
             if (!isFileValid) {
-                alert(`${modifiedExtension} is not allowed.`);
+                toast(`${modifiedExtension} is not allowed.`, {
+                    position: "top-right",
+                    autoClose: 1000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "dark",
+
+                    transition: Bounce,
+                });
                 setLoading(false);
                 return;
             }
@@ -493,6 +526,8 @@ const InquiryThread = () => {
     return (
         <>
             <div className="flex h-full bg-custom-grayFA">
+                <ToastContainer />
+
                 <div className="bg-custom-grayFA w-[601px] px-[20px] pb-[103px] ">
                     {" "}
                     {/* boxdevref */}
