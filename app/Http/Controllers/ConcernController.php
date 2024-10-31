@@ -235,7 +235,7 @@ class ConcernController extends Controller
 
         try {
             $allFiles = [];
-            $files = $request->file('files');
+            $files = $request->file('files'); 
             //$files = $validatedData['files'];
             $all_file_names = [];
             $filesData = [];
