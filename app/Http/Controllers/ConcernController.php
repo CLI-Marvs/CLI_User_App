@@ -1507,10 +1507,11 @@ class ConcernController extends Controller
             if (!empty($assignees)) {
                 foreach ($assignees as $assignee) {
                     $data = [
-                        'ticket_id' => $modifiedTicketId,
+                        'ticket_id' => $request->ticket_id,
                         'buyer_name' => $buyer_name,
                         'admin_name' => $admin_name,
-                        'details_concern' => $details_concern
+                        'details_concern' => $details_concern,
+                        'modifiedTicketId' => $modifiedTicketId
                     ];
                     NotifyAssignedCliOfResolvedInquiryJob::dispatch(
                         $assignee['employee_email'],
@@ -1523,7 +1524,7 @@ class ConcernController extends Controller
             $this->inquiryResolveLogs($request);
             // ReplyFromAdminJob::dispatch($request->ticket_id, $buyerEmail, $request->remarks, $messageId, $allFiles, $admin_name, $buyer_lastname);
             // dd($request->ticket_id, $buyerEmail, $buyer_lastname, $message_id, $admin_name, $department);
-            MarkResolvedToCustomerJob::dispatch($request->ticket_id, $buyerEmail, $buyer_lastname, $message_id, $admin_name, $department);
+            MarkResolvedToCustomerJob::dispatch($request->ticket_id, $buyerEmail, $buyer_lastname, $message_id, $admin_name, $department, $modifiedTicketId);
         } catch (\Exception $e) {
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
         }
