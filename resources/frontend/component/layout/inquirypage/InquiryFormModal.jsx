@@ -688,7 +688,11 @@ const InquiryFormModal = ({ modalRef }) => {
                             <input
                                 name="contract_number"
                                 value={formData.contract_number}
-                                onChange={handleChange}
+                                onChange={(e) => {
+                                    if (e.target.value.length <= 13) {
+                                        handleChange(e);
+                                    }
+                                }}
                                 type="number"
                                 className="w-full px-4 text-sm focus:outline-none mobile:text-xs"
                                 placeholder=""
