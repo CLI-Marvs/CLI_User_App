@@ -219,7 +219,8 @@ const InquiryThread = () => {
                 "webm", // WebM format
                 "3gp", // 3GPP format for mobile
                 "3g2", // 3GPP2 format for mobile
-                "plain", // Handle for .txt file extension
+                "zip",
+                "txt", // Handle for .txt file extension
             ];
             const extension = attachedFiles[0].type;
 
@@ -293,9 +294,7 @@ const InquiryThread = () => {
             ) {
                 modifiedExtension = "3g2";
             } else if (extension === "application/x-zip-compressed") {
-                alert("Zip files are not allowed.");
-                setLoading(false);
-                return;
+                  modifiedExtension = "zip";
             } else {
                 alert("File type not supported.");
                 setLoading(false);
