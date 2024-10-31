@@ -901,31 +901,56 @@ const InquiryThread = () => {
                                                                     (
                                                                         file,
                                                                         index
-                                                                    ) => (
-                                                                        <div
-                                                                            key={
-                                                                                index
-                                                                            }
-                                                                            className="flex items-center justify-between mb-2 p-2 border bg-white rounded"
-                                                                        >
-                                                                            <span className="text-sm text-gray-700">
-                                                                                {
-                                                                                    file.name
+                                                                    ) => {
+                                                                        const fileName =
+                                                                            file.name;
+                                                                        const fileExtension =
+                                                                            fileName.slice(
+                                                                                fileName.lastIndexOf(
+                                                                                    "."
+                                                                                )
+                                                                            );
+                                                                        const baseName =
+                                                                            fileName.slice(
+                                                                                0,
+                                                                                fileName.lastIndexOf(
+                                                                                    "."
+                                                                                )
+                                                                            );
+                                                                        const truncatedName =
+                                                                            baseName.length >
+                                                                            30
+                                                                                ? baseName.slice(
+                                                                                      0,
+                                                                                      30
+                                                                                  ) +
+                                                                                  "..."
+                                                                                : baseName;
+                                                                        return (
+                                                                            <div
+                                                                                key={
+                                                                                    index
                                                                                 }
-                                                                            </span>
-                                                                            <button
-                                                                                type="button"
-                                                                                onClick={() =>
-                                                                                    removeFile(
-                                                                                        file.name
-                                                                                    )
-                                                                                }
-                                                                                className="text-red-500"
+                                                                                className="flex items-center justify-between mb-2 p-2 border bg-white rounded"
                                                                             >
-                                                                                Remove
-                                                                            </button>
-                                                                        </div>
-                                                                    )
+                                                                                <span className="text-sm text-gray-700">
+                                                                                    {truncatedName +
+                                                                                        fileExtension}
+                                                                                </span>
+                                                                                <button
+                                                                                    type="button"
+                                                                                    onClick={() =>
+                                                                                        removeFile(
+                                                                                            file.name
+                                                                                        )
+                                                                                    }
+                                                                                    className="text-red-500"
+                                                                                >
+                                                                                    Remove
+                                                                                </button>
+                                                                            </div>
+                                                                        );
+                                                                    }
                                                                 )}
                                                             </div>
                                                         )}
@@ -953,10 +978,11 @@ const InquiryThread = () => {
                                 {dataConcern.created_by &&
                                     dataConcern.created_by === user?.id && (
                                         <FaTrash
-                                            className="text-[#EB4444] hover:text-red-600 cursor-pointer"
-                                            onClick={handleDeleteInquiry}
-                                        />
-                                    )}
+                                        className="text-[#EB4444] hover:text-red-600 cursor-pointer"
+                                        onClick={handleDeleteInquiry}
+                                    />
+                                   )}
+                               
                                 {dataConcern.status === "Resolved" ? (
                                     <div className="flex justify-start items-center w-[122px] font-semibold text-[13px] text-custom-lightgreen space-x-1">
                                         <p>Ticket Resolved</p>
