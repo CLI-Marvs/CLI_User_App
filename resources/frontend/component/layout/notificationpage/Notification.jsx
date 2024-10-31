@@ -47,6 +47,7 @@ const Notification = () => {
         getAllConcerns();
         navigate(`/inquirymanagement/thread/${encodedTicketId}`);
         updateIsReadStatus(items);
+        console.log("items", items);
     };
 
     const updateIsReadStatus = (item) => {
