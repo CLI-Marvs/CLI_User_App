@@ -21,7 +21,7 @@ const formDataState = {
 
 const InquiryFormModal = ({ modalRef }) => {
     const [files, setFiles] = useState([]);
-    console.log("files", files);
+ 
     const fileInputRef = useRef();
     const [fileName, setFileName] = useState([]);
     const [message, setMessage] = useState("");
@@ -401,7 +401,15 @@ const InquiryFormModal = ({ modalRef }) => {
                         method="dialog"
                         className="pt-1 flex justify-end -mr-[75px]"
                     >
-                        <button className="flex justify-center w-10 h-10 items-center rounded-full text-custom-bluegreen hover:bg-custombg">
+                        <button
+                            className="flex justify-center w-10 h-10 items-center rounded-full text-custom-bluegreen hover:bg-custombg"
+                            onClick={() => {
+                                setFormData(formDataState);
+                                setMessage("");
+                                setFiles([]);
+                                setFileName('')
+                            }}
+                        >
                             ✕
                         </button>
                     </form>

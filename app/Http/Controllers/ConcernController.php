@@ -235,8 +235,8 @@ class ConcernController extends Controller
 
         try {
             $allFiles = [];
-            // $files = $request->file('files');
-            $files = $validatedData['files'];
+            $files = $request->file('files');
+            //$files = $validatedData['files'];
             $all_file_names = [];
             $filesData = [];
 
@@ -417,7 +417,8 @@ class ConcernController extends Controller
             ]);
             $user = $request->user();
             $filesData = [];
-            $files = $validatedData['files'];
+            // $files = $validatedData['files'];
+            $files = $request->file('files');
 
             if ($files) {
                 $fileLinks = $this->uploadToGCS($files);
