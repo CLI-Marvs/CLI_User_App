@@ -4,7 +4,7 @@ import { IoIosSend, IoMdArrowDropdown, IoMdTrash } from "react-icons/io";
 import apiService from "../../servicesApi/apiService";
 import { useStateContext } from "../../../context/contextprovider";
 import CircularProgress from "@mui/material/CircularProgress";
-
+import { toast, ToastContainer, Bounce } from "react-toastify";
 const formDataState = {
     fname: "",
     mname: "",
@@ -21,7 +21,7 @@ const formDataState = {
 
 const InquiryFormModal = ({ modalRef }) => {
     const [files, setFiles] = useState([]);
- 
+
     const fileInputRef = useRef();
     const [fileName, setFileName] = useState([]);
     const [message, setMessage] = useState("");
@@ -95,11 +95,10 @@ const InquiryFormModal = ({ modalRef }) => {
     ];
 
     const handleDelete = (fileNameToDelete) => {
-    
         // setFiles((prevFiles) =>
         //     prevFiles.filter((file) => file !== fileNameToDelete)
         // );
-       // setFiles([]);
+        // setFiles([]);
         setFileName((prevFiles) =>
             prevFiles.filter((file) => file !== fileNameToDelete)
         );
@@ -151,7 +150,8 @@ const InquiryFormModal = ({ modalRef }) => {
     const callBackHandler = () => {
         getAllConcerns();
         setFormData(formDataState);
-        setFiles([]);
+        setIsSubmitted(false);
+        setFileName("");
         setMessage("");
         setIsChecked(false);
     };
@@ -203,11 +203,12 @@ const InquiryFormModal = ({ modalRef }) => {
                 "webm", // WebM format
                 "3gp", // 3GPP format for mobile
                 "3g2", // 3GPP2 format for mobile
-                "plain", // Handle for .txt file extension
+                "zip",
+                "txt", // Handle for .txt file extension
             ];
 
             const extension = files[0].type;
-         
+
             let modifiedExtension = extension.split("/")[1]; //from application/pdf to pdf
             // Special handling for .docx MIME type
             if (
@@ -278,11 +279,21 @@ const InquiryFormModal = ({ modalRef }) => {
             ) {
                 modifiedExtension = "3g2";
             } else if (extension === "application/x-zip-compressed") {
-                alert("Zip files are not allowed.");
-                setLoading(false);
-                return;
+                modifiedExtension = "zip";
             } else {
-                alert("File type not supported.");
+                // alert("File type not supported.");
+                toast("File type not supported.", {
+                    position: "top-right",
+                    autoClose: 1000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "dark",
+
+                    transition: Bounce,
+                });
                 setLoading(false);
                 return;
             }
@@ -291,11 +302,35 @@ const InquiryFormModal = ({ modalRef }) => {
             if (files[0].size > 100 * 1024 * 1024) {
                 // 100 MB
                 setLoading(false);
-                alert("File size must be 100MB or less.");
+                // alert("File size must be 100MB or less.");
+                toast(`File size must be 100MB or less.`, {
+                    position: "top-right",
+                    autoClose: 1000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "dark",
+
+                    transition: Bounce,
+                });
                 return;
             }
             if (!isFileValid) {
-                alert(`${modifiedExtension} is not allowed.`);
+                // alert(`${modifiedExtension} is not allowed.`);
+                toast(`${modifiedExtension} is not allowed.`, {
+                    position: "top-right",
+                    autoClose: 1000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "dark",
+
+                    transition: Bounce,
+                });
                 setLoading(false);
                 return;
             }
@@ -339,9 +374,10 @@ const InquiryFormModal = ({ modalRef }) => {
                 }
                 callBackHandler();
                 setLoading(false);
+                setFiles([]);
             } catch (error) {
                 console.log("error saving concerns", error.response);
-      
+
                 if (error.response) {
                     if (error?.response?.status === 422) {
                         const validationErrors = error.response?.data.error;
@@ -395,6 +431,7 @@ const InquiryFormModal = ({ modalRef }) => {
             className="modal w-[589px] rounded-[10px] shadow-custom5 backdrop:bg-black/50"
             ref={modalRef}
         >
+            <ToastContainer />
             <div className=" px-20 rounded-lg">
                 <div className="">
                     <form
@@ -407,7 +444,7 @@ const InquiryFormModal = ({ modalRef }) => {
                                 setFormData(formDataState);
                                 setMessage("");
                                 setFiles([]);
-                                setFileName('')
+                                setFileName("");
                             }}
                         >
                             ✕
@@ -581,7 +618,12 @@ const InquiryFormModal = ({ modalRef }) => {
                                 onChange={handleChange}
                                 name="mobile_number"
                                 type="number"
-                                onInput={(e) => e.target.value = e.target.value.replace(/[^0-9]/g, '')}
+                                onInput={(e) =>
+                                    (e.target.value = e.target.value.replace(
+                                        /[^0-9]/g,
+                                        ""
+                                    ))
+                                }
                                 className="w-full px-4 text-sm focus:outline-none mobile:text-xs"
                                 placeholder=""
                             />
@@ -778,7 +820,12 @@ const InquiryFormModal = ({ modalRef }) => {
                                 type="number"
                                 className="w-full px-4 text-sm focus:outline-none mobile:text-xs"
                                 placeholder=""
-                                onInput={(e) => e.target.value = e.target.value.replace(/[^0-9]/g, '')}
+                                onInput={(e) =>
+                                    (e.target.value = e.target.value.replace(
+                                        /[^0-9]/g,
+                                        ""
+                                    ))
+                                }
                             />
                         </div>
                         <div className="flex items-center border border-custom-bluegreen rounded-[5px] overflow-hidden">
