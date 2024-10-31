@@ -124,12 +124,12 @@
 
 <body style="font-family: Arial, sans-serif; font-size: 14px; color: #333; line-height: 1.6; padding: 10px;">
     <div class="container">
-        <h1>Hi {{ $assignee_name }},</h1>
-        <p>An feedback ticket that is assigned to you is marked as resolved by {{ $admin_name }}.
+        <span>Hi {{ $assignee_name }},</span>
+        <p>A feedback ticket that is assigned to you is marked as resolved by {{ $admin_name }}.
         </p>
         <p><strong>Ticket info:</strong></p>
         <ul style="list-style-type: none; padding: 0;">
-            <li><strong>Ticket No:</strong> {{ $ticket_id }}</li>
+            <li><strong>Ticket No:</strong> {{ $modifiedTicketId }}</li>
             <li><strong>Concern: </strong> {{ $details_concern }}</li>
             <li><strong>From:</strong> {{ ucwords($buyer_name) }}</li>
         </ul>
@@ -138,8 +138,22 @@
             Cebu Landmasters, Inc.
         </div> --}}
 
-        <p style="font-size: 16px; margin-top:10px;">Best Regards,  </p>
-        <p style="font-weight: bold;"> Cebu Landmasters, Inc. </p>
+        <p style="margin: 0; padding: 0;">Thank you,</p>
+        <p style="margin: 0; padding: 0;">Cebu Landmasters, Inc.</p>
+        <br>
+        <img style="margin-top; 5px"
+            src="https://storage.googleapis.com/super-app-storage/concerns/67219ce89c592.png?GoogleAccessId=799945112092-compute%40developer.gserviceaccount.com&Expires=2045788905&Signature=aIFtdGmczZSDdCikC8VR%2FIEnS6g0bLs%2BXhOP7lekJ5m10Qktmc%2FotqfUrpYCFyC9qBizDk5zo4jhc1ebO54YBPc45h1qYf%2B96R8m2v0AWzo9NED1sD6i4qgKPd4Nn5wJ19iZFPPpSXWrht7idXcg9Ja05hd%2BpuxoknvV0%2BP%2Fnh9W%2B4pucqoT%2Fo6C7jN9Rp2gvrkH04EgjgrsSfgTkxraaURAs0IcUlmq7Ma4eBQU%2FDL2uMuSsupk9%2FyxisXoI2PT%2FOAdjanl9uxSNFqnR2dg8YUmF2NcxRPaSjcojZfcwZEiuz%2B9Pc50f1DvqVNOe06hl%2BCw9i7dJMsKUNN0tgkz0w%3D%3D"
+            title="clisignature" />
+
+
+        <p style="margin-top: 5px;">
+            <strong>
+                Reminder:
+                This is an automated message from a no-reply email address.
+                Please do not reply directly to this email as your message will not be received.
+            </strong>
+        </p>
+
         {{-- <p style="font-weight: bold;">CLI - {{$department}}</p> --}}
     </div>
 </body>
