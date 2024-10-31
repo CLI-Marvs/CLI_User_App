@@ -366,19 +366,19 @@ const AssignDetails = ({ logMessages, ticketId }) => {
     return (
         <>
             <div className="px-[20px]">
-                <div className="flex h-[49px] w-full gradient-btn2 p-[2px] rounded-[10px] items-center justify-center my-[16px] ">
+                <div className="flex h-[49px] w-full gradient-btn2 p-[2px] rounded-[10px] items-center justify-center  ">
                     <div className="w-full h-full flex gap-2 items-center bg-white rounded-[8px] p-[10px] ">
                         <input
                             type="text"
                             className="w-full outline-none"
                             onChange={(e) => setMessage(e.target.value)}
-                            maxLength={250}
+                            maxLength={255}
                             value={message}
                         />
                         <button
                             className={`w-[76px] h-[28px] rounded-[10px] text-xs text-white 
                                 ${!message.trim()
-                                        ? "bg-gray-400 cursor-not-allowed" // Gray out when input is empty
+                                        ? "bg-gray-400 cursor-not-allowed" 
                                         : "gradient-btn2"
                                 } 
                                 `}
@@ -387,6 +387,9 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                             Comment
                         </button>
                     </div>
+                </div>
+                <div className="flex justify-end">
+                    <p className="text-sm my-1 text-custom-gray81">{message.length}/255 characters</p>
                 </div>
             </div>
             <div className="border border-t-1 border-custom-lightestgreen"></div>

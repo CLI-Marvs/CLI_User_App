@@ -229,6 +229,7 @@ const AddInfoModal = ({ modalRef, dataConcern }) => {
                                 value={dataToUpdate.mobile_number || ""}
                                 className="w-full px-4 text-sm focus:outline-none mobile:text-xs no-spinner"
                                 placeholder=""
+                                onInput={(e) => e.target.value = e.target.value.replace(/[^0-9]/g, '')}
                             />
                         </div>
                         <div
@@ -289,6 +290,7 @@ const AddInfoModal = ({ modalRef, dataConcern }) => {
                                 value={dataToUpdate.contract_number || ""}
                                 className="w-full px-4 text-sm focus:outline-none mobile:text-xs"
                                 placeholder=""
+                                onInput={(e) => e.target.value = e.target.value.replace(/[^0-9]/g, '')}
                             />
                         </div>
                         <div
