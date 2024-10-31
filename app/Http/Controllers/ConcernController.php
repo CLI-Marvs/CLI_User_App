@@ -229,10 +229,14 @@ class ConcernController extends Controller
 
     public function sendMessage(Request $request)
     {
+        $validatedData = $request->validate([
+            'files.*' => 'file|max:102400',
+        ]);
 
         try {
             $allFiles = [];
-            $files = $request->file('files');
+            // $files = $request->file('files');
+            $files = $validatedData['files'];
             $all_file_names = [];
             $filesData = [];
 
@@ -401,6 +405,8 @@ class ConcernController extends Controller
                 ['required', 'regex:/^[\pL\s\-\'\.]+$/u', 'max:255'],
                 'details_concern' => 'required|string',
                 'message' => 'required|string|max:500',
+                'files.*' => 'file|max:102400',
+
             ], [
                 'fname.regex' => 'The first name field format is invalid.',
                 'fname.required' => 'The first name field is required.',
@@ -411,7 +417,8 @@ class ConcernController extends Controller
             ]);
             $user = $request->user();
             $filesData = [];
-            $files = $request->file('files');
+            $files = $validatedData['files'];
+
             if ($files) {
                 $fileLinks = $this->uploadToGCS($files);
                 foreach ($files as $index => $file) {
