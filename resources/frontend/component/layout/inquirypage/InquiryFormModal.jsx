@@ -581,6 +581,7 @@ const InquiryFormModal = ({ modalRef }) => {
                                 onChange={handleChange}
                                 name="mobile_number"
                                 type="number"
+                                onInput={(e) => e.target.value = e.target.value.replace(/[^0-9]/g, '')}
                                 className="w-full px-4 text-sm focus:outline-none mobile:text-xs"
                                 placeholder=""
                             />
@@ -777,6 +778,7 @@ const InquiryFormModal = ({ modalRef }) => {
                                 type="number"
                                 className="w-full px-4 text-sm focus:outline-none mobile:text-xs"
                                 placeholder=""
+                                onInput={(e) => e.target.value = e.target.value.replace(/[^0-9]/g, '')}
                             />
                         </div>
                         <div className="flex items-center border border-custom-bluegreen rounded-[5px] overflow-hidden">

@@ -98,7 +98,7 @@ const PaymentMethod = () => {
                 <span className="absolute inset-y-0 left-[1px] rounded-l-[6px] top-[1px] flex items-center px-[8px] h-[38px] text-xs bg-[#F7F7F7] text-custom-gray81 pointer-events-none montserrat-bold">
                   PHP
                 </span>
-                <input id='amountDue' type="number" placeholder='Please input...' className='w-full h-[40px] rounded-[6px] border border-[#F4F3F3] pl-[51px] no-spinner focus:outline-none' />
+                <input id='amountDue' type="number" placeholder='Please input...' className='w-full h-[40px] rounded-[6px] border border-[#F4F3F3] pl-[51px] no-spinner focus:outline-none' onInput={(e) => e.target.value = e.target.value.replace(/[^0-9]/g, '')}/>
               </div>
             </div>
             <div className=' flex flex-col gap-[4px] '>
