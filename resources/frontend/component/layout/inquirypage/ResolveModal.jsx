@@ -12,7 +12,7 @@ const ResolveModal = ({ modalRef, ticketId, dataRef }) => {
         data?.find((items) => items.ticket_id === ticketId) || {};
     const messageId = dataConcern?.message_id || null;
 
-    console.log("assigneesPersonnle", assigneesPersonnel);
+ 
     const capitalizeWords = (name) => {
         if (name) {
             return name

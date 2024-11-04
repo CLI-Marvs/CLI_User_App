@@ -3,7 +3,7 @@ import { IoMdArrowDropdown } from "react-icons/io";
 import apiService from "../../servicesApi/apiService";
 import { data } from "autoprefixer";
 import { useStateContext } from "../../../context/contextprovider";
-
+import Alert from "../../../component/Alert";
 const AddInfoModal = ({ modalRef, dataConcern }) => {
     const predefinedUserTypes = ["Property Owner", "Buyer", "Broker", "Seller"];
     const { getAllConcerns, propertyNamesList } = useStateContext();
@@ -25,7 +25,8 @@ const AddInfoModal = ({ modalRef, dataConcern }) => {
             ? dataConcern.user_type
             : "",
     });
- 
+    const [showAlert, setShowAlert] = useState(false);
+
     const formatFunc = (name) => {
         return name
             .toLowerCase()
@@ -60,7 +61,8 @@ const AddInfoModal = ({ modalRef, dataConcern }) => {
 
     const handleCloseModal = () => {
         setDataToUpdate(dataConcern);
-        setMessage('')
+        setMessage("");
+        //  setShowAlert(false);
     };
     const handleChange = (e) => {
         const newValue = e.target.value;
@@ -84,7 +86,22 @@ const AddInfoModal = ({ modalRef, dataConcern }) => {
             });
         }
     };
+    const handleShowUpdateAlert = () => {
+        setShowAlert(true);
+        modalRef.current.showModal();
+    };
+    
+    const handleConfirm = () => {
+        addInfo();
+        setShowAlert(false);
+        setTimeout(() => {
+            modalRef.current.close();
+        }, 1000);
+    };
 
+    const handleCancel = () => {
+        setShowAlert(false);
+    };
     const addInfo = async () => {
         try {
             const response = await apiService.put(
@@ -229,7 +246,12 @@ const AddInfoModal = ({ modalRef, dataConcern }) => {
                                 value={dataToUpdate.mobile_number || ""}
                                 className="w-full px-4 text-sm focus:outline-none mobile:text-xs no-spinner"
                                 placeholder=""
-                                onInput={(e) => e.target.value = e.target.value.replace(/[^0-9]/g, '')}
+                                onInput={(e) =>
+                                    (e.target.value = e.target.value.replace(
+                                        /[^0-9]/g,
+                                        ""
+                                    ))
+                                }
                             />
                         </div>
                         <div
@@ -290,7 +312,12 @@ const AddInfoModal = ({ modalRef, dataConcern }) => {
                                 value={dataToUpdate.contract_number || ""}
                                 className="w-full px-4 text-sm focus:outline-none mobile:text-xs"
                                 placeholder=""
-                                onInput={(e) => e.target.value = e.target.value.replace(/[^0-9]/g, '')}
+                                onInput={(e) =>
+                                    (e.target.value = e.target.value.replace(
+                                        /[^0-9]/g,
+                                        ""
+                                    ))
+                                }
                             />
                         </div>
                         <div
@@ -362,15 +389,26 @@ const AddInfoModal = ({ modalRef, dataConcern }) => {
                         </div>
                     </div>
                     <div className="flex justify-end">
-                        <form method="dialog">
+                        <form method="">
                             <button
                                 className="w-[133px] h-[39px] gradient-btn5 font-semibold text-sm text-white rounded-[10px]"
-                                onClick={addInfo}
+                                type="button"
+                                onClick={handleShowUpdateAlert}
                             >
                                 Update
                             </button>
                         </form>
                     </div>
+                </div>
+            </div>
+            <div>
+                <div className="">
+                    <Alert
+                        title="Are you sure you want to update this data?"
+                        show={showAlert}
+                        onCancel={handleCancel}
+                        onConfirm={handleConfirm}
+                    />
                 </div>
             </div>
         </dialog>
