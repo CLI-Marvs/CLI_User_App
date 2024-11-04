@@ -762,7 +762,9 @@ class ConcernController extends Controller
                 $join->on('concerns.id', '=', 'pinned_concerns.concern_id')
                     ->where('pinned_concerns.user_id', $employee->id);
             })
-                ->orderByRaw("CASE WHEN concerns.id IN (" . implode(',', $pinnedConcerns) . ") THEN 0 ELSE 1 END, pinned_concerns.pinned_at DESC");
+                ->orderByRaw("CASE WHEN concerns.id IN (" . implode(',', $pinnedConcerns) . ") THEN 0 ELSE 1 END, pinned_concerns.pinned_at DESC")
+                ->orderBy('created_at', 'desc')
+                ->orderBy('pinned_concerns.pinned_at', 'desc');
         } else {
             $query->orderBy('created_at', 'desc');
         }
