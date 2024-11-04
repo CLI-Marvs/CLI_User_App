@@ -135,11 +135,10 @@ const TicketTable = ({ concernData }) => {
                                 }
                                 `}
                             >
-                                <p className={`w-[130px] pr-2  truncate`}>
+                                <p className={`w-[130px] pr-2  truncate `}>
                                     {(() => {
                                         const nameParts =
                                             row.buyer_name.split(" ");
-
                                         // Check if the middle name exists in the full name and remove it if it does
                                         if (row.buyer_middlename) {
                                             const middleName =
@@ -171,12 +170,19 @@ const TicketTable = ({ concernData }) => {
                                         const capitalize = (name) =>
                                             name.charAt(0).toUpperCase() +
                                             name.slice(1).toLowerCase();
-
                                         return `${capitalize(
                                             lastName
-                                        )}, ${capitalize(
-                                            firstName
-                                        )}, ${middleInitial}`;
+                                        )}, ${capitalize(firstName)}${
+                                            middleInitial
+                                                ? `, ${middleInitial}`
+                                                : ""
+                                        }`;
+
+                                        // return `${capitalize(
+                                        //     lastName
+                                        // )}, ${capitalize(
+                                        //     firstName
+                                        // )}, ${middleInitial} `;
                                     })()}
                                 </p>
                             </td>
