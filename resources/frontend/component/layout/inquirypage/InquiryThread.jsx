@@ -20,7 +20,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 import { AiFillInfoCircle } from "react-icons/ai";
 import { IoIosCheckmarkCircle } from "react-icons/io";
 import { toast, ToastContainer, Bounce } from "react-toastify";
-
+import Alert from "../../../component/Alert";
 import AddInfoModal from "./AddInfoModal";
 
 const InquiryThread = () => {
@@ -59,7 +59,7 @@ const InquiryThread = () => {
     const params = useParams();
     const ticketId = decodeURIComponent(params.id);
     const [isResolved, setIsResolved] = useState(false);
-
+    const [showAlert, setShowAlert] = useState(false);
     const handleDateChange = (date) => {
         setStartDate(date);
     };
@@ -131,6 +131,19 @@ const InquiryThread = () => {
         }
     };
 
+    const handleDelete = () => {
+        setShowAlert(true);
+    };
+    const handleConfirm = () => {
+        // console.log("it runs")
+        handleDeleteInquiry();
+        setShowAlert(false);
+    };
+
+    const handleCancel = () => {
+        console.log("Cancelled");
+        setShowAlert(false);
+    };
     const handleOpenResolveModal = () => {
         if (resolveModalRef.current) {
             resolveModalRef.current.showModal();
@@ -1077,7 +1090,7 @@ const InquiryThread = () => {
                                     dataConcern.created_by === user?.id && (
                                         <FaTrash
                                             className="text-[#EB4444] hover:text-red-600 cursor-pointer"
-                                            onClick={handleDeleteInquiry}
+                                            onClick={handleDelete}
                                         />
                                     )}
 
@@ -1195,6 +1208,14 @@ const InquiryThread = () => {
                     modalRef={resolveModalRef}
                     ticketId={ticketId}
                     dataRef={dataConcern}
+                />
+            </div>
+            <div>
+                <Alert
+                    title="Are you sure you want to delete?"
+                    show={showAlert}
+                    onCancel={handleCancel}
+                    onConfirm={handleConfirm}
                 />
             </div>
         </>
