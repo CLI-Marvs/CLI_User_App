@@ -980,8 +980,7 @@ class ConcernController extends Controller
             'inquiry_assignee.ticket_id',
             'inquiry_assignee.id as assignee_id',
             'inquiry_assignee.created_at',
-            'concerns.details_concern',
-            'concerns.details_message',
+            'concerns.*',
             \DB::raw('CASE WHEN read_notif_by_user.assignee_id IS NULL THEN 0 ELSE 1 END as is_read'),
             \DB::raw("'Inquiry Assignment' as message_log")
         );

@@ -41,12 +41,17 @@ const Notification = () => {
     const buttonLabels = ["All", "Unread", "Read"];
 
     const navigateToThread = (items) => {
+        console.log("items", items);
         const ticketId = items.ticket_id;
         const encodedTicketId = encodeURIComponent(ticketId);
         getNotifications();
         getMessages(ticketId);
         getAllConcerns();
-        navigate(`/inquirymanagement/thread/${encodedTicketId}`);
+        navigate(
+            `/inquirymanagement/thread/${encodedTicketId}` , {
+            state: { dataConcern: items },
+         }
+        );
         updateIsReadStatus(items);
         console.log("items", items);
     };

@@ -4,7 +4,7 @@ import Kent from "../../../../../public/Images/kent.png";
 import defaultAvatar from "../../../../../public/Images/AdminSilouette.svg";
 import moment from "moment";
 import { useStateContext } from "../../../context/contextprovider";
-import { Link, useParams } from "react-router-dom";
+import { Link, useLocation, useParams } from "react-router-dom";
 
 const UserMessages = ({ items }) => {
     const attachmentData = JSON.parse(items.attachment || "[]");
@@ -15,7 +15,10 @@ const UserMessages = ({ items }) => {
     const formattedDate = moment(items.created_at).format("MMMM D, YYYY");
     const formattedTime = moment(items.created_at).format("hh:mm A");
 
-    const dataConcern = data?.find((item) => item.ticket_id === ticketId) || {};
+    const location = useLocation();
+    const { dataConcern } = location?.state || {};
+    console.log("dataConcern from usermessages", dataConcern);
+    /* const dataConcern = data?.find((item) => item.ticket_id === ticketId) || {}; */
     const capitalizeWords = (name) => {
         if (name) {
             return name
