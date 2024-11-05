@@ -1016,9 +1016,11 @@ class ConcernController extends Controller
         }
 
         $buyerReplyQuery->leftJoin('read_notif_by_user', function ($join) use ($employee) {
-            $join->on('buyer_reply_notif.id', '=', 'read_notif_by_user.reply_id')
-                ->where('read_notif_by_user.user_id', $employee->id);
-        });
+            $join->on('buyer_reply_notif.id', '=', 'read_notif_by_user.reply_id');
+        })
+        ->leftJoin('concerns', 'buyer_reply_notif.ticket_id', '=', 'concerns.ticket_id');
+    
+        $buyerReplyQuery->where('read_notif_by_user.user_id', $employee->id);
 
         $buyerReplyQuery->select(
             'buyer_reply_notif.ticket_id',
@@ -1026,6 +1028,23 @@ class ConcernController extends Controller
             'buyer_reply_notif.created_at',
             'buyer_reply_notif.updated_at',
             'buyer_reply_notif.message_log',
+            'concerns.details_concern',
+            'concerns.details_message',
+            'concerns.property',
+            'concerns.status',
+            'concerns.buyer_name',
+            'concerns.property_code',
+            'concerns.buyer_email',
+            'concerns.message_id',
+            'concerns.user_type',
+            'concerns.mobile_number',
+            'concerns.contract_number',
+            'concerns.unit_number',
+            'concerns.email_subject',
+            'concerns.buyer_middlename',
+            'concerns.buyer_firstname',
+            'concerns.buyer_lastname',
+            'concerns.suffix_name',
             \DB::raw('CASE WHEN read_notif_by_user.reply_id IS NULL THEN 0 ELSE 1 END as is_read'),
             'buyer_reply_notif.id as buyer_notif_id'
         );
