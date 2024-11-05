@@ -625,7 +625,8 @@ export const ContextProvider = ({ children }) => {
                 bankList,
                 getInvoices,
                 filterDueDate,
-                setFilterDueDate
+                setFilterDueDate,
+                notifStatus
             }}
         >
             {children}
