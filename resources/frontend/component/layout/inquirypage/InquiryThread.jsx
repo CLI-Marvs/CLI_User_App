@@ -55,8 +55,6 @@ const InquiryThread = () => {
     const modalRef = useRef(null);
     const resolveModalRef = useRef(null);
     const navigate = useNavigate();
-    /*   const location = useLocation();
-    const { item } = location?.state || {}; */
     const params = useParams();
     const ticketId = decodeURIComponent(params.id);
     const [isResolved, setIsResolved] = useState(false);
@@ -70,6 +68,7 @@ const InquiryThread = () => {
     };
 
     const dataConcern = data?.find((item) => item.ticket_id === ticketId) || {};
+ 
    
    /*  useEffect(() => {
         console.log("ticketId inside useEffect", ticketId);
@@ -1086,6 +1085,9 @@ const InquiryThread = () => {
                                         <span className="font-semibold">
                                             {capitalizeWords(
                                                 dataConcern.buyer_name
+                                            )}{" "}
+                                            {capitalizeWords(
+                                                dataConcern.suffix_name
                                             )}
                                         </span>
                                         . Please use the comment section for CLI

@@ -452,6 +452,7 @@ class ConcernController extends Controller
             $concerns->buyer_firstname = $validatedData['fname'];
             $concerns->buyer_middlename =
                 $request->mname;
+            $concerns->suffix_name= $request->suffix;
             $concerns->buyer_lastname = $validatedData['lname'];
             $concerns->mobile_number = $request->mobile_number;
             $concerns->contract_number = $request->contract_number;
@@ -500,6 +501,7 @@ class ConcernController extends Controller
                 = $request->buyer_middlename;
             $concern->buyer_lastname
                 = $request->buyer_lastname;
+                $concern->suffix_name= $request->suffix_name;
             $concern->user_type = $request->user_type;
 
             if ($request->user_type === "Others") {
