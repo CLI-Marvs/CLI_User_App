@@ -69,7 +69,7 @@ const InquiryThread = () => {
         setSelectedProperty(e.target.value);
     };
 
-    const dataConcern = data.find((item) => item.ticket_id === ticketId || {});
+    const dataConcern = data?.find((item) => item.ticket_id === ticketId || {});
    
    /*  useEffect(() => {
         console.log("ticketId inside useEffect", ticketId);
