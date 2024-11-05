@@ -103,7 +103,6 @@ export const ContextProvider = ({ children }) => {
                 const response = await apiService.get(
                     `/get-concern?${searchParams}`
                 );
-
                 setData(response.data.data);
                 setPageCount(response.data.last_page);
             } catch (error) {

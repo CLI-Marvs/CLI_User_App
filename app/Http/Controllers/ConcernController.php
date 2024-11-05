@@ -452,7 +452,6 @@ class ConcernController extends Controller
             $concerns->buyer_firstname = $validatedData['fname'];
             $concerns->buyer_middlename =
                 $request->mname;
-            $concerns->suffix_name= $request->suffix;
             $concerns->buyer_lastname = $validatedData['lname'];
             $concerns->mobile_number = $request->mobile_number;
             $concerns->contract_number = $request->contract_number;
@@ -501,7 +500,6 @@ class ConcernController extends Controller
                 = $request->buyer_middlename;
             $concern->buyer_lastname
                 = $request->buyer_lastname;
-                $concern->suffix_name= $request->suffix_name;
             $concern->user_type = $request->user_type;
 
             if ($request->user_type === "Others") {
@@ -982,7 +980,8 @@ class ConcernController extends Controller
             'inquiry_assignee.ticket_id',
             'inquiry_assignee.id as assignee_id',
             'inquiry_assignee.created_at',
-            'concerns.*',
+            'concerns.details_concern',
+            'concerns.details_message',
             \DB::raw('CASE WHEN read_notif_by_user.assignee_id IS NULL THEN 0 ELSE 1 END as is_read'),
             \DB::raw("'Inquiry Assignment' as message_log")
         );

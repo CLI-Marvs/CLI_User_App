@@ -56,7 +56,7 @@ const InquiryThread = () => {
     const resolveModalRef = useRef(null);
     const navigate = useNavigate();
       const location = useLocation();
-    const { dataConcern } = location?.state || {};
+  /*   const { dataConcern } = location?.state || {}; */
     const params = useParams();
     const ticketId = decodeURIComponent(params.id);
     const [isResolved, setIsResolved] = useState(false);
@@ -69,12 +69,12 @@ const InquiryThread = () => {
         setSelectedProperty(e.target.value);
     };
 
-   /*  const dataConcern = dataFromTicket?.find((item) => item.ticket_id === ticketId) || {}; */
+    const dataConcern = data?.find((item) => item.ticket_id === ticketId) || {};
    
-    console.log("data", data);
+   /*  console.log("data", data);
 
     console.log("dataConcern", dataConcern);
-    console.log("ticketId", ticketId);
+    console.log("ticketId", ticketId); */
 
     const toggleFilterBox = () => {
         setIsFilterVisible((prev) => !prev);

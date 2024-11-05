@@ -15,10 +15,9 @@ const UserMessages = ({ items }) => {
     const formattedDate = moment(items.created_at).format("MMMM D, YYYY");
     const formattedTime = moment(items.created_at).format("hh:mm A");
 
-    const location = useLocation();
-    const { dataConcern } = location?.state || {};
-    console.log("dataConcern from usermessages", dataConcern);
-    /* const dataConcern = data?.find((item) => item.ticket_id === ticketId) || {}; */
+  /*   const location = useLocation();
+    const { dataConcern } = location?.state || {}; */
+    const dataConcern = data?.find((item) => item.ticket_id === ticketId) || {};
     const capitalizeWords = (name) => {
         if (name) {
             return name
