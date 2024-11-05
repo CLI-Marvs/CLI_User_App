@@ -20,7 +20,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 import { AiFillInfoCircle } from "react-icons/ai";
 import { IoIosCheckmarkCircle } from "react-icons/io";
 import { toast, ToastContainer, Bounce } from "react-toastify";
-
+import Alert from "../../../component/Alert";
 import AddInfoModal from "./AddInfoModal";
 
 const InquiryThread = () => {
@@ -39,6 +39,7 @@ const InquiryThread = () => {
     const [hasAttachments, setHasAttachments] = useState(false);
     const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
     const { propertyNamesList } = useStateContext();
+    const [dataConcern, setDataConcern] = useState({});
     const {
         messages,
         setTicketId,
@@ -59,7 +60,7 @@ const InquiryThread = () => {
     const params = useParams();
     const ticketId = decodeURIComponent(params.id);
     const [isResolved, setIsResolved] = useState(false);
-
+    const [showAlert, setShowAlert] = useState(false);
     const handleDateChange = (date) => {
         setStartDate(date);
     };
@@ -68,14 +69,22 @@ const InquiryThread = () => {
         setSelectedProperty(e.target.value);
     };
 
-    /**
-     * This function retrieves the most recently updated name when the admin modifies the buyer's information (first name, last name, middle name).
-     */
+   
     useEffect(() => {
-        console.log("this is fetching");
-    }, []);
-    const dataConcern =
-        data?.find((items) => items.ticket_id === ticketId) || {};
+        console.log("ticketId inside useEffect", ticketId);
+        console.log("data insideUseEffect", data);
+
+        const dataConcernData = data.find((item) => item.ticket_id === ticketId || {});
+        console.log("dataConcernData", dataConcernData);
+        setDataConcern(dataConcernData);
+    }, [data, ticketId]);
+    
+
+
+    console.log("data", data);
+
+    console.log("dataConcern", dataConcern);
+    console.log("ticketId", ticketId);
 
     const toggleFilterBox = () => {
         setIsFilterVisible((prev) => !prev);
@@ -131,6 +140,19 @@ const InquiryThread = () => {
         }
     };
 
+    const handleDelete = () => {
+        setShowAlert(true);
+    };
+    const handleConfirm = () => {
+        // console.log("it runs")
+        handleDeleteInquiry();
+        setShowAlert(false);
+    };
+
+    const handleCancel = () => {
+        console.log("Cancelled");
+        setShowAlert(false);
+    };
     const handleOpenResolveModal = () => {
         if (resolveModalRef.current) {
             resolveModalRef.current.showModal();
@@ -1077,7 +1099,7 @@ const InquiryThread = () => {
                                     dataConcern.created_by === user?.id && (
                                         <FaTrash
                                             className="text-[#EB4444] hover:text-red-600 cursor-pointer"
-                                            onClick={handleDeleteInquiry}
+                                            onClick={handleDelete}
                                         />
                                     )}
 
@@ -1195,6 +1217,14 @@ const InquiryThread = () => {
                     modalRef={resolveModalRef}
                     ticketId={ticketId}
                     dataRef={dataConcern}
+                />
+            </div>
+            <div>
+                <Alert
+                    title="Are you sure you want to delete?"
+                    show={showAlert}
+                    onCancel={handleCancel}
+                    onConfirm={handleConfirm}
                 />
             </div>
         </>

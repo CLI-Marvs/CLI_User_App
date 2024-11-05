@@ -16,6 +16,7 @@ const Notification = () => {
         getAllConcerns,
         getNotifications,
         setNotifStatus,
+        notifStatus
     } = useStateContext();
     const [activeButton, setActiveButton] = useState("All");
     
@@ -71,9 +72,17 @@ const Notification = () => {
         }
     };
 
+    console.log("activeButton", activeButton);
+    console.log("notifStatus", notifStatus);
+
+
     useEffect(() => {
         getNotifications();
     }, []);
+
+    useEffect(() => {
+        setNotifStatus("All");
+    }, [location.pathname]);
 
 
     return (
