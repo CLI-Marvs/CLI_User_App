@@ -56,7 +56,7 @@ const InquiryThread = () => {
     const resolveModalRef = useRef(null);
     const navigate = useNavigate();
       const location = useLocation();
-  /*   const { dataConcern } = location?.state || {}; */
+   /*  const { dataConcern } = location?.state || {}; */
     const params = useParams();
     const ticketId = decodeURIComponent(params.id);
     const [isResolved, setIsResolved] = useState(false);

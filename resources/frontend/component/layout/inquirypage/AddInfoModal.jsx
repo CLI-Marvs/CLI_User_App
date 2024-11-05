@@ -6,7 +6,7 @@ import { useStateContext } from "../../../context/contextprovider";
 import Alert from "../../../component/Alert";
 const AddInfoModal = ({ modalRef, dataConcern }) => {
     const predefinedUserTypes = ["Property Owner", "Buyer", "Broker", "Seller"];
-    const { getAllConcerns, propertyNamesList } = useStateContext();
+    const { getAllConcerns, propertyNamesList, updateConcern } = useStateContext();
     const [message, setMessage] = useState("");
     const [dataToUpdate, setDataToUpdate] = useState({
         contract_number: dataConcern.contract_number || "",

@@ -111,6 +111,14 @@ export const ContextProvider = ({ children }) => {
         }
     };
 
+    const updateConcern = ({ id, ...dataToUpdate }) => {
+        setData((prevData) =>
+            prevData.map((concern) =>
+                concern.id === id ? { ...dataToUpdate } : concern
+            )
+        );
+    };
+    
     const getBankName = async () => {
        if(token) {
         try {
@@ -622,7 +630,8 @@ export const ContextProvider = ({ children }) => {
                 getInvoices,
                 filterDueDate,
                 setFilterDueDate,
-                notifStatus
+                notifStatus,
+                updateConcern
             }}
         >
             {children}
