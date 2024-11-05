@@ -39,6 +39,7 @@ const InquiryThread = () => {
     const [hasAttachments, setHasAttachments] = useState(false);
     const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
     const { propertyNamesList } = useStateContext();
+    const [dataConcern, setDataConcern] = useState({});
     const {
         messages,
         setTicketId,
@@ -68,14 +69,22 @@ const InquiryThread = () => {
         setSelectedProperty(e.target.value);
     };
 
-    /**
-     * This function retrieves the most recently updated name when the admin modifies the buyer's information (first name, last name, middle name).
-     */
+   
     useEffect(() => {
-        console.log("this is fetching");
-    }, []);
-    const dataConcern =
-        data?.find((items) => items.ticket_id === ticketId) || {};
+        console.log("ticketId inside useEffect", ticketId);
+        console.log("data insideUseEffect", data);
+
+        const dataConcernData = data.find((item) => item.ticket_id === ticketId || {});
+        console.log("dataConcernData", dataConcernData);
+        setDataConcern(dataConcernData);
+    }, [data, ticketId]);
+    
+
+
+    console.log("data", data);
+
+    console.log("dataConcern", dataConcern);
+    console.log("ticketId", ticketId);
 
     const toggleFilterBox = () => {
         setIsFilterVisible((prev) => !prev);
