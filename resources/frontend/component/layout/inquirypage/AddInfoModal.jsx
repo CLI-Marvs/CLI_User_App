@@ -4,7 +4,7 @@ import apiService from "../../servicesApi/apiService";
 import { data } from "autoprefixer";
 import { useStateContext } from "../../../context/contextprovider";
 import Alert from "../../../component/Alert";
-const AddInfoModal = ({ modalRef, dataConcern }) => {
+const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
     const predefinedUserTypes = ["Property Owner", "Buyer", "Broker", "Seller"];
     const { getAllConcerns, propertyNamesList, updateConcern } = useStateContext();
     const [message, setMessage] = useState("");
@@ -111,6 +111,7 @@ const AddInfoModal = ({ modalRef, dataConcern }) => {
             );
 
             console.log("response", response);
+            onupdate({ ...dataToUpdate, dataConcern});
             getAllConcerns();
         } catch (error) {
             console.log("error", error);

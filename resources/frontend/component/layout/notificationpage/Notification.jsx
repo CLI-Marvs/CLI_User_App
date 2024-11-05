@@ -48,7 +48,7 @@ const Notification = () => {
         getAllConcerns();
         navigate(
             `/inquirymanagement/thread/${encodedTicketId}` , {
-            state: { dataConcern: items },
+            state: { itemsData: items },
          }
         );
         updateIsReadStatus(items);

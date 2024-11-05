@@ -56,11 +56,12 @@ const InquiryThread = () => {
     const resolveModalRef = useRef(null);
     const navigate = useNavigate();
       const location = useLocation();
-   /*  const { dataConcern } = location?.state || {}; */
+    const { itemsData } = location?.state || {};
     const params = useParams();
     const ticketId = decodeURIComponent(params.id);
     const [isResolved, setIsResolved] = useState(false);
     const [showAlert, setShowAlert] = useState(false);
+    const [dataConcern, setDataConcern] = useState(itemsData || {});
     const handleDateChange = (date) => {
         setStartDate(date);
     };
@@ -69,8 +70,19 @@ const InquiryThread = () => {
         setSelectedProperty(e.target.value);
     };
 
-    const dataConcern = data?.find((item) => item.ticket_id === ticketId) || {};
+    const handleUpdate = (newData) => {
+        setDataConcern(prevData => ({
+            ...prevData,
+            ...newData, 
+        }));
+    };
+
+  /*   console.log("data", data); */
+    console.log("updatedConcern", dataConcern);
+
+   /*  const dataConcern = data?.find((item) => item.ticket_id === ticketId) || {}; */
    
+   /*  console.log("dataConcern", data); */
    /*  console.log("data", data);
 
     console.log("dataConcern", dataConcern);
@@ -1076,7 +1088,7 @@ const InquiryThread = () => {
                                         Note: This message will be sent to{" "}
                                         <span className="font-semibold">
                                             {capitalizeWords(
-                                                dataConcern.buyer_name
+                                                `${dataConcern.buyer_firstname} ${dataConcern.buyer_middlename} ${dataConcern.buyer_lastname}`
                                             )}{" "}
                                             {capitalizeWords(
                                                 dataConcern.suffix_name
@@ -1118,6 +1130,7 @@ const InquiryThread = () => {
                                             (item, index) =>
                                                 item.buyer_email ? (
                                                     <UserMessages
+                                                        dataConcern={dataConcern}
                                                         items={item}
                                                         key={index}
                                                     />
@@ -1204,7 +1217,7 @@ const InquiryThread = () => {
                 </div>
             </div>
             <div>
-                <AddInfoModal modalRef={modalRef} dataConcern={dataConcern} />
+                <AddInfoModal modalRef={modalRef} dataConcern={dataConcern} onupdate={handleUpdate} />
             </div>
             <div>
                 <ResolveModal
