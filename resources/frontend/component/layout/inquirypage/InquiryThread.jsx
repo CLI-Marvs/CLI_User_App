@@ -1077,6 +1077,9 @@ const InquiryThread = () => {
                                         <span className="font-semibold">
                                             {capitalizeWords(
                                                 dataConcern.buyer_name
+                                            )}{" "}
+                                            {capitalizeWords(
+                                                dataConcern.suffix_name
                                             )}
                                         </span>
                                         . Please use the comment section for CLI

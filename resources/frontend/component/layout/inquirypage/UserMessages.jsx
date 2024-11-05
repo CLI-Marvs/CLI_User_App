@@ -40,7 +40,8 @@ const UserMessages = ({ items }) => {
                     </p>
                     <p className=" text-sm text-custom-gray81 flex gap-1">
                         <span>From:</span>
-                        {capitalizeWords(dataConcern.buyer_name)}
+                        {capitalizeWords(dataConcern.buyer_name)}{" "}
+                        {capitalizeWords(dataConcern.suffix_name)}
                     </p>
                     <p className=" text-sm text-custom-gray81 flex gap-1">
                         {dataConcern.buyer_email} <span>|</span>{" "}
@@ -89,7 +90,10 @@ const UserMessages = ({ items }) => {
                                                 "fileUrlPath",
                                                 JSON.stringify(attachment.url)
                                             );
-                                            console.log("attachment", attachment.url)
+                                            console.log(
+                                                "attachment",
+                                                attachment.url
+                                            );
                                             window.open(
                                                 `/file-viewer/attachment/${items.id}`,
                                                 "_blank"

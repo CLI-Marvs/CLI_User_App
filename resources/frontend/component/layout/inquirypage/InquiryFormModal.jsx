@@ -9,6 +9,7 @@ const formDataState = {
     fname: "",
     mname: "",
     lname: "",
+    suffix: "",
     buyer_email: "",
     mobile_number: "",
     property: "",
@@ -27,7 +28,8 @@ const InquiryFormModal = ({ modalRef }) => {
     const [message, setMessage] = useState("");
     const { user, getAllConcerns } = useStateContext();
     const maxCharacters = 500;
-    const [isChecked, setIsChecked] = useState(false);
+    const [isMiddleNameChecked, setIsMiddleNameChecked] = useState(false);
+    const [isSuffixChecked, setIsSuffixChecked] = useState(false);
     const [hasErrors, setHasErrors] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -124,16 +126,27 @@ const InquiryFormModal = ({ modalRef }) => {
             }));
         }
     };
-    const handleCheckboxChange = (event) => {
-        setIsChecked(event.target.checked);
+    const handleMiddleNameCheckboxChange = (event) => {
+        setIsMiddleNameChecked(event.target.checked);
         setFormData((prevData) => ({
             ...prevData,
-            mname: isChecked ? "" : "",
+            mname: isMiddleNameChecked ? "" : "",
         }));
         // setHasErrors(false);
         setResetSuccess(true);
         setIsSubmitted(false);
     };
+
+     const handleSuffixNameCheckboxChange = (event) => {
+         setIsSuffixChecked(event.target.checked);
+         setFormData((prevData) => ({
+             ...prevData,
+             suffix: isSuffixChecked ? "" : "",
+         }));
+         // setHasErrors(false);
+         setResetSuccess(true);
+         setIsSubmitted(false);
+     };
     const isTextareaValid = message.trim().length > 0;
 
     const validateEmail = (email) => {
@@ -153,7 +166,7 @@ const InquiryFormModal = ({ modalRef }) => {
         setIsSubmitted(false);
         setFileName("");
         setMessage("");
-        setIsChecked(false);
+        setIsMiddleNameChecked(false);
     };
 
     const {
@@ -162,6 +175,7 @@ const InquiryFormModal = ({ modalRef }) => {
         unit_number,
         other_user_type,
         mname,
+        suffix,
         ...requiredFields
     } = formData;
 
@@ -173,7 +187,9 @@ const InquiryFormModal = ({ modalRef }) => {
         e.preventDefault();
 
         setIsSubmitted(true);
-        const isMnameValid = isChecked || mname.trim() !== "";
+        const isMnameValid = isMiddleNameChecked || mname.trim() !== ""; 
+        const isSuffixValid = isSuffixChecked || suffix.trim() !== ""; 
+
         let isOtherUserTypeValid = true;
         if (user_type === "Others") {
             isOtherUserTypeValid = other_user_type.trim().length > 0;
@@ -337,6 +353,7 @@ const InquiryFormModal = ({ modalRef }) => {
             isFormDataValid &&
             isTextareaValid &&
             isMnameValid &&
+            isSuffixValid &&
             !errors.buyer_email &&
             isOtherUserTypeValid
         ) {
@@ -355,7 +372,8 @@ const InquiryFormModal = ({ modalRef }) => {
                 fileData.append("admin_email", user?.employee_email);
                 fileData.append("admin_id", user?.id);
                 fileData.append("admin_profile_picture", user?.profile_picture);
-
+              
+         
                 const response = await apiService.post(
                     "add-concern",
                     fileData,
@@ -413,12 +431,12 @@ const InquiryFormModal = ({ modalRef }) => {
             if (!isTextareaValid) {
                 setIsValid(false);
             }
-            if (!isChecked) {
+            if (!isMiddleNameChecked) {
                 //setIsValid(false);
                 setResetSuccess(false);
                 setHasErrors(false);
             }
-            // console.log("(!isChecked", isChecked);
+            // console.log("(!isMiddleNameChecked", isMiddleNameChecked);
             console.log("Form validation failed");
         }
     };
@@ -527,7 +545,9 @@ const InquiryFormModal = ({ modalRef }) => {
                                 //         : "border-custom-bluegreen"
                                 // }`}
                                 className={`flex relative items-center border w-[430px] rounded-[5px] overflow-hidden ${
-                                    isSubmitted && !formData.mname && !isChecked
+                                    isSubmitted &&
+                                    !formData.mname &&
+                                    !isMiddleNameChecked
                                         ? "border-red-500"
                                         : "border-custom-bluegreen"
                                 }`}
@@ -538,7 +558,7 @@ const InquiryFormModal = ({ modalRef }) => {
                                 <input
                                     name="mname"
                                     type="text"
-                                    disabled={isChecked}
+                                    disabled={isMiddleNameChecked}
                                     className="w-full px-4 text-sm focus:outline-none mobile:text-xs"
                                     value={formData.mname}
                                     onChange={handleChange}
@@ -546,9 +566,11 @@ const InquiryFormModal = ({ modalRef }) => {
                                 />
                                 <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3 gap-2 text-sm bg-custom-lightestgreen">
                                     <input
-                                        onChange={handleCheckboxChange}
+                                        onChange={
+                                            handleMiddleNameCheckboxChange
+                                        }
                                         type="checkbox"
-                                        checked={isChecked}
+                                        checked={isMiddleNameChecked}
                                         name="checkbox"
                                         className="accent-custom-lightgreen"
                                         value="checkbox"
@@ -557,6 +579,7 @@ const InquiryFormModal = ({ modalRef }) => {
                                 </span>
                             </div>
                         </div>
+
                         <div
                             className={`flex items-center border  rounded-[5px] overflow-hidden ${
                                 isSubmitted && !formData.lname
@@ -577,6 +600,43 @@ const InquiryFormModal = ({ modalRef }) => {
                                 className="w-full px-4 text-sm focus:outline-none mobile:text-xs"
                                 placeholder=""
                             />
+                        </div>
+                        <div className="flex items-center gap-[4px]">
+                            <div
+                                className={`flex relative items-center border w-[430px] rounded-[5px] overflow-hidden ${
+                                    isSubmitted &&
+                                    !formData.suffix &&
+                                    !isSuffixChecked
+                                        ? "border-red-500"
+                                        : "border-custom-bluegreen"
+                                }`}
+                            >
+                                <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex w-[240px] pl-3 py-1 tablet:w-[160px] mobile:w-[270px] mobile:text-xs">
+                                    Suffix Name
+                                </span>
+                                <input
+                                    name="suffix"
+                                    type="text"
+                                    disabled={isSuffixChecked}
+                                    className="w-full px-4 text-sm focus:outline-none mobile:text-xs"
+                                    value={formData.suffix}
+                                    onChange={handleChange}
+                                    placeholder=""
+                                />
+                                <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3 gap-2 text-sm bg-custom-lightestgreen">
+                                    <input
+                                        onChange={
+                                            handleSuffixNameCheckboxChange
+                                        }
+                                        type="checkbox"
+                                        checked={isSuffixChecked}
+                                        name="checkbox"
+                                        className="accent-custom-lightgreen"
+                                        value="checkbox"
+                                    />
+                                    <p>N/A</p>
+                                </span>
+                            </div>
                         </div>
                         <div
                             className={`flex items-center border  rounded-[5px] overflow-hidden ${
