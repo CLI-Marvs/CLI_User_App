@@ -39,7 +39,7 @@ const InquiryThread = () => {
     const [hasAttachments, setHasAttachments] = useState(false);
     const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
     const { propertyNamesList } = useStateContext();
-    const [dataConcern, setDataConcern] = useState({});
+  /*   const [dataConcern, setDataConcern] = useState({}); */
     const {
         messages,
         setTicketId,
@@ -69,16 +69,16 @@ const InquiryThread = () => {
         setSelectedProperty(e.target.value);
     };
 
+    const dataConcern = data.find((item) => item.ticket_id === ticketId || {});
    
-    useEffect(() => {
+   /*  useEffect(() => {
         console.log("ticketId inside useEffect", ticketId);
         console.log("data insideUseEffect", data);
 
-        const dataConcernData = data.find((item) => item.ticket_id === ticketId || {});
         console.log("dataConcernData", dataConcernData);
         setDataConcern(dataConcernData);
     }, [data, ticketId]);
-    
+     */
 
 
     console.log("data", data);
