@@ -374,13 +374,22 @@ const InquiryThread = () => {
         channel.listen("MessageID", (event) => {
             console.log("message id event", event.data);
             setEmailMessageID(event.data.message_id);
-            setDataConcern((prevDataConcern) => ({
+           /*  setDataConcern((prevDataConcern) => ({
                 ...prevDataConcern,
                 message_id: event.data.message_id,
-            }));
+            })); */
         });
     };
 
+    useEffect(() => {
+        if (emailMessageID) {
+            setDataConcern((prevData) => ({
+                ...prevData,
+                message_id: emailMessageID,
+            }));
+        }
+    }, [emailMessageID]);
+    
     
     const combineThreadMessages = messages[ticketId]
         ? messages[ticketId]
