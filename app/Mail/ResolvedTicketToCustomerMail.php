@@ -43,7 +43,7 @@ class ResolvedTicketToCustomerMail extends Mailable
     {
         return new Envelope(
             from: new Address('ask@cebulandmasters.com', 'Cebu Landmasters Inc.'),
-            subject: "[CLI Inquiry Test] Transaction {$this->ticket_id}",
+            subject: "[CLI Inquiry] Transaction {$this->ticket_id}",
         );
     }
 

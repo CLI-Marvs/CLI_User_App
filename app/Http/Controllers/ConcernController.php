@@ -942,28 +942,6 @@ class ConcernController extends Controller
         );
     }
 
-    /*   public function assigneeNotify($employee, $ticketIds)
-    {
-        $assignQuery = InquiryAssignee::query();
-        $assignQuery->whereIn('ticket_id', $ticketIds);
-        $assignQuery->where('email', $employee->employee_email);
-        $assignQuery->select(
-            'ticket_id',
-            'inquiry_assignee.id as assignee_id',
-            'inquiry_assignee.created_at',
-            \DB::raw('CASE WHEN read_notif_by_user.assignee_id IS NULL THEN 0 ELSE 1 END as is_read'),
-            \DB::raw("'Inquiry Assignment' as message_log")
-        );
-
-        $assignQuery->leftJoin('read_notif_by_user', function ($join) use ($employee) {
-            $join->on('inquiry_assignee.id', '=', 'read_notif_by_user.assignee_id')
-                ->where('read_notif_by_user.user_id', '=', $employee->id);
-        });
-
-        return $assignQuery->get();
-    } */
-
-
     public function assigneeNotify($employee, $ticketIds)
     {
         $assignQuery = InquiryAssignee::query();
@@ -1003,9 +981,6 @@ class ConcernController extends Controller
 
         return $assignQuery->get();
     }
-
-
-
 
     private function buyerReplyNotifs($employee, $ticketIds, $employeeDepartment)
     {
