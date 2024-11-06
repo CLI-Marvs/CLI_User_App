@@ -5,6 +5,7 @@ import apiService from "../../servicesApi/apiService";
 import { useStateContext } from "../../../context/contextprovider";
 import CircularProgress from "@mui/material/CircularProgress";
 import { toast, ToastContainer, Bounce } from "react-toastify";
+import { VALID_FILE_EXTENSIONS } from "../../../constant/data/validFile";
 const formDataState = {
     fname: "",
     mname: "",
@@ -22,7 +23,6 @@ const formDataState = {
 
 const InquiryFormModal = ({ modalRef }) => {
     const [files, setFiles] = useState([]);
-
     const fileInputRef = useRef();
     const [fileName, setFileName] = useState([]);
     const [message, setMessage] = useState("");
@@ -42,7 +42,6 @@ const InquiryFormModal = ({ modalRef }) => {
 
     const handleFileChange = (event) => {
         const selectedFiles = Array.from(event.target.files);
-
         setFiles((prevFiles) => {
             const prevFileNames = prevFiles.map((file) => file.name);
 
@@ -53,18 +52,11 @@ const InquiryFormModal = ({ modalRef }) => {
 
             return [...prevFiles, ...uniqueFiles];
         });
-
         setFileName((prevFileNames) => {
             const uniqueFileNames = selectedFiles
-                .map((file) =>
-                    file.name.length > 15
-                        ? `${file.name.substring(0, 12)}... .${file.name
-                              .split(".")
-                              .pop()}`
-                        : file.name
-                )
+                .map((file) => formatFileName(file.name))
                 .filter((name) => !prevFileNames.includes(name));
-
+            
             return [...prevFileNames, ...uniqueFileNames];
         });
 
@@ -96,16 +88,28 @@ const InquiryFormModal = ({ modalRef }) => {
             : []),
     ];
 
-    const handleDelete = (fileNameToDelete) => {
-        // setFiles((prevFiles) =>
-        //     prevFiles.filter((file) => file !== fileNameToDelete)
-        // );
-        // setFiles([]);
-        setFileName((prevFiles) =>
-            prevFiles.filter((file) => file !== fileNameToDelete)
-        );
+    // Helper function to normalize file names
+    const formatFileName = (fileName) => {
+        return fileName.length > 15
+            ? `${fileName.substring(0, 12)}... .${fileName.split(".").pop()}`
+            : fileName;
     };
 
+    const handleDelete = (fileNameToDelete) => {
+        const normalizedFileNameToDelete = formatFileName(fileNameToDelete);
+        // Remove from `files` state by comparing with the original file name
+        setFiles((prevFiles) =>
+            prevFiles.filter(
+                (file) =>
+                    formatFileName(file.name) !== normalizedFileNameToDelete
+            )
+        );
+
+        // Remove from `fileName` state
+        setFileName((prevFileNames) =>
+            prevFileNames.filter((name) => name !== normalizedFileNameToDelete)
+        );
+    };
     const [formData, setFormData] = useState(formDataState);
 
     const handleChange = (e) => {
@@ -137,16 +141,16 @@ const InquiryFormModal = ({ modalRef }) => {
         setIsSubmitted(false);
     };
 
-     const handleSuffixNameCheckboxChange = (event) => {
-         setIsSuffixChecked(event.target.checked);
-         setFormData((prevData) => ({
-             ...prevData,
-             suffix: isSuffixChecked ? "" : "",
-         }));
-         // setHasErrors(false);
-         setResetSuccess(true);
-         setIsSubmitted(false);
-     };
+    const handleSuffixNameCheckboxChange = (event) => {
+        setIsSuffixChecked(event.target.checked);
+        setFormData((prevData) => ({
+            ...prevData,
+            suffix: isSuffixChecked ? "" : "",
+        }));
+        // setHasErrors(false);
+        setResetSuccess(true);
+        setIsSubmitted(false);
+    };
     const isTextareaValid = message.trim().length > 0;
 
     const validateEmail = (email) => {
@@ -167,6 +171,7 @@ const InquiryFormModal = ({ modalRef }) => {
         setFileName("");
         setMessage("");
         setIsMiddleNameChecked(false);
+        setIsSuffixChecked(false);
     };
 
     const {
@@ -187,8 +192,8 @@ const InquiryFormModal = ({ modalRef }) => {
         e.preventDefault();
 
         setIsSubmitted(true);
-        const isMnameValid = isMiddleNameChecked || mname.trim() !== ""; 
-        const isSuffixValid = isSuffixChecked || suffix.trim() !== ""; 
+        const isMnameValid = isMiddleNameChecked || mname.trim() !== "";
+        const isSuffixValid = isSuffixChecked || suffix.trim() !== "";
 
         let isOtherUserTypeValid = true;
         if (user_type === "Others") {
@@ -196,159 +201,68 @@ const InquiryFormModal = ({ modalRef }) => {
         }
 
         if (files && files.length > 0) {
-            const validFile = [
-                "pdf",
-                "png",
-                "bmp",
-                "jpg",
-                "jpeg",
-                "xls",
-                "xlsx",
-                "xlsm",
-                "xml",
-                "csv",
-                "doc",
-                "docx",
-                "mp4", // MPEG-4
-                "m4v", // MPEG-4 with DRM
-                "mov", // Apple QuickTime
-                "avi", // Audio Video Interleave
-                "wmv", // Windows Media Video
-                "flv", // Flash Video
-                "mkv", // Matroska Video
-                "webm", // WebM format
-                "3gp", // 3GPP format for mobile
-                "3g2", // 3GPP2 format for mobile
-                "zip",
-                "txt", // Handle for .txt file extension
-            ];
+            let allFilesValid = true; // Track if all files are valid
+            const invalidExtensions = []; // Store invalid extensions
 
-            const extension = files[0].type;
+            files.forEach((file) => {
+                const extension = file.name.split(".").pop(); // Get the file extension
 
-            let modifiedExtension = extension.split("/")[1]; //from application/pdf to pdf
-            // Special handling for .docx MIME type
-            if (
-                extension ===
-                "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-            ) {
-                modifiedExtension = "docx";
-            } else if (extension === "application/msword") {
-                modifiedExtension = "doc";
-            } else if (
-                extension === "application/vnd.ms-excel.sheet.macroEnabled.12"
-            ) {
-                modifiedExtension = "xlsm";
-            } else if (extension === "application/vnd.ms-excel") {
-                modifiedExtension = "xls";
-            } else if (
-                extension ===
-                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-            ) {
-                modifiedExtension = "xlsx";
-            } else if (extension === "application/pdf") {
-                modifiedExtension = "pdf";
-            } else if (extension === "image/jpeg") {
-                modifiedExtension = "jpeg";
-            } else if (extension === "image/png") {
-                modifiedExtension = "png";
-            } else if (extension === "image/bmp") {
-                modifiedExtension = "bmp";
-            } else if (extension === "text/plain") {
-                modifiedExtension = "txt";
-            } else if (extension === "video/mp4") {
-                modifiedExtension = "mp4";
-            } else if (
-                extension === "video/x-m4v" ||
-                extension === "video/m4v"
-            ) {
-                modifiedExtension = "m4v";
-            } else if (
-                extension === "video/x-msvideo" ||
-                extension === "video/avi"
-            ) {
-                modifiedExtension = "avi";
-            } else if (
-                extension === "video/x-ms-wmv" ||
-                extension === "video/wmv"
-            ) {
-                modifiedExtension = "wmv";
-            } else if (
-                extension === "video/x-flv" ||
-                extension === "video/flv"
-            ) {
-                modifiedExtension = "flv";
-            } else if (
-                extension === "video/x-matroska" ||
-                extension === "video/mkv"
-            ) {
-                modifiedExtension = "mkv";
-            } else if (extension === "video/webm") {
-                modifiedExtension = "webm";
-            } else if (
-                extension === "video/3gpp" ||
-                extension === "video/3gp"
-            ) {
-                modifiedExtension = "3gp";
-            } else if (
-                extension === "video/3gpp2" ||
-                extension === "video/3g2"
-            ) {
-                modifiedExtension = "3g2";
-            } else if (extension === "application/x-zip-compressed") {
-                modifiedExtension = "zip";
-            } else {
-                // alert("File type not supported.");
-                toast("File type not supported.", {
-                    position: "top-right",
-                    autoClose: 1000,
-                    hideProgressBar: false,
-                    closeOnClick: true,
-                    pauseOnHover: true,
-                    draggable: true,
-                    progress: undefined,
-                    theme: "dark",
-                    transition: Bounce,
-                });
+                if (file.size > 100 * 1024 * 1024) {
+                    // Check size (100 MB)
+                    setLoading(false);
+                    toast.warning(`File is too large. Maximum size is 100MB.`, {
+                        position: "top-right",
+                        autoClose: 1500,
+                        hideProgressBar: false,
+                        closeOnClick: true,
+                        pauseOnHover: true,
+                        draggable: true,
+                        progress: undefined,
+                        theme: "dark",
+                        transition: Bounce
+                    });
+                    allFilesValid = false;
+                    return;
+                }
+
+                const isFileValid = VALID_FILE_EXTENSIONS.includes(extension); // Check if extension is allowed
+                if (!isFileValid) {
+                    invalidExtensions.push(extension); // Add to invalid list
+                    allFilesValid = false;
+                }
+            });
+
+            // If there are any invalid extensions, show a message
+            if (invalidExtensions.length > 0) {
+                toast.warning(
+                    `.${invalidExtensions.join(
+                        ", ."
+                    )} file type(s) are not allowed.`,
+                    {
+                        position: "top-right",
+                        autoClose: 1500,
+                        hideProgressBar: false,
+                        closeOnClick: true,
+                        pauseOnHover: true,
+                        draggable: true,
+                        progress: undefined,
+                        theme: "dark",
+                        transition: Bounce,
+                    }
+                );
                 setLoading(false);
                 return;
             }
 
-            const isFileValid = validFile.includes(modifiedExtension);
-            if (files[0].size > 100 * 1024 * 1024) {
-                // 100 MB
-                setLoading(false);
-                // alert("File size must be 100MB or less.");
-                toast(`File size must be 100MB or less.`, {
-                    position: "top-right",
-                    autoClose: 1000,
-                    hideProgressBar: false,
-                    closeOnClick: true,
-                    pauseOnHover: true,
-                    draggable: true,
-                    progress: undefined,
-                    theme: "dark",
-                    transition: Bounce,
-                });
+            if (!allFilesValid) {
+                // Stop further processing if files are invalid
                 return;
             }
-            if (!isFileValid) {
-                // alert(`${modifiedExtension} is not allowed.`);
-                toast(`${modifiedExtension} is not allowed.`, {
-                    position: "top-right",
-                    autoClose: 1000,
-                    hideProgressBar: false,
-                    closeOnClick: true,
-                    pauseOnHover: true,
-                    draggable: true,
-                    progress: undefined,
-                    theme: "dark",
 
-                    transition: Bounce,
-                });
-                setLoading(false);
-                return;
-            }
+            // Proceed with further processing if all files are valid
+            setLoading(true);
         }
+
         if (
             isFormDataValid &&
             isTextareaValid &&
@@ -372,8 +286,7 @@ const InquiryFormModal = ({ modalRef }) => {
                 fileData.append("admin_email", user?.employee_email);
                 fileData.append("admin_id", user?.id);
                 fileData.append("admin_profile_picture", user?.profile_picture);
-              
-         
+
                 const response = await apiService.post(
                     "add-concern",
                     fileData,
