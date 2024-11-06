@@ -203,7 +203,7 @@ const Navbar = () => {
                                 onClick={() => setIsOpen(!isOpen)}
                             />
                             {isOpen && (
-                                <div className="absolute top-full right-0 mt-2 w-[262px] h-auto px-[14px] py-[12px] bg-white text-custom-gray81 text-sm rounded-[10px] shadow-custom4 z-10">
+                                <div className="hidden absolute top-full right-0 mt-2 w-[262px] h-auto px-[14px] py-[12px] bg-white text-custom-gray81 text-sm rounded-[10px] shadow-custom4 z-10">
                                    <div className="h-[29px] px-[10px] py-[6px]">
                                         <p>Jannet T. Doe</p>
                                    </div>
