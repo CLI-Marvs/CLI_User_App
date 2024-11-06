@@ -1193,6 +1193,7 @@ const InquiryThread = () => {
                     modalRef={resolveModalRef}
                     ticketId={ticketId}
                     dataRef={dataConcern}
+                    onupdate={handleUpdate}
                 />
             </div>
             <div>

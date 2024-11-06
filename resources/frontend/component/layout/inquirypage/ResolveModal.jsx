@@ -4,7 +4,7 @@ import apiService from "../../servicesApi/apiService";
 import { AiFillInfoCircle } from "react-icons/ai";
 import { IoMdArrowDropdown } from "react-icons/io";
 
-const ResolveModal = ({ modalRef, ticketId, dataRef }) => {
+const ResolveModal = ({ modalRef, ticketId, dataRef, onupdate }) => {
     const { getAllConcerns, user, getInquiryLogs, data, assigneesPersonnel } =
         useStateContext();
     const [remarks, setRemarks] = useState("");
@@ -48,6 +48,7 @@ const ResolveModal = ({ modalRef, ticketId, dataRef }) => {
             });
             setRemarks("");
             getInquiryLogs(ticketId);
+            onupdate({...dataRef, status: "Resolved"});
             getAllConcerns();
             console.log("sucess", response);
         } catch (error) {
