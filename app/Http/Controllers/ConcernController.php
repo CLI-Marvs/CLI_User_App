@@ -1202,9 +1202,10 @@ class ConcernController extends Controller
                 ]
             ];
 
+            //* For concerns logs to join
             $inquiry->removed_assignee = json_encode($logData);
             $inquiry->ticket_id = $request->ticketId;
-            $inquiry->message_log = "Removed to" . ' ' . $request->name;
+            $inquiry->message_log = "Assignee removed" . ' ' . $request->name;
             $inquiry->save();
         } catch (\Exception $e) {
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
