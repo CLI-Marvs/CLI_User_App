@@ -39,8 +39,8 @@ const UserMessages = ({ items, dataConcern }) => {
                     </p>
                     <p className=" text-sm text-custom-gray81 flex gap-1">
                         <span>From:</span>
-                        {capitalizeWords(`${dataConcern.buyer_firstname} ${dataConcern.buyer_middlename} ${dataConcern.buyer_lastname}`)}{" "}
-                        {capitalizeWords(dataConcern.suffix_name)}
+                        {capitalizeWords(`${dataConcern?.buyer_firstname} ${dataConcern?.buyer_middlename} ${dataConcern?.buyer_lastname}`)}{" "}
+                        {capitalizeWords(dataConcern?.suffix_name)}
                     </p>
                     <p className=" text-sm text-custom-gray81 flex gap-1">
                         {dataConcern.buyer_email} <span>|</span>{" "}

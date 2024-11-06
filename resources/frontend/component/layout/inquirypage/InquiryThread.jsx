@@ -741,10 +741,10 @@ const InquiryThread = () => {
                             />
                             <div className="flex-1 flex flex-wrap">
                                 <p className="space-x-1 text-custom-bluegreen">
-                                    {dataConcern.property} (
-                                    {dataConcern.details_concern ??
-                                        dataConcern.email_subject}
-                                    ) <span>-</span> {dataConcern.ticket_id}
+                                    {dataConcern?.property} (
+                                    {dataConcern?.details_concern ??
+                                        dataConcern?.email_subject}
+                                    ) <span>-</span> {dataConcern?.ticket_id}
                                 </p>
                             </div>
                             {/*   {dataConcern.created_by &&
@@ -1051,10 +1051,10 @@ const InquiryThread = () => {
                                         Note: This message will be sent to{" "}
                                         <span className="font-semibold">
                                             {capitalizeWords(
-                                                `${dataConcern.buyer_firstname} ${dataConcern.buyer_middlename} ${dataConcern.buyer_lastname}`
+                                                `${dataConcern?.buyer_firstname} ${dataConcern?.buyer_middlename} ${dataConcern?.buyer_lastname}`
                                             )}{" "}
                                             {capitalizeWords(
-                                                dataConcern.suffix_name
+                                                dataConcern?.suffix_name
                                             )}
                                         </span>
                                         . Please use the comment section for CLI
@@ -1064,15 +1064,15 @@ const InquiryThread = () => {
                             </div>
                             <div className="border my-2 border-t-1 border-custom-lightestgreen"></div>
                             <div className="w-full flex justify-end gap-[13px]">
-                                {dataConcern.created_by &&
-                                    dataConcern.created_by === user?.id && (
+                                {dataConcern?.created_by &&
+                                    dataConcern?.created_by === user?.id && (
                                         <FaTrash
                                             className="text-[#EB4444] hover:text-red-600 cursor-pointer"
                                             onClick={handleDelete}
                                         />
                                     )}
 
-                                {dataConcern.status === "Resolved" ? (
+                                {dataConcern?.status === "Resolved" ? (
                                     <div className="flex justify-start items-center w-[122px] font-semibold text-[13px] text-custom-lightgreen space-x-1">
                                         <p>Ticket Resolved</p>
                                         <IoIosCheckmarkCircle className="size-[18px] text-custom-lightgreen" />
