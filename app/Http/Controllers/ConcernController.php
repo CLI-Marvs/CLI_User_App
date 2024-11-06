@@ -990,12 +990,12 @@ class ConcernController extends Controller
             $buyerReplyQuery->whereIn('ticket_id', $ticketIds);
         }
 
-        $buyerReplyQuery->leftJoin('read_notif_by_user', function ($join) use ($employee) {
-            $join->on('buyer_reply_notif.id', '=', 'read_notif_by_user.reply_id');
-        })
-        ->leftJoin('concerns', 'buyer_reply_notif.ticket_id', '=', 'concerns.ticket_id');
+        $buyerReplyQuery->leftJoin('concerns', 'buyer_reply_notif.ticket_id', '=', 'concerns.ticket_id')
+           ->leftJoin('read_notif_by_user', function ($join) use ($employee) {
+            $join->on('buyer_reply_notif.id', '=', 'read_notif_by_user.reply_id')
+                  ->where('read_notif_by_user.user_id', '=', $employee->id);
+        });
     
-        $buyerReplyQuery->where('read_notif_by_user.user_id', $employee->id);
 
         $buyerReplyQuery->select(
             'buyer_reply_notif.ticket_id',
