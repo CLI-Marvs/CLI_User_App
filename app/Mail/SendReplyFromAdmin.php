@@ -48,7 +48,7 @@ class SendReplyFromAdmin extends Mailable
         if (config('services.APP_URL') === 'https://admin-dev.cebulandmasters.com' || config('services.APP_URL') === 'http://localhost:8001') {
             return new Envelope(
                 from: new Address('ask@cebulandmasters.com', 'Cebu Landmasters Inc.'),
-                subject: "[CLI Inquiry Test] Transaction {$this->ticket_id}",
+                subject: "[Test] [CLI Inquiry] Transaction {$this->ticket_id}",
             );
         } else {
             return new Envelope(
