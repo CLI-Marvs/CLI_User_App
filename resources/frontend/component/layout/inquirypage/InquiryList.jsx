@@ -34,6 +34,7 @@ const InquiryList = () => {
         user,
         setSpecificAssigneeCsr,
         specificAssigneeCsr,
+        loading
         /*  setHasAttachments,
         hasAttachments */
     } = useStateContext();
@@ -332,6 +333,8 @@ const InquiryList = () => {
         }
     }; */
 
+
+    console.log("loading", loading);
     return (
         <>
             <div className="h-screen max-w-full bg-custom-grayFA px-[20px]">

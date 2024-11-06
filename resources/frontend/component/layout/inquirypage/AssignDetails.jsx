@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useStateContext } from "../../../context/contextprovider";
 import apiService from "../../servicesApi/apiService";
 import moment from "moment";
+import { BsPaperclip } from "react-icons/bs";
 
 const AssignDetails = ({ logMessages, ticketId }) => {
     const {
@@ -365,9 +366,9 @@ const AssignDetails = ({ logMessages, ticketId }) => {
 
     return (
         <>
-            <div className="px-[20px]">
+            <div className="px-[20px] mt-[16px]">
                 <div className="flex h-[49px] w-full gradient-btn2 p-[2px] rounded-[10px] items-center justify-center  ">
-                    <div className="w-full h-full flex gap-2 items-center bg-white rounded-[8px] p-[10px] ">
+                    <div className="relative gap-[10px] w-full h-full flex items-center bg-white rounded-[8px] p-[10px] ">
                         <input
                             type="text"
                             className="w-full outline-none"
@@ -375,6 +376,34 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                             maxLength={255}
                             value={message}
                         />
+                        <div className="hidden w-auto flex gap-[10px]">
+                            <div className="flex items-center">
+                                <input
+                                    type="file"
+                                    id="fileInput"
+                                    multiple
+                                    style={{ display: "none" }}
+                                    /* onChange={handleFileAttach} */
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() =>
+                                        document
+                                            .getElementById(
+                                                "fileInput"
+                                            )
+                                            .click()
+                                    }
+                                >
+                                    <BsPaperclip className="h-5 w-5 text-custom-solidgreen hover:text-gray-700" />
+                                </button>
+                            </div>
+                            <div className="flex justify-center items-center rounded-full bg-custom-bluegreen size-[24px]">
+                                <p className="text-sm text-white">
+                                    1
+                                </p>
+                            </div>
+                        </div>
                         <button
                             className={`w-[76px] h-[28px] rounded-[10px] text-xs text-white 
                                 ${!message.trim()

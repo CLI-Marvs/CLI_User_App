@@ -70,6 +70,7 @@ export const ContextProvider = ({ children }) => {
     const [bankNames, setBankNames] = useState("All");
     const [bankList, setBankList] = useState([]);
     const [filterDueDate, setFilterDueDate] = useState(null);
+    const [loading, setLoading] = useState(false);
 
 
     useEffect(() => {
@@ -90,6 +91,7 @@ export const ContextProvider = ({ children }) => {
 
     const getAllConcerns = async () => {
         if (token) {
+            setLoading(true);
             try {
                 const searchParams = new URLSearchParams({
                     search: JSON.stringify(searchFilter),
@@ -105,6 +107,7 @@ export const ContextProvider = ({ children }) => {
                 );
                 setData(response.data.data);
                 setPageCount(response.data.last_page);
+                setLoading(false);
             } catch (error) {
                 console.error("Error fetching data: ", error);
             }
@@ -631,7 +634,8 @@ export const ContextProvider = ({ children }) => {
                 filterDueDate,
                 setFilterDueDate,
                 notifStatus,
-                updateConcern
+                updateConcern,
+                loading
             }}
         >
             {children}

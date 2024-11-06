@@ -22,30 +22,30 @@ import { useStateContext } from "../../../context/contextprovider";
 import { IoMdArrowDropdown } from "react-icons/io";
 import { useLocation } from "react-router-dom";
 
-const data = [
-    { name: "01", Resolved: 0, Unresolved: 0 },
-    { name: "02", Resolved: 23, Unresolved: 5 },
-    { name: "03", Resolved: 26, Unresolved: 15 },
-    { name: "04", Resolved: 15, Unresolved: 13 },
-    { name: "05", Resolved: 4, Unresolved: 1 },
-    { name: "06", Resolved: 5, Unresolved: 11 },
-    { name: "07", Resolved: 19, Unresolved: 9 },
-    { name: "08", Resolved: 19, Unresolved: 19 },
-    { name: "09", Resolved: 15, Unresolved: 20 },
-    { name: "10", Resolved: 23, Unresolved: 9 },
-    { name: "11", Resolved: 28, Unresolved: 26 },
-    { name: "12", Resolved: 13, Unresolved: 9 },
-];
 
-const data2 = [
-    { name: "Group A", value: 40 },
-    { name: "Group B", value: 60 },
-];
 
-const data3 = [
-    { name: "38 Park Ave.", value1: 44, value2: 123 },
-    { name: "Casa Mira", value1: 136, value2: 220 },
-    { name: "Mivessa", value1: 275, value2: 44 },
+const data1 = [
+    {
+        name: '38 Park Ave',
+        inquiries: 80,
+        complaints: 20,
+        requests: 40,
+        suggestions: 15
+    },
+    {
+        name: 'Casa Mira',
+        inquiries: 120,
+        complaints: 35,
+        requests: 50,
+        suggestions: 10
+    },
+    {
+        name: 'Mivessa',
+        inquiries: 100,
+        complaints: 25,
+        requests: 60,
+        suggestions: 20
+    }
 ];
 
 const barHeight = 20;
@@ -74,7 +74,7 @@ const categoryColors = {
     "SOA/ Billing Statement/ Buyer's Ledger": COLORS[6],
     "Title and Other Registration Documents": COLORS[7],
     "Turn Over Status": COLORS[8],
-    "Unit Status": COLORS[9],   
+    "Unit Status": COLORS[9],
 };
 
 const SINGLE_COLOR = "#5B9BD5";
@@ -89,6 +89,22 @@ const CustomTooltip = ({ active, payload }) => {
                 {/*  <p>{`${payload[0].name}`}</p> */}
                 <p>{`Resolved: ${payload[0].value}`}</p>
                 <p>{`Unresolved: ${payload[1].value}`}</p>
+            </div>
+        );
+    }
+
+    return null;
+};
+
+const CustomTooltip2 = ({ active, payload }) => {
+    if (active && payload && payload.length) {
+        return (
+            <div className="bg-white p-2 shadow-lg rounded">
+                {/*  <p>{`${payload[0].name}`}</p> */}
+                <p>{`Complaints: ${payload[0].value}`}</p>
+                <p>{`Requests: ${payload[1].value}`}</p>
+                <p>{`Inquiries: ${payload[2].value}`}</p>
+                <p>{`Suggestions or Recommendations: ${payload[3].value}`}</p>
             </div>
         );
     }
@@ -158,23 +174,24 @@ const ReportPage = () => {
     };
 
     const chartHeight = dataProperty.length * (barHeight + 60);
+    const chartHeight2 = data1.length * (barHeight + 100);
 
-    const allDepartment = allEmployees 
-    ? ["All", ...Array.from(new Set(allEmployees
-        .map((employee) => employee.department)
-        .filter((department) => department !== null && department !== undefined && department !== "PM")
-      ))]
-    : ["All"];
-  
-  
-  
-   /*  const allDepartment = [
-        { key: "All", value: "All" },
-        { key: "Customer Relations - Services", value: "Customer Relations - Services" },
-        { key: "SALES", value: "Sales" },
-        { key: "AP", value: "Ap Commission" },
-        { key: "PM", value: "Property Management" },
-    ]; */
+    const allDepartment = allEmployees
+        ? ["All", ...Array.from(new Set(allEmployees
+            .map((employee) => employee.department)
+            .filter((department) => department !== null && department !== undefined && department !== "PM")
+        ))]
+        : ["All"];
+
+
+
+    /*  const allDepartment = [
+         { key: "All", value: "All" },
+         { key: "Customer Relations - Services", value: "Customer Relations - Services" },
+         { key: "SALES", value: "Sales" },
+         { key: "AP", value: "Ap Commission" },
+         { key: "PM", value: "Property Management" },
+     ]; */
 
 
     // const getCurrentMonth = () => {
@@ -263,16 +280,16 @@ const ReportPage = () => {
                                 <select
                                     name="year"
                                     className="appearance-none w-[100px] px-4 py-1 bg-white focus:outline-none border-0"
-                                   /*  value={department} */
-                                    /* onChange={(e) => setDepartment(e.target.value)} */
+                                /*  value={department} */
+                                /* onChange={(e) => setDepartment(e.target.value)} */
                                 >
-                                       {/*  <option value="2023">
+                                    {/*  <option value="2023">
                                             2023
                                         </option> */}
-                                        <option value="2024">
-                                            2024
-                                        </option>
-                                       {/*  <option value="2025">
+                                    <option value="2024">
+                                        2024
+                                    </option>
+                                    {/*  <option value="2025">
                                             2025
                                         </option> */}
                                 </select>
@@ -329,51 +346,52 @@ const ReportPage = () => {
                 </div>
             </div>
             <div className="relative flex gap-3 mt-4 bg-custom-grayFA items-start">
-                <div className="w-[547px] pb-7 min-h-[335px] flex-grow-1 bg-white rounded-lg">
-                    <p className="p-4 text-base montserrat-bold">
-                        Inquiries per category
-                    </p>
-                    <div className="border border-t-1"></div>
-                    <div className="mt-4">
-                        <div className="flex gap-[10px]">
-                            <div className="flex  w-[300px] items-center border rounded-md overflow-hidden">
-                                <span className="text-custom-gray81 bg-custom-grayFA flex items-center text-sm w-[150px] -mr-3 pl-3 py-1">
-                                    For the month of
-                                </span>
-                                <div className="relative w-[159px]">
-                                    <select
-                                        name="concern"
-                                        className="appearance-none w-full px-4 py-1 bg-white focus:outline-none border-0"
-                                        value={month}
-                                        onChange={(e) => setMonth(e.target.value)}
-                                    >
-                                        <option value="january">January</option>
-                                        <option value="february">February</option>
-                                        <option value="march">March</option>
-                                        <option value="april">April</option>
-                                        <option value="may">May</option>
-                                        <option value="june">June</option>
-                                        <option value="july">July</option>
-                                        <option value="august">August</option>
-                                        <option value="september">September</option>
-                                        <option value="october">October</option>
-                                        <option value="november">November</option>
-                                        <option value="december">December</option>
-                                    </select>
-                                    <span className="absolute inset-y-0 right-0 flex items-center text-custom-gray81 pr-3 pl-3 bg-custom-grayFA pointer-events-none">
-                                        <IoMdArrowDropdown />
+                <div>
+                    <div className="w-[547px] pb-7 min-h-[335px] flex-grow-1 bg-white rounded-lg">
+                        <p className="p-4 text-base montserrat-bold">
+                            Inquiries per category
+                        </p>
+                        <div className="border border-t-1"></div>
+                        <div className="mt-4">
+                            <div className="flex gap-[10px]">
+                                <div className="flex  w-[300px] items-center border rounded-md overflow-hidden">
+                                    <span className="text-custom-gray81 bg-custom-grayFA flex items-center text-sm w-[150px] -mr-3 pl-3 py-1">
+                                        For the month of
                                     </span>
+                                    <div className="relative w-[159px]">
+                                        <select
+                                            name="concern"
+                                            className="appearance-none w-full px-4 py-1 bg-white focus:outline-none border-0"
+                                            value={month}
+                                            onChange={(e) => setMonth(e.target.value)}
+                                        >
+                                            <option value="january">January</option>
+                                            <option value="february">February</option>
+                                            <option value="march">March</option>
+                                            <option value="april">April</option>
+                                            <option value="may">May</option>
+                                            <option value="june">June</option>
+                                            <option value="july">July</option>
+                                            <option value="august">August</option>
+                                            <option value="september">September</option>
+                                            <option value="october">October</option>
+                                            <option value="november">November</option>
+                                            <option value="december">December</option>
+                                        </select>
+                                        <span className="absolute inset-y-0 right-0 flex items-center text-custom-gray81 pr-3 pl-3 bg-custom-grayFA pointer-events-none">
+                                            <IoMdArrowDropdown />
+                                        </span>
+                                    </div>
                                 </div>
-                            </div>
-                            <div className="flex w-[95px] items-center border rounded-md overflow-hidden">
-                                <div className="relative w-full">
-                                    <select
-                                        name="year"
-                                        className="appearance-none w-[100px] px-4 py-1 bg-white focus:outline-none border-0"
-                                    /*  value={department} */
+                                <div className="flex w-[95px] items-center border rounded-md overflow-hidden">
+                                    <div className="relative w-full">
+                                        <select
+                                            name="year"
+                                            className="appearance-none w-[100px] px-4 py-1 bg-white focus:outline-none border-0"
+                                        /*  value={department} */
                                         /* onChange={(e) => setDepartment(e.target.value)} */
-                                    >
-                                           {/*  <option value="2023">
+                                        >
+                                            {/*  <option value="2023">
                                                 2023
                                             </option> */}
                                             <option value="2024">
@@ -382,262 +400,400 @@ const ReportPage = () => {
                                             {/* <option value="2025">
                                                 2025
                                             </option> */}
-                                    </select>
-                                    <span className="absolute inset-y-0 right-0 flex items-center text-custom-gray81 pr-3 pl-3 bg-custom-grayFA pointer-events-none">
-                                        <IoMdArrowDropdown />
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                        </div>
-                    <div className="flex flex-col">
-                        <div>
-                            <PieChart width={548} height={360}>
-                                <Pie
-                                    data={dataToDisplay}
-                                    cx="50%"
-                                    cy="50%"
-                                    outerRadius={170}
-                                    innerRadius={0}
-                                    paddingAngle={1}
-                                    strokeWidth={1}
-                                    stroke="white"
-                                    cornerRadius={0}
-                                    fill="#8884d8"
-                                    dataKey="value"
-                                    startAngle={90}
-                                    endAngle={450}
-                                >
-                                    {dataToDisplay.map((entry, index) => (
-                                        <Cell
-                                            key={index}
-                                            fill={categoryColors[entry.name] || COLORS[index % COLORS.length]}
-                                        />
-                                    ))}
-                                    <LabelList
-                                    dataKey="value" 
-                                    position="inside"
-                                    fill="white" 
-                                    formatter={(value) => `${value}%`}
-                                    style={{ fontFamily: '', fontWeight: 'normal', fontSize: 20}}
-                                    />
-                                </Pie>
-                            </PieChart>
-                        </div>
-
-                        {/*  <div className="w-full flex justify-start items-center">
-                            <div className="flex flex-col">
-                                <div className="flex gap-10 ">
-                                    <div className="flex gap-1 items-center">
-                                        <span className="text-xl mb-1 text-custom-lightblue">
-                                            ●
-                                        </span>
-                                        <span className="text-sm text-gray-500">
-                                            Reservation Documents
-                                        </span>
-                                    </div>
-                                    <div className="flex items-center gap-1">
-                                        <span className="text-gray-700 font-semibold text-lg">
-                                            40
-                                        </span>
-                                        <span className="text-custom-gray81">
-                                            %
-                                        </span>
-                                    </div>
-                                </div>
-                                <div className="flex gap-10 justify-between">
-                                    <div className="flex gap-1 items-center">
-                                        <span className="text-xl mb-1 text-custom-solidgreen">
-                                            ●
-                                        </span>
-                                        <span className="text-sm text-gray-500">
-                                            Payment Issues
-                                        </span>
-                                    </div>
-                                    <div className="flex items-center gap-1">
-                                        <span className="text-gray-700 font-semibold text-lg">
-                                            60
-                                        </span>
-                                        <span className="text-custom-gray81">
-                                            %
+                                        </select>
+                                        <span className="absolute inset-y-0 right-0 flex items-center text-custom-gray81 pr-3 pl-3 bg-custom-grayFA pointer-events-none">
+                                            <IoMdArrowDropdown />
                                         </span>
                                     </div>
                                 </div>
                             </div>
-                        </div> */}
-                        <div className="w-full px-[70px]">
-                            <div className="flex flex-col">
-                                {dataToDisplay.map((category, index) => (
-                                    <div
-                                        className="flex justify-between w-full"
-                                        key={index}
+                        </div>
+                        <div className="flex flex-col">
+                            <div>
+                                <PieChart width={548} height={360}>
+                                    <Pie
+                                        data={dataToDisplay}
+                                        cx="50%"
+                                        cy="50%"
+                                        outerRadius={170}
+                                        innerRadius={0}
+                                        paddingAngle={1}
+                                        strokeWidth={1}
+                                        stroke="white"
+                                        cornerRadius={0}
+                                        fill="#8884d8"
+                                        dataKey="value"
+                                        startAngle={90}
+                                        endAngle={450}
                                     >
-                                        <div className="flex gap-1 items-center">
-                                            <span
-                                                className="text-xl mb-1"
-                                                style={{
-                                                    color: getCategoryColor(
-                                                        category.name
-                                                    ),
-                                                }}
-                                            >
-                                                ●
-                                            </span>
-                                            <span className="text-sm text-gray-500 leading-[15px] py-[4px]">
-                                                {category.name}
-                                            </span>
+                                        {dataToDisplay.map((entry, index) => (
+                                            <Cell
+                                                key={index}
+                                                fill={categoryColors[entry.name] || COLORS[index % COLORS.length]}
+                                            />
+                                        ))}
+                                        
+                                    </Pie>
+                                    <Tooltip formatter={(value, name) => ` ${value}%`} />
+                                </PieChart>
+                            </div>
+
+                            <div className="w-full px-[70px]">
+                                <div className="flex flex-col">
+                                    {dataToDisplay.map((category, index) => (
+                                        <div
+                                            className="flex justify-between w-full"
+                                            key={index}
+                                        >
+                                            <div className="flex gap-1 items-center">
+                                                <span
+                                                    className="text-xl mb-1"
+                                                    style={{
+                                                        color: getCategoryColor(
+                                                            category.name
+                                                        ),
+                                                    }}
+                                                >
+                                                    ●
+                                                </span>
+                                                <span className="text-sm text-gray-500 leading-[15px] py-[4px]">
+                                                    {category.name}
+                                                </span>
+                                            </div>
+                                            <div className="flex items-center gap-1">
+                                                <span className="text-gray-700 font-semibold text-lg">
+                                                    {category.value}
+                                                </span>
+                                                <span className="text-custom-gray81">
+                                                    {category.value ? "%" : ""}
+                                                </span>
+                                            </div>
                                         </div>
-                                        <div className="flex items-center gap-1">
-                                            <span className="text-gray-700 font-semibold text-lg">
-                                                {category.value}
-                                            </span>
-                                            <span className="text-custom-gray81">
-                                                {category.value ? "%" : ""}
-                                            </span>
-                                        </div>
-                                    </div>
-                                ))}
+                                    ))}
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div className=" bg-white rounded-[10px]  w-[579px] flex flex-col overflow-y-auto">
-                    <p className="p-4  text-base montserrat-bold">
-                        Inquiries per property
-                    </p>
-                    <div className="border border-t-1"></div>
-                    <div className="mt-4 ">
-                        <div className="flex gap-[10px]">
-                            <div className="flex w-[300px] items-center border rounded-md overflow-hidden">
-                                <span className="text-custom-gray81 bg-custom-grayFA flex items-center text-sm w-[150px] -mr-3 pl-3 py-1">
-                                    For the month of
-                                </span>
-                                <div className="relative w-[159px]">
-                                    <select
-                                        name="concern"
-                                        className="appearance-none w-full px-4 py-1 bg-white focus:outline-none border-0"
-                                        onChange={(e) => setPropertyMonth(e.target.value)}
-                                        value={propertyMonth}
-                                    >
-                                        <option value="january">January</option>
-                                        <option value="february">February</option>
-                                        <option value="march">March</option>
-                                        <option value="april">April</option>
-                                        <option value="may">May</option>
-                                        <option value="june">June</option>
-                                        <option value="july">July</option>
-                                        <option value="august">August</option>
-                                        <option value="september">September</option>
-                                        <option value="october">October</option>
-                                        <option value="november">November</option>
-                                        <option value="december">December</option>
-                                    </select>
-                                    <span className="absolute inset-y-0 right-0 flex items-center text-custom-gray81 pr-3 pl-3 bg-custom-grayFA pointer-events-none">
-                                        <IoMdArrowDropdown />
+                <div className="flex flex-col gap-3">
+                    <div className=" bg-white rounded-[10px]  w-[579px] flex flex-col overflow-y-auto">
+                        <p className="p-4  text-base montserrat-bold">
+                            Inquiries per property
+                        </p>
+                        <div className="border border-t-1"></div>
+                        <div className="mt-4 ">
+                            <div className="flex gap-[10px]">
+                                <div className="flex w-[300px] items-center border rounded-md overflow-hidden">
+                                    <span className="text-custom-gray81 bg-custom-grayFA flex items-center text-sm w-[150px] -mr-3 pl-3 py-1">
+                                        For the month of
                                     </span>
+                                    <div className="relative w-[159px]">
+                                        <select
+                                            name="concern"
+                                            className="appearance-none w-full px-4 py-1 bg-white focus:outline-none border-0"
+                                            onChange={(e) => setPropertyMonth(e.target.value)}
+                                            value={propertyMonth}
+                                        >
+                                            <option value="january">January</option>
+                                            <option value="february">February</option>
+                                            <option value="march">March</option>
+                                            <option value="april">April</option>
+                                            <option value="may">May</option>
+                                            <option value="june">June</option>
+                                            <option value="july">July</option>
+                                            <option value="august">August</option>
+                                            <option value="september">September</option>
+                                            <option value="october">October</option>
+                                            <option value="november">November</option>
+                                            <option value="december">December</option>
+                                        </select>
+                                        <span className="absolute inset-y-0 right-0 flex items-center text-custom-gray81 pr-3 pl-3 bg-custom-grayFA pointer-events-none">
+                                            <IoMdArrowDropdown />
+                                        </span>
+                                    </div>
                                 </div>
-                            </div>
-                            <div className="flex w-[95px] items-center border rounded-md overflow-hidden">
-                                <div className="relative w-full">
-                                    <select
-                                        name="year"
-                                        className="appearance-none w-[100px] px-4 py-1 bg-white focus:outline-none border-0"
-                                    /*  value={department} */
+                                <div className="flex w-[95px] items-center border rounded-md overflow-hidden">
+                                    <div className="relative w-full">
+                                        <select
+                                            name="year"
+                                            className="appearance-none w-[100px] px-4 py-1 bg-white focus:outline-none border-0"
+                                        /*  value={department} */
                                         /* onChange={(e) => setDepartment(e.target.value)} */
-                                    >
+                                        >
                                             {/* <option value="2023">
                                                 2023
                                             </option> */}
                                             <option value="2024">
                                                 2024
                                             </option>
-                                           {/*  <option value="2025">
+                                            {/*  <option value="2025">
                                                 2025
                                             </option> */}
-                                    </select>
-                                    <span className="absolute inset-y-0 right-0 flex items-center text-custom-gray81 pr-3 pl-3 bg-custom-grayFA pointer-events-none">
-                                        <IoMdArrowDropdown />
+                                        </select>
+                                        <span className="absolute inset-y-0 right-0 flex items-center text-custom-gray81 pr-3 pl-3 bg-custom-grayFA pointer-events-none">
+                                            <IoMdArrowDropdown />
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="flex-grow">
+
+                            <BarChart
+                                width={400}
+                                height={chartHeight}
+                                data={dataProperty}
+                                layout="vertical"
+                                margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                            >
+                                <XAxis type="number" hide />
+                                <YAxis
+                                    type="category"
+                                    dataKey="name"
+                                    hide
+                                    tick={false}
+                                />
+                                <Tooltip content={<CustomTooltip />} />
+
+                                <Bar
+                                    dataKey="resolved"
+                                    fill="#348017"
+                                    barSize={15}
+                                    radius={[0, 4, 4, 0]}
+                                >
+                                    <LabelList
+                                        dataKey="resolved"
+                                        position="right"
+                                        fill="#4a5568"
+                                    />
+                                    <LabelList
+                                        dataKey="name"
+                                        position="top"
+                                        content={({ x, y, value }) => (
+                                            <text
+                                                x={x}
+                                                y={y - 13}
+                                                fill="#00000"
+                                                textAnchor="start"
+                                                dominantBaseline="central"
+                                            >
+                                                {value}
+                                            </text>
+                                        )}
+                                    />
+                                </Bar>
+
+                                <Bar
+                                    dataKey="unresolved" // Update this to unresolved
+                                    fill="#D3F1D8"
+                                    barSize={15}
+                                    radius={[0, 4, 4, 0]}
+                                >
+                                    <LabelList
+                                        dataKey="unresolved" // Update this to unresolved
+                                        position="right"
+                                        fill="#4a5568"
+                                    />
+                                </Bar>
+                            </BarChart>
+
+                            <div className="flex justify-end">
+                                <div className="flex items-center px-3 py-2 gap-2">
+                                    <span className="flex h-[20px] items-center pb-1 text-custom-lightestgreen text-2xl">
+                                        ●
+                                    </span>
+                                    <span className="text-custom-gray12 text-sm">
+                                        Unresolved
+                                    </span>
+                                </div>
+                                <div className="flex items-center px-3 py-2 gap-2">
+                                    <span className="flex h-[20px] items-center pb-1 text-custom-solidgreen text-2xl">
+                                        ●
+                                    </span>
+                                    <span className="text-custom-gray12 text-sm">
+                                        Resolved
                                     </span>
                                 </div>
                             </div>
-                        </div>     
+                        </div>
                     </div>
-                    <div className="flex-grow">
-
-                        <BarChart
-                            width={400}
-                            height={chartHeight}
-                            data={dataProperty}
-                            layout="vertical"
-                            margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-                        >
-                            <XAxis type="number" hide />
-                            <YAxis
-                                type="category"
-                                dataKey="name"
-                                hide
-                                tick={false}
-                            />
-                            <Tooltip content={<CustomTooltip />} />
-
-                            <Bar
-                                dataKey="resolved"
-                                fill="#348017"
-                                barSize={15}
-                                radius={[0, 4, 4, 0]}
-                            >
-                                <LabelList
-                                    dataKey="resolved"
-                                    position="right"
-                                    fill="#4a5568"
-                                />
-                                <LabelList
-                                    dataKey="name"
-                                    position="top"
-                                    content={({ x, y, value }) => (
-                                        <text
-                                            x={x}
-                                            y={y - 13}
-                                            fill="#00000"
-                                            textAnchor="start"
-                                            dominantBaseline="central"
+                    <div className=" bg-white rounded-[10px]  w-[579px] flex flex-col overflow-y-auto">
+                        <p className="p-4  text-base montserrat-bold">
+                            Customer communication type
+                        </p>
+                        <div className="border border-t-1"></div>
+                        <div className="mt-4 ">
+                            <div className="flex gap-[10px]">
+                                <div className="flex w-[300px] items-center border rounded-md overflow-hidden">
+                                    <span className="text-custom-gray81 bg-custom-grayFA flex items-center text-sm w-[150px] -mr-3 pl-3 py-1">
+                                        For the month of
+                                    </span>
+                                    <div className="relative w-[159px]">
+                                        <select
+                                            name="concern"
+                                            className="appearance-none w-full px-4 py-1 bg-white focus:outline-none border-0"
+                                            onChange={(e) => setPropertyMonth(e.target.value)}
+                                            value={propertyMonth}
                                         >
-                                            {value}
-                                        </text>
-                                    )}
-                                />
-                            </Bar>
-
-                            <Bar
-                                dataKey="unresolved" // Update this to unresolved
-                                fill="#D3F1D8"
-                                barSize={15}
-                                radius={[0, 4, 4, 0]}
-                            >
-                                <LabelList
-                                    dataKey="unresolved" // Update this to unresolved
-                                    position="right"
-                                    fill="#4a5568"
-                                />
-                            </Bar>
-                        </BarChart>
-
-                        <div className="flex justify-end">
-                            <div className="flex items-center px-3 py-2 gap-3">
-                                <span className="flex items-center text-custom-lightestgreen text-2xl">
-                                    ●
-                                </span>
-                                <span className="text-custom-gray12">
-                                    Unresolved
-                                </span>
+                                            <option value="january">January</option>
+                                            <option value="february">February</option>
+                                            <option value="march">March</option>
+                                            <option value="april">April</option>
+                                            <option value="may">May</option>
+                                            <option value="june">June</option>
+                                            <option value="july">July</option>
+                                            <option value="august">August</option>
+                                            <option value="september">September</option>
+                                            <option value="october">October</option>
+                                            <option value="november">November</option>
+                                            <option value="december">December</option>
+                                        </select>
+                                        <span className="absolute inset-y-0 right-0 flex items-center text-custom-gray81 pr-3 pl-3 bg-custom-grayFA pointer-events-none">
+                                            <IoMdArrowDropdown />
+                                        </span>
+                                    </div>
+                                </div>
+                                <div className="flex w-[95px] items-center border rounded-md overflow-hidden">
+                                    <div className="relative w-full">
+                                        <select
+                                            name="year"
+                                            className="appearance-none w-[100px] px-4 py-1 bg-white focus:outline-none border-0"
+                                        /*  value={department} */
+                                        /* onChange={(e) => setDepartment(e.target.value)} */
+                                        >
+                                            {/* <option value="2023">
+                                                2023
+                                            </option> */}
+                                            <option value="2024">
+                                                2024
+                                            </option>
+                                            {/*  <option value="2025">
+                                                2025
+                                            </option> */}
+                                        </select>
+                                        <span className="absolute inset-y-0 right-0 flex items-center text-custom-gray81 pr-3 pl-3 bg-custom-grayFA pointer-events-none">
+                                            <IoMdArrowDropdown />
+                                        </span>
+                                    </div>
+                                </div>
                             </div>
-                            <div className="flex items-center px-3 py-2 gap-3">
-                                <span className="flex items-center text-custom-solidgreen text-2xl">
-                                    ●
-                                </span>
-                                <span className="text-custom-gray12">
-                                    Resolved
-                                </span>
+                        </div>
+                        <div className="flex-grow">
+
+                            <BarChart
+                                width={400}
+                                height={chartHeight2}
+                                data={data1}
+                                layout="vertical"
+                                margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                            >
+                                <XAxis type="number" hide />
+                                <YAxis
+                                    type="category"
+                                    dataKey="name"
+                                    hide
+                                    tick={false}
+                                />
+                                <Tooltip content={<CustomTooltip2 />}/>
+
+                                <Bar
+                                    dataKey="complaints"
+                                    fill="#EB4444"
+                                    barSize={15}
+                                    radius={[0, 4, 4, 0]}
+                                >
+                                    <LabelList
+                                        dataKey="complaints"
+                                        position="right"
+                                        fill="#4a5568"
+                                    />
+                                    <LabelList
+                                        dataKey="name"
+                                        position="top"
+                                        content={({ x, y, value }) => (
+                                            <text
+                                                x={x}
+                                                y={y - 13}
+                                                fill="#00000"
+                                                textAnchor="start"
+                                                dominantBaseline="central"
+                                            >
+                                                {value}
+                                            </text>
+                                        )}
+                                    />
+                                </Bar>
+                                <Bar
+                                    dataKey="requests"
+                                    fill="#348017"
+                                    barSize={15}
+                                    radius={[0, 4, 4, 0]}
+                                >
+                                    <LabelList
+                                        dataKey="requests"
+                                        position="right"
+                                        fill="#4a5568"
+                                    />
+                                </Bar>
+                                <Bar
+                                    dataKey="inquiries"
+                                    fill="#1A73E8"
+                                    barSize={15}
+                                    radius={[0, 4, 4, 0]}
+                                >
+                                    <LabelList
+                                        dataKey="inquiries"
+                                        position="right"
+                                        fill="#4a5568"
+                                    />
+                                </Bar>
+                                <Bar
+                                    dataKey="suggestions"
+                                    fill="#E4EA3B"
+                                    barSize={15}
+                                    radius={[0, 4, 4, 0]}
+                                >
+                                    <LabelList
+                                        dataKey="suggestions"
+                                        position="right"
+                                        fill="#4a5568"
+                                    />
+                                </Bar>
+                            </BarChart>
+
+                            <div className="flex justify-end">
+                                <div className="flex items-center pr-3 py-2 gap-2">
+                                    <span className="flex h-[20px] items-center pb-1 text-[#EB4444] text-2xl">
+                                        ●
+                                    </span>
+                                    <span className="text-custom-gray12 text-sm">
+                                        Complaints
+                                    </span>
+                                </div>
+                                <div className="flex items-center pr-3 py-2 gap-2">
+                                    <span className="flex h-[20px] items-center pb-1 text-[#348017] text-2xl">
+                                        ●
+                                    </span>
+                                    <span className="text-custom-gray12 text-sm">
+                                        Requests
+                                    </span>
+                                </div>
+                                <div className="flex items-center pr-3 py-2 gap-2">
+                                    <span className="flex h-[20px] items-center pb-1 text-[#1A73E8] text-2xl">
+                                        ●
+                                    </span>
+                                    <span className="text-custom-gray12 text-sm">
+                                        Inquiries
+                                    </span>
+                                </div>
+                                <div className="flex items-center pr-3 py-2 gap-2">
+                                    <span className="flex h-[20px] items-center pb-1 text-[#E4EA3B] text-2xl">
+                                        ●
+                                    </span>
+                                    <span className="text-custom-gray12 text-sm">
+                                        Suggestion or Recommendations
+                                    </span>
+                                </div>
                             </div>
                         </div>
                     </div>
