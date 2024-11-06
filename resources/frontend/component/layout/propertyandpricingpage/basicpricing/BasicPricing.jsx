@@ -13,7 +13,7 @@ import { usePriceBasicDetailStateContext } from "../../../../context/PriceBasicD
 import { useFloorPremiumStateContext } from "../../../../context/FloorPremium/FloorPremiumContext";
 import { useStateContext } from "../../../../context/contextprovider";
 import apiService from "../../../servicesApi/apiService";
-import expectedHeaders from "../../../../constant/excelHeader";
+import expectedHeaders from "../../../../constant/data/excelHeader";
 import * as XLSX from "xlsx";
 import { useNavigate } from "react-router-dom";
 import { useParams } from "react-router-dom";
