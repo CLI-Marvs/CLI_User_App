@@ -45,11 +45,21 @@ class SendReplyFromAdmin extends Mailable
      */
     public function envelope(): Envelope
     {
+        \Log::info('Envelopt services', [
+            'APP_URL' => config('services.APP_URL')
+        ]);
 
-        return new Envelope(
-            from: new Address('ask@cebulandmasters.com', 'Cebu Landmasters Inc.'),
-            subject: "[CLI Inquiry] Transaction {$this->ticket_id}",
-        );
+        if (config('services.APP_URL') === 'https://admin-dev.cebulandmasters.com' || config('services.APP_URL') === 'http://localhost:8001') {
+            return new Envelope(
+                from: new Address('ask@cebulandmasters.com', 'Cebu Landmasters Inc.'),
+                subject: "[CLI Inquiry Test] Transaction {$this->ticket_id}",
+            );
+        } else {
+            return new Envelope(
+                from: new Address('ask@cebulandmasters.com', 'Cebu Landmasters Inc.'),
+                subject: "[CLI Inquiry] Transaction {$this->ticket_id}",
+            );
+        }
     }
 
     public function headers(): Headers
