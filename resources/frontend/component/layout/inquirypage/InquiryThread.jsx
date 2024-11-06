@@ -82,7 +82,6 @@ const InquiryThread = () => {
         setDataConcern((prevData) => ({
             ...prevData,
             ...newData,
-            message_id: emailMessageID || prevData.message_id, // Use the latest message ID if available
         }));
     };
 
@@ -375,9 +374,14 @@ const InquiryThread = () => {
         channel.listen("MessageID", (event) => {
             console.log("message id event", event.data);
             setEmailMessageID(event.data.message_id);
+            setDataConcern((prevDataConcern) => ({
+                ...prevDataConcern,
+                message_id: event.data.message_id,
+            }));
         });
     };
 
+    
     const combineThreadMessages = messages[ticketId]
         ? messages[ticketId]
               .flat()
