@@ -22,6 +22,7 @@ import { IoIosCheckmarkCircle } from "react-icons/io";
 import { toast, ToastContainer, Bounce } from "react-toastify";
 import Alert from "../../../component/Alert";
 import AddInfoModal from "./AddInfoModal";
+import { VALID_FILE_EXTENSIONS } from "../../../constant/data/validFile";
 
 const InquiryThread = () => {
     const [attachedFiles, setAttachedFiles] = useState([]);
@@ -39,7 +40,7 @@ const InquiryThread = () => {
     const [hasAttachments, setHasAttachments] = useState(false);
     const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
     const { propertyNamesList } = useStateContext();
-  /*   const [dataConcern, setDataConcern] = useState({}); */
+    /*   const [dataConcern, setDataConcern] = useState({}); */
     const {
         messages,
         setTicketId,
@@ -55,7 +56,7 @@ const InquiryThread = () => {
     const modalRef = useRef(null);
     const resolveModalRef = useRef(null);
     const navigate = useNavigate();
-      const location = useLocation();
+    const location = useLocation();
     const { itemsData } = location?.state || {};
     const params = useParams();
     const ticketId = decodeURIComponent(params.id);
@@ -71,19 +72,19 @@ const InquiryThread = () => {
     };
 
     const handleUpdate = (newData) => {
-        setDataConcern(prevData => ({
+        setDataConcern((prevData) => ({
             ...prevData,
-            ...newData, 
+            ...newData,
         }));
     };
 
-  /*   console.log("data", data); */
+    /*   console.log("data", data); */
     console.log("updatedConcern", dataConcern);
 
-   /*  const dataConcern = data?.find((item) => item.ticket_id === ticketId) || {}; */
-   
-   /*  console.log("dataConcern", data); */
-   /*  console.log("data", data);
+    /*  const dataConcern = data?.find((item) => item.ticket_id === ticketId) || {}; */
+
+    /*  console.log("dataConcern", data); */
+    /*  console.log("data", data);
 
     console.log("dataConcern", dataConcern);
     console.log("ticketId", ticketId); */
@@ -221,156 +222,62 @@ const InquiryThread = () => {
         const formData = new FormData();
 
         if (attachedFiles && attachedFiles.length > 0) {
-            const validFile = [
-                "pdf",
-                "png",
-                "bmp",
-                "jpg",
-                "jpeg",
-                "xls",
-                "xlsx",
-                "xlsm",
-                "xml",
-                "csv",
-                "doc",
-                "docx",
-                "mp4", // MPEG-4
-                "m4v", // MPEG-4 with DRM
-                "mov", // Apple QuickTime
-                "avi", // Audio Video Interleave
-                "wmv", // Windows Media Video
-                "flv", // Flash Video
-                "mkv", // Matroska Video
-                "webm", // WebM format
-                "3gp", // 3GPP format for mobile
-                "3g2", // 3GPP2 format for mobile
-                "zip",
-                "txt", // Handle for .txt file extension
-            ];
-            const extension = attachedFiles[0].type;
+            const invalidExtensions = []; // To collect invalid file extensions
+            const oversizedFiles = []; // To collect oversized file names
 
-            let modifiedExtension = extension.split("/")[1]; //from application/pdf to pdf
-            // Special handling for .docx MIME type
-            if (
-                extension ===
-                "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-            ) {
-                modifiedExtension = "docx";
-            } else if (extension === "application/msword") {
-                modifiedExtension = "doc";
-            } else if (
-                extension === "application/vnd.ms-excel.sheet.macroEnabled.12"
-            ) {
-                modifiedExtension = "xlsm";
-            } else if (extension === "application/vnd.ms-excel") {
-                modifiedExtension = "xls";
-            } else if (
-                extension ===
-                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-            ) {
-                modifiedExtension = "xlsx";
-            } else if (extension === "application/pdf") {
-                modifiedExtension = "pdf";
-            } else if (extension === "image/jpeg") {
-                modifiedExtension = "jpeg";
-            } else if (extension === "image/png") {
-                modifiedExtension = "png";
-            } else if (extension === "image/bmp") {
-                modifiedExtension = "bmp";
-            } else if (extension === "text/plain") {
-                modifiedExtension = "txt";
-            } else if (extension === "video/mp4") {
-                modifiedExtension = "mp4";
-            } else if (
-                extension === "video/x-m4v" ||
-                extension === "video/m4v"
-            ) {
-                modifiedExtension = "m4v";
-            } else if (
-                extension === "video/x-msvideo" ||
-                extension === "video/avi"
-            ) {
-                modifiedExtension = "avi";
-            } else if (
-                extension === "video/x-ms-wmv" ||
-                extension === "video/wmv"
-            ) {
-                modifiedExtension = "wmv";
-            } else if (
-                extension === "video/x-flv" ||
-                extension === "video/flv"
-            ) {
-                modifiedExtension = "flv";
-            } else if (
-                extension === "video/x-matroska" ||
-                extension === "video/mkv"
-            ) {
-                modifiedExtension = "mkv";
-            } else if (extension === "video/webm") {
-                modifiedExtension = "webm";
-            } else if (
-                extension === "video/3gpp" ||
-                extension === "video/3gp"
-            ) {
-                modifiedExtension = "3gp";
-            } else if (
-                extension === "video/3gpp2" ||
-                extension === "video/3g2"
-            ) {
-                modifiedExtension = "3g2";
-            } else if (extension === "application/x-zip-compressed") {
-                modifiedExtension = "zip";
-            } else {
-                // alert("File type not supported.");
-                toast("File type not supported.", {
+            attachedFiles.forEach((file) => {
+                const extension = file.name.split(".").pop(); // Get file extension
+                const isFileValid = VALID_FILE_EXTENSIONS.includes(extension); // Check if extension is valid
+                const isFileSizeValid = file.size <= 100 * 1024 * 1024; // Check if size is within 100 MB
+
+                // Collect invalid extensions and oversized files
+                if (!isFileValid) invalidExtensions.push(extension);
+                if (!isFileSizeValid) oversizedFiles.push(file.name);
+            });
+
+            // Show toast for invalid extensions if any are found
+            if (invalidExtensions.length > 0) {
+                toast.warning(
+                    `.${invalidExtensions.join(
+                        ", ."
+                    )} file type(s) are not allowed.`,
+                    {
+                        position: "top-right",
+                        autoClose: 1500,
+                        hideProgressBar: false,
+                        closeOnClick: true,
+                        pauseOnHover: true,
+                        draggable: true,
+                        progress: undefined,
+                        theme: "dark",
+                        transition: Bounce,
+                    }
+                );
+                setLoading(false);
+                return;
+            }
+
+            // Show toast for oversized files if any are found
+            if (oversizedFiles.length > 0) {
+                toast.warning(` File is too large. Maximum size is 100MB.`, {
                     position: "top-right",
-                    autoClose: 1000,
+                    autoClose: 1500,
                     hideProgressBar: false,
                     closeOnClick: true,
                     pauseOnHover: true,
                     draggable: true,
                     progress: undefined,
                     theme: "dark",
-                    transition: Bounce,
+                    transition: Bounce 
                 });
                 setLoading(false);
                 return;
             }
 
-            const isFileValid = validFile.includes(modifiedExtension);
-            if (attachedFiles[0].size > 100 * 1024 * 1024) {
-                // 100 MB
-                setLoading(false);
-                toast(`File size must be 100MB or less.`, {
-                    position: "top-right",
-                    autoClose: 1000,
-                    hideProgressBar: false,
-                    closeOnClick: true,
-                    pauseOnHover: true,
-                    draggable: true,
-                    progress: undefined,
-                    theme: "dark",
-                    transition: Bounce,
-                });
-                return;
-            }
-            if (!isFileValid) {
-                toast(`${modifiedExtension} is not allowed.`, {
-                    position: "top-right",
-                    autoClose: 1000,
-                    hideProgressBar: false,
-                    closeOnClick: true,
-                    pauseOnHover: true,
-                    draggable: true,
-                    progress: undefined,
-                    theme: "dark",
-
-                    transition: Bounce,
-                });
-                setLoading(false);
-                return;
-            }
+            // If all files are valid, proceed with further processing
+            setLoading(true);
         }
+
         if (attachedFiles && attachedFiles.length > 0) {
             attachedFiles.forEach((file) => {
                 formData.append("files[]", file);
@@ -1130,7 +1037,9 @@ const InquiryThread = () => {
                                             (item, index) =>
                                                 item.buyer_email ? (
                                                     <UserMessages
-                                                        dataConcern={dataConcern}
+                                                        dataConcern={
+                                                            dataConcern
+                                                        }
                                                         items={item}
                                                         key={index}
                                                     />
@@ -1217,7 +1126,11 @@ const InquiryThread = () => {
                 </div>
             </div>
             <div>
-                <AddInfoModal modalRef={modalRef} dataConcern={dataConcern} onupdate={handleUpdate} />
+                <AddInfoModal
+                    modalRef={modalRef}
+                    dataConcern={dataConcern}
+                    onupdate={handleUpdate}
+                />
             </div>
             <div>
                 <ResolveModal
