@@ -483,7 +483,7 @@ const ReportPage = () => {
                     </div>
                 </div>
                 <div className="flex flex-col gap-3">
-                    <div className=" bg-red-900 rounded-[10px]  w-[579px] flex flex-col overflow-y-auto">
+                    <div className=" bg-whiterounded-[10px]  w-[579px] flex flex-col overflow-y-auto">
                         <p className="p-4  text-base montserrat-bold">
                             Inquiries per property
                         </p>
@@ -545,7 +545,7 @@ const ReportPage = () => {
                             </div>
                         </div>
                         <div className="flex-grow">
-                            <p>Inquiries per propertys test</p>
+                            {/* <p>Inquiries per propertys test</p> */}
                             <BarChart
                                 width={400}
                                 height={chartHeight}
@@ -624,7 +624,7 @@ const ReportPage = () => {
                             </div>
                         </div>
                     </div>
-                    <div className=" bg-green-200 rounded-[10px]  w-[579px] flex flex-col overflow-y-auto">
+                    <div className=" bg-white rounded-[10px]  w-[579px] flex flex-col overflow-y-auto">
                         <p className="p-4  text-base montserrat-bold">
                             Customer communication type
                         </p>
