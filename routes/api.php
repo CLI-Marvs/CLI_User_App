@@ -47,6 +47,7 @@ Route::get('/get-messageId/{ticketId}', [ConcernController::class, 'getMessageId
 Route::get('/report-monthly', [ConcernController::class, 'getMonthlyReports']);
 Route::get('/category-monthly', [ConcernController::class, 'getInquiriesByCategory']);
 Route::get('/inquiries-property', [ConcernController::class, 'getInquiriesPerProperty']);
+Route::get('/communication-type-property', [ConcernController::class, 'getCommunicationType']);
 Route::post('delete-concerns', [ConcernController::class, 'deleteConcern']);
 
 Route::post('conversation', [ConcernController::class, 'sendMessageConcerns']);

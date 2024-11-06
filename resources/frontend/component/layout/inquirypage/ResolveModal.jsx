@@ -13,7 +13,6 @@ const ResolveModal = ({ modalRef, ticketId, dataRef, onupdate }) => {
         data?.find((items) => items.ticket_id === ticketId) || {};
     const messageId = dataConcern?.message_id || null;
 
- 
     const capitalizeWords = (name) => {
         if (name) {
             return name
@@ -101,17 +100,18 @@ const ResolveModal = ({ modalRef, ticketId, dataRef, onupdate }) => {
                         ></textarea>
                     </div>
                 </div>
-                {/* <div
+                <div
                     className={`flex items-center border border-[D6D6D6] rounded-[5px] overflow-hidden mt-[12px]`}
                 >
                     <span className="text-custom-gray81 text-sm bg-[#EDEDED] flex items-center w-[308px] tablet:w-[175px] mobile:w-[270px] mobile:text-xs -mr-3 pl-3 py-1">
                         Communication Type
                     </span>
                     <div className="relative w-full">
+                       
                         <select
                             name="user_type"
-                            // value={dataToUpdate.user_type || ""}
-                            // onChange={handleChange}
+                            value={dataConcern.communication_type || ""}
+                            // onChange={handleChange}  
                             className="appearance-none w-full px-4 text-sm py-1 bg-white focus:outline-none border-0 mobile:text-xs"
                         >
                             <option value="">(Select)</option>
@@ -124,7 +124,7 @@ const ResolveModal = ({ modalRef, ticketId, dataRef, onupdate }) => {
                             <IoMdArrowDropdown />
                         </span>
                     </div>
-                </div> */}
+                </div>
                 <div className="mt-5 mb-[25px]">
                     <form
                         method="dialog"

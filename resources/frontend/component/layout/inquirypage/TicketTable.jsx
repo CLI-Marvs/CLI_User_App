@@ -6,7 +6,7 @@ import moment from "moment";
 import apiService from "../../servicesApi/apiService";
 
 const TicketTable = ({ concernData }) => {
-     
+    
     const [checkedRows, setCheckedRows] = useState([]);
     const {
         getMessages,
