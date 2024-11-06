@@ -46,9 +46,12 @@ const Notification = () => {
         getNotifications();
         getMessages(ticketId);
         getAllConcerns();
-        navigate(`/inquirymanagement/thread/${encodedTicketId}`);
+        navigate(
+            `/inquirymanagement/thread/${encodedTicketId}` , {
+            state: { itemsData: items },
+         }
+        );
         updateIsReadStatus(items);
-        console.log("items", items);
     };
 
     const updateIsReadStatus = (item) => {

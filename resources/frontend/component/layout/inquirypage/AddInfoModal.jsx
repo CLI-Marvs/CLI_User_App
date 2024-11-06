@@ -4,9 +4,9 @@ import apiService from "../../servicesApi/apiService";
 import { data } from "autoprefixer";
 import { useStateContext } from "../../../context/contextprovider";
 import Alert from "../../../component/Alert";
-const AddInfoModal = ({ modalRef, dataConcern }) => {
+const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
     const predefinedUserTypes = ["Property Owner", "Buyer", "Broker", "Seller"];
-    const { getAllConcerns, propertyNamesList } = useStateContext();
+    const { getAllConcerns, propertyNamesList, updateConcern } = useStateContext();
     const [message, setMessage] = useState("");
     const [dataToUpdate, setDataToUpdate] = useState({
         contract_number: dataConcern.contract_number || "",
@@ -18,6 +18,7 @@ const AddInfoModal = ({ modalRef, dataConcern }) => {
         buyer_firstname: dataConcern.buyer_firstname || "",
         buyer_middlename: dataConcern.buyer_middlename || "",
         buyer_lastname: dataConcern.buyer_lastname || "",
+        suffix_name: dataConcern.suffix_name || "",
         user_type: predefinedUserTypes.includes(dataConcern.user_type)
             ? dataConcern.user_type
             : "Others",
@@ -110,6 +111,7 @@ const AddInfoModal = ({ modalRef, dataConcern }) => {
             );
 
             console.log("response", response);
+            onupdate({ ...dataToUpdate, dataConcern});
             getAllConcerns();
         } catch (error) {
             console.log("error", error);
@@ -128,6 +130,7 @@ const AddInfoModal = ({ modalRef, dataConcern }) => {
                 buyer_firstname: dataConcern.buyer_firstname || "",
                 buyer_middlename: dataConcern.buyer_middlename || "",
                 buyer_lastname: dataConcern.buyer_lastname || "",
+                suffix_name: dataConcern.suffix_name || "",
                 user_type: predefinedUserTypes.includes(dataConcern.user_type)
                     ? dataConcern.user_type
                     : "Others", // Set to "Others" for any non-standard user_type
@@ -212,6 +215,21 @@ const AddInfoModal = ({ modalRef, dataConcern }) => {
                             <input
                                 name="buyer_lastname"
                                 value={dataToUpdate.buyer_lastname || ""}
+                                onChange={handleChange}
+                                type="text"
+                                className="w-full px-4 text-sm focus:outline-none mobile:text-xs capitalize"
+                                placeholder=""
+                            />
+                        </div>
+                        <div
+                            className={`flex items-center border border-[D6D6D6] rounded-[5px] overflow-hidden`}
+                        >
+                            <span className="text-custom-gray81 text-sm bg-[#EDEDED] flex pl-3 py-1 w-[300px]">
+                                Suffix Name
+                            </span>
+                            <input
+                                name="suffix_name"
+                                value={dataToUpdate.suffix_name || ""}
                                 onChange={handleChange}
                                 type="text"
                                 className="w-full px-4 text-sm focus:outline-none mobile:text-xs capitalize"
@@ -433,6 +451,9 @@ const AddInfoModal = ({ modalRef, dataConcern }) => {
                         show={showAlert}
                         onCancel={handleCancel}
                         onConfirm={handleConfirm}
+                        //You can pass onConfirm and onCancel props to customize the text of the buttons. Example below; 
+                        // confirmText="Update"
+                        // cancelText="Cancel"
                     />
                 </div>
             </div>

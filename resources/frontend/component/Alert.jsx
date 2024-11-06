@@ -1,7 +1,18 @@
 import React, { useRef } from "react";
 import { AiFillInfoCircle } from "react-icons/ai";
 
-const Alert = ({ title = "Alert", onConfirm, onCancel, show }) => {
+/**
+ * By default, the Confirm Text is "Yes" and the Cancel Text is "Cancel".
+ * You can change these values by passing in the `confirmText` and `cancelText` props.
+ */
+const Alert = ({
+    title = "Alert",
+    onConfirm,
+    onCancel,
+    show,
+    confirmText = "Yes",
+    cancelText = "Cancel",
+}) => {
     if (!show) return null; // Only render if `show` is true
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 overflow-auto">
@@ -10,15 +21,17 @@ const Alert = ({ title = "Alert", onConfirm, onCancel, show }) => {
                     <div className="flex justify-center items-center">
                         <AiFillInfoCircle className="size-[37px] text-[#5B9BD5]" />
                     </div>
-                    <h1 className="montserrat-medium text-[20px] text-center">{title}</h1>
-                    <div className="flex justify-center items-center h-[55px] space-x-4 ">
+                    <h1 className="montserrat-medium text-[20px] text-center">
+                        {title}
+                    </h1>
+                    <div className="flex justify-center space-x-4 mt-10">
                         <button
                             onClick={onCancel}
                             className="gradient-btn5 p-[1px] w-[92px] h-[35px] rounded-[10px]"
                         >
                             <div className="w-full h-full rounded-[9px] bg-white flex justify-center items-center montserrat-semibold text-sm">
                                 <p className="text-base font-bold bg-gradient-to-r from-custom-bluegreen via-custom-solidgreen to-custom-solidgreen bg-clip-text text-transparent">
-                                    Cancel
+                                    {cancelText}
                                 </p>
                             </div>
                         </button>
@@ -26,7 +39,7 @@ const Alert = ({ title = "Alert", onConfirm, onCancel, show }) => {
                             onClick={onConfirm}
                             className="gradient-btn5 w-[100px] h-[35px] rounded-[10px] text-sm text-white montserrat-semibold"
                         >
-                            Confirm
+                            {confirmText}
                         </button>
                     </div>
                 </div>

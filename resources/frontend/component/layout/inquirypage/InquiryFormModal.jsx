@@ -5,10 +5,12 @@ import apiService from "../../servicesApi/apiService";
 import { useStateContext } from "../../../context/contextprovider";
 import CircularProgress from "@mui/material/CircularProgress";
 import { toast, ToastContainer, Bounce } from "react-toastify";
+import { VALID_FILE_EXTENSIONS } from "../../../constant/data/validFile";
 const formDataState = {
     fname: "",
     mname: "",
     lname: "",
+    suffix: "",
     buyer_email: "",
     mobile_number: "",
     property: "",
@@ -21,13 +23,13 @@ const formDataState = {
 
 const InquiryFormModal = ({ modalRef }) => {
     const [files, setFiles] = useState([]);
-
     const fileInputRef = useRef();
     const [fileName, setFileName] = useState([]);
     const [message, setMessage] = useState("");
     const { user, getAllConcerns } = useStateContext();
     const maxCharacters = 500;
-    const [isChecked, setIsChecked] = useState(false);
+    const [isMiddleNameChecked, setIsMiddleNameChecked] = useState(false);
+    const [isSuffixChecked, setIsSuffixChecked] = useState(false);
     const [hasErrors, setHasErrors] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -40,7 +42,6 @@ const InquiryFormModal = ({ modalRef }) => {
 
     const handleFileChange = (event) => {
         const selectedFiles = Array.from(event.target.files);
-
         setFiles((prevFiles) => {
             const prevFileNames = prevFiles.map((file) => file.name);
 
@@ -51,18 +52,11 @@ const InquiryFormModal = ({ modalRef }) => {
 
             return [...prevFiles, ...uniqueFiles];
         });
-
         setFileName((prevFileNames) => {
             const uniqueFileNames = selectedFiles
-                .map((file) =>
-                    file.name.length > 15
-                        ? `${file.name.substring(0, 12)}... .${file.name
-                              .split(".")
-                              .pop()}`
-                        : file.name
-                )
+                .map((file) => formatFileName(file.name))
                 .filter((name) => !prevFileNames.includes(name));
-
+            
             return [...prevFileNames, ...uniqueFileNames];
         });
 
@@ -94,16 +88,28 @@ const InquiryFormModal = ({ modalRef }) => {
             : []),
     ];
 
-    const handleDelete = (fileNameToDelete) => {
-        // setFiles((prevFiles) =>
-        //     prevFiles.filter((file) => file !== fileNameToDelete)
-        // );
-        // setFiles([]);
-        setFileName((prevFiles) =>
-            prevFiles.filter((file) => file !== fileNameToDelete)
-        );
+    // Helper function to normalize file names
+    const formatFileName = (fileName) => {
+        return fileName.length > 15
+            ? `${fileName.substring(0, 12)}... .${fileName.split(".").pop()}`
+            : fileName;
     };
 
+    const handleDelete = (fileNameToDelete) => {
+        const normalizedFileNameToDelete = formatFileName(fileNameToDelete);
+        // Remove from `files` state by comparing with the original file name
+        setFiles((prevFiles) =>
+            prevFiles.filter(
+                (file) =>
+                    formatFileName(file.name) !== normalizedFileNameToDelete
+            )
+        );
+
+        // Remove from `fileName` state
+        setFileName((prevFileNames) =>
+            prevFileNames.filter((name) => name !== normalizedFileNameToDelete)
+        );
+    };
     const [formData, setFormData] = useState(formDataState);
 
     const handleChange = (e) => {
@@ -124,11 +130,22 @@ const InquiryFormModal = ({ modalRef }) => {
             }));
         }
     };
-    const handleCheckboxChange = (event) => {
-        setIsChecked(event.target.checked);
+    const handleMiddleNameCheckboxChange = (event) => {
+        setIsMiddleNameChecked(event.target.checked);
         setFormData((prevData) => ({
             ...prevData,
-            mname: isChecked ? "" : "",
+            mname: isMiddleNameChecked ? "" : "",
+        }));
+        // setHasErrors(false);
+        setResetSuccess(true);
+        setIsSubmitted(false);
+    };
+
+    const handleSuffixNameCheckboxChange = (event) => {
+        setIsSuffixChecked(event.target.checked);
+        setFormData((prevData) => ({
+            ...prevData,
+            suffix: isSuffixChecked ? "" : "",
         }));
         // setHasErrors(false);
         setResetSuccess(true);
@@ -153,7 +170,8 @@ const InquiryFormModal = ({ modalRef }) => {
         setIsSubmitted(false);
         setFileName("");
         setMessage("");
-        setIsChecked(false);
+        setIsMiddleNameChecked(false);
+        setIsSuffixChecked(false);
     };
 
     const {
@@ -162,6 +180,7 @@ const InquiryFormModal = ({ modalRef }) => {
         unit_number,
         other_user_type,
         mname,
+        suffix,
         ...requiredFields
     } = formData;
 
@@ -173,170 +192,82 @@ const InquiryFormModal = ({ modalRef }) => {
         e.preventDefault();
 
         setIsSubmitted(true);
-        const isMnameValid = isChecked || mname.trim() !== "";
+        const isMnameValid = isMiddleNameChecked || mname.trim() !== "";
+        const isSuffixValid = isSuffixChecked || suffix.trim() !== "";
+
         let isOtherUserTypeValid = true;
         if (user_type === "Others") {
             isOtherUserTypeValid = other_user_type.trim().length > 0;
         }
 
         if (files && files.length > 0) {
-            const validFile = [
-                "pdf",
-                "png",
-                "bmp",
-                "jpg",
-                "jpeg",
-                "xls",
-                "xlsx",
-                "xlsm",
-                "xml",
-                "csv",
-                "doc",
-                "docx",
-                "mp4", // MPEG-4
-                "m4v", // MPEG-4 with DRM
-                "mov", // Apple QuickTime
-                "avi", // Audio Video Interleave
-                "wmv", // Windows Media Video
-                "flv", // Flash Video
-                "mkv", // Matroska Video
-                "webm", // WebM format
-                "3gp", // 3GPP format for mobile
-                "3g2", // 3GPP2 format for mobile
-                "zip",
-                "txt", // Handle for .txt file extension
-            ];
+            let allFilesValid = true; // Track if all files are valid
+            const invalidExtensions = []; // Store invalid extensions
 
-            const extension = files[0].type;
+            files.forEach((file) => {
+                const extension = file.name.split(".").pop(); // Get the file extension
 
-            let modifiedExtension = extension.split("/")[1]; //from application/pdf to pdf
-            // Special handling for .docx MIME type
-            if (
-                extension ===
-                "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-            ) {
-                modifiedExtension = "docx";
-            } else if (extension === "application/msword") {
-                modifiedExtension = "doc";
-            } else if (
-                extension === "application/vnd.ms-excel.sheet.macroEnabled.12"
-            ) {
-                modifiedExtension = "xlsm";
-            } else if (extension === "application/vnd.ms-excel") {
-                modifiedExtension = "xls";
-            } else if (
-                extension ===
-                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-            ) {
-                modifiedExtension = "xlsx";
-            } else if (extension === "application/pdf") {
-                modifiedExtension = "pdf";
-            } else if (extension === "image/jpeg") {
-                modifiedExtension = "jpeg";
-            } else if (extension === "image/png") {
-                modifiedExtension = "png";
-            } else if (extension === "image/bmp") {
-                modifiedExtension = "bmp";
-            } else if (extension === "text/plain") {
-                modifiedExtension = "txt";
-            } else if (extension === "video/mp4") {
-                modifiedExtension = "mp4";
-            } else if (
-                extension === "video/x-m4v" ||
-                extension === "video/m4v"
-            ) {
-                modifiedExtension = "m4v";
-            } else if (
-                extension === "video/x-msvideo" ||
-                extension === "video/avi"
-            ) {
-                modifiedExtension = "avi";
-            } else if (
-                extension === "video/x-ms-wmv" ||
-                extension === "video/wmv"
-            ) {
-                modifiedExtension = "wmv";
-            } else if (
-                extension === "video/x-flv" ||
-                extension === "video/flv"
-            ) {
-                modifiedExtension = "flv";
-            } else if (
-                extension === "video/x-matroska" ||
-                extension === "video/mkv"
-            ) {
-                modifiedExtension = "mkv";
-            } else if (extension === "video/webm") {
-                modifiedExtension = "webm";
-            } else if (
-                extension === "video/3gpp" ||
-                extension === "video/3gp"
-            ) {
-                modifiedExtension = "3gp";
-            } else if (
-                extension === "video/3gpp2" ||
-                extension === "video/3g2"
-            ) {
-                modifiedExtension = "3g2";
-            } else if (extension === "application/x-zip-compressed") {
-                modifiedExtension = "zip";
-            } else {
-                // alert("File type not supported.");
-                toast("File type not supported.", {
-                    position: "top-right",
-                    autoClose: 1000,
-                    hideProgressBar: false,
-                    closeOnClick: true,
-                    pauseOnHover: true,
-                    draggable: true,
-                    progress: undefined,
-                    theme: "dark",
-                    transition: Bounce,
-                });
+                if (file.size > 100 * 1024 * 1024) {
+                    // Check size (100 MB)
+                    setLoading(false);
+                    toast.warning(`File is too large. Maximum size is 100MB.`, {
+                        position: "top-right",
+                        autoClose: 1500,
+                        hideProgressBar: false,
+                        closeOnClick: true,
+                        pauseOnHover: true,
+                        draggable: true,
+                        progress: undefined,
+                        theme: "dark",
+                        transition: Bounce
+                    });
+                    allFilesValid = false;
+                    return;
+                }
+
+                const isFileValid = VALID_FILE_EXTENSIONS.includes(extension); // Check if extension is allowed
+                if (!isFileValid) {
+                    invalidExtensions.push(extension); // Add to invalid list
+                    allFilesValid = false;
+                }
+            });
+
+            // If there are any invalid extensions, show a message
+            if (invalidExtensions.length > 0) {
+                toast.warning(
+                    `.${invalidExtensions.join(
+                        ", ."
+                    )} file type(s) are not allowed.`,
+                    {
+                        position: "top-right",
+                        autoClose: 1500,
+                        hideProgressBar: false,
+                        closeOnClick: true,
+                        pauseOnHover: true,
+                        draggable: true,
+                        progress: undefined,
+                        theme: "dark",
+                        transition: Bounce,
+                    }
+                );
                 setLoading(false);
                 return;
             }
 
-            const isFileValid = validFile.includes(modifiedExtension);
-            if (files[0].size > 100 * 1024 * 1024) {
-                // 100 MB
-                setLoading(false);
-                // alert("File size must be 100MB or less.");
-                toast(`File size must be 100MB or less.`, {
-                    position: "top-right",
-                    autoClose: 1000,
-                    hideProgressBar: false,
-                    closeOnClick: true,
-                    pauseOnHover: true,
-                    draggable: true,
-                    progress: undefined,
-                    theme: "dark",
-                    transition: Bounce,
-                });
+            if (!allFilesValid) {
+                // Stop further processing if files are invalid
                 return;
             }
-            if (!isFileValid) {
-                // alert(`${modifiedExtension} is not allowed.`);
-                toast(`${modifiedExtension} is not allowed.`, {
-                    position: "top-right",
-                    autoClose: 1000,
-                    hideProgressBar: false,
-                    closeOnClick: true,
-                    pauseOnHover: true,
-                    draggable: true,
-                    progress: undefined,
-                    theme: "dark",
 
-                    transition: Bounce,
-                });
-                setLoading(false);
-                return;
-            }
+            // Proceed with further processing if all files are valid
+            setLoading(true);
         }
+
         if (
             isFormDataValid &&
             isTextareaValid &&
             isMnameValid &&
+            isSuffixValid &&
             !errors.buyer_email &&
             isOtherUserTypeValid
         ) {
@@ -413,12 +344,12 @@ const InquiryFormModal = ({ modalRef }) => {
             if (!isTextareaValid) {
                 setIsValid(false);
             }
-            if (!isChecked) {
+            if (!isMiddleNameChecked) {
                 //setIsValid(false);
                 setResetSuccess(false);
                 setHasErrors(false);
             }
-            // console.log("(!isChecked", isChecked);
+            // console.log("(!isMiddleNameChecked", isMiddleNameChecked);
             console.log("Form validation failed");
         }
     };
@@ -527,7 +458,9 @@ const InquiryFormModal = ({ modalRef }) => {
                                 //         : "border-custom-bluegreen"
                                 // }`}
                                 className={`flex relative items-center border w-[430px] rounded-[5px] overflow-hidden ${
-                                    isSubmitted && !formData.mname && !isChecked
+                                    isSubmitted &&
+                                    !formData.mname &&
+                                    !isMiddleNameChecked
                                         ? "border-red-500"
                                         : "border-custom-bluegreen"
                                 }`}
@@ -538,7 +471,7 @@ const InquiryFormModal = ({ modalRef }) => {
                                 <input
                                     name="mname"
                                     type="text"
-                                    disabled={isChecked}
+                                    disabled={isMiddleNameChecked}
                                     className="w-full px-4 text-sm focus:outline-none mobile:text-xs"
                                     value={formData.mname}
                                     onChange={handleChange}
@@ -546,9 +479,11 @@ const InquiryFormModal = ({ modalRef }) => {
                                 />
                                 <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3 gap-2 text-sm bg-custom-lightestgreen">
                                     <input
-                                        onChange={handleCheckboxChange}
+                                        onChange={
+                                            handleMiddleNameCheckboxChange
+                                        }
                                         type="checkbox"
-                                        checked={isChecked}
+                                        checked={isMiddleNameChecked}
                                         name="checkbox"
                                         className="accent-custom-lightgreen"
                                         value="checkbox"
@@ -557,6 +492,7 @@ const InquiryFormModal = ({ modalRef }) => {
                                 </span>
                             </div>
                         </div>
+
                         <div
                             className={`flex items-center border  rounded-[5px] overflow-hidden ${
                                 isSubmitted && !formData.lname
@@ -577,6 +513,43 @@ const InquiryFormModal = ({ modalRef }) => {
                                 className="w-full px-4 text-sm focus:outline-none mobile:text-xs"
                                 placeholder=""
                             />
+                        </div>
+                        <div className="flex items-center gap-[4px]">
+                            <div
+                                className={`flex relative items-center border w-[430px] rounded-[5px] overflow-hidden ${
+                                    isSubmitted &&
+                                    !formData.suffix &&
+                                    !isSuffixChecked
+                                        ? "border-red-500"
+                                        : "border-custom-bluegreen"
+                                }`}
+                            >
+                                <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex w-[240px] pl-3 py-1 tablet:w-[160px] mobile:w-[270px] mobile:text-xs">
+                                    Suffix Name
+                                </span>
+                                <input
+                                    name="suffix"
+                                    type="text"
+                                    disabled={isSuffixChecked}
+                                    className="w-full px-4 text-sm focus:outline-none mobile:text-xs"
+                                    value={formData.suffix}
+                                    onChange={handleChange}
+                                    placeholder=""
+                                />
+                                <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3 gap-2 text-sm bg-custom-lightestgreen">
+                                    <input
+                                        onChange={
+                                            handleSuffixNameCheckboxChange
+                                        }
+                                        type="checkbox"
+                                        checked={isSuffixChecked}
+                                        name="checkbox"
+                                        className="accent-custom-lightgreen"
+                                        value="checkbox"
+                                    />
+                                    <p>N/A</p>
+                                </span>
+                            </div>
                         </div>
                         <div
                             className={`flex items-center border  rounded-[5px] overflow-hidden ${

@@ -103,7 +103,6 @@ export const ContextProvider = ({ children }) => {
                 const response = await apiService.get(
                     `/get-concern?${searchParams}`
                 );
-
                 setData(response.data.data);
                 setPageCount(response.data.last_page);
             } catch (error) {
@@ -112,11 +111,18 @@ export const ContextProvider = ({ children }) => {
         }
     };
 
+    const updateConcern = ({ id, ...dataToUpdate }) => {
+        setData((prevData) =>
+            prevData.map((concern) =>
+                concern.id === id ? { ...dataToUpdate } : concern
+            )
+        );
+    };
+    
     const getBankName = async () => {
        if(token) {
         try {
             const response = await apiService.get("get-transaction-bank");
-            console.log("response banks", response.data);
             setBankList(response.data);
         } catch (error) {
             console.log("error retrieving banks", error);
@@ -126,14 +132,12 @@ export const ContextProvider = ({ children }) => {
        
     const getTransactions = async () => {
         try {
-            console.log("banknames", bankNames);
             const searchParams = new URLSearchParams({
               /*   search: JSON.stringify(searchFilter), */
                 page: currentPageTransaction + 1,
                 bank_name: bankNames ? bankNames : null
             }).toString();
             const response = await apiService.get(`get-transactions?${searchParams}`);
-            console.log("response", response.data);
             setTransactions(response.data.data);
             setTransactionsPageCount(response.data.last_page);
            
@@ -626,7 +630,8 @@ export const ContextProvider = ({ children }) => {
                 getInvoices,
                 filterDueDate,
                 setFilterDueDate,
-                notifStatus
+                notifStatus,
+                updateConcern
             }}
         >
             {children}

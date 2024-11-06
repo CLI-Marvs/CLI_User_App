@@ -6,6 +6,7 @@ import moment from "moment";
 import apiService from "../../servicesApi/apiService";
 
 const TicketTable = ({ concernData }) => {
+     
     const [checkedRows, setCheckedRows] = useState([]);
     const {
         getMessages,
@@ -44,9 +45,9 @@ const TicketTable = ({ concernData }) => {
         getConcernMessages();
         const encodedTicketId = encodeURIComponent(items.ticket_id);
         navigate(
-            `/inquirymanagement/thread/${encodedTicketId}` /* , {
-            state: { item: items },
-        } */
+            `/inquirymanagement/thread/${encodedTicketId}` , {
+            state: { itemsData: items },
+         }
         );
     };
 
@@ -139,6 +140,7 @@ const TicketTable = ({ concernData }) => {
                                     {(() => {
                                         const nameParts =
                                             row.buyer_name.split(" ");
+
                                         // Check if the middle name exists in the full name and remove it if it does
                                         if (row.buyer_middlename) {
                                             const middleName =
@@ -159,17 +161,30 @@ const TicketTable = ({ concernData }) => {
 
                                         const lastName = nameParts.pop();
                                         const firstName = nameParts.join(" ");
+
                                         const middleInitial =
                                             row.buyer_middlename
                                                 ? `${row.buyer_middlename
                                                       .charAt(0)
                                                       .toUpperCase()}.`
                                                 : "";
-
+                                        // Define the suffix if it exists
+                                        const suffix = row.suffix_name
+                                            ? row.suffix_name
+                                            : "";
                                         // Helper function to capitalize the first letter of a string
                                         const capitalize = (name) =>
                                             name.charAt(0).toUpperCase() +
                                             name.slice(1).toLowerCase();
+
+                                        // return `${capitalize(
+                                        //     lastName
+                                        // )}, ${capitalize(firstName)}${
+                                        //     middleInitial
+                                        //         ? `, ${middleInitial}`
+                                        //         : ""
+                                        // }${suffix ? `, ${suffix}` : ""}`;
+
                                         return `${capitalize(
                                             lastName
                                         )}, ${capitalize(firstName)}${
