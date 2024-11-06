@@ -4,9 +4,9 @@ import Kent from "../../../../../public/Images/kent.png";
 import defaultAvatar from "../../../../../public/Images/AdminSilouette.svg";
 import moment from "moment";
 import { useStateContext } from "../../../context/contextprovider";
-import { Link, useParams } from "react-router-dom";
+import { Link, useLocation, useParams } from "react-router-dom";
 
-const UserMessages = ({ items }) => {
+const UserMessages = ({ items, dataConcern }) => {
     const attachmentData = JSON.parse(items.attachment || "[]");
     const { data } = useStateContext();
 
@@ -15,7 +15,9 @@ const UserMessages = ({ items }) => {
     const formattedDate = moment(items.created_at).format("MMMM D, YYYY");
     const formattedTime = moment(items.created_at).format("hh:mm A");
 
-    const dataConcern = data?.find((item) => item.ticket_id === ticketId) || {};
+    /*   const location = useLocation();
+    const { dataConcern } = location?.state || {}; */
+    /*  const dataConcern = data?.find((item) => item.ticket_id === ticketId) || {}; */
     const capitalizeWords = (name) => {
         if (name) {
             return name
@@ -37,7 +39,12 @@ const UserMessages = ({ items }) => {
                     </p>
                     <p className=" text-sm text-custom-gray81 flex gap-1">
                         <span>From:</span>
-                        {capitalizeWords(dataConcern.buyer_name)}
+                        {capitalizeWords(
+                            `${dataConcern?.buyer_firstname || ""} ${
+                                dataConcern?.buyer_middlename || ""
+                            } ${dataConcern?.buyer_lastname || ""}`
+                        )}{" "}
+                        {capitalizeWords(dataConcern?.suffix_name)}
                     </p>
                     <p className=" text-sm text-custom-gray81 flex gap-1">
                         {dataConcern.buyer_email} <span>|</span>{" "}
@@ -86,7 +93,10 @@ const UserMessages = ({ items }) => {
                                                 "fileUrlPath",
                                                 JSON.stringify(attachment.url)
                                             );
-                                            console.log("attachment", attachment.url)
+                                            console.log(
+                                                "attachment",
+                                                attachment.url
+                                            );
                                             window.open(
                                                 `/file-viewer/attachment/${items.id}`,
                                                 "_blank"

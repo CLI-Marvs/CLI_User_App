@@ -49,4 +49,6 @@ return [
         'key_json' => env('GCS_KEY_JSON'),
     ],
 
+    'APP_URL' => env('APP_URL'),
+
 ];

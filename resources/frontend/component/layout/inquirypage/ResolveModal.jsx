@@ -2,8 +2,9 @@ import React, { useEffect, useState } from "react";
 import { useStateContext } from "../../../context/contextprovider";
 import apiService from "../../servicesApi/apiService";
 import { AiFillInfoCircle } from "react-icons/ai";
+import { IoMdArrowDropdown } from "react-icons/io";
 
-const ResolveModal = ({ modalRef, ticketId, dataRef }) => {
+const ResolveModal = ({ modalRef, ticketId, dataRef, onupdate }) => {
     const { getAllConcerns, user, getInquiryLogs, data, assigneesPersonnel } =
         useStateContext();
     const [remarks, setRemarks] = useState("");
@@ -47,6 +48,7 @@ const ResolveModal = ({ modalRef, ticketId, dataRef }) => {
             });
             setRemarks("");
             getInquiryLogs(ticketId);
+            onupdate({...dataRef, status: "Resolved"});
             getAllConcerns();
             console.log("sucess", response);
         } catch (error) {
@@ -99,6 +101,30 @@ const ResolveModal = ({ modalRef, ticketId, dataRef }) => {
                         ></textarea>
                     </div>
                 </div>
+                {/* <div
+                    className={`flex items-center border border-[D6D6D6] rounded-[5px] overflow-hidden mt-[12px]`}
+                >
+                    <span className="text-custom-gray81 text-sm bg-[#EDEDED] flex items-center w-[308px] tablet:w-[175px] mobile:w-[270px] mobile:text-xs -mr-3 pl-3 py-1">
+                        Communication Type
+                    </span>
+                    <div className="relative w-full">
+                        <select
+                            name="user_type"
+                            // value={dataToUpdate.user_type || ""}
+                            // onChange={handleChange}
+                            className="appearance-none w-full px-4 text-sm py-1 bg-white focus:outline-none border-0 mobile:text-xs"
+                        >
+                            <option value="">(Select)</option>
+                            <option value="Complain">Complain</option>
+                            <option value="Request">Request</option>
+                            <option value="Inquiry">Inquiry</option>
+                            <option value="Suggestion or recommendation">Suggestion or Recommendation</option>
+                        </select>
+                        <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3 bg-[#EDEDED] text-custom-gray81 pointer-events-none">
+                            <IoMdArrowDropdown />
+                        </span>
+                    </div>
+                </div> */}
                 <div className="mt-5 mb-[25px]">
                     <form
                         method="dialog"

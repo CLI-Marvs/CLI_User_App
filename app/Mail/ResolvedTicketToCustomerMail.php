@@ -24,10 +24,10 @@ class ResolvedTicketToCustomerMail extends Mailable
     /**
      * Create a new message instance.
      */
-    public function __construct($ticket_id, $email, $buyer_lastname,$message_id,$admin_name,$department, $modifiedTicketId)
+    public function __construct($ticket_id, $email, $buyer_lastname, $message_id, $admin_name, $department, $modifiedTicketId)
     {
         $this->ticket_id = $ticket_id;
-        $this->email = $email;  
+        $this->email = $email;
         $this->message_id = $message_id;
         $this->buyer_lastname = $buyer_lastname;
         $this->admin_name = $admin_name;
@@ -41,10 +41,18 @@ class ResolvedTicketToCustomerMail extends Mailable
      */
     public function envelope(): Envelope
     {
-        return new Envelope(
-            from: new Address('ask@cebulandmasters.com', 'Cebu Landmasters Inc.'),
-            subject: "[CLI Inquiry] Transaction {$this->ticket_id}",
-        );
+        
+        if (config('services.APP_URL') === 'https://admin-dev.cebulandmasters.com' || config('services.APP_URL') === 'http://localhost:8001') {
+            return new Envelope(
+                from: new Address('ask@cebulandmasters.com', 'Cebu Landmasters Inc.'),
+                subject: "[Test] [CLI Inquiry] Transaction {$this->ticket_id}",
+            );
+        } else {
+            return new Envelope(
+                from: new Address('ask@cebulandmasters.com', 'Cebu Landmasters Inc.'),
+                subject: "[CLI Inquiry] Transaction {$this->ticket_id}",
+            );
+        }
     }
 
     public function headers(): Headers
