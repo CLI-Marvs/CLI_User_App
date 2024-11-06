@@ -1051,7 +1051,7 @@ const InquiryThread = () => {
                                         Note: This message will be sent to{" "}
                                         <span className="font-semibold">
                                             {capitalizeWords(
-                                                `${dataConcern?.buyer_firstname} ${dataConcern?.buyer_middlename} ${dataConcern?.buyer_lastname}`
+                                                `${dataConcern?.buyer_firstname || ""} ${dataConcern?.buyer_middlename || ""} ${dataConcern?.buyer_lastname || ""}`
                                             )}{" "}
                                             {capitalizeWords(
                                                 dataConcern?.suffix_name
