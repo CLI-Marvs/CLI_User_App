@@ -63,6 +63,7 @@ const InquiryThread = () => {
     const [isResolved, setIsResolved] = useState(false);
     const [showAlert, setShowAlert] = useState(false);
     const [dataConcern, setDataConcern] = useState(itemsData || {});
+    const [emailMessageID, setEmailMessageID] = useState(null);
     const handleDateChange = (date) => {
         setStartDate(date);
     };
@@ -71,10 +72,17 @@ const InquiryThread = () => {
         setSelectedProperty(e.target.value);
     };
 
+    /* const handleUpdate = (newData) => {
+        setDataConcern((prevData) => ({
+            ...prevData,
+            ...newData,
+        }));
+    }; */
     const handleUpdate = (newData) => {
         setDataConcern((prevData) => ({
             ...prevData,
             ...newData,
+            message_id: emailMessageID || prevData.message_id, // Use the latest message ID if available
         }));
     };
 
@@ -329,6 +337,7 @@ const InquiryThread = () => {
         setTicketId(ticketId);
     }, [ticketId, setTicketId]);
 
+    
     useEffect(() => {
         if (isFilterVisible) {
             document.addEventListener("mousedown", handleClickOutside);
@@ -364,8 +373,8 @@ const InquiryThread = () => {
 
     const messageIdChannelFunc = (channel) => {
         channel.listen("MessageID", (event) => {
-            console.log("message id event");
-            setEmailMessageId(event.data.message_id);
+            console.log("message id event", event.data);
+            setEmailMessageID(event.data.message_id);
         });
     };
 
