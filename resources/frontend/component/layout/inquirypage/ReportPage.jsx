@@ -17,6 +17,7 @@ import {
 } from "recharts";
 import apiService from "../../servicesApi/apiService";
 import debounce from "lodash/debounce";
+import { TiDownload } from "react-icons/ti";
 import { useStateContext } from "../../../context/contextprovider";
 import { IoMdArrowDropdown } from "react-icons/io";
 import { useLocation } from "react-router-dom";
@@ -51,20 +52,29 @@ const barHeight = 20;
 
 
 const COLORS = [
-    "#5B9BD5", "#348017", "#FFB300", "#FF5733", "1ABC9C", "#8E44AD", "#2ECC71", "#3498DB",
-    "#E74C3C",
+    "#1F77B4", // Blue
+    "#FF7F0E", // Orange
+    "#2CA02C", // Green
+    "#D62728", // Red
+    "#9467BD", // Purple
+    "#8C564B", // Brown
+    "#E377C2", // Pink
+    "#7F7F7F", // Gray
+    "#BCBD22", // Olive
+    "#17BECF"  // Teal
 ];
 
 const categoryColors = {
-    "Reservation Documents": "#5B9BD5",
-    "Payment Issues": "#348017",
-    "SOA/ Billing Statement/ Buyer's Ledger": "#FFB300",
-    "Turn Over Status": "#FF5733",
-    "Unit Status": "#1ABC9C",
-    "Loan Application": "#8E44AD",
-    "Title and Other Registration Documents": "#2ECC71",
-    "Commissions": "#3498DB",
-    "Other Concerns": "#E74C3C",
+    "Commissions": COLORS[0],
+    "Leasing": COLORS[1],
+    "Loan Application": COLORS[2],
+    "Other Concerns": COLORS[3],
+    "Payment Issues": COLORS[4],
+    "Reservation Documents": COLORS[5],
+    "SOA/ Billing Statement/ Buyer's Ledger": COLORS[6],
+    "Title and Other Registration Documents": COLORS[7],
+    "Turn Over Status": COLORS[8],
+    "Unit Status": COLORS[9],   
 };
 
 const SINGLE_COLOR = "#5B9BD5";
@@ -318,7 +328,7 @@ const ReportPage = () => {
                     </div>
                 </div>
             </div>
-            <div className="flex gap-3 mt-4 bg-custom-grayFA items-start">
+            <div className="relative flex gap-3 mt-4 bg-custom-grayFA items-start">
                 <div className="w-[547px] pb-7 min-h-[335px] flex-grow-1 bg-white rounded-lg">
                     <p className="p-4 text-base montserrat-bold">
                         Inquiries per category
@@ -382,15 +392,16 @@ const ReportPage = () => {
                         </div>
                     <div className="flex flex-col">
                         <div>
-                            <PieChart width={430} height={260}>
+                            <PieChart width={548} height={360}>
                                 <Pie
                                     data={dataToDisplay}
                                     cx="50%"
                                     cy="50%"
-                                    outerRadius={115}
-                                    innerRadius={1}
+                                    outerRadius={170}
+                                    innerRadius={0}
                                     paddingAngle={1}
-                                    strokeWidth={5}
+                                    strokeWidth={1}
+                                    stroke="white"
                                     cornerRadius={0}
                                     fill="#8884d8"
                                     dataKey="value"
@@ -403,6 +414,13 @@ const ReportPage = () => {
                                             fill={categoryColors[entry.name] || COLORS[index % COLORS.length]}
                                         />
                                     ))}
+                                    <LabelList
+                                    dataKey="value" 
+                                    position="inside"
+                                    fill="white" 
+                                    formatter={(value) => `${value}%`}
+                                    style={{ fontFamily: '', fontWeight: 'normal', fontSize: 20}}
+                                    />
                                 </Pie>
                             </PieChart>
                         </div>
@@ -623,6 +641,11 @@ const ReportPage = () => {
                             </div>
                         </div>
                     </div>
+                </div>
+                <div className="fixed bottom-[50px] right-[41px]">
+                    <button className="flex justify-center items-center size-[60px] shadow-custom8 rounded-full bg-[#1A73E8] text-white text-lg">
+                        <TiDownload className="text-white text-[30px]" />
+                    </button>
                 </div>
             </div>
         </div>

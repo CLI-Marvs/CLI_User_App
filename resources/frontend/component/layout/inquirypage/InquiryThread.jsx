@@ -593,6 +593,40 @@ const InquiryThread = () => {
                                             <IoIosArrowDown />
                                         </span>
                                     </div>
+                                    <div className="flex relative">
+                                        <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
+                                            {" "}
+                                            Status
+                                        </label>
+                                        <div className="flex bg-red-900 justify-start w-full relative">
+                                            <label
+                                                htmlFor=""
+                                                className="w-full border-b-2"
+                                            >
+                                                {""}
+                                            </label>
+                                            <select
+                                                className="w-full border-b-1 outline-none appearance-none text-sm absolute px-[8px]"
+                                                value={status}
+                                                onChange={(e) =>
+                                                    setStatus(e.target.value)
+                                                }
+                                            >
+                                                <option value=" ">
+                                                    Select Status
+                                                </option>
+                                                <option value="Resolved">
+                                                    Resolved
+                                                </option>
+                                                <option value="Unresolved">
+                                                    Unresolved
+                                                </option>
+                                            </select>
+                                        </div>
+                                        <span className="absolute inset-y-0 right-0 flex items-center  pl-3 pointer-events-none">
+                                            <IoIosArrowDown />
+                                        </span>
+                                    </div>
                                     <div className="flex">
                                         <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
                                             {" "}
@@ -1163,7 +1197,7 @@ const InquiryThread = () => {
             </div>
             <div>
                 <Alert
-                    title="Are you sure you want to delete?"
+                    title="Are you sure you want to delete this inquiry?"
                     show={showAlert}
                     onCancel={handleCancel}
                     onConfirm={handleConfirm}
