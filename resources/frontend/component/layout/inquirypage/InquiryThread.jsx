@@ -79,8 +79,16 @@ const InquiryThread = () => {
         }));
     };
 
+
+    useEffect(() => {
+        const storedData = JSON.parse(localStorage.getItem("dataConcern"));
+        if (storedData) {
+            setDataConcern(storedData);
+        }
+    }, []);
+
+    
     /*   console.log("data", data); */
-    console.log("updatedConcern", dataConcern);
 
     /*  const dataConcern = data?.find((item) => item.ticket_id === ticketId) || {}; */
 
@@ -377,13 +385,14 @@ const InquiryThread = () => {
 
     useEffect(() => {
         if (emailMessageID) {
+            console.log("trigger here");
             setDataConcern((prevData) => ({
                 ...prevData,
                 message_id: emailMessageID,
             }));
         }
     }, [emailMessageID]);
-    
+
     
     const combineThreadMessages = messages[ticketId]
         ? messages[ticketId]
@@ -457,6 +466,7 @@ const InquiryThread = () => {
             }
         };
     }, [ticketId]);
+
 
     const capitalizeWords = (name) => {
         if (name) {
