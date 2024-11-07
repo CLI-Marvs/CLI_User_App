@@ -318,7 +318,7 @@ const AssignDetails = ({ logMessages, ticketId }) => {
 
                         {/* Updated Info  */}
 
-                        <div className="flex flex-col hidden">
+                        <div className="flex flex-col  ">
                             <div className="flex gap-1 items-center  ">
                                 <span className="flex mb-1 text-[25px] text-custom-blue ">
                                     ⚬
@@ -479,7 +479,7 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                                     <BsPaperclip className="h-5 w-5 text-custom-solidgreen hover:text-gray-700" />
                                 </button>
                             </div>
-                            <button onClick={() => setIsOpen(!isOpen)} className="hidden flex justify-center items-center rounded-full bg-custom-bluegreen size-[24px]">
+                            <button onClick={() => setIsOpen(!isOpen)} className="  flex justify-center items-center rounded-full bg-custom-bluegreen size-[24px]">
                                 <p className="text-sm text-white">
                                     3
                                 </p>
@@ -584,7 +584,7 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                                             {item.message}
                                         </p>
                                     </div>
-                                    <div className="flex flex-col gap-[5px] hidden">
+                                    <div className="flex flex-col gap-[5px]  ">
                                         <button className="w-[218px] h-[42px] rounded-[7px] gradient-btn2 px-[20px] py-[8px] flex items-center justify-start text-white gap-2">
                                             <img
                                                 src={FolderFile2}

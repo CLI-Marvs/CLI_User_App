@@ -486,7 +486,6 @@ class ConcernController extends Controller
 
     public function updateInfo(Request $request)
     {
-        // dd($request);
         try {
             $dataId = $request->dataId;
             $concern = Concerns::where('id', $dataId)->first();
@@ -501,7 +500,7 @@ class ConcernController extends Controller
             $concern->buyer_lastname
                 = $request->buyer_lastname;
             $concern->user_type = $request->user_type;
-
+            $concern->communication_type = $request->communication_type;
             if ($request->user_type === "Others") {
                 $concern->user_type = $request->other_user_type;
             }
@@ -1508,7 +1507,7 @@ class ConcernController extends Controller
     {
 
         try {
-            /*  dd($request->all()); */
+            /*dd($request->all()); */
             $assignees = $request->assignees;
             $concerns = Concerns::where('ticket_id', $request->ticket_id)->first();
 
@@ -1520,6 +1519,7 @@ class ConcernController extends Controller
             $department = $request->department;
             $details_concern = $request->details_concern;
             $buyer_name = $request->buyer_name;
+            $concerns->communication_type = $request->communication_type;
             $concerns->status = "Resolved";
             $buyer_lastname = $request->buyer_lastname;
             $message_id = $request->message_id;
@@ -1655,6 +1655,33 @@ class ConcernController extends Controller
         $concerns = $query->groupBy('property')->get();
         return response()->json($concerns);
     }
+
+    public function getCommunicationType(Request $request)
+    {
+        //dd($request);
+        $department = $request->department;
+        $monthNumber = Carbon::parse($request->propertyMonth)->month;
+
+        // Query to count each communication_type grouped by property
+        $query = Concerns::select(
+            'property',
+            DB::raw("SUM(case when communication_type = 'Complain' then 1 else 0 end) as Complain"),
+            DB::raw("SUM(case when communication_type = 'Request' then 1 else 0 end) as Request"),
+            DB::raw("SUM(case when communication_type = 'Inquiry' then 1 else 0 end) as Inquiry"),
+            DB::raw("SUM(case when communication_type = 'Suggestion or recommendation' then 1 else 0 end) as Suggestion"),
+
+        )
+            ->whereMonth('created_at', $monthNumber);
+
+        if ($department && $department !== "All") {
+            $query->whereRaw("resolve_from::jsonb @> ?", json_encode([['department' => $department]]));
+        }
+
+        // Group by property and get the result
+        $communicationTypes = $query->groupBy('property')->get();
+        return response()->json($communicationTypes);
+    }
+
 
 
     public function getInquiriesByCategory(Request $request)

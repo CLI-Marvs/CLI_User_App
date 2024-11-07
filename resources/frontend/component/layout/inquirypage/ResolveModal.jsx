@@ -1,17 +1,49 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useStateContext } from "../../../context/contextprovider";
 import apiService from "../../servicesApi/apiService";
 import { AiFillInfoCircle } from "react-icons/ai";
 import { IoMdArrowDropdown } from "react-icons/io";
 
+
 const ResolveModal = ({ modalRef, ticketId, dataRef, onupdate }) => {
     const { getAllConcerns, user, getInquiryLogs, data, assigneesPersonnel } =
         useStateContext();
     const [remarks, setRemarks] = useState("");
+    const [isCommunicationTypeRequired, setIsCommunicationTypeRequired] = useState(false);
     const maxCharacters = 500;
     const dataConcern =
         data?.find((items) => items.ticket_id === ticketId) || {};
     const messageId = dataConcern?.message_id || null;
+    const [communicationType, setCommunicationType] = useState("");
+    
+
+    /**
+     *  Set initial communication type when dataRef changes
+     */
+    useEffect(() => {
+        if (dataRef) {
+            setCommunicationType(dataRef.communication_type);
+        }
+    }, [dataRef])
+
+    /**
+     *Memoized function to fetch all concerns
+     */
+    const getConcerns = useCallback(() => {
+        getAllConcerns();
+    }, []);
+
+    /**
+     * Call getAllConcerns initially if needed, without dependency on dataConcern
+     */
+    useEffect(() => {
+        getConcerns();
+    }, [getConcerns]);
+
+    const handleCommunityTypeChange = (e) => {
+        setCommunicationType(e.target.value);
+        setIsCommunicationTypeRequired(false);
+    };
 
     const capitalizeWords = (name) => {
         if (name) {
@@ -26,7 +58,14 @@ const ResolveModal = ({ modalRef, ticketId, dataRef, onupdate }) => {
         }
     };
     const updateStatus = async () => {
+        if (communicationType === null || communicationType === "") {
+            {
+                setIsCommunicationTypeRequired(true);
+                return;
+            }
+        }
         try {
+
             const response = await apiService.post("resolve", {
                 ticket_id: ticketId,
                 admin_name: `${user?.firstname} ${user?.lastname}`,
@@ -36,29 +75,34 @@ const ResolveModal = ({ modalRef, ticketId, dataRef, onupdate }) => {
                 buyer_name: `${capitalizeWords(`${dataRef.buyer_firstname} ${dataRef.buyer_lastname}`)}`,
                 details_concern: dataRef.details_concern,
                 remarks: remarks,
+                communication_type: communicationType,
                 assignees: assigneesPersonnel[ticketId],
-                // assignees_info: Array.isArray(assigneesPersonnel[ticketId])
-                //     ? assigneesPersonnel[ticketId].map((person) => ({
-                //           assignees_email: person.employee_email,
-                //           assignees_name: person.name,
-                //       }))
-                //     : [],
                 message_id: messageId,
             });
+
             setRemarks("");
             getInquiryLogs(ticketId);
-            onupdate({...dataRef, status: "Resolved"});
+            onupdate({ ...dataRef, status: "Resolved", communication_type: communicationType });
             getAllConcerns();
             console.log("sucess", response);
+            //Close the modal
+            if (modalRef.current) {
+                modalRef.current.close();
+            }
+
         } catch (error) {
             console.log("error saving", error);
         }
     };
 
+    const handleCloseModal = () => {
+        setCommunicationType(dataRef.communication_type);
+        setIsCommunicationTypeRequired(false);
+    };
     return (
         <dialog
             id="Resolved"
-            className="modal w-[557px] rounded-[10px] shadow-custom5 backdrop:bg-black/50"
+            className="modal w-[557px] rounded-[10px] shadow-custom5 backdrop:bg-black/50  "
             ref={modalRef}
         >
             <div className=" px-[25px] rounded-lg">
@@ -67,7 +111,7 @@ const ResolveModal = ({ modalRef, ticketId, dataRef, onupdate }) => {
                         method="dialog"
                         className="pt-3 flex justify-end -mr-4"
                     >
-                        <button className="absolute justify-center w-10 h-10 items-center rounded-full bg-custom-grayFA text-custom-bluegreen hover:bg-custombg">
+                        <button className="absolute justify-center w-10 h-10 items-center rounded-full bg-custom-grayFA text-custom-bluegreen hover:bg-custombg" onClick={handleCloseModal} >
                             ✕
                         </button>
                     </form>
@@ -75,10 +119,22 @@ const ResolveModal = ({ modalRef, ticketId, dataRef, onupdate }) => {
                 <div className="flex justify-center items-center mt-[14px] ">
                     <AiFillInfoCircle className="size-[37px] text-[#5B9BD5]" />
                 </div>
-                <div className="flex justify-center mt-[30px] mb-[26px]">
+                <div className="flex justify-center mt-[30px] mb-[26px] flex-col items-center">
                     <p className="montserrat-medium text-[20px]">
                         You want to mark this as resolved?
                     </p>
+                    <div className="w-full mt-2">
+                        {
+                            isCommunicationTypeRequired && (
+                                <div className="w-full flex justify-center items-center h-12 bg-red-100 mb-4 rounded-lg">
+                                    <p className="flex text-[#C42E2E] ">
+                                        Please select communication type.
+                                    </p>
+                                </div>
+                            )
+                        }
+                    </div>
+
                 </div>
                 <div className=" bg-[#EDEDED] border border-[#D9D9D9]">
                     <div className="flex items-center justify-between">
@@ -100,18 +156,19 @@ const ResolveModal = ({ modalRef, ticketId, dataRef, onupdate }) => {
                         ></textarea>
                     </div>
                 </div>
-                {/* <div
+                <div
                     className={`flex items-center border border-[D6D6D6] rounded-[5px] overflow-hidden mt-[12px]`}
                 >
                     <span className="text-custom-gray81 text-sm bg-[#EDEDED] flex items-center w-[308px] tablet:w-[175px] mobile:w-[270px] mobile:text-xs -mr-3 pl-3 py-1">
                         Communication Type
                     </span>
                     <div className="relative w-full">
-                       
+
                         <select
+                            disabled={!!dataRef.communication_type}
                             name="user_type"
-                            value={dataConcern.communication_type || ""}
-                            // onChange={handleChange}  
+                            value={communicationType || ""}
+                            onChange={handleCommunityTypeChange}
                             className="appearance-none w-full px-4 text-sm py-1 bg-white focus:outline-none border-0 mobile:text-xs"
                         >
                             <option value="">(Select)</option>
@@ -124,10 +181,9 @@ const ResolveModal = ({ modalRef, ticketId, dataRef, onupdate }) => {
                             <IoMdArrowDropdown />
                         </span>
                     </div>
-                </div> */}
+                </div>
                 <div className="mt-5 mb-[25px]">
-                    <form
-                        method="dialog"
+                    <div
                         className="flex justify-center gap-[19px]"
                     >
                         <button className="gradient-btn5 p-[1px] w-[92px] h-[35px] rounded-[10px]">
@@ -140,10 +196,11 @@ const ResolveModal = ({ modalRef, ticketId, dataRef, onupdate }) => {
                         <button
                             onClick={updateStatus}
                             className="h-[35px] w-[185px] text-white rounded-[10px] gradient-btn2 hover:shadow-custom4"
+                            type="submit"
                         >
                             Mark as Resolved
                         </button>
-                    </form>
+                    </div>
                 </div>
             </div>
         </dialog>
