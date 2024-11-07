@@ -235,7 +235,7 @@ class ConcernController extends Controller
 
         try {
             $allFiles = [];
-            $files = $request->file('files');
+            $files = $request->file('files'); 
             //$files = $validatedData['files'];
             $all_file_names = [];
             $filesData = [];
@@ -486,6 +486,7 @@ class ConcernController extends Controller
 
     public function updateInfo(Request $request)
     {
+        // dd($request);
         try {
             $dataId = $request->dataId;
             $concern = Concerns::where('id', $dataId)->first();
@@ -507,7 +508,6 @@ class ConcernController extends Controller
             $concern->buyer_email = $request->buyer_email;
             $concern->property = $request->property;
             $concern->admin_remarks = $request->remarks;
-            $concern->communication_type = $request->communication_type;
             $concern->save();
 
             return response()->json('Successfully updated');
@@ -889,7 +889,7 @@ class ConcernController extends Controller
             $ticketIds = $assignedInquiries->pluck('ticket_id')->toArray();
 
             if ($employeeDepartment !== "Customer Relations - Services") {
-                $concernsQuery->whereIn('concerns.ticket_id', $ticketIds);
+                $concernsQuery->whereIn('ticket_id', $ticketIds);
             }
 
             $concernsQuery->leftJoin('read_notif_by_user', function ($join) use ($employee) {
@@ -987,15 +987,15 @@ class ConcernController extends Controller
         $buyerReplyQuery = BuyerReplyNotif::query();
 
         if ($employeeDepartment !== "Customer Relations - Services") {
-            $buyerReplyQuery->whereIn('ticket_id', $ticketIds);
+            $buyerReplyQuery->whereIn('concerns.ticket_id', $ticketIds);
         }
 
         $buyerReplyQuery->leftJoin('concerns', 'buyer_reply_notif.ticket_id', '=', 'concerns.ticket_id')
-            ->leftJoin('read_notif_by_user', function ($join) use ($employee) {
-                $join->on('buyer_reply_notif.id', '=', 'read_notif_by_user.reply_id')
-                    ->where('read_notif_by_user.user_id', '=', $employee->id);
-            });
-
+           ->leftJoin('read_notif_by_user', function ($join) use ($employee) {
+            $join->on('buyer_reply_notif.id', '=', 'read_notif_by_user.reply_id')
+                  ->where('read_notif_by_user.user_id', '=', $employee->id);
+        });
+    
 
         $buyerReplyQuery->select(
             'buyer_reply_notif.ticket_id',
@@ -1655,34 +1655,6 @@ class ConcernController extends Controller
         $concerns = $query->groupBy('property')->get();
         return response()->json($concerns);
     }
-
-    public function getCommunicationType(Request $request)
-    {
-        dd($request);
-        $department = $request->department;
-        $monthNumber = Carbon::parse($request->propertyMonth)->month;
-
-        // Query to count each communication_type grouped by property
-        $query = Concerns::select(
-            'property',
-            DB::raw("SUM(case when communication_type = 'Complain' then 1 else 0 end) as Complain"),
-            DB::raw("SUM(case when communication_type = 'Request' then 1 else 0 end) as Request"),
-            DB::raw("SUM(case when communication_type = 'Inquiry' then 1 else 0 end) as Inquiry"),
-            DB::raw("SUM(case when communication_type = 'Suggestion or recommendation' then 1 else 0 end) as Suggestion or recommendation"),
-
-        )
-            ->whereMonth('created_at', $monthNumber);
-
-        if ($department && $department !== "All") {
-            $query->whereRaw("resolve_from::jsonb @> ?", json_encode([['department' => $department]]));
-        }
-
-        // Group by property and get the result
-        $communicationTypes = $query->groupBy('property')->get();
-
-        return response()->json($communicationTypes);
-    }
-
 
 
     public function getInquiriesByCategory(Request $request)
