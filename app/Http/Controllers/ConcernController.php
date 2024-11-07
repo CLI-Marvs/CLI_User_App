@@ -987,7 +987,7 @@ class ConcernController extends Controller
         $buyerReplyQuery = BuyerReplyNotif::query();
 
         if ($employeeDepartment !== "Customer Relations - Services") {
-            $buyerReplyQuery->whereIn('ticket_id', $ticketIds);
+            $buyerReplyQuery->whereIn('concerns.ticket_id', $ticketIds);
         }
 
         $buyerReplyQuery->leftJoin('concerns', 'buyer_reply_notif.ticket_id', '=', 'concerns.ticket_id')
@@ -1227,7 +1227,8 @@ class ConcernController extends Controller
                     $newTicketId = str_replace('#', '', $ticketId);
                     $modifiedTicketId = str_replace('Ticket#', '', $ticketId);
                     $concernData = Concerns::where('ticket_id', $ticketId)->first();
-
+ 
+                     
                     $assigneeData = [
                         'name' => $selectedOption['name'],
                         'email' => $selectedOption['email'],
@@ -1247,10 +1248,10 @@ class ConcernController extends Controller
                     $concernData->save();
                     $dataToEmail = [
                         'ticketId' => $modifiedTicketId,
-                        'details_concern' => $request->details_concern,
+                        'details_concern' => $concernData->details_concern,
                         'from_user' => $request->assign_by,
                         'department' => $request->assign_by_department,
-                        'buyer_name' => $request->buyer_name,
+                        'buyer_name' => $concernData->buyer_name,
                         'assignee_name' => $selectedOption['name'],
                     ];
                     $data = [

@@ -183,8 +183,8 @@ const AssignSidePanel = ({ ticketId }) => {
                     selectedOptions: newAssignees,
                     assign_by: user?.firstname + " " + user?.lastname,
                     assign_by_department: user?.department,
-                    details_concern: dataConcern.details_concern,
-                    buyer_name: dataConcern.buyer_name,
+                   /*  details_concern: dataConcern.details_concern,
+                    buyer_name: dataConcern.buyer_name, */
                 });
                 console.log("Assignees saved successfully:", response);
             } else {
