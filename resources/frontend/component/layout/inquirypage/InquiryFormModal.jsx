@@ -696,8 +696,8 @@ const InquiryFormModal = ({ modalRef }) => {
                                     <option value="Payment Issues">
                                         Payment Issues
                                     </option>
-                                    <option value="SOA/ Billing Statement/ Buyer's Ledger">
-                                        SOA/ Billing Statement/ Buyer's Ledger
+                                    <option value="SOA/ Buyer's Ledger">
+                                        SOA/ Buyer's Ledger
                                     </option>
                                     <option value="Turn Over Status">
                                         Turn Over Status
@@ -747,6 +747,7 @@ const InquiryFormModal = ({ modalRef }) => {
                                     </option>
                                     <option value="Buyer">Buyer</option>
                                     <option value="Broker">Broker</option>
+                                    <option value="Lessee">Lessee</option>
                                     <option value="Others">Others</option>
                                 </select>
                                 <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3  bg-custom-lightestgreen text-custom-bluegreen pointer-events-none">
