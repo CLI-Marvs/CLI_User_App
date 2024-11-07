@@ -11,8 +11,8 @@ import debounce from "lodash/debounce";
 const StateContext = createContext({
     user: null,
     token: null,
-    setUser: () => {},
-    setToken: () => {},
+    setUser: () => { },
+    setToken: () => { },
 });
 
 export const ContextProvider = ({ children }) => {
@@ -38,6 +38,7 @@ export const ContextProvider = ({ children }) => {
     const [ticketId, setTicketId] = useState(null);
     const [dataCategory, setDataCategory] = useState([]);
     const [dataProperty, setDataPropery] = useState([]);
+    const [communicationTypeData, setCommunicationTypeData] = useState([]);
     const [month, setMonth] = useState("");
     const [propertyMonth, setPropertyMonth] = useState("");
     const [specificInquiry, setSpecificInquiry] = useState(null);
@@ -121,42 +122,42 @@ export const ContextProvider = ({ children }) => {
             )
         );
     };
-    
+
     const getBankName = async () => {
-       if(token) {
-        try {
-            const response = await apiService.get("get-transaction-bank");
-            setBankList(response.data);
-        } catch (error) {
-            console.log("error retrieving banks", error);
+        if (token) {
+            try {
+                const response = await apiService.get("get-transaction-bank");
+                setBankList(response.data);
+            } catch (error) {
+                console.log("error retrieving banks", error);
+            }
         }
-       }
     };
-       
+
     const getTransactions = async () => {
         try {
             const searchParams = new URLSearchParams({
-              /*   search: JSON.stringify(searchFilter), */
+                /*   search: JSON.stringify(searchFilter), */
                 page: currentPageTransaction + 1,
                 bank_name: bankNames ? bankNames : null
             }).toString();
             const response = await apiService.get(`get-transactions?${searchParams}`);
             setTransactions(response.data.data);
             setTransactionsPageCount(response.data.last_page);
-           
+
         } catch (error) {
             console.error("Error fetching data: ", error);
         }
     };
 
     const getMatches = async () => {
-       if(token) {
-        try {
-            const response = await apiService.get("get-matches");
-            setMatchesData(response.data);
-        } catch (error) {
-            console.log("error uploading data", error);
-        }
+        if (token) {
+            try {
+                const response = await apiService.get("get-matches");
+                setMatchesData(response.data);
+            } catch (error) {
+                console.log("error uploading data", error);
+            }
         }
     };
 
@@ -191,17 +192,17 @@ export const ContextProvider = ({ children }) => {
         }
     };
 
-    
-      const getPropertyNames = async () => {
+
+    const getPropertyNames = async () => {
         if (token) {
-          try {
-            const response = await apiService.get("property-name");
-            setPropertyNamesList(response.data);
-          } catch (error) {
-            console.log("Error retrieving data", error);
-          }
+            try {
+                const response = await apiService.get("property-name");
+                setPropertyNamesList(response.data);
+            } catch (error) {
+                console.log("Error retrieving data", error);
+            }
         }
-      };
+    };
     const fetchDataReport = async () => {
         if (!isDepartmentInitialized) return;
         try {
@@ -242,7 +243,33 @@ export const ContextProvider = ({ children }) => {
             console.log("error retrieving", error);
         }
     };
+    const getCommunicationTypePerProperty = async () => {
+        if (!isDepartmentInitialized) return;
+        console.log("propertyMonth", propertyMonth)
+        console.log("propertyMonth", department)
+        try {
+            const response = await apiService.get("communication-type-property", {
+                params: {
+                    propertyMonth: propertyMonth,
+                    department: department,
+                },
+            });
+            const result = response.data;
+            console.log("result",result)
+            // const formattedData = result.map((item) => ({
+            //     propertyName: item.property,
+            //     complainCount: item.Complain,
+            //     requestCount: item.Request,
+            //     inquiryCount: item.Inquiry,
+            //     suggestionCount: item.Suggestion,
+            //     recommendationCount: item.Recommendation,
+            // }));
 
+            // setCommunicationTypeData(formattedData);
+        } catch (error) {
+            console.log("Error retrieving communication types:", error);
+        }
+    };
     const getSpecificInquiry = async () => {
         if (token) {
             try {
@@ -269,8 +296,7 @@ export const ContextProvider = ({ children }) => {
         if (token) {
             try {
                 const response = await apiService.get(
-                    `notifications?page=${notifCurrentPage + 1}&status=${
-                        notifStatus || ""
+                    `notifications?page=${notifCurrentPage + 1}&status=${notifStatus || ""
                     }`
                 );
                 setNotifications(response.data.data);
@@ -468,7 +494,7 @@ export const ContextProvider = ({ children }) => {
             const getEmployeeData = async () => {
                 const response = await apiService.get("employee-list");
                 setAllEmployees(response.data);
-            };  
+            };
             getEmployeeData();
             getPropertyNames();
         }
@@ -512,7 +538,7 @@ export const ContextProvider = ({ children }) => {
         getCount();
     }, [unreadCount, token]);
 
-    useEffect(() => {}, [user, token]);
+    useEffect(() => { }, [user, token]);
 
     useEffect(() => {
         getSpecificInquiry();
@@ -574,6 +600,9 @@ export const ContextProvider = ({ children }) => {
                 propertyMonth,
                 dataProperty,
                 getInquiriesPerProperty,
+                getCommunicationTypePerProperty,
+                communicationTypeData,
+                setCommunicationTypeData,
                 setPropertyMonth,
                 setData,
                 searchFilter,

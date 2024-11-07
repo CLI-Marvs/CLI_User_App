@@ -149,6 +149,8 @@ const ReportPage = () => {
         dataCategory,
         fetchCategory,
         dataProperty,
+        communicationTypeData,
+        getCommunicationTypePerProperty,
         getInquiriesPerProperty,
         propertyMonth,
         setPropertyMonth,
@@ -157,9 +159,13 @@ const ReportPage = () => {
         setDepartment,
         dataSet,
         fetchDataReport,
-        allEmployees
+        allEmployees,
+        data
     } = useStateContext();
+   console.log("communicationTypeData", communicationTypeData)
 
+    // console.log("dataProperty", dataProperty)
+    // console.log("data",data)
     const defaultData = [{ name: "No Data" }];
     const dataToDisplay = dataCategory.length > 0 ? dataCategory : defaultData;
     const location = useLocation();
@@ -204,7 +210,7 @@ const ReportPage = () => {
         setMonth(e.target.value);
     };
 
-    console.log("dataToDisplay", dataToDisplay);
+    //   console.log("dataToDisplay", dataToDisplay);
     const handleInputChangeProperty = (e) => {
         setPropertyMonth(e.target.value);
     };
@@ -230,6 +236,7 @@ const ReportPage = () => {
         fetchCategory();
         getInquiriesPerProperty();
         fetchDataReport();
+        getCommunicationTypePerProperty();
     }, []);
 
     useEffect(() => {
@@ -237,7 +244,7 @@ const ReportPage = () => {
         setPropertyMonth(getCurrentMonth());
     }, []);
 
-    console.log("department", department);
+    //  console.log("department", department);
 
     return (
         <div className="h-screen bg-custom-grayFA p-4">
@@ -432,7 +439,7 @@ const ReportPage = () => {
                                                 fill={categoryColors[entry.name] || COLORS[index % COLORS.length]}
                                             />
                                         ))}
-                                        
+
                                     </Pie>
                                     <Tooltip formatter={(value, name) => ` ${value}%`} />
                                 </PieChart>
@@ -476,7 +483,7 @@ const ReportPage = () => {
                     </div>
                 </div>
                 <div className="flex flex-col gap-3">
-                    <div className=" bg-white rounded-[10px]  w-[579px] flex flex-col overflow-y-auto">
+                    <div className=" bg-whiterounded-[10px]  w-[579px] flex flex-col overflow-y-auto">
                         <p className="p-4  text-base montserrat-bold">
                             Inquiries per property
                         </p>
@@ -538,7 +545,7 @@ const ReportPage = () => {
                             </div>
                         </div>
                         <div className="flex-grow">
-
+                            {/* <p>Inquiries per propertys test</p> */}
                             <BarChart
                                 width={400}
                                 height={chartHeight}
@@ -694,7 +701,7 @@ const ReportPage = () => {
                                     hide
                                     tick={false}
                                 />
-                                <Tooltip content={<CustomTooltip2 />}/>
+                                <Tooltip content={<CustomTooltip2 />} />
 
                                 <Bar
                                     dataKey="complaints"

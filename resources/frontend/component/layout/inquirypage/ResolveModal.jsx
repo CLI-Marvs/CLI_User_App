@@ -13,7 +13,6 @@ const ResolveModal = ({ modalRef, ticketId, dataRef, onupdate }) => {
         data?.find((items) => items.ticket_id === ticketId) || {};
     const messageId = dataConcern?.message_id || null;
 
- 
     const capitalizeWords = (name) => {
         if (name) {
             return name
@@ -108,10 +107,11 @@ const ResolveModal = ({ modalRef, ticketId, dataRef, onupdate }) => {
                         Communication Type
                     </span>
                     <div className="relative w-full">
+                       
                         <select
                             name="user_type"
-                            // value={dataToUpdate.user_type || ""}
-                            // onChange={handleChange}
+                            value={dataConcern.communication_type || ""}
+                            // onChange={handleChange}  
                             className="appearance-none w-full px-4 text-sm py-1 bg-white focus:outline-none border-0 mobile:text-xs"
                         >
                             <option value="">(Select)</option>
