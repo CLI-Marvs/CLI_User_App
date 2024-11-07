@@ -71,13 +71,7 @@ const InquiryThread = () => {
     const handleSelectProperty = (e) => {
         setSelectedProperty(e.target.value);
     };
-
-    /* const handleUpdate = (newData) => {
-        setDataConcern((prevData) => ({
-            ...prevData,
-            ...newData,
-        }));
-    }; */
+    
     const handleUpdate = (newData) => {
         setDataConcern((prevData) => ({
             ...prevData,

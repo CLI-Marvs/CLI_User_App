@@ -6,8 +6,10 @@ import { useStateContext } from "../../../context/contextprovider";
 import Alert from "../../../component/Alert";
 const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
     const predefinedUserTypes = ["Property Owner", "Buyer", "Broker", "Seller"];
-    const { getAllConcerns, propertyNamesList, updateConcern } = useStateContext();
+    const { getAllConcerns, propertyNamesList, updateConcern } =
+        useStateContext();
     const [message, setMessage] = useState("");
+
     const [dataToUpdate, setDataToUpdate] = useState({
         contract_number: dataConcern.contract_number || "",
         unit_number: dataConcern.unit_number || "",
@@ -22,6 +24,7 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
         user_type: predefinedUserTypes.includes(dataConcern.user_type)
             ? dataConcern.user_type
             : "Others",
+        communication_type: dataConcern.communication_type || "",
         other_user_type: !predefinedUserTypes.includes(dataConcern.user_type)
             ? dataConcern.user_type
             : "",
@@ -38,18 +41,18 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
         "N/A",
         ...(Array.isArray(propertyNamesList) && propertyNamesList.length > 0
             ? propertyNamesList
-                  .filter((item) => !item.toLowerCase().includes("phase"))
-                  .map((item) => {
-                      const formattedItem = formatFunc(item);
-                      return formattedItem === "Casamira South"
-                          ? "Casa Mira South"
-                          : formattedItem;
-                  })
-                  .sort((a, b) => {
-                      if (a === "N/A") return -1;
-                      if (b === "N/A") return 1;
-                      return a.localeCompare(b);
-                  })
+                .filter((item) => !item.toLowerCase().includes("phase"))
+                .map((item) => {
+                    const formattedItem = formatFunc(item);
+                    return formattedItem === "Casamira South"
+                        ? "Casa Mira South"
+                        : formattedItem;
+                })
+                .sort((a, b) => {
+                    if (a === "N/A") return -1;
+                    if (b === "N/A") return 1;
+                    return a.localeCompare(b);
+                })
             : []),
     ];
 
@@ -91,7 +94,7 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
         setShowAlert(true);
         modalRef.current.showModal();
     };
-    
+
     const handleConfirm = () => {
         addInfo();
         setShowAlert(false);
@@ -111,8 +114,9 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
             );
 
             console.log("response", response);
-            onupdate({ ...dataToUpdate, dataConcern});
+            onupdate({ ...dataToUpdate, dataConcern });
             getAllConcerns();
+
         } catch (error) {
             console.log("error", error);
         }
@@ -134,6 +138,7 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
                 user_type: predefinedUserTypes.includes(dataConcern.user_type)
                     ? dataConcern.user_type
                     : "Others", // Set to "Others" for any non-standard user_type
+                communication_type: dataConcern.communication_type || "",
                 other_user_type: !predefinedUserTypes.includes(
                     dataConcern.user_type
                 )
@@ -265,10 +270,10 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
                                 className="w-full px-4 text-sm focus:outline-none mobile:text-xs no-spinner"
                                 placeholder=""
                                 onInput={(e) =>
-                                    (e.target.value = e.target.value.replace(
-                                        /[^0-9]/g,
-                                        ""
-                                    ))
+                                (e.target.value = e.target.value.replace(
+                                    /[^0-9]/g,
+                                    ""
+                                ))
                                 }
                             />
                         </div>
@@ -298,7 +303,6 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
                                     <IoMdArrowDropdown />
                                 </span>
                             </div>
-                            
                         </div>
                         {/* <div
                             className={`flex items-center border border-[D6D6D6] rounded-[5px] overflow-hidden`}
@@ -308,16 +312,18 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
                             </span>
                             <div className="relative w-full">
                                 <select
-                                    name="user_type"
-                                    // value={dataToUpdate.user_type || ""}
-                                    // onChange={handleChange}
+                                    name="communication_type"
+                                    value={dataToUpdate.communication_type || ""}
+                                    onChange={handleChange}
                                     className="appearance-none w-full px-4 text-sm py-1 bg-white focus:outline-none border-0 mobile:text-xs"
                                 >
                                     <option value="">(Select)</option>
                                     <option value="Complain">Complain</option>
                                     <option value="Request">Request</option>
                                     <option value="Inquiry">Inquiry</option>
-                                    <option value="Suggestion or recommendation">Suggestion or Recommendation</option>
+                                    <option value="Suggestion or recommendation">
+                                        Suggestion or Recommendation
+                                    </option>
                                 </select>
                                 <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3 bg-[#EDEDED] text-custom-gray81 pointer-events-none">
                                     <IoMdArrowDropdown />
@@ -356,10 +362,10 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
                                 className="w-full px-4 text-sm focus:outline-none mobile:text-xs"
                                 placeholder=""
                                 onInput={(e) =>
-                                    (e.target.value = e.target.value.replace(
-                                        /[^0-9]/g,
-                                        ""
-                                    ))
+                                (e.target.value = e.target.value.replace(
+                                    /[^0-9]/g,
+                                    ""
+                                ))
                                 }
                             />
                         </div>
@@ -451,9 +457,9 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
                         show={showAlert}
                         onCancel={handleCancel}
                         onConfirm={handleConfirm}
-                        //You can pass onConfirm and onCancel props to customize the text of the buttons. Example below; 
-                        // confirmText="Update"
-                        // cancelText="Cancel"
+                    //You can pass onConfirm and onCancel props to customize the text of the buttons. Example below;
+                    // confirmText="Update"
+                    // cancelText="Cancel"
                     />
                 </div>
             </div>
