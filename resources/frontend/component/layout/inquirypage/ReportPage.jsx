@@ -71,7 +71,7 @@ const categoryColors = {
     "Other Concerns": COLORS[3],
     "Payment Issues": COLORS[4],
     "Reservation Documents": COLORS[5],
-    "SOA/ Billing Statement/ Buyer's Ledger": COLORS[6],
+    "SOA/ Buyer's Ledger": COLORS[6],
     "Title and Other Registration Documents": COLORS[7],
     "Turn Over Status": COLORS[8],
     "Unit Status": COLORS[9],

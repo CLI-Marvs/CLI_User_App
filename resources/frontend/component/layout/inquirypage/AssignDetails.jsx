@@ -1,9 +1,12 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useStateContext } from "../../../context/contextprovider";
 import apiService from "../../servicesApi/apiService";
 import moment from "moment";
 import { BsPaperclip } from "react-icons/bs";
+import FolderFile from "../../../../../public/Images/folder_file.svg";
+import FolderFile2 from "../../../../../public/Images/Folder_file_light.svg";
 
+import { FaTrash } from "react-icons/fa";
 const AssignDetails = ({ logMessages, ticketId }) => {
     const {
         user,
@@ -11,11 +14,11 @@ const AssignDetails = ({ logMessages, ticketId }) => {
         setConcernMessages,
         concernMessages,
         setLogs,
-        logs, 
-        assigneesPersonnel  
+        logs,
+        assigneesPersonnel
     } = useStateContext();
     const [message, setMessage] = useState("");
-
+    const [isOpen, setIsOpen] = useState(false);
     const handleSendMessage = async () => {
         if (message.trim()) {
             try {
@@ -148,10 +151,29 @@ const AssignDetails = ({ logMessages, ticketId }) => {
         };
     }, [ticketId]);
 
+    const dropdownRef = useRef(null);
+
+    const handleClickOutside = (event) => {
+        if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+            setIsOpen(false);
+        }
+    };
+
+    useEffect(() => {
+        if (isOpen) {
+            document.addEventListener('mousedown', handleClickOutside);
+        } else {
+            document.removeEventListener('mousedown', handleClickOutside);
+        }
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [isOpen]);
+
     const sortedConcernMessages = concernMessages[ticketId]
         ? concernMessages[ticketId]
-              .flat()
-              .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+            .flat()
+            .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
         : [];
 
     const sortedLogs = logs[ticketId] || [];
@@ -165,9 +187,9 @@ const AssignDetails = ({ logMessages, ticketId }) => {
             type: "log",
             created_at: logReply.created_at,
         })),
-        
+
     ].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-    
+
     const capitalizeWords = (name) => {
         if (name) {
             return name
@@ -292,6 +314,65 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                                 </p>
                             </div>
                         </div>
+
+
+                        {/* Updated Info  */}
+
+                        <div className="flex flex-col hidden">
+                            <div className="flex gap-1 items-center  ">
+                                <span className="flex mb-1 text-[25px] text-custom-blue ">
+                                    ⚬
+                                </span>
+                                <p className="montserrat-medium text-sm text-custom-blue ">
+                                    {moment(inquiry_createdAt).format(
+                                        "MMMM D, YYYY"
+                                    )}
+                                </p>
+                                <span className="montserrat-medium text-custom-gray81">
+                                    {moment(inquiry_createdAt).format(
+                                        "hh:mm A"
+                                    )}
+                                </span>
+                            </div>
+                            <div>
+                                <p className="text-custom-solidgreen ">
+                                    Updated Info
+                                </p>
+                                <p className="text-[#A5A5A5]">
+                                    by: {details.remove_by}
+                                </p>
+                            </div>
+                            <div className="mt-[20px]">
+                                <div className="w-full min-h-[39px] border-[2px] border-custom-grayF1 flex flex-col gap-[10px] bg-white p-[10px] rounded-[5px]">
+                                    <p className="text-sm text-custom-bluegreen">
+                                        First Name:  
+                                        <span className="text-custom-grayA5">
+                                            {" "}From{" "}{"{"}
+                                        </span>
+                                        <span className="text-red-500">
+                                            {" "}Josh{" "}
+                                        </span>
+                                        <span className="text-custom-grayA5">
+                                            {"}"}{" "}To{" "}{"{"}
+                                        </span>
+                                        <span className="text-black">
+                                            {" "}Joshua{" "}
+                                        </span>
+                                        <span className="text-custom-grayA5">{"}"}</span>
+                                    </p>
+                                    <p className="text-sm text-custom-bluegreen">
+                                        Middle Name:  
+                                        <span className="text-custom-grayA5">
+                                            {" "}Added{" "}{"{"}
+                                        </span>
+                                        <span className="text-black">
+                                            {" "}Tee{" "}
+                                        </span>
+                                        <span className="text-custom-grayA5">{"}"}</span>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
                     </>
                 );
             case "inquiry_status":
@@ -376,14 +457,14 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                             maxLength={255}
                             value={message}
                         />
-                        <div className="hidden w-auto flex gap-[10px]">
+                        <div className="relative w-auto flex gap-[10px]" ref={dropdownRef}>
                             <div className="flex items-center">
                                 <input
                                     type="file"
                                     id="fileInput"
                                     multiple
                                     style={{ display: "none" }}
-                                    /* onChange={handleFileAttach} */
+                                /* onChange={handleFileAttach} */
                                 />
                                 <button
                                     type="button"
@@ -398,17 +479,57 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                                     <BsPaperclip className="h-5 w-5 text-custom-solidgreen hover:text-gray-700" />
                                 </button>
                             </div>
-                            <div className="flex justify-center items-center rounded-full bg-custom-bluegreen size-[24px]">
+                            <button onClick={() => setIsOpen(!isOpen)} className="hidden flex justify-center items-center rounded-full bg-custom-bluegreen size-[24px]">
                                 <p className="text-sm text-white">
-                                    1
+                                    3
                                 </p>
-                            </div>
+                            </button>
+                            {isOpen && (
+                                <div className="absolute right-0 top-full mt-2 w-[331px] h-auto p-[30px] bg-white text-xs rounded-[10px] shadow-custom4 z-10">
+                                    <div className="flex flex-col gap-[6px]">
+                                        <div className="flex items-center gap-[6px]">
+                                            <button className="flex items-center gap-2 w-full h-[38px] px-[10px] py-[6px] bg-custom-grayF1 rounded-[4px]" >
+                                                <img src={FolderFile} alt="folder" />
+                                                <p>Attached_File</p>
+                                            </button>
+                                            <button className="flex justify-center items-centersize-[24px]">
+                                                <FaTrash
+                                                    className="text-[#EB4444] hover:text-red-600 cursor-pointer text-[20px]"
+                                                />
+                                            </button>
+                                        </div>
+
+                                        <div className="flex items-center gap-[6px]">
+                                            <button className="flex items-center gap-2 w-full h-[38px] px-[10px] py-[6px] bg-custom-grayF1 rounded-[4px]" >
+                                                <img src={FolderFile} alt="folder" />
+                                                <p>Attached_File</p>
+                                            </button>
+                                            <button className="flex justify-center items-centersize-[24px]">
+                                                <FaTrash
+                                                    className="text-[#EB4444] hover:text-red-600 cursor-pointer text-[20px]"
+                                                />
+                                            </button>
+                                        </div>
+                                        <div className="flex items-center gap-[6px]">
+                                            <button className="flex items-center gap-2 w-full h-[38px] px-[10px] py-[6px] bg-custom-grayF1 rounded-[4px]" >
+                                                <img src={FolderFile} alt="folder" />
+                                                <p>Attached_File</p>
+                                            </button>
+                                            <button className="flex justify-center items-centersize-[24px]">
+                                                <FaTrash
+                                                    className="text-[#EB4444] hover:text-red-600 cursor-pointer text-[20px]"
+                                                />
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                         <button
-                            className={`w-[76px] h-[28px] rounded-[10px] text-xs text-white 
+                            className={`shrink-0 w-[76px] h-[28px] rounded-[10px] text-xs text-white 
                                 ${!message.trim()
-                                        ? "bg-gray-400 cursor-not-allowed" 
-                                        : "gradient-btn2"
+                                    ? "bg-gray-400 cursor-not-allowed"
+                                    : "gradient-btn2"
                                 } 
                                 `}
                             onClick={handleSendMessage}
@@ -436,7 +557,7 @@ const AssignDetails = ({ logMessages, ticketId }) => {
 
                             return (
                                 <div
-                                    className={`flex flex-col gap-[10px] py-[20px] px-[30px] ${alternatingBackground}`}
+                                    className={`flex flex-col gap-[20px] py-[20px] px-[30px] ${alternatingBackground}`}
                                     key={index}
                                 >
                                     <div className="flex gap-[10px] text-sm montserrat-medium items-center">
@@ -458,11 +579,37 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                                             </p>
                                         </div>
                                     </div>
-                                    <div className="w-full min-h-[39px] border-[2px] border-custom-grayF1 bg-white p-[10px] rounded-[10px]">
+                                    <div className=" w-full min-h-[39px] border-[2px] border-custom-grayF1 bg-white p-[10px] rounded-[10px]">
                                         <p className="text-sm break-words whitespace-pre-wrap">
                                             {item.message}
                                         </p>
                                     </div>
+                                    <div className="flex flex-col gap-[5px] hidden">
+                                        <button className="w-[218px] h-[42px] rounded-[7px] gradient-btn2 px-[20px] py-[8px] flex items-center justify-start text-white gap-2">
+                                            <img
+                                                src={FolderFile2}
+                                                alt="View Attachment"
+                                                className=""
+                                            />
+                                            <span className="text-xs">
+                                                {" "}
+                                                {/* {truncatedName}.{fileType} */}Attachments_File
+                                            </span>
+                                        </button>
+                                        <button className="w-[218px] h-[42px] rounded-[7px] gradient-btn2 px-[20px] py-[8px] flex items-center justify-start text-white gap-2">
+                                            <img
+                                                src={FolderFile2}
+                                                alt="View Attachment"
+                                                className=""
+                                            />
+                                            <span className="text-xs">
+                                                {" "}
+                                                {/* {truncatedName}.{fileType} */}Attachments_File
+                                            </span>
+                                        </button>
+                                    </div>
+                                    
+                                    
                                 </div>
                             );
                         } else if (item.type === "log") {
@@ -486,7 +633,7 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                                 return (
                                     <>
                                         <div
-                                            className={`flex flex-col gap-[10px] py-[20px] px-[30px] ${alternatingBackground}`} // Apply alternating background
+                                            className={`flex flex-col gap-[10px] py-[20px] px-[30px] ${alternatingBackground}`} 
                                             key={index}
                                         >
                                             {renderDetails(

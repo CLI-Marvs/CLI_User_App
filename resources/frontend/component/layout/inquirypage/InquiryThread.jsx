@@ -565,8 +565,8 @@ const InquiryThread = () => {
                                             <option value="Payment Issues">
                                                 Payment Issues
                                             </option>
-                                            <option value="SOA/ Billing Statement/ Buyer's Ledger">
-                                                SOA/ Billing Statement/ Buyer's
+                                            <option value="SOA/ Buyer's Ledger">
+                                                SOA/ Buyer's
                                                 Ledger
                                             </option>
                                             <option value="Turn Over Status">

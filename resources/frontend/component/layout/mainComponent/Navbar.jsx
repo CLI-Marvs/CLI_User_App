@@ -218,7 +218,7 @@ const Navbar = () => {
                                             <div className="flex items-center">
                                                 <MdOutlineMail />
                                             </div>
-                                            send Feedback/Suggestion
+                                            Send Feedback/Suggestion
                                         </p>
                                    </div>
                                 </div>
