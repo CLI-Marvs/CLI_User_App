@@ -68,6 +68,7 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
         setMessage("");
         //  setShowAlert(false);
     };
+
     const handleChange = (e) => {
         const newValue = e.target.value;
         const { name, value } = e.target;
@@ -90,6 +91,7 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
             });
         }
     };
+
     const handleShowUpdateAlert = () => {
         setShowAlert(true);
         modalRef.current.showModal();
@@ -106,12 +108,14 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
     const handleCancel = () => {
         setShowAlert(false);
     };
+
     const addInfo = async () => {
         try {
             const response = await apiService.put(
                 `update-info?dataId=${dataConcern.id}`,
                 { ...dataToUpdate }
             );
+             
 
             console.log("response", response);
             onupdate({ ...dataToUpdate, dataConcern });
@@ -304,7 +308,7 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
                                 </span>
                             </div>
                         </div>
-                        {/* <div
+                        <div
                             className={`flex items-center border border-[D6D6D6] rounded-[5px] overflow-hidden`}
                         >
                             <span className="text-custom-gray81 text-sm bg-[#EDEDED] flex items-center w-[308px] tablet:w-[175px] mobile:w-[270px] mobile:text-xs -mr-3 pl-3 py-1">
@@ -329,7 +333,7 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
                                     <IoMdArrowDropdown />
                                 </span>
                             </div>
-                        </div> */}
+                        </div>
                         <div className="flex justify-end">
                             {dataToUpdate.user_type === "Others" && (
                                 <div

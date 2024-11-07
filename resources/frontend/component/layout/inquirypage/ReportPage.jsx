@@ -22,32 +22,6 @@ import { useStateContext } from "../../../context/contextprovider";
 import { IoMdArrowDropdown } from "react-icons/io";
 import { useLocation } from "react-router-dom";
 
-
-
-const data1 = [
-    {
-        name: '38 Park Ave',
-        inquiries: 80,
-        complaints: 20,
-        requests: 40,
-        suggestions: 15
-    },
-    {
-        name: 'Casa Mira',
-        inquiries: 120,
-        complaints: 35,
-        requests: 50,
-        suggestions: 10
-    },
-    {
-        name: 'Mivessa',
-        inquiries: 100,
-        complaints: 25,
-        requests: 60,
-        suggestions: 20
-    }
-];
-
 const barHeight = 20;
 
 
@@ -95,7 +69,6 @@ const CustomTooltip = ({ active, payload }) => {
 
     return null;
 };
-
 const CustomTooltip2 = ({ active, payload }) => {
     if (active && payload && payload.length) {
         return (
@@ -162,10 +135,7 @@ const ReportPage = () => {
         allEmployees,
         data
     } = useStateContext();
-   console.log("communicationTypeData", communicationTypeData)
 
-    // console.log("dataProperty", dataProperty)
-    // console.log("data",data)
     const defaultData = [{ name: "No Data" }];
     const dataToDisplay = dataCategory.length > 0 ? dataCategory : defaultData;
     const location = useLocation();
@@ -180,8 +150,9 @@ const ReportPage = () => {
     };
 
     const chartHeight = dataProperty.length * (barHeight + 60);
-    const chartHeight2 = data1.length * (barHeight + 100);
-
+    const chartHeight2 = communicationTypeData.length * (barHeight + 100);
+    console.log("dataProperty", dataProperty);
+    console.log("communicationTypeData", communicationTypeData);
     const allDepartment = allEmployees
         ? ["All", ...Array.from(new Set(allEmployees
             .map((employee) => employee.department)
@@ -545,7 +516,7 @@ const ReportPage = () => {
                             </div>
                         </div>
                         <div className="flex-grow">
-                            {/* <p>Inquiries per propertys test</p> */}
+                            <p>Inquiries per propertys test</p>
                             <BarChart
                                 width={400}
                                 height={chartHeight}
@@ -690,7 +661,7 @@ const ReportPage = () => {
                             <BarChart
                                 width={400}
                                 height={chartHeight2}
-                                data={data1}
+                                data={communicationTypeData}
                                 layout="vertical"
                                 margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
                             >
@@ -704,13 +675,13 @@ const ReportPage = () => {
                                 <Tooltip content={<CustomTooltip2 />} />
 
                                 <Bar
-                                    dataKey="complaints"
+                                    dataKey="complainCount"
                                     fill="#EB4444"
                                     barSize={15}
                                     radius={[0, 4, 4, 0]}
                                 >
                                     <LabelList
-                                        dataKey="complaints"
+                                        dataKey="complainCount"
                                         position="right"
                                         fill="#4a5568"
                                     />
@@ -731,37 +702,37 @@ const ReportPage = () => {
                                     />
                                 </Bar>
                                 <Bar
-                                    dataKey="requests"
+                                    dataKey="requestCount"
                                     fill="#348017"
                                     barSize={15}
                                     radius={[0, 4, 4, 0]}
                                 >
                                     <LabelList
-                                        dataKey="requests"
+                                        dataKey="requestCount"
                                         position="right"
                                         fill="#4a5568"
                                     />
                                 </Bar>
                                 <Bar
-                                    dataKey="inquiries"
+                                    dataKey="inquiryCount"
                                     fill="#1A73E8"
                                     barSize={15}
                                     radius={[0, 4, 4, 0]}
                                 >
                                     <LabelList
-                                        dataKey="inquiries"
+                                        dataKey="inquiryCount"
                                         position="right"
                                         fill="#4a5568"
                                     />
                                 </Bar>
                                 <Bar
-                                    dataKey="suggestions"
+                                    dataKey="suggestionCount"
                                     fill="#E4EA3B"
                                     barSize={15}
                                     radius={[0, 4, 4, 0]}
                                 >
                                     <LabelList
-                                        dataKey="suggestions"
+                                        dataKey="suggestionCount"
                                         position="right"
                                         fill="#4a5568"
                                     />

@@ -71,7 +71,7 @@ const InquiryThread = () => {
     const handleSelectProperty = (e) => {
         setSelectedProperty(e.target.value);
     };
-    
+
     const handleUpdate = (newData) => {
         setDataConcern((prevData) => ({
             ...prevData,
@@ -94,6 +94,7 @@ const InquiryThread = () => {
         setIsFilterVisible((prev) => !prev);
     };
 
+
     const handleFileAttach = (event) => {
         const files = Array.from(event.target.files);
         setAttachedFiles((prevFiles) => [...prevFiles, ...files]);
@@ -109,13 +110,13 @@ const InquiryThread = () => {
         "N/A",
         ...(Array.isArray(propertyNamesList) && propertyNamesList.length > 0
             ? propertyNamesList
-                  .filter((item) => !item.toLowerCase().includes("phase"))
-                  .map((item) => formatFunc(item))
-                  .sort((a, b) => {
-                      if (a === "N/A") return -1;
-                      if (b === "N/A") return 1;
-                      return a.localeCompare(b);
-                  })
+                .filter((item) => !item.toLowerCase().includes("phase"))
+                .map((item) => formatFunc(item))
+                .sort((a, b) => {
+                    if (a === "N/A") return -1;
+                    if (b === "N/A") return 1;
+                    return a.localeCompare(b);
+                })
             : []),
     ];
 
@@ -144,19 +145,28 @@ const InquiryThread = () => {
         }
     };
 
+    /**
+     * To handle delete inquiry
+     */
     const handleDelete = () => {
         setShowAlert(true);
     };
+
+    /**
+    * To handle confirm delete inquiry
+    */
     const handleConfirm = () => {
-        // console.log("it runs")
         handleDeleteInquiry();
         setShowAlert(false);
     };
 
+    /**
+     * To handle cancel delete inquiry
+     */
     const handleCancel = () => {
-        console.log("Cancelled");
         setShowAlert(false);
     };
+
     const handleOpenResolveModal = () => {
         if (resolveModalRef.current) {
             resolveModalRef.current.showModal();
@@ -269,7 +279,7 @@ const InquiryThread = () => {
                     draggable: true,
                     progress: undefined,
                     theme: "dark",
-                    transition: Bounce 
+                    transition: Bounce
                 });
                 setLoading(false);
                 return;
@@ -330,7 +340,7 @@ const InquiryThread = () => {
         setTicketId(ticketId);
     }, [ticketId, setTicketId]);
 
-    
+
     useEffect(() => {
         if (isFilterVisible) {
             document.addEventListener("mousedown", handleClickOutside);
@@ -368,10 +378,10 @@ const InquiryThread = () => {
         channel.listen("MessageID", (event) => {
             console.log("message id event", event.data);
             setEmailMessageID(event.data.message_id);
-           /*  setDataConcern((prevDataConcern) => ({
-                ...prevDataConcern,
-                message_id: event.data.message_id,
-            })); */
+            /*  setDataConcern((prevDataConcern) => ({
+                 ...prevDataConcern,
+                 message_id: event.data.message_id,
+             })); */
         });
     };
 
@@ -383,12 +393,12 @@ const InquiryThread = () => {
             }));
         }
     }, [emailMessageID]);
-    
-    
+
+
     const combineThreadMessages = messages[ticketId]
         ? messages[ticketId]
-              .flat()
-              .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+            .flat()
+            .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
         : [];
     // useEffect(() => {
     //     let adminMessageChannel;
@@ -790,9 +800,9 @@ const InquiryThread = () => {
                                                         const truncatedName =
                                                             baseName.length > 30
                                                                 ? baseName.slice(
-                                                                      0,
-                                                                      30
-                                                                  ) + "..."
+                                                                    0,
+                                                                    30
+                                                                ) + "..."
                                                                 : baseName;
                                                         return (
                                                             <div
@@ -871,11 +881,10 @@ const InquiryThread = () => {
                                                         loading
                                                     }
                                                     className={`flex w-[82px] h-[28px] rounded-[5px] text-white text-xs justify-center items-center 
-                                                        ${
-                                                            loading ||
+                                                        ${loading ||
                                                             !chatMessage.trim()
-                                                                ? "bg-gray-400 cursor-not-allowed"
-                                                                : "gradient-background3 hover:shadow-custom4"
+                                                            ? "bg-gray-400 cursor-not-allowed"
+                                                            : "gradient-background3 hover:shadow-custom4"
                                                         } 
                                                     `}
                                                 >
@@ -976,64 +985,64 @@ const InquiryThread = () => {
                                                         </div>
                                                         {attachedFiles.length >
                                                             0 && (
-                                                            <div className="mb-2 ">
-                                                                {attachedFiles.map(
-                                                                    (
-                                                                        file,
-                                                                        index
-                                                                    ) => {
-                                                                        const fileName =
-                                                                            file.name;
-                                                                        const fileExtension =
-                                                                            fileName.slice(
-                                                                                fileName.lastIndexOf(
-                                                                                    "."
-                                                                                )
-                                                                            );
-                                                                        const baseName =
-                                                                            fileName.slice(
-                                                                                0,
-                                                                                fileName.lastIndexOf(
-                                                                                    "."
-                                                                                )
-                                                                            );
-                                                                        const truncatedName =
-                                                                            baseName.length >
-                                                                            30
-                                                                                ? baseName.slice(
-                                                                                      0,
-                                                                                      30
-                                                                                  ) +
-                                                                                  "..."
-                                                                                : baseName;
-                                                                        return (
-                                                                            <div
-                                                                                key={
-                                                                                    index
-                                                                                }
-                                                                                className="flex items-center justify-between mb-2 p-2 border bg-white rounded"
-                                                                            >
-                                                                                <span className="text-sm text-gray-700">
-                                                                                    {truncatedName +
-                                                                                        fileExtension}
-                                                                                </span>
-                                                                                <button
-                                                                                    type="button"
-                                                                                    onClick={() =>
-                                                                                        removeFile(
-                                                                                            file.name
-                                                                                        )
+                                                                <div className="mb-2 ">
+                                                                    {attachedFiles.map(
+                                                                        (
+                                                                            file,
+                                                                            index
+                                                                        ) => {
+                                                                            const fileName =
+                                                                                file.name;
+                                                                            const fileExtension =
+                                                                                fileName.slice(
+                                                                                    fileName.lastIndexOf(
+                                                                                        "."
+                                                                                    )
+                                                                                );
+                                                                            const baseName =
+                                                                                fileName.slice(
+                                                                                    0,
+                                                                                    fileName.lastIndexOf(
+                                                                                        "."
+                                                                                    )
+                                                                                );
+                                                                            const truncatedName =
+                                                                                baseName.length >
+                                                                                    30
+                                                                                    ? baseName.slice(
+                                                                                        0,
+                                                                                        30
+                                                                                    ) +
+                                                                                    "..."
+                                                                                    : baseName;
+                                                                            return (
+                                                                                <div
+                                                                                    key={
+                                                                                        index
                                                                                     }
-                                                                                    className="text-red-500"
+                                                                                    className="flex items-center justify-between mb-2 p-2 border bg-white rounded"
                                                                                 >
-                                                                                    Remove
-                                                                                </button>
-                                                                            </div>
-                                                                        );
-                                                                    }
-                                                                )}
-                                                            </div>
-                                                        )}
+                                                                                    <span className="text-sm text-gray-700">
+                                                                                        {truncatedName +
+                                                                                            fileExtension}
+                                                                                    </span>
+                                                                                    <button
+                                                                                        type="button"
+                                                                                        onClick={() =>
+                                                                                            removeFile(
+                                                                                                file.name
+                                                                                            )
+                                                                                        }
+                                                                                        className="text-red-500"
+                                                                                    >
+                                                                                        Remove
+                                                                                    </button>
+                                                                                </div>
+                                                                            );
+                                                                        }
+                                                                    )}
+                                                                </div>
+                                                            )}
                                                     </div>
                                                 </div>
                                             )}
