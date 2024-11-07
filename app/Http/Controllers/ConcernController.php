@@ -1004,7 +1004,7 @@ class ConcernController extends Controller
             'buyer_reply_notif.updated_at',
             'buyer_reply_notif.message_log',
             'concerns.details_concern',
-            'concerns.details_message',
+           /*  'concerns.details_message', */
             'concerns.property',
             'concerns.status',
             'concerns.buyer_name',
