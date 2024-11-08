@@ -67,7 +67,7 @@ const InquiryThread = () => {
     const handleDateChange = (date) => {
         setStartDate(date);
     };
-
+    console.log("dataConcern", dataConcern)
     const handleSelectProperty = (e) => {
         setSelectedProperty(e.target.value);
     };
