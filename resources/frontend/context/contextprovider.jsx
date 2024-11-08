@@ -73,7 +73,6 @@ export const ContextProvider = ({ children }) => {
     const [filterDueDate, setFilterDueDate] = useState(null);
     const [loading, setLoading] = useState(false);
 
-
     useEffect(() => {
         if (user && user.department && !isDepartmentInitialized) {
             setDepartment(user.department === "Customer Relations - Services" ? "All" : user.department);
@@ -664,7 +663,9 @@ export const ContextProvider = ({ children }) => {
                 setFilterDueDate,
                 notifStatus,
                 updateConcern,
-                loading
+                loading,
+                
+                
             }}
         >
             {children}
