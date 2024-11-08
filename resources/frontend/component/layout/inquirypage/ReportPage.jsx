@@ -483,7 +483,7 @@ const ReportPage = () => {
                     </div>
                 </div>
                 <div className="flex flex-col gap-3">
-                    <div className=" bg-whiterounded-[10px]  w-[579px] flex flex-col overflow-y-auto">
+                    <div className=" bg-whiterounded-[10px] bg-white w-[579px] flex flex-col overflow-y-auto">
                         <p className="p-4  text-base montserrat-bold">
                             Inquiries per property
                         </p>

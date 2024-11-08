@@ -20,7 +20,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 import { AiFillInfoCircle } from "react-icons/ai";
 import { IoIosCheckmarkCircle } from "react-icons/io";
 import { toast, ToastContainer, Bounce } from "react-toastify";
-import Alert from "../../../component/Alert";
+import Alert from "../mainComponent/Alert";
 import AddInfoModal from "./AddInfoModal";
 import { VALID_FILE_EXTENSIONS } from "../../../constant/data/validFile";
 
@@ -364,6 +364,13 @@ const InquiryThread = () => {
         });
     };
 
+    const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);  // Scrolls to the top
+  }, [pathname]);
+
+  
     const messageIdChannelFunc = (channel) => {
         channel.listen("MessageID", (event) => {
             console.log("message id event", event.data);

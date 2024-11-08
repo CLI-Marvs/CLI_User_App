@@ -3,7 +3,7 @@ import { IoMdArrowDropdown } from "react-icons/io";
 import apiService from "../../servicesApi/apiService";
 import { data } from "autoprefixer";
 import { useStateContext } from "../../../context/contextprovider";
-import Alert from "../../../component/Alert";
+import Alert from "../mainComponent/Alert";
 const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
     const predefinedUserTypes = ["Property Owner", "Buyer", "Broker", "Seller"];
     const { getAllConcerns, propertyNamesList, updateConcern } =
