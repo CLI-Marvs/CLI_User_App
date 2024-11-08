@@ -6,15 +6,15 @@ import { useStateContext } from "../../../context/contextprovider";
 import Alert from "../mainComponent/Alert";
 const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
     const predefinedUserTypes = ["Property Owner", "Buyer", "Broker", "Seller"];
-    const { getAllConcerns, propertyNamesList, updateConcern } =
+    const { getAllConcerns, propertyNamesList, updateConcern, user, getInquiryLogs } =
         useStateContext();
-    const [message, setMessage] = useState("");
+    const [message, setMessage] = useState(dataConcern.admin_remarks || "");
 
     const [dataToUpdate, setDataToUpdate] = useState({
         contract_number: dataConcern.contract_number || "",
         unit_number: dataConcern.unit_number || "",
         property: dataConcern.property || "",
-        remarks: message || "",
+        remarks: dataConcern.admin_remarks || "",
         buyer_email: dataConcern.buyer_email || "",
         mobile_number: dataConcern.mobile_number || "",
         buyer_firstname: dataConcern.buyer_firstname || "",
@@ -28,7 +28,9 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
         other_user_type: !predefinedUserTypes.includes(dataConcern.user_type)
             ? dataConcern.user_type
             : "",
+
     });
+
     const [showAlert, setShowAlert] = useState(false);
 
     const formatFunc = (name) => {
@@ -60,14 +62,16 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
 
     const handleChangeValue = (e) => {
         const newValue = e.target.value;
+        //console.log("newValue", newValue);
         setMessage(newValue);
     };
 
     const handleCloseModal = () => {
         setDataToUpdate(dataConcern);
-        setMessage("");
+        setMessage(dataConcern.admin_remarks || "");
         //  setShowAlert(false);
     };
+
     const handleChange = (e) => {
         const newValue = e.target.value;
         const { name, value } = e.target;
@@ -90,6 +94,7 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
             });
         }
     };
+
     const handleShowUpdateAlert = () => {
         setShowAlert(true);
         modalRef.current.showModal();
@@ -106,29 +111,53 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
     const handleCancel = () => {
         setShowAlert(false);
     };
+    /**
+     *  Iterates over each field and compares the values between buyerUpdatedData and    filteredBuyerOldData
+     */
+    const filteredBuyerOldData = Object.keys(dataToUpdate).reduce((acc, key) => {
+        if (dataConcern.hasOwnProperty(key)) {
+            acc[key] = dataConcern[key];
+        }
+        return acc;
+    }, {});
+    // console.log("filteredBuyerOldData", filteredBuyerOldData);
+    // console.log("dataConcern.ticket_id", dataConcern.ticket_id)
     const addInfo = async () => {
         try {
             const response = await apiService.put(
                 `update-info?dataId=${dataConcern.id}`,
-                { ...dataToUpdate }
+                {
+                    buyerUpdatedData: { ...dataToUpdate },
+                    buyerOldData: filteredBuyerOldData,
+                    ticketId: dataConcern.ticket_id,
+                    updated_by: user?.firstname + " " + user?.lastname,
+                }
             );
+
 
             console.log("response", response);
             onupdate({ ...dataToUpdate, dataConcern });
+            getInquiryLogs(dataConcern.ticket_id);
             getAllConcerns();
 
         } catch (error) {
             console.log("error", error);
         }
     };
-
+    // Update `dataToUpdate.remarks` whenever `message` changes
+    useEffect(() => {
+        setDataToUpdate((prevData) => ({
+            ...prevData,
+            remarks: message,
+        }));
+    }, [message]);
     useEffect(() => {
         if (dataConcern) {
             setDataToUpdate({
                 contract_number: dataConcern.contract_number || "",
                 unit_number: dataConcern.unit_number || "",
                 property: dataConcern.property || "",
-                remarks: message || "",
+                remarks: dataConcern.admin_remarks || "",
                 buyer_email: dataConcern.buyer_email || "",
                 mobile_number: dataConcern.mobile_number || "",
                 buyer_firstname: dataConcern.buyer_firstname || "",
@@ -304,7 +333,24 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
                                 </span>
                             </div>
                         </div>
-                        {/* <div
+
+                        <div className="flex justify-end">
+                            {dataToUpdate.user_type === "Others" && (
+                                <div
+                                    className={`flex items-center border rounded-[5px] w-[305px] overflow-hidden`}
+                                >
+                                    <input
+                                        name="other_user_type"
+                                        type="text"
+                                        className="w-full px-4 text-sm focus:outline-none mobile:text-xs py-1"
+                                        value={dataToUpdate.other_user_type}
+                                        onChange={handleChange}
+                                        placeholder=""
+                                    />
+                                </div>
+                            )}
+                        </div>
+                        <div
                             className={`flex items-center border border-[D6D6D6] rounded-[5px] overflow-hidden`}
                         >
                             <span className="text-custom-gray81 text-sm bg-[#EDEDED] flex items-center w-[308px] tablet:w-[175px] mobile:w-[270px] mobile:text-xs -mr-3 pl-3 py-1">
@@ -329,22 +375,6 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
                                     <IoMdArrowDropdown />
                                 </span>
                             </div>
-                        </div> */}
-                        <div className="flex justify-end">
-                            {dataToUpdate.user_type === "Others" && (
-                                <div
-                                    className={`flex items-center border rounded-[5px] w-[305px] overflow-hidden`}
-                                >
-                                    <input
-                                        name="other_user_type"
-                                        type="text"
-                                        className="w-full px-4 text-sm focus:outline-none mobile:text-xs py-1"
-                                        value={dataToUpdate.other_user_type}
-                                        onChange={handleChange}
-                                        placeholder=""
-                                    />
-                                </div>
-                            )}
                         </div>
                     </div>
                     <div className="flex flex-col gap-[10px]">

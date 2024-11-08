@@ -73,7 +73,6 @@ export const ContextProvider = ({ children }) => {
     const [filterDueDate, setFilterDueDate] = useState(null);
     const [loading, setLoading] = useState(false);
 
-
     useEffect(() => {
         if (user && user.department && !isDepartmentInitialized) {
             setDepartment(user.department === "Customer Relations - Services" ? "All" : user.department);
@@ -245,8 +244,6 @@ export const ContextProvider = ({ children }) => {
     };
     const getCommunicationTypePerProperty = async () => {
         if (!isDepartmentInitialized) return;
-        console.log("propertyMonth", propertyMonth)
-        console.log("propertyMonth", department)
         try {
             const response = await apiService.get("communication-type-property", {
                 params: {
@@ -255,21 +252,22 @@ export const ContextProvider = ({ children }) => {
                 },
             });
             const result = response.data;
-            console.log("result",result)
-            // const formattedData = result.map((item) => ({
-            //     propertyName: item.property,
-            //     complainCount: item.Complain,
-            //     requestCount: item.Request,
-            //     inquiryCount: item.Inquiry,
-            //     suggestionCount: item.Suggestion,
-            //     recommendationCount: item.Recommendation,
-            // }));
+            
+            const formattedData = result.map((item) => ({
+                name: item.property,
+                complainCount: item.complain,
+                requestCount: item.request,
+                inquiryCount: item.inquiry,
+                suggestionCount: item.suggestion,
+               
+            }));
 
-            // setCommunicationTypeData(formattedData);
+             setCommunicationTypeData(formattedData);
         } catch (error) {
             console.log("Error retrieving communication types:", error);
         }
     };
+
     const getSpecificInquiry = async () => {
         if (token) {
             try {
@@ -551,6 +549,7 @@ export const ContextProvider = ({ children }) => {
                 await fetchDataReport();
                 await getInquiriesPerProperty();
                 await fetchCategory();
+                await getCommunicationTypePerProperty();
             } catch (error) {
                 console.error("Error fetching data:", error);
             }
@@ -664,7 +663,9 @@ export const ContextProvider = ({ children }) => {
                 setFilterDueDate,
                 notifStatus,
                 updateConcern,
-                loading
+                loading,
+                
+                
             }}
         >
             {children}

@@ -235,7 +235,7 @@ class ConcernController extends Controller
 
         try {
             $allFiles = [];
-            $files = $request->file('files'); 
+            $files = $request->file('files');
             //$files = $validatedData['files'];
             $all_file_names = [];
             $filesData = [];
@@ -475,8 +475,6 @@ class ConcernController extends Controller
             $messages->buyer_name = $request->fname . ' ' . $request->lname;
             $messages->save();
 
-
-
             return response()->json('Successfully added');
         } catch (\Exception $e) {
             \Log::error("Error occurred: " . $e->getMessage());
@@ -486,30 +484,33 @@ class ConcernController extends Controller
 
     public function updateInfo(Request $request)
     {
-        // dd($request);
         try {
+            $ticket_id = $request->ticketId;
             $dataId = $request->dataId;
             $concern = Concerns::where('id', $dataId)->first();
-            $concern->mobile_number = $request->mobile_number;
-            $concern->contract_number = $request->contract_number;
-            $concern->unit_number = $request->unit_number;
-            $concern->buyer_name = $request->buyer_firstname . ' ' . $request->buyer_middlename . ' ' . $request->buyer_lastname;
+            $concern->mobile_number =  $request->buyerUpdatedData['mobile_number'];
+            $concern->suffix_name = $request->buyerUpdatedData['suffix_name'];
+            $concern->contract_number = $request->buyerUpdatedData['contract_number'];
+            $concern->unit_number = $request->buyerUpdatedData['unit_number'];
+            $concern->buyer_name = $request->buyerUpdatedData['buyer_firstname'] . ' ' . $request->buyerUpdatedData['buyer_middlename'] . ' ' . $request->buyerUpdatedData['buyer_lastname'];
             $concern->buyer_firstname
-                = $request->buyer_firstname;
+                = $request->buyerUpdatedData['buyer_firstname'];
             $concern->buyer_middlename
-                = $request->buyer_middlename;
+                = $request->buyerUpdatedData['buyer_middlename'];
             $concern->buyer_lastname
-                = $request->buyer_lastname;
-            $concern->user_type = $request->user_type;
-
+                = $request->buyerUpdatedData['buyer_lastname'];
+            $concern->user_type = $request->buyerUpdatedData['user_type'];
+            $concern->communication_type = $request->buyerUpdatedData['communication_type'];
             if ($request->user_type === "Others") {
-                $concern->user_type = $request->other_user_type;
+                $concern->user_type = $request->buyerUpdatedData['other_user_type'];
             }
-            $concern->buyer_email = $request->buyer_email;
-            $concern->property = $request->property;
-            $concern->admin_remarks = $request->remarks;
-            $concern->save();
+            $concern->buyer_email = $request->buyerUpdatedData['buyer_email'];
+            $concern->property = $request->buyerUpdatedData['property'];
+            $concern->admin_remarks =
+                $request->buyerUpdatedData['remarks'];
 
+            $concern->save();
+            $this->logBuyerDataEdit($request, $ticket_id);
             return response()->json('Successfully updated');
         } catch (\Exception $e) {
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
@@ -991,11 +992,11 @@ class ConcernController extends Controller
         }
 
         $buyerReplyQuery->leftJoin('concerns', 'buyer_reply_notif.ticket_id', '=', 'concerns.ticket_id')
-           ->leftJoin('read_notif_by_user', function ($join) use ($employee) {
-            $join->on('buyer_reply_notif.id', '=', 'read_notif_by_user.reply_id')
-                  ->where('read_notif_by_user.user_id', '=', $employee->id);
-        });
-    
+            ->leftJoin('read_notif_by_user', function ($join) use ($employee) {
+                $join->on('buyer_reply_notif.id', '=', 'read_notif_by_user.reply_id')
+                    ->where('read_notif_by_user.user_id', '=', $employee->id);
+            });
+
 
         $buyerReplyQuery->select(
             'buyer_reply_notif.ticket_id',
@@ -1004,7 +1005,7 @@ class ConcernController extends Controller
             'buyer_reply_notif.updated_at',
             'buyer_reply_notif.message_log',
             'concerns.details_concern',
-           /*  'concerns.details_message', */
+            /*  'concerns.details_message', */
             'concerns.property',
             'concerns.status',
             'concerns.buyer_name',
@@ -1211,6 +1212,73 @@ class ConcernController extends Controller
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
         }
     }
+
+    /**
+     * Logs changes made by an admin to a buyer's data in the inquiry logs.
+     *
+     * @param Request $request
+     * 
+     */
+    public function logBuyerDataEdit(Request $request, $ticketId)
+    {
+        try {
+            $inquiry = new InquiryLogs();
+            $logData = [
+                'log_type' => 'update_info',
+                'details' => [
+                    'message_tag' => 'Update_info',
+                    'buyer_updated_data' => [
+                        'buyer_firstname' => $request->buyerUpdatedData['buyer_firstname'],
+                        'buyer_lastname' => $request->buyerUpdatedData['buyer_lastname'],
+                        'buyer_middlename' => $request->buyerUpdatedData['buyer_middlename'],
+                        'suffix' => $request->buyerUpdatedData['suffix'] ?? null,
+                        'buyer_email' => $request->buyerUpdatedData['buyer_email'],
+                        'mobile_number' => $request->buyerUpdatedData['mobile_number'],
+                        'user_type' => $request->buyerUpdatedData['user_type'],
+                        'communication_type' => $request->buyerUpdatedData['communication_type'],
+                        'contract_number' => $request->buyerUpdatedData['contract_number'],
+                        'unit_number' => $request->buyerUpdatedData['unit_number'],
+                        'property' => $request->buyerUpdatedData['property'],
+                        'other_user_type' => $request->buyerUpdatedData['other_user_type'],
+                        // 'remarks' => $request->remarks,
+
+                    ],
+                    'buyer_old_data' => [
+                        'buyer_firstname' => $request->buyerOldData['buyer_firstname'],
+                        'buyer_lastname' => $request->buyerOldData['buyer_lastname'],
+                        'buyer_middlename' => $request->buyerOldData['buyer_middlename'],
+                        'suffix' => $request->buyerOldData['suffix'] ?? null,
+                        'buyer_email' => $request->buyerOldData['buyer_email'],
+                        'mobile_number' => $request->buyerOldData['mobile_number'],
+                        'user_type' => $request->buyerOldData['user_type'],
+                        'communication_type' => $request->buyerOldData['communication_type'],
+                        'contract_number' => $request->buyerOldData['contract_number'],
+                        'unit_number' => $request->buyerOldData['unit_number'],
+                        'property' => $request->buyerOldData['property'],
+                        'other_user_type' => $request->buyerOldData['other_user_type'],
+                        // 'remarks' => $request->remarks,
+                    ],
+                    'updated_by' => $request->updated_by,
+                ],
+            ];
+ 
+            //* For concerns logs to join
+            $inquiry->edited_by = json_encode($logData);
+            $inquiry->ticket_id = $ticketId;
+            $inquiry->message_log = "Buyer_data_updated_info: " . $request->buyerUpdatedData['buyer_firstname'] . ' ' . $request->buyerUpdatedData['buyer_lastname'];
+
+            if ($inquiry->save()) {
+                return response()->json(['message' => 'Log Successfully updated', 'data' => $logData]);
+            } else {
+                return response()->json(['message' => 'Failed to save log entry.'], 500);
+            }
+            return response()->json(['message' => 'Log Successfully updated', 'data' => $logData]);
+        } catch (\Exception $e) {
+            return response()->json([ 'error saving log in buyer data' => $e->getMessage()], 500);
+        }
+    }
+
+
     public function assignInquiryTo(Request $request)
     {
         try {
@@ -1227,8 +1295,8 @@ class ConcernController extends Controller
                     $newTicketId = str_replace('#', '', $ticketId);
                     $modifiedTicketId = str_replace('Ticket#', '', $ticketId);
                     $concernData = Concerns::where('ticket_id', $ticketId)->first();
- 
-                     
+
+
                     $assigneeData = [
                         'name' => $selectedOption['name'],
                         'email' => $selectedOption['email'],
@@ -1508,7 +1576,7 @@ class ConcernController extends Controller
     {
 
         try {
-            /*  dd($request->all()); */
+            /*dd($request->all()); */
             $assignees = $request->assignees;
             $concerns = Concerns::where('ticket_id', $request->ticket_id)->first();
 
@@ -1520,6 +1588,7 @@ class ConcernController extends Controller
             $department = $request->department;
             $details_concern = $request->details_concern;
             $buyer_name = $request->buyer_name;
+            $concerns->communication_type = $request->communication_type;
             $concerns->status = "Resolved";
             $buyer_lastname = $request->buyer_lastname;
             $message_id = $request->message_id;
@@ -1655,6 +1724,33 @@ class ConcernController extends Controller
         $concerns = $query->groupBy('property')->get();
         return response()->json($concerns);
     }
+
+    public function getCommunicationType(Request $request)
+    {
+        //dd($request);
+        $department = $request->department;
+        $monthNumber = Carbon::parse($request->propertyMonth)->month;
+
+        // Query to count each communication_type grouped by property
+        $query = Concerns::select(
+            'property',
+            DB::raw("SUM(case when communication_type = 'Complain' then 1 else 0 end) as Complain"),
+            DB::raw("SUM(case when communication_type = 'Request' then 1 else 0 end) as Request"),
+            DB::raw("SUM(case when communication_type = 'Inquiry' then 1 else 0 end) as Inquiry"),
+            DB::raw("SUM(case when communication_type = 'Suggestion or recommendation' then 1 else 0 end) as Suggestion"),
+
+        )
+            ->whereMonth('created_at', $monthNumber);
+
+        if ($department && $department !== "All") {
+            $query->whereRaw("resolve_from::jsonb @> ?", json_encode([['department' => $department]]));
+        }
+
+        // Group by property and get the result
+        $communicationTypes = $query->groupBy('property')->get();
+        return response()->json($communicationTypes);
+    }
+
 
 
     public function getInquiriesByCategory(Request $request)
