@@ -484,10 +484,8 @@ class ConcernController extends Controller
 
     public function updateInfo(Request $request)
     {
-
-
         try {
-            $ticket_id=$request->ticketId;
+            $ticket_id = $request->ticketId;
             $dataId = $request->dataId;
             $concern = Concerns::where('id', $dataId)->first();
             $concern->mobile_number =  $request->buyerUpdatedData['mobile_number'];
@@ -508,7 +506,9 @@ class ConcernController extends Controller
             }
             $concern->buyer_email = $request->buyerUpdatedData['buyer_email'];
             $concern->property = $request->buyerUpdatedData['property'];
-            $concern->admin_remarks = $request->remarks;
+            $concern->admin_remarks =
+                $request->buyerUpdatedData['remarks'];
+
             $concern->save();
             $this->logBuyerDataEdit($request, $ticket_id);
             return response()->json('Successfully updated');
@@ -1221,8 +1221,6 @@ class ConcernController extends Controller
      */
     public function logBuyerDataEdit(Request $request, $ticketId)
     {
-         dd($request);
-
         try {
             $inquiry = new InquiryLogs();
             $logData = [
@@ -1259,13 +1257,11 @@ class ConcernController extends Controller
                         'property' => $request->buyerOldData['property'],
                         'other_user_type' => $request->buyerOldData['other_user_type'],
                         // 'remarks' => $request->remarks,
-
-
                     ],
                     'updated_by' => $request->updated_by,
                 ],
             ];
-            // dd($logData);
+ 
             //* For concerns logs to join
             $inquiry->edited_by = json_encode($logData);
             $inquiry->ticket_id = $ticketId;
@@ -1278,7 +1274,7 @@ class ConcernController extends Controller
             }
             return response()->json(['message' => 'Log Successfully updated', 'data' => $logData]);
         } catch (\Exception $e) {
-            return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
+            return response()->json([ 'error saving log in buyer data' => $e->getMessage()], 500);
         }
     }
 

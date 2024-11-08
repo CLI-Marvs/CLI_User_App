@@ -8,13 +8,13 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
     const predefinedUserTypes = ["Property Owner", "Buyer", "Broker", "Seller"];
     const { getAllConcerns, propertyNamesList, updateConcern, user, getInquiryLogs } =
         useStateContext();
-    const [message, setMessage] = useState(dataConcern.message || "");
-    
+    const [message, setMessage] = useState(dataConcern.admin_remarks || "");
+
     const [dataToUpdate, setDataToUpdate] = useState({
         contract_number: dataConcern.contract_number || "",
         unit_number: dataConcern.unit_number || "",
         property: dataConcern.property || "",
-       //admin_remarks: dataConcern.admin_remarks || "",
+        remarks: dataConcern.admin_remarks || "",
         buyer_email: dataConcern.buyer_email || "",
         mobile_number: dataConcern.mobile_number || "",
         buyer_firstname: dataConcern.buyer_firstname || "",
@@ -30,7 +30,6 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
             : "",
 
     });
-
 
     const [showAlert, setShowAlert] = useState(false);
 
@@ -63,12 +62,13 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
 
     const handleChangeValue = (e) => {
         const newValue = e.target.value;
+        //console.log("newValue", newValue);
         setMessage(newValue);
     };
 
     const handleCloseModal = () => {
         setDataToUpdate(dataConcern);
-        setMessage("");
+        setMessage(dataConcern.admin_remarks || "");
         //  setShowAlert(false);
     };
 
@@ -124,8 +124,6 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
     // console.log("dataConcern.ticket_id", dataConcern.ticket_id)
     const addInfo = async () => {
         try {
-            console.log("buyerUpdatedData", dataToUpdate);
-            console.log("buyerOldData", filteredBuyerOldData);
             const response = await apiService.put(
                 `update-info?dataId=${dataConcern.id}`,
                 {
@@ -139,7 +137,6 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
 
             console.log("response", response);
             onupdate({ ...dataToUpdate, dataConcern });
-            // console.log('ticketID', dataConcern.ticket_id);
             getInquiryLogs(dataConcern.ticket_id);
             getAllConcerns();
 
@@ -147,14 +144,20 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
             console.log("error", error);
         }
     };
-
+    // Update `dataToUpdate.remarks` whenever `message` changes
+    useEffect(() => {
+        setDataToUpdate((prevData) => ({
+            ...prevData,
+            remarks: message,
+        }));
+    }, [message]);
     useEffect(() => {
         if (dataConcern) {
             setDataToUpdate({
                 contract_number: dataConcern.contract_number || "",
                 unit_number: dataConcern.unit_number || "",
                 property: dataConcern.property || "",
-               // admin_remarks: dataConcern.admin_remarks || "",
+                remarks: dataConcern.admin_remarks || "",
                 buyer_email: dataConcern.buyer_email || "",
                 mobile_number: dataConcern.mobile_number || "",
                 buyer_firstname: dataConcern.buyer_firstname || "",
@@ -439,7 +442,7 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
                             />
                         </div>
                     </div>
-                    {/* <div
+                    <div
                         className={`border-[D6D6D6] rounded-[5px] bg-[#EDEDED] border`}
                     >
                         <div className="flex items-center justify-between">
@@ -453,17 +456,17 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
                         </div>
                         <div className="flex gap-3 ">
                             <textarea
-                                id="admin_remarks"
+                                id="details_message"
                                 value={message}
                                 onChange={handleChangeValue}
                                 maxLength={maxCharacters}
-                                name="admin_remarks"
+                                name="details_message"
                                 rows="4"
                                 draggable="false"
                                 className={` rounded-[5px] bg-white border border-[D6D6D6] w-full pl-2 outline-none`}
                             ></textarea>
                         </div>
-                    </div> */}
+                    </div>
                     <div className="flex justify-end">
                         <form method="">
                             <button
