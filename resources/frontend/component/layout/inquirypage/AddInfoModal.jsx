@@ -9,12 +9,12 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
     const { getAllConcerns, propertyNamesList, updateConcern, user, getInquiryLogs } =
         useStateContext();
     const [message, setMessage] = useState(dataConcern.admin_remarks || "");
-
+   
     const [dataToUpdate, setDataToUpdate] = useState({
         contract_number: dataConcern.contract_number || "",
         unit_number: dataConcern.unit_number || "",
         property: dataConcern.property || "",
-        remarks: dataConcern.admin_remarks || "",
+        admin_remarks: dataConcern.admin_remarks || "",
         buyer_email: dataConcern.buyer_email || "",
         mobile_number: dataConcern.mobile_number || "",
         buyer_firstname: dataConcern.buyer_firstname || "",
@@ -30,6 +30,25 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
             : "",
 
     });
+ 
+    /* Buyers old data to be used in AssignDetails.jsx 
+     * to compare the values and show the differences
+     */
+    const buyerOldData = {
+        buyer_firstname: dataConcern.buyer_firstname,
+        buyer_lastname: dataConcern.buyer_lastname,
+        buyer_middlename: dataConcern.buyer_middlename,
+        suffix_name: dataConcern.suffix_name,
+        buyer_email: dataConcern.buyer_email,
+        mobile_number: dataConcern.mobile_number,
+        user_type: dataConcern.user_type === "Others" ? dataConcern.other_user_type : dataConcern.user_type,
+        other_user_type: dataConcern.user_type === "Others" ? dataConcern.other_user_type : dataConcern.user_type,
+        communication_type: dataConcern.communication_type,
+        contract_number: dataConcern.contract_number,
+        property: dataConcern.property,
+        unit_number: dataConcern.unit_number,
+        admin_remarks: dataConcern.admin_remarks,
+    };
 
     const [showAlert, setShowAlert] = useState(false);
 
@@ -62,38 +81,37 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
 
     const handleChangeValue = (e) => {
         const newValue = e.target.value;
-        //console.log("newValue", newValue);
         setMessage(newValue);
     };
 
     const handleCloseModal = () => {
-        setDataToUpdate(dataConcern);
-        setMessage(dataConcern.admin_remarks || "");
-        //  setShowAlert(false);
+        if (dataConcern) {
+            setDataToUpdate(dataConcern);
+            setMessage(dataConcern.admin_remarks || "");
+            getAllConcerns();
+        }
     };
 
     const handleChange = (e) => {
-        const newValue = e.target.value;
         const { name, value } = e.target;
-        if (name === "user_type" && value === "Others") {
-            setDataToUpdate((prevState) => ({
+
+        setDataToUpdate((prevState) => {
+            // When switching to "Others," retain the current other_user_type if it exists
+            if (name === "user_type") {
+                return {
+                    ...prevState,
+                    user_type: value,
+                    other_user_type: value === "Others" ? prevState.other_user_type : "",
+                };
+            }
+
+            return {
                 ...prevState,
-                user_type: "Others",
-                other_user_type: "", // Clear the other_user_type field when selecting Others
-            }));
-        } else if (name === "user_type") {
-            setDataToUpdate((prevState) => ({
-                ...prevState,
-                user_type: value,
-                other_user_type: "", // Clear the other_user_type when predefined type is selected
-            }));
-        } else {
-            setDataToUpdate({
-                ...dataToUpdate,
-                [e.target.name]: newValue,
-            });
-        }
+                [name]: value,
+            };
+        });
     };
+
 
     const handleShowUpdateAlert = () => {
         setShowAlert(true);
@@ -111,53 +129,44 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
     const handleCancel = () => {
         setShowAlert(false);
     };
-    /**
-     *  Iterates over each field and compares the values between buyerUpdatedData and    filteredBuyerOldData
-     */
-    const filteredBuyerOldData = Object.keys(dataToUpdate).reduce((acc, key) => {
-        if (dataConcern.hasOwnProperty(key)) {
-            acc[key] = dataConcern[key];
-        }
-        return acc;
-    }, {});
-    // console.log("filteredBuyerOldData", filteredBuyerOldData);
-    // console.log("dataConcern.ticket_id", dataConcern.ticket_id)
+
     const addInfo = async () => {
         try {
             const response = await apiService.put(
                 `update-info?dataId=${dataConcern.id}`,
                 {
-                    buyerUpdatedData: { ...dataToUpdate },
-                    buyerOldData: filteredBuyerOldData,
+                    buyerOldData,
+                    ...dataToUpdate,
                     ticketId: dataConcern.ticket_id,
                     updated_by: user?.firstname + " " + user?.lastname,
                 }
             );
-
 
             console.log("response", response);
             onupdate({ ...dataToUpdate, dataConcern });
             getInquiryLogs(dataConcern.ticket_id);
             getAllConcerns();
 
+
         } catch (error) {
             console.log("error", error);
         }
     };
-    // Update `dataToUpdate.remarks` whenever `message` changes
+
     useEffect(() => {
         setDataToUpdate((prevData) => ({
             ...prevData,
-            remarks: message,
+            admin_remarks: message,
         }));
     }, [message]);
+
     useEffect(() => {
         if (dataConcern) {
             setDataToUpdate({
                 contract_number: dataConcern.contract_number || "",
                 unit_number: dataConcern.unit_number || "",
                 property: dataConcern.property || "",
-                remarks: dataConcern.admin_remarks || "",
+                admin_remarks: dataConcern.admin_remarks || "",
                 buyer_email: dataConcern.buyer_email || "",
                 mobile_number: dataConcern.mobile_number || "",
                 buyer_firstname: dataConcern.buyer_firstname || "",
@@ -174,6 +183,7 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
                     ? dataConcern.user_type
                     : "",
             });
+            setMessage(dataConcern.admin_remarks || "");
         }
     }, [dataConcern]);
     return (
