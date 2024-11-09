@@ -161,7 +161,7 @@ const Sidebar = () => {
                 </Link>
                 <Link to="/inquirymanagement/autoassign">
                   <ListItem
-                    className={`h-[32px] w-full py-[8px] px-[18px] text-sm rounded-[50px] ${location.pathname.startsWith(
+                    className={`h-[32px] w-full py-[8px] px-[18px] text-sm rounded-[50px] hidden ${location.pathname.startsWith(
                       "/inquirymanagement/autoassign"
                     )
                         ? "bg-white text-custom-solidgreen font-semibold"
@@ -176,7 +176,6 @@ const Sidebar = () => {
                 </Link>
               </div>
             )}
-
           <Link to="/transactionmanagement/invoices">
             <ListItem
               className={`h-[35px] w-[210px] text-sm pl-[12px] transition-all duration-300 ease-in-out 

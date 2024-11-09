@@ -333,11 +333,10 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
                                 </span>
                             </div>
                         </div>
-
-                        <div className="flex justify-end">
-                            {dataToUpdate.user_type === "Others" && (
+                        {dataToUpdate.user_type === "Others" && (
+                            <div className="flex justify-end">
                                 <div
-                                    className={`flex items-center border rounded-[5px] w-[305px] overflow-hidden`}
+                                    className={`flex items-center border rounded-[5px] w-[61.5%] overflow-hidden`}
                                 >
                                     <input
                                         name="other_user_type"
@@ -348,8 +347,8 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
                                         placeholder=""
                                     />
                                 </div>
-                            )}
-                        </div>
+                            </div>
+                        )}
                         <div
                             className={`flex items-center border border-[D6D6D6] rounded-[5px] overflow-hidden`}
                         >
