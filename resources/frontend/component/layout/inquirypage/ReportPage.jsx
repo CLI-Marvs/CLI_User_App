@@ -151,8 +151,7 @@ const ReportPage = () => {
 
     const chartHeight = dataProperty.length * (barHeight + 60);
     const chartHeight2 = communicationTypeData.length * (barHeight + 100);
-    console.log("dataProperty", dataProperty);
-    console.log("communicationTypeData", communicationTypeData);
+ 
     const allDepartment = allEmployees
         ? ["All", ...Array.from(new Set(allEmployees
             .map((employee) => employee.department)
