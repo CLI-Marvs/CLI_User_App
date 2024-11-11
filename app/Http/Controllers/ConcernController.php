@@ -512,7 +512,7 @@ class ConcernController extends Controller
             // Save the updated concern
             $concern->save();
             $this->logBuyerDataEdit($request, $request->buyerOldData, $ticket_id);
-            
+
             return response()->json(['message' => 'Successfully updated']);
         } catch (\Exception $e) {
             return response()->json(['message' => 'Error updating buyer data', 'error' => $e->getMessage()], 500);
@@ -712,6 +712,7 @@ class ConcernController extends Controller
             return response()->json(['message' => 'Error pinning concern.', 'error' => $e->getMessage()], 500);
         }
     }
+
 
 
     public function getAllConcerns(Request $request)
@@ -1263,7 +1264,7 @@ class ConcernController extends Controller
                 ],
             ];
 
-         
+
             $inquiry = new InquiryLogs();
             $inquiry->edited_by = json_encode($logData);
             $inquiry->ticket_id = $ticketId;
@@ -1668,7 +1669,8 @@ class ConcernController extends Controller
 
     public function getMonthlyReports(Request $request)
     {
-        $year = Carbon::now()->year;
+
+        $year = $request->input('year', Carbon::now()->year);
         $department = $request->department;
 
         $query = Concerns::select(
@@ -1704,6 +1706,7 @@ class ConcernController extends Controller
     {
         $department = $request->department;
         $monthNumber = Carbon::parse($request->propertyMonth)->month;
+        $year = $request->input('year', Carbon::now()->year);
         $query = Concerns::select(
             DB::raw('property'),
             /*   DB::raw('EXTRACT(MONTH FROM created_at) as month'), */
@@ -1712,7 +1715,9 @@ class ConcernController extends Controller
 
         )
             ->whereMonth('created_at', $monthNumber)
+            ->whereYear('created_at', $year)
             ->whereNotNull('status');
+
 
 
         if ($department && $department !== "All") {
@@ -1725,7 +1730,7 @@ class ConcernController extends Controller
 
     public function getCommunicationType(Request $request)
     {
-        //dd($request);
+        $year = $request->input('year', Carbon::now()->year);
         $department = $request->department;
         $monthNumber = Carbon::parse($request->propertyMonth)->month;
 
@@ -1738,7 +1743,8 @@ class ConcernController extends Controller
             DB::raw("SUM(case when communication_type = 'Suggestion or recommendation' then 1 else 0 end) as Suggestion"),
 
         )
-            ->whereMonth('created_at', $monthNumber);
+            ->whereMonth('created_at', $monthNumber)
+            ->whereYear('created_at', $year);
 
         if ($department && $department !== "All") {
             $query->whereRaw("resolve_from::jsonb @> ?", json_encode([['department' => $department]]));
@@ -1755,6 +1761,7 @@ class ConcernController extends Controller
     {
         try {
             $monthNumber = Carbon::parse($request->month)->month;
+            $year = $request->input('year', Carbon::now()->year);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Invalid month format'], 400);
         }
@@ -1762,6 +1769,7 @@ class ConcernController extends Controller
         $department = $request->department;
         $query = Concerns::select('details_concern', DB::raw('COUNT(*) as total'))
             ->whereMonth('created_at', $monthNumber)
+            ->whereYear('created_at', $year)
             ->whereNotNull('details_concern');
 
         if ($department && $department !== "All") {

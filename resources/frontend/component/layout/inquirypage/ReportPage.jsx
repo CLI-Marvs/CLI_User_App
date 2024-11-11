@@ -128,12 +128,20 @@ const ReportPage = () => {
         propertyMonth,
         setPropertyMonth,
         user,
-        department,
         setDepartment,
+        department,
         dataSet,
         fetchDataReport,
         allEmployees,
-        data
+        data,
+        setDepartmentStatusYear,
+        departmentStatusYear,
+        setInquiriesPerCategoryYear,
+        inquiriesPerCategoryYear,
+        setInquiriesPerPropertyYear,
+        inquiriesPerPropertyYear,
+        setCommunicationTypeYear,
+        communicationTypeYear,
     } = useStateContext();
 
     const defaultData = [{ name: "No Data" }];
@@ -151,7 +159,7 @@ const ReportPage = () => {
 
     const chartHeight = dataProperty.length * (barHeight + 60);
     const chartHeight2 = communicationTypeData.length * (barHeight + 100);
- 
+
     const allDepartment = allEmployees
         ? ["All", ...Array.from(new Set(allEmployees
             .map((employee) => employee.department)
@@ -184,7 +192,20 @@ const ReportPage = () => {
     const handleInputChangeProperty = (e) => {
         setPropertyMonth(e.target.value);
     };
+    // Handle year change from the dropdown
+    const handleDepartmentYearChange = (e) => {
+        setDepartmentStatusYear(e.target.value);
+    }
+    const handleInquiriesPerCategoryYearChange = (e) => {
+        setInquiriesPerCategoryYear(e.target.value);
+    }
+    const handleInquiriesPerPropertyYearChange = (e) => {
+        setInquiriesPerPropertyYear(e.target.value);
+    }
 
+    const handleCommunicationTypeYearChange = (e) => {
+        setCommunicationTypeYear(e.target.value);
+    }
     const handleKeyDown = (e) => {
         if (e.key === "Enter") {
             fetchCategory(month);
@@ -207,6 +228,7 @@ const ReportPage = () => {
         getInquiriesPerProperty();
         fetchDataReport();
         getCommunicationTypePerProperty();
+
     }, []);
 
     useEffect(() => {
@@ -256,19 +278,20 @@ const ReportPage = () => {
                             <div className="relative w-full">
                                 <select
                                     name="year"
+                                    value={departmentStatusYear}
                                     className="appearance-none w-[100px] px-4 py-1 bg-white focus:outline-none border-0"
-                                /*  value={department} */
-                                /* onChange={(e) => setDepartment(e.target.value)} */
+                                    /*  value={department} */
+                                    onChange={handleDepartmentYearChange}
                                 >
-                                    {/*  <option value="2023">
-                                            2023
-                                        </option> */}
+                                    <option value="2023">
+                                        2023
+                                    </option>
                                     <option value="2024">
                                         2024
                                     </option>
-                                    {/*  <option value="2025">
-                                            2025
-                                        </option> */}
+                                    <option value="2025">
+                                        2025
+                                    </option>
                                 </select>
                                 <span className="absolute inset-y-0 right-0 flex items-center text-custom-gray81 pr-3 pl-3 bg-custom-grayFA pointer-events-none">
                                     <IoMdArrowDropdown />
@@ -365,18 +388,18 @@ const ReportPage = () => {
                                         <select
                                             name="year"
                                             className="appearance-none w-[100px] px-4 py-1 bg-white focus:outline-none border-0"
-                                        /*  value={department} */
-                                        /* onChange={(e) => setDepartment(e.target.value)} */
+                                            value={inquiriesPerCategoryYear}
+                                            onChange={handleInquiriesPerCategoryYearChange}
                                         >
-                                            {/*  <option value="2023">
+                                            <option value="2023">
                                                 2023
-                                            </option> */}
+                                            </option>
                                             <option value="2024">
                                                 2024
                                             </option>
-                                            {/* <option value="2025">
+                                            <option value="2025">
                                                 2025
-                                            </option> */}
+                                            </option>
                                         </select>
                                         <span className="absolute inset-y-0 right-0 flex items-center text-custom-gray81 pr-3 pl-3 bg-custom-grayFA pointer-events-none">
                                             <IoMdArrowDropdown />
@@ -494,18 +517,18 @@ const ReportPage = () => {
                                         <select
                                             name="year"
                                             className="appearance-none w-[100px] px-4 py-1 bg-white focus:outline-none border-0"
-                                        /*  value={department} */
-                                        /* onChange={(e) => setDepartment(e.target.value)} */
+                                            value={inquiriesPerPropertyYear}
+                                            onChange={handleInquiriesPerPropertyYearChange}
                                         >
-                                            {/* <option value="2023">
+                                            <option value="2023">
                                                 2023
-                                            </option> */}
+                                            </option>
                                             <option value="2024">
                                                 2024
                                             </option>
-                                            {/*  <option value="2025">
+                                            <option value="2025">
                                                 2025
-                                            </option> */}
+                                            </option>
                                         </select>
                                         <span className="absolute inset-y-0 right-0 flex items-center text-custom-gray81 pr-3 pl-3 bg-custom-grayFA pointer-events-none">
                                             <IoMdArrowDropdown />
@@ -515,7 +538,7 @@ const ReportPage = () => {
                             </div>
                         </div>
                         <div className="flex-grow">
-                            {/* <p>Inquiries per propertys test</p> */}
+
                             <BarChart
                                 width={400}
                                 height={chartHeight}
@@ -631,22 +654,22 @@ const ReportPage = () => {
                                     </div>
                                 </div>
                                 <div className="flex w-[95px] items-center border rounded-md overflow-hidden">
-                                    <div className="relative w-full">
+                                    <div className="relative w-full">                                
                                         <select
                                             name="year"
                                             className="appearance-none w-[100px] px-4 py-1 bg-white focus:outline-none border-0"
-                                        /*  value={department} */
-                                        /* onChange={(e) => setDepartment(e.target.value)} */
+                                            value={communicationTypeYear}
+                                            onChange={handleCommunicationTypeYearChange}
                                         >
-                                            {/* <option value="2023">
+                                            <option value="2023">
                                                 2023
-                                            </option> */}
+                                            </option>
                                             <option value="2024">
                                                 2024
                                             </option>
-                                            {/*  <option value="2025">
+                                            <option value="2025">
                                                 2025
-                                            </option> */}
+                                            </option>
                                         </select>
                                         <span className="absolute inset-y-0 right-0 flex items-center text-custom-gray81 pr-3 pl-3 bg-custom-grayFA pointer-events-none">
                                             <IoMdArrowDropdown />
