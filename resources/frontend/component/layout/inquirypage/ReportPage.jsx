@@ -515,7 +515,7 @@ const ReportPage = () => {
                             </div>
                         </div>
                         <div className="flex-grow">
-                            <p>Inquiries per propertys test</p>
+                            {/* <p>Inquiries per propertys test</p> */}
                             <BarChart
                                 width={400}
                                 height={chartHeight}
