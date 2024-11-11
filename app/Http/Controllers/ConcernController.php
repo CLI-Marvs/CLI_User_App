@@ -396,7 +396,7 @@ class ConcernController extends Controller
     //*For Cloud Storage
     public function addConcernPublic(Request $request)
     {
-
+        
         try {
             $validatedData = $request->validate([
                 'fname' =>
@@ -457,6 +457,7 @@ class ConcernController extends Controller
             $concerns->contract_number = $request->contract_number;
             $concerns->unit_number = $request->unit_number;
             $concerns->buyer_email = $request->buyer_email;
+            $concerns->communication_type=$request->type;
             $concerns->inquiry_type = "from_admin";
             $concerns->save();
 
