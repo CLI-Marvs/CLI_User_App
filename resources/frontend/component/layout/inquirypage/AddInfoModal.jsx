@@ -5,7 +5,7 @@ import { data } from "autoprefixer";
 import { useStateContext } from "../../../context/contextprovider";
 import Alert from "../mainComponent/Alert";
 const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
-    const predefinedUserTypes = ["Property Owner", "Buyer", "Broker", "Seller"];
+    const predefinedUserTypes = ["Property Owner", "Buyer", "Broker", "Seller","Lessee"];
     const { getAllConcerns, propertyNamesList, updateConcern, user, getInquiryLogs } =
         useStateContext();
     const [message, setMessage] = useState(dataConcern.admin_remarks || "");
@@ -336,6 +336,7 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
                                     <option value="Buyer">Buyer</option>
                                     <option value="Broker">Broker</option>
                                     <option value="Seller">Seller</option>
+                                    <option value="Lessee">Lessee</option>
                                     <option value="Others">Others</option>
                                 </select>
                                 <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3 bg-[#EDEDED] text-custom-gray81 pointer-events-none">
