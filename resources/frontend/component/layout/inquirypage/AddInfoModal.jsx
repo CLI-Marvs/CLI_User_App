@@ -8,8 +8,9 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
     const predefinedUserTypes = ["Property Owner", "Buyer", "Broker", "Seller","Lessee"];
     const { getAllConcerns, propertyNamesList, updateConcern, user, getInquiryLogs } =
         useStateContext();
+    console.log("user", user?.department);
     const [message, setMessage] = useState(dataConcern.admin_remarks || "");
-   
+    console.log("dataConcern", dataConcern);
     const [dataToUpdate, setDataToUpdate] = useState({
         contract_number: dataConcern.contract_number || "",
         unit_number: dataConcern.unit_number || "",
@@ -479,13 +480,16 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
                     </div>
                     <div className="flex justify-end">
                         <form method="">
-                            <button
-                                className="w-[133px] h-[39px] gradient-btn5 font-semibold text-sm text-white rounded-[10px]"
-                                type="button"
-                                onClick={handleShowUpdateAlert}
-                            >
-                                Update
-                            </button>
+                            {user?.department === "Customer Relations - Services" && (
+                                <button
+                                    className="w-[133px] h-[39px] font-semibold text-sm text-white rounded-[10px] gradient-btn5"
+                                    type="button"
+                                    onClick={handleShowUpdateAlert}
+                                >
+                                    Update
+                                </button>
+                            )}
+
                         </form>
                     </div>
                 </div>

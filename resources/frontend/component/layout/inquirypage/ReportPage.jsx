@@ -151,7 +151,7 @@ const ReportPage = () => {
 
     const chartHeight = dataProperty.length * (barHeight + 60);
     const chartHeight2 = communicationTypeData.length * (barHeight + 100);
- 
+
     const allDepartment = allEmployees
         ? ["All", ...Array.from(new Set(allEmployees
             .map((employee) => employee.department)
@@ -256,19 +256,20 @@ const ReportPage = () => {
                             <div className="relative w-full">
                                 <select
                                     name="year"
+                                    defaultValue={2024}
                                     className="appearance-none w-[100px] px-4 py-1 bg-white focus:outline-none border-0"
                                 /*  value={department} */
                                 /* onChange={(e) => setDepartment(e.target.value)} */
                                 >
-                                    {/*  <option value="2023">
-                                            2023
-                                        </option> */}
+                                    {/* <option value="2023">
+                                        2023
+                                    </option> */}
                                     <option value="2024">
                                         2024
                                     </option>
-                                    {/*  <option value="2025">
-                                            2025
-                                        </option> */}
+                                    {/* <option value="2025">
+                                        2025
+                                    </option> */}
                                 </select>
                                 <span className="absolute inset-y-0 right-0 flex items-center text-custom-gray81 pr-3 pl-3 bg-custom-grayFA pointer-events-none">
                                     <IoMdArrowDropdown />
@@ -371,6 +372,7 @@ const ReportPage = () => {
                                             {/*  <option value="2023">
                                                 2023
                                             </option> */}
+
                                             <option value="2024">
                                                 2024
                                             </option>
@@ -515,7 +517,7 @@ const ReportPage = () => {
                             </div>
                         </div>
                         <div className="flex-grow">
-                            {/* <p>Inquiries per propertys test</p> */}
+
                             <BarChart
                                 width={400}
                                 height={chartHeight}
