@@ -100,6 +100,7 @@ const ResolveModal = ({ modalRef, ticketId, dataRef, onupdate }) => {
 
     const handleCloseModal = () => {
         setCommunicationType(dataRef.communication_type);
+        setRemarks("");
         setIsCommunicationTypeRequired(false);
     };
     return (
