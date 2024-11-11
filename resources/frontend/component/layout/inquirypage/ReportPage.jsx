@@ -326,7 +326,7 @@ const ReportPage = () => {
                 <div>
                     <div className="w-[547px] pb-7 min-h-[335px] flex-grow-1 bg-white rounded-lg">
                         <p className="p-4 text-base montserrat-bold">
-                            Inquiries per category
+                            Inquiries Per Category
                         </p>
                         <div className="border border-t-1"></div>
                         <div className="mt-4">
@@ -455,7 +455,7 @@ const ReportPage = () => {
                 <div className="flex flex-col gap-3">
                     <div className=" bg-whiterounded-[10px] bg-white w-[579px] flex flex-col overflow-y-auto">
                         <p className="p-4  text-base montserrat-bold">
-                            Inquiries per property
+                            Inquiries Per Property
                         </p>
                         <div className="border border-t-1"></div>
                         <div className="mt-4 ">
@@ -596,7 +596,7 @@ const ReportPage = () => {
                     </div>
                     <div className=" bg-white rounded-[10px]  w-[579px] flex flex-col overflow-y-auto">
                         <p className="p-4  text-base montserrat-bold">
-                            Customer communication type
+                            Customer Communication Type
                         </p>
                         <div className="border border-t-1"></div>
                         <div className="mt-4 ">

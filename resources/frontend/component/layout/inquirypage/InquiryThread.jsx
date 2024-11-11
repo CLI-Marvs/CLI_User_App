@@ -35,6 +35,7 @@ const InquiryThread = () => {
     const [email, setEmail] = useState("");
     const [ticket, setTicket] = useState("");
     const [status, setStatus] = useState("");
+    const [type, setType] = useState("");
     const [selectedProperty, setSelectedProperty] = useState("");
     const [fileName, setFileName] = useState("");
     const [hasAttachments, setHasAttachments] = useState(false);
@@ -67,7 +68,7 @@ const InquiryThread = () => {
     const handleDateChange = (date) => {
         setStartDate(date);
     };
-  
+
     const handleSelectProperty = (e) => {
         setSelectedProperty(e.target.value);
     };
@@ -87,7 +88,7 @@ const InquiryThread = () => {
         }
     }, []);
 
-    
+
     /*   console.log("data", data); */
 
     /*  const dataConcern = data?.find((item) => item.ticket_id === ticketId) || {}; */
@@ -384,11 +385,11 @@ const InquiryThread = () => {
 
     const { pathname } = useLocation();
 
-  useEffect(() => {
-    window.scrollTo(0, 0);  // Scrolls to the top
-  }, [pathname]);
+    useEffect(() => {
+        window.scrollTo(0, 0);  // Scrolls to the top
+    }, [pathname]);
 
-  
+
     const messageIdChannelFunc = (channel) => {
         channel.listen("MessageID", (event) => {
             console.log("message id event", event.data);
@@ -410,7 +411,7 @@ const InquiryThread = () => {
         }
     }, [emailMessageID]);
 
-    
+
     const combineThreadMessages = messages[ticketId]
         ? messages[ticketId]
             .flat()
@@ -610,6 +611,47 @@ const InquiryThread = () => {
                                                 Other Concerns
                                             </option>
                                         </select>
+                                        <span className="absolute inset-y-0 right-0 flex items-center  pl-3 pointer-events-none">
+                                            <IoIosArrowDown />
+                                        </span>
+                                    </div>
+                                    <div className="flex relative">
+                                        <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
+                                            {" "}
+                                            Type
+                                        </label>
+                                        <div className="flex bg-red-900 justify-start w-full relative">
+                                            <label
+                                                htmlFor=""
+                                                className="w-full border-b-2"
+                                            >
+                                                {""}
+                                            </label>
+                                            <select
+                                                className="w-full border-b-1 outline-none appearance-none text-sm absolute px-[8px]"
+                                                value={type}
+                                                onChange={(e) =>
+                                                    setStatus(e.target.value)
+                                                }
+                                            >
+                                                <option value="">
+                                                    Select Type
+                                                </option>
+                                                <option value="Complain">
+                                                    Complain
+                                                </option>
+                                                <option value="Request">
+                                                    Request
+                                                </option>
+                                                <option value="Inquiry">
+                                                    Inquiry
+                                                </option>
+                                                <option value="Suggestion or Recommendation">
+                                                    Suggestion or Recommendation
+                                                </option>
+                                            </select>
+                                        </div>
+
                                         <span className="absolute inset-y-0 right-0 flex items-center  pl-3 pointer-events-none">
                                             <IoIosArrowDown />
                                         </span>
@@ -967,38 +1009,35 @@ const InquiryThread = () => {
                                                                 </span>
                                                             </div>
 
-                                                            <div className="flex items-center h-[19px] text-sm">
-                                                                Hi Mr./Ms.{" "}
-                                                                {capitalizeWords(
-                                                                    dataConcern.buyer_lastname
-                                                                )}
-                                                                ,
-                                                            </div>
+                                                            
                                                             <div className="w-full p-[10px] border-[2px] rounded-[5px] border-custom-grayF1 text-sm text-custom-gray81">
-                                                                {formatChatMessage(
-                                                                    chatMessage
-                                                                )}
+                                                                <div>
+                                                                    {formatChatMessage(
+                                                                        chatMessage
+                                                                    )}
+                                                                </div>
+                                                                <div className="mt-[26px]">
+                                                                    <p>
+                                                                        Sincerely,
+                                                                    </p>
+                                                                    <br />
+                                                                    <p>
+                                                                        {
+                                                                            user?.firstname
+                                                                        }{" "}
+                                                                        {
+                                                                            user?.lastname
+                                                                        }
+                                                                    </p>
+                                                                    <p>
+                                                                        CLI -{" "}
+                                                                        {
+                                                                            user?.department
+                                                                        }
+                                                                    </p>
+                                                                </div>
                                                             </div>
-                                                            <div className="text-sm">
-                                                                <p>
-                                                                    Sincerely,
-                                                                </p>
-                                                                <br />
-                                                                <p>
-                                                                    {
-                                                                        user?.firstname
-                                                                    }{" "}
-                                                                    {
-                                                                        user?.lastname
-                                                                    }
-                                                                </p>
-                                                                <p>
-                                                                    CLI -{" "}
-                                                                    {
-                                                                        user?.department
-                                                                    }
-                                                                </p>
-                                                            </div>
+
                                                         </div>
                                                         {attachedFiles.length >
                                                             0 && (

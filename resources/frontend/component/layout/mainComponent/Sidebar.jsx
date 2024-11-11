@@ -250,7 +250,7 @@ const Sidebar = () => {
             <p>Property & Pricing</p>
             <p>Sales Management</p>
             <p>Broker Management</p>
-              <p className='leading-none'>Transaction <br />Management</p>
+            <p className='leading-none'>Transaction <br />Management</p>
             <p className="leading-none">
               Document
               <br /> Management
