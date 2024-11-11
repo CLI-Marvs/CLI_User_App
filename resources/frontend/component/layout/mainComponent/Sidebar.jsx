@@ -176,7 +176,7 @@ const Sidebar = () => {
                 </Link>
               </div>
             )}
-          <Link to="/transactionmanagement/invoices">
+          {/* <Link to="/transactionmanagement/invoices">
             <ListItem
               className={`h-[35px] w-[210px] text-sm pl-[12px] transition-all duration-300 ease-in-out 
             ${activeItemTransaction === "invoices" ||
@@ -196,8 +196,8 @@ const Sidebar = () => {
                 />
               </ListItemSuffix>
             </ListItem>
-          </Link>
-
+          </Link> */}
+{/* 
           {isInvoiceOpen &&
             location.pathname.startsWith(
               "/transactionmanagement"
@@ -239,7 +239,7 @@ const Sidebar = () => {
                   </ListItem>
                 </Link>
               </div>
-            )}
+            )} */}
 
           <div className="mt-3 mb-1 px-4">
             <p className="text-[14px] font-bold bg-gradient-to-r from-custom-bluegreen via-custom-lightgreen to-custom-solidgreen bg-clip-text text-transparent">
