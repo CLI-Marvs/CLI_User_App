@@ -37,8 +37,7 @@ use App\Jobs\MarkResolvedToCustomerJob;
 use Google\Cloud\Storage\StorageClient;
 use Illuminate\Pagination\LengthAwarePaginator;
 use App\Jobs\NotifyAssignedCliOfResolvedInquiryJob;
-
-
+use App\Models\BankTransaction;
 
 class ConcernController extends Controller
 {
@@ -1362,6 +1361,17 @@ class ConcernController extends Controller
             return response()->json($assignees);
         } catch (\Exception $e) {
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function testApi(Request $request) {
+        try {
+            $testData = new BankTransaction();
+            $testData->bank_nam = $request->input('content');
+            $testData->save();
+        } catch (\Throwable $e) {
+            return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
+
         }
     }
     public function removeAssignee(Request $request)

@@ -61,6 +61,8 @@ Route::post('/buyer-reply', [ConcernController::class, 'fromAppSript']);
 
 //*Post date on sap
 Route::post('/proxy-sap', [SapController::class, 'postDateToSap']);
+Route::post('/test-api', [SapController::class, 'postDateToSap']);
+
 
 //*Retrieve invoice from sap upon trigger the date
 Route::post('/posting-invoices', [SapController::class, 'retrieveInvoicesFromSap']);
