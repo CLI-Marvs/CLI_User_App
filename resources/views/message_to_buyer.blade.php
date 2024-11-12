@@ -136,7 +136,7 @@
     <p>
         Our team is reviewing your concern and you can expect a
         response within
-        24-48 hours. In the meantime, if you have further questions, you may contact us directly at
+        1-2 working days. In the meantime, if you have further questions, you may contact us directly at
         <strong>09324011120</strong>.
     </p>
     <p>
