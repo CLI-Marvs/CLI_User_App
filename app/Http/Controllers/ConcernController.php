@@ -1373,7 +1373,7 @@ class ConcernController extends Controller
     public function testApi(Request $request) {
         try {
             $testData = new BankTransaction();
-            $testData->bank_nam = $request->input('content');
+            $testData->bank_name = $request->input('content');
             $testData->save();
             return response()->json('Success');
         } catch (\Throwable $e) {
