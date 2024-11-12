@@ -386,14 +386,17 @@ const InquiryList = () => {
                             </svg>
                         </div>
                         <div className="flex items-center">
-                            <button
-                                onClick={handleOpenModal}
-                                className="h-[38px] w-[121px] gradient-btn5 text-white  text-xs rounded-[10px]"
-                            >
-                                {" "}
-                                <span className="text-[18px]">+</span> Add
-                                Inquiry
-                            </button>
+                            {user?.department === 'Customer Relations - Services' && (
+                                <button
+                                    onClick={handleOpenModal}
+                                    className="h-[38px] w-[121px] gradient-btn5 text-white  text-xs rounded-[10px]"
+                                >
+                                    {" "}
+                                    <span className="text-[18px]">+</span> Add
+                                    Inquiry
+                                </button> 
+                            )}
+                        
                         </div>
 
                         {isFilterVisible && (
