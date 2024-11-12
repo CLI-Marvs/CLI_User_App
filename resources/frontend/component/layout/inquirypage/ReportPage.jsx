@@ -189,8 +189,8 @@ const ReportPage = () => {
         setMonth(e.target.value);
     };
 
- 
- 
+
+
     // Handle year change from the dropdown
     const handleDepartmentYearChange = (e) => {
         setDepartmentStatusYear(e.target.value);
@@ -234,7 +234,7 @@ const ReportPage = () => {
         setMonth(getCurrentMonth());
         setPropertyMonth(getCurrentMonth());
         setCommunicationTypeMonth(getCurrentMonth())
-         
+
     }, []);
 
     //  console.log("department", department);
@@ -620,7 +620,7 @@ const ReportPage = () => {
                     </div>
                     <div className=" bg-white rounded-[10px]  w-[579px] flex flex-col overflow-y-auto">
                         <p className="p-4  text-base montserrat-bold">
-                            Customer Communication Type
+                            Type
                         </p>
                         <div className="border border-t-1"></div>
                         <div className="mt-4 ">
@@ -655,7 +655,7 @@ const ReportPage = () => {
                                     </div>
                                 </div>
                                 <div className="flex w-[95px] items-center border rounded-md overflow-hidden">
-                                    <div className="relative w-full">                                
+                                    <div className="relative w-full">
                                         <select
                                             name="year"
                                             className="appearance-none w-[100px] px-4 py-1 bg-white focus:outline-none border-0"
