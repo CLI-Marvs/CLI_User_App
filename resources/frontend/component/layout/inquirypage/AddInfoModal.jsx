@@ -365,7 +365,7 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
                             className={`flex items-center border border-[D6D6D6] rounded-[5px] overflow-hidden`}
                         >
                             <span className="text-custom-gray81 text-sm bg-[#EDEDED] flex items-center w-[308px] tablet:w-[175px] mobile:w-[270px] mobile:text-xs -mr-3 pl-3 py-1">
-                                Communication Type
+                                Type
                             </span>
                             <div className="relative w-full">
                                 <select
@@ -381,6 +381,31 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
                                     <option value="Suggestion or recommendation">
                                         Suggestion or Recommendation
                                     </option>
+                                </select>
+                                <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3 bg-[#EDEDED] text-custom-gray81 pointer-events-none">
+                                    <IoMdArrowDropdown />
+                                </span>
+                            </div>
+                        </div>
+                        <div
+                            className={`flex items-center border border-[D6D6D6] rounded-[5px] overflow-hidden`}
+                        >
+                            <span className="text-custom-gray81 text-sm bg-[#EDEDED] flex items-center w-[308px] tablet:w-[175px] mobile:w-[270px] mobile:text-xs -mr-3 pl-3 py-1">
+                                Channels
+                            </span>
+                            <div className="relative w-full">
+                                <select
+                                    name="channels"
+                                    value={dataToUpdate.channels || ""}
+                                    onChange={handleChange}
+                                    className="appearance-none w-full px-4 text-sm py-1 bg-white focus:outline-none border-0 mobile:text-xs"
+                                >
+                                    <option value="">(Select)</option>
+                                    <option value="Email">Email</option>
+                                    <option value="Call">Call</option>
+                                    <option value="Walk-in">Walk-in</option>
+                                    <option value="Website">Website</option>
+                                    <option value="Social media">Social media</option>
                                 </select>
                                 <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3 bg-[#EDEDED] text-custom-gray81 pointer-events-none">
                                     <IoMdArrowDropdown />

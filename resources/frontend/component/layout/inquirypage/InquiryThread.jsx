@@ -1139,11 +1139,17 @@ const InquiryThread = () => {
                                 ) : (
                                     <div
                                         onClick={handleOpenResolveModal}
-                                        className="flex justify-start w-[122px] font-semibold text-[13px] text-[#1A73E8] underline cursor-pointer"
+                                        className="flex justify-start w-auto font-semibold text-[13px] text-[#1A73E8] underline cursor-pointer"
                                     >
                                         Mark as resolved
                                     </div>
                                 )}
+                                 <div
+                                        onClick={handleOpenResolveModal}
+                                        className="flex justify-start w-auto font-semibold text-[13px] text-[#1A73E8] underline cursor-pointer"
+                                    >
+                                        Mark as closed
+                                    </div>
                             </div>
                             <div className="">
                                 <div className="">
