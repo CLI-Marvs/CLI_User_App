@@ -457,6 +457,7 @@ class ConcernController extends Controller
             $concerns->contract_number = $request->contract_number;
             $concerns->unit_number = $request->unit_number;
             $concerns->buyer_email = $request->buyer_email;
+            $concerns->communication_type = $request->type;
             $concerns->inquiry_type = "from_admin";
             $concerns->save();
 
@@ -720,7 +721,6 @@ class ConcernController extends Controller
         try {
             $employee = $request->user();
             $query = Concerns::query();
-
             $this->applyFilters($query, $request, $employee);
 
             $latestLogs = $this->getLatestLogsSubquery();
@@ -751,6 +751,9 @@ class ConcernController extends Controller
     {
         $days = $request->query("days", null);
         $status = $request->query("status", null);
+        // $type = $request->query('type', null);
+        // dd($type, $status);
+
         $search = $request->query("search", null);
         $specificAssignCSR = $request->query('specificAssigneeCsr', null);
 
@@ -851,6 +854,7 @@ class ConcernController extends Controller
 
     public function handleSearchFilter($query, $searchParams)
     {
+
         if (!empty($searchParams['name'])) {
             $query->where('buyer_name', 'ILIKE', '%' . $searchParams['name'] . '%');
         }
@@ -865,7 +869,10 @@ class ConcernController extends Controller
         }
 
         if (!empty($searchParams['status'])) {
-            $query->where('message_log', 'ILIKE', '%' . $searchParams['status'] . '%');
+            $query->where('status', $searchParams['status']);
+        }
+        if (!empty($searchParams['type'])) {
+            $query->where('communication_type', 'ILIKE', '%' . $searchParams['type'] . '%');
         }
         if (!empty($searchParams['selectedProperty'])) {
             $query->where('property', 'ILIKE', '%' . $searchParams['selectedProperty'] . '%');

@@ -38,7 +38,7 @@ const InquiryList = () => {
         /*  setHasAttachments,
         hasAttachments */
     } = useStateContext();
-
+ 
     const [name, setName] = useState("");
     const [category, setCategory] = useState("");
 
@@ -58,7 +58,8 @@ const InquiryList = () => {
     const [lastActivity, setLastActivity] = useState(null);
     const filterBoxRef = useRef(null);
     const [isOpenSelect, setIsOpenSelect] = useState(false);
-
+    console.log("type", type);
+    console.log("status", status);
     const handleSelect = (option) => {
         onChange(option);
         setIsOpenSelect(false);
@@ -256,6 +257,7 @@ const InquiryList = () => {
             name,
             category,
             type,
+            status,
             email,
             ticket,
             startDate,
@@ -269,8 +271,9 @@ const InquiryList = () => {
         setName("");
         setCategory("");
         setEmail("");
-        setTicket("");
-        //setStatus("");
+        setTicket("");  
+        setStatus("");
+        setType("");
         setSelectedProperty("");
         setHasAttachments(false);
         setSpecificAssigneeCsr("");
@@ -530,7 +533,7 @@ const InquiryList = () => {
                                                 className="w-full border-b-1 outline-none appearance-none text-sm absolute px-[8px]"
                                                 value={type}
                                                 onChange={(e) =>
-                                                    setStatus(e.target.value)
+                                                    setType(e.target.value)
                                                 }
                                             >
                                                 <option value="">
@@ -580,7 +583,7 @@ const InquiryList = () => {
                                                 <option value="Resolved">
                                                     Resolved
                                                 </option>
-                                                <option value="Unresolved">
+                                                <option value="unresolved">
                                                     Unresolved
                                                 </option>
                                             </select>

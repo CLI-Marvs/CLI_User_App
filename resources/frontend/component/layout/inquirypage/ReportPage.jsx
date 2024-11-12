@@ -127,6 +127,8 @@ const ReportPage = () => {
         getInquiriesPerProperty,
         propertyMonth,
         setPropertyMonth,
+        setCommunicationTypeMonth,
+        communicationTypeMonth,
         user,
         setDepartment,
         department,
@@ -143,7 +145,6 @@ const ReportPage = () => {
         setCommunicationTypeYear,
         communicationTypeYear,
     } = useStateContext();
-
     const defaultData = [{ name: "No Data" }];
     const dataToDisplay = dataCategory.length > 0 ? dataCategory : defaultData;
     const location = useLocation();
@@ -188,10 +189,8 @@ const ReportPage = () => {
         setMonth(e.target.value);
     };
 
-    //   console.log("dataToDisplay", dataToDisplay);
-    const handleInputChangeProperty = (e) => {
-        setPropertyMonth(e.target.value);
-    };
+ 
+ 
     // Handle year change from the dropdown
     const handleDepartmentYearChange = (e) => {
         setDepartmentStatusYear(e.target.value);
@@ -234,6 +233,8 @@ const ReportPage = () => {
     useEffect(() => {
         setMonth(getCurrentMonth());
         setPropertyMonth(getCurrentMonth());
+        setCommunicationTypeMonth(getCurrentMonth())
+         
     }, []);
 
     //  console.log("department", department);
@@ -632,8 +633,8 @@ const ReportPage = () => {
                                         <select
                                             name="concern"
                                             className="appearance-none w-full px-4 py-1 bg-white focus:outline-none border-0"
-                                            onChange={(e) => setPropertyMonth(e.target.value)}
-                                            value={propertyMonth}
+                                            onChange={(e) => setCommunicationTypeMonth(e.target.value)}
+                                            value={communicationTypeMonth}
                                         >
                                             <option value="january">January</option>
                                             <option value="february">February</option>

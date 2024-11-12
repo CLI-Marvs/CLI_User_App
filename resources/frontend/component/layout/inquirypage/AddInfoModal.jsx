@@ -365,7 +365,7 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
                             className={`flex items-center border border-[D6D6D6] rounded-[5px] overflow-hidden`}
                         >
                             <span className="text-custom-gray81 text-sm bg-[#EDEDED] flex items-center w-[308px] tablet:w-[175px] mobile:w-[270px] mobile:text-xs -mr-3 pl-3 py-1">
-                                Communication Type
+                                Type
                             </span>
                             <div className="relative w-full">
                                 <select

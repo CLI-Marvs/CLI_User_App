@@ -41,6 +41,7 @@ export const ContextProvider = ({ children }) => {
     const [communicationTypeData, setCommunicationTypeData] = useState([]);
     const [month, setMonth] = useState("");
     const [propertyMonth, setPropertyMonth] = useState("");
+    const [communicationTypeMonth, setCommunicationTypeMonth] = useState("");
     const [specificInquiry, setSpecificInquiry] = useState(null);
     const [dataSet, setDataSet] = useState([]);
     const [department, setDepartment] = useState("");
@@ -101,6 +102,7 @@ export const ContextProvider = ({ children }) => {
     const getAllConcerns = async () => {
         if (token) {
             setLoading(true);
+            console.log("searchFilter", searchFilter);
             try {
                 const searchParams = new URLSearchParams({
                     search: JSON.stringify(searchFilter),
@@ -257,7 +259,7 @@ export const ContextProvider = ({ children }) => {
         try {
             const response = await apiService.get("communication-type-property", {
                 params: {
-                    propertyMonth: propertyMonth,
+                    propertyMonth: communicationTypeMonth,
                     department: department,
                     year: communicationTypeYear
                 },
@@ -567,7 +569,7 @@ export const ContextProvider = ({ children }) => {
         };
 
         fetchData();
-    }, [department, propertyMonth, month, departmentStatusYear, inquiriesPerCategoryYear, inquiriesPerPropertyYear, communicationTypeYear]);
+    }, [department, propertyMonth, month, departmentStatusYear, inquiriesPerCategoryYear, inquiriesPerPropertyYear, communicationTypeYear, communicationTypeMonth]);
 
     return (
         <StateContext.Provider
@@ -614,6 +616,8 @@ export const ContextProvider = ({ children }) => {
                 communicationTypeData,
                 setCommunicationTypeData,
                 setPropertyMonth,
+                setCommunicationTypeMonth,
+                communicationTypeMonth,
                 setData,
                 searchFilter,
                 statusFilter,
