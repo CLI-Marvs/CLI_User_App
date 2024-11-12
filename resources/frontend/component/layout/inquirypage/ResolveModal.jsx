@@ -132,7 +132,7 @@ const ResolveModal = ({ modalRef, ticketId, dataRef, onupdate }) => {
                             isCommunicationTypeRequired && (
                                 <div className="w-full flex justify-center items-center h-12 bg-red-100 mb-4 rounded-lg">
                                     <p className="flex text-[#C42E2E] ">
-                                        Please select communication type.
+                                        Please select  type.
                                     </p>
                                 </div>
                             )
@@ -164,7 +164,7 @@ const ResolveModal = ({ modalRef, ticketId, dataRef, onupdate }) => {
                     className={`flex items-center border border-[D6D6D6] rounded-[5px] overflow-hidden mt-[12px]`}
                 >
                     <span className="text-custom-gray81 text-sm bg-[#EDEDED] flex items-center w-[308px] tablet:w-[175px] mobile:w-[270px] mobile:text-xs -mr-3 pl-3 py-1">
-                        Communication Type
+                          Type
                     </span>
                     <div className="relative w-full">
 
