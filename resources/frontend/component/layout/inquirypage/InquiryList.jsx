@@ -45,6 +45,7 @@ const InquiryList = () => {
     const [email, setEmail] = useState("");
     const [ticket, setTicket] = useState("");
     const [status, setStatus] = useState("");
+    const [type, setType] = useState("");
     const [selectedProperty, setSelectedProperty] = useState("");
     const [hasAttachments, setHasAttachments] = useState(false);
     const { propertyNamesList } = useStateContext();
@@ -254,6 +255,7 @@ const InquiryList = () => {
         setSearchFilter({
             name,
             category,
+            type,
             email,
             ticket,
             startDate,
@@ -333,7 +335,8 @@ const InquiryList = () => {
         }
     }; */
 
-
+    
+    console.log("loading", loading);
     return (
         <>
             <div className="h-screen max-w-full bg-custom-grayFA px-[20px]">
@@ -503,6 +506,47 @@ const InquiryList = () => {
                                                 </option>
                                                 <option value="Other Concerns">
                                                     Other Concerns
+                                                </option>
+                                            </select>
+                                        </div>
+
+                                        <span className="absolute inset-y-0 right-0 flex items-center  pl-3 pointer-events-none">
+                                            <IoIosArrowDown />
+                                        </span>
+                                    </div>
+                                    <div className="flex relative">
+                                        <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
+                                            {" "}
+                                            Type
+                                        </label>
+                                        <div className="flex bg-red-900 justify-start w-full relative">
+                                            <label
+                                                htmlFor=""
+                                                className="w-full border-b-2"
+                                            >
+                                                {""}
+                                            </label>
+                                            <select
+                                                className="w-full border-b-1 outline-none appearance-none text-sm absolute px-[8px]"
+                                                value={type}
+                                                onChange={(e) =>
+                                                    setStatus(e.target.value)
+                                                }
+                                            >
+                                                <option value="">
+                                                    Select Type
+                                                </option>
+                                                <option value="Complain">
+                                                    Complain
+                                                </option>
+                                                <option value="Request">
+                                                    Request
+                                                </option>
+                                                <option value="Inquiry">
+                                                    Inquiry
+                                                </option>
+                                                <option value="Suggestion or Recommendation">
+                                                    Suggestion or Recommendation
                                                 </option>
                                             </select>
                                         </div>
@@ -772,7 +816,6 @@ const InquiryList = () => {
                             <TicketTable concernData={data || []} />
                         )}
                     </div>
-
                     <div className="flex justify-end items-center h-12 px-6 gap-2 bg-white rounded-b-lg">
                         <p className="text-sm text-gray-400 hidden">
                             Last account activity: {getTimeDifference()}

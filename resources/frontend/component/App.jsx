@@ -35,6 +35,7 @@ import AdminSettingView from "./views/pages/adminsettingsViews/AdminSettingView"
 import TransactionView from "./views/pages/transactionViews/TransactionView";
 import TransactionSidebar from "./views/pages/transactionViews/TransactionSidebar";
 import BankStatementView from "./views/pages/transactionViews/BankStatementView";
+import AutoAssignView from "./views/pages/raiseaconcernViews/AutoAssignView";
 
 // PrivateRoute component to check authentication
 const PrivateRoute = () => {
@@ -291,6 +292,10 @@ const App = () => {
                         {
                             path: "inquirymanagement/report",
                             element: <ReportViews />,
+                        },
+                        {
+                            path: "inquirymanagement/autoassign",
+                            element: <AutoAssignView />,
                         },
                         {
                             path: "propertyandpricing",

@@ -3,18 +3,19 @@ import { IoMdArrowDropdown } from "react-icons/io";
 import apiService from "../../servicesApi/apiService";
 import { data } from "autoprefixer";
 import { useStateContext } from "../../../context/contextprovider";
-import Alert from "../../../component/Alert";
+import Alert from "../mainComponent/Alert";
 const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
-    const predefinedUserTypes = ["Property Owner", "Buyer", "Broker", "Seller"];
+    const predefinedUserTypes = ["Property Owner", "Buyer", "Broker", "Seller","Lessee"];
     const { getAllConcerns, propertyNamesList, updateConcern, user, getInquiryLogs } =
         useStateContext();
-    const [message, setMessage] = useState(dataConcern.message || "");
-    
+    console.log("user", user?.department);
+    const [message, setMessage] = useState(dataConcern.admin_remarks || "");
+    console.log("dataConcern", dataConcern);
     const [dataToUpdate, setDataToUpdate] = useState({
         contract_number: dataConcern.contract_number || "",
         unit_number: dataConcern.unit_number || "",
         property: dataConcern.property || "",
-       //admin_remarks: dataConcern.admin_remarks || "",
+        admin_remarks: dataConcern.admin_remarks || "",
         buyer_email: dataConcern.buyer_email || "",
         mobile_number: dataConcern.mobile_number || "",
         buyer_firstname: dataConcern.buyer_firstname || "",
@@ -30,7 +31,25 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
             : "",
 
     });
-
+ 
+    /* Buyers old data to be used in AssignDetails.jsx 
+     * to compare the values and show the differences
+     */
+    const buyerOldData = {
+        buyer_firstname: dataConcern.buyer_firstname,
+        buyer_lastname: dataConcern.buyer_lastname,
+        buyer_middlename: dataConcern.buyer_middlename,
+        suffix_name: dataConcern.suffix_name,
+        buyer_email: dataConcern.buyer_email,
+        mobile_number: dataConcern.mobile_number,
+        user_type: dataConcern.user_type === "Others" ? dataConcern.other_user_type : dataConcern.user_type,
+        other_user_type: dataConcern.user_type === "Others" ? dataConcern.other_user_type : dataConcern.user_type,
+        communication_type: dataConcern.communication_type,
+        contract_number: dataConcern.contract_number,
+        property: dataConcern.property,
+        unit_number: dataConcern.unit_number,
+        admin_remarks: dataConcern.admin_remarks,
+    };
 
     const [showAlert, setShowAlert] = useState(false);
 
@@ -67,33 +86,33 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
     };
 
     const handleCloseModal = () => {
-        setDataToUpdate(dataConcern);
-        setMessage("");
-        //  setShowAlert(false);
+        if (dataConcern) {
+            setDataToUpdate(dataConcern);
+            setMessage(dataConcern.admin_remarks || "");
+            getAllConcerns();
+        }
     };
 
     const handleChange = (e) => {
-        const newValue = e.target.value;
         const { name, value } = e.target;
-        if (name === "user_type" && value === "Others") {
-            setDataToUpdate((prevState) => ({
+
+        setDataToUpdate((prevState) => {
+            // When switching to "Others," retain the current other_user_type if it exists
+            if (name === "user_type") {
+                return {
+                    ...prevState,
+                    user_type: value,
+                    other_user_type: value === "Others" ? prevState.other_user_type : "",
+                };
+            }
+
+            return {
                 ...prevState,
-                user_type: "Others",
-                other_user_type: "", // Clear the other_user_type field when selecting Others
-            }));
-        } else if (name === "user_type") {
-            setDataToUpdate((prevState) => ({
-                ...prevState,
-                user_type: value,
-                other_user_type: "", // Clear the other_user_type when predefined type is selected
-            }));
-        } else {
-            setDataToUpdate({
-                ...dataToUpdate,
-                [e.target.name]: newValue,
-            });
-        }
+                [name]: value,
+            };
+        });
     };
+
 
     const handleShowUpdateAlert = () => {
         setShowAlert(true);
@@ -111,37 +130,24 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
     const handleCancel = () => {
         setShowAlert(false);
     };
-    /**
-     *  Iterates over each field and compares the values between buyerUpdatedData and    filteredBuyerOldData
-     */
-    const filteredBuyerOldData = Object.keys(dataToUpdate).reduce((acc, key) => {
-        if (dataConcern.hasOwnProperty(key)) {
-            acc[key] = dataConcern[key];
-        }
-        return acc;
-    }, {});
-    // console.log("filteredBuyerOldData", filteredBuyerOldData);
-    // console.log("dataConcern.ticket_id", dataConcern.ticket_id)
+
     const addInfo = async () => {
         try {
-            console.log("buyerUpdatedData", dataToUpdate);
-            console.log("buyerOldData", filteredBuyerOldData);
             const response = await apiService.put(
                 `update-info?dataId=${dataConcern.id}`,
                 {
-                    buyerUpdatedData: { ...dataToUpdate },
-                    buyerOldData: filteredBuyerOldData,
+                    buyerOldData,
+                    ...dataToUpdate,
                     ticketId: dataConcern.ticket_id,
                     updated_by: user?.firstname + " " + user?.lastname,
                 }
             );
 
-
             console.log("response", response);
             onupdate({ ...dataToUpdate, dataConcern });
-            // console.log('ticketID', dataConcern.ticket_id);
             getInquiryLogs(dataConcern.ticket_id);
             getAllConcerns();
+
 
         } catch (error) {
             console.log("error", error);
@@ -149,12 +155,19 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
     };
 
     useEffect(() => {
+        setDataToUpdate((prevData) => ({
+            ...prevData,
+            admin_remarks: message,
+        }));
+    }, [message]);
+
+    useEffect(() => {
         if (dataConcern) {
             setDataToUpdate({
                 contract_number: dataConcern.contract_number || "",
                 unit_number: dataConcern.unit_number || "",
                 property: dataConcern.property || "",
-               // admin_remarks: dataConcern.admin_remarks || "",
+                admin_remarks: dataConcern.admin_remarks || "",
                 buyer_email: dataConcern.buyer_email || "",
                 mobile_number: dataConcern.mobile_number || "",
                 buyer_firstname: dataConcern.buyer_firstname || "",
@@ -171,6 +184,7 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
                     ? dataConcern.user_type
                     : "",
             });
+            setMessage(dataConcern.admin_remarks || "");
         }
     }, [dataConcern]);
     return (
@@ -323,6 +337,7 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
                                     <option value="Buyer">Buyer</option>
                                     <option value="Broker">Broker</option>
                                     <option value="Seller">Seller</option>
+                                    <option value="Lessee">Lessee</option>
                                     <option value="Others">Others</option>
                                 </select>
                                 <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3 bg-[#EDEDED] text-custom-gray81 pointer-events-none">
@@ -330,11 +345,10 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
                                 </span>
                             </div>
                         </div>
-
-                        <div className="flex justify-end">
-                            {dataToUpdate.user_type === "Others" && (
+                        {dataToUpdate.user_type === "Others" && (
+                            <div className="flex justify-end">
                                 <div
-                                    className={`flex items-center border rounded-[5px] w-[305px] overflow-hidden`}
+                                    className={`flex items-center border rounded-[5px] w-[61.5%] overflow-hidden`}
                                 >
                                     <input
                                         name="other_user_type"
@@ -345,8 +359,8 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
                                         placeholder=""
                                     />
                                 </div>
-                            )}
-                        </div>
+                            </div>
+                        )}
                         <div
                             className={`flex items-center border border-[D6D6D6] rounded-[5px] overflow-hidden`}
                         >
@@ -439,7 +453,7 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
                             />
                         </div>
                     </div>
-                    {/* <div
+                    <div
                         className={`border-[D6D6D6] rounded-[5px] bg-[#EDEDED] border`}
                     >
                         <div className="flex items-center justify-between">
@@ -453,26 +467,29 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
                         </div>
                         <div className="flex gap-3 ">
                             <textarea
-                                id="admin_remarks"
+                                id="details_message"
                                 value={message}
                                 onChange={handleChangeValue}
                                 maxLength={maxCharacters}
-                                name="admin_remarks"
+                                name="details_message"
                                 rows="4"
                                 draggable="false"
                                 className={` rounded-[5px] bg-white border border-[D6D6D6] w-full pl-2 outline-none`}
                             ></textarea>
                         </div>
-                    </div> */}
+                    </div>
                     <div className="flex justify-end">
                         <form method="">
-                            <button
-                                className="w-[133px] h-[39px] gradient-btn5 font-semibold text-sm text-white rounded-[10px]"
-                                type="button"
-                                onClick={handleShowUpdateAlert}
-                            >
-                                Update
-                            </button>
+                            {user?.department === "Customer Relations - Services" && (
+                                <button
+                                    className="w-[133px] h-[39px] font-semibold text-sm text-white rounded-[10px] gradient-btn5"
+                                    type="button"
+                                    onClick={handleShowUpdateAlert}
+                                >
+                                    Update
+                                </button>
+                            )}
+
                         </form>
                     </div>
                 </div>

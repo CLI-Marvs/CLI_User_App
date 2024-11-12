@@ -44,6 +44,11 @@ export const ContextProvider = ({ children }) => {
     const [specificInquiry, setSpecificInquiry] = useState(null);
     const [dataSet, setDataSet] = useState([]);
     const [department, setDepartment] = useState("");
+    const [year, setYear] = useState("");
+    const [departmentStatusYear, setDepartmentStatusYear] = useState("");
+    const [inquiriesPerCategoryYear, setInquiriesPerCategoryYear] = useState("");
+    const [inquiriesPerPropertyYear, setInquiriesPerPropertyYear] = useState("");
+    const [communicationTypeYear, setCommunicationTypeYear] = useState("");
     const [isDepartmentInitialized, setIsDepartmentInitialized] =
         useState(false);
     const [pricingMasterLists, setPricingMasterLists] = useState([]);
@@ -77,6 +82,10 @@ export const ContextProvider = ({ children }) => {
         if (user && user.department && !isDepartmentInitialized) {
             setDepartment(user.department === "Customer Relations - Services" ? "All" : user.department);
             setIsDepartmentInitialized(true);
+            setDepartmentStatusYear(2024);
+            setInquiriesPerCategoryYear(2024);
+            setInquiriesPerPropertyYear(2024);
+            setCommunicationTypeYear(2024);
         }
     }, [user, isDepartmentInitialized]);
 
@@ -178,7 +187,7 @@ export const ContextProvider = ({ children }) => {
         if (!isDepartmentInitialized) return;
         try {
             const response = await apiService.get("category-monthly", {
-                params: { month: month, department: department },
+                params: { month: month, department: department, year: inquiriesPerCategoryYear },
             });
             const result = response.data;
             const formattedData = result.map((item) => ({
@@ -205,11 +214,11 @@ export const ContextProvider = ({ children }) => {
     const fetchDataReport = async () => {
         if (!isDepartmentInitialized) return;
         try {
+
             const response = await apiService.get("report-monthly", {
-                params: { department: department },
+                params: { department: department, year: departmentStatusYear },
             });
             const result = response.data;
-
             const formattedData = result.map((item) => ({
                 name: item.month.toString().padStart(2, "0"),
                 Resolved: item.resolved,
@@ -229,6 +238,7 @@ export const ContextProvider = ({ children }) => {
                 params: {
                     propertyMonth: propertyMonth,
                     department: department,
+                    year: inquiriesPerPropertyYear
                 },
             });
             const result = response.data;
@@ -249,20 +259,21 @@ export const ContextProvider = ({ children }) => {
                 params: {
                     propertyMonth: propertyMonth,
                     department: department,
+                    year: communicationTypeYear
                 },
             });
             const result = response.data;
-            
+
             const formattedData = result.map((item) => ({
                 name: item.property,
                 complainCount: item.complain,
                 requestCount: item.request,
                 inquiryCount: item.inquiry,
                 suggestionCount: item.suggestion,
-               
+
             }));
 
-             setCommunicationTypeData(formattedData);
+            setCommunicationTypeData(formattedData);
         } catch (error) {
             console.log("Error retrieving communication types:", error);
         }
@@ -556,7 +567,7 @@ export const ContextProvider = ({ children }) => {
         };
 
         fetchData();
-    }, [department, propertyMonth, month]);
+    }, [department, propertyMonth, month, departmentStatusYear, inquiriesPerCategoryYear, inquiriesPerPropertyYear, communicationTypeYear]);
 
     return (
         <StateContext.Provider
@@ -664,8 +675,15 @@ export const ContextProvider = ({ children }) => {
                 notifStatus,
                 updateConcern,
                 loading,
-                
-                
+                setDepartmentStatusYear,
+                departmentStatusYear,
+                setInquiriesPerCategoryYear,
+                inquiriesPerCategoryYear,
+                setInquiriesPerPropertyYear,
+                inquiriesPerPropertyYear,
+                setCommunicationTypeYear,                
+                communicationTypeYear,
+
             }}
         >
             {children}

@@ -16,7 +16,7 @@ const AssignDetails = ({ logMessages, ticketId }) => {
         setLogs,
         logs,
         assigneesPersonnel,
-
+        getInquiryLogs
     } = useStateContext();
 
     const [message, setMessage] = useState("");
@@ -39,6 +39,10 @@ const AssignDetails = ({ logMessages, ticketId }) => {
             }
         }
     };
+
+    useEffect(() => {
+        getInquiryLogs(ticketId)
+    }, [ticketId]);
 
     const concernChannelFunc = (channel) => {
         channel.listen("ConcernMessages", (event) => {
@@ -387,6 +391,7 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                 );
             case "update_info":
                 return (
+                    // <div></div>
                     <div className="flex flex-col  ">
                         <div className="flex gap-1 items-center  ">
                             <span className="flex mb-1 text-[25px] text-custom-blue ">
@@ -413,215 +418,343 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                         </div>
                         <div className="mt-[20px]">
                             <div className="w-full min-h-[39px] border-[2px] border-custom-grayF1 flex flex-col gap-[10px] bg-white p-[10px] rounded-[5px]">
-                                {/* First name */}
-                                <p className="text-sm text-custom-bluegreen">
-                                    First Name:
-                                    <span className="text-custom-grayA5">
-                                        {" "}From{" "}{"{"}
-                                    </span>
-                                    <span className="text-red-500">
-                                        {" "}{details.buyer_old_data.buyer_firstname}{" "}
-                                    </span>
-                                    <span className="text-custom-grayA5">
-                                        {"}"}{" "}To{" "}{"{"}
-                                    </span>
-                                    <span className="text-black">
-                                        {" "}{details.buyer_updated_data.buyer_firstname}{" "}
 
-                                    </span>
-                                    <span className="text-custom-grayA5">{"}"}</span>
-                                </p>
+                                {/* First name */}
+                                {(details.buyer_old_data.buyer_firstname !== details.buyer_updated_data.buyer_firstname) && (
+                                    <p className="text-sm text-custom-bluegreen">
+                                        First Name:
+                                        {details.buyer_old_data.buyer_firstname && details.buyer_old_data.buyer_firstname !== details.buyer_updated_data.buyer_firstname ? (
+                                            <>
+                                                <span className="text-custom-grayA5">{" "}From{" "}{"{"}</span>
+                                                <span className="text-red-500">
+                                                    {" "}{details.buyer_old_data.buyer_firstname}{" "}
+                                                </span>
+                                                <span className="text-custom-grayA5">{"}"}{" "}To{" "}{"{"}</span>
+                                                <span className="text-black">
+                                                    {" "}{details.buyer_updated_data.buyer_firstname}{" "}
+                                                </span>
+                                                <span className="text-custom-grayA5">{"}"}</span>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <span className="text-custom-grayA5">{details.buyer_old_data.buyer_firstname ? " " : " Added "}</span>
+                                                <span className="text-black">
+                                                    {" "}{details.buyer_updated_data.buyer_firstname}{" "}
+                                                </span>
+                                            </>
+                                        )}
+                                    </p>
+                                )}
 
                                 {/* Middle name */}
-                                <p className="text-sm text-custom-bluegreen">
-                                    Middle Name:
-                                    <span className="text-custom-grayA5">
-                                        {" "}From{" "}{"{"}
-                                    </span>
-                                    <span className="text-red-500">
-                                        {" "}{details.buyer_old_data.buyer_middlename}{" "}
-                                    </span>
-                                    <span className="text-custom-grayA5">
-                                        {"}"}{" "}To{" "}{"{"}
-                                    </span>
-                                    <span className="text-black">
-                                        {" "}{details.buyer_updated_data.buyer_middlename}{" "}
-
-                                    </span>
-                                    <span className="text-custom-grayA5">{"}"}</span>
-
-                                </p>
+                                {(details.buyer_old_data.buyer_middlename !==  details.buyer_updated_data.buyer_middlename) && (
+                                    <p className="text-sm text-custom-bluegreen">
+                                        Middle Name:
+                                        {details.buyer_old_data.buyer_middlename && details.buyer_old_data.buyer_middlename !== details.buyer_updated_data.buyer_middlename ? (
+                                            <>
+                                                <span className="text-custom-grayA5">{" "}From{" "}{"{"}</span>
+                                                <span className="text-red-500">
+                                                    {" "}{details.buyer_old_data.buyer_middlename}{" "}
+                                                </span>
+                                                <span className="text-custom-grayA5">{"}"}{" "}To{" "}{"{"}</span>
+                                                <span className="text-black">
+                                                    {" "}{details.buyer_updated_data.buyer_middlename}{" "}
+                                                </span>
+                                                <span className="text-custom-grayA5">{"}"}</span>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <span className="text-custom-grayA5">{details.buyer_old_data.buyer_middlename ? " " : " Added "}</span>
+                                                <span className="text-black">
+                                                    {" "}{details.buyer_updated_data.buyer_middlename}{" "}
+                                                </span>
+                                            </>
+                                        )}
+                                    </p>
+                                )}
 
                                 {/* Last name */}
-                                <p className="text-sm text-custom-bluegreen">
-                                    Last Name:
-                                    <span className="text-custom-grayA5">
-                                        {" "}From{" "}{"{"}
-                                    </span>
-                                    <span className="text-red-500">
-                                        {" "}{details.buyer_old_data.buyer_lastname}{" "}
-                                    </span>
-                                    <span className="text-custom-grayA5">
-                                        {"}"}{" "}To{" "}{"{"}
-                                    </span>
-                                    <span className="text-black">
-                                        {" "}{details.buyer_updated_data.buyer_lastname}{" "}
-
-                                        <span className="text-custom-grayA5">{"}"}</span>
-                                    </span>
-                                </p>
+                                {(details.buyer_old_data.buyer_lastname !==  details.buyer_updated_data.buyer_lastname) && (
+                                    <p className="text-sm text-custom-bluegreen">
+                                        Last Name:
+                                        {details.buyer_old_data.buyer_lastname && details.buyer_old_data.buyer_lastname !== details.buyer_updated_data.buyer_lastname ? (
+                                            <>
+                                                <span className="text-custom-grayA5">{" "}From{" "}{"{"}</span>
+                                                <span className="text-red-500">
+                                                    {" "}{details.buyer_old_data.buyer_lastname}{" "}
+                                                </span>
+                                                <span className="text-custom-grayA5">{"}"}{" "}To{" "}{"{"}</span>
+                                                <span className="text-black">
+                                                    {" "}{details.buyer_updated_data.buyer_lastname}{" "}
+                                                </span>
+                                                <span className="text-custom-grayA5">{"}"}</span>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <span className="text-custom-grayA5">{details.buyer_old_data.buyer_lastname ? " " : " Added "}</span>
+                                                <span className="text-black">
+                                                    {" "}{details.buyer_updated_data.buyer_lastname}{" "}
+                                                </span>
+                                            </>
+                                        )}
+                                    </p>
+                                )}
 
                                 {/* Suffix name */}
-                                <p className="text-sm text-custom-bluegreen">
-                                    Suffix Name:
-                                    <span className="text-custom-grayA5">
-                                        {" "}From{" "}{"{"}
-                                    </span>
-                                    <span className="text-red-500">
-                                        {" "}{details.buyer_old_data.suffix}{" "}
-                                    </span>
-                                    <span className="text-custom-grayA5">
-                                        {"}"}{" "}To{" "}{"{"}
-                                    </span>
-                                    <span className="text-black">
-                                        {" "}{details.buyer_updated_data.suffix}{" "}
-                                        <span className="text-custom-grayA5">{"}"}</span>
-                                    </span>
-                                </p>
+                                {(details.buyer_old_data.suffix !==  details.buyer_updated_data.suffix) && (
+                                    <p className="text-sm text-custom-bluegreen">
+                                        Suffix Name:
+                                        {details.buyer_old_data.suffix && details.buyer_old_data.suffix !== details.buyer_updated_data.suffix ? (
+                                            <>
+                                                <span className="text-custom-grayA5">{" "}From{" "}{"{"}</span>
+                                                <span className="text-red-500">
+                                                    {" "}{details.buyer_old_data.suffix}{" "}
+                                                </span>
+                                                <span className="text-custom-grayA5">{"}"}{" "}To{" "}{"{"}</span>
+                                                <span className="text-black">
+                                                    {" "}{details.buyer_updated_data.suffix}{" "}
+                                                </span>
+                                                <span className="text-custom-grayA5">{"}"}</span>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <span className="text-custom-grayA5">{details.buyer_old_data.suffix ? " " : " Added "}</span>
+                                                <span className="text-black">
+                                                    {" "}{details.buyer_updated_data.suffix}{" "}
+                                                </span>
+                                            </>
+                                        )}
+                                    </p>
+                                )}
+
 
                                 {/* Email */}
-                                <p className="text-sm text-custom-bluegreen">
-                                    Email:
-                                    <span className="text-custom-grayA5">
-                                        {" "}From{" "}{"{"}
-                                    </span>
-                                    <span className="text-red-500">
-                                        {" "}{details.buyer_old_data.buyer_email}{" "}
-                                    </span>
-                                    <span className="text-custom-grayA5">
-                                        {"}"}{" "}To{" "}{"{"}
-                                    </span>
-                                    <span className="text-black">
-                                        {" "}{details.buyer_updated_data.buyer_email}{" "}
-
-                                        <span className="text-custom-grayA5">{"}"}</span>
-                                    </span>
-                                </p>
+                                {(details.buyer_old_data.buyer_email !==  details.buyer_updated_data.buyer_email) && (
+                                    <p className="text-sm text-custom-bluegreen">
+                                        Email:
+                                        {details.buyer_old_data.buyer_email &&
+                                            details.buyer_old_data.buyer_email !== details.buyer_updated_data.buyer_email ? (
+                                            <>
+                                                <span className="text-custom-grayA5">{" "}From{" "}{"{"}</span>
+                                                <span className="text-red-500">
+                                                    {" "}{details.buyer_old_data.buyer_email}{" "}
+                                                </span>
+                                                <span className="text-custom-grayA5">{"}"}{" "}To{" "}{"{"}</span>
+                                                <span className="text-black">
+                                                    {" "}{details.buyer_updated_data.buyer_email}{" "}
+                                                </span>
+                                                <span className="text-custom-grayA5">{"}"}</span>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <span className="text-custom-grayA5">
+                                                    {details.buyer_old_data.buyer_email ? " " : " Added "}
+                                                </span>
+                                                <span className="text-black">
+                                                    {" "}{details.buyer_updated_data.buyer_email}{" "}
+                                                </span>
+                                            </>
+                                        )}
+                                    </p>
+                                )}
 
                                 {/* Mobile number */}
-                                <p className="text-sm text-custom-bluegreen">
-                                    Mobile No:
-                                    <span className="text-custom-grayA5">
-                                        {" "}From{" "}{"{"}
-                                    </span>
-                                    <span className="text-red-500">
-                                        {" "}{details.buyer_old_data.mobile_number}{" "}
-                                    </span>
-                                    <span className="text-custom-grayA5">
-                                        {"}"}{" "}To{" "}{"{"}
-                                    </span>
-                                    <span className="text-black">
-                                        {" "}{details.buyer_updated_data.mobile_number}{" "}
-
-                                        <span className="text-custom-grayA5">{"}"}</span>
-                                    </span>
-                                </p>
+                                {(details.buyer_old_data.mobile_number !== details.buyer_updated_data.mobile_number) && (
+                                    <p className="text-sm text-custom-bluegreen">
+                                        Mobile No.:
+                                        {details.buyer_old_data.mobile_number &&
+                                            details.buyer_old_data.mobile_number !== details.buyer_updated_data.mobile_number ? (
+                                            <>
+                                                <span className="text-custom-grayA5">{" "}From{" "}{"{"}</span>
+                                                <span className="text-red-500">
+                                                    {" "}{details.buyer_old_data.mobile_number}{" "}
+                                                </span>
+                                                <span className="text-custom-grayA5">{"}"}{" "}To{" "}{"{"}</span>
+                                                <span className="text-black">
+                                                    {" "}{details.buyer_updated_data.mobile_number}{" "}
+                                                </span>
+                                                <span className="text-custom-grayA5">{"}"}</span>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <span className="text-custom-grayA5">
+                                                    {details.buyer_old_data.mobile_number ? " " : " Added "}
+                                                </span>
+                                                <span className="text-black">
+                                                    {" "}{details.buyer_updated_data.mobile_number}{" "}
+                                                </span>
+                                            </>
+                                        )}
+                                    </p>
+                                )}
 
                                 {/*User type*/}
-                                <p className="text-sm text-custom-bluegreen">
-                                    User type:
-                                    <span className="text-custom-grayA5">
-                                        {" "}From{" "}{"{"}
-                                    </span>
-                                    <span className="text-red-500">
-                                        {" "}{details.buyer_old_data.user_type}{" "}
-                                    </span>
-                                    <span className="text-custom-grayA5">
-                                        {"}"}{" "}To{" "}{"{"}
-                                    </span>
-                                    <span className="text-black">
-                                        {" "}{details.buyer_updated_data.user_type}{" "}
-
-                                        <span className="text-custom-grayA5">{"}"}</span>
-                                    </span>
-                                </p>
+                                {(details.buyer_old_data.user_type !==  details.buyer_updated_data.user_type) && (
+                                    <p className="text-sm text-custom-bluegreen">
+                                        User type:
+                                        {details.buyer_old_data.user_type &&
+                                            details.buyer_old_data.user_type !== details.buyer_updated_data.user_type ? (
+                                            <>
+                                                <span className="text-custom-grayA5">{" "}From{" "}{"{"}</span>
+                                                <span className="text-red-500">
+                                                    {" "}{details.buyer_old_data.user_type}{" "}
+                                                </span>
+                                                <span className="text-custom-grayA5">{"}"}{" "}To{" "}{"{"}</span>
+                                                <span className="text-black">
+                                                        {" "}{details.buyer_updated_data.user_type === "Others" ? details.buyer_updated_data.other_user_type : details.buyer_updated_data.user_type}{" "}
+                                                </span>
+                                                <span className="text-custom-grayA5">{"}"}</span>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <span className="text-custom-grayA5">
+                                                    {details.buyer_old_data.user_type ? " " : " Added "}
+                                                </span>
+                                                <span className="text-black">
+                                                        {" "}{details.buyer_updated_data.user_type === "Others" ? details.buyer_updated_data.other_user_type : details.buyer_updated_data.user_type}{" "}
+                                                </span>
+                                            </>
+                                        )}
+                                    </p>
+                                )}
 
                                 {/* Communication type */}
-                                <p className="text-sm text-custom-bluegreen">
-                                    Communication type:
-                                    <span className="text-custom-grayA5">
-                                        {" "}From{" "}{"{"}
-                                    </span>
-                                    <span className="text-red-500">
-                                        {" "}{details.buyer_old_data.communication_type}{" "}
-                                    </span>
-                                    <span className="text-custom-grayA5">
-                                        {"}"}{" "}To{" "}{"{"}
-                                    </span>
-                                    <span className="text-black">
-                                        {" "}{details.buyer_updated_data.communication_type}{" "}
-
-                                        <span className="text-custom-grayA5">{"}"}</span>
-                                    </span>
-                                </p>
+                                {(details.buyer_old_data.communication_type !==  details.buyer_updated_data.communication_type) && (
+                                    <p className="text-sm text-custom-bluegreen">
+                                        User type:
+                                        {details.buyer_old_data.communication_type &&
+                                            details.buyer_old_data.communication_type !== details.buyer_updated_data.communication_type ? (
+                                            <>
+                                                <span className="text-custom-grayA5">{" "}From{" "}{"{"}</span>
+                                                <span className="text-red-500">
+                                                    {" "}{details.buyer_old_data.communication_type}{" "}
+                                                </span>
+                                                <span className="text-custom-grayA5">{"}"}{" "}To{" "}{"{"}</span>
+                                                <span className="text-black">
+                                                    {" "}{details.buyer_updated_data.communication_type}{" "}
+                                                </span>
+                                                <span className="text-custom-grayA5">{"}"}</span>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <span className="text-custom-grayA5">
+                                                    {details.buyer_old_data.communication_type ? " " : " Added "}
+                                                </span>
+                                                <span className="text-black">
+                                                    {" "}{details.buyer_updated_data.communication_type}{" "}
+                                                </span>
+                                            </>
+                                        )}
+                                    </p>
+                                )}
 
                                 {/* Contract number */}
-                                <p className="text-sm text-custom-bluegreen">
-                                    Contract No:
-                                    <span className="text-custom-grayA5">
-                                        {" "}From{" "}{"{"}
-                                    </span>
-                                    <span className="text-red-500">
-                                        {" "}{details.buyer_old_data.contract_number}{" "}
-                                    </span>
-                                    <span className="text-custom-grayA5">
-                                        {"}"}{" "}To{" "}{"{"}
-                                    </span>
-                                    <span className="text-black">
-                                        {" "}{details.buyer_updated_data.contract_number}{" "}
-
-                                        <span className="text-custom-grayA5">{"}"}</span>
-                                    </span>
-                                </p>
-
+                                {(details.buyer_old_data.contract_number !==  details.buyer_updated_data.contract_number) && (
+                                    <p className="text-sm text-custom-bluegreen">
+                                        Contract No:
+                                        {details.buyer_old_data.contract_number && details.buyer_old_data.contract_number !== details.buyer_updated_data.contract_number ? (
+                                            <>
+                                                <span className="text-custom-grayA5">{" "}From{" "}{"{"}</span>
+                                                <span className="text-red-500">
+                                                    {" "}{details.buyer_old_data.contract_number}{" "}
+                                                </span>
+                                                <span className="text-custom-grayA5">{"}"}{" "}To{" "}{"{"}</span>
+                                                <span className="text-black">
+                                                    {" "}{details.buyer_updated_data.contract_number}{" "}
+                                                </span>
+                                                <span className="text-custom-grayA5">{"}"}</span>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <span className="text-custom-grayA5">{details.buyer_old_data.contract_number ? " " : " Added "}</span>
+                                                <span className="text-black">
+                                                    {" "}{details.buyer_updated_data.contract_number}{" "}
+                                                </span>
+                                            </>
+                                        )}
+                                    </p>
+                                )}
 
                                 {/* Property */}
-                                <p className="text-sm text-custom-bluegreen">
-                                    Property:
-                                    <span className="text-custom-grayA5">
-                                        {" "}From{" "}{"{"}
-                                    </span>
-                                    <span className="text-red-500">
-                                        {" "}{details.buyer_old_data.property}{" "}
-                                    </span>
-                                    <span className="text-custom-grayA5">
-                                        {"}"}{" "}To{" "}{"{"}
-                                    </span>
-                                    <span className="text-black">
-                                        {" "}{details.buyer_updated_data.property}{" "}
-
-                                        <span className="text-custom-grayA5">{"}"}</span>
-                                    </span>
-                                </p>
+                                {(details.buyer_old_data.property !==  details.buyer_updated_data.property) && (
+                                    <p className="text-sm text-custom-bluegreen">
+                                        Property:
+                                        {details.buyer_old_data.property && details.buyer_old_data.property !== details.buyer_updated_data.property ? (
+                                            <>
+                                                <span className="text-custom-grayA5">{" "}From{" "}{"{"}</span>
+                                                <span className="text-red-500">
+                                                    {" "}{details.buyer_old_data.property}{" "}
+                                                </span>
+                                                <span className="text-custom-grayA5">{"}"}{" "}To{" "}{"{"}</span>
+                                                <span className="text-black">
+                                                    {" "}{details.buyer_updated_data.property}{" "}
+                                                </span>
+                                                <span className="text-custom-grayA5">{"}"}</span>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <span className="text-custom-grayA5">{details.buyer_old_data.property ? " " : " Added "}</span>
+                                                <span className="text-black">
+                                                    {" "}{details.buyer_updated_data.property}{" "}
+                                                </span>
+                                            </>
+                                        )}
+                                    </p>
+                                )}
 
                                 {/*Unit/Lot */}
-                                <p className="text-sm text-custom-bluegreen">
-                                    Unit/Lot:
-                                    <span className="text-custom-grayA5">
-                                        {" "}From{" "}{"{"}
-                                    </span>
-                                    <span className="text-red-500">
-                                        {" "}{details.buyer_old_data.unit_number}{" "}
-                                    </span>
-                                    <span className="text-custom-grayA5">
-                                        {"}"}{" "}To{" "}{"{"}
-                                    </span>
-                                    <span className="text-black">
-                                        {" "}{details.buyer_updated_data.unit_number}{" "}
+                                {(details.buyer_old_data.unit_number !==  details.buyer_updated_data.unit_number) && (
+                                    <p className="text-sm text-custom-bluegreen">
+                                        Unit No:
+                                        {details.buyer_old_data.unit_number && details.buyer_old_data.unit_number !== details.buyer_updated_data.unit_number ? (
+                                            <>
+                                                <span className="text-custom-grayA5">{" "}From{" "}{"{"}</span>
+                                                <span className="text-red-500">
+                                                    {" "}{details.buyer_old_data.unit_number}{" "}
+                                                </span>
+                                                <span className="text-custom-grayA5">{"}"}{" "}To{" "}{"{"}</span>
+                                                <span className="text-black">
+                                                    {" "}{details.buyer_updated_data.unit_number}{" "}
+                                                </span>
+                                                <span className="text-custom-grayA5">{"}"}</span>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <span className="text-custom-grayA5">{details.buyer_old_data.unit_number ? " " : " Added "}</span>
+                                                <span className="text-black">
+                                                    {" "}{details.buyer_updated_data.unit_number}{" "}
+                                                </span>
+                                            </>
+                                        )}
+                                    </p>
+                                )}
 
-                                        <span className="text-custom-grayA5">{"}"}</span>
-                                    </span>
-                                </p>
+                                {/* Remarks */}
+                                {(details.buyer_old_data.admin_remarks !== details.buyer_updated_data.admin_remarks) && (
+                                    <p className="text-sm text-custom-bluegreen">
+                                        Remarks:
+                                        {details.buyer_old_data.admin_remarks && details.buyer_old_data.admin_remarks !== details.buyer_updated_data.admin_remarks ? (
+                                            <>
+                                                <span className="text-custom-grayA5">{" "}From{" "}{"{"}</span>
+                                                <span className="text-red-500">
+                                                    {" "}{details.buyer_old_data.admin_remarks}{" "}
+                                                </span>
+                                                <span className="text-custom-grayA5">{"}"}{" "}To{" "}{"{"}</span>
+                                                <span className="text-black">
+                                                    {" "}{details.buyer_updated_data.admin_remarks}{" "}
+                                                </span>
+                                                <span className="text-custom-grayA5">{"}"}</span>
+                                            </>
+                                        ) : (
+                                            <>
+                                                    <span className="text-custom-grayA5">{details.buyer_old_data.admin_remarks ? " " : " Added "}</span>
+                                                <span className="text-black">
+                                                        {" "}{details.buyer_updated_data.admin_remarks}{" "}
+                                                </span>
+                                            </>
+                                        )}
+                                    </p>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -652,7 +785,7 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                                     style={{ display: "none" }}
                                 /* onChange={handleFileAttach} */
                                 />
-                                <button
+                                {/* <button
                                     type="button"
                                     onClick={() =>
                                         document
@@ -663,9 +796,9 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                                     }
                                 >
                                     <BsPaperclip className="h-5 w-5 text-custom-solidgreen hover:text-gray-700" />
-                                </button>
+                                </button> */}
                             </div>
-                            <button onClick={() => setIsOpen(!isOpen)} className="  flex justify-center items-center rounded-full bg-custom-bluegreen size-[24px]">
+                            <button onClick={() => setIsOpen(!isOpen)} className=" hidden flex justify-center items-center rounded-full bg-custom-bluegreen size-[24px]">
                                 <p className="text-sm text-white">
                                     3
                                 </p>
@@ -770,7 +903,7 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                                             {item.message}
                                         </p>
                                     </div>
-                                    <div className="flex flex-col gap-[5px]  ">
+                                    <div className="flex flex-col gap-[5px]  hidden">
                                         <button className="w-[218px] h-[42px] rounded-[7px] gradient-btn2 px-[20px] py-[8px] flex items-center justify-start text-white gap-2">
                                             <img
                                                 src={FolderFile2}

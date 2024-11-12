@@ -53,21 +53,15 @@ const Sidebar = () => {
   }, [location]);
 
   useEffect(() => {
-
     switch (location.pathname) {
       case "/transactionmanagement/invoices":
-        setInquiryOpen(false);
-        setIsInvoiceOpen(true);
-        break;
       case "/transactionmanagement/transactionrecords":
         setInquiryOpen(false);
         setIsInvoiceOpen(true);
         break;
       case "/inquirymanagement/inquirylist":
-        setIsInvoiceOpen(false);
-        setInquiryOpen(true);
-        break;
       case "/inquirymanagement/report":
+      case "/inquirymanagement/autoassign":
         setIsInvoiceOpen(false);
         setInquiryOpen(true);
         break;
@@ -76,7 +70,6 @@ const Sidebar = () => {
         setIsInvoiceOpen(false);
         break;
     }
-
   }, [location.pathname]);
 
   return (
@@ -166,10 +159,24 @@ const Sidebar = () => {
                     Reports
                   </ListItem>
                 </Link>
+                <Link to="/inquirymanagement/autoassign">
+                  <ListItem
+                    className={`h-[32px] w-full py-[8px] px-[18px] text-sm rounded-[50px] hidden ${location.pathname.startsWith(
+                      "/inquirymanagement/autoassign"
+                    )
+                        ? "bg-white text-custom-solidgreen font-semibold"
+                        : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
+                      }`}
+                    onClick={() =>
+                      handleItemClick("/autoassign")
+                    }
+                  >
+                    Auto Assign
+                  </ListItem>
+                </Link>
               </div>
             )}
-
-          <Link to="/transactionmanagement/invoices">
+          {/* <Link to="/transactionmanagement/invoices">
             <ListItem
               className={`h-[35px] w-[210px] text-sm pl-[12px] transition-all duration-300 ease-in-out 
             ${activeItemTransaction === "invoices" ||
@@ -189,8 +196,8 @@ const Sidebar = () => {
                 />
               </ListItemSuffix>
             </ListItem>
-          </Link>
-
+          </Link> */}
+{/* 
           {isInvoiceOpen &&
             location.pathname.startsWith(
               "/transactionmanagement"
@@ -232,7 +239,7 @@ const Sidebar = () => {
                   </ListItem>
                 </Link>
               </div>
-            )}
+            )} */}
 
           <div className="mt-3 mb-1 px-4">
             <p className="text-[14px] font-bold bg-gradient-to-r from-custom-bluegreen via-custom-lightgreen to-custom-solidgreen bg-clip-text text-transparent">
@@ -243,7 +250,7 @@ const Sidebar = () => {
             <p>Property & Pricing</p>
             <p>Sales Management</p>
             <p>Broker Management</p>
-              <p className='leading-none'>Transaction <br />Management</p>
+            <p className='leading-none'>Transaction <br />Management</p>
             <p className="leading-none">
               Document
               <br /> Management
