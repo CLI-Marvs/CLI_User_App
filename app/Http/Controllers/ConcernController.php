@@ -1375,6 +1375,7 @@ class ConcernController extends Controller
             $testData = new BankTransaction();
             $testData->bank_nam = $request->input('content');
             $testData->save();
+            return response()->json('Success');
         } catch (\Throwable $e) {
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
 
