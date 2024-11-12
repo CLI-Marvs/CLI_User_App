@@ -40,7 +40,8 @@ const InquiryFormModal = ({ modalRef }) => {
     const [errors, setErrors] = useState({});
     const { propertyNamesList } = useStateContext();
     const [specificInputErrors, setSpecificInputErrors] = useState({});
-
+    const [isSendEmail, setIsSendEmail] = useState(false);
+ 
     const handleFileChange = (event) => {
         const selectedFiles = Array.from(event.target.files);
         setFiles((prevFiles) => {
@@ -141,7 +142,9 @@ const InquiryFormModal = ({ modalRef }) => {
         setResetSuccess(true);
         setIsSubmitted(false);
     };
-
+    const handleSendEmailChange = (event) => {
+        setIsSendEmail(event.target.checked);
+    };
     const handleSuffixNameCheckboxChange = (event) => {
         setIsSuffixChecked(event.target.checked);
         setFormData((prevData) => ({
@@ -173,6 +176,7 @@ const InquiryFormModal = ({ modalRef }) => {
         setMessage("");
         setIsMiddleNameChecked(false);
         setIsSuffixChecked(false);
+        setIsSendEmail(false);
     };
 
     const {
@@ -285,6 +289,7 @@ const InquiryFormModal = ({ modalRef }) => {
                 const formattedMessage = message.replace(/\n/g, "<br>");
                 fileData.append("message", formattedMessage);
                 fileData.append("admin_email", user?.employee_email);
+                fileData.append('isSendEmail', isSendEmail);
                 fileData.append("admin_id", user?.id);
                 fileData.append("admin_profile_picture", user?.profile_picture);
 
@@ -569,8 +574,8 @@ const InquiryFormModal = ({ modalRef }) => {
                             />
                         </div>
                         <div className="flex gap-[6px] items-center">
-                            <input type="checkbox" className="h-[16px] w-[16px] rounded-[2px] border border-gray-400 checked:bg-transparent flex items-center justify-center accent-custom-lightgreen" />
-                            <p className="text-sm font-light text-custom-bluegreen">Email will not be sent.</p>
+                            <input type="checkbox" className="h-[16px] w-[16px] rounded-[2px] border border-gray-400 checked:bg-transparent flex items-center justify-center accent-custom-lightgreen" onChange={handleSendEmailChange}/>
+                            <p className="text-sm font-light text-custom-bluegreen">Email will be sent.</p>
                         </div>
                         <div
                             className={`flex items-center border rounded-[5px] overflow-hidden ${isSubmitted && !formData.mobile_number
