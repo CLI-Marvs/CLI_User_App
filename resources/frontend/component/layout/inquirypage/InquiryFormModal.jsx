@@ -568,6 +568,10 @@ const InquiryFormModal = ({ modalRef }) => {
                                 placeholder=""
                             />
                         </div>
+                        <div className="flex gap-[6px] items-center">
+                            <input type="checkbox" className="h-[16px] w-[16px] rounded-[2px] border border-gray-400 checked:bg-transparent flex items-center justify-center accent-custom-lightgreen" />
+                            <p className="text-sm font-light text-custom-bluegreen">Email will not be sent.</p>
+                        </div>
                         <div
                             className={`flex items-center border rounded-[5px] overflow-hidden ${isSubmitted && !formData.mobile_number
                                     ? resetSuccess
@@ -742,6 +746,39 @@ const InquiryFormModal = ({ modalRef }) => {
                                     <option value="Suggestion or Recommendation">
                                         Suggestion or Recommendation
                                     </option>
+
+                                </select>
+                                <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3 bg-custom-lightestgreen text-custom-bluegreen pointer-events-none">
+                                    <IoMdArrowDropdown />
+                                </span>
+                            </div>
+                        </div>
+                        <div
+                            className={`flex items-center border rounded-[5px] overflow-hidden ${isSubmitted && !formData.type
+                                    ? resetSuccess
+                                        ? "border-custom-bluegreen"
+                                        : "border-red-500"
+                                    : "border-custom-bluegreen"
+                                }`}
+                        >
+                            <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex items-center w-[250px] tablet:w-[175px] mobile:w-[270px] mobile:text-xs -mr-3 pl-3 py-1">
+                                Channels
+                            </span>
+                            <div className="relative w-full">
+                                <select
+                                    /* value={formData.type}
+                                    onChange={handleChange} */
+                                    name="channels"
+                                    className="appearance-none text-sm w-full px-4 py-1 bg-white focus:outline-none border-0 mobile:text-xs"
+                                >
+                                    <option value="">(Select)</option>
+                                    <option value="Email">Email</option>
+                                    <option value="Call">Call</option>
+                                    <option value="Walk-in">Walk-in</option>
+                                    <option value="Website">Website</option>
+                                    <option value="Social media">Social media</option>
+                                    <option value="Branch Tablet">Branch Tablet (Jotform created by IT)</option>
+                                    <option value="Internal Endorsement">Internal Endorsement</option>
 
                                 </select>
                                 <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3 bg-custom-lightestgreen text-custom-bluegreen pointer-events-none">
