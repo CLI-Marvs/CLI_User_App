@@ -58,8 +58,7 @@ const InquiryList = () => {
     const [lastActivity, setLastActivity] = useState(null);
     const filterBoxRef = useRef(null);
     const [isOpenSelect, setIsOpenSelect] = useState(false);
-    console.log("type", type);
-    console.log("status", status);
+
     const handleSelect = (option) => {
         onChange(option);
         setIsOpenSelect(false);
