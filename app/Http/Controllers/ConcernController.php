@@ -1221,7 +1221,6 @@ class ConcernController extends Controller
      */
     public function logBuyerDataEdit(Request $request, $ticketId)
     {
-         dd($request);
 
         try {
             $inquiry = new InquiryLogs();
