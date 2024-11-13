@@ -1372,6 +1372,9 @@ class ConcernController extends Controller
 
     public function testApi(Request $request) {
         try {
+            \Log::info('testApi', [
+               'content' => $request->all()
+            ]);
             $testData = new BankTransaction();
             $testData->bank_name = $request->input('content');
             $testData->save();
