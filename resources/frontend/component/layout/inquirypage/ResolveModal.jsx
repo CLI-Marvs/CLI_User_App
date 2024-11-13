@@ -89,6 +89,7 @@ const ResolveModal = ({ modalRef, ticketId, dataRef, onupdate }) => {
             setRemarks("");
             getInquiryLogs(ticketId);
             const updatedData = { ...dataRef, status: "Resolved", communication_type: communicationType };
+            localStorage.removeItem("updatedData");
             localStorage.setItem("dataConcern", JSON.stringify(updatedData));
             onupdate(updatedData); // Call handleUpdate with the updated data
             /* onupdate({...dataRef, status: "Resolved"}); */

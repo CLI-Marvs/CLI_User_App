@@ -1301,7 +1301,7 @@ class ConcernController extends Controller
             $inquiry = new InquiryLogs();
             $inquiry->edited_by = json_encode($logData);
             $inquiry->ticket_id = $ticketId;
-            $inquiry->message_log = "Updated info to: " . $request->buyer_firstname . ' ' . $request->buyer_lastname;
+            $inquiry->message_log = "Data updated " . $request->buyer_firstname . ' ' . $request->buyer_lastname;
             $inquiry->save();
 
             return ['success' => true, 'message' => 'Log successfully updated', 'data' => $logData];
