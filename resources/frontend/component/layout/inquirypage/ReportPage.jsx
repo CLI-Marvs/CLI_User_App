@@ -276,7 +276,7 @@ const ReportPage = () => {
                     <p className="text-lg montserrat-bold">
                         Resolved vs. Unresolved Chart
                     </p>
-                    <div className="flex gap-[10px]">
+                    <div className="flex gap-[10px] px-[16px]">
                         <div className="flex w-[300px] items-center border rounded-md overflow-hidden">
                             <span className="text-custom-gray81 bg-custom-grayFA flex items-center w-44 -mr-3 pl-3 py-1">
                                 Department
@@ -384,7 +384,7 @@ const ReportPage = () => {
                         </p>
                         <div className="border border-t-1"></div>
                         <div className="mt-4">
-                            <div className="flex gap-[10px]">
+                            <div className="flex gap-[10px] px-[16px]">
                                 <div className="flex  w-[300px] items-center border rounded-md overflow-hidden">
                                     <span className="text-custom-gray81 bg-custom-grayFA flex items-center text-sm w-[150px] -mr-3 pl-3 py-1">
                                         For the month of
@@ -511,7 +511,7 @@ const ReportPage = () => {
                         </p>
                         <div className="border border-t-1"></div>
                         <div className="mt-4">
-                            <div className="flex gap-[10px]">
+                            <div className="flex gap-[10px] px-[16px]">
                                 <div className="flex  w-[300px] items-center border rounded-md overflow-hidden">
                                     <span className="text-custom-gray81 bg-custom-grayFA flex items-center text-sm w-[150px] -mr-3 pl-3 py-1">
                                         For the month of
@@ -581,7 +581,7 @@ const ReportPage = () => {
                                     }}
                                 >
                                     <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                                    <XAxis dataKey="name" tick={{ fontSize: 10, fill: '#000', width: 10,   }}  dy={5} />
+                                    <XAxis dataKey="name" tick={{ fontSize: 10, fill: '#000', width: 10,   }} angle={-25}  dy={5} />
                                     <YAxis ticks={[10, 20, 30,]} />
                                     <Tooltip formatter={(value, name) => ` ${value}%`} />
                                     <Bar
@@ -668,7 +668,7 @@ const ReportPage = () => {
                         </p>
                         <div className="border border-t-1"></div>
                         <div className="mt-4 ">
-                            <div className="flex gap-[10px]">
+                            <div className="flex gap-[10px] px-[16px]">
                                 <div className="flex w-[300px] items-center border rounded-md overflow-hidden">
                                     <span className="text-custom-gray81 bg-custom-grayFA flex items-center text-sm w-[150px] -mr-3 pl-3 py-1">
                                         For the month of
@@ -809,7 +809,7 @@ const ReportPage = () => {
                         </p>
                         <div className="border border-t-1"></div>
                         <div className="mt-4 ">
-                            <div className="flex gap-[10px]">
+                            <div className="flex gap-[10px] px-[16px]">
                                 <div className="flex w-[300px] items-center border rounded-md overflow-hidden">
                                     <span className="text-custom-gray81 bg-custom-grayFA flex items-center text-sm w-[150px] -mr-3 pl-3 py-1">
                                         For the month of
