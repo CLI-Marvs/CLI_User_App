@@ -21,10 +21,11 @@ class ResolvedTicketToCustomerMail extends Mailable
     protected $admin_name;
     protected $department;
     protected $modifiedTicketId;
+    protected $surveyLink;
     /**
      * Create a new message instance.
      */
-    public function __construct($ticket_id, $email, $buyer_lastname, $message_id, $admin_name, $department, $modifiedTicketId)
+    public function __construct($ticket_id, $email, $buyer_lastname, $message_id, $admin_name, $department, $modifiedTicketId, $surveyLink)
     {
         $this->ticket_id = $ticket_id;
         $this->email = $email;
@@ -33,6 +34,7 @@ class ResolvedTicketToCustomerMail extends Mailable
         $this->admin_name = $admin_name;
         $this->department = $department;
         $this->modifiedTicketId = $modifiedTicketId;
+        $this->surveyLink = $surveyLink;
     }
 
 
@@ -41,7 +43,7 @@ class ResolvedTicketToCustomerMail extends Mailable
      */
     public function envelope(): Envelope
     {
-        
+
         if (config('services.APP_URL') === 'https://admin-dev.cebulandmasters.com' || config('services.APP_URL') === 'http://localhost:8001') {
             return new Envelope(
                 from: new Address('ask@cebulandmasters.com', 'Cebu Landmasters Inc.'),
@@ -85,7 +87,8 @@ class ResolvedTicketToCustomerMail extends Mailable
                 'ticket_id' => $this->ticket_id,
                 'admin_name' => $this->admin_name,
                 'department' => $this->department,
-                'modifiedTicketId' => $this->modifiedTicketId
+                'modifiedTicketId' => $this->modifiedTicketId,
+                'surveyLink' => $this->surveyLink
             ],
         );
     }
