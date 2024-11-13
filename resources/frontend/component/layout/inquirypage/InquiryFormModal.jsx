@@ -15,6 +15,7 @@ const formDataState = {
     mobile_number: "",
     property: "",
     type: "",
+    channels:"",
     user_type: "",
     other_user_type: "",
     contract_number: "",
@@ -40,6 +41,7 @@ const InquiryFormModal = ({ modalRef }) => {
     const [errors, setErrors] = useState({});
     const { propertyNamesList } = useStateContext();
     const [specificInputErrors, setSpecificInputErrors] = useState({});
+    const [isSendEmail, setIsSendEmail] = useState(false);
 
     const handleFileChange = (event) => {
         const selectedFiles = Array.from(event.target.files);
@@ -141,7 +143,9 @@ const InquiryFormModal = ({ modalRef }) => {
         setResetSuccess(true);
         setIsSubmitted(false);
     };
-
+    const handleSendEmailChange = (event) => {
+        setIsSendEmail(event.target.checked);
+    };
     const handleSuffixNameCheckboxChange = (event) => {
         setIsSuffixChecked(event.target.checked);
         setFormData((prevData) => ({
@@ -173,6 +177,7 @@ const InquiryFormModal = ({ modalRef }) => {
         setMessage("");
         setIsMiddleNameChecked(false);
         setIsSuffixChecked(false);
+        setIsSendEmail(false);
     };
 
     const {
@@ -285,6 +290,7 @@ const InquiryFormModal = ({ modalRef }) => {
                 const formattedMessage = message.replace(/\n/g, "<br>");
                 fileData.append("message", formattedMessage);
                 fileData.append("admin_email", user?.employee_email);
+                fileData.append('isSendEmail', isSendEmail);
                 fileData.append("admin_id", user?.id);
                 fileData.append("admin_profile_picture", user?.profile_picture);
 
@@ -430,10 +436,10 @@ const InquiryFormModal = ({ modalRef }) => {
                     <div className="flex flex-col gap-2">
                         <div
                             className={`flex items-center border rounded-[5px] overflow-hidden ${isSubmitted && !formData.fname
-                                    ? resetSuccess
-                                        ? "border-custom-bluegreen"
-                                        : "border-red-500"
-                                    : "border-custom-bluegreen"
+                                ? resetSuccess
+                                    ? "border-custom-bluegreen"
+                                    : "border-red-500"
+                                : "border-custom-bluegreen"
                                 }`}
                         >
                             <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex pl-3 py-1 w-[240px]">
@@ -458,10 +464,10 @@ const InquiryFormModal = ({ modalRef }) => {
                                 //         : "border-custom-bluegreen"
                                 // }`}
                                 className={`flex relative items-center border w-[430px] rounded-[5px] overflow-hidden ${isSubmitted &&
-                                        !formData.mname &&
-                                        !isMiddleNameChecked
-                                        ? "border-red-500"
-                                        : "border-custom-bluegreen"
+                                    !formData.mname &&
+                                    !isMiddleNameChecked
+                                    ? "border-red-500"
+                                    : "border-custom-bluegreen"
                                     }`}
                             >
                                 <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex w-[240px] pl-3 py-1 tablet:w-[160px] mobile:w-[270px] mobile:text-xs">
@@ -494,10 +500,10 @@ const InquiryFormModal = ({ modalRef }) => {
 
                         <div
                             className={`flex items-center border  rounded-[5px] overflow-hidden ${isSubmitted && !formData.lname
-                                    ? resetSuccess
-                                        ? "border-custom-bluegreen"
-                                        : "border-red-500"
-                                    : "border-custom-bluegreen"
+                                ? resetSuccess
+                                    ? "border-custom-bluegreen"
+                                    : "border-red-500"
+                                : "border-custom-bluegreen"
                                 }`}
                         >
                             <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex w-[240px] pl-3 py-1">
@@ -515,10 +521,10 @@ const InquiryFormModal = ({ modalRef }) => {
                         <div className="flex items-center gap-[4px]">
                             <div
                                 className={`flex relative items-center border w-[430px] rounded-[5px] overflow-hidden ${isSubmitted &&
-                                        !formData.suffix &&
-                                        !isSuffixChecked
-                                        ? "border-red-500"
-                                        : "border-custom-bluegreen"
+                                    !formData.suffix &&
+                                    !isSuffixChecked
+                                    ? "border-red-500"
+                                    : "border-custom-bluegreen"
                                     }`}
                             >
                                 <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex w-[240px] pl-3 py-1 tablet:w-[160px] mobile:w-[270px] mobile:text-xs">
@@ -550,10 +556,10 @@ const InquiryFormModal = ({ modalRef }) => {
                         </div>
                         <div
                             className={`flex items-center border  rounded-[5px] overflow-hidden ${isSubmitted && !formData.buyer_email
-                                    ? resetSuccess
-                                        ? "border-custom-bluegreen"
-                                        : "border-red-500"
-                                    : "border-custom-bluegreen"
+                                ? resetSuccess
+                                    ? "border-custom-bluegreen"
+                                    : "border-red-500"
+                                : "border-custom-bluegreen"
                                 }`}
                         >
                             <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex w-[240px] pl-3 py-1">
@@ -569,15 +575,15 @@ const InquiryFormModal = ({ modalRef }) => {
                             />
                         </div>
                         <div className="flex gap-[6px] items-center">
-                            <input type="checkbox" className="h-[16px] w-[16px] rounded-[2px] border border-gray-400 checked:bg-transparent flex items-center justify-center accent-custom-lightgreen" />
-                            <p className="text-sm font-light text-custom-bluegreen">Email will not be sent.</p>
+                            <input type="checkbox" className="h-[16px] w-[16px] rounded-[2px] border border-gray-400 checked:bg-transparent flex items-center justify-center accent-custom-lightgreen" onChange={handleSendEmailChange} />
+                            <p className="text-sm font-light text-custom-bluegreen">Email will be sent.</p>
                         </div>
                         <div
                             className={`flex items-center border rounded-[5px] overflow-hidden ${isSubmitted && !formData.mobile_number
-                                    ? resetSuccess
-                                        ? "border-custom-bluegreen"
-                                        : "border-red-500"
-                                    : "border-custom-bluegreen"
+                                ? resetSuccess
+                                    ? "border-custom-bluegreen"
+                                    : "border-red-500"
+                                : "border-custom-bluegreen"
                                 }`}
                         >
                             <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex w-[240px] pl-3 py-1">
@@ -600,10 +606,10 @@ const InquiryFormModal = ({ modalRef }) => {
                         </div>
                         <div
                             className={`flex items-center border rounded-[5px] overflow-hidden ${isSubmitted && !formData.property
-                                    ? resetSuccess
-                                        ? "border-custom-bluegreen"
-                                        : "border-red-500"
-                                    : "border-custom-bluegreen"
+                                ? resetSuccess
+                                    ? "border-custom-bluegreen"
+                                    : "border-red-500"
+                                : "border-custom-bluegreen"
                                 }`}
                         >
                             <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex items-center w-[250px] tablet:w-[175px] mobile:w-[270px] mobile:text-xs -mr-3 pl-3 py-1">
@@ -637,10 +643,10 @@ const InquiryFormModal = ({ modalRef }) => {
                         </div>
                         <div
                             className={`flex items-center border rounded-[5px] overflow-hidden ${isSubmitted && !formData.details_concern
-                                    ? resetSuccess
-                                        ? "border-custom-bluegreen"
-                                        : "border-red-500"
-                                    : "border-custom-bluegreen"
+                                ? resetSuccess
+                                    ? "border-custom-bluegreen"
+                                    : "border-red-500"
+                                : "border-custom-bluegreen"
                                 }`}
                         >
                             <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex items-center w-[250px] tablet:w-[175px] mobile:w-[270px] mobile:text-xs -mr-3 pl-3 py-1">
@@ -723,10 +729,10 @@ const InquiryFormModal = ({ modalRef }) => {
                         </div>
                         <div
                             className={`flex items-center border rounded-[5px] overflow-hidden ${isSubmitted && !formData.type
-                                    ? resetSuccess
-                                        ? "border-custom-bluegreen"
-                                        : "border-red-500"
-                                    : "border-custom-bluegreen"
+                                ? resetSuccess
+                                    ? "border-custom-bluegreen"
+                                    : "border-red-500"
+                                : "border-custom-bluegreen"
                                 }`}
                         >
                             <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex items-center w-[250px] tablet:w-[175px] mobile:w-[270px] mobile:text-xs -mr-3 pl-3 py-1">
@@ -755,10 +761,10 @@ const InquiryFormModal = ({ modalRef }) => {
                         </div>
                         <div
                             className={`flex items-center border rounded-[5px] overflow-hidden ${isSubmitted && !formData.type
-                                    ? resetSuccess
-                                        ? "border-custom-bluegreen"
-                                        : "border-red-500"
-                                    : "border-custom-bluegreen"
+                                ? resetSuccess
+                                    ? "border-custom-bluegreen"
+                                    : "border-red-500"
+                                : "border-custom-bluegreen"
                                 }`}
                         >
                             <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex items-center w-[250px] tablet:w-[175px] mobile:w-[270px] mobile:text-xs -mr-3 pl-3 py-1">
@@ -766,8 +772,8 @@ const InquiryFormModal = ({ modalRef }) => {
                             </span>
                             <div className="relative w-full">
                                 <select
-                                    /* value={formData.type}
-                                    onChange={handleChange} */
+                                    value={formData.channels}
+                                    onChange={handleChange}
                                     name="channels"
                                     className="appearance-none text-sm w-full px-4 py-1 bg-white focus:outline-none border-0 mobile:text-xs"
                                 >
@@ -821,10 +827,10 @@ const InquiryFormModal = ({ modalRef }) => {
                             <div className="flex justify-end">
                                 <div
                                     className={`flex items-center border rounded-[5px] w-[277px] overflow-hidden ${isSubmitted && !formData.other_user_type
-                                            ? resetSuccess
-                                                ? "border-custom-bluegreen"
-                                                : "border-red-500"
-                                            : "border-custom-bluegreen"
+                                        ? resetSuccess
+                                            ? "border-custom-bluegreen"
+                                            : "border-red-500"
+                                        : "border-custom-bluegreen"
                                         }`}
                                 >
                                     <input
@@ -878,10 +884,10 @@ const InquiryFormModal = ({ modalRef }) => {
                     <div className="border border-b-1 border-[#D9D9D9] my-2"></div>
                     <div
                         className={`${!isValid
-                                ? resetSuccess
-                                    ? "border-custom-bluegreen"
-                                    : "border-red-500"
-                                : "border-custom-bluegreen"
+                            ? resetSuccess
+                                ? "border-custom-bluegreen"
+                                : "border-red-500"
+                            : "border-custom-bluegreen"
                             } rounded-[5px] bg-custom-lightestgreen border`}
                     >
                         <div className="flex items-center justify-between">

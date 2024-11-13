@@ -690,6 +690,41 @@ const InquiryThread = () => {
                                             <IoIosArrowDown />
                                         </span>
                                     </div>
+                                    <div className="flex relative">
+                                        <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
+                                            {" "}
+                                            Channel
+                                        </label>
+                                        <div className="flex bg-red-900 justify-start w-full relative">
+                                            <label
+                                                htmlFor=""
+                                                className="w-full border-b-2"
+                                            >
+                                                {""}
+                                            </label>
+                                            <select
+                                                className="w-full border-b-1 outline-none appearance-none text-sm absolute px-[8px]"
+                                                /* value={status}
+                                                onChange={(e) =>
+                                                    setStatus(e.target.value)
+                                                } */
+                                            >
+                                                 <option value=" ">
+                                                    Select Channel
+                                                </option>
+                                                <option value="Email">Email</option>
+                                                <option value="Call">Call</option>
+                                                <option value="Walk-in">Walk-in</option>
+                                                <option value="Website">Website</option>
+                                                <option value="Social media">Social media</option>
+                                                <option value="Branch Tablet">Branch Tablet (Jotform created by IT)</option>
+                                                <option value="Internal Endorsement">Internal Endorsement</option>
+                                            </select>
+                                        </div>
+                                        <span className="absolute inset-y-0 right-0 flex items-center  pl-3 pointer-events-none">
+                                            <IoIosArrowDown />
+                                        </span>
+                                    </div>
                                     <div className="flex">
                                         <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
                                             {" "}
@@ -1009,7 +1044,7 @@ const InquiryThread = () => {
                                                                 </span>
                                                             </div>
 
-                                                            
+
                                                             <div className="w-full p-[10px] border-[2px] rounded-[5px] border-custom-grayF1 text-sm text-custom-gray81">
                                                                 <div>
                                                                     {formatChatMessage(
@@ -1124,7 +1159,8 @@ const InquiryThread = () => {
                             <div className="border my-2 border-t-1 border-custom-lightestgreen"></div>
                             <div className="w-full flex justify-end gap-[13px]">
                                 {dataConcern?.created_by &&
-                                    dataConcern?.created_by === user?.id && (
+                                    dataConcern?.created_by === user?.id &&
+                                    user?.department === 'Customer Relations - Services' && (
                                         <FaTrash
                                             className="text-[#EB4444] hover:text-red-600 cursor-pointer"
                                             onClick={handleDelete}
@@ -1137,19 +1173,20 @@ const InquiryThread = () => {
                                         <IoIosCheckmarkCircle className="size-[18px] text-custom-lightgreen" />
                                     </div>
                                 ) : (
-                                    <div
+                                    user?.department === 'Customer Relations - Services' && (<div
                                         onClick={handleOpenResolveModal}
                                         className="flex justify-start w-auto font-semibold text-[13px] text-[#1A73E8] underline cursor-pointer"
                                     >
                                         Mark as resolved
-                                    </div>
+                                    </div>)
+
                                 )}
-                                 <div
-                                        onClick={handleOpenResolveModal}
-                                        className="flex justify-start w-auto font-semibold text-[13px] text-[#1A73E8] underline cursor-pointer"
-                                    >
-                                        Mark as closed
-                                    </div>
+                                <div
+                                    onClick={handleOpenResolveModal}
+                                    className="flex justify-start w-auto font-semibold text-[13px] text-[#1A73E8] underline cursor-pointer"
+                                >
+                                    Mark as closed
+                                </div>
                             </div>
                             <div className="">
                                 <div className="">
