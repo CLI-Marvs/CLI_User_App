@@ -1402,7 +1402,7 @@ class ConcernController extends Controller
             $testData->bank_name = $request->input('content');
             $testData->save();
             return response()->json('Success');
-        } catch (\Throwable $e) {
+        } catch (\Exception $e) {
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
         }
     }
