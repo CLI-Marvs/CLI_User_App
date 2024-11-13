@@ -292,7 +292,7 @@ export const ContextProvider = ({ children }) => {
                 },
             });
             const result = response.data;
-            console.log("result", result)
+ 
             const formattedData = result.map((item) => ({
                 name: item.channels,
                 value: item.total,

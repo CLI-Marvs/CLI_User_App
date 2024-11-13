@@ -3,7 +3,7 @@ import { useStateContext } from "../../../context/contextprovider";
 import apiService from "../../servicesApi/apiService";
 import { AiFillInfoCircle } from "react-icons/ai";
 import { IoMdArrowDropdown } from "react-icons/io";
-
+import { SURVEY_LINKS } from '../../../constant/data/surveyLink';
 
 const ResolveModal = ({ modalRef, ticketId, dataRef, onupdate }) => {
     const { getAllConcerns, user, getInquiryLogs, data, assigneesPersonnel } =
@@ -15,7 +15,8 @@ const ResolveModal = ({ modalRef, ticketId, dataRef, onupdate }) => {
         data?.find((items) => items.ticket_id === ticketId) || {};
     const messageId = dataConcern?.message_id || null;
     const [communicationType, setCommunicationType] = useState("");
-    
+    const [selectedSurveyName, setSelectedSurveyName] = useState("");
+
 
     /**
      *  Set initial communication type when dataRef changes
@@ -44,7 +45,11 @@ const ResolveModal = ({ modalRef, ticketId, dataRef, onupdate }) => {
         setCommunicationType(e.target.value);
         setIsCommunicationTypeRequired(false);
     };
+    const handleSurveyChange = (e) => {
+        const surveyName = e.target.value;
+        setSelectedSurveyName(surveyName);
 
+    };
     const capitalizeWords = (name) => {
         if (name) {
             return name
@@ -76,6 +81,7 @@ const ResolveModal = ({ modalRef, ticketId, dataRef, onupdate }) => {
                 details_concern: dataRef.details_concern,
                 remarks: remarks,
                 communication_type: communicationType,
+                surveyLink: selectedSurveyName,
                 assignees: assigneesPersonnel[ticketId],
                 message_id: messageId,
             });
@@ -102,6 +108,12 @@ const ResolveModal = ({ modalRef, ticketId, dataRef, onupdate }) => {
         setCommunicationType(dataRef.communication_type);
         setRemarks("");
         setIsCommunicationTypeRequired(false);
+        setSelectedSurveyName("");
+    };
+    const handleCancel = () => {
+        if (modalRef.current) {
+            modalRef.current.close();
+        }
     };
     return (
         <dialog
@@ -164,7 +176,7 @@ const ResolveModal = ({ modalRef, ticketId, dataRef, onupdate }) => {
                     className={`flex items-center border border-[D6D6D6] rounded-[5px] overflow-hidden mt-[12px]`}
                 >
                     <span className="text-custom-gray81 text-sm bg-[#EDEDED] flex items-center w-[308px] tablet:w-[175px] mobile:w-[270px] mobile:text-xs -mr-3 pl-3 py-1">
-                          Type
+                        Type
                     </span>
                     <div className="relative w-full">
 
@@ -186,39 +198,38 @@ const ResolveModal = ({ modalRef, ticketId, dataRef, onupdate }) => {
                         </span>
                     </div>
                 </div>
-                <div
+                {/* <div
                     className={`flex items-center border border-[D6D6D6] rounded-[5px] overflow-hidden mt-[12px]`}
                 >
                     <span className="text-custom-gray81 text-sm bg-[#EDEDED] flex items-center w-[308px] tablet:w-[175px] mobile:w-[270px] mobile:text-xs -mr-3 pl-3 py-1">
-                          Send Survey
+                        Send Survey
                     </span>
                     <div className="relative w-full">
 
                         <select
-                            /* disabled={!!dataRef.communication_type}
-                            name="user_type"
-                            value={communicationType || ""}
-                            onChange={handleCommunityTypeChange} */
+                            onChange={handleSurveyChange}
                             className="appearance-none w-full px-4 text-sm py-1 bg-white focus:outline-none border-0 mobile:text-xs"
                         >
                             <option value="">(Select)</option>
-                            <option value="Reservation">Reservation</option>
-                            <option value="After-Sales">After-Sales</option>
-                            <option value="Move-In">Move-In</option>
+                            {SURVEY_LINKS.map((item, index) => (
+                                <option key={index} value={item.surveyLink}>
+                                    {item.surveyName}
+                                </option>
+                            ))}
                         </select>
                         <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3 bg-[#EDEDED] text-custom-gray81 pointer-events-none">
                             <IoMdArrowDropdown />
                         </span>
                     </div>
-                </div>
-                <form
-                        method="dialog"
-                    >
+                </div> */}
+                <div
+
+                >
                     <div className="mt-5 mb-[25px]">
                         <div
                             className="flex justify-center gap-[19px]"
                         >
-                            <button className="gradient-btn5 p-[1px] w-[92px] h-[35px] rounded-[10px]">
+                            <button className="gradient-btn5 p-[1px] w-[92px] h-[35px] rounded-[10px]" onClick={handleCancel}>
                                 <div className="w-full h-full rounded-[9px] bg-white flex justify-center items-center montserrat-semibold text-sm">
                                     <p className="text-base font-bold bg-gradient-to-r from-custom-bluegreen via-custom-solidgreen to-custom-solidgreen bg-clip-text text-transparent">
                                         Cancel
@@ -234,7 +245,7 @@ const ResolveModal = ({ modalRef, ticketId, dataRef, onupdate }) => {
                             </button>
                         </div>
                     </div>
-                </form>
+                </div>
             </div>
         </dialog>
     );
