@@ -103,6 +103,7 @@ export const ContextProvider = ({ children }) => {
         if (token) {
             setLoading(true);
             try {
+               
                 const searchParams = new URLSearchParams({
                     search: JSON.stringify(searchFilter),
                     page: currentPage + 1,
