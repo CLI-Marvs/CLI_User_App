@@ -805,7 +805,7 @@ const ReportPage = () => {
                     </div>
                     <div className=" bg-white rounded-[10px]  w-[579px] flex flex-col overflow-y-auto">
                         <p className="p-4  text-base montserrat-bold">
-                            Customer Communication Type
+                            Type
                         </p>
                         <div className="border border-t-1"></div>
                         <div className="mt-4 ">

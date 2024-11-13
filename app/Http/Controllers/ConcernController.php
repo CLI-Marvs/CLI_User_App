@@ -12,15 +12,18 @@ use App\Events\SampleEvent;
 use App\Models\InquiryLogs;
 use App\Events\AdminMessage;
 use Illuminate\Http\Request;
+use App\Jobs\CommentNotifJob;
 use App\Models\Conversations;
 use App\Events\AdminReplyLogs;
 use App\Models\PinnedConcerns;
 use App\Events\ConcernMessages;
 use App\Events\RemoveAssignees;
 use App\Jobs\ReplyFromAdminJob;
+use App\Models\BankTransaction;
 use App\Models\BuyerReplyNotif;
 use App\Models\InquiryAssignee;
 use App\Models\ReadNotifByUser;
+use App\Jobs\FeedbackJobToBuyer;
 use App\Jobs\ResolveJobToSender;
 use App\Mail\SendReplyFromAdmin;
 use App\Events\RetrieveAssignees;
@@ -29,7 +32,6 @@ use App\Jobs\JobToPersonnelAssign;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use App\Events\InquiryAssignedLogs;
-use App\Jobs\CommentNotifJob;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
@@ -37,7 +39,6 @@ use App\Jobs\MarkResolvedToCustomerJob;
 use Google\Cloud\Storage\StorageClient;
 use Illuminate\Pagination\LengthAwarePaginator;
 use App\Jobs\NotifyAssignedCliOfResolvedInquiryJob;
-use App\Models\BankTransaction;
 
 class ConcernController extends Controller
 {
@@ -415,6 +416,8 @@ class ConcernController extends Controller
 
             ]);
             $user = $request->user();
+            $isSendEmail = $request->isSendEmail;
+
             $filesData = [];
             // $files = $validatedData['files'];
             $files = $request->file('files');
@@ -457,11 +460,25 @@ class ConcernController extends Controller
             $concerns->unit_number = $request->unit_number;
             $concerns->buyer_email = $request->buyer_email;
             $concerns->communication_type = $request->type;
+            $concerns->channels = $request->channels;
             $concerns->inquiry_type = "from_admin";
             $concerns->save();
 
             $this->inquiryReceivedLogs($request, $ticketId);
             $this->concernsCreatedBy($user, $concerns->id);
+
+            //If this is True, send a email to the buyer
+            if ($isSendEmail) {
+                $data = [
+                    'lname'
+                    => $request->lname,
+                    'details_concern' => $request->details_concern,
+                    'property' => $request->property,
+                    'unit_number' => $request->unit_number,
+                ];
+
+                FeedbackJobToBuyer::dispatch($data, $request->buyer_email);
+            }
 
 
             $attachment = !empty($filesData) ? json_encode($filesData) : null;
@@ -509,6 +526,7 @@ class ConcernController extends Controller
             $concern->buyer_email = $request->buyer_email;
             $concern->property = $request->property;
             $concern->admin_remarks = $request->admin_remarks ?? null;
+            $concern->channels = $request->channels;
             // Save the updated concern
             $concern->save();
             $this->logBuyerDataEdit($request, $request->buyerOldData, $ticket_id);
@@ -876,7 +894,9 @@ class ConcernController extends Controller
         if (!empty($searchParams['selectedProperty'])) {
             $query->where('property', 'ILIKE', '%' . $searchParams['selectedProperty'] . '%');
         }
-
+        if (!empty($searchParams['channels'])) {
+            $query->where('channels', $searchParams['channels']);
+        }
 
         if (!empty($searchParams['startDate'])) {
             $startDate = Carbon::parse($searchParams['startDate'])->setTimezone('Asia/Manila');
@@ -1248,6 +1268,7 @@ class ConcernController extends Controller
                         'contract_number' => $request->contract_number,
                         'unit_number' => $request->unit_number,
                         'property' => $request->property,
+                        'channels' => $request->channels,
                         'other_user_type' => $request->other_user_type ?? null,
                         'admin_remarks' => $request->admin_remarks ?? null,
                     ],
@@ -1263,6 +1284,7 @@ class ConcernController extends Controller
                         'contract_number' => $buyerOldData['contract_number'],
                         'unit_number' => $buyerOldData['unit_number'],
                         'property' => $buyerOldData['property'] ?? null,
+                        'channels' => $buyerOldData['channels'],
                         'other_user_type' => $buyerOldData['other_user_type'] ?? null,
                         'admin_remarks' => $buyerOldData['admin_remarks'] ?? null,
                     ],
@@ -1370,7 +1392,8 @@ class ConcernController extends Controller
         }
     }
 
-    public function testApi(Request $request) {
+    public function testApi(Request $request)
+    {
         try {
             $testData = new BankTransaction();
             $testData->bank_name = $request->input('content');
@@ -1378,7 +1401,6 @@ class ConcernController extends Controller
             return response()->json('Success');
         } catch (\Throwable $e) {
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
-
         }
     }
     public function removeAssignee(Request $request)

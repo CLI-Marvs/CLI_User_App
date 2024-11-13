@@ -5,12 +5,12 @@ import { data } from "autoprefixer";
 import { useStateContext } from "../../../context/contextprovider";
 import Alert from "../mainComponent/Alert";
 const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
-    const predefinedUserTypes = ["Property Owner", "Buyer", "Broker", "Seller","Lessee"];
+    const predefinedUserTypes = ["Property Owner", "Buyer", "Broker", "Seller", "Lessee"];
     const { getAllConcerns, propertyNamesList, updateConcern, user, getInquiryLogs } =
         useStateContext();
-    console.log("user", user?.department);
+ 
     const [message, setMessage] = useState(dataConcern.admin_remarks || "");
-    console.log("dataConcern", dataConcern);
+   
     const [dataToUpdate, setDataToUpdate] = useState({
         contract_number: dataConcern.contract_number || "",
         unit_number: dataConcern.unit_number || "",
@@ -26,12 +26,13 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
             ? dataConcern.user_type
             : "Others",
         communication_type: dataConcern.communication_type || "",
+        channels: dataConcern.channels,
         other_user_type: !predefinedUserTypes.includes(dataConcern.user_type)
             ? dataConcern.user_type
             : "",
 
     });
- 
+
     /* Buyers old data to be used in AssignDetails.jsx 
      * to compare the values and show the differences
      */
@@ -43,6 +44,7 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
         buyer_email: dataConcern.buyer_email,
         mobile_number: dataConcern.mobile_number,
         user_type: dataConcern.user_type === "Others" ? dataConcern.other_user_type : dataConcern.user_type,
+        channels: dataConcern.channels,
         other_user_type: dataConcern.user_type === "Others" ? dataConcern.other_user_type : dataConcern.user_type,
         communication_type: dataConcern.communication_type,
         contract_number: dataConcern.contract_number,
@@ -183,6 +185,7 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
                 )
                     ? dataConcern.user_type
                     : "",
+                channels: dataConcern.channels,
             });
             setMessage(dataConcern.admin_remarks || "");
         }
@@ -406,6 +409,8 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
                                     <option value="Walk-in">Walk-in</option>
                                     <option value="Website">Website</option>
                                     <option value="Social media">Social media</option>
+                                    <option value="Branch Tablet">Branch Tablet (Jotform created by IT)</option>
+                                    <option value="Internal Endorsement">Internal Endorsement</option>
                                 </select>
                                 <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3 bg-[#EDEDED] text-custom-gray81 pointer-events-none">
                                     <IoMdArrowDropdown />

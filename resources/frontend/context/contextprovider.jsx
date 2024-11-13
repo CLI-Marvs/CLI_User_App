@@ -102,7 +102,6 @@ export const ContextProvider = ({ children }) => {
     const getAllConcerns = async () => {
         if (token) {
             setLoading(true);
-            console.log("searchFilter", searchFilter);
             try {
                 const searchParams = new URLSearchParams({
                     search: JSON.stringify(searchFilter),

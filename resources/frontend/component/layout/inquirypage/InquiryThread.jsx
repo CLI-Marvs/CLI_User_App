@@ -1044,7 +1044,7 @@ const InquiryThread = () => {
                                                                 </span>
                                                             </div>
 
-                                                            
+
                                                             <div className="w-full p-[10px] border-[2px] rounded-[5px] border-custom-grayF1 text-sm text-custom-gray81">
                                                                 <div>
                                                                     {formatChatMessage(
@@ -1159,7 +1159,8 @@ const InquiryThread = () => {
                             <div className="border my-2 border-t-1 border-custom-lightestgreen"></div>
                             <div className="w-full flex justify-end gap-[13px]">
                                 {dataConcern?.created_by &&
-                                    dataConcern?.created_by === user?.id && (
+                                    dataConcern?.created_by === user?.id &&
+                                    user?.department === 'Customer Relations - Services' && (
                                         <FaTrash
                                             className="text-[#EB4444] hover:text-red-600 cursor-pointer"
                                             onClick={handleDelete}
@@ -1172,19 +1173,20 @@ const InquiryThread = () => {
                                         <IoIosCheckmarkCircle className="size-[18px] text-custom-lightgreen" />
                                     </div>
                                 ) : (
-                                    <div
+                                    user?.department === 'Customer Relations - Services' && (<div
                                         onClick={handleOpenResolveModal}
                                         className="flex justify-start w-auto font-semibold text-[13px] text-[#1A73E8] underline cursor-pointer"
                                     >
                                         Mark as resolved
-                                    </div>
+                                    </div>)
+
                                 )}
-                                 <div
-                                        onClick={handleOpenResolveModal}
-                                        className="flex justify-start w-auto font-semibold text-[13px] text-[#1A73E8] underline cursor-pointer"
-                                    >
-                                        Mark as closed
-                                    </div>
+                                <div
+                                    onClick={handleOpenResolveModal}
+                                    className="flex justify-start w-auto font-semibold text-[13px] text-[#1A73E8] underline cursor-pointer"
+                                >
+                                    Mark as closed
+                                </div>
                             </div>
                             <div className="">
                                 <div className="">

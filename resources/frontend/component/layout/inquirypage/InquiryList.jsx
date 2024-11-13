@@ -38,7 +38,7 @@ const InquiryList = () => {
         /*  setHasAttachments,
         hasAttachments */
     } = useStateContext();
- 
+
     const [name, setName] = useState("");
     const [category, setCategory] = useState("");
 
@@ -46,6 +46,7 @@ const InquiryList = () => {
     const [ticket, setTicket] = useState("");
     const [status, setStatus] = useState("");
     const [type, setType] = useState("");
+    const [channels, setChannels] = useState("");
     const [selectedProperty, setSelectedProperty] = useState("");
     const [hasAttachments, setHasAttachments] = useState(false);
     const { propertyNamesList } = useStateContext();
@@ -58,8 +59,7 @@ const InquiryList = () => {
     const [lastActivity, setLastActivity] = useState(null);
     const filterBoxRef = useRef(null);
     const [isOpenSelect, setIsOpenSelect] = useState(false);
-    console.log("type", type);
-    console.log("status", status);
+
     const handleSelect = (option) => {
         onChange(option);
         setIsOpenSelect(false);
@@ -223,13 +223,13 @@ const InquiryList = () => {
         "N/A",
         ...(Array.isArray(propertyNamesList) && propertyNamesList.length > 0
             ? propertyNamesList
-                  .filter((item) => !item.toLowerCase().includes("phase"))
-                  .map((item) => formatFunc(item))
-                  .sort((a, b) => {
-                      if (a === "N/A") return -1;
-                      if (b === "N/A") return 1;
-                      return a.localeCompare(b);
-                  })
+                .filter((item) => !item.toLowerCase().includes("phase"))
+                .map((item) => formatFunc(item))
+                .sort((a, b) => {
+                    if (a === "N/A") return -1;
+                    if (b === "N/A") return 1;
+                    return a.localeCompare(b);
+                })
             : []),
     ];
 
@@ -259,6 +259,7 @@ const InquiryList = () => {
             type,
             status,
             email,
+            channels,
             ticket,
             startDate,
             selectedProperty,
@@ -271,9 +272,10 @@ const InquiryList = () => {
         setName("");
         setCategory("");
         setEmail("");
-        setTicket("");  
+        setTicket("");
         setStatus("");
         setType("");
+        setChannels("");
         setSelectedProperty("");
         setHasAttachments(false);
         setSpecificAssigneeCsr("");
@@ -338,7 +340,7 @@ const InquiryList = () => {
         }
     }; */
 
-    
+
     console.log("loading", loading);
     return (
         <>
@@ -384,14 +386,17 @@ const InquiryList = () => {
                             </svg>
                         </div>
                         <div className="flex items-center">
-                            <button
-                                onClick={handleOpenModal}
-                                className="h-[38px] w-[121px] gradient-btn5 text-white  text-xs rounded-[10px]"
-                            >
-                                {" "}
-                                <span className="text-[18px]">+</span> Add
-                                Inquiry
-                            </button>
+                            {user?.department === 'Customer Relations - Services' && (
+                                <button
+                                    onClick={handleOpenModal}
+                                    className="h-[38px] w-[121px] gradient-btn5 text-white  text-xs rounded-[10px]"
+                                >
+                                    {" "}
+                                    <span className="text-[18px]">+</span> Add
+                                    Inquiry
+                                </button> 
+                            )}
+                        
                         </div>
 
                         {isFilterVisible && (
@@ -593,10 +598,11 @@ const InquiryList = () => {
                                             <IoIosArrowDown />
                                         </span>
                                     </div>
+
                                     <div className="flex relative">
                                         <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
                                             {" "}
-                                            Channel
+                                            Channels
                                         </label>
                                         <div className="flex bg-red-900 justify-start w-full relative">
                                             <label
@@ -607,14 +613,12 @@ const InquiryList = () => {
                                             </label>
                                             <select
                                                 className="w-full border-b-1 outline-none appearance-none text-sm absolute px-[8px]"
-                                              /*   value={status}
+                                                value={channels}
                                                 onChange={(e) =>
-                                                    setStatus(e.target.value)
-                                                } */
+                                                    setChannels(e.target.value)
+                                                }
                                             >
-                                                <option value=" ">
-                                                    Select Channel
-                                                </option>
+                                                <option value=""> Select Channels</option>
                                                 <option value="Email">Email</option>
                                                 <option value="Call">Call</option>
                                                 <option value="Walk-in">Walk-in</option>
@@ -783,51 +787,46 @@ const InquiryList = () => {
                                 <div className="flex items-center space-x-2">
                                     {user?.department ===
                                         "Customer Relations - Services" && (
-                                        <button
-                                            onClick={handleAssignedToMeClick}
-                                            className={`flex items-center text-custom-lightgreen h-[25px] w-[125px] rounded-[55px] p-[2px] ${
-                                                assignedToMeActive
-                                                    ? "bglightgreen-btn"
-                                                    : "gradient-btn2hover "
-                                            }`}
-                                        >
-                                            <p
-                                                className={`h-full w-full flex justify-center items-center text-xs montserrat-semibold rounded-[50px]   ${
-                                                    assignedToMeActive
+                                            <button
+                                                onClick={handleAssignedToMeClick}
+                                                className={`flex items-center text-custom-lightgreen h-[25px] w-[125px] rounded-[55px] p-[2px] ${assignedToMeActive
                                                         ? "bglightgreen-btn"
-                                                        : "bg-white hover:bg-custom-lightestgreen"
-                                                }
-                                        `}
+                                                        : "gradient-btn2hover "
+                                                    }`}
                                             >
-                                                Assigned to me
-                                            </p>
-                                        </button>
-                                    )}
+                                                <p
+                                                    className={`h-full w-full flex justify-center items-center text-xs montserrat-semibold rounded-[50px]   ${assignedToMeActive
+                                                            ? "bglightgreen-btn"
+                                                            : "bg-white hover:bg-custom-lightestgreen"
+                                                        }
+                                        `}
+                                                >
+                                                    Assigned to me
+                                                </p>
+                                            </button>
+                                        )}
                                     {dayButtonLabels.map((label) => (
                                         <button
                                             key={label}
                                             onClick={() =>
                                                 handleDayClick(label)
                                             }
-                                            className={`flex justify-center items-center  text-custom-lightgreen h-[25px] rounded-[55px] p-[2px] ${
-                                                activeDayButton === label
+                                            className={`flex justify-center items-center  text-custom-lightgreen h-[25px] rounded-[55px] p-[2px] ${activeDayButton === label
                                                     ? "bglightgreen-btn hover:bg-custom-lightgreen"
                                                     : "gradient-btn2hover border-custom-lightgreen"
-                                            } hover:bg-custom-lightestgreen ${
-                                                label === "3+ Days"
+                                                } hover:bg-custom-lightestgreen ${label === "3+ Days"
                                                     ? "w-[76px]"
                                                     : label === "2 Days"
-                                                    ? "w-[69px]"
-                                                    : "w-[60px]"
-                                            }`}
+                                                        ? "w-[69px]"
+                                                        : "w-[60px]"
+                                                }`}
                                         >
                                             <p
                                                 className={`h-full w-full flex justify-center items-center text-xs montserrat-semibold rounded-[50px]
-                                            ${
-                                                activeDayButton === label
-                                                    ? "bglightgreen-btn"
-                                                    : "bg-white hover:bg-custom-lightestgreen"
-                                            }
+                                            ${activeDayButton === label
+                                                        ? "bglightgreen-btn"
+                                                        : "bg-white hover:bg-custom-lightestgreen"
+                                                    }
                                             `}
                                             >
                                                 {label}
