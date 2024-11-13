@@ -593,6 +593,42 @@ const InquiryList = () => {
                                             <IoIosArrowDown />
                                         </span>
                                     </div>
+                                    <div className="flex relative">
+                                        <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
+                                            {" "}
+                                            Channel
+                                        </label>
+                                        <div className="flex bg-red-900 justify-start w-full relative">
+                                            <label
+                                                htmlFor=""
+                                                className="w-full border-b-2"
+                                            >
+                                                {""}
+                                            </label>
+                                            <select
+                                                className="w-full border-b-1 outline-none appearance-none text-sm absolute px-[8px]"
+                                              /*   value={status}
+                                                onChange={(e) =>
+                                                    setStatus(e.target.value)
+                                                } */
+                                            >
+                                                <option value=" ">
+                                                    Select Channel
+                                                </option>
+                                                <option value="Email">Email</option>
+                                                <option value="Call">Call</option>
+                                                <option value="Walk-in">Walk-in</option>
+                                                <option value="Website">Website</option>
+                                                <option value="Social media">Social media</option>
+                                                <option value="Branch Tablet">Branch Tablet (Jotform created by IT)</option>
+                                                <option value="Internal Endorsement">Internal Endorsement</option>
+                                            </select>
+                                        </div>
+
+                                        <span className="absolute inset-y-0 right-0 flex items-center  pl-3 pointer-events-none">
+                                            <IoIosArrowDown />
+                                        </span>
+                                    </div>
                                     <div className="flex">
                                         <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
                                             {" "}

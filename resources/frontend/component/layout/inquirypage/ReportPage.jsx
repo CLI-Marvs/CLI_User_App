@@ -24,6 +24,16 @@ import { useLocation } from "react-router-dom";
 
 const barHeight = 20;
 
+const dataSet2 = [
+    { name: "Email", value: 20 },
+    { name: "Call", value: 15 },
+    { name: "Walk-in", value: 25 },
+    { name: "Website", value: 30 },
+    { name: "Social Media", value: 18 },
+    { name: "Branch Tablet", value: 22 },
+    { name: "Internal Endorsement", value: 12 },
+];
+const colors = ["#348017", "#70AD47", "#1A73E8", "#5B9BD5", "#175D5F", "#404B52", "#A5A5A5"];
 
 const COLORS = [
     "#1F77B4", // Blue
@@ -37,6 +47,26 @@ const COLORS = [
     "#BCBD22", // Olive
     "#17BECF"  // Teal
 ];
+
+const CustomTick = ({ x, y, payload }) => {
+    const words = payload.value.split(' '); // Split by spaces to handle word wrapping
+    return (
+      <g transform={`translate(${x},${y})`}>
+        {words.map((word, index) => (
+          <text
+            key={index}
+            x={0}
+            y={index * 12} // Adjust the y position for each line of text
+            textAnchor="middle"
+            fontSize={10}
+            fill="#000"
+          >
+            {word}
+          </text>
+        ))}
+      </g>
+    );
+  };
 
 const categoryColors = {
     "Commissions": COLORS[0],
@@ -189,8 +219,8 @@ const ReportPage = () => {
         setMonth(e.target.value);
     };
 
- 
- 
+
+
     // Handle year change from the dropdown
     const handleDepartmentYearChange = (e) => {
         setDepartmentStatusYear(e.target.value);
@@ -234,7 +264,7 @@ const ReportPage = () => {
         setMonth(getCurrentMonth());
         setPropertyMonth(getCurrentMonth());
         setCommunicationTypeMonth(getCurrentMonth())
-         
+
     }, []);
 
     //  console.log("department", department);
@@ -347,8 +377,8 @@ const ReportPage = () => {
                 </div>
             </div>
             <div className="relative flex gap-3 mt-4 bg-custom-grayFA items-start">
-                <div>
-                    <div className="w-[547px] pb-7 min-h-[335px] flex-grow-1 bg-white rounded-lg">
+                <div className="flex flex-col gap-[15px] w-[571px]">
+                    <div className="w-full pb-7 min-h-[335px] flex-grow-1 bg-white rounded-lg">
                         <p className="p-4 text-base montserrat-bold">
                             Inquiries Per Category
                         </p>
@@ -471,6 +501,161 @@ const ReportPage = () => {
                                             </div>
                                         </div>
                                     ))}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="w-full pb-7 min-h-[335px] flex-grow-1 bg-white rounded-lg">
+                        <p className="p-4 text-base montserrat-bold">
+                            Inquiries Per Channel
+                        </p>
+                        <div className="border border-t-1"></div>
+                        <div className="mt-4">
+                            <div className="flex gap-[10px]">
+                                <div className="flex  w-[300px] items-center border rounded-md overflow-hidden">
+                                    <span className="text-custom-gray81 bg-custom-grayFA flex items-center text-sm w-[150px] -mr-3 pl-3 py-1">
+                                        For the month of
+                                    </span>
+                                    <div className="relative w-[159px]">
+                                        <select
+                                            name="concern"
+                                            className="appearance-none w-full px-4 py-1 bg-white focus:outline-none border-0"
+                                           /*  value={month}
+                                            onChange={(e) => setMonth(e.target.value)} */
+                                        >
+                                            <option value="january">January</option>
+                                            <option value="february">February</option>
+                                            <option value="march">March</option>
+                                            <option value="april">April</option>
+                                            <option value="may">May</option>
+                                            <option value="june">June</option>
+                                            <option value="july">July</option>
+                                            <option value="august">August</option>
+                                            <option value="september">September</option>
+                                            <option value="october">October</option>
+                                            <option value="november">November</option>
+                                            <option value="december">December</option>
+                                        </select>
+                                        <span className="absolute inset-y-0 right-0 flex items-center text-custom-gray81 pr-3 pl-3 bg-custom-grayFA pointer-events-none">
+                                            <IoMdArrowDropdown />
+                                        </span>
+                                    </div>
+                                </div>
+                                <div className="flex w-[95px] items-center border rounded-md overflow-hidden">
+                                    <div className="relative w-full">
+                                        <select
+                                            name="year"
+                                            className="appearance-none w-[100px] px-4 py-1 bg-white focus:outline-none border-0"
+                                           /*  value={inquiriesPerCategoryYear}
+                                            onChange={handleInquiriesPerCategoryYearChange} */
+                                        >
+                                            <option value="2023">
+                                                2023
+                                            </option>
+                                            <option value="2024">
+                                                2024
+                                            </option>
+                                            <option value="2025">
+                                                2025
+                                            </option>
+                                        </select>
+                                        <span className="absolute inset-y-0 right-0 flex items-center text-custom-gray81 pr-3 pl-3 bg-custom-grayFA pointer-events-none">
+                                            <IoMdArrowDropdown />
+                                        </span>
+                                    </div>
+                                </div>
+                                
+                            </div>
+                        </div>
+                        <div className="flex flex-col">
+                            <div className="py-[10px]">
+                                <BarChart
+                                    width={571}
+                                    height={200}
+                                    data={dataSet2}
+                                    margin={{
+                                        top: 5,
+                                        right: 20,
+                                        left: -25,
+                                        bottom: 15,
+                                    }}
+                                >
+                                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                                    <XAxis dataKey="name" tick={{ fontSize: 10, fill: '#000', width: 10,   }}  dy={5} />
+                                    <YAxis ticks={[10, 20, 30,]} />
+                                    <Tooltip formatter={(value, name) => ` ${value}%`} />
+                                    <Bar
+                                        dataKey="value"
+                                        fill="#348017"
+                                        barSize={15}
+                                        radius={[3, 3, 0, 0]}
+                                        
+                                    >
+                                   {dataSet2.map((entry, index) => (
+                                        <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
+                                    ))}
+                                    </Bar>
+                                </BarChart>
+                            </div>
+                            <div className="w-full px-[10px]">
+                                <div className="flex flex-wrap text-[#121212]">
+                                    <div className="flex items-center pr-3 gap-[11px] ">
+                                        <span className="flex h-[20px] items-center pb-1 text-custom-solidgreen text-2xl">
+                                            ●
+                                        </span>
+                                        <span className="text-custom-gray12 text-xs">
+                                            Email
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center pr-3 gap-[11px]">
+                                        <span className="flex h-[20px] items-center pb-1 text-custom-lightgreen text-2xl">
+                                            ●
+                                        </span>
+                                        <span className="text-custom-gray12 text-xs">
+                                            Call
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center pr-3 gap-[11px]">
+                                        <span className="flex h-[20px] items-center pb-1 text-[#1A73E8] text-2xl">
+                                            ●
+                                        </span>
+                                        <span className="text-custom-gray12 text-xs">
+                                            Walk-in
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center pr-3 gap-[11px]">
+                                        <span className="flex h-[20px] items-center pb-1 text-[#5B9BD5] text-2xl">
+                                            ●
+                                        </span>
+                                        <span className="text-custom-gray12 text-sm">
+                                            Website
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center pr-3 gap-[11px]">
+                                        <span className="flex h-[20px] items-center pb-1 text-custom-bluegreen text-2xl">
+                                            ●
+                                        </span>
+                                        <span className="text-custom-gray12 text-xs">
+                                            Social Media
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center pr-3 gap-[11px] ">
+                                        <span className="flex h-[20px] items-center pb-1 text-[#404B52] text-2xl">
+                                            ●
+                                        </span>
+                                        <span className="text-custom-gray12 text-xs">
+                                            Branch Tablet
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center pr-3 gap-[11px] ">
+                                        <span className="flex h-[20px] items-center pb-1 text-custom-grayA5 text-2xl">
+                                            ●
+                                        </span>
+                                        <span className="text-custom-gray12 text-xs">
+                                            Internal Endorsement
+                                        </span>
+                                    </div>
+                                    
                                 </div>
                             </div>
                         </div>
@@ -655,7 +840,7 @@ const ReportPage = () => {
                                     </div>
                                 </div>
                                 <div className="flex w-[95px] items-center border rounded-md overflow-hidden">
-                                    <div className="relative w-full">                                
+                                    <div className="relative w-full">
                                         <select
                                             name="year"
                                             className="appearance-none w-[100px] px-4 py-1 bg-white focus:outline-none border-0"
