@@ -1005,6 +1005,8 @@ class ConcernController extends Controller
             'concerns.buyer_firstname',
             'concerns.buyer_lastname',
             'concerns.suffix_name',
+            'concerns.communication_type',
+            'concerns.channels',
             \DB::raw('CASE WHEN read_notif_by_user.assignee_id IS NULL THEN 0 ELSE 1 END as is_read'),
             \DB::raw("'Inquiry Assignment' as message_log")
         );
@@ -1050,6 +1052,8 @@ class ConcernController extends Controller
             'concerns.buyer_firstname',
             'concerns.buyer_lastname',
             'concerns.suffix_name',
+            'concerns.communication_type',
+            'concerns.channels',
             \DB::raw('CASE WHEN read_notif_by_user.reply_id IS NULL THEN 0 ELSE 1 END as is_read'),
             'buyer_reply_notif.id as buyer_notif_id'
         );
@@ -1395,11 +1399,14 @@ class ConcernController extends Controller
     public function testApi(Request $request)
     {
         try {
+            \Log::info('testApi', [
+               'content' => $request->all()
+            ]);
             $testData = new BankTransaction();
             $testData->bank_name = $request->input('content');
             $testData->save();
             return response()->json('Success');
-        } catch (\Throwable $e) {
+        } catch (\Exception $e) {
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
         }
     }
