@@ -871,6 +871,7 @@ class ConcernController extends Controller
 
     public function handleSearchFilter($query, $searchParams)
     {
+        
 
         if (!empty($searchParams['name'])) {
             $query->where('buyer_name', 'ILIKE', '%' . $searchParams['name'] . '%');
@@ -1661,7 +1662,7 @@ class ConcernController extends Controller
             $this->inquiryResolveLogs($request);
             // ReplyFromAdminJob::dispatch($request->ticket_id, $buyerEmail, $request->remarks, $messageId, $allFiles, $admin_name, $buyer_lastname);
             // dd($request->ticket_id, $buyerEmail, $buyer_lastname, $message_id, $admin_name, $department);
-            
+
 
             MarkResolvedToCustomerJob::dispatch($request->ticket_id, $buyerEmail, $buyer_lastname, $message_id, $admin_name, $department, $modifiedTicketId, $surveyLink);
         } catch (\Exception $e) {
