@@ -186,26 +186,30 @@ const ResolveModal = ({ modalRef, ticketId, dataRef, onupdate }) => {
                         </span>
                     </div>
                 </div>
-                <div className="mt-5 mb-[25px]">
-                    <div
-                        className="flex justify-center gap-[19px]"
+                <form
+                        method="dialog"
                     >
-                        <button className="gradient-btn5 p-[1px] w-[92px] h-[35px] rounded-[10px]">
-                            <div className="w-full h-full rounded-[9px] bg-white flex justify-center items-center montserrat-semibold text-sm">
-                                <p className="text-base font-bold bg-gradient-to-r from-custom-bluegreen via-custom-solidgreen to-custom-solidgreen bg-clip-text text-transparent">
-                                    Cancel
-                                </p>
-                            </div>
-                        </button>
-                        <button
-                            onClick={updateStatus}
-                            className="h-[35px] w-[185px] text-white rounded-[10px] gradient-btn2 hover:shadow-custom4"
-                            type="submit"
+                    <div className="mt-5 mb-[25px]">
+                        <div
+                            className="flex justify-center gap-[19px]"
                         >
-                            Mark as Resolved
-                        </button>
+                            <button className="gradient-btn5 p-[1px] w-[92px] h-[35px] rounded-[10px]">
+                                <div className="w-full h-full rounded-[9px] bg-white flex justify-center items-center montserrat-semibold text-sm">
+                                    <p className="text-base font-bold bg-gradient-to-r from-custom-bluegreen via-custom-solidgreen to-custom-solidgreen bg-clip-text text-transparent">
+                                        Cancel
+                                    </p>
+                                </div>
+                            </button>
+                            <button
+                                onClick={updateStatus}
+                                className="h-[35px] w-[185px] text-white rounded-[10px] gradient-btn2 hover:shadow-custom4"
+                                type="submit"
+                            >
+                                Mark as Resolved
+                            </button>
+                        </div>
                     </div>
-                </div>
+                </form>
             </div>
         </dialog>
     );

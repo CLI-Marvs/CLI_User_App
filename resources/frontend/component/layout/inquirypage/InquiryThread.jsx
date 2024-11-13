@@ -23,6 +23,8 @@ import { toast, ToastContainer, Bounce } from "react-toastify";
 import Alert from "../mainComponent/Alert";
 import AddInfoModal from "./AddInfoModal";
 import { VALID_FILE_EXTENSIONS } from "../../../constant/data/validFile";
+import InquiryFormModal from "./InquiryFormModal";
+import ThreadInquiryFormModal from "./ThreadInquiryFormModal";
 
 const InquiryThread = () => {
     const [attachedFiles, setAttachedFiles] = useState([]);
@@ -55,6 +57,7 @@ const InquiryThread = () => {
     } = useStateContext();
     const [chatMessage, setChatMessage] = useState("");
     const modalRef = useRef(null);
+    const modalRef2 = useRef(null);
     const resolveModalRef = useRef(null);
     const navigate = useNavigate();
     const location = useLocation();
@@ -151,6 +154,12 @@ const InquiryThread = () => {
     const handleOpenModal = () => {
         if (modalRef.current) {
             modalRef.current.showModal();
+        }
+    };
+
+    const handleOpenAddInfoModal = () => {
+        if (modalRef2.current) {
+            modalRef2.current.showModal();
         }
     };
 
@@ -1188,6 +1197,9 @@ const InquiryThread = () => {
                                     Mark as closed
                                 </div>
                             </div>
+                            <div onClick={handleOpenAddInfoModal}>
+                                <button className="border py-2 px-5">button</button>
+                            </div>
                             <div className="">
                                 <div className="">
                                     {combineThreadMessages.length > 0 &&
@@ -1305,6 +1317,9 @@ const InquiryThread = () => {
                     onCancel={handleCancel}
                     onConfirm={handleConfirm}
                 />
+            </div>
+            <div>
+               <ThreadInquiryFormModal modalRef={modalRef2} />
             </div>
         </>
     );
