@@ -1,7 +1,9 @@
 import React from 'react'
 import { IoIosSend, IoMdArrowDropdown } from 'react-icons/io';
 
-const ThreadInquiryFormModal = ({ modalRef }) => {
+const ThreadInquiryFormModal = ({ modalRef, dataConcern, filesRef }) => {
+    console.log("dataConcern from modal", dataConcern);
+    console.log("attachment", filesRef);
   return (
     <dialog
             id="Employment"
@@ -67,6 +69,7 @@ const ThreadInquiryFormModal = ({ modalRef }) => {
                                 type="text"
                                 className="w-full px-4 text-sm focus:outline-none mobile:text-xs"
                                 placeholder=""
+                                value={dataConcern.buyer_firstname || ""}
                             />
                         </div>
                         <div className="flex items-center gap-[4px]">
@@ -80,13 +83,15 @@ const ThreadInquiryFormModal = ({ modalRef }) => {
                                     name="mname"
                                     type="text"
                                     className="w-full px-4 text-sm focus:outline-none mobile:text-xs"
+                                    value={dataConcern.buyer_middlename || ""}
+
                                 />
                                 <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3 gap-2 text-sm bg-custom-lightestgreen">
                                     <input
                                         type="checkbox"
                                         name="checkbox"
                                         className="accent-custom-lightgreen"
-                                        value="checkbox"
+                                        value={dataConcern.buyer_middlename || ""}
                                     />
                                     <p>N/A</p>
                                 </span>
@@ -104,6 +109,7 @@ const ThreadInquiryFormModal = ({ modalRef }) => {
                                 type="text"
                                 className="w-full px-4 text-sm focus:outline-none mobile:text-xs"
                                 placeholder=""
+                                value={dataConcern.buyer_lastname || ""}
                             />
                         </div>
                         <div className="flex items-center gap-[4px]">
@@ -118,6 +124,8 @@ const ThreadInquiryFormModal = ({ modalRef }) => {
                                     type="text"  
                                     className="w-full px-4 text-sm focus:outline-none mobile:text-xs"
                                     placeholder=""
+                                     value={dataConcern.suffix_name || ""}
+
                                 />
                                 <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3 gap-2 text-sm bg-custom-lightestgreen">
                                     <input
@@ -141,6 +149,8 @@ const ThreadInquiryFormModal = ({ modalRef }) => {
                                 type="email"
                                 className="w-full px-4 text-sm focus:outline-none mobile:text-xs"
                                 placeholder=""
+                                value={dataConcern.buyer_email || ""}
+
                             />
                         </div>
                         
@@ -161,6 +171,8 @@ const ThreadInquiryFormModal = ({ modalRef }) => {
                                 }
                                 className="w-full px-4 text-sm focus:outline-none mobile:text-xs"
                                 placeholder=""
+                                value={dataConcern.mobile_number || ""}
+
                             />
                         </div>
                         <div
@@ -174,7 +186,7 @@ const ThreadInquiryFormModal = ({ modalRef }) => {
                                     name="property"
                                     className="appearance-none w-full px-4 text-sm py-1 bg-white focus:outline-none border-0 mobile:text-xs"
                                 >
-                                    <option value="">(Select)</option>
+                                    <option value={dataConcern.property || ""}>{dataConcern.proerty || ""}</option>
                                 </select>
                                 <span className="absolute inset-y-0 right-0 flex  items-center pr-3 pl-3 bg-custom-lightestgreen text-custom-bluegreen pointer-events-none">
                                     <IoMdArrowDropdown />
@@ -192,35 +204,7 @@ const ThreadInquiryFormModal = ({ modalRef }) => {
                                     name="details_concern"
                                     className="appearance-none text-sm w-full px-4 py-1 bg-white focus:outline-none border-0 mobile:text-xs"
                                 >
-                                    <option value="">(Select)</option>
-                                    <option value="Reservation Documents">
-                                        Reservation Documents
-                                    </option>
-                                    <option value="Payment Issues">
-                                        Payment Issues
-                                    </option>
-                                    <option value="SOA/ Buyer's Ledger">
-                                        SOA/ Buyer's Ledger
-                                    </option>
-                                    <option value="Turn Over Status">
-                                        Turn Over Status
-                                    </option>
-                                    <option value="Unit Status">
-                                        Unit Status
-                                    </option>
-                                    <option value="Loan Application">
-                                        Loan Application
-                                    </option>
-                                    <option value="Title and Other Registration Documents">
-                                        Title and Other Registration Documents
-                                    </option>
-                                    <option value="Commissions">
-                                        Commissions
-                                    </option>
-                                    <option value="Leasing">Leasing</option>
-                                    <option value="Other Concerns">
-                                        Other Concerns
-                                    </option>
+                                    <option value={dataConcern.details_concern || ""}>{dataConcern.details_concern || ""}</option>
                                 </select>
                                 <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3 bg-custom-lightestgreen text-custom-bluegreen pointer-events-none">
                                     <IoMdArrowDropdown />
@@ -238,14 +222,8 @@ const ThreadInquiryFormModal = ({ modalRef }) => {
                                     name="type"
                                     className="appearance-none text-sm w-full px-4 py-1 bg-white focus:outline-none border-0 mobile:text-xs"
                                 >
-                                    <option value="">(Select)</option>
-                                    <option value="Complain">Complain</option>
-                                    <option value="Request">Request</option>
-                                    <option value="Inquiry">Inquiry</option>
-                                    <option value="Suggestion or Recommendation">
-                                        Suggestion or Recommendation
-                                    </option>
-
+                                    <option value={dataConcern.communication_type || ""}>{dataConcern.communication_type || ""}</option>
+                        
                                 </select>
                                 <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3 bg-custom-lightestgreen text-custom-bluegreen pointer-events-none">
                                     <IoMdArrowDropdown />
@@ -264,15 +242,7 @@ const ThreadInquiryFormModal = ({ modalRef }) => {
                                     name="channels"
                                     className="appearance-none text-sm w-full px-4 py-1 bg-white focus:outline-none border-0 mobile:text-xs"
                                 >
-                                    <option value="">(Select)</option>
-                                    <option value="Email">Email</option>
-                                    <option value="Call">Call</option>
-                                    <option value="Walk-in">Walk-in</option>
-                                    <option value="Website">Website</option>
-                                    <option value="Social media">Social media</option>
-                                    <option value="Branch Tablet">Branch Tablet (Jotform created by IT)</option>
-                                    <option value="Internal Endorsement">Internal Endorsement</option>
-
+                                    <option value={dataConcern.channels || ""}>{dataConcern.channels || ""}</option>
                                 </select>
                                 <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3 bg-custom-lightestgreen text-custom-bluegreen pointer-events-none">
                                     <IoMdArrowDropdown />
@@ -294,14 +264,7 @@ const ThreadInquiryFormModal = ({ modalRef }) => {
                                     name="user_type"
                                     className="appearance-none w-full px-4 py-1 text-sm bg-white focus:outline-none border-0 mobile:text-xs"
                                 >
-                                    <option value="">(Select)</option>
-                                    <option value="Property Owner">
-                                        Property Owner
-                                    </option>
-                                    <option value="Buyer">Buyer</option>
-                                    <option value="Broker">Broker</option>
-                                    <option value="Lessee">Lessee</option>
-                                    <option value="Others">Others</option>
+                                    <option value={dataConcern.user_type|| ""}>{dataConcern.user_type || ""}</option>
                                 </select>
                                 <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3  bg-custom-lightestgreen text-custom-bluegreen pointer-events-none">
                                     <IoMdArrowDropdown />
@@ -338,6 +301,7 @@ const ThreadInquiryFormModal = ({ modalRef }) => {
                                 type="number"
                                 className="w-full px-4 text-sm focus:outline-none mobile:text-xs"
                                 placeholder=""
+                                value={dataConcern.contract_number || ""}
                                 onInput={(e) =>
                                 (e.target.value = e.target.value.replace(
                                     /[^0-9]/g,
@@ -353,6 +317,7 @@ const ThreadInquiryFormModal = ({ modalRef }) => {
                             <input
                                 name="unit_number"
                                 type="text"
+                                value={dataConcern.unit_number || ""}
                                 className="w-full px-4 text-sm focus:outline-none mobile:text-xs"
                                 placeholder=""
                             />
@@ -374,9 +339,7 @@ const ThreadInquiryFormModal = ({ modalRef }) => {
                         <div className="flex gap-3 ">
                             <textarea
                                 id="details_message"
-                               /*  value={message}
-                                onChange={handleChangeValue}
-                                maxLength={maxCharacters} */
+                                value={dataConcern.details_message || ""}
                                 name="details_message"
                                 placeholder=""
                                 rows="4"
@@ -386,35 +349,13 @@ const ThreadInquiryFormModal = ({ modalRef }) => {
                     </div>
                     <div className="flex flex-col mt-5 mb-12">
                         <div className="flex justify-between w-54 tablet:flex-col">
-                            <button
-                                htmlFor="attachment"
-                                className="tablet:w-full h-10 px-5 text-sm border montserrat-medium border-custom-solidgreen rounded-lg text-custom-solidgreen flex justify-center items-center gap-1 cursor-pointer hover:shadow-custom"
-                            >
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    strokeWidth="1.5"
-                                    stroke="currentColor"
-                                    className="size-3"
-                                >
-                                    <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244"
-                                    />
-                                </svg>
-                                Add attachment
-                            </button>
-                            <input
-                                type="file"
-                                id="attachment"
-                                name="files[]"
-                                className="hidden"
-                               /*  ref={fileInputRef} */
-                                multiple
-                                /* onChange={handleFileChange} */
-                            />
+                         {/*    <div>{filesRef && filesRef.attachment.map((item) => {
+                                return (
+                                    <div>
+                                        <span>{item.original_file_name}</span>
+                                    </div>
+                                )
+                            })}</div> */}
                             <button
                               /*   onClick={handleSubmit}
                                 disabled={loading} */

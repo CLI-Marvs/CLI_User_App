@@ -1983,7 +1983,6 @@ class ConcernController extends Controller
         }
     }
 
-
     public function inquiryLogsFromBuyer($ticketId)
     {
         try {
