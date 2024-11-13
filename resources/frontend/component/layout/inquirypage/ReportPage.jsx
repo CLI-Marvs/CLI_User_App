@@ -51,22 +51,22 @@ const COLORS = [
 const CustomTick = ({ x, y, payload }) => {
     const words = payload.value.split(' '); // Split by spaces to handle word wrapping
     return (
-      <g transform={`translate(${x},${y})`}>
-        {words.map((word, index) => (
-          <text
-            key={index}
-            x={0}
-            y={index * 12} // Adjust the y position for each line of text
-            textAnchor="middle"
-            fontSize={10}
-            fill="#000"
-          >
-            {word}
-          </text>
-        ))}
-      </g>
+        <g transform={`translate(${x},${y})`}>
+            {words.map((word, index) => (
+                <text
+                    key={index}
+                    x={0}
+                    y={index * 12} // Adjust the y position for each line of text
+                    textAnchor="middle"
+                    fontSize={10}
+                    fill="#000"
+                >
+                    {word}
+                </text>
+            ))}
+        </g>
     );
-  };
+};
 
 const categoryColors = {
     "Commissions": COLORS[0],
@@ -174,11 +174,17 @@ const ReportPage = () => {
         inquiriesPerPropertyYear,
         setCommunicationTypeYear,
         communicationTypeYear,
+        inquiriesPerChanelYear,
+        setInquiriesPerChanelYear,
+        inquiriesPerChannelMonth,
+        setInquiriesPerChannelMonth,
+        getInquiriesPerChannel,
+        inquriesPerChannelData
     } = useStateContext();
     const defaultData = [{ name: "No Data" }];
     const dataToDisplay = dataCategory.length > 0 ? dataCategory : defaultData;
     const location = useLocation();
-
+ 
     const getCurrentMonth = () => {
         const months = [
             'january', 'february', 'march', 'april', 'may', 'june',
@@ -187,6 +193,9 @@ const ReportPage = () => {
         const currentMonthIndex = new Date().getMonth();
         return months[currentMonthIndex];
     };
+
+    //Get current year
+    const currentYear = new Date().getFullYear();
 
     const chartHeight = dataProperty.length * (barHeight + 60);
     const chartHeight2 = communicationTypeData.length * (barHeight + 100);
@@ -198,28 +207,10 @@ const ReportPage = () => {
         ))]
         : ["All"];
 
-
-
-    /*  const allDepartment = [
-         { key: "All", value: "All" },
-         { key: "Customer Relations - Services", value: "Customer Relations - Services" },
-         { key: "SALES", value: "Sales" },
-         { key: "AP", value: "Ap Commission" },
-         { key: "PM", value: "Property Management" },
-     ]; */
-
-
-    // const getCurrentMonth = () => {
-    //     const date = new Date();
-    //     const options = { month: "long" };
-    //     return new Intl.DateTimeFormat("en-US", options).format(date);
-    // };
-
+ 
     const handleInputChange = (e) => {
         setMonth(e.target.value);
     };
-
-
 
     // Handle year change from the dropdown
     const handleDepartmentYearChange = (e) => {
@@ -235,6 +226,10 @@ const ReportPage = () => {
     const handleCommunicationTypeYearChange = (e) => {
         setCommunicationTypeYear(e.target.value);
     }
+
+    const handleInquiriesPerChannelYearChange = (e) => {
+        setInquiriesPerChanelYear(e.target.value);
+    }
     const handleKeyDown = (e) => {
         if (e.key === "Enter") {
             fetchCategory(month);
@@ -246,17 +241,13 @@ const ReportPage = () => {
             getInquiriesPerProperty(propertyMonth);
         }
     };
-    // useEffect(() => {
-    //     const currentMonth = getCurrentMonth();
-    //     setMonth(currentMonth);
-    //     setPropertyMonth(currentMonth);
-    // }, []);
 
     useEffect(() => {
         fetchCategory();
         getInquiriesPerProperty();
         fetchDataReport();
         getCommunicationTypePerProperty();
+        getInquiriesPerChannel();
 
     }, []);
 
@@ -264,7 +255,13 @@ const ReportPage = () => {
         setMonth(getCurrentMonth());
         setPropertyMonth(getCurrentMonth());
         setCommunicationTypeMonth(getCurrentMonth())
+        setInquiriesPerChannelMonth(getCurrentMonth());
 
+        setDepartmentStatusYear(currentYear);
+        setInquiriesPerCategoryYear(currentYear);
+        setInquiriesPerPropertyYear(currentYear);
+        setCommunicationTypeYear(currentYear);
+        setInquiriesPerChanelYear(currentYear);
     }, []);
 
     //  console.log("department", department);
@@ -314,14 +311,8 @@ const ReportPage = () => {
                                     /*  value={department} */
                                     onChange={handleDepartmentYearChange}
                                 >
-                                    <option value="2023">
-                                        2023
-                                    </option>
                                     <option value="2024">
                                         2024
-                                    </option>
-                                    <option value="2025">
-                                        2025
                                     </option>
                                 </select>
                                 <span className="absolute inset-y-0 right-0 flex items-center text-custom-gray81 pr-3 pl-3 bg-custom-grayFA pointer-events-none">
@@ -422,15 +413,11 @@ const ReportPage = () => {
                                             value={inquiriesPerCategoryYear}
                                             onChange={handleInquiriesPerCategoryYearChange}
                                         >
-                                            <option value="2023">
-                                                2023
-                                            </option>
+
                                             <option value="2024">
                                                 2024
                                             </option>
-                                            <option value="2025">
-                                                2025
-                                            </option>
+
                                         </select>
                                         <span className="absolute inset-y-0 right-0 flex items-center text-custom-gray81 pr-3 pl-3 bg-custom-grayFA pointer-events-none">
                                             <IoMdArrowDropdown />
@@ -520,8 +507,8 @@ const ReportPage = () => {
                                         <select
                                             name="concern"
                                             className="appearance-none w-full px-4 py-1 bg-white focus:outline-none border-0"
-                                           /*  value={month}
-                                            onChange={(e) => setMonth(e.target.value)} */
+                                            value={inquiriesPerChannelMonth}
+                                            onChange={(e) => setInquiriesPerChannelMonth(e.target.value)}
                                         >
                                             <option value="january">January</option>
                                             <option value="february">February</option>
@@ -546,25 +533,21 @@ const ReportPage = () => {
                                         <select
                                             name="year"
                                             className="appearance-none w-[100px] px-4 py-1 bg-white focus:outline-none border-0"
-                                           /*  value={inquiriesPerCategoryYear}
-                                            onChange={handleInquiriesPerCategoryYearChange} */
+                                            value={inquiriesPerChanelYear}
+                                            onChange={handleInquiriesPerChannelYearChange}
                                         >
-                                            <option value="2023">
-                                                2023
-                                            </option>
+
                                             <option value="2024">
                                                 2024
                                             </option>
-                                            <option value="2025">
-                                                2025
-                                            </option>
+
                                         </select>
                                         <span className="absolute inset-y-0 right-0 flex items-center text-custom-gray81 pr-3 pl-3 bg-custom-grayFA pointer-events-none">
                                             <IoMdArrowDropdown />
                                         </span>
                                     </div>
                                 </div>
-                                
+
                             </div>
                         </div>
                         <div className="flex flex-col">
@@ -572,7 +555,7 @@ const ReportPage = () => {
                                 <BarChart
                                     width={571}
                                     height={200}
-                                    data={dataSet2}
+                                    data={inquriesPerChannelData}
                                     margin={{
                                         top: 5,
                                         right: 20,
@@ -581,7 +564,7 @@ const ReportPage = () => {
                                     }}
                                 >
                                     <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                                    <XAxis dataKey="name" tick={{ fontSize: 10, fill: '#000', width: 10,   }} angle={-25}  dy={5} />
+                                    <XAxis dataKey="name" tick={{ fontSize: 10, fill: '#000', width: 10, }} angle={-25} dy={5} />
                                     <YAxis ticks={[10, 20, 30,]} />
                                     <Tooltip formatter={(value, name) => ` ${value}%`} />
                                     <Bar
@@ -589,11 +572,11 @@ const ReportPage = () => {
                                         fill="#348017"
                                         barSize={15}
                                         radius={[3, 3, 0, 0]}
-                                        
+
                                     >
-                                   {dataSet2.map((entry, index) => (
-                                        <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
-                                    ))}
+                                        {inquriesPerChannelData.map((entry, index) => (
+                                            <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
+                                        ))}
                                     </Bar>
                                 </BarChart>
                             </div>
@@ -655,7 +638,7 @@ const ReportPage = () => {
                                             Internal Endorsement
                                         </span>
                                     </div>
-                                    
+
                                 </div>
                             </div>
                         </div>
@@ -706,15 +689,11 @@ const ReportPage = () => {
                                             value={inquiriesPerPropertyYear}
                                             onChange={handleInquiriesPerPropertyYearChange}
                                         >
-                                            <option value="2023">
-                                                2023
-                                            </option>
+
                                             <option value="2024">
                                                 2024
                                             </option>
-                                            <option value="2025">
-                                                2025
-                                            </option>
+
                                         </select>
                                         <span className="absolute inset-y-0 right-0 flex items-center text-custom-gray81 pr-3 pl-3 bg-custom-grayFA pointer-events-none">
                                             <IoMdArrowDropdown />
@@ -847,15 +826,11 @@ const ReportPage = () => {
                                             value={communicationTypeYear}
                                             onChange={handleCommunicationTypeYearChange}
                                         >
-                                            <option value="2023">
-                                                2023
-                                            </option>
+
                                             <option value="2024">
                                                 2024
                                             </option>
-                                            <option value="2025">
-                                                2025
-                                            </option>
+
                                         </select>
                                         <span className="absolute inset-y-0 right-0 flex items-center text-custom-gray81 pr-3 pl-3 bg-custom-grayFA pointer-events-none">
                                             <IoMdArrowDropdown />

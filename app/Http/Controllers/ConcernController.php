@@ -933,7 +933,7 @@ class ConcernController extends Controller
             $concernsResults = $concernsQuery/* ->orderBy('is_read', 'asc') */
                 /*  ->orderBy('concerns.created_at', 'desc') */
                 ->get();
-
+             
             $latestBuyerReply = $this->buyerReplyNotifs($employee, $ticketIds, $employeeDepartment);
 
             $assigneeQuery = $this->assigneeNotify($employee, $ticketIds);
@@ -1775,13 +1775,35 @@ class ConcernController extends Controller
         return response()->json($concerns);
     }
 
+    /**
+     * Get Inquiries per channel data
+     */
+    public function getInquiriesPerChannel(Request $request)
+    {
+        $department = $request->department;
+        $monthNumber = Carbon::parse($request->propertyMonth)->month;
+        $year = $request->input('year', Carbon::now()->year);
+        $query = Concerns::select('channels', DB::raw('COUNT(*) as total'))
+            ->whereMonth('created_at', $monthNumber)
+            ->whereYear('created_at', $year)
+            ->whereNotNull('channels');
+
+        if ($department && $department !== "All") {
+            $query->whereRaw("resolve_from::jsonb @> ?", json_encode([['department' => $department]]));
+        }
+
+        $inquiryChannels = $query->groupBy('channels')->get();
+        return response()->json($inquiryChannels);
+    }
+
     public function getCommunicationType(Request $request)
     {
         $year = $request->input('year', Carbon::now()->year);
         $department = $request->department;
         $monthNumber = Carbon::parse($request->propertyMonth)->month;
 
-        // Query to count each communication_type grouped by property
+
+        // Query to count each <communication_t></communication_t>ype grouped by property
         $query = Concerns::select(
             'property',
             DB::raw("SUM(case when communication_type = 'Complain' then 1 else 0 end) as Complain"),
