@@ -186,6 +186,31 @@ const ResolveModal = ({ modalRef, ticketId, dataRef, onupdate }) => {
                         </span>
                     </div>
                 </div>
+                <div
+                    className={`flex items-center border border-[D6D6D6] rounded-[5px] overflow-hidden mt-[12px]`}
+                >
+                    <span className="text-custom-gray81 text-sm bg-[#EDEDED] flex items-center w-[308px] tablet:w-[175px] mobile:w-[270px] mobile:text-xs -mr-3 pl-3 py-1">
+                          Send Survey
+                    </span>
+                    <div className="relative w-full">
+
+                        <select
+                            /* disabled={!!dataRef.communication_type}
+                            name="user_type"
+                            value={communicationType || ""}
+                            onChange={handleCommunityTypeChange} */
+                            className="appearance-none w-full px-4 text-sm py-1 bg-white focus:outline-none border-0 mobile:text-xs"
+                        >
+                            <option value="">(Select)</option>
+                            <option value="Reservation">Reservation</option>
+                            <option value="After-Sales">After-Sales</option>
+                            <option value="Move-In">Move-In</option>
+                        </select>
+                        <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3 bg-[#EDEDED] text-custom-gray81 pointer-events-none">
+                            <IoMdArrowDropdown />
+                        </span>
+                    </div>
+                </div>
                 <form
                         method="dialog"
                     >
