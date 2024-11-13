@@ -39,6 +39,7 @@ export const ContextProvider = ({ children }) => {
     const [dataCategory, setDataCategory] = useState([]);
     const [dataProperty, setDataPropery] = useState([]);
     const [communicationTypeData, setCommunicationTypeData] = useState([]);
+    const [inquriesPerChannelData, setInquriesPerChannelData] = useState([]);
     const [month, setMonth] = useState("");
     const [propertyMonth, setPropertyMonth] = useState("");
     const [communicationTypeMonth, setCommunicationTypeMonth] = useState("");
@@ -52,6 +53,8 @@ export const ContextProvider = ({ children }) => {
     const [communicationTypeYear, setCommunicationTypeYear] = useState("");
     const [isDepartmentInitialized, setIsDepartmentInitialized] =
         useState(false);
+    const [inquiriesPerChanelYear, setInquiriesPerChanelYear] = useState("");
+    const [inquiriesPerChannelMonth, setInquiriesPerChannelMonth] = useState("");
     const [pricingMasterLists, setPricingMasterLists] = useState([]);
     const [paymentSchemes, setPaymentSchemes] = useState([]);
     const [propertyId, setPropertyId] = useState(null);
@@ -83,10 +86,7 @@ export const ContextProvider = ({ children }) => {
         if (user && user.department && !isDepartmentInitialized) {
             setDepartment(user.department === "Customer Relations - Services" ? "All" : user.department);
             setIsDepartmentInitialized(true);
-            setDepartmentStatusYear(2024);
-            setInquiriesPerCategoryYear(2024);
-            setInquiriesPerPropertyYear(2024);
-            setCommunicationTypeYear(2024);
+
         }
     }, [user, isDepartmentInitialized]);
 
@@ -280,6 +280,29 @@ export const ContextProvider = ({ children }) => {
         }
     };
 
+    const getInquiriesPerChannel = async () => {
+        if (!isDepartmentInitialized) return;
+
+        try {
+            const response = await apiService.get("inquiries-channel", {
+                params: {
+                    propertyMonth: inquiriesPerChannelMonth,
+                    department: department,
+                    year: communicationTypeYear
+                },
+            });
+            const result = response.data;
+            console.log("result", result)
+            const formattedData = result.map((item) => ({
+                name: item.channels,
+                value: item.total,
+            }));
+
+            setInquriesPerChannelData(formattedData);
+        } catch (error) {
+            console.error("Error fetching data:", error);
+        }
+    };
     const getSpecificInquiry = async () => {
         if (token) {
             try {
@@ -562,13 +585,14 @@ export const ContextProvider = ({ children }) => {
                 await getInquiriesPerProperty();
                 await fetchCategory();
                 await getCommunicationTypePerProperty();
+                await getInquiriesPerChannel();
             } catch (error) {
                 console.error("Error fetching data:", error);
             }
         };
 
         fetchData();
-    }, [department, propertyMonth, month, departmentStatusYear, inquiriesPerCategoryYear, inquiriesPerPropertyYear, communicationTypeYear, communicationTypeMonth]);
+    }, [department, propertyMonth, month, departmentStatusYear, inquiriesPerCategoryYear, inquiriesPerPropertyYear, communicationTypeYear, communicationTypeMonth, inquiriesPerChannelMonth, inquiriesPerChanelYear]);
 
     return (
         <StateContext.Provider
@@ -684,10 +708,16 @@ export const ContextProvider = ({ children }) => {
                 inquiriesPerCategoryYear,
                 setInquiriesPerPropertyYear,
                 inquiriesPerPropertyYear,
-                setCommunicationTypeYear,                
+                setCommunicationTypeYear,
                 communicationTypeYear,
-
+                inquiriesPerChanelYear,
+                setInquiriesPerChanelYear,
+                inquiriesPerChannelMonth,
+                setInquiriesPerChannelMonth,
+                getInquiriesPerChannel,
+                inquriesPerChannelData
             }}
+
         >
             {children}
         </StateContext.Provider>
