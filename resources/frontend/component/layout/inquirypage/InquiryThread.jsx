@@ -431,8 +431,8 @@ const InquiryThread = () => {
               .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
         : [];
     const getLatestMessageFromBuyer = combineThreadMessages
-        .filter((item) => item.buyer_email) // Get only messages with buyer_email
-        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))[0]; // Get the latest one
+        .filter((item) => item.buyer_email)
+        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))[0];
 
     console.log("getLataest", getLatestMessageFromBuyer);
 
