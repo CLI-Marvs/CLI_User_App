@@ -125,13 +125,13 @@ const InquiryThread = () => {
         "N/A",
         ...(Array.isArray(propertyNamesList) && propertyNamesList.length > 0
             ? propertyNamesList
-                .filter((item) => !item.toLowerCase().includes("phase"))
-                .map((item) => formatFunc(item))
-                .sort((a, b) => {
-                    if (a === "N/A") return -1;
-                    if (b === "N/A") return 1;
-                    return a.localeCompare(b);
-                })
+                  .filter((item) => !item.toLowerCase().includes("phase"))
+                  .map((item) => formatFunc(item))
+                  .sort((a, b) => {
+                      if (a === "N/A") return -1;
+                      if (b === "N/A") return 1;
+                      return a.localeCompare(b);
+                  })
             : []),
     ];
 
@@ -361,12 +361,10 @@ const InquiryThread = () => {
         setTicketId(ticketId);
     }, [ticketId, setTicketId]);
 
-
     useEffect(() => {
         console.log("This is fetching");
         getAllConcerns();
     }, []);
-
 
     useEffect(() => {
         if (isFilterVisible) {
@@ -429,11 +427,12 @@ const InquiryThread = () => {
 
     const combineThreadMessages = messages[ticketId]
         ? messages[ticketId]
-            .flat()
-            .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+              .flat()
+              .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
         : [];
-    const getLatestMessageFromBuyer = combineThreadMessages.find((item) => item.buyer_email);
-
+    const getLatestMessageFromBuyer = combineThreadMessages.find(
+        (item) => item.buyer_email
+    );
 
     // useEffect(() => {
     //     let adminMessageChannel;
@@ -720,7 +719,7 @@ const InquiryThread = () => {
                                             </label>
                                             <select
                                                 className="w-full border-b-1 outline-none appearance-none text-sm absolute px-[8px]"
-                                            /* value={status}
+                                                /* value={status}
                                             onChange={(e) =>
                                                 setStatus(e.target.value)
                                             } */
@@ -925,9 +924,9 @@ const InquiryThread = () => {
                                                         const truncatedName =
                                                             baseName.length > 30
                                                                 ? baseName.slice(
-                                                                    0,
-                                                                    30
-                                                                ) + "..."
+                                                                      0,
+                                                                      30
+                                                                  ) + "..."
                                                                 : baseName;
                                                         return (
                                                             <div
@@ -1006,10 +1005,11 @@ const InquiryThread = () => {
                                                         loading
                                                     }
                                                     className={`flex w-[82px] h-[28px] rounded-[5px] text-white text-xs justify-center items-center 
-                                                        ${loading ||
+                                                        ${
+                                                            loading ||
                                                             !chatMessage.trim()
-                                                            ? "bg-gray-400 cursor-not-allowed"
-                                                            : "gradient-background3 hover:shadow-custom4"
+                                                                ? "bg-gray-400 cursor-not-allowed"
+                                                                : "gradient-background3 hover:shadow-custom4"
                                                         } 
                                                     `}
                                                 >
@@ -1105,64 +1105,64 @@ const InquiryThread = () => {
                                                         </div>
                                                         {attachedFiles.length >
                                                             0 && (
-                                                                <div className="mb-2 ">
-                                                                    {attachedFiles.map(
-                                                                        (
-                                                                            file,
-                                                                            index
-                                                                        ) => {
-                                                                            const fileName =
-                                                                                file.name;
-                                                                            const fileExtension =
-                                                                                fileName.slice(
-                                                                                    fileName.lastIndexOf(
-                                                                                        "."
-                                                                                    )
-                                                                                );
-                                                                            const baseName =
-                                                                                fileName.slice(
-                                                                                    0,
-                                                                                    fileName.lastIndexOf(
-                                                                                        "."
-                                                                                    )
-                                                                                );
-                                                                            const truncatedName =
-                                                                                baseName.length >
-                                                                                    30
-                                                                                    ? baseName.slice(
-                                                                                        0,
-                                                                                        30
-                                                                                    ) +
-                                                                                    "..."
-                                                                                    : baseName;
-                                                                            return (
-                                                                                <div
-                                                                                    key={
-                                                                                        index
-                                                                                    }
-                                                                                    className="flex items-center justify-between mb-2 p-2 border bg-white rounded"
-                                                                                >
-                                                                                    <span className="text-sm text-gray-700">
-                                                                                        {truncatedName +
-                                                                                            fileExtension}
-                                                                                    </span>
-                                                                                    <button
-                                                                                        type="button"
-                                                                                        onClick={() =>
-                                                                                            removeFile(
-                                                                                                file.name
-                                                                                            )
-                                                                                        }
-                                                                                        className="text-red-500"
-                                                                                    >
-                                                                                        Remove
-                                                                                    </button>
-                                                                                </div>
+                                                            <div className="mb-2 ">
+                                                                {attachedFiles.map(
+                                                                    (
+                                                                        file,
+                                                                        index
+                                                                    ) => {
+                                                                        const fileName =
+                                                                            file.name;
+                                                                        const fileExtension =
+                                                                            fileName.slice(
+                                                                                fileName.lastIndexOf(
+                                                                                    "."
+                                                                                )
                                                                             );
-                                                                        }
-                                                                    )}
-                                                                </div>
-                                                            )}
+                                                                        const baseName =
+                                                                            fileName.slice(
+                                                                                0,
+                                                                                fileName.lastIndexOf(
+                                                                                    "."
+                                                                                )
+                                                                            );
+                                                                        const truncatedName =
+                                                                            baseName.length >
+                                                                            30
+                                                                                ? baseName.slice(
+                                                                                      0,
+                                                                                      30
+                                                                                  ) +
+                                                                                  "..."
+                                                                                : baseName;
+                                                                        return (
+                                                                            <div
+                                                                                key={
+                                                                                    index
+                                                                                }
+                                                                                className="flex items-center justify-between mb-2 p-2 border bg-white rounded"
+                                                                            >
+                                                                                <span className="text-sm text-gray-700">
+                                                                                    {truncatedName +
+                                                                                        fileExtension}
+                                                                                </span>
+                                                                                <button
+                                                                                    type="button"
+                                                                                    onClick={() =>
+                                                                                        removeFile(
+                                                                                            file.name
+                                                                                        )
+                                                                                    }
+                                                                                    className="text-red-500"
+                                                                                >
+                                                                                    Remove
+                                                                                </button>
+                                                                            </div>
+                                                                        );
+                                                                    }
+                                                                )}
+                                                            </div>
+                                                        )}
                                                     </div>
                                                 </div>
                                             )}
@@ -1174,12 +1174,15 @@ const InquiryThread = () => {
                                         Note: This message will be sent to{" "}
                                         <span className="font-semibold">
                                             {capitalizeWords(
-                                                `${dataConcern?.buyer_firstname ||
-                                                ""
-                                                } ${dataConcern?.buyer_middlename ||
-                                                ""
-                                                } ${dataConcern?.buyer_lastname ||
-                                                ""
+                                                `${
+                                                    dataConcern?.buyer_firstname ||
+                                                    ""
+                                                } ${
+                                                    dataConcern?.buyer_middlename ||
+                                                    ""
+                                                } ${
+                                                    dataConcern?.buyer_lastname ||
+                                                    ""
                                                 }`
                                             )}{" "}
                                             {capitalizeWords(
@@ -1196,7 +1199,7 @@ const InquiryThread = () => {
                                 {dataConcern?.created_by &&
                                     dataConcern?.created_by === user?.id &&
                                     user?.department ===
-                                    "Customer Relations - Services" && (
+                                        "Customer Relations - Services" && (
                                         <FaTrash
                                             className="text-[#EB4444] hover:text-red-600 cursor-pointer"
                                             onClick={handleDelete}
@@ -1210,7 +1213,7 @@ const InquiryThread = () => {
                                     </div>
                                 ) : (
                                     user?.department ===
-                                    "Customer Relations - Services" && (
+                                        "Customer Relations - Services" && (
                                         <div
                                             onClick={handleOpenResolveModal}
                                             className="flex justify-start w-auto font-semibold text-[13px] text-[#1A73E8] underline cursor-pointer"
@@ -1226,14 +1229,16 @@ const InquiryThread = () => {
                                     Mark as closed
                                 </div>
                             </div>
-                            <div
-                                onClick={handleOpenAddInfoModal}
-                                className="flex justify-end mt-3"
-                            >
-                                <span className="underline cursor-pointer">
-                                    Create new ticket
-                                </span>
-                            </div>
+                            {dataConcern?.status === "Resolved" && (
+                                <div
+                                    onClick={handleOpenAddInfoModal}
+                                    className="flex justify-end mt-3"
+                                >
+                                    <span className="underline cursor-pointer">
+                                        Create new ticket
+                                    </span>
+                                </div>
+                            )}
                             <div className="">
                                 <div className="">
                                     {combineThreadMessages.length > 0 &&
