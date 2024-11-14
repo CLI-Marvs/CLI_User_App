@@ -274,7 +274,7 @@ const ReportPage = () => {
                         Resolved vs. Unresolved Chart
                     </p>
                     <div className="flex gap-[10px] px-[16px]">
-                        <div className="flex w-[300px] items-center border rounded-md overflow-hidden">
+                        <div className="flex w-[550px] items-center border rounded-md overflow-hidden">
                             <span className="text-custom-gray81 bg-custom-grayFA flex items-center w-44 -mr-3 pl-3 py-1">
                                 Department
                             </span>

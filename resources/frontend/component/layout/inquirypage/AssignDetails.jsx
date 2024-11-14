@@ -591,7 +591,7 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                                 {/*User type*/}
                                 {(details.buyer_old_data.user_type !==  details.buyer_updated_data.user_type) && (
                                     <p className="text-sm text-custom-bluegreen">
-                                        User type:
+                                        Type:
                                         {details.buyer_old_data.user_type &&
                                             details.buyer_old_data.user_type !== details.buyer_updated_data.user_type ? (
                                             <>
