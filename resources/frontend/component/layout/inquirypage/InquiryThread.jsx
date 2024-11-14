@@ -66,7 +66,7 @@ const InquiryThread = () => {
     const ticketId = decodeURIComponent(params.id);
     const [isResolved, setIsResolved] = useState(false);
     const [showAlert, setShowAlert] = useState(false);
-    const [alertType, setAlertType] = useState(''); // "delete", "close", or "resolve"
+    const [alertType, setAlertType] = useState(""); // "delete", "close", or "resolve"
     const [dataConcern, setDataConcern] = useState(itemsData || {});
     const [emailMessageID, setEmailMessageID] = useState(null);
     const handleDateChange = (date) => {
@@ -168,20 +168,18 @@ const InquiryThread = () => {
     };
 
     /**
-    * To handle mark as closed modal
-    */
+     * To handle mark as closed modal
+     */
     const handleOpenMarkAsClosedModal = () => {
-        setAlertType('close');
+        setAlertType("close");
         setShowAlert(true);
-
     };
-
 
     /**
      * To handle delete modal
      */
     const handleOpenDeleteModal = () => {
-        setAlertType('delete');
+        setAlertType("delete");
         setShowAlert(true);
     };
 
@@ -189,9 +187,9 @@ const InquiryThread = () => {
      * To handle confirm delete/close inquiry
      */
     const handleConfirm = () => {
-        if (alertType === 'delete') {
+        if (alertType === "delete") {
             deleteInquiry();
-        } else if (alertType === 'close') {
+        } else if (alertType === "close") {
             closedInquiry();
         }
         setShowAlert(false);
@@ -203,7 +201,6 @@ const InquiryThread = () => {
     const handleCancel = () => {
         setShowAlert(false);
     };
-
 
     const handleOpenResolveModal = () => {
         if (resolveModalRef.current) {
@@ -278,7 +275,9 @@ const InquiryThread = () => {
             department: user?.department,
             buyer_email: dataConcern.buyer_email,
             buyer_lastname: dataConcern.buyer_lastname,
-            buyer_name: `${capitalizeWords(`${dataConcern.buyer_firstname} ${dataConcern.buyer_lastname}`)}`,
+            buyer_name: `${capitalizeWords(
+                `${dataConcern.buyer_firstname} ${dataConcern.buyer_lastname}`
+            )}`,
             // details_concern: dataRef.details_concern,
             //  remarks: remarks,
             //communication_type: communicationType,
@@ -1246,37 +1245,40 @@ const InquiryThread = () => {
                                     </span>
                                 )}
                                 {dataConcern?.created_by &&
-                                        dataConcern?.created_by === user?.id &&
-                                        user?.department ===
-                                            "Customer Relations - Services" && (
-                                            <FaTrash
-                                                className="text-[#EB4444] hover:text-red-600 cursor-pointer"
-                                                onClick={handleDelete}
-                                            />
-                                        )}
-
-                                    {dataConcern?.status === "Resolved" ? (
-                                        <div className="flex justify-start items-center w-[122px] font-semibold text-[13px] text-custom-lightgreen space-x-1">
-                                            <p>Ticket Resolved</p>
-                                            <IoIosCheckmarkCircle className="size-[18px] text-custom-lightgreen" />
-                                        </div>
-                                    ) : (
-                                        user?.department ===
-                                            "Customer Relations - Services" && (
-                                            <div
-                                                onClick={handleOpenResolveModal}
-                                                className="flex justify-start w-auto font-semibold text-[13px] text-[#1A73E8] underline cursor-pointer"
-                                            >
-                                                Mark as resolved
-                                            </div>
-                                        )
+                                    dataConcern?.created_by === user?.id &&
+                                    user?.department ===
+                                        "Customer Relations - Services" && (
+                                        <FaTrash
+                                            className="text-[#EB4444] hover:text-red-600 cursor-pointer"
+                                            onClick={handleOpenDeleteModal}
+                                        />
                                     )}
+
+                                {dataConcern?.status === "Resolved" ? (
+                                    <div className="flex justify-start items-center w-[122px] font-semibold text-[13px] text-custom-lightgreen space-x-1">
+                                        <p>Ticket Resolved</p>
+                                        <IoIosCheckmarkCircle className="size-[18px] text-custom-lightgreen" />
+                                    </div>
+                                ) : (
+                                    user?.department ===
+                                        "Customer Relations - Services" && (
+                                        <div
+                                            onClick={handleOpenResolveModal}
+                                            className="flex justify-start w-auto font-semibold text-[13px] text-[#1A73E8] underline cursor-pointer"
+                                        >
+                                            Mark as resolved
+                                        </div>
+                                    )
+                                )}
+                                {user?.department ===
+                                    "Customer Relations - Services" && (
                                     <div
                                         onClick={handleOpenResolveModal}
                                         className="flex justify-start w-auto font-semibold text-[13px] text-[#1A73E8] underline cursor-pointer"
                                     >
                                         Mark as closed
                                     </div>
+                                )}
                             </div>
 
                             <div className="">
@@ -1392,11 +1394,11 @@ const InquiryThread = () => {
             <div>
                 <Alert
                     title={
-                        alertType === 'delete'
-                            ? 'Are you sure you want to delete this inquiry?'
-                            : alertType === 'close'
-                                ? 'Are you sure you want to mark this inquiry as closed?'
-                                : ''
+                        alertType === "delete"
+                            ? "Are you sure you want to delete this inquiry?"
+                            : alertType === "close"
+                            ? "Are you sure you want to mark this inquiry as closed?"
+                            : ""
                     }
                     show={showAlert}
                     onCancel={handleCancel}
