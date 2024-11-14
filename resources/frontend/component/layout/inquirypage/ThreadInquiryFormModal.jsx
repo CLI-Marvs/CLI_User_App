@@ -1,25 +1,83 @@
-import React from 'react'
-import { IoIosSend, IoMdArrowDropdown } from 'react-icons/io';
+import React, { useState } from "react";
+import { IoIosSend, IoMdArrowDropdown } from "react-icons/io";
+import apiService from "../../servicesApi/apiService";
+import { data } from "autoprefixer";
+import { useStateContext } from "../../../context/contextprovider";
 
-const ThreadInquiryFormModal = ({ modalRef, dataConcern, filesRef }) => {
-    console.log("dataConcern from modal", dataConcern);
-    console.log("attachment", filesRef);
-  return (
-    <dialog
+const ThreadInquiryFormModal = ({ modalRef, dataConcern, messageRef }) => {
+    const attachmentData = JSON.parse(messageRef?.attachment || "[]");
+    const [loading, setLoading] = useState(false);
+    const { user } = useStateContext();
+
+    const formDataState = {
+        fname: dataConcern.buyer_firstname || "",
+        mname: dataConcern.buyer_middlename || "",
+        lname: dataConcern.buyer_lastname || "",
+        suffix: dataConcern.suffix_name || "",
+        buyer_email: dataConcern.buyer_email || "",
+        mobile_number: dataConcern.mobile_number || "",
+        property: dataConcern.property || "",
+        type: dataConcern.communication_type || "",
+        channels: dataConcern.channels || "",
+        user_type: dataConcern.user_type || "",
+        contract_number: dataConcern.contract_number || "",
+        details_concern: dataConcern.details_concern || "",
+        unit_number: dataConcern.unit_number || "",
+        ticket_id: dataConcern.ticket_id || "",
+    };
+
+    const submitNewEntry = async () => {
+        try {
+            const formData = new FormData();
+            Object.keys(formDataState).forEach((key) => {
+                formData.append(key, formDataState[key]);
+            });
+
+            const encodedTicketId = encodeURIComponent(formDataState.ticket_id);
+
+            const baseMessage = messageRef.details_message || ""; // Ensure the message is not undefined
+            const ticketNumber = formDataState.ticket_id; // or another variable if you fetch the ticket ID elsewhere
+            const ticketLink = `/inquirymanagement/thread/${encodedTicketId}`; // Replace with your actual URL structure
+            const referenceText = `<br><br>Reference: Ticket No. ${ticketNumber}`;
+            const formattedMessage = `${baseMessage.replace(
+                /\n/g,
+                "<br>"
+            )}${referenceText}`;
+
+            formData.append("message", formattedMessage);
+            formData.append("admin_email", user?.employee_email);
+            formData.append("admin_profile_picture", user?.profile_picture);
+
+            const response = await apiService.post(
+                "add-concern-prev",
+                formData,
+                {
+                    headers: {
+                        "Content-Type": "multipart/form-data",
+                    },
+                }
+            );
+
+            if (modalRef.current) {
+                modalRef.current.close();
+            }
+        } catch (error) {
+            console.log("error", error);
+        }
+    };
+    return (
+        <dialog
             id="Employment"
             className="modal w-[589px] rounded-[10px] shadow-custom5 backdrop:bg-black/50"
             ref={modalRef}
         >
-           
             <div className=" px-20 rounded-lg">
                 <div className="">
                     <form
                         method="dialog"
                         className="pt-1 flex justify-end -mr-[75px]"
                     >
-                        <button
-                            className="flex justify-center w-10 h-10 items-center rounded-full text-custom-bluegreen hover:bg-custombg"
-                        >
+                        <button className="flex justify-center w-10 h-10 items-center rounded-full text-custom-bluegreen hover:bg-custombg">
                             ✕
                         </button>
                     </form>
@@ -29,7 +87,6 @@ const ThreadInquiryFormModal = ({ modalRef, dataConcern, filesRef }) => {
                                 Feedback / Inquiry Form
                             </p>
                         </div>
-                       
 
                         {/* {specificInputErrors &&
                             Object.entries(specificInputErrors).map(
@@ -50,7 +107,7 @@ const ThreadInquiryFormModal = ({ modalRef, dataConcern, filesRef }) => {
                                        Message sent successfully.
                                     </p>
                                 </div>
-                            )} */}  
+                            )} */}
                     </div>
                     <div className="mb-3">
                         <p className="text-sm font-semibold mobile:text-xs">
@@ -70,6 +127,7 @@ const ThreadInquiryFormModal = ({ modalRef, dataConcern, filesRef }) => {
                                 className="w-full px-4 text-sm focus:outline-none mobile:text-xs"
                                 placeholder=""
                                 value={dataConcern.buyer_firstname || ""}
+                                readOnly
                             />
                         </div>
                         <div className="flex items-center gap-[4px]">
@@ -84,14 +142,17 @@ const ThreadInquiryFormModal = ({ modalRef, dataConcern, filesRef }) => {
                                     type="text"
                                     className="w-full px-4 text-sm focus:outline-none mobile:text-xs"
                                     value={dataConcern.buyer_middlename || ""}
-
+                                    readOnly
                                 />
                                 <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3 gap-2 text-sm bg-custom-lightestgreen">
                                     <input
                                         type="checkbox"
                                         name="checkbox"
                                         className="accent-custom-lightgreen"
-                                        value={dataConcern.buyer_middlename || ""}
+                                        value={
+                                            dataConcern.buyer_middlename || ""
+                                        }
+                                        readOnly
                                     />
                                     <p>N/A</p>
                                 </span>
@@ -110,6 +171,7 @@ const ThreadInquiryFormModal = ({ modalRef, dataConcern, filesRef }) => {
                                 className="w-full px-4 text-sm focus:outline-none mobile:text-xs"
                                 placeholder=""
                                 value={dataConcern.buyer_lastname || ""}
+                                readOnly
                             />
                         </div>
                         <div className="flex items-center gap-[4px]">
@@ -121,11 +183,11 @@ const ThreadInquiryFormModal = ({ modalRef, dataConcern, filesRef }) => {
                                 </span>
                                 <input
                                     name="suffix"
-                                    type="text"  
+                                    type="text"
                                     className="w-full px-4 text-sm focus:outline-none mobile:text-xs"
                                     placeholder=""
-                                     value={dataConcern.suffix_name || ""}
-
+                                    value={dataConcern.suffix_name || ""}
+                                    readOnly
                                 />
                                 <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3 gap-2 text-sm bg-custom-lightestgreen">
                                     <input
@@ -133,6 +195,7 @@ const ThreadInquiryFormModal = ({ modalRef, dataConcern, filesRef }) => {
                                         name="checkbox"
                                         className="accent-custom-lightgreen"
                                         value="checkbox"
+                                        readOnly
                                     />
                                     <p>N/A</p>
                                 </span>
@@ -150,10 +213,10 @@ const ThreadInquiryFormModal = ({ modalRef, dataConcern, filesRef }) => {
                                 className="w-full px-4 text-sm focus:outline-none mobile:text-xs"
                                 placeholder=""
                                 value={dataConcern.buyer_email || ""}
-
+                                readOnly
                             />
                         </div>
-                        
+
                         <div
                             className={`flex items-center border rounded-[5px] overflow-hidden border-custom-bluegreen`}
                         >
@@ -163,16 +226,10 @@ const ThreadInquiryFormModal = ({ modalRef, dataConcern, filesRef }) => {
                             <input
                                 name="mobile_number"
                                 type="number"
-                                onInput={(e) =>
-                                (e.target.value = e.target.value.replace(
-                                    /[^0-9]/g,
-                                    ""
-                                ))
-                                }
                                 className="w-full px-4 text-sm focus:outline-none mobile:text-xs"
                                 placeholder=""
                                 value={dataConcern.mobile_number || ""}
-
+                                readOnly
                             />
                         </div>
                         <div
@@ -186,7 +243,9 @@ const ThreadInquiryFormModal = ({ modalRef, dataConcern, filesRef }) => {
                                     name="property"
                                     className="appearance-none w-full px-4 text-sm py-1 bg-white focus:outline-none border-0 mobile:text-xs"
                                 >
-                                    <option value={dataConcern.property || ""}>{dataConcern.proerty || ""}</option>
+                                    <option value={dataConcern.property || ""}>
+                                        {dataConcern.proerty || ""}
+                                    </option>
                                 </select>
                                 <span className="absolute inset-y-0 right-0 flex  items-center pr-3 pl-3 bg-custom-lightestgreen text-custom-bluegreen pointer-events-none">
                                     <IoMdArrowDropdown />
@@ -204,7 +263,13 @@ const ThreadInquiryFormModal = ({ modalRef, dataConcern, filesRef }) => {
                                     name="details_concern"
                                     className="appearance-none text-sm w-full px-4 py-1 bg-white focus:outline-none border-0 mobile:text-xs"
                                 >
-                                    <option value={dataConcern.details_concern || ""}>{dataConcern.details_concern || ""}</option>
+                                    <option
+                                        value={
+                                            dataConcern.details_concern || ""
+                                        }
+                                    >
+                                        {dataConcern.details_concern || ""}
+                                    </option>
                                 </select>
                                 <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3 bg-custom-lightestgreen text-custom-bluegreen pointer-events-none">
                                     <IoMdArrowDropdown />
@@ -222,8 +287,13 @@ const ThreadInquiryFormModal = ({ modalRef, dataConcern, filesRef }) => {
                                     name="type"
                                     className="appearance-none text-sm w-full px-4 py-1 bg-white focus:outline-none border-0 mobile:text-xs"
                                 >
-                                    <option value={dataConcern.communication_type || ""}>{dataConcern.communication_type || ""}</option>
-                        
+                                    <option
+                                        value={
+                                            dataConcern.communication_type || ""
+                                        }
+                                    >
+                                        {dataConcern.communication_type || ""}
+                                    </option>
                                 </select>
                                 <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3 bg-custom-lightestgreen text-custom-bluegreen pointer-events-none">
                                     <IoMdArrowDropdown />
@@ -238,11 +308,12 @@ const ThreadInquiryFormModal = ({ modalRef, dataConcern, filesRef }) => {
                             </span>
                             <div className="relative w-full">
                                 <select
-                                   
                                     name="channels"
                                     className="appearance-none text-sm w-full px-4 py-1 bg-white focus:outline-none border-0 mobile:text-xs"
                                 >
-                                    <option value={dataConcern.channels || ""}>{dataConcern.channels || ""}</option>
+                                    <option value={dataConcern.channels || ""}>
+                                        {dataConcern.channels || ""}
+                                    </option>
                                 </select>
                                 <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3 bg-custom-lightestgreen text-custom-bluegreen pointer-events-none">
                                     <IoMdArrowDropdown />
@@ -264,7 +335,9 @@ const ThreadInquiryFormModal = ({ modalRef, dataConcern, filesRef }) => {
                                     name="user_type"
                                     className="appearance-none w-full px-4 py-1 text-sm bg-white focus:outline-none border-0 mobile:text-xs"
                                 >
-                                    <option value={dataConcern.user_type|| ""}>{dataConcern.user_type || ""}</option>
+                                    <option value={dataConcern.user_type || ""}>
+                                        {dataConcern.user_type || ""}
+                                    </option>
                                 </select>
                                 <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3  bg-custom-lightestgreen text-custom-bluegreen pointer-events-none">
                                     <IoMdArrowDropdown />
@@ -302,12 +375,7 @@ const ThreadInquiryFormModal = ({ modalRef, dataConcern, filesRef }) => {
                                 className="w-full px-4 text-sm focus:outline-none mobile:text-xs"
                                 placeholder=""
                                 value={dataConcern.contract_number || ""}
-                                onInput={(e) =>
-                                (e.target.value = e.target.value.replace(
-                                    /[^0-9]/g,
-                                    ""
-                                ))
-                                }
+                                readOnly
                             />
                         </div>
                         <div className="flex items-center border border-custom-bluegreen rounded-[5px] overflow-hidden">
@@ -318,6 +386,7 @@ const ThreadInquiryFormModal = ({ modalRef, dataConcern, filesRef }) => {
                                 name="unit_number"
                                 type="text"
                                 value={dataConcern.unit_number || ""}
+                                readOnly
                                 className="w-full px-4 text-sm focus:outline-none mobile:text-xs"
                                 placeholder=""
                             />
@@ -343,31 +412,35 @@ const ThreadInquiryFormModal = ({ modalRef, dataConcern, filesRef }) => {
                                 name="details_message"
                                 placeholder=""
                                 rows="4"
+                                readOnly
                                 className={` border-custom-bluegreen rounded-b-[5px] border-t w-full pl-2 outline-none`}
                             ></textarea>
                         </div>
                     </div>
                     <div className="flex flex-col mt-5 mb-12">
                         <div className="flex justify-between w-54 tablet:flex-col">
-                         {/*    <div>{filesRef && filesRef.attachment.map((item) => {
-                                return (
-                                    <div>
-                                        <span>{item.original_file_name}</span>
-                                    </div>
-                                )
-                            })}</div> */}
+                            <div>
+                                {attachmentData &&
+                                    attachmentData.map((item, key) => {
+                                        return (
+                                            <div>
+                                                <span key={key}>
+                                                    {item.original_file_name}
+                                                </span>
+                                            </div>
+                                        );
+                                    })}
+                            </div>
                             <button
-                              /*   onClick={handleSubmit}
-                                disabled={loading} */
+                                onClick={submitNewEntry}
+                                disabled={loading}
                                 type="submit"
                                 className={`w-[133px] text-sm montserrat-semibold text-white h-[40px] rounded-[10px] gradient-btn2 flex justify-center items-center gap-2 tablet:w-full hover:shadow-custom4
 
                                             `}
                             >
-                                
-                                        Submit
-                                        <IoIosSend />
-                                   
+                                Submit
+                                <IoIosSend />
                             </button>
                         </div>
                         {/* <div className="mt-2">
@@ -394,7 +467,7 @@ const ThreadInquiryFormModal = ({ modalRef, dataConcern, filesRef }) => {
                 </div>
             </div>
         </dialog>
-  )
-}
+    );
+};
 
-export default ThreadInquiryFormModal
+export default ThreadInquiryFormModal;

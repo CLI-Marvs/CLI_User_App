@@ -32,6 +32,7 @@ use App\Jobs\JobToPersonnelAssign;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use App\Events\InquiryAssignedLogs;
+use App\Jobs\BuyerReplyInResolveOrClose;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
@@ -499,6 +500,75 @@ class ConcernController extends Controller
         }
     }
 
+
+    public function addConcernFromPreviousInquiry(Request $request)
+    {
+        try {
+            
+            $user = $request->user();           
+            $lastConcern = Concerns::latest()->first();
+            $messageRef = Messages::where('ticket_id', $request->ticket_id)
+                                  ->whereNotNull('buyer_email')
+                                  ->latest()
+                                  ->first();
+            $nextId = $lastConcern ? $lastConcern->id + 1 : 1;
+            $formattedId = str_pad($nextId, 8, '0', STR_PAD_LEFT);
+
+            $ticketId = 'Ticket#24' . $formattedId;
+
+
+            $concerns = new Concerns();
+            $concerns->details_concern = $request->details_concern;
+            $concerns->property = $request->property;
+            $concerns->details_message = $request->message;
+            $concerns->status = "unresolved";
+            $concerns->ticket_id = $ticketId;
+            $concerns->user_type = $request->user_type;
+            if ($request->user_type === "Others") {
+                $concerns->user_type = $request->other_user_type;
+            }
+            $concerns->buyer_name
+                = $request->fname . ' ' . $request->mname . ' ' .  $request->lname;
+            $concerns->buyer_firstname = $request->fname;
+            $concerns->buyer_middlename =
+                $request->mname;
+            $concerns->buyer_lastname = $request->lname;
+            $concerns->mobile_number = $request->mobile_number;
+            $concerns->contract_number = $request->contract_number;
+            $concerns->unit_number = $request->unit_number;
+            $concerns->buyer_email = $request->buyer_email;
+            $concerns->communication_type = $request->type;
+            $concerns->channels = $request->channels;
+            $concerns->inquiry_type = "new_ticket";
+            $concerns->save();
+
+            $this->inquiryReceivedLogs($request, $ticketId);
+            $this->concernsCreatedBy($user, $concerns->id);
+
+          
+
+            $messages = new Messages();
+            $messages->buyer_email = $request->buyer_email;
+            /* $messages->admin_id = $request->admin_id; */
+            /*  $messages->admin_profile_picture = $request->admin_profile_picture; */
+            $messages->attachment = $messageRef->attachment;
+            $messages->ticket_id = $concerns->ticket_id;
+            $messages->details_message = $request->message;
+            $messages->buyer_name = $request->fname . ' ' . $request->lname;
+            $messages->save();
+
+            $data = [
+                'buyer_email' => $request->buyer_email,
+                'lname' => $request->lname,
+            ];
+            BuyerReplyInResolveOrClose::dispatch($data);
+
+            return response()->json('Successfully added');
+        } catch (\Exception $e) {
+            \Log::error("Error occurred: " . $e->getMessage());
+            return response()->json(['message' => 'An error occurred.', 'error' => $e->getMessage()], 500);
+        }
+    }
 
     public function updateInfo(Request $request)
     {

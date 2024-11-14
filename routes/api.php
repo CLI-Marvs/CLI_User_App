@@ -86,6 +86,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/upload-notepad', [SapController::class, 'uploadNotepad']);
     Route::get('/get-concern', [ConcernController::class, 'getAllConcerns']);
     Route::post('/add-concern', [ConcernController::class, 'addConcernPublic']);
+    Route::post('/add-concern-prev', [ConcernController::class, 'addConcernFromPreviousInquiry']);
     Route::get('/get-message/{ticketId}', [ConcernController::class, 'getMessage']);
     Route::post('/send-message', [ConcernController::class, 'sendMessage']);
     Route::get('/get-logs/{ticketId}', [ConcernController::class, 'getInquiryLogs']);

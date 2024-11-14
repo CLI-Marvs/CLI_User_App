@@ -7,7 +7,7 @@ import { useStateContext } from "../../../context/contextprovider";
 import { Link, useLocation, useParams } from "react-router-dom";
 
 const UserMessages = ({ items, dataConcern }) => {
-    const attachmentData = JSON.parse(items.attachment || "[]");
+    const attachmentData = JSON.parse(items?.attachment || "[]");
     const { data } = useStateContext();
 
     const params = useParams();
@@ -55,7 +55,7 @@ const UserMessages = ({ items, dataConcern }) => {
             <div className="w-full mt-[10px]">
                 <div className="w-full h-auto gradient-background1 rounded-b-[10px] rounded-r-[10px]  p-[20px] pl-[31px] text-xs text-white">
                     <div className="break-words whitespace-pre-wrap">
-                        <p
+                        <p className="cursor-pointer"
                             dangerouslySetInnerHTML={{
                                 __html: items.details_message,
                             }}

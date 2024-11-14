@@ -422,7 +422,6 @@ const InquiryThread = () => {
         : [];
      const getLatestMessageFromBuyer = combineThreadMessages.find((item) => item.buyer_email);
 
-     console.log("getLatestMessageFromBuyer", getLatestMessageFromBuyer);
     // useEffect(() => {
     //     let adminMessageChannel;
     //     let newTicketId;
@@ -1347,7 +1346,7 @@ const InquiryThread = () => {
             <div>
                 <ThreadInquiryFormModal
                     modalRef={modalRef2}
-                    filesRef={getLatestMessageFromBuyer}
+                    messageRef={getLatestMessageFromBuyer}
                     dataConcern={dataConcern}
                 />
             </div>
