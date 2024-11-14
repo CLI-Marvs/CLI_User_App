@@ -66,6 +66,7 @@ const InquiryThread = () => {
     const ticketId = decodeURIComponent(params.id);
     const [isResolved, setIsResolved] = useState(false);
     const [showAlert, setShowAlert] = useState(false);
+    const [alertType, setAlertType] = useState(''); // "delete", "close", or "resolve"
     const [dataConcern, setDataConcern] = useState(itemsData || {});
     const [emailMessageID, setEmailMessageID] = useState(null);
     const handleDateChange = (date) => {
@@ -167,17 +168,32 @@ const InquiryThread = () => {
     };
 
     /**
-     * To handle delete inquiry
+    * To handle mark as closed modal
+    */
+    const handleOpenMarkAsClosedModal = () => {
+        setAlertType('close');
+        setShowAlert(true);
+
+    };
+
+
+    /**
+     * To handle delete modal
      */
-    const handleDelete = () => {
+    const handleOpenDeleteModal = () => {
+        setAlertType('delete');
         setShowAlert(true);
     };
 
     /**
-     * To handle confirm delete inquiry
+     * To handle confirm delete/close inquiry
      */
     const handleConfirm = () => {
-        handleDeleteInquiry();
+        if (alertType === 'delete') {
+            deleteInquiry();
+        } else if (alertType === 'close') {
+            closedInquiry();
+        }
         setShowAlert(false);
     };
 
@@ -187,6 +203,7 @@ const InquiryThread = () => {
     const handleCancel = () => {
         setShowAlert(false);
     };
+
 
     const handleOpenResolveModal = () => {
         if (resolveModalRef.current) {
@@ -242,12 +259,36 @@ const InquiryThread = () => {
         }
     };
 
-    const handleDeleteInquiry = async () => {
+    /**
+     * Function to delete inquiry
+     */
+    const deleteInquiry = async () => {
         await apiService.post("delete-concerns", { ticketId });
         navigate("/inquirymanagement/inquirylist");
         getAllConcerns();
     };
-
+    /**
+     * To handle close inquiry
+     */
+    const closedInquiry = async () => {
+        // await apiService.post("close-concerns", { ticketId });
+        await apiService.post("close-concerns", {
+            ticket_id: ticketId,
+            admin_name: `${user?.firstname} ${user?.lastname}`,
+            department: user?.department,
+            buyer_email: dataConcern.buyer_email,
+            buyer_lastname: dataConcern.buyer_lastname,
+            buyer_name: `${capitalizeWords(`${dataConcern.buyer_firstname} ${dataConcern.buyer_lastname}`)}`,
+            // details_concern: dataRef.details_concern,
+            //  remarks: remarks,
+            //communication_type: communicationType,
+            //surveyLink: selectedSurveyName,
+            //assignees: assigneesPersonnel[ticketId],
+            //message_id: messageId,
+        });
+        navigate("/inquirymanagement/inquirylist");
+        getAllConcerns();
+    };
     const submitMessage = async () => {
         setLoading(true);
         setIsConfirmModalOpen(false);
@@ -880,7 +921,7 @@ const InquiryThread = () => {
                                     <div className="flex justify-center w-[20px] shrink-0">
                                         <LuTrash2
                                             className="text-custom-bluegreen hover:text-red-500 cursor-pointer"
-                                            onClick={handleDeleteInquiry}
+                                            onClick={deleteInquiry}
                                         />
                                     </div>
                                 )} */}
@@ -1202,7 +1243,7 @@ const InquiryThread = () => {
                                         "Customer Relations - Services" && (
                                         <FaTrash
                                             className="text-[#EB4444] hover:text-red-600 cursor-pointer"
-                                            onClick={handleDelete}
+                                            onClick={handleOpenDeleteModal}
                                         />
                                     )}
 
@@ -1222,12 +1263,15 @@ const InquiryThread = () => {
                                         </div>
                                     )
                                 )}
-                                <div
-                                    onClick={handleOpenResolveModal}
-                                    className="flex justify-start w-auto font-semibold text-[13px] text-[#1A73E8] underline cursor-pointer"
-                                >
-                                    Mark as closed
-                                </div>
+                                {user?.department ===
+                                    "Customer Relations - Services" && (
+                                        <div
+                                            onClick={handleOpenMarkAsClosedModal}
+                                            className="flex justify-start w-auto font-semibold text-[13px] text-[#1A73E8] underline cursor-pointer"
+                                        >
+                                            Mark as closed
+                                        </div>
+                                    )}
                             </div>
                             {dataConcern?.status === "Resolved" && (
                                 <div
@@ -1351,7 +1395,13 @@ const InquiryThread = () => {
             </div>
             <div>
                 <Alert
-                    title="Are you sure you want to delete this inquiry?"
+                    title={
+                        alertType === 'delete'
+                            ? 'Are you sure you want to delete this inquiry?'
+                            : alertType === 'close'
+                                ? 'Are you sure you want to mark this inquiry as closed?'
+                                : ''
+                    }
                     show={showAlert}
                     onCancel={handleCancel}
                     onConfirm={handleConfirm}
