@@ -593,6 +593,7 @@ class ConcernController extends Controller
             $concern->buyer_middlename = $request->buyer_middlename;
             $concern->buyer_lastname = $request->buyer_lastname;
             $concern->user_type = $request->user_type === "Others" ? $request->other_user_type : $request->user_type;
+            $concern->details_concern = $request->details_concern;
             $concern->communication_type = $request->communication_type;
             $concern->buyer_email = $request->buyer_email;
             $concern->property = $request->property;
@@ -1342,6 +1343,7 @@ class ConcernController extends Controller
                         'user_type' => $request->user_type,
                         'communication_type' => $request->communication_type,
                         'contract_number' => $request->contract_number,
+                        'details_concern' => $request->details_concern,
                         'unit_number' => $request->unit_number,
                         'property' => $request->property,
                         'channels' => $request->channels,
@@ -1354,6 +1356,7 @@ class ConcernController extends Controller
                         'buyer_middlename' => $buyerOldData['buyer_middlename'],
                         'suffix' => $buyerOldData['suffix_name'] ?? null,
                         'buyer_email' => $buyerOldData['buyer_email'],
+                        'details_concern' => $buyerOldData['details_concern'],
                         'mobile_number' => $buyerOldData['mobile_number'],
                         'user_type' => $buyerOldData['user_type'],
                         'communication_type' => $buyerOldData['communication_type'] ?? null,
@@ -1375,9 +1378,8 @@ class ConcernController extends Controller
             $inquiry->message_log = "Data updated " . $request->buyer_firstname . ' ' . $request->buyer_lastname;
             $inquiry->save();
 
-            return ['success' => true, 'message' => 'Log successfully updated', 'data' => $logData];
         } catch (\Exception $e) {
-            return response()->json(['error saving log in buyer data' => $e->getMessage()], 500);
+            return response()->json(['Error saving log in buyer data' => $e->getMessage()], 500);
         }
     }
 

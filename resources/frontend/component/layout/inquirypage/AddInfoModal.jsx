@@ -8,12 +8,12 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
     const predefinedUserTypes = ["Property Owner", "Buyer", "Broker", "Seller", "Lessee"];
     const { getAllConcerns, propertyNamesList, updateConcern, user, getInquiryLogs } =
         useStateContext();
-
+ 
     const [message, setMessage] = useState(dataConcern.admin_remarks || "");
-
+ 
     const [dataToUpdate, setDataToUpdate] = useState({
         ticket_id: dataConcern.ticket_id,
-        details_concern:dataConcern.details_concern,
+        details_concern: dataConcern.details_concern || "",
         contract_number: dataConcern.contract_number || "",
         unit_number: dataConcern.unit_number || "",
         property: dataConcern.property || "",
@@ -34,7 +34,7 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
             : "",
 
     });
-
+    console.log("dataToUpdate", dataToUpdate);
     /* Buyers old data to be used in AssignDetails.jsx 
      * to compare the values and show the differences
      */
@@ -42,6 +42,7 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
         buyer_firstname: dataConcern.buyer_firstname,
         buyer_lastname: dataConcern.buyer_lastname,
         buyer_middlename: dataConcern.buyer_middlename,
+        details_concern: dataConcern.details_concern,
         suffix_name: dataConcern.suffix_name,
         buyer_email: dataConcern.buyer_email,
         mobile_number: dataConcern.mobile_number,
@@ -117,7 +118,7 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
         });
     };
 
-     
+
     const handleShowUpdateAlert = () => {
         setShowAlert(true);
         modalRef.current.showModal();
@@ -175,6 +176,7 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
                 contract_number: dataConcern.contract_number || "",
                 unit_number: dataConcern.unit_number || "",
                 property: dataConcern.property || "",
+                details_concern: dataConcern.details_concern || "",
                 admin_remarks: dataConcern.admin_remarks || "",
                 buyer_email: dataConcern.buyer_email || "",
                 mobile_number: dataConcern.mobile_number || "",
@@ -426,15 +428,15 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
                         <div
                             className={`flex items-center border border-[D6D6D6] rounded-[5px] overflow-hidden`}
                         >
-                            {/* TODO: add functionation to change the value of Concern Regarding */}
+
                             <span className="text-custom-gray81 text-sm bg-[#EDEDED] flex items-center w-[308px] tablet:w-[175px] mobile:w-[270px] mobile:text-xs -mr-3 pl-3 py-1">
                                 Concern Regarding
                             </span>
                             <div className="relative w-full">
                                 <select
-                                   /*  name="channels"
-                                    value={dataToUpdate.channels || ""}
-                                    onChange={handleChange} */
+                                    name="details_concern"
+                                    value={dataToUpdate.details_concern || ""}
+                                    onChange={handleChange}
                                     className="appearance-none w-full px-4 text-sm py-1 bg-white focus:outline-none border-0 mobile:text-xs"
                                 >
                                     <option value="">(Select)</option>

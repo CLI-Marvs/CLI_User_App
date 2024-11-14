@@ -682,6 +682,34 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                                     </p>
                                 )}
 
+                                {/* Concern regarding */}
+                                {(details.buyer_old_data.details_concern !== details.buyer_updated_data.details_concern) && (
+                                    <p className="text-sm text-custom-bluegreen">
+                                        Concern Regarding:
+                                        {details.buyer_old_data.details_concern && details.buyer_old_data.details_concern !== details.buyer_updated_data.details_concern ? (
+                                            <>
+                                                <span className="text-custom-grayA5">{" "}From{" "}{"{"}</span>
+                                                <span className="text-red-500">
+                                                    {" "}{details.buyer_old_data.details_concern}{" "}
+                                                </span>
+                                                <span className="text-custom-grayA5">{"}"}{" "}To{" "}{"{"}</span>
+                                                <span className="text-black">
+                                                    {" "}{details.buyer_updated_data.details_concern}{" "}
+                                                </span>
+                                                <span className="text-custom-grayA5">{"}"}</span>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <span className="text-custom-grayA5">{details.buyer_old_data.details_concern ? " " : " Added "}</span>
+                                                <span className="text-black">
+                                                    {" "}{details.buyer_updated_data.details_concern}{" "}
+                                                </span>
+                                            </>
+                                        )}
+                                    </p>
+                                )}
+
+                                
                                 {/* Contract number */}
                                 {(details.buyer_old_data.contract_number !== details.buyer_updated_data.contract_number) && (
                                     <p className="text-sm text-custom-bluegreen">
