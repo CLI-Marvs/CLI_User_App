@@ -13,7 +13,6 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
 
     const [dataToUpdate, setDataToUpdate] = useState({
         ticket_id: dataConcern.ticket_id,
-        property: dataConcern.property,
         details_concern:dataConcern.details_concern,
         contract_number: dataConcern.contract_number || "",
         unit_number: dataConcern.unit_number || "",
