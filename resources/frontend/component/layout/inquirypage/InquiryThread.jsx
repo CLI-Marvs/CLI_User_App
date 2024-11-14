@@ -1195,50 +1195,49 @@ const InquiryThread = () => {
                                 </div>
                             </div>
                             <div className="border my-2 border-t-1 border-custom-lightestgreen"></div>
-                            <div className="w-full flex justify-end gap-[13px]">
-                                {dataConcern?.created_by &&
-                                    dataConcern?.created_by === user?.id &&
-                                    user?.department ===
-                                        "Customer Relations - Services" && (
-                                        <FaTrash
-                                            className="text-[#EB4444] hover:text-red-600 cursor-pointer"
-                                            onClick={handleDelete}
-                                        />
-                                    )}
-
-                                {dataConcern?.status === "Resolved" ? (
-                                    <div className="flex justify-start items-center w-[122px] font-semibold text-[13px] text-custom-lightgreen space-x-1">
-                                        <p>Ticket Resolved</p>
-                                        <IoIosCheckmarkCircle className="size-[18px] text-custom-lightgreen" />
-                                    </div>
-                                ) : (
-                                    user?.department ===
-                                        "Customer Relations - Services" && (
-                                        <div
-                                            onClick={handleOpenResolveModal}
-                                            className="flex justify-start w-auto font-semibold text-[13px] text-[#1A73E8] underline cursor-pointer"
-                                        >
-                                            Mark as resolved
-                                        </div>
-                                    )
-                                )}
-                                <div
-                                    onClick={handleOpenResolveModal}
-                                    className="flex justify-start w-auto font-semibold text-[13px] text-[#1A73E8] underline cursor-pointer"
-                                >
-                                    Mark as closed
-                                </div>
-                            </div>
-                            {dataConcern?.status === "Resolved" && (
-                                <div
-                                    onClick={handleOpenAddInfoModal}
-                                    className="flex justify-end mt-3"
-                                >
-                                    <span className="underline cursor-pointer">
+                            <div className="w-full flex justify-end gap-[13px] items-center">
+                                {dataConcern?.status === "Resolved" && (
+                                    <span
+                                        className="w-auto font-semibold text-[13px] text-[#1A73E8] underline cursor-pointer"
+                                        onClick={handleOpenAddInfoModal}
+                                    >
                                         Create new ticket
                                     </span>
-                                </div>
-                            )}
+                                )}
+                                {dataConcern?.created_by &&
+                                        dataConcern?.created_by === user?.id &&
+                                        user?.department ===
+                                            "Customer Relations - Services" && (
+                                            <FaTrash
+                                                className="text-[#EB4444] hover:text-red-600 cursor-pointer"
+                                                onClick={handleDelete}
+                                            />
+                                        )}
+
+                                    {dataConcern?.status === "Resolved" ? (
+                                        <div className="flex justify-start items-center w-[122px] font-semibold text-[13px] text-custom-lightgreen space-x-1">
+                                            <p>Ticket Resolved</p>
+                                            <IoIosCheckmarkCircle className="size-[18px] text-custom-lightgreen" />
+                                        </div>
+                                    ) : (
+                                        user?.department ===
+                                            "Customer Relations - Services" && (
+                                            <div
+                                                onClick={handleOpenResolveModal}
+                                                className="flex justify-start w-auto font-semibold text-[13px] text-[#1A73E8] underline cursor-pointer"
+                                            >
+                                                Mark as resolved
+                                            </div>
+                                        )
+                                    )}
+                                    <div
+                                        onClick={handleOpenResolveModal}
+                                        className="flex justify-start w-auto font-semibold text-[13px] text-[#1A73E8] underline cursor-pointer"
+                                    >
+                                        Mark as closed
+                                    </div>
+                            </div>
+
                             <div className="">
                                 <div className="">
                                     {combineThreadMessages.length > 0 &&
