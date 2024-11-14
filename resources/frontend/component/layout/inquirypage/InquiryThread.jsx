@@ -1273,7 +1273,7 @@ const InquiryThread = () => {
                                 {user?.department ===
                                     "Customer Relations - Services" && (
                                     <div
-                                        onClick={handleOpenResolveModal}
+                                        onClick={handleOpenMarkAsClosedModal}
                                         className="flex justify-start w-auto font-semibold text-[13px] text-[#1A73E8] underline cursor-pointer"
                                     >
                                         Mark as closed
