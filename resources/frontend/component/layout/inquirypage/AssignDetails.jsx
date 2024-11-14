@@ -347,9 +347,16 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                                 <p className="text-sm break-words whitespace-pre-wrap">{details.remarks}</p>
                             </div>
                             <div>
-                                <p className="text-custom-solidgreen mb-1">
-                                    Ticket Resolved!
-                                </p>
+                                {details?.message_tag === 'Marked as resolved by' ? (
+                                    <p className="text-custom-solidgreen mb-1">
+                                        Ticket Resolved!
+                                    </p>
+                                ) : (
+                                    <p className="text-custom-solidgreen mb-1">
+                                        Ticket Closed!
+                                    </p>
+                                ) }
+                    
                             </div>
                             <div>
                                 <p className="text-[#A5A5A5] mb-1">
@@ -447,7 +454,7 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                                 )}
 
                                 {/* Middle name */}
-                                {(details.buyer_old_data.buyer_middlename !==  details.buyer_updated_data.buyer_middlename) && (
+                                {(details.buyer_old_data.buyer_middlename !== details.buyer_updated_data.buyer_middlename) && (
                                     <p className="text-sm text-custom-bluegreen">
                                         Middle Name:
                                         {details.buyer_old_data.buyer_middlename && details.buyer_old_data.buyer_middlename !== details.buyer_updated_data.buyer_middlename ? (
@@ -474,7 +481,7 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                                 )}
 
                                 {/* Last name */}
-                                {(details.buyer_old_data.buyer_lastname !==  details.buyer_updated_data.buyer_lastname) && (
+                                {(details.buyer_old_data.buyer_lastname !== details.buyer_updated_data.buyer_lastname) && (
                                     <p className="text-sm text-custom-bluegreen">
                                         Last Name:
                                         {details.buyer_old_data.buyer_lastname && details.buyer_old_data.buyer_lastname !== details.buyer_updated_data.buyer_lastname ? (
@@ -501,7 +508,7 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                                 )}
 
                                 {/* Suffix name */}
-                                {(details.buyer_old_data.suffix !==  details.buyer_updated_data.suffix) && (
+                                {(details.buyer_old_data.suffix !== details.buyer_updated_data.suffix) && (
                                     <p className="text-sm text-custom-bluegreen">
                                         Suffix Name:
                                         {details.buyer_old_data.suffix && details.buyer_old_data.suffix !== details.buyer_updated_data.suffix ? (
@@ -529,7 +536,7 @@ const AssignDetails = ({ logMessages, ticketId }) => {
 
 
                                 {/* Email */}
-                                {(details.buyer_old_data.buyer_email !==  details.buyer_updated_data.buyer_email) && (
+                                {(details.buyer_old_data.buyer_email !== details.buyer_updated_data.buyer_email) && (
                                     <p className="text-sm text-custom-bluegreen">
                                         Email:
                                         {details.buyer_old_data.buyer_email &&
@@ -589,7 +596,7 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                                 )}
 
                                 {/*User type*/}
-                                {(details.buyer_old_data.user_type !==  details.buyer_updated_data.user_type) && (
+                                {(details.buyer_old_data.user_type !== details.buyer_updated_data.user_type) && (
                                     <p className="text-sm text-custom-bluegreen">
                                         Type:
                                         {details.buyer_old_data.user_type &&
@@ -601,7 +608,7 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                                                 </span>
                                                 <span className="text-custom-grayA5">{"}"}{" "}To{" "}{"{"}</span>
                                                 <span className="text-black">
-                                                        {" "}{details.buyer_updated_data.user_type === "Others" ? details.buyer_updated_data.other_user_type : details.buyer_updated_data.user_type}{" "}
+                                                    {" "}{details.buyer_updated_data.user_type === "Others" ? details.buyer_updated_data.other_user_type : details.buyer_updated_data.user_type}{" "}
                                                 </span>
                                                 <span className="text-custom-grayA5">{"}"}</span>
                                             </>
@@ -611,7 +618,7 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                                                     {details.buyer_old_data.user_type ? " " : " Added "}
                                                 </span>
                                                 <span className="text-black">
-                                                        {" "}{details.buyer_updated_data.user_type === "Others" ? details.buyer_updated_data.other_user_type : details.buyer_updated_data.user_type}{" "}
+                                                    {" "}{details.buyer_updated_data.user_type === "Others" ? details.buyer_updated_data.other_user_type : details.buyer_updated_data.user_type}{" "}
                                                 </span>
                                             </>
                                         )}
@@ -619,7 +626,7 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                                 )}
 
                                 {/* Communication type */}
-                                {(details.buyer_old_data.communication_type !==  details.buyer_updated_data.communication_type) && (
+                                {(details.buyer_old_data.communication_type !== details.buyer_updated_data.communication_type) && (
                                     <p className="text-sm text-custom-bluegreen">
                                         User type:
                                         {details.buyer_old_data.communication_type &&
@@ -649,7 +656,7 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                                 )}
 
                                 {/* Channels */}
-                                {(details.buyer_old_data.channels !==  details.buyer_updated_data.channels) && (
+                                {(details.buyer_old_data.channels !== details.buyer_updated_data.channels) && (
                                     <p className="text-sm text-custom-bluegreen">
                                         Channels:
                                         {details.buyer_old_data.channels && details.buyer_old_data.channels !== details.buyer_updated_data.channels ? (
@@ -674,9 +681,9 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                                         )}
                                     </p>
                                 )}
-                                
+
                                 {/* Contract number */}
-                                {(details.buyer_old_data.contract_number !==  details.buyer_updated_data.contract_number) && (
+                                {(details.buyer_old_data.contract_number !== details.buyer_updated_data.contract_number) && (
                                     <p className="text-sm text-custom-bluegreen">
                                         Contract No:
                                         {details.buyer_old_data.contract_number && details.buyer_old_data.contract_number !== details.buyer_updated_data.contract_number ? (
@@ -703,7 +710,7 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                                 )}
 
                                 {/* Property */}
-                                {(details.buyer_old_data.property !==  details.buyer_updated_data.property) && (
+                                {(details.buyer_old_data.property !== details.buyer_updated_data.property) && (
                                     <p className="text-sm text-custom-bluegreen">
                                         Property:
                                         {details.buyer_old_data.property && details.buyer_old_data.property !== details.buyer_updated_data.property ? (
@@ -730,7 +737,7 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                                 )}
 
                                 {/*Unit/Lot */}
-                                {(details.buyer_old_data.unit_number !==  details.buyer_updated_data.unit_number) && (
+                                {(details.buyer_old_data.unit_number !== details.buyer_updated_data.unit_number) && (
                                     <p className="text-sm text-custom-bluegreen">
                                         Unit No:
                                         {details.buyer_old_data.unit_number && details.buyer_old_data.unit_number !== details.buyer_updated_data.unit_number ? (
@@ -774,9 +781,9 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                                             </>
                                         ) : (
                                             <>
-                                                    <span className="text-custom-grayA5">{details.buyer_old_data.admin_remarks ? " " : " Added "}</span>
+                                                <span className="text-custom-grayA5">{details.buyer_old_data.admin_remarks ? " " : " Added "}</span>
                                                 <span className="text-black">
-                                                        {" "}{details.buyer_updated_data.admin_remarks}{" "}
+                                                    {" "}{details.buyer_updated_data.admin_remarks}{" "}
                                                 </span>
                                             </>
                                         )}
