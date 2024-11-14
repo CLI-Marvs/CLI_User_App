@@ -1378,7 +1378,6 @@ class ConcernController extends Controller
             $inquiry->message_log = "Data updated " . $request->buyer_firstname . ' ' . $request->buyer_lastname;
             $inquiry->save();
 
-            return ['success' => true, 'message' => 'Log successfully updated', 'data' => $logData];
         } catch (\Exception $e) {
             return response()->json(['Error saving log in buyer data' => $e->getMessage()], 500);
         }
