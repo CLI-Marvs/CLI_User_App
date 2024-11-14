@@ -424,6 +424,54 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
                                 </span>
                             </div>
                         </div>
+                        <div
+                            className={`flex items-center border border-[D6D6D6] rounded-[5px] overflow-hidden`}
+                        >
+                            <span className="text-custom-gray81 text-sm bg-[#EDEDED] flex items-center w-[308px] tablet:w-[175px] mobile:w-[270px] mobile:text-xs -mr-3 pl-3 py-1">
+                                Concern Regarding
+                            </span>
+                            <div className="relative w-full">
+                                <select
+                                   /*  name="channels"
+                                    value={dataToUpdate.channels || ""}
+                                    onChange={handleChange} */
+                                    className="appearance-none w-full px-4 text-sm py-1 bg-white focus:outline-none border-0 mobile:text-xs"
+                                >
+                                    <option value="">(Select)</option>
+                                    <option value="Reservation Documents">
+                                        Reservation Documents
+                                    </option>
+                                    <option value="Payment Issues">
+                                        Payment Issues
+                                    </option>
+                                    <option value="SOA/ Buyer's Ledger">
+                                        SOA/ Buyer's Ledger
+                                    </option>
+                                    <option value="Turn Over Status">
+                                        Turn Over Status
+                                    </option>
+                                    <option value="Unit Status">
+                                        Unit Status
+                                    </option>
+                                    <option value="Loan Application">
+                                        Loan Application
+                                    </option>
+                                    <option value="Title and Other Registration Documents">
+                                        Title and Other Registration Documents
+                                    </option>
+                                    <option value="Commissions">
+                                        Commissions
+                                    </option>
+                                    <option value="Leasing">Leasing</option>
+                                    <option value="Other Concerns">
+                                        Other Concerns
+                                    </option>
+                                </select>
+                                <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3 bg-[#EDEDED] text-custom-gray81 pointer-events-none">
+                                    <IoMdArrowDropdown />
+                                </span>
+                            </div>
+                        </div>
                     </div>
                     <div className="flex flex-col gap-[10px]">
                         <div
