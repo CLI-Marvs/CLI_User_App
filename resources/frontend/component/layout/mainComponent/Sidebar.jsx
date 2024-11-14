@@ -44,10 +44,10 @@ const Sidebar = () => {
 
   useEffect(() => {
     if (!location.pathname.startsWith("/inquirymanagement/thread")) {
-        localStorage.removeItem("dataConcern");
-
-    } 
-}, [location]);
+      localStorage.removeItem("dataConcern");
+      localStorage.removeItem("updatedData");
+    }
+  }, [location]);
   useEffect(() => {
     getCount();
   }, [location]);
@@ -79,9 +79,9 @@ const Sidebar = () => {
           <Link to="/notification">
             <ListItem
               className={`flex text-sm items-center w-[185px] h-[36px] pl-[12px] pr-[60px] gap-2 rounded-[10px] ${activeItem === "notification" &&
-                  location.pathname.startsWith("/notification")
-                  ? "bg-custom-lightestgreen text-custom-solidgreen font-semibold"
-                  : " hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
+                location.pathname.startsWith("/notification")
+                ? "bg-custom-lightestgreen text-custom-solidgreen font-semibold"
+                : " hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
                 } `}
               onClick={() => handleItemClick("notification")}
             >
@@ -129,11 +129,11 @@ const Sidebar = () => {
                     className={`h-[32px] w-full py-[8px] px-[18px]  text-sm rounded-[50px] ${location.pathname.startsWith(
                       "/inquirymanagement/inquirylist"
                     ) ||
-                        location.pathname.startsWith(
-                          "/inquirymanagement/thread"
-                        )
-                        ? "bg-white text-custom-solidgreen font-semibold"
-                        : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
+                      location.pathname.startsWith(
+                        "/inquirymanagement/thread"
+                      )
+                      ? "bg-white text-custom-solidgreen font-semibold"
+                      : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
                       }`}
                     onClick={() =>
                       handleItemClick(
@@ -149,8 +149,8 @@ const Sidebar = () => {
                     className={`h-[32px] w-full py-[8px] px-[18px] text-sm rounded-[50px] ${location.pathname.startsWith(
                       "/inquirymanagement/report"
                     )
-                        ? "bg-white text-custom-solidgreen font-semibold"
-                        : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
+                      ? "bg-white text-custom-solidgreen font-semibold"
+                      : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
                       }`}
                     onClick={() =>
                       handleItemClick("/reports")
@@ -164,8 +164,8 @@ const Sidebar = () => {
                     className={`h-[32px] w-full py-[8px] px-[18px] text-sm rounded-[50px] hidden ${location.pathname.startsWith(
                       "/inquirymanagement/autoassign"
                     )
-                        ? "bg-white text-custom-solidgreen font-semibold"
-                        : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
+                      ? "bg-white text-custom-solidgreen font-semibold"
+                      : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
                       }`}
                     onClick={() =>
                       handleItemClick("/autoassign")
@@ -197,7 +197,7 @@ const Sidebar = () => {
               </ListItemSuffix>
             </ListItem>
           </Link> */}
-{/* 
+          {/* 
           {isInvoiceOpen &&
             location.pathname.startsWith(
               "/transactionmanagement"

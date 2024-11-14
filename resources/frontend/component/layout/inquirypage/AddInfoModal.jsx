@@ -8,10 +8,13 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
     const predefinedUserTypes = ["Property Owner", "Buyer", "Broker", "Seller", "Lessee"];
     const { getAllConcerns, propertyNamesList, updateConcern, user, getInquiryLogs } =
         useStateContext();
- 
+
     const [message, setMessage] = useState(dataConcern.admin_remarks || "");
-   
+
     const [dataToUpdate, setDataToUpdate] = useState({
+        ticket_id: dataConcern.ticket_id,
+        property: dataConcern.property,
+        details_concern:dataConcern.details_concern,
         contract_number: dataConcern.contract_number || "",
         unit_number: dataConcern.unit_number || "",
         property: dataConcern.property || "",
@@ -115,7 +118,7 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
         });
     };
 
-
+     
     const handleShowUpdateAlert = () => {
         setShowAlert(true);
         modalRef.current.showModal();
@@ -146,6 +149,10 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
             );
 
             console.log("response", response);
+            const updatedData = { ...dataToUpdate };
+            localStorage.removeItem("dataConcern");
+            localStorage.setItem("updatedData", JSON.stringify(updatedData));
+
             onupdate({ ...dataToUpdate, dataConcern });
             getInquiryLogs(dataConcern.ticket_id);
             getAllConcerns();

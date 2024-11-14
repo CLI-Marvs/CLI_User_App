@@ -103,6 +103,7 @@ export const ContextProvider = ({ children }) => {
         if (token) {
             setLoading(true);
             try {
+               
                 const searchParams = new URLSearchParams({
                     search: JSON.stringify(searchFilter),
                     page: currentPage + 1,
@@ -292,7 +293,7 @@ export const ContextProvider = ({ children }) => {
                 },
             });
             const result = response.data;
-            console.log("result", result)
+ 
             const formattedData = result.map((item) => ({
                 name: item.channels,
                 value: item.total,

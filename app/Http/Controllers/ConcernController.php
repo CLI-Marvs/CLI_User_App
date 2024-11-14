@@ -941,6 +941,7 @@ class ConcernController extends Controller
 
     public function handleSearchFilter($query, $searchParams)
     {
+        
 
         if (!empty($searchParams['name'])) {
             $query->where('buyer_name', 'ILIKE', '%' . $searchParams['name'] . '%');
@@ -1003,7 +1004,7 @@ class ConcernController extends Controller
             $concernsResults = $concernsQuery/* ->orderBy('is_read', 'asc') */
                 /*  ->orderBy('concerns.created_at', 'desc') */
                 ->get();
-             
+
             $latestBuyerReply = $this->buyerReplyNotifs($employee, $ticketIds, $employeeDepartment);
 
             $assigneeQuery = $this->assigneeNotify($employee, $ticketIds);
@@ -1370,7 +1371,7 @@ class ConcernController extends Controller
             $inquiry = new InquiryLogs();
             $inquiry->edited_by = json_encode($logData);
             $inquiry->ticket_id = $ticketId;
-            $inquiry->message_log = "Updated info to: " . $request->buyer_firstname . ' ' . $request->buyer_lastname;
+            $inquiry->message_log = "Data updated " . $request->buyer_firstname . ' ' . $request->buyer_lastname;
             $inquiry->save();
 
             return ['success' => true, 'message' => 'Log successfully updated', 'data' => $logData];
@@ -1470,7 +1471,7 @@ class ConcernController extends Controller
     {
         try {
             \Log::info('testApi', [
-               'content' => $request->all()
+                'content' => $request->all()
             ]);
             $testData = new BankTransaction();
             $testData->bank_name = $request->input('content');
@@ -1695,7 +1696,7 @@ class ConcernController extends Controller
             /*dd($request->all()); */
             $assignees = $request->assignees;
             $concerns = Concerns::where('ticket_id', $request->ticket_id)->first();
-
+            $surveyLink = $request->surveyLink;
             $allFiles = null;
             $messageId = $request->message_id;
             $modifiedTicketId = str_replace('Ticket#', '', $request->ticket_id);
@@ -1706,6 +1707,7 @@ class ConcernController extends Controller
             $buyer_name = $request->buyer_name;
             $concerns->communication_type = $request->communication_type;
             $concerns->status = "Resolved";
+            $concerns->survey_link = $surveyLink;
             $buyer_lastname = $request->buyer_lastname;
             $message_id = $request->message_id;
             $concerns->save();
@@ -1730,7 +1732,9 @@ class ConcernController extends Controller
             $this->inquiryResolveLogs($request);
             // ReplyFromAdminJob::dispatch($request->ticket_id, $buyerEmail, $request->remarks, $messageId, $allFiles, $admin_name, $buyer_lastname);
             // dd($request->ticket_id, $buyerEmail, $buyer_lastname, $message_id, $admin_name, $department);
-            MarkResolvedToCustomerJob::dispatch($request->ticket_id, $buyerEmail, $buyer_lastname, $message_id, $admin_name, $department, $modifiedTicketId);
+
+
+            MarkResolvedToCustomerJob::dispatch($request->ticket_id, $buyerEmail, $buyer_lastname, $message_id, $admin_name, $department, $modifiedTicketId, $surveyLink);
         } catch (\Exception $e) {
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
         }
