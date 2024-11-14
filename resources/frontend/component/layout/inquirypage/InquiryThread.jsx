@@ -83,14 +83,18 @@ const InquiryThread = () => {
         }));
     };
 
-
     useEffect(() => {
         const storedData = JSON.parse(localStorage.getItem("dataConcern"));
+        const updatedData = JSON.parse(localStorage.getItem("updatedData"));
+
         if (storedData) {
             setDataConcern(storedData);
         }
-    }, []);
 
+        if (updatedData) {
+            setDataConcern(updatedData);
+        }
+    }, []);
 
     /*   console.log("data", data); */
 
@@ -105,7 +109,6 @@ const InquiryThread = () => {
     const toggleFilterBox = () => {
         setIsFilterVisible((prev) => !prev);
     };
-
 
     const handleFileAttach = (event) => {
         const files = Array.from(event.target.files);
@@ -171,8 +174,8 @@ const InquiryThread = () => {
     };
 
     /**
-    * To handle confirm delete inquiry
-    */
+     * To handle confirm delete inquiry
+     */
     const handleConfirm = () => {
         handleDeleteInquiry();
         setShowAlert(false);
@@ -297,7 +300,7 @@ const InquiryThread = () => {
                     draggable: true,
                     progress: undefined,
                     theme: "dark",
-                    transition: Bounce
+                    transition: Bounce,
                 });
                 setLoading(false);
                 return;
@@ -360,6 +363,12 @@ const InquiryThread = () => {
 
 
     useEffect(() => {
+        console.log("This is fetching");
+        getAllConcerns();
+    }, []);
+
+
+    useEffect(() => {
         if (isFilterVisible) {
             document.addEventListener("mousedown", handleClickOutside);
             document.addEventListener("keydown", handleKeyDown);
@@ -395,9 +404,8 @@ const InquiryThread = () => {
     const { pathname } = useLocation();
 
     useEffect(() => {
-        window.scrollTo(0, 0);  // Scrolls to the top
+        window.scrollTo(0, 0); // Scrolls to the top
     }, [pathname]);
-
 
     const messageIdChannelFunc = (channel) => {
         channel.listen("MessageID", (event) => {
@@ -420,12 +428,13 @@ const InquiryThread = () => {
         }
     }, [emailMessageID]);
 
-
     const combineThreadMessages = messages[ticketId]
         ? messages[ticketId]
             .flat()
             .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
         : [];
+    const getLatestMessageFromBuyer = combineThreadMessages.find((item) => item.buyer_email);
+
     // useEffect(() => {
     //     let adminMessageChannel;
     //     let newTicketId;
@@ -493,7 +502,6 @@ const InquiryThread = () => {
             }
         };
     }, [ticketId]);
-
 
     const capitalizeWords = (name) => {
         if (name) {
@@ -597,8 +605,7 @@ const InquiryThread = () => {
                                                 Payment Issues
                                             </option>
                                             <option value="SOA/ Buyer's Ledger">
-                                                SOA/ Buyer's
-                                                Ledger
+                                                SOA/ Buyer's Ledger
                                             </option>
                                             <option value="Turn Over Status">
                                                 Turn Over Status
@@ -713,21 +720,36 @@ const InquiryThread = () => {
                                             </label>
                                             <select
                                                 className="w-full border-b-1 outline-none appearance-none text-sm absolute px-[8px]"
-                                                /* value={status}
-                                                onChange={(e) =>
-                                                    setStatus(e.target.value)
-                                                } */
+                                            /* value={status}
+                                            onChange={(e) =>
+                                                setStatus(e.target.value)
+                                            } */
                                             >
-                                                 <option value=" ">
+                                                <option value=" ">
                                                     Select Channel
                                                 </option>
-                                                <option value="Email">Email</option>
-                                                <option value="Call">Call</option>
-                                                <option value="Walk-in">Walk-in</option>
-                                                <option value="Website">Website</option>
-                                                <option value="Social media">Social media</option>
-                                                <option value="Branch Tablet">Branch Tablet (Jotform created by IT)</option>
-                                                <option value="Internal Endorsement">Internal Endorsement</option>
+                                                <option value="Email">
+                                                    Email
+                                                </option>
+                                                <option value="Call">
+                                                    Call
+                                                </option>
+                                                <option value="Walk-in">
+                                                    Walk-in
+                                                </option>
+                                                <option value="Website">
+                                                    Website
+                                                </option>
+                                                <option value="Social media">
+                                                    Social media
+                                                </option>
+                                                <option value="Branch Tablet">
+                                                    Branch Tablet (Jotform
+                                                    created by IT)
+                                                </option>
+                                                <option value="Internal Endorsement">
+                                                    Internal Endorsement
+                                                </option>
                                             </select>
                                         </div>
                                         <span className="absolute inset-y-0 right-0 flex items-center  pl-3 pointer-events-none">
@@ -1053,7 +1075,6 @@ const InquiryThread = () => {
                                                                 </span>
                                                             </div>
 
-
                                                             <div className="w-full p-[10px] border-[2px] rounded-[5px] border-custom-grayF1 text-sm text-custom-gray81">
                                                                 <div>
                                                                     {formatChatMessage(
@@ -1081,7 +1102,6 @@ const InquiryThread = () => {
                                                                     </p>
                                                                 </div>
                                                             </div>
-
                                                         </div>
                                                         {attachedFiles.length >
                                                             0 && (
@@ -1154,7 +1174,13 @@ const InquiryThread = () => {
                                         Note: This message will be sent to{" "}
                                         <span className="font-semibold">
                                             {capitalizeWords(
-                                                `${dataConcern?.buyer_firstname || ""} ${dataConcern?.buyer_middlename || ""} ${dataConcern?.buyer_lastname || ""}`
+                                                `${dataConcern?.buyer_firstname ||
+                                                ""
+                                                } ${dataConcern?.buyer_middlename ||
+                                                ""
+                                                } ${dataConcern?.buyer_lastname ||
+                                                ""
+                                                }`
                                             )}{" "}
                                             {capitalizeWords(
                                                 dataConcern?.suffix_name
@@ -1169,7 +1195,8 @@ const InquiryThread = () => {
                             <div className="w-full flex justify-end gap-[13px]">
                                 {dataConcern?.created_by &&
                                     dataConcern?.created_by === user?.id &&
-                                    user?.department === 'Customer Relations - Services' && (
+                                    user?.department ===
+                                    "Customer Relations - Services" && (
                                         <FaTrash
                                             className="text-[#EB4444] hover:text-red-600 cursor-pointer"
                                             onClick={handleDelete}
@@ -1182,13 +1209,15 @@ const InquiryThread = () => {
                                         <IoIosCheckmarkCircle className="size-[18px] text-custom-lightgreen" />
                                     </div>
                                 ) : (
-                                    user?.department === 'Customer Relations - Services' && (<div
-                                        onClick={handleOpenResolveModal}
-                                        className="flex justify-start w-auto font-semibold text-[13px] text-[#1A73E8] underline cursor-pointer"
-                                    >
-                                        Mark as resolved
-                                    </div>)
-
+                                    user?.department ===
+                                    "Customer Relations - Services" && (
+                                        <div
+                                            onClick={handleOpenResolveModal}
+                                            className="flex justify-start w-auto font-semibold text-[13px] text-[#1A73E8] underline cursor-pointer"
+                                        >
+                                            Mark as resolved
+                                        </div>
+                                    )
                                 )}
                                 <div
                                     onClick={handleOpenResolveModal}
@@ -1197,8 +1226,13 @@ const InquiryThread = () => {
                                     Mark as closed
                                 </div>
                             </div>
-                            <div onClick={handleOpenAddInfoModal}>
-                                <button className="border py-2 px-5">button</button>
+                            <div
+                                onClick={handleOpenAddInfoModal}
+                                className="flex justify-end mt-3"
+                            >
+                                <span className="underline cursor-pointer">
+                                    Create new ticket
+                                </span>
                             </div>
                             <div className="">
                                 <div className="">
@@ -1319,7 +1353,11 @@ const InquiryThread = () => {
                 />
             </div>
             <div>
-               <ThreadInquiryFormModal modalRef={modalRef2} />
+                <ThreadInquiryFormModal
+                    modalRef={modalRef2}
+                    messageRef={getLatestMessageFromBuyer}
+                    dataConcern={dataConcern}
+                />
             </div>
         </>
     );

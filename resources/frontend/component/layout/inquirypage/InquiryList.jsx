@@ -424,51 +424,7 @@ const InquiryList = () => {
                                             {" "}
                                             Category
                                         </label>
-                                        {/* 
-                                        <select
-                                            className="w-full border-b-1 outline-none appearance-none text-sm   "
-                                            value={category}
-                                            onChange={(e) =>
-                                                setCategory(e.target.value)
-                                            }
-                                        >
-                                            <option value=" ">
-                                                 Select Category
-                                            </option>
-                                            <option
-                                                value="Reservation Documents"
-                                                className="bg-red-900"
-                                            >
-                                                &nbsp;&nbsp;Reservation
-                                                Documents
-                                            </option>
-                                            <option value="Payment Issues">
-                                                Payment Issues
-                                            </option>
-                                            <option value="SOA/ Billing Statement/ Buyer's Ledger">
-                                                SOA/ Billing Statement/ Buyer's
-                                                Ledger
-                                            </option>
-                                            <option value="Turn Over Status">
-                                                Turn Over Status
-                                            </option>
-                                            <option value="Unit Status">
-                                                Unit Status
-                                            </option>
-                                            <option value="Loan Application">
-                                                Loan Application
-                                            </option>
-                                            <option value="Title and Other Registration Documents">
-                                                Title and Other Registration
-                                                Documents
-                                            </option>
-                                            <option value="Commissions">
-                                                Commissions
-                                            </option>
-                                            <option value="Other Concerns">
-                                                Other Concerns
-                                            </option>
-                                        </select> */}
+                                      
                                         <div className="flex bg-red-900 justify-start w-full relative">
                                             <label
                                                 htmlFor=""
@@ -621,7 +577,7 @@ const InquiryList = () => {
                                                 <option value=""> Select Channels</option>
                                                 <option value="Email">Email</option>
                                                 <option value="Call">Call</option>
-                                                <option value="Walk-in">Walk-in</option>
+                                                <option value="Walk in">Walk-in</option>
                                                 <option value="Website">Website</option>
                                                 <option value="Social media">Social media</option>
                                                 <option value="Branch Tablet">Branch Tablet (Jotform created by IT)</option>
