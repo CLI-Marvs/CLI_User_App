@@ -35,7 +35,7 @@ const ThreadInquiryFormModal = ({ modalRef, dataConcern, messageRef }) => {
 
             const encodedTicketId = encodeURIComponent(formDataState.ticket_id);
 
-            const baseMessage = messageRef?.details_message ; // Ensure the message is not undefined
+            const baseMessage = messageRef.details_message || ""; // Ensure the message is not undefined
             const ticketNumber = formDataState.ticket_id; // or another variable if you fetch the ticket ID elsewhere
             const ticketLink = `/inquirymanagement/thread/${encodedTicketId}`; // Replace with your actual URL structure
             const referenceText = `<br><br>Reference: Ticket No. ${ticketNumber}`;
