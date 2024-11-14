@@ -1474,7 +1474,11 @@ class ConcernController extends Controller
                 'content' => $request->all()
             ]);
             $testData = new BankTransaction();
-            $testData->bank_name = $request->input('content');
+            $testData->bank_name = $request->input('burks');
+            $testData->payment_channel = $request->input('recnnr');
+            $testData->transact_by = $request->input('objnr');
+            $testData->status = $request->input('cancl');
+            $testData->invoice_link = $request->input('name');
             $testData->save();
             return response()->json('Success');
         } catch (\Exception $e) {
