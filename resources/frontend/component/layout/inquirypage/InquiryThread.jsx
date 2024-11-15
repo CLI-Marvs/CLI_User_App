@@ -379,7 +379,6 @@ const InquiryThread = () => {
             });
             console.log("triger here");
 
-            callBackHandler();
             setAttachedFiles([]);
             setLoading(false);
             callBackHandler();
