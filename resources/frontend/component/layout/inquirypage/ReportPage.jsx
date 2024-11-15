@@ -80,7 +80,11 @@ const categoryColors = {
     "Turn Over Status": COLORS[8],
     "Unit Status": COLORS[9],
 };
-
+// Function to get a unique color from COLORS if a category is missing from categoryColors 
+const getColor = (category, index) => {
+    if (categoryColors[category]) return categoryColors[category];
+    return COLORS[index % COLORS.length];
+};
 const SINGLE_COLOR = "#5B9BD5";
 
 const getCategoryColor = (categoryName) => {
@@ -184,7 +188,7 @@ const ReportPage = () => {
     const defaultData = [{ name: "No Data" }];
     const dataToDisplay = dataCategory.length > 0 ? dataCategory : defaultData;
     const location = useLocation();
- 
+
     const getCurrentMonth = () => {
         const months = [
             'january', 'february', 'march', 'april', 'may', 'june',
@@ -207,7 +211,7 @@ const ReportPage = () => {
         ))]
         : ["All"];
 
- 
+
     const handleInputChange = (e) => {
         setMonth(e.target.value);
     };
@@ -447,7 +451,8 @@ const ReportPage = () => {
                                         {dataToDisplay.map((entry, index) => (
                                             <Cell
                                                 key={index}
-                                                fill={categoryColors[entry.name] || COLORS[index % COLORS.length]}
+                                                // fill={categoryColors[entry.name] || COLORS[index % COLORS.length]}
+                                                fill={getColor(entry.name, index)}
                                             />
                                         ))}
 

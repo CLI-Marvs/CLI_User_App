@@ -368,11 +368,11 @@ const InquiryFormModal = ({ modalRef }) => {
             ref={modalRef}
         >
             <ToastContainer />
-            <div className=" px-20 rounded-lg">
+            <div className="px-[50px] rounded-lg overflow-hidden">
                 <div className="">
                     <form
                         method="dialog"
-                        className="pt-1 flex justify-end -mr-[75px]"
+                        className="pt-1 flex justify-end -mr-[50px]"
                     >
                         <button
                             className="flex justify-center w-10 h-10 items-center rounded-full text-custom-bluegreen hover:bg-custombg"
@@ -463,7 +463,7 @@ const InquiryFormModal = ({ modalRef }) => {
                                 //             : "border-red-500"
                                 //         : "border-custom-bluegreen"
                                 // }`}
-                                className={`flex relative items-center border w-[430px] rounded-[5px] overflow-hidden ${isSubmitted &&
+                                className={`flex relative items-center border w-full rounded-[5px] overflow-hidden ${isSubmitted &&
                                     !formData.mname &&
                                     !isMiddleNameChecked
                                     ? "border-red-500"
@@ -520,7 +520,7 @@ const InquiryFormModal = ({ modalRef }) => {
                         </div>
                         <div className="flex items-center gap-[4px]">
                             <div
-                                className={`flex relative items-center border w-[430px] rounded-[5px] overflow-hidden ${isSubmitted &&
+                                className={`flex relative items-center border w-full rounded-[5px] overflow-hidden ${isSubmitted &&
                                     !formData.suffix &&
                                     !isSuffixChecked
                                     ? "border-red-500"
@@ -620,7 +620,7 @@ const InquiryFormModal = ({ modalRef }) => {
                                     name="property"
                                     value={formData.property}
                                     onChange={handleChange}
-                                    className="appearance-none w-full px-4 text-sm py-1 bg-white focus:outline-none border-0 mobile:text-xs"
+                                    className="appearance-none w-[88%] px-4 text-sm py-1 bg-white focus:outline-none border-0 mobile:text-xs"
                                 >
                                     <option value="">(Select)</option>
                                     {formattedPropertyNames.map(
@@ -642,90 +642,61 @@ const InquiryFormModal = ({ modalRef }) => {
                             </div>
                         </div>
                         <div
-                            className={`flex items-center border rounded-[5px] overflow-hidden ${isSubmitted && !formData.details_concern
+                            className={`flex items-center border rounded-[5px]  ${isSubmitted && !formData.details_concern
                                 ? resetSuccess
                                     ? "border-custom-bluegreen"
                                     : "border-red-500"
                                 : "border-custom-bluegreen"
-                                }`}
+                                }  `}
                         >
                             <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex items-center w-[250px] tablet:w-[175px] mobile:w-[270px] mobile:text-xs -mr-3 pl-3 py-1">
-                                Concern regarding
+                                Concern Regarding
                             </span>
-                            <div className="relative w-full">
-                                {/* <select
-                                    name="details_concern"
-                                    value={formData.details_concern}
-                                    onChange={handleChange}
-                                    className="appearance-none text-sm w-full px-4 py-1 bg-white focus:outline-none border-0 mobile:text-xs"
-                                >
-                                    <option value="">(Select)</option>
-                                    <option value="Reservation Documents">
-                                        Reservation Documents
-                                    </option>
-                                    <option value="Payment Issues">
-                                        Payment Issues
-                                    </option>
-                                    <option value="Statement of Account and Billing Statement">
-                                        Statement of Account and Billing
-                                        Statement
-                                    </option>
-                                    <option value="Turnover Status/Unit Concerns">
-                                        Turnover Status/Unit Concerns
-                                    </option>
-                                    <option value="Loan Application">
-                                        Loan Application
-                                    </option>
-                                    <option value="Title and Other Registration Documents">
-                                       Title and Other Registration Documents
-                                    </option>formDatainqu
-                                    <option value="Commissions">
-                                        Commissions
-                                    </option>
-                                    <option value="Other Concerns">
-                                        Other Concerns
-                                    </option>
-                                </select> */}
+                            <div className="relative w-full ">
                                 <select
                                     value={formData.details_concern}
                                     onChange={handleChange}
                                     name="details_concern"
-                                    className="appearance-none text-sm w-full px-4 py-1 bg-white focus:outline-none border-0 mobile:text-xs"
+                                    className="appearance-none text-sm  px-4 py-1  focus:outline-none border-0 mobile:text-xs   "
                                 >
                                     <option value="">(Select)</option>
-                                    <option value="Reservation Documents">
+                                    <option value="Reservation Documents" className="pr-8">
                                         Reservation Documents
                                     </option>
-                                    <option value="Payment Issues">
+                                    <option value="Payment Issues" className="pr-8">
                                         Payment Issues
                                     </option>
-                                    <option value="SOA/ Buyer's Ledger">
+                                    <option value="SOA/ Buyer's Ledger" className="pr-8">
                                         SOA/ Buyer's Ledger
                                     </option>
-                                    <option value="Turn Over Status">
+                                    <option value="Turn Over Status" className="pr-8">
                                         Turn Over Status
                                     </option>
-                                    <option value="Unit Status">
+                                    <option value="Unit Status" className="pr-8">
                                         Unit Status
                                     </option>
-                                    <option value="Loan Application">
+                                    <option value="Loan Application" className="pr-8">
                                         Loan Application
                                     </option>
-                                    <option value="Title and Other Registration Documents">
+                                    <option value="Title and Other Registration Documents" className="pr-8  ">
                                         Title and Other Registration Documents
                                     </option>
-                                    <option value="Commissions">
+                                   
+                                    <option value="Commissions" className="pr-8">
                                         Commissions
                                     </option>
-                                    <option value="Leasing">Leasing</option>
-                                    <option value="Other Concerns">
+                                    <option value="Leasing" className="pr-8">
+                                        Leasing
+                                    </option>
+                                    <option value="Other Concerns" className="pr-8">
                                         Other Concerns
                                     </option>
                                 </select>
-                                <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3 bg-custom-lightestgreen text-custom-bluegreen pointer-events-none">
+                                <div className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3 bg-custom-lightestgreen text-custom-bluegreen pointer-events-none">
                                     <IoMdArrowDropdown />
-                                </span>
+                                </div>
                             </div>
+
                         </div>
                         <div
                             className={`flex items-center border rounded-[5px] overflow-hidden ${isSubmitted && !formData.type
@@ -743,7 +714,7 @@ const InquiryFormModal = ({ modalRef }) => {
                                     value={formData.type}
                                     onChange={handleChange}
                                     name="type"
-                                    className="appearance-none text-sm w-full px-4 py-1 bg-white focus:outline-none border-0 mobile:text-xs"
+                                    className="appearance-none text-sm w-[89%] px-4 py-1 bg-white focus:outline-none border-0 mobile:text-xs"
                                 >
                                     <option value="">(Select)</option>
                                     <option value="Complain">Complain</option>
@@ -775,14 +746,14 @@ const InquiryFormModal = ({ modalRef }) => {
                                     value={formData.channels}
                                     onChange={handleChange}
                                     name="channels"
-                                    className="appearance-none text-sm w-full px-4 py-1 bg-white focus:outline-none border-0 mobile:text-xs"
+                                    className="appearance-none text-sm w-[89%] px-4 py-1 bg-white focus:outline-none border-0 mobile:text-xs"
                                 >
                                     <option value="">(Select)</option>
                                     <option value="Email">Email</option>
                                     <option value="Call">Call</option>
                                     <option value="Walk in">Walk-in</option>
                                     <option value="Website">Website</option>
-                                    <option value="Social media">Social media</option>
+                                    <option value="Social media">Social Media</option>
                                     <option value="Branch Tablet">Branch Tablet (Jotform created by IT)</option>
                                     <option value="Internal Endorsement">Internal Endorsement</option>
 
@@ -807,7 +778,7 @@ const InquiryFormModal = ({ modalRef }) => {
                                     name="user_type"
                                     value={formData.user_type}
                                     onChange={handleChange}
-                                    className="appearance-none w-full px-4 py-1 text-sm bg-white focus:outline-none border-0 mobile:text-xs"
+                                    className="appearance-none w-[90%] px-4 py-1 text-sm bg-white focus:outline-none border-0 mobile:text-xs"
                                 >
                                     <option value="">(Select)</option>
                                     <option value="Property Owner">
