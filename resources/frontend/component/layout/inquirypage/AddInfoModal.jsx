@@ -204,7 +204,7 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
             className="modal w-[587px] rounded-[10px] shadow-custom5 backdrop:bg-black/50"
             ref={modalRef}
         >
-            <div className=" rounded-[10px]">
+            <div className="rounded-[10px]">
                 <div className="absolute right-0">
                     <form
                         method="dialog"
@@ -218,7 +218,7 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
                         </button>
                     </form>
                 </div>
-                <div className=" px-[50px] py-[77px] flex flex-col gap-[40px]">
+                <div className=" px-[50px] py-[77px] flex flex-col gap-[40px] ">
                     <div className="flex flex-col gap-[10px]">
                         {/* First name */}
                         <div
@@ -528,7 +528,7 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
                             className={`flex items-center border border-[D6D6D6] rounded-[5px] overflow-hidden`}
                         >
                             <span className="text-custom-gray81 text-sm bg-[#EDEDED] flex pl-3 py-1 w-[300px]">
-                                Unit/Lot
+                                Unit/Lot Number
                             </span>
                             <input
                                 name="unit_number"
