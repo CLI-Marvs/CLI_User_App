@@ -34,7 +34,7 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
             : "",
 
     });
-    console.log("dataToUpdate", dataToUpdate);
+ 
     /* Buyers old data to be used in AssignDetails.jsx 
      * to compare the values and show the differences
      */

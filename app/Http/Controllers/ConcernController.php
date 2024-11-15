@@ -231,6 +231,7 @@ class ConcernController extends Controller
 
     public function sendMessage(Request $request)
     {
+
         $validatedData = $request->validate([
             'files.*' => 'file|max:102400',
         ]);
@@ -1328,7 +1329,7 @@ class ConcernController extends Controller
     public function logBuyerDataEdit($request, $buyerOldData, $ticketId)
     {
         try {
-  
+
             $logData = [
                 'log_type' => 'update_info',
                 'details' => [
@@ -1377,7 +1378,6 @@ class ConcernController extends Controller
             $inquiry->ticket_id = $ticketId;
             $inquiry->message_log = "Data updated " . $request->buyer_firstname . ' ' . $request->buyer_lastname;
             $inquiry->save();
-
         } catch (\Exception $e) {
             return response()->json(['Error saving log in buyer data' => $e->getMessage()], 500);
         }
@@ -1980,9 +1980,43 @@ class ConcernController extends Controller
 
     public function sendMessageConcerns(Request $request)
     {
+
+
+        $validatedData = $request->validate([
+            'files.*' => 'file|max:102400',
+        ]);
+
+
         try {
+            $allFiles = [];
+            $files = $request->file('files');
+            $all_file_names = [];
+            $filesData = [];
+            if ($files) {
+                $fileLinks = $this->uploadToGCS($files);
+
+                foreach ($files as $index => $file) {
+                    $fileName  = $file->getClientOriginalName();
+
+
+                    $filePath = $file->storeAs('temp', $fileName);
+                    // Store the filename for JSON output
+
+                    $allFiles[] = [
+                        'name' => $fileName,
+                        'path' => storage_path('app/' . $filePath),
+                    ];
+                    // Create an associative array for each file
+                    $filesData[] = [
+                        'url' => $fileLinks[$index], // Use the corresponding URL from the GCS upload
+                        'original_file_name' => $fileName // Store the original file name
+                    ];
+                }
+            }
             $assigness = $request->assignees;
             $conversation = new Conversations();
+            $attachment = !empty($filesData) ? json_encode($filesData) : null;
+            $conversation->attachment = $attachment;
             $conversation->sender_id = $request->sender_id;
             $conversation->ticket_id = $request->ticketId;
             $conversation->message = $request->message;
