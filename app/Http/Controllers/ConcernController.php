@@ -2013,7 +2013,7 @@ class ConcernController extends Controller
                     ];
                 }
             }
-            $assigness = $request->assignees;
+            $assigness = $request->assignees;   
             $conversation = new Conversations();
             $attachment = !empty($filesData) ? json_encode($filesData) : null;
             $conversation->attachment = $attachment;

@@ -144,6 +144,7 @@ const AssignDetails = ({ logMessages, ticketId }) => {
 
     const concernChannelFunc = (channel) => {
         channel.listen("ConcernMessages", (event) => {
+            console.log("event", event);
             setConcernMessages((prevMessages) => {
                 const messagesForTicket = prevMessages[ticketId] || [];
                 if (
@@ -162,6 +163,7 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                     lastname: event.data.lastname,
                     ticketId: event.data.ticketId,
                     created_at: event.data.message.created_at,
+                    attachment: event.data.message.attachment 
                 };
 
                 return {
