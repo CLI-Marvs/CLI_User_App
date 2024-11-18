@@ -98,7 +98,7 @@ const AssignDetails = ({ logMessages, ticketId }) => {
         formData.append("sender_id", user?.id);
         formData.append("ticketId", ticketId);
         formData.append("message", message);
-        formData.append("assignees", assigneesPersonnel[ticketId]);
+        formData.append("assignees", JSON.stringify(assigneesPersonnel[ticketId] || []));
         formData.append("admin_name", `${user?.firstname} ${user?.lastname}`);
         console.log('formData', formData);
 
@@ -137,6 +137,8 @@ const AssignDetails = ({ logMessages, ticketId }) => {
         }
 
     };
+
+    console.log("assignpersonales", assigneesPersonnel[ticketId]);
 
     useEffect(() => {
         getInquiryLogs(ticketId)
