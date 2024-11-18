@@ -959,7 +959,7 @@ const ReportPage = () => {
                         </div>
                     </div>
                 </div>
-                <div className="fixed bottom-[50px] right-[41px]">
+                <div className="hidden fixed bottom-[50px] right-[41px]">
                     <button className="flex justify-center items-center size-[60px] shadow-custom8 rounded-full bg-[#1A73E8] text-white text-lg">
                         <TiDownload className="text-white text-[30px]" />
                     </button>
