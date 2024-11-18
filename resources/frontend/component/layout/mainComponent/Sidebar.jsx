@@ -45,7 +45,8 @@ const Sidebar = () => {
   useEffect(() => {
     if (!location.pathname.startsWith("/inquirymanagement/thread")) {
       localStorage.removeItem("dataConcern");
-      localStorage.removeItem("updatedData");
+      localStorage.removeItem("updatedData"); 
+      localStorage.removeItem("closeConcern"); 
     }
   }, [location]);
   useEffect(() => {
