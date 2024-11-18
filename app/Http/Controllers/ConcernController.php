@@ -1807,7 +1807,9 @@ class ConcernController extends Controller
         $query = Concerns::select(
             DB::raw('EXTRACT(MONTH FROM created_at) as month'),
             DB::raw('SUM(case when status = \'Resolved\' then 1 else 0 end) as Resolved'),
-            DB::raw('SUM(case when status = \'unresolved\' then 1 else 0 end) as Unresolved')
+            DB::raw('SUM(case when status = \'unresolved\' then 1 else 0 end) as Unresolved'),
+            DB::raw('SUM(case when status = \'Closed\' then 1 else 0 end) as Closed')
+
         )
             ->whereYear('created_at', $year);
 
@@ -1826,6 +1828,7 @@ class ConcernController extends Controller
                 'month' => $month,
                 'resolved' => $reports->get($month)?->resolved ?? 0,
                 'unresolved' => $reports->get($month)?->unresolved ?? 0,
+                'closed'=> $reports->get($month)?->closed ?? 0,
             ];
         });
 
