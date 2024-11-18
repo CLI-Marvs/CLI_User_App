@@ -1298,7 +1298,7 @@ const InquiryThread = () => {
                                         {/* This message will be shown to all users */}
                                     </div>
                                 ) : (
-                                    dataConcern?.status !== "Closed" && !ALLOWED_EMPLOYEES_CRS.includes(userLoggedInEmail) && (
+                                    dataConcern?.status !== "Closed" && ALLOWED_EMPLOYEES_CRS.includes(userLoggedInEmail) && (
                                         <div
                                             onClick={handleOpenMarkAsClosedModal}
                                             className="flex justify-start w-auto font-semibold text-[13px] text-[#1A73E8] underline cursor-pointer"
