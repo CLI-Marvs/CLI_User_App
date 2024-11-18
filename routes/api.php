@@ -50,7 +50,7 @@ Route::get('/inquiries-property', [ConcernController::class, 'getInquiriesPerPro
 Route::get('/inquiries-channel', [ConcernController::class, 'getInquiriesPerChannel']);
 Route::get('/communication-type-property', [ConcernController::class, 'getCommunicationType']);
 Route::post('delete-concerns', [ConcernController::class, 'deleteConcern']);
-
+Route::post('close-concerns', [ConcernController::class, 'markAsClosed']);
 Route::post('conversation', [ConcernController::class, 'sendMessageConcerns']);
 Route::get('/get-concern-messages', [ConcernController::class, 'retrieveConcernsMessages']);
 Route::get('/personnel-assignee', [ConcernController::class, 'retrieveAssignees']);

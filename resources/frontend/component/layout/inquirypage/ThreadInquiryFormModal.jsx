@@ -408,7 +408,7 @@ const ThreadInquiryFormModal = ({ modalRef, dataConcern, messageRef }) => {
                         <div className="flex gap-3 ">
                             <textarea
                                 id="details_message"
-                                value={dataConcern.details_message || ""}
+                                value={(messageRef?.details_message || "").replace(/<br\s*\/?>/gi, '\n')}
                                 name="details_message"
                                 placeholder=""
                                 rows="4"

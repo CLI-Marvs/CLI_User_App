@@ -125,6 +125,7 @@
 
     <p style="margin-bottom: 5px;">
         We are pleased to inform you that your feedback ticket {{ $ticket_id }} has been resolved. 
+        <br>
         Thank you for bringing this matter to our attention and for your patience as we addressed it.
     </p>
 
