@@ -39,13 +39,22 @@ export const ContextProvider = ({ children }) => {
     const [dataCategory, setDataCategory] = useState([]);
     const [dataProperty, setDataPropery] = useState([]);
     const [communicationTypeData, setCommunicationTypeData] = useState([]);
+    const [inquriesPerChannelData, setInquriesPerChannelData] = useState([]);
     const [month, setMonth] = useState("");
     const [propertyMonth, setPropertyMonth] = useState("");
+    const [communicationTypeMonth, setCommunicationTypeMonth] = useState("");
     const [specificInquiry, setSpecificInquiry] = useState(null);
     const [dataSet, setDataSet] = useState([]);
     const [department, setDepartment] = useState("");
+    const [year, setYear] = useState("");
+    const [departmentStatusYear, setDepartmentStatusYear] = useState("");
+    const [inquiriesPerCategoryYear, setInquiriesPerCategoryYear] = useState("");
+    const [inquiriesPerPropertyYear, setInquiriesPerPropertyYear] = useState("");
+    const [communicationTypeYear, setCommunicationTypeYear] = useState("");
     const [isDepartmentInitialized, setIsDepartmentInitialized] =
         useState(false);
+    const [inquiriesPerChanelYear, setInquiriesPerChanelYear] = useState("");
+    const [inquiriesPerChannelMonth, setInquiriesPerChannelMonth] = useState("");
     const [pricingMasterLists, setPricingMasterLists] = useState([]);
     const [paymentSchemes, setPaymentSchemes] = useState([]);
     const [propertyId, setPropertyId] = useState(null);
@@ -73,11 +82,11 @@ export const ContextProvider = ({ children }) => {
     const [filterDueDate, setFilterDueDate] = useState(null);
     const [loading, setLoading] = useState(false);
 
-
     useEffect(() => {
         if (user && user.department && !isDepartmentInitialized) {
             setDepartment(user.department === "Customer Relations - Services" ? "All" : user.department);
             setIsDepartmentInitialized(true);
+
         }
     }, [user, isDepartmentInitialized]);
 
@@ -94,6 +103,7 @@ export const ContextProvider = ({ children }) => {
         if (token) {
             setLoading(true);
             try {
+               
                 const searchParams = new URLSearchParams({
                     search: JSON.stringify(searchFilter),
                     page: currentPage + 1,
@@ -179,7 +189,7 @@ export const ContextProvider = ({ children }) => {
         if (!isDepartmentInitialized) return;
         try {
             const response = await apiService.get("category-monthly", {
-                params: { month: month, department: department },
+                params: { month: month, department: department, year: inquiriesPerCategoryYear },
             });
             const result = response.data;
             const formattedData = result.map((item) => ({
@@ -206,11 +216,11 @@ export const ContextProvider = ({ children }) => {
     const fetchDataReport = async () => {
         if (!isDepartmentInitialized) return;
         try {
+
             const response = await apiService.get("report-monthly", {
-                params: { department: department },
+                params: { department: department, year: departmentStatusYear },
             });
             const result = response.data;
-
             const formattedData = result.map((item) => ({
                 name: item.month.toString().padStart(2, "0"),
                 Resolved: item.resolved,
@@ -230,6 +240,7 @@ export const ContextProvider = ({ children }) => {
                 params: {
                     propertyMonth: propertyMonth,
                     department: department,
+                    year: inquiriesPerPropertyYear
                 },
             });
             const result = response.data;
@@ -245,29 +256,52 @@ export const ContextProvider = ({ children }) => {
     };
     const getCommunicationTypePerProperty = async () => {
         if (!isDepartmentInitialized) return;
-        console.log("propertyMonth", propertyMonth)
-        console.log("propertyMonth", department)
         try {
             const response = await apiService.get("communication-type-property", {
                 params: {
-                    propertyMonth: propertyMonth,
+                    propertyMonth: communicationTypeMonth,
                     department: department,
+                    year: communicationTypeYear
                 },
             });
             const result = response.data;
-            console.log("result",result)
-            // const formattedData = result.map((item) => ({
-            //     propertyName: item.property,
-            //     complainCount: item.Complain,
-            //     requestCount: item.Request,
-            //     inquiryCount: item.Inquiry,
-            //     suggestionCount: item.Suggestion,
-            //     recommendationCount: item.Recommendation,
-            // }));
 
-            // setCommunicationTypeData(formattedData);
+            const formattedData = result.map((item) => ({
+                name: item.property,
+                complainCount: item.complain,
+                requestCount: item.request,
+                inquiryCount: item.inquiry,
+                suggestionCount: item.suggestion,
+
+            }));
+
+            setCommunicationTypeData(formattedData);
         } catch (error) {
             console.log("Error retrieving communication types:", error);
+        }
+    };
+
+    const getInquiriesPerChannel = async () => {
+        if (!isDepartmentInitialized) return;
+
+        try {
+            const response = await apiService.get("inquiries-channel", {
+                params: {
+                    propertyMonth: inquiriesPerChannelMonth,
+                    department: department,
+                    year: communicationTypeYear
+                },
+            });
+            const result = response.data;
+ 
+            const formattedData = result.map((item) => ({
+                name: item.channels,
+                value: item.total,
+            }));
+
+            setInquriesPerChannelData(formattedData);
+        } catch (error) {
+            console.error("Error fetching data:", error);
         }
     };
     const getSpecificInquiry = async () => {
@@ -551,13 +585,15 @@ export const ContextProvider = ({ children }) => {
                 await fetchDataReport();
                 await getInquiriesPerProperty();
                 await fetchCategory();
+                await getCommunicationTypePerProperty();
+                await getInquiriesPerChannel();
             } catch (error) {
                 console.error("Error fetching data:", error);
             }
         };
 
         fetchData();
-    }, [department, propertyMonth, month]);
+    }, [department, propertyMonth, month, departmentStatusYear, inquiriesPerCategoryYear, inquiriesPerPropertyYear, communicationTypeYear, communicationTypeMonth, inquiriesPerChannelMonth, inquiriesPerChanelYear]);
 
     return (
         <StateContext.Provider
@@ -604,6 +640,8 @@ export const ContextProvider = ({ children }) => {
                 communicationTypeData,
                 setCommunicationTypeData,
                 setPropertyMonth,
+                setCommunicationTypeMonth,
+                communicationTypeMonth,
                 setData,
                 searchFilter,
                 statusFilter,
@@ -664,8 +702,23 @@ export const ContextProvider = ({ children }) => {
                 setFilterDueDate,
                 notifStatus,
                 updateConcern,
-                loading
+                loading,
+                setDepartmentStatusYear,
+                departmentStatusYear,
+                setInquiriesPerCategoryYear,
+                inquiriesPerCategoryYear,
+                setInquiriesPerPropertyYear,
+                inquiriesPerPropertyYear,
+                setCommunicationTypeYear,
+                communicationTypeYear,
+                inquiriesPerChanelYear,
+                setInquiriesPerChanelYear,
+                inquiriesPerChannelMonth,
+                setInquiriesPerChannelMonth,
+                getInquiriesPerChannel,
+                inquriesPerChannelData
             }}
+
         >
             {children}
         </StateContext.Provider>

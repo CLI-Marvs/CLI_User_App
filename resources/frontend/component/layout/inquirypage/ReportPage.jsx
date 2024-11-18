@@ -22,34 +22,18 @@ import { useStateContext } from "../../../context/contextprovider";
 import { IoMdArrowDropdown } from "react-icons/io";
 import { useLocation } from "react-router-dom";
 
-
-
-const data1 = [
-    {
-        name: '38 Park Ave',
-        inquiries: 80,
-        complaints: 20,
-        requests: 40,
-        suggestions: 15
-    },
-    {
-        name: 'Casa Mira',
-        inquiries: 120,
-        complaints: 35,
-        requests: 50,
-        suggestions: 10
-    },
-    {
-        name: 'Mivessa',
-        inquiries: 100,
-        complaints: 25,
-        requests: 60,
-        suggestions: 20
-    }
-];
-
 const barHeight = 20;
 
+const dataSet2 = [
+    { name: "Email", value: 20 },
+    { name: "Call", value: 15 },
+    { name: "Walk-in", value: 25 },
+    { name: "Website", value: 30 },
+    { name: "Social Media", value: 18 },
+    { name: "Branch Tablet", value: 22 },
+    { name: "Internal Endorsement", value: 12 },
+];
+const colors = ["#348017", "#70AD47", "#1A73E8", "#5B9BD5", "#175D5F", "#404B52", "#A5A5A5"];
 
 const COLORS = [
     "#1F77B4", // Blue
@@ -64,6 +48,26 @@ const COLORS = [
     "#17BECF"  // Teal
 ];
 
+const CustomTick = ({ x, y, payload }) => {
+    const words = payload.value.split(' '); // Split by spaces to handle word wrapping
+    return (
+        <g transform={`translate(${x},${y})`}>
+            {words.map((word, index) => (
+                <text
+                    key={index}
+                    x={0}
+                    y={index * 12} // Adjust the y position for each line of text
+                    textAnchor="middle"
+                    fontSize={10}
+                    fill="#000"
+                >
+                    {word}
+                </text>
+            ))}
+        </g>
+    );
+};
+
 const categoryColors = {
     "Commissions": COLORS[0],
     "Leasing": COLORS[1],
@@ -71,12 +75,16 @@ const categoryColors = {
     "Other Concerns": COLORS[3],
     "Payment Issues": COLORS[4],
     "Reservation Documents": COLORS[5],
-    "SOA/ Billing Statement/ Buyer's Ledger": COLORS[6],
+    "SOA/ Buyer's Ledger": COLORS[6],
     "Title and Other Registration Documents": COLORS[7],
     "Turn Over Status": COLORS[8],
     "Unit Status": COLORS[9],
 };
-
+// Function to get a unique color from COLORS if a category is missing from categoryColors 
+const getColor = (category, index) => {
+    if (categoryColors[category]) return categoryColors[category];
+    return COLORS[index % COLORS.length];
+};
 const SINGLE_COLOR = "#5B9BD5";
 
 const getCategoryColor = (categoryName) => {
@@ -95,7 +103,6 @@ const CustomTooltip = ({ active, payload }) => {
 
     return null;
 };
-
 const CustomTooltip2 = ({ active, payload }) => {
     if (active && payload && payload.length) {
         return (
@@ -154,18 +161,30 @@ const ReportPage = () => {
         getInquiriesPerProperty,
         propertyMonth,
         setPropertyMonth,
+        setCommunicationTypeMonth,
+        communicationTypeMonth,
         user,
-        department,
         setDepartment,
+        department,
         dataSet,
         fetchDataReport,
         allEmployees,
-        data
+        data,
+        setDepartmentStatusYear,
+        departmentStatusYear,
+        setInquiriesPerCategoryYear,
+        inquiriesPerCategoryYear,
+        setInquiriesPerPropertyYear,
+        inquiriesPerPropertyYear,
+        setCommunicationTypeYear,
+        communicationTypeYear,
+        inquiriesPerChanelYear,
+        setInquiriesPerChanelYear,
+        inquiriesPerChannelMonth,
+        setInquiriesPerChannelMonth,
+        getInquiriesPerChannel,
+        inquriesPerChannelData
     } = useStateContext();
-   console.log("communicationTypeData", communicationTypeData)
-
-    // console.log("dataProperty", dataProperty)
-    // console.log("data",data)
     const defaultData = [{ name: "No Data" }];
     const dataToDisplay = dataCategory.length > 0 ? dataCategory : defaultData;
     const location = useLocation();
@@ -179,8 +198,11 @@ const ReportPage = () => {
         return months[currentMonthIndex];
     };
 
+    //Get current year
+    const currentYear = new Date().getFullYear();
+
     const chartHeight = dataProperty.length * (barHeight + 60);
-    const chartHeight2 = data1.length * (barHeight + 100);
+    const chartHeight2 = communicationTypeData.length * (barHeight + 100);
 
     const allDepartment = allEmployees
         ? ["All", ...Array.from(new Set(allEmployees
@@ -190,31 +212,28 @@ const ReportPage = () => {
         : ["All"];
 
 
-
-    /*  const allDepartment = [
-         { key: "All", value: "All" },
-         { key: "Customer Relations - Services", value: "Customer Relations - Services" },
-         { key: "SALES", value: "Sales" },
-         { key: "AP", value: "Ap Commission" },
-         { key: "PM", value: "Property Management" },
-     ]; */
-
-
-    // const getCurrentMonth = () => {
-    //     const date = new Date();
-    //     const options = { month: "long" };
-    //     return new Intl.DateTimeFormat("en-US", options).format(date);
-    // };
-
     const handleInputChange = (e) => {
         setMonth(e.target.value);
     };
 
-    //   console.log("dataToDisplay", dataToDisplay);
-    const handleInputChangeProperty = (e) => {
-        setPropertyMonth(e.target.value);
-    };
+    // Handle year change from the dropdown
+    const handleDepartmentYearChange = (e) => {
+        setDepartmentStatusYear(e.target.value);
+    }
+    const handleInquiriesPerCategoryYearChange = (e) => {
+        setInquiriesPerCategoryYear(e.target.value);
+    }
+    const handleInquiriesPerPropertyYearChange = (e) => {
+        setInquiriesPerPropertyYear(e.target.value);
+    }
 
+    const handleCommunicationTypeYearChange = (e) => {
+        setCommunicationTypeYear(e.target.value);
+    }
+
+    const handleInquiriesPerChannelYearChange = (e) => {
+        setInquiriesPerChanelYear(e.target.value);
+    }
     const handleKeyDown = (e) => {
         if (e.key === "Enter") {
             fetchCategory(month);
@@ -226,22 +245,27 @@ const ReportPage = () => {
             getInquiriesPerProperty(propertyMonth);
         }
     };
-    // useEffect(() => {
-    //     const currentMonth = getCurrentMonth();
-    //     setMonth(currentMonth);
-    //     setPropertyMonth(currentMonth);
-    // }, []);
 
     useEffect(() => {
         fetchCategory();
         getInquiriesPerProperty();
         fetchDataReport();
         getCommunicationTypePerProperty();
+        getInquiriesPerChannel();
+
     }, []);
 
     useEffect(() => {
         setMonth(getCurrentMonth());
         setPropertyMonth(getCurrentMonth());
+        setCommunicationTypeMonth(getCurrentMonth())
+        setInquiriesPerChannelMonth(getCurrentMonth());
+
+        setDepartmentStatusYear(currentYear);
+        setInquiriesPerCategoryYear(currentYear);
+        setInquiriesPerPropertyYear(currentYear);
+        setCommunicationTypeYear(currentYear);
+        setInquiriesPerChanelYear(currentYear);
     }, []);
 
     //  console.log("department", department);
@@ -253,8 +277,8 @@ const ReportPage = () => {
                     <p className="text-lg montserrat-bold">
                         Resolved vs. Unresolved Chart
                     </p>
-                    <div className="flex gap-[10px]">
-                        <div className="flex w-[300px] items-center border rounded-md overflow-hidden">
+                    <div className="flex gap-[10px] px-[16px]">
+                        <div className="flex w-[550px] items-center border rounded-md overflow-hidden">
                             <span className="text-custom-gray81 bg-custom-grayFA flex items-center w-44 -mr-3 pl-3 py-1">
                                 Department
                             </span>
@@ -286,19 +310,14 @@ const ReportPage = () => {
                             <div className="relative w-full">
                                 <select
                                     name="year"
+                                    value={departmentStatusYear}
                                     className="appearance-none w-[100px] px-4 py-1 bg-white focus:outline-none border-0"
-                                /*  value={department} */
-                                /* onChange={(e) => setDepartment(e.target.value)} */
+                                    /*  value={department} */
+                                    onChange={handleDepartmentYearChange}
                                 >
-                                    {/*  <option value="2023">
-                                            2023
-                                        </option> */}
                                     <option value="2024">
                                         2024
                                     </option>
-                                    {/*  <option value="2025">
-                                            2025
-                                        </option> */}
                                 </select>
                                 <span className="absolute inset-y-0 right-0 flex items-center text-custom-gray81 pr-3 pl-3 bg-custom-grayFA pointer-events-none">
                                     <IoMdArrowDropdown />
@@ -353,14 +372,14 @@ const ReportPage = () => {
                 </div>
             </div>
             <div className="relative flex gap-3 mt-4 bg-custom-grayFA items-start">
-                <div>
-                    <div className="w-[547px] pb-7 min-h-[335px] flex-grow-1 bg-white rounded-lg">
+                <div className="flex flex-col gap-[15px] w-[571px]">
+                    <div className="w-full pb-7 min-h-[335px] flex-grow-1 bg-white rounded-lg">
                         <p className="p-4 text-base montserrat-bold">
-                            Inquiries per category
+                            Inquiries Per Category
                         </p>
                         <div className="border border-t-1"></div>
                         <div className="mt-4">
-                            <div className="flex gap-[10px]">
+                            <div className="flex gap-[10px] px-[16px]">
                                 <div className="flex  w-[300px] items-center border rounded-md overflow-hidden">
                                     <span className="text-custom-gray81 bg-custom-grayFA flex items-center text-sm w-[150px] -mr-3 pl-3 py-1">
                                         For the month of
@@ -395,18 +414,14 @@ const ReportPage = () => {
                                         <select
                                             name="year"
                                             className="appearance-none w-[100px] px-4 py-1 bg-white focus:outline-none border-0"
-                                        /*  value={department} */
-                                        /* onChange={(e) => setDepartment(e.target.value)} */
+                                            value={inquiriesPerCategoryYear}
+                                            onChange={handleInquiriesPerCategoryYearChange}
                                         >
-                                            {/*  <option value="2023">
-                                                2023
-                                            </option> */}
+
                                             <option value="2024">
                                                 2024
                                             </option>
-                                            {/* <option value="2025">
-                                                2025
-                                            </option> */}
+
                                         </select>
                                         <span className="absolute inset-y-0 right-0 flex items-center text-custom-gray81 pr-3 pl-3 bg-custom-grayFA pointer-events-none">
                                             <IoMdArrowDropdown />
@@ -436,7 +451,8 @@ const ReportPage = () => {
                                         {dataToDisplay.map((entry, index) => (
                                             <Cell
                                                 key={index}
-                                                fill={categoryColors[entry.name] || COLORS[index % COLORS.length]}
+                                                // fill={categoryColors[entry.name] || COLORS[index % COLORS.length]}
+                                                fill={getColor(entry.name, index)}
                                             />
                                         ))}
 
@@ -481,15 +497,166 @@ const ReportPage = () => {
                             </div>
                         </div>
                     </div>
+                    <div className="w-full pb-7 min-h-[335px] flex-grow-1 bg-white rounded-lg">
+                        <p className="p-4 text-base montserrat-bold">
+                            Inquiries Per Channel
+                        </p>
+                        <div className="border border-t-1"></div>
+                        <div className="mt-4">
+                            <div className="flex gap-[10px] px-[16px]">
+                                <div className="flex  w-[300px] items-center border rounded-md overflow-hidden">
+                                    <span className="text-custom-gray81 bg-custom-grayFA flex items-center text-sm w-[150px] -mr-3 pl-3 py-1">
+                                        For the month of
+                                    </span>
+                                    <div className="relative w-[159px]">
+                                        <select
+                                            name="concern"
+                                            className="appearance-none w-full px-4 py-1 bg-white focus:outline-none border-0"
+                                            value={inquiriesPerChannelMonth}
+                                            onChange={(e) => setInquiriesPerChannelMonth(e.target.value)}
+                                        >
+                                            <option value="january">January</option>
+                                            <option value="february">February</option>
+                                            <option value="march">March</option>
+                                            <option value="april">April</option>
+                                            <option value="may">May</option>
+                                            <option value="june">June</option>
+                                            <option value="july">July</option>
+                                            <option value="august">August</option>
+                                            <option value="september">September</option>
+                                            <option value="october">October</option>
+                                            <option value="november">November</option>
+                                            <option value="december">December</option>
+                                        </select>
+                                        <span className="absolute inset-y-0 right-0 flex items-center text-custom-gray81 pr-3 pl-3 bg-custom-grayFA pointer-events-none">
+                                            <IoMdArrowDropdown />
+                                        </span>
+                                    </div>
+                                </div>
+                                <div className="flex w-[95px] items-center border rounded-md overflow-hidden">
+                                    <div className="relative w-full">
+                                        <select
+                                            name="year"
+                                            className="appearance-none w-[100px] px-4 py-1 bg-white focus:outline-none border-0"
+                                            value={inquiriesPerChanelYear}
+                                            onChange={handleInquiriesPerChannelYearChange}
+                                        >
+
+                                            <option value="2024">
+                                                2024
+                                            </option>
+
+                                        </select>
+                                        <span className="absolute inset-y-0 right-0 flex items-center text-custom-gray81 pr-3 pl-3 bg-custom-grayFA pointer-events-none">
+                                            <IoMdArrowDropdown />
+                                        </span>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                        <div className="flex flex-col">
+                            <div className="py-[10px]">
+                                <BarChart
+                                    width={571}
+                                    height={200}
+                                    data={inquriesPerChannelData}
+                                    margin={{
+                                        top: 5,
+                                        right: 20,
+                                        left: -25,
+                                        bottom: 15,
+                                    }}
+                                >
+                                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                                    <XAxis dataKey="name" tick={{ fontSize: 10, fill: '#000', width: 10, }} angle={-25} dy={5} />
+                                    <YAxis ticks={[10, 20, 30,]} />
+                                    <Tooltip formatter={(value, name) => ` ${value}%`} />
+                                    <Bar
+                                        dataKey="value"
+                                        fill="#348017"
+                                        barSize={15}
+                                        radius={[3, 3, 0, 0]}
+
+                                    >
+                                        {inquriesPerChannelData.map((entry, index) => (
+                                            <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
+                                        ))}
+                                    </Bar>
+                                </BarChart>
+                            </div>
+                            <div className="w-full px-[10px]">
+                                <div className="flex flex-wrap text-[#121212]">
+                                    <div className="flex items-center pr-3 gap-[11px] ">
+                                        <span className="flex h-[20px] items-center pb-1 text-custom-solidgreen text-2xl">
+                                            ●
+                                        </span>
+                                        <span className="text-custom-gray12 text-xs">
+                                            Email
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center pr-3 gap-[11px]">
+                                        <span className="flex h-[20px] items-center pb-1 text-custom-lightgreen text-2xl">
+                                            ●
+                                        </span>
+                                        <span className="text-custom-gray12 text-xs">
+                                            Call
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center pr-3 gap-[11px]">
+                                        <span className="flex h-[20px] items-center pb-1 text-[#1A73E8] text-2xl">
+                                            ●
+                                        </span>
+                                        <span className="text-custom-gray12 text-xs">
+                                            Walk-in
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center pr-3 gap-[11px]">
+                                        <span className="flex h-[20px] items-center pb-1 text-[#5B9BD5] text-2xl">
+                                            ●
+                                        </span>
+                                        <span className="text-custom-gray12 text-sm">
+                                            Website
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center pr-3 gap-[11px]">
+                                        <span className="flex h-[20px] items-center pb-1 text-custom-bluegreen text-2xl">
+                                            ●
+                                        </span>
+                                        <span className="text-custom-gray12 text-xs">
+                                            Social Media
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center pr-3 gap-[11px] ">
+                                        <span className="flex h-[20px] items-center pb-1 text-[#404B52] text-2xl">
+                                            ●
+                                        </span>
+                                        <span className="text-custom-gray12 text-xs">
+                                            Branch Tablet
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center pr-3 gap-[11px] ">
+                                        <span className="flex h-[20px] items-center pb-1 text-custom-grayA5 text-2xl">
+                                            ●
+                                        </span>
+                                        <span className="text-custom-gray12 text-xs">
+                                            Internal Endorsement
+                                        </span>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div className="flex flex-col gap-3">
-                    <div className=" bg-whiterounded-[10px]  w-[579px] flex flex-col overflow-y-auto">
+                    <div className=" bg-whiterounded-[10px] bg-white w-[579px] flex flex-col overflow-y-auto">
                         <p className="p-4  text-base montserrat-bold">
-                            Inquiries per property
+                            Inquiries Per Property
                         </p>
                         <div className="border border-t-1"></div>
                         <div className="mt-4 ">
-                            <div className="flex gap-[10px]">
+                            <div className="flex gap-[10px] px-[16px]">
                                 <div className="flex w-[300px] items-center border rounded-md overflow-hidden">
                                     <span className="text-custom-gray81 bg-custom-grayFA flex items-center text-sm w-[150px] -mr-3 pl-3 py-1">
                                         For the month of
@@ -524,18 +691,14 @@ const ReportPage = () => {
                                         <select
                                             name="year"
                                             className="appearance-none w-[100px] px-4 py-1 bg-white focus:outline-none border-0"
-                                        /*  value={department} */
-                                        /* onChange={(e) => setDepartment(e.target.value)} */
+                                            value={inquiriesPerPropertyYear}
+                                            onChange={handleInquiriesPerPropertyYearChange}
                                         >
-                                            {/* <option value="2023">
-                                                2023
-                                            </option> */}
+
                                             <option value="2024">
                                                 2024
                                             </option>
-                                            {/*  <option value="2025">
-                                                2025
-                                            </option> */}
+
                                         </select>
                                         <span className="absolute inset-y-0 right-0 flex items-center text-custom-gray81 pr-3 pl-3 bg-custom-grayFA pointer-events-none">
                                             <IoMdArrowDropdown />
@@ -545,7 +708,7 @@ const ReportPage = () => {
                             </div>
                         </div>
                         <div className="flex-grow">
-                            {/* <p>Inquiries per propertys test</p> */}
+
                             <BarChart
                                 width={400}
                                 height={chartHeight}
@@ -626,11 +789,11 @@ const ReportPage = () => {
                     </div>
                     <div className=" bg-white rounded-[10px]  w-[579px] flex flex-col overflow-y-auto">
                         <p className="p-4  text-base montserrat-bold">
-                            Customer communication type
+                            Type
                         </p>
                         <div className="border border-t-1"></div>
                         <div className="mt-4 ">
-                            <div className="flex gap-[10px]">
+                            <div className="flex gap-[10px] px-[16px]">
                                 <div className="flex w-[300px] items-center border rounded-md overflow-hidden">
                                     <span className="text-custom-gray81 bg-custom-grayFA flex items-center text-sm w-[150px] -mr-3 pl-3 py-1">
                                         For the month of
@@ -639,8 +802,8 @@ const ReportPage = () => {
                                         <select
                                             name="concern"
                                             className="appearance-none w-full px-4 py-1 bg-white focus:outline-none border-0"
-                                            onChange={(e) => setPropertyMonth(e.target.value)}
-                                            value={propertyMonth}
+                                            onChange={(e) => setCommunicationTypeMonth(e.target.value)}
+                                            value={communicationTypeMonth}
                                         >
                                             <option value="january">January</option>
                                             <option value="february">February</option>
@@ -665,18 +828,14 @@ const ReportPage = () => {
                                         <select
                                             name="year"
                                             className="appearance-none w-[100px] px-4 py-1 bg-white focus:outline-none border-0"
-                                        /*  value={department} */
-                                        /* onChange={(e) => setDepartment(e.target.value)} */
+                                            value={communicationTypeYear}
+                                            onChange={handleCommunicationTypeYearChange}
                                         >
-                                            {/* <option value="2023">
-                                                2023
-                                            </option> */}
+
                                             <option value="2024">
                                                 2024
                                             </option>
-                                            {/*  <option value="2025">
-                                                2025
-                                            </option> */}
+
                                         </select>
                                         <span className="absolute inset-y-0 right-0 flex items-center text-custom-gray81 pr-3 pl-3 bg-custom-grayFA pointer-events-none">
                                             <IoMdArrowDropdown />
@@ -690,7 +849,7 @@ const ReportPage = () => {
                             <BarChart
                                 width={400}
                                 height={chartHeight2}
-                                data={data1}
+                                data={communicationTypeData}
                                 layout="vertical"
                                 margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
                             >
@@ -704,13 +863,13 @@ const ReportPage = () => {
                                 <Tooltip content={<CustomTooltip2 />} />
 
                                 <Bar
-                                    dataKey="complaints"
+                                    dataKey="complainCount"
                                     fill="#EB4444"
                                     barSize={15}
                                     radius={[0, 4, 4, 0]}
                                 >
                                     <LabelList
-                                        dataKey="complaints"
+                                        dataKey="complainCount"
                                         position="right"
                                         fill="#4a5568"
                                     />
@@ -731,37 +890,37 @@ const ReportPage = () => {
                                     />
                                 </Bar>
                                 <Bar
-                                    dataKey="requests"
+                                    dataKey="requestCount"
                                     fill="#348017"
                                     barSize={15}
                                     radius={[0, 4, 4, 0]}
                                 >
                                     <LabelList
-                                        dataKey="requests"
+                                        dataKey="requestCount"
                                         position="right"
                                         fill="#4a5568"
                                     />
                                 </Bar>
                                 <Bar
-                                    dataKey="inquiries"
+                                    dataKey="inquiryCount"
                                     fill="#1A73E8"
                                     barSize={15}
                                     radius={[0, 4, 4, 0]}
                                 >
                                     <LabelList
-                                        dataKey="inquiries"
+                                        dataKey="inquiryCount"
                                         position="right"
                                         fill="#4a5568"
                                     />
                                 </Bar>
                                 <Bar
-                                    dataKey="suggestions"
+                                    dataKey="suggestionCount"
                                     fill="#E4EA3B"
                                     barSize={15}
                                     radius={[0, 4, 4, 0]}
                                 >
                                     <LabelList
-                                        dataKey="suggestions"
+                                        dataKey="suggestionCount"
                                         position="right"
                                         fill="#4a5568"
                                     />
@@ -805,7 +964,7 @@ const ReportPage = () => {
                         </div>
                     </div>
                 </div>
-                <div className="fixed bottom-[50px] right-[41px]">
+                <div className="hidden fixed bottom-[50px] right-[41px]">
                     <button className="flex justify-center items-center size-[60px] shadow-custom8 rounded-full bg-[#1A73E8] text-white text-lg">
                         <TiDownload className="text-white text-[30px]" />
                     </button>

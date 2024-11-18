@@ -4,14 +4,14 @@ namespace App\Mail;
 
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
+use Illuminate\Mail\Mailables\Address;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Headers;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Mail\Mailables\Envelope;
-use Illuminate\Mail\Mailables\Address;
 use Illuminate\Contracts\Queue\ShouldQueue;
 
-class ResolvedTicketToCustomerMail extends Mailable
+class ClosedTicketToCustomerMail extends Mailable
 {
     use Queueable, SerializesModels;
     protected $ticket_id;
@@ -21,11 +21,11 @@ class ResolvedTicketToCustomerMail extends Mailable
     protected $admin_name;
     protected $department;
     protected $modifiedTicketId;
-    protected $surveyLink;
+
     /**
      * Create a new message instance.
      */
-    public function __construct($ticket_id, $email, $buyer_lastname, $message_id, $admin_name, $department, $modifiedTicketId, $surveyLink)
+    public function __construct($ticket_id, $email, $buyer_lastname, $message_id, $admin_name, $department, $modifiedTicketId,)
     {
         $this->ticket_id = $ticket_id;
         $this->email = $email;
@@ -34,9 +34,7 @@ class ResolvedTicketToCustomerMail extends Mailable
         $this->admin_name = $admin_name;
         $this->department = $department;
         $this->modifiedTicketId = $modifiedTicketId;
-        $this->surveyLink = $surveyLink;
     }
-
 
     /**
      * Get the message envelope.
@@ -57,6 +55,7 @@ class ResolvedTicketToCustomerMail extends Mailable
         }
     }
 
+
     public function headers(): Headers
     {
 
@@ -74,25 +73,22 @@ class ResolvedTicketToCustomerMail extends Mailable
 
         return $headers;
     }
-
     /**
      * Get the message content definition.
      */
     public function content(): Content
     {
         return new Content(
-            view: 'resolve_inquiry_customer',
+            view: 'close_inquiry_customer',
             with: [
                 'buyer_lname' => $this->buyer_lastname,
                 'ticket_id' => $this->ticket_id,
                 'admin_name' => $this->admin_name,
                 'department' => $this->department,
                 'modifiedTicketId' => $this->modifiedTicketId,
-                'surveyLink' => $this->surveyLink
             ],
         );
     }
-
     /**
      * Get the attachments for the message.
      *

@@ -19,6 +19,7 @@
         }
 
 
+
         p {
             font-family: 'Barlow', sans-serif;
             font-weight: 400;
@@ -121,26 +122,46 @@
 </head>
 
 <body style="font-family: Arial, sans-serif; font-size: 14px; color: #333; line-height: 1.6;">
-    <p style="font-size: 16px; font-weight: bold;">Hi Mr./Ms. {{ $buyer_lname }},</p>
-
-    <p style="margin-bottom: 5px;">
-        We are pleased to inform you that your feedback ticket {{ $ticket_id }} has been resolved. 
-        <br>
-        Thank you for bringing this matter to our attention and for your patience as we addressed it.
-    </p>
+    <p>Hi Mr./Ms. {{ ucwords($data['lname']) }},</p>
 
     <p>
-        If you have any further questions or need additional assistance, please don't hesitate to contact us.
+        Thank you for reaching out to us. We have received your feedback about <strong>
+            {{ implode(', ', array_filter([
+            $data['details_concern'],
+            ($data['property'] ?? 'N/A') !== 'N/A' ? $data['property'] : null,
+            $data['unit_number'] ?? null
+            ])) }}.
+        </strong>
     </p>
-
     <p>
-        Thank you for choosing Cebu Landmasters. We build with you in mind.
+        Our team is reviewing your concern and you can expect a
+        response within
+        1-2 working days. In the meantime, if you have further questions, you may contact us directly at
+        <strong>09324011120</strong>.
+    </p>
+    <p>
+        At CLI, we build with you in mind.
     </p>
 
 
-    {{-- <p>Thank you for reaching out to us; we build with you in mind.</p> --}}
+    <p style="margin: 0; padding: 0;">Best regards,</p>
+    <p style="margin: 0; padding: 0;">Cebu Landmasters, Inc.</p>
+    <br>
+    <img style="margin-top; 5px;"
+        src="https://storage.googleapis.com/super-app-storage/concerns/67219ce89c592.png?GoogleAccessId=799945112092-compute%40developer.gserviceaccount.com&Expires=2045788905&Signature=aIFtdGmczZSDdCikC8VR%2FIEnS6g0bLs%2BXhOP7lekJ5m10Qktmc%2FotqfUrpYCFyC9qBizDk5zo4jhc1ebO54YBPc45h1qYf%2B96R8m2v0AWzo9NED1sD6i4qgKPd4Nn5wJ19iZFPPpSXWrht7idXcg9Ja05hd%2BpuxoknvV0%2BP%2Fnh9W%2B4pucqoT%2Fo6C7jN9Rp2gvrkH04EgjgrsSfgTkxraaURAs0IcUlmq7Ma4eBQU%2FDL2uMuSsupk9%2FyxisXoI2PT%2FOAdjanl9uxSNFqnR2dg8YUmF2NcxRPaSjcojZfcwZEiuz%2B9Pc50f1DvqVNOe06hl%2BCw9i7dJMsKUNN0tgkz0w%3D%3D"
+        title="clisignature" />
 
-    <p style="font-size: 16px;">Best regards,</p>
-    <p style="font-weight: bold;">Cebu Landmasters Inc.</p>
-    <img src="https://storage.googleapis.com/super-app-storage/concerns/67219ce89c592.png?GoogleAccessId=799945112092-compute%40developer.gserviceaccount.com&Expires=2045788905&Signature=aIFtdGmczZSDdCikC8VR%2FIEnS6g0bLs%2BXhOP7lekJ5m10Qktmc%2FotqfUrpYCFyC9qBizDk5zo4jhc1ebO54YBPc45h1qYf%2B96R8m2v0AWzo9NED1sD6i4qgKPd4Nn5wJ19iZFPPpSXWrht7idXcg9Ja05hd%2BpuxoknvV0%2BP%2Fnh9W%2B4pucqoT%2Fo6C7jN9Rp2gvrkH04EgjgrsSfgTkxraaURAs0IcUlmq7Ma4eBQU%2FDL2uMuSsupk9%2FyxisXoI2PT%2FOAdjanl9uxSNFqnR2dg8YUmF2NcxRPaSjcojZfcwZEiuz%2B9Pc50f1DvqVNOe06hl%2BCw9i7dJMsKUNN0tgkz0w%3D%3D" title="clisignature" />
+    <p style="margin-top: 5px;">
+        <strong>
+            Reminder:
+            This is an automated message from a no-reply email address.
+            Please do not reply directly to this email as your message will not be received.
+            <br>
+            If you need assistance, contact our support team at customer service support.
+        </strong>
+    </p>
+
+    <p style="margin-top: 5px;">
+        <strong>If you did not request this inquiry, please disregard this message.</strong>
+    </p>
 </body>

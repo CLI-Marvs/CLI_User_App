@@ -20,10 +20,12 @@ import CircularProgress from "@mui/material/CircularProgress";
 import { AiFillInfoCircle } from "react-icons/ai";
 import { IoIosCheckmarkCircle } from "react-icons/io";
 import { toast, ToastContainer, Bounce } from "react-toastify";
-import Alert from "../../../component/Alert";
+import Alert from "../mainComponent/Alert";
 import AddInfoModal from "./AddInfoModal";
 import { VALID_FILE_EXTENSIONS } from "../../../constant/data/validFile";
-
+import InquiryFormModal from "./InquiryFormModal";
+import ThreadInquiryFormModal from "./ThreadInquiryFormModal";
+import { ALLOWED_EMPLOYEES_CRS } from '../../../constant/data/allowedEmployeesCRS';
 const InquiryThread = () => {
     const [attachedFiles, setAttachedFiles] = useState([]);
     const [startDate, setStartDate] = useState(null);
@@ -35,6 +37,7 @@ const InquiryThread = () => {
     const [email, setEmail] = useState("");
     const [ticket, setTicket] = useState("");
     const [status, setStatus] = useState("");
+    const [type, setType] = useState("");
     const [selectedProperty, setSelectedProperty] = useState("");
     const [fileName, setFileName] = useState("");
     const [hasAttachments, setHasAttachments] = useState(false);
@@ -53,7 +56,10 @@ const InquiryThread = () => {
         setMessages,
     } = useStateContext();
     const [chatMessage, setChatMessage] = useState("");
+    const userLoggedInEmail = user?.employee_email;
+
     const modalRef = useRef(null);
+    const modalRef2 = useRef(null);
     const resolveModalRef = useRef(null);
     const navigate = useNavigate();
     const location = useLocation();
@@ -62,16 +68,21 @@ const InquiryThread = () => {
     const ticketId = decodeURIComponent(params.id);
     const [isResolved, setIsResolved] = useState(false);
     const [showAlert, setShowAlert] = useState(false);
+    const [alertType, setAlertType] = useState(""); // "delete", "close", or "resolve"
     const [dataConcern, setDataConcern] = useState(itemsData || {});
     const [emailMessageID, setEmailMessageID] = useState(null);
     const handleDateChange = (date) => {
         setStartDate(date);
     };
+    console.log("dataConcern", dataConcern);
+
+    // Function to normalize names
+    //const normalizeEmail = (email) => email.trim().toLowerCase();
 
     const handleSelectProperty = (e) => {
         setSelectedProperty(e.target.value);
     };
-    
+
     const handleUpdate = (newData) => {
         setDataConcern((prevData) => ({
             ...prevData,
@@ -79,8 +90,20 @@ const InquiryThread = () => {
         }));
     };
 
+    useEffect(() => {
+        const storedData = JSON.parse(localStorage.getItem("dataConcern"));
+        const updatedData = JSON.parse(localStorage.getItem("updatedData"));
+
+        if (storedData) {
+            setDataConcern(storedData);
+        }
+
+        if (updatedData) {
+            setDataConcern(updatedData);
+        }
+    }, []);
+
     /*   console.log("data", data); */
-    console.log("updatedConcern", dataConcern);
 
     /*  const dataConcern = data?.find((item) => item.ticket_id === ticketId) || {}; */
 
@@ -109,13 +132,13 @@ const InquiryThread = () => {
         "N/A",
         ...(Array.isArray(propertyNamesList) && propertyNamesList.length > 0
             ? propertyNamesList
-                  .filter((item) => !item.toLowerCase().includes("phase"))
-                  .map((item) => formatFunc(item))
-                  .sort((a, b) => {
-                      if (a === "N/A") return -1;
-                      if (b === "N/A") return 1;
-                      return a.localeCompare(b);
-                  })
+                .filter((item) => !item.toLowerCase().includes("phase"))
+                .map((item) => formatFunc(item))
+                .sort((a, b) => {
+                    if (a === "N/A") return -1;
+                    if (b === "N/A") return 1;
+                    return a.localeCompare(b);
+                })
             : []),
     ];
 
@@ -144,19 +167,47 @@ const InquiryThread = () => {
         }
     };
 
-    const handleDelete = () => {
+    const handleOpenAddInfoModal = () => {
+        if (modalRef2.current) {
+            modalRef2.current.showModal();
+        }
+    };
+
+    /**
+     * To handle mark as closed modal
+     */
+    const handleOpenMarkAsClosedModal = () => {
+        setAlertType("close");
         setShowAlert(true);
     };
+
+    /**
+     * To handle delete modal
+     */
+    const handleOpenDeleteModal = () => {
+        setAlertType("delete");
+        setShowAlert(true);
+    };
+
+    /**
+     * To handle confirm delete/close inquiry
+     */
     const handleConfirm = () => {
-        // console.log("it runs")
-        handleDeleteInquiry();
+        if (alertType === "delete") {
+            deleteInquiry();
+        } else if (alertType === "close") {
+            closedInquiry();
+        }
         setShowAlert(false);
     };
 
+    /**
+     * To handle cancel delete inquiry
+     */
     const handleCancel = () => {
-        console.log("Cancelled");
         setShowAlert(false);
     };
+
     const handleOpenResolveModal = () => {
         if (resolveModalRef.current) {
             resolveModalRef.current.showModal();
@@ -211,12 +262,44 @@ const InquiryThread = () => {
         }
     };
 
-    const handleDeleteInquiry = async () => {
+    /**
+     * Function to delete inquiry
+     */
+    const deleteInquiry = async () => {
         await apiService.post("delete-concerns", { ticketId });
         navigate("/inquirymanagement/inquirylist");
         getAllConcerns();
     };
-
+    /**
+     * To handle close inquiry
+     */
+    const closedInquiry = async () => {
+        // await apiService.post("close-concerns", { ticketId });
+        await apiService.post("close-concerns", {
+            ticket_id: ticketId,
+            admin_name: `${user?.firstname} ${user?.lastname}`,
+            department: user?.department,
+            buyer_email: dataConcern.buyer_email,
+            buyer_lastname: dataConcern.buyer_lastname,
+            buyer_name: `${capitalizeWords(
+                `${dataConcern.buyer_firstname} ${dataConcern.buyer_lastname}`
+            )}`,
+            // details_concern: dataRef.details_concern,
+            //  remarks: remarks,
+            //communication_type: communicationType,
+            //surveyLink: selectedSurveyName,
+            //assignees: assigneesPersonnel[ticketId],
+            //message_id: messageId,
+        });
+        const updatedData = { ...dataConcern, status: "Closed" };
+        localStorage.removeItem("updatedData");
+        localStorage.removeItem("dataConcern");
+        localStorage.setItem("closeConcern", JSON.stringify(updatedData));
+        
+        handleUpdate(updatedData);
+       
+        getAllConcerns();
+    };
     const submitMessage = async () => {
         setLoading(true);
         setIsConfirmModalOpen(false);
@@ -269,7 +352,7 @@ const InquiryThread = () => {
                     draggable: true,
                     progress: undefined,
                     theme: "dark",
-                    transition: Bounce 
+                    transition: Bounce,
                 });
                 setLoading(false);
                 return;
@@ -308,7 +391,6 @@ const InquiryThread = () => {
             });
             console.log("triger here");
 
-            callBackHandler();
             setAttachedFiles([]);
             setLoading(false);
             callBackHandler();
@@ -330,7 +412,11 @@ const InquiryThread = () => {
         setTicketId(ticketId);
     }, [ticketId, setTicketId]);
 
-    
+    useEffect(() => {
+        console.log("This is fetching");
+        getAllConcerns();
+    }, []);
+
     useEffect(() => {
         if (isFilterVisible) {
             document.addEventListener("mousedown", handleClickOutside);
@@ -364,14 +450,20 @@ const InquiryThread = () => {
         });
     };
 
+    const { pathname } = useLocation();
+
+    useEffect(() => {
+        window.scrollTo(0, 0); // Scrolls to the top
+    }, [pathname]);
+
     const messageIdChannelFunc = (channel) => {
         channel.listen("MessageID", (event) => {
             console.log("message id event", event.data);
             setEmailMessageID(event.data.message_id);
-           /*  setDataConcern((prevDataConcern) => ({
-                ...prevDataConcern,
-                message_id: event.data.message_id,
-            })); */
+            /*  setDataConcern((prevDataConcern) => ({
+                 ...prevDataConcern,
+                 message_id: event.data.message_id,
+             })); */
         });
     };
 
@@ -383,13 +475,16 @@ const InquiryThread = () => {
             }));
         }
     }, [emailMessageID]);
-    
-    
+
     const combineThreadMessages = messages[ticketId]
         ? messages[ticketId]
-              .flat()
-              .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+            .flat()
+            .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
         : [];
+    const getLatestMessageFromBuyer = combineThreadMessages.find(
+        (item) => item.buyer_email
+    );
+
     // useEffect(() => {
     //     let adminMessageChannel;
     //     let newTicketId;
@@ -559,9 +654,8 @@ const InquiryThread = () => {
                                             <option value="Payment Issues">
                                                 Payment Issues
                                             </option>
-                                            <option value="SOA/ Billing Statement/ Buyer's Ledger">
-                                                SOA/ Billing Statement/ Buyer's
-                                                Ledger
+                                            <option value="SOA/ Buyer's Ledger">
+                                                SOA/ Buyer's Ledger
                                             </option>
                                             <option value="Turn Over Status">
                                                 Turn Over Status
@@ -583,6 +677,47 @@ const InquiryThread = () => {
                                                 Other Concerns
                                             </option>
                                         </select>
+                                        <span className="absolute inset-y-0 right-0 flex items-center  pl-3 pointer-events-none">
+                                            <IoIosArrowDown />
+                                        </span>
+                                    </div>
+                                    <div className="flex relative">
+                                        <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
+                                            {" "}
+                                            Type
+                                        </label>
+                                        <div className="flex bg-red-900 justify-start w-full relative">
+                                            <label
+                                                htmlFor=""
+                                                className="w-full border-b-2"
+                                            >
+                                                {""}
+                                            </label>
+                                            <select
+                                                className="w-full border-b-1 outline-none appearance-none text-sm absolute px-[8px]"
+                                                value={type}
+                                                onChange={(e) =>
+                                                    setStatus(e.target.value)
+                                                }
+                                            >
+                                                <option value="">
+                                                    Select Type
+                                                </option>
+                                                <option value="Complain">
+                                                    Complain
+                                                </option>
+                                                <option value="Request">
+                                                    Request
+                                                </option>
+                                                <option value="Inquiry">
+                                                    Inquiry
+                                                </option>
+                                                <option value="Suggestion or Recommendation">
+                                                    Suggestion or Recommendation
+                                                </option>
+                                            </select>
+                                        </div>
+
                                         <span className="absolute inset-y-0 right-0 flex items-center  pl-3 pointer-events-none">
                                             <IoIosArrowDown />
                                         </span>
@@ -614,6 +749,56 @@ const InquiryThread = () => {
                                                 </option>
                                                 <option value="Unresolved">
                                                     Unresolved
+                                                </option>
+                                            </select>
+                                        </div>
+                                        <span className="absolute inset-y-0 right-0 flex items-center  pl-3 pointer-events-none">
+                                            <IoIosArrowDown />
+                                        </span>
+                                    </div>
+                                    <div className="flex relative">
+                                        <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
+                                            {" "}
+                                            Channel
+                                        </label>
+                                        <div className="flex bg-red-900 justify-start w-full relative">
+                                            <label
+                                                htmlFor=""
+                                                className="w-full border-b-2"
+                                            >
+                                                {""}
+                                            </label>
+                                            <select
+                                                className="w-full border-b-1 outline-none appearance-none text-sm absolute px-[8px]"
+                                            /* value={status}
+                                        onChange={(e) =>
+                                            setStatus(e.target.value)
+                                        } */
+                                            >
+                                                <option value=" ">
+                                                    Select Channel
+                                                </option>
+                                                <option value="Email">
+                                                    Email
+                                                </option>
+                                                <option value="Call">
+                                                    Call
+                                                </option>
+                                                <option value="Walk-in">
+                                                    Walk-in
+                                                </option>
+                                                <option value="Website">
+                                                    Website
+                                                </option>
+                                                <option value="Social media">
+                                                    Social media
+                                                </option>
+                                                <option value="Branch Tablet">
+                                                    Branch Tablet (Jotform
+                                                    created by IT)
+                                                </option>
+                                                <option value="Internal Endorsement">
+                                                    Internal Endorsement
                                                 </option>
                                             </select>
                                         </div>
@@ -746,7 +931,7 @@ const InquiryThread = () => {
                                     <div className="flex justify-center w-[20px] shrink-0">
                                         <LuTrash2
                                             className="text-custom-bluegreen hover:text-red-500 cursor-pointer"
-                                            onClick={handleDeleteInquiry}
+                                            onClick={deleteInquiry}
                                         />
                                     </div>
                                 )} */}
@@ -760,326 +945,390 @@ const InquiryThread = () => {
                             </div>
                         </div>
                         <div className="p-[10px]">
-                            <div className="relative">
-                                {" "}
-                                {/* boxref */}
-                                {/* Container for chat input and attached files */}
-                                <div className="gradient-btn2 rounded-[12px] p-[2px] relative">
-                                    <div className="bg-white p-[10px] rounded-[10px]">
-                                        {/* Display attached files inside the same container */}
-                                        {attachedFiles.length > 0 && (
-                                            <div className="mb-2 ">
-                                                {attachedFiles.map(
-                                                    (file, index) => {
-                                                        const fileName =
-                                                            file.name;
+                            {/* Container for chat input and attached files */}
+                            {/* {(dataConcern?.status === 'Resolved' || dataConcern?.status === 'Closed') && ( */}
+                            {dataConcern?.status === 'unresolved'  && (
+                                <div className="relative">
+                                    <div className="gradient-btn2 rounded-[12px] p-[2px] relative">
+                                        <div className="bg-white p-[10px] rounded-[10px]">
+                                            {/* Display attached files inside the same container */}
+                                            {attachedFiles.length > 0 && (
+                                                <div className="mb-2 ">
+                                                    {attachedFiles.map(
+                                                        (file, index) => {
+                                                            const fileName =
+                                                                file.name;
 
-                                                        const fileExtension =
-                                                            fileName.slice(
-                                                                fileName.lastIndexOf(
-                                                                    "."
-                                                                )
-                                                            );
-                                                        const baseName =
-                                                            fileName.slice(
-                                                                0,
-                                                                fileName.lastIndexOf(
-                                                                    "."
-                                                                )
-                                                            );
-                                                        const truncatedName =
-                                                            baseName.length > 30
-                                                                ? baseName.slice(
-                                                                      0,
-                                                                      30
-                                                                  ) + "..."
-                                                                : baseName;
-                                                        return (
-                                                            <div
-                                                                key={index}
-                                                                className="flex items-center justify-between mb-2 p-2 border bg-white rounded "
-                                                            >
-                                                                <span className="text-sm text-gray-700">
-                                                                    {/* {file.name} */}
-                                                                    {truncatedName +
-                                                                        fileExtension}
-                                                                </span>
-                                                                <button
-                                                                    type="button"
-                                                                    onClick={() =>
-                                                                        removeFile(
-                                                                            file.name
-                                                                        )
-                                                                    }
-                                                                    className="text-red-500"
+                                                            const fileExtension =
+                                                                fileName.slice(
+                                                                    fileName.lastIndexOf(
+                                                                        "."
+                                                                    )
+                                                                );
+                                                            const baseName =
+                                                                fileName.slice(
+                                                                    0,
+                                                                    fileName.lastIndexOf(
+                                                                        "."
+                                                                    )
+                                                                );
+                                                            const truncatedName =
+                                                                baseName.length > 30
+                                                                    ? baseName.slice(
+                                                                        0,
+                                                                        30
+                                                                    ) + "..."
+                                                                    : baseName;
+                                                            return (
+                                                                <div
+                                                                    key={index}
+                                                                    className="flex items-center justify-between mb-2 p-2 border bg-white rounded "
                                                                 >
-                                                                    Remove
-                                                                </button>
-                                                            </div>
-                                                        );
-                                                    }
-                                                )}
-                                            </div>
-                                        )}
+                                                                    <span className="text-sm text-gray-700">
 
-                                        {/* Input field */}
-                                        <div className="h-[101px] w-[668]  ">
-                                            <textarea
-                                                placeholder="Reply..."
-                                                onChange={(e) =>
-                                                    setChatMessage(
-                                                        e.target.value
-                                                    )
-                                                }
-                                                value={chatMessage}
-                                                id="chat"
-                                                name="chat"
-                                                rows="4"
-                                                draggable="false"
-                                                className="h-full w-full pl-2 pr-[123px] border-none  text-sm focus:outline-none"
-                                            ></textarea>
+                                                                        {truncatedName +
+                                                                            fileExtension}
+                                                                    </span>
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() =>
+                                                                            removeFile(
+                                                                                file.name
+                                                                            )
+                                                                        }
+                                                                        className="text-red-500"
+                                                                    >
+                                                                        Remove
+                                                                    </button>
+                                                                </div>
+                                                            );
+                                                        }
+                                                    )}
+                                                </div>
+                                            )}
 
-                                            {/* File attachment button */}
-                                            <div className=" absolute bottom-[6px] right-[108px] items-center">
-                                                <input
-                                                    type="file"
-                                                    id="fileInput"
-                                                    multiple
-                                                    style={{ display: "none" }}
-                                                    onChange={handleFileAttach}
-                                                />
-                                                <button
-                                                    type="button"
-                                                    onClick={() =>
-                                                        document
-                                                            .getElementById(
-                                                                "fileInput"
-                                                            )
-                                                            .click()
+                                            {/* Input field */}
+                                            <div className="h-[101px] w-[668]  ">
+                                                <textarea
+                                                    placeholder="Reply..."
+                                                    onChange={(e) =>
+                                                        setChatMessage(
+                                                            e.target.value
+                                                        )
                                                     }
-                                                >
-                                                    <BsPaperclip className="h-5 w-5 text-custom-solidgreen hover:text-gray-700" />
-                                                </button>
-                                            </div>
-                                            {/* Send button */}
-                                            <div className="absolute bottom-2 right-4 flex items-center">
-                                                <button
-                                                    type="button"
-                                                    onClick={handleConfirmation}
-                                                    disabled={
-                                                        !chatMessage.trim() ||
-                                                        loading
-                                                    }
-                                                    className={`flex w-[82px] h-[28px] rounded-[5px] text-white text-xs justify-center items-center 
-                                                        ${
-                                                            loading ||
-                                                            !chatMessage.trim()
+                                                    value={chatMessage}
+                                                    id="chat"
+                                                    name="chat"
+                                                    rows="4"
+                                                    draggable="false"
+                                                    className="h-full w-full pl-2 pr-[123px] border-none  text-sm focus:outline-none"
+                                                ></textarea>
+
+                                                {/* File attachment button */}
+                                                <div className=" absolute bottom-[6px] right-[108px] items-center">
+                                                    <input
+                                                        type="file"
+                                                        id="fileInput"
+                                                        multiple
+                                                        style={{ display: "none" }}
+                                                        onChange={handleFileAttach}
+                                                    />
+                                                    <button
+                                                        type="button"
+                                                        onClick={() =>
+                                                            document
+                                                                .getElementById(
+                                                                    "fileInput"
+                                                                )
+                                                                .click()
+                                                        }
+                                                    >
+                                                        <BsPaperclip className="h-5 w-5 text-custom-solidgreen hover:text-gray-700" />
+                                                    </button>
+                                                </div>
+                                                {/* Send button */}
+                                                <div className="absolute bottom-2 right-4 flex items-center">
+                                                    <button
+                                                        type="button"
+                                                        onClick={handleConfirmation}
+                                                        disabled={
+                                                            !chatMessage.trim() ||
+                                                            loading
+                                                        }
+                                                        className={`flex w-[82px] h-[28px] rounded-[5px] text-white text-xs justify-center items-center 
+                                                        ${loading ||
+                                                                !chatMessage.trim()
                                                                 ? "bg-gray-400 cursor-not-allowed"
                                                                 : "gradient-background3 hover:shadow-custom4"
-                                                        } 
+                                                            } 
                                                     `}
-                                                >
-                                                    {loading ? (
-                                                        <CircularProgress className="spinnerSize" />
-                                                    ) : (
-                                                        <>Send Reply</>
-                                                    )}
-                                                </button>
-                                            </div>
-                                            {isConfirmModalOpen && (
-                                                <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 overflow-auto">
-                                                    <div className="bg-white p-[20px] rounded-[10px] shadow-custom5 w-[784px] min-h-[442px]">
-                                                        <div className="p-[10px] flex flex-col gap-[26px]">
-                                                            <div className="flex justify-center items-center">
-                                                                <AiFillInfoCircle className="size-[37px] text-[#5B9BD5]" />
-                                                            </div>
-                                                            <div className="flex items-center justify-between  px-[25px] h-[50px] rounded-[4px] bg-custom-lightestgreen">
-                                                                <p className="montserrat-medium text-[20px]">
-                                                                    Are you sure
-                                                                    about
-                                                                    sending this
-                                                                    message?
-                                                                </p>
-                                                                <div>
-                                                                    <div className="flex justify-center space-x-[10px]">
-                                                                        <button
-                                                                            onClick={() =>
-                                                                                setIsConfirmModalOpen(
-                                                                                    false
-                                                                                )
+                                                    >
+                                                        {loading ? (
+                                                            <CircularProgress className="spinnerSize" />
+                                                        ) : (
+                                                            <>Send Reply</>
+                                                        )}
+                                                    </button>
+                                                </div>
+                                                {isConfirmModalOpen && (
+                                                    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 overflow-auto">
+                                                        <div className="bg-white p-[20px] rounded-[10px] shadow-custom5 w-[784px] min-h-[442px]">
+                                                            <div className="p-[10px] flex flex-col gap-[26px]">
+                                                                <div className="flex justify-center items-center">
+                                                                    <AiFillInfoCircle className="size-[37px] text-[#5B9BD5]" />
+                                                                </div>
+                                                                <div className="flex items-center justify-between  px-[25px] h-[50px] rounded-[4px] bg-custom-lightestgreen">
+                                                                    <p className="montserrat-medium text-[20px]">
+                                                                        Are you sure
+                                                                        about
+                                                                        sending this
+                                                                        message?
+                                                                    </p>
+                                                                    <div>
+                                                                        <div className="flex justify-center space-x-[10px]">
+                                                                            <button
+                                                                                onClick={() =>
+                                                                                    setIsConfirmModalOpen(
+                                                                                        false
+                                                                                    )
+                                                                                }
+                                                                                className="gradient-btn5 p-[1px] w-[92px] h-[35px] rounded-[10px]"
+                                                                            >
+                                                                                <div className="w-full h-full rounded-[9px] bg-white flex justify-center items-center montserrat-semibold text-sm">
+                                                                                    <p className="text-base font-bold bg-gradient-to-r from-custom-bluegreen via-custom-solidgreen to-custom-solidgreen bg-clip-text text-transparent">
+                                                                                        Cancel
+                                                                                    </p>
+                                                                                </div>
+                                                                            </button>
+                                                                            <button
+                                                                                onClick={
+                                                                                    submitMessage
+                                                                                }
+                                                                                className="gradient-btn5 w-[100px] h-[35px] rounded-[10px] text-sm text-white montserrat-semibold"
+                                                                            >
+                                                                                Confirm
+                                                                            </button>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div className="flex items-center h-[22px] text-custom-solidgreen font-semibold">
+                                                                    PREVIEW
+                                                                </div>
+                                                                <div className="flex items-center h-[22px] text-custom-solidgreen font-semibold">
+                                                                    <span className="mr-1">
+                                                                        TO:
+                                                                    </span>
+                                                                    <span className="text-sm">
+                                                                        {
+                                                                            dataConcern.buyer_email
+                                                                        }
+                                                                    </span>
+                                                                </div>
+
+                                                                <div className="w-full p-[10px] border-[2px] rounded-[5px] border-custom-grayF1 text-sm text-custom-gray81">
+                                                                    <div>
+                                                                        {formatChatMessage(
+                                                                            chatMessage
+                                                                        )}
+                                                                    </div>
+                                                                    <div className="mt-[26px]">
+                                                                        <p>
+                                                                            Sincerely,
+                                                                        </p>
+                                                                        <br />
+                                                                        <p>
+                                                                            {
+                                                                                user?.firstname
+                                                                            }{" "}
+                                                                            {
+                                                                                user?.lastname
                                                                             }
-                                                                            className="gradient-btn5 p-[1px] w-[92px] h-[35px] rounded-[10px]"
-                                                                        >
-                                                                            <div className="w-full h-full rounded-[9px] bg-white flex justify-center items-center montserrat-semibold text-sm">
-                                                                                <p className="text-base font-bold bg-gradient-to-r from-custom-bluegreen via-custom-solidgreen to-custom-solidgreen bg-clip-text text-transparent">
-                                                                                    Cancel
-                                                                                </p>
-                                                                            </div>
-                                                                        </button>
-                                                                        <button
-                                                                            onClick={
-                                                                                submitMessage
+                                                                        </p>
+                                                                        <p>
+                                                                            CLI -{" "}
+                                                                            {
+                                                                                user?.department
                                                                             }
-                                                                            className="gradient-btn5 w-[100px] h-[35px] rounded-[10px] text-sm text-white montserrat-semibold"
-                                                                        >
-                                                                            Confirm
-                                                                        </button>
+                                                                        </p>
                                                                     </div>
                                                                 </div>
                                                             </div>
-                                                            <div className="flex items-center h-[22px] text-custom-solidgreen font-semibold">
-                                                                PREVIEW
-                                                            </div>
-                                                            <div className="flex items-center h-[22px] text-custom-solidgreen font-semibold">
-                                                                <span className="mr-1">
-                                                                    TO:
-                                                                </span>
-                                                                <span className="text-sm">
-                                                                    {
-                                                                        dataConcern.buyer_email
-                                                                    }
-                                                                </span>
-                                                            </div>
-
-                                                            <div className="flex items-center h-[19px] text-sm">
-                                                                Hi Mr./Ms.{" "}
-                                                                {capitalizeWords(
-                                                                    dataConcern.buyer_lastname
-                                                                )}
-                                                                ,
-                                                            </div>
-                                                            <div className="w-full p-[10px] border-[2px] rounded-[5px] border-custom-grayF1 text-sm text-custom-gray81">
-                                                                {formatChatMessage(
-                                                                    chatMessage
-                                                                )}
-                                                            </div>
-                                                            <div className="text-sm">
-                                                                <p>
-                                                                    Sincerely,
-                                                                </p>
-                                                                <br />
-                                                                <p>
-                                                                    {
-                                                                        user?.firstname
-                                                                    }{" "}
-                                                                    {
-                                                                        user?.lastname
-                                                                    }
-                                                                </p>
-                                                                <p>
-                                                                    CLI -{" "}
-                                                                    {
-                                                                        user?.department
-                                                                    }
-                                                                </p>
-                                                            </div>
-                                                        </div>
-                                                        {attachedFiles.length >
-                                                            0 && (
-                                                            <div className="mb-2 ">
-                                                                {attachedFiles.map(
-                                                                    (
-                                                                        file,
-                                                                        index
-                                                                    ) => {
-                                                                        const fileName =
-                                                                            file.name;
-                                                                        const fileExtension =
-                                                                            fileName.slice(
-                                                                                fileName.lastIndexOf(
-                                                                                    "."
-                                                                                )
-                                                                            );
-                                                                        const baseName =
-                                                                            fileName.slice(
-                                                                                0,
-                                                                                fileName.lastIndexOf(
-                                                                                    "."
-                                                                                )
-                                                                            );
-                                                                        const truncatedName =
-                                                                            baseName.length >
-                                                                            30
-                                                                                ? baseName.slice(
-                                                                                      0,
-                                                                                      30
-                                                                                  ) +
-                                                                                  "..."
-                                                                                : baseName;
-                                                                        return (
-                                                                            <div
-                                                                                key={
-                                                                                    index
-                                                                                }
-                                                                                className="flex items-center justify-between mb-2 p-2 border bg-white rounded"
-                                                                            >
-                                                                                <span className="text-sm text-gray-700">
-                                                                                    {truncatedName +
-                                                                                        fileExtension}
-                                                                                </span>
-                                                                                <button
-                                                                                    type="button"
-                                                                                    onClick={() =>
-                                                                                        removeFile(
-                                                                                            file.name
+                                                            {attachedFiles.length >
+                                                                0 && (
+                                                                    <div className="mb-2 ">
+                                                                        {attachedFiles.map(
+                                                                            (
+                                                                                file,
+                                                                                index
+                                                                            ) => {
+                                                                                const fileName =
+                                                                                    file.name;
+                                                                                const fileExtension =
+                                                                                    fileName.slice(
+                                                                                        fileName.lastIndexOf(
+                                                                                            "."
                                                                                         )
-                                                                                    }
-                                                                                    className="text-red-500"
-                                                                                >
-                                                                                    Remove
-                                                                                </button>
-                                                                            </div>
-                                                                        );
-                                                                    }
+                                                                                    );
+                                                                                const baseName =
+                                                                                    fileName.slice(
+                                                                                        0,
+                                                                                        fileName.lastIndexOf(
+                                                                                            "."
+                                                                                        )
+                                                                                    );
+                                                                                const truncatedName =
+                                                                                    baseName.length >
+                                                                                        30
+                                                                                        ? baseName.slice(
+                                                                                            0,
+                                                                                            30
+                                                                                        ) +
+                                                                                        "..."
+                                                                                        : baseName;
+                                                                                return (
+                                                                                    <div
+                                                                                        key={
+                                                                                            index
+                                                                                        }
+                                                                                        className="flex items-center justify-between mb-2 p-2 border bg-white rounded"
+                                                                                    >
+                                                                                        <span className="text-sm text-gray-700">
+                                                                                            {truncatedName +
+                                                                                                fileExtension}
+                                                                                        </span>
+                                                                                        <button
+                                                                                            type="button"
+                                                                                            onClick={() =>
+                                                                                                removeFile(
+                                                                                                    file.name
+                                                                                                )
+                                                                                            }
+                                                                                            className="text-red-500"
+                                                                                        >
+                                                                                            Remove
+                                                                                        </button>
+                                                                                    </div>
+                                                                                );
+                                                                            }
+                                                                        )}
+                                                                    </div>
                                                                 )}
-                                                            </div>
-                                                        )}
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            )}
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
+                                    <div className="text-[11px] text-[#B54D4D]">
+                                        <p>
+                                            Note: This message will be sent to{" "}
+                                            <span className="font-semibold">
+                                                {capitalizeWords(
+                                                    `${dataConcern?.buyer_firstname ||
+                                                    ""
+                                                    } ${dataConcern?.buyer_middlename ||
+                                                    ""
+                                                    } ${dataConcern?.buyer_lastname ||
+                                                    ""
+                                                    }`
+                                                )}{" "}
+                                                {capitalizeWords(
+                                                    dataConcern?.suffix_name
+                                                )}
+                                            </span>
+                                            . Please use the comment section for CLI
+                                            internal communication.
+                                        </p>
+                                    </div>
+
                                 </div>
-                                <div className="text-[11px] text-[#B54D4D]">
-                                    <p>
-                                        Note: This message will be sent to{" "}
-                                        <span className="font-semibold">
-                                            {capitalizeWords(
-                                                `${dataConcern?.buyer_firstname || ""} ${dataConcern?.buyer_middlename || ""} ${dataConcern?.buyer_lastname || ""}`
-                                            )}{" "}
-                                            {capitalizeWords(
-                                                dataConcern?.suffix_name
-                                            )}
-                                        </span>
-                                        . Please use the comment section for CLI
-                                        internal communication.
-                                    </p>
-                                </div>
-                            </div>
+                            )}
+                           
+
+
+
                             <div className="border my-2 border-t-1 border-custom-lightestgreen"></div>
-                            <div className="w-full flex justify-end gap-[13px]">
-                                {dataConcern?.created_by &&
-                                    dataConcern?.created_by === user?.id && (
+                            <div className="w-full flex justify-end gap-[13px] items-center">
+                                {dataConcern?.status === "Resolved" || dataConcern?.status == 'Closed' && (
+                                    <span
+                                        className="w-auto font-semibold text-[13px] text-[#1A73E8] underline cursor-pointer"
+                                        onClick={handleOpenAddInfoModal}
+                                    >
+                                        Create new ticket
+                                    </span>
+                                )}
+                                {/* {dataConcern?.created_by &&
+                                    dataConcern?.created_by === user?.id &&
+                                    user?.department ===
+                                        "Customer Relations - Services" && (
                                         <FaTrash
                                             className="text-[#EB4444] hover:text-red-600 cursor-pointer"
-                                            onClick={handleDelete}
+                                            onClick={handleOpenDeleteModal}
                                         />
-                                    )}
+                                    )} */}
+                                {
+                                    ALLOWED_EMPLOYEES_CRS.includes(userLoggedInEmail) && (
+                                        <FaTrash
+                                            className="text-[#EB4444] hover:text-red-600 cursor-pointer"
+                                            onClick={handleOpenDeleteModal}
+                                        />
+                                    )
+                                }
 
+ 
                                 {dataConcern?.status === "Resolved" ? (
                                     <div className="flex justify-start items-center w-[122px] font-semibold text-[13px] text-custom-lightgreen space-x-1">
                                         <p>Ticket Resolved</p>
                                         <IoIosCheckmarkCircle className="size-[18px] text-custom-lightgreen" />
                                     </div>
                                 ) : (
-                                    <div
-                                        onClick={handleOpenResolveModal}
-                                        className="flex justify-start w-[122px] font-semibold text-[13px] text-[#1A73E8] underline cursor-pointer"
-                                    >
-                                        Mark as resolved
-                                    </div>
+                                    user?.department === "Customer Relations - Services" && dataConcern?.status !== "Closed" && (
+                                        <div
+                                            onClick={handleOpenResolveModal}
+                                            className="flex justify-start w-auto font-semibold text-[13px] text-[#1A73E8] underline cursor-pointer"
+                                        >
+                                            Mark as resolved
+                                        </div>
+                                    )
                                 )}
+
+                                {dataConcern?.status === "Closed" ? (
+                                    <div className="flex justify-start items-center w-[122px] font-semibold text-[13px] text-red-500 space-x-1">
+                                        <p>Ticket Closed</p>
+                                        {/* This message will be shown to all users */}
+                                    </div>
+                                ) : (
+                                    dataConcern?.status !== "Closed" && !ALLOWED_EMPLOYEES_CRS.includes(userLoggedInEmail) && (
+                                        <div
+                                            onClick={handleOpenMarkAsClosedModal}
+                                            className="flex justify-start w-auto font-semibold text-[13px] text-[#1A73E8] underline cursor-pointer"
+                                        >
+                                            Mark as closed
+                                        </div>
+                                    )
+                                )}
+
+                                {/* {
+                                    ALLOWED_EMPLOYEES_CRS.map(normalizeEmail).includes(normalizeEmail(userLoggedInEmail)) && (
+                                        <FaTrash
+                                            className="text-[#EB4444] hover:text-red-600 cursor-pointer"
+                                            onClick={handleOpenDeleteModal}
+                                        />
+                                    )
+                                } */}
+                                {/* {
+                                
+                                ALLOWED_EMPLOYEES_CRS.map(normalizeEmail).includes(normalizeEmail(userLoggedInEmail)) && (
+                                    <div
+                                        onClick={handleOpenMarkAsClosedModal}
+                                        className="flex justify-start w-auto font-semibold text-[13px] text-[#1A73E8] underline cursor-pointer"
+                                    >
+                                        Mark as closed
+                                    </div>
+                                )} */}
+                               
                             </div>
+
                             <div className="">
                                 <div className="">
                                     {combineThreadMessages.length > 0 &&
@@ -1192,10 +1441,23 @@ const InquiryThread = () => {
             </div>
             <div>
                 <Alert
-                    title="Are you sure you want to delete this inquiry?"
+                    title={
+                        alertType === "delete"
+                            ? "Are you sure you want to delete this inquiry?"
+                            : alertType === "close"
+                                ? "Are you sure you want to mark this inquiry as closed?"
+                                : ""
+                    }
                     show={showAlert}
                     onCancel={handleCancel}
                     onConfirm={handleConfirm}
+                />
+            </div>
+            <div>
+                <ThreadInquiryFormModal
+                    modalRef={modalRef2}
+                    messageRef={getLatestMessageFromBuyer}
+                    dataConcern={dataConcern}
                 />
             </div>
         </>

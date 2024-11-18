@@ -45,6 +45,8 @@ const InquiryList = () => {
     const [email, setEmail] = useState("");
     const [ticket, setTicket] = useState("");
     const [status, setStatus] = useState("");
+    const [type, setType] = useState("");
+    const [channels, setChannels] = useState("");
     const [selectedProperty, setSelectedProperty] = useState("");
     const [hasAttachments, setHasAttachments] = useState(false);
     const { propertyNamesList } = useStateContext();
@@ -221,13 +223,13 @@ const InquiryList = () => {
         "N/A",
         ...(Array.isArray(propertyNamesList) && propertyNamesList.length > 0
             ? propertyNamesList
-                  .filter((item) => !item.toLowerCase().includes("phase"))
-                  .map((item) => formatFunc(item))
-                  .sort((a, b) => {
-                      if (a === "N/A") return -1;
-                      if (b === "N/A") return 1;
-                      return a.localeCompare(b);
-                  })
+                .filter((item) => !item.toLowerCase().includes("phase"))
+                .map((item) => formatFunc(item))
+                .sort((a, b) => {
+                    if (a === "N/A") return -1;
+                    if (b === "N/A") return 1;
+                    return a.localeCompare(b);
+                })
             : []),
     ];
 
@@ -254,7 +256,10 @@ const InquiryList = () => {
         setSearchFilter({
             name,
             category,
+            type,
+            status,
             email,
+            channels,
             ticket,
             startDate,
             selectedProperty,
@@ -268,7 +273,9 @@ const InquiryList = () => {
         setCategory("");
         setEmail("");
         setTicket("");
-        //setStatus("");
+        setStatus("");
+        setType("");
+        setChannels("");
         setSelectedProperty("");
         setHasAttachments(false);
         setSpecificAssigneeCsr("");
@@ -334,7 +341,6 @@ const InquiryList = () => {
     }; */
 
 
-    console.log("loading", loading);
     return (
         <>
             <div className="h-screen max-w-full bg-custom-grayFA px-[20px]">
@@ -379,14 +385,17 @@ const InquiryList = () => {
                             </svg>
                         </div>
                         <div className="flex items-center">
-                            <button
-                                onClick={handleOpenModal}
-                                className="h-[38px] w-[121px] gradient-btn5 text-white  text-xs rounded-[10px]"
-                            >
-                                {" "}
-                                <span className="text-[18px]">+</span> Add
-                                Inquiry
-                            </button>
+                            {user?.department === 'Customer Relations - Services' && (
+                                <button
+                                    onClick={handleOpenModal}
+                                    className="h-[38px] w-[121px] gradient-btn5 text-white  text-xs rounded-[10px]"
+                                >
+                                    {" "}
+                                    <span className="text-[18px]">+</span> Add
+                                    Inquiry
+                                </button> 
+                            )}
+                        
                         </div>
 
                         {isFilterVisible && (
@@ -414,51 +423,7 @@ const InquiryList = () => {
                                             {" "}
                                             Category
                                         </label>
-                                        {/* 
-                                        <select
-                                            className="w-full border-b-1 outline-none appearance-none text-sm   "
-                                            value={category}
-                                            onChange={(e) =>
-                                                setCategory(e.target.value)
-                                            }
-                                        >
-                                            <option value=" ">
-                                                 Select Category
-                                            </option>
-                                            <option
-                                                value="Reservation Documents"
-                                                className="bg-red-900"
-                                            >
-                                                &nbsp;&nbsp;Reservation
-                                                Documents
-                                            </option>
-                                            <option value="Payment Issues">
-                                                Payment Issues
-                                            </option>
-                                            <option value="SOA/ Billing Statement/ Buyer's Ledger">
-                                                SOA/ Billing Statement/ Buyer's
-                                                Ledger
-                                            </option>
-                                            <option value="Turn Over Status">
-                                                Turn Over Status
-                                            </option>
-                                            <option value="Unit Status">
-                                                Unit Status
-                                            </option>
-                                            <option value="Loan Application">
-                                                Loan Application
-                                            </option>
-                                            <option value="Title and Other Registration Documents">
-                                                Title and Other Registration
-                                                Documents
-                                            </option>
-                                            <option value="Commissions">
-                                                Commissions
-                                            </option>
-                                            <option value="Other Concerns">
-                                                Other Concerns
-                                            </option>
-                                        </select> */}
+                                      
                                         <div className="flex bg-red-900 justify-start w-full relative">
                                             <label
                                                 htmlFor=""
@@ -482,8 +447,8 @@ const InquiryList = () => {
                                                 <option value="Payment Issues">
                                                     Payment Issues
                                                 </option>
-                                                <option value="SOA/ Billing Statement/ Buyer's Ledger">
-                                                    SOA/ Billing Statement/
+                                                <option value="SOA/ Buyer's Ledger">
+                                                    SOA/
                                                     Buyer's Ledger
                                                 </option>
                                                 <option value="Turn Over Status">
@@ -504,6 +469,47 @@ const InquiryList = () => {
                                                 </option>
                                                 <option value="Other Concerns">
                                                     Other Concerns
+                                                </option>
+                                            </select>
+                                        </div>
+
+                                        <span className="absolute inset-y-0 right-0 flex items-center  pl-3 pointer-events-none">
+                                            <IoIosArrowDown />
+                                        </span>
+                                    </div>
+                                    <div className="flex relative">
+                                        <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
+                                            {" "}
+                                            Type
+                                        </label>
+                                        <div className="flex bg-red-900 justify-start w-full relative">
+                                            <label
+                                                htmlFor=""
+                                                className="w-full border-b-2"
+                                            >
+                                                {""}
+                                            </label>
+                                            <select
+                                                className="w-full border-b-1 outline-none appearance-none text-sm absolute px-[8px]"
+                                                value={type}
+                                                onChange={(e) =>
+                                                    setType(e.target.value)
+                                                }
+                                            >
+                                                <option value="">
+                                                    Select Type
+                                                </option>
+                                                <option value="Complain">
+                                                    Complain
+                                                </option>
+                                                <option value="Request">
+                                                    Request
+                                                </option>
+                                                <option value="Inquiry">
+                                                    Inquiry
+                                                </option>
+                                                <option value="Suggestion or Recommendation">
+                                                    Suggestion or Recommendation
                                                 </option>
                                             </select>
                                         </div>
@@ -537,9 +543,44 @@ const InquiryList = () => {
                                                 <option value="Resolved">
                                                     Resolved
                                                 </option>
-                                                <option value="Unresolved">
+                                                <option value="unresolved">
                                                     Unresolved
                                                 </option>
+                                            </select>
+                                        </div>
+
+                                        <span className="absolute inset-y-0 right-0 flex items-center  pl-3 pointer-events-none">
+                                            <IoIosArrowDown />
+                                        </span>
+                                    </div>
+
+                                    <div className="flex relative">
+                                        <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
+                                            {" "}
+                                            Channels
+                                        </label>
+                                        <div className="flex bg-red-900 justify-start w-full relative">
+                                            <label
+                                                htmlFor=""
+                                                className="w-full border-b-2"
+                                            >
+                                                {""}
+                                            </label>
+                                            <select
+                                                className="w-full border-b-1 outline-none appearance-none text-sm absolute px-[8px]"
+                                                value={channels}
+                                                onChange={(e) =>
+                                                    setChannels(e.target.value)
+                                                }
+                                            >
+                                                <option value=""> Select Channels</option>
+                                                <option value="Email">Email</option>
+                                                <option value="Call">Call</option>
+                                                <option value="Walk in">Walk-in</option>
+                                                <option value="Website">Website</option>
+                                                <option value="Social media">Social media</option>
+                                                <option value="Branch Tablet">Branch Tablet (Jotform created by IT)</option>
+                                                <option value="Internal Endorsement">Internal Endorsement</option>
                                             </select>
                                         </div>
 
@@ -701,51 +742,46 @@ const InquiryList = () => {
                                 <div className="flex items-center space-x-2">
                                     {user?.department ===
                                         "Customer Relations - Services" && (
-                                        <button
-                                            onClick={handleAssignedToMeClick}
-                                            className={`flex items-center text-custom-lightgreen h-[25px] w-[125px] rounded-[55px] p-[2px] ${
-                                                assignedToMeActive
-                                                    ? "bglightgreen-btn"
-                                                    : "gradient-btn2hover "
-                                            }`}
-                                        >
-                                            <p
-                                                className={`h-full w-full flex justify-center items-center text-xs montserrat-semibold rounded-[50px]   ${
-                                                    assignedToMeActive
+                                            <button
+                                                onClick={handleAssignedToMeClick}
+                                                className={`flex items-center text-custom-lightgreen h-[25px] w-[125px] rounded-[55px] p-[2px] ${assignedToMeActive
                                                         ? "bglightgreen-btn"
-                                                        : "bg-white hover:bg-custom-lightestgreen"
-                                                }
-                                        `}
+                                                        : "gradient-btn2hover "
+                                                    }`}
                                             >
-                                                Assigned to me
-                                            </p>
-                                        </button>
-                                    )}
+                                                <p
+                                                    className={`h-full w-full flex justify-center items-center text-xs montserrat-semibold rounded-[50px]   ${assignedToMeActive
+                                                            ? "bglightgreen-btn"
+                                                            : "bg-white hover:bg-custom-lightestgreen"
+                                                        }
+                                        `}
+                                                >
+                                                    Assigned to me
+                                                </p>
+                                            </button>
+                                        )}
                                     {dayButtonLabels.map((label) => (
                                         <button
                                             key={label}
                                             onClick={() =>
                                                 handleDayClick(label)
                                             }
-                                            className={`flex justify-center items-center  text-custom-lightgreen h-[25px] rounded-[55px] p-[2px] ${
-                                                activeDayButton === label
+                                            className={`flex justify-center items-center  text-custom-lightgreen h-[25px] rounded-[55px] p-[2px] ${activeDayButton === label
                                                     ? "bglightgreen-btn hover:bg-custom-lightgreen"
                                                     : "gradient-btn2hover border-custom-lightgreen"
-                                            } hover:bg-custom-lightestgreen ${
-                                                label === "3+ Days"
+                                                } hover:bg-custom-lightestgreen ${label === "3+ Days"
                                                     ? "w-[76px]"
                                                     : label === "2 Days"
-                                                    ? "w-[69px]"
-                                                    : "w-[60px]"
-                                            }`}
+                                                        ? "w-[69px]"
+                                                        : "w-[60px]"
+                                                }`}
                                         >
                                             <p
                                                 className={`h-full w-full flex justify-center items-center text-xs montserrat-semibold rounded-[50px]
-                                            ${
-                                                activeDayButton === label
-                                                    ? "bglightgreen-btn"
-                                                    : "bg-white hover:bg-custom-lightestgreen"
-                                            }
+                                            ${activeDayButton === label
+                                                        ? "bglightgreen-btn"
+                                                        : "bg-white hover:bg-custom-lightestgreen"
+                                                    }
                                             `}
                                             >
                                                 {label}
@@ -773,7 +809,6 @@ const InquiryList = () => {
                             <TicketTable concernData={data || []} />
                         )}
                     </div>
-
                     <div className="flex justify-end items-center h-12 px-6 gap-2 bg-white rounded-b-lg">
                         <p className="text-sm text-gray-400 hidden">
                             Last account activity: {getTimeDifference()}

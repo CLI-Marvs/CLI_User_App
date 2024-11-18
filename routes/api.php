@@ -47,9 +47,10 @@ Route::get('/get-messageId/{ticketId}', [ConcernController::class, 'getMessageId
 Route::get('/report-monthly', [ConcernController::class, 'getMonthlyReports']);
 Route::get('/category-monthly', [ConcernController::class, 'getInquiriesByCategory']);
 Route::get('/inquiries-property', [ConcernController::class, 'getInquiriesPerProperty']);
+Route::get('/inquiries-channel', [ConcernController::class, 'getInquiriesPerChannel']);
 Route::get('/communication-type-property', [ConcernController::class, 'getCommunicationType']);
 Route::post('delete-concerns', [ConcernController::class, 'deleteConcern']);
-
+Route::post('close-concerns', [ConcernController::class, 'markAsClosed']);
 Route::post('conversation', [ConcernController::class, 'sendMessageConcerns']);
 Route::get('/get-concern-messages', [ConcernController::class, 'retrieveConcernsMessages']);
 Route::get('/personnel-assignee', [ConcernController::class, 'retrieveAssignees']);
@@ -61,6 +62,8 @@ Route::post('/buyer-reply', [ConcernController::class, 'fromAppSript']);
 
 //*Post date on sap
 Route::post('/proxy-sap', [SapController::class, 'postDateToSap']);
+Route::post('/test-api', [ConcernController::class, 'testApi']);
+
 
 //*Retrieve invoice from sap upon trigger the date
 Route::post('/posting-invoices', [SapController::class, 'retrieveInvoicesFromSap']);
@@ -83,6 +86,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/upload-notepad', [SapController::class, 'uploadNotepad']);
     Route::get('/get-concern', [ConcernController::class, 'getAllConcerns']);
     Route::post('/add-concern', [ConcernController::class, 'addConcernPublic']);
+    Route::post('/add-concern-prev', [ConcernController::class, 'addConcernFromPreviousInquiry']);
     Route::get('/get-message/{ticketId}', [ConcernController::class, 'getMessage']);
     Route::post('/send-message', [ConcernController::class, 'sendMessage']);
     Route::get('/get-logs/{ticketId}', [ConcernController::class, 'getInquiryLogs']);
