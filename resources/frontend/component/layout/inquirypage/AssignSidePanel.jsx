@@ -32,7 +32,7 @@ const AssignSidePanel = ({ ticketId }) => {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
     const userLoggedInEmail = user?.employee_email;
-    const normalizeEmail = (email) => email.trim().toLowerCase();
+
 
     const modalRef = useRef(null);
     const dropdownRef = useRef(null);
@@ -562,7 +562,7 @@ const AssignSidePanel = ({ ticketId }) => {
                                             className="bg-custom-lightgreen text-white rounded-full px-3 py-1 text-xs flex-shrink-0 flex mb-[4px]"
                                         >
                                             {assignee.name}
-                                            {ALLOWED_EMPLOYEES_CRS.map(normalizeEmail).includes(normalizeEmail(userLoggedInEmail)) && (
+                                            {ALLOWED_EMPLOYEES_CRS.includes(userLoggedInEmail) && (
                                                 <button
                                                     onClick={() =>
                                                         removeTag(assignee)
