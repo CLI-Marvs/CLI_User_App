@@ -151,7 +151,8 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
             console.log("response", response);
             const updatedData = { ...dataToUpdate };
             localStorage.removeItem("dataConcern");
-            localStorage.setItem("updatedData", JSON.stringify(updatedData));
+            localStorage.removeItem("closeConcern");
+            localStorage.setItem("updatedData", JSON.stringify(updatedData)); 
 
             onupdate({ ...dataToUpdate, dataConcern });
             getInquiryLogs(dataConcern.ticket_id);
