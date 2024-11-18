@@ -25,8 +25,8 @@ const AssignDetails = ({ logMessages, ticketId }) => {
     const [message, setMessage] = useState("");
     const [isOpen, setIsOpen] = useState(false);
     const [attachedFiles, setAttachedFiles] = useState([]);
-    console.log("attachedFiles", attachedFiles);
     const [loading, setLoading] = useState(false);
+    console.log("attachedFiles", attachedFiles);
 
     const handleSendMessage = async () => {
         const formData = new FormData();
@@ -163,7 +163,7 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                     lastname: event.data.lastname,
                     ticketId: event.data.ticketId,
                     created_at: event.data.message.created_at,
-                    attachment: event.data.message.attachment 
+                    attachment: event.data.message.attachment
                 };
 
                 return {
@@ -178,7 +178,7 @@ const AssignDetails = ({ logMessages, ticketId }) => {
      * Select and attach files to the comment
      */
 
-    const handleFileAttach = (event) => {
+    const handleFileAttachChange = (event) => {
         const files = Array.from(event.target.files);
         setAttachedFiles((prevFiles) => {
             const prevFileNames = prevFiles.map((file) => file.name);
@@ -190,18 +190,21 @@ const AssignDetails = ({ logMessages, ticketId }) => {
 
             return [...prevFiles, ...uniqueFiles];
         });
+        // Reset the input value so the same file can be selected again
+        event.target.value = "";
     }
 
     /**
      * Remove a file from the comment
-     *  
      * @param {string} fileNameToDelete - The name of the file to be removed
      */
     const removeFile = (fileNameToDelete) => {
-        setAttachedFiles((prevFiles) =>
-            prevFiles.filter((file) => file.name !== fileNameToDelete)
-        );
- 
+        if (fileNameToDelete) {
+            console.log("fileNameToDelete", fileNameToDelete);
+            setAttachedFiles((prevFiles) =>
+                prevFiles.filter((file) => file.name !== fileNameToDelete)
+            );
+        }
     };
 
     const adminReplyChannelFunc = (channel) => {
@@ -977,7 +980,7 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                                     id="commentFileInput"
                                     multiple
                                     style={{ display: "none" }}
-                                    onChange={handleFileAttach}
+                                    onChange={handleFileAttachChange}
                                 />
                                 <button
                                     type="button"
@@ -992,16 +995,13 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                                     <BsPaperclip className="h-5 w-5 text-custom-solidgreen hover:text-gray-700" />
                                 </button>
                             </div>
-                            {/* {attachedFiles && attachedFiles.length > 0 && (
-                              
 
-                            )} */}
                             <button onClick={() => attachedFiles?.length > 0 && setIsOpen(!isOpen)} className=" flex justify-center items-center rounded-full bg-custom-bluegreen size-[24px]">
                                 <p className="text-sm text-white">
                                     {attachedFiles && attachedFiles.length}
                                 </p>
                             </button>
-                            {isOpen && attachedFiles?.length > 0   && (
+                            {isOpen && attachedFiles?.length > 0 && (
                                 <div className="absolute right-0 top-full mt-2 w-[331px] h-auto p-[30px] bg-white text-xs rounded-[10px] shadow-custom4 z-10">
                                     {attachedFiles && attachedFiles.map((item, index) => {
                                         const fileName = item?.name;
