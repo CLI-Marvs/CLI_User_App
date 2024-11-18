@@ -190,9 +190,9 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
                     : "Others", // Set to "Others" for any non-standard user_type
                 communication_type: dataConcern.communication_type || "",
                 other_user_type: !predefinedUserTypes.includes(
-                    dataConcern.user_type
+                    dataConcern.other_user_type
                 )
-                    ? dataConcern.user_type
+                    ? dataConcern.other_user_type
                     : "",
                 channels: dataConcern.channels,
             });
