@@ -142,6 +142,7 @@ const CustomTooltip1 = ({ active, payload, label }) => {
                 <p className="label">{`${monthName}`}</p>
                 <p>{`Resolved: ${payload[0].value}`}</p>
                 <p>{`Unresolved: ${payload[1].value}`}</p>
+                <p>{`Closed: ${payload[2].value}`}</p>
             </div>
         );
     }
@@ -188,7 +189,7 @@ const ReportPage = () => {
     const defaultData = [{ name: "No Data" }];
     const dataToDisplay = dataCategory.length > 0 ? dataCategory : defaultData;
     const location = useLocation();
-
+ 
     const getCurrentMonth = () => {
         const months = [
             'january', 'february', 'march', 'april', 'may', 'june',
@@ -354,6 +355,12 @@ const ReportPage = () => {
                             barSize={12}
                             radius={[3, 3, 0, 0]}
                         />
+                        <Bar
+                            dataKey="Closed"
+                            fill="#EF4444"
+                            barSize={12}
+                            radius={[3, 3, 0, 0]}
+                        />
                     </BarChart>
                 </div>
                 <div className="flex gap-6">
@@ -368,6 +375,12 @@ const ReportPage = () => {
                             ●
                         </span>
                         <span className="text-custom-gray12">Unresolved</span>
+                    </div>
+                    <div className="flex items-center px-3 py-2 gap-3">
+                        <span className="flex items-center text-red-500 text-2xl">
+                            ●
+                        </span>
+                        <span className="text-custom-gray12">Closed</span>
                     </div>
                 </div>
             </div>

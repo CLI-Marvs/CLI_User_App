@@ -221,10 +221,12 @@ export const ContextProvider = ({ children }) => {
                 params: { department: department, year: departmentStatusYear },
             });
             const result = response.data;
+           
             const formattedData = result.map((item) => ({
                 name: item.month.toString().padStart(2, "0"),
                 Resolved: item.resolved,
                 Unresolved: item.unresolved,
+                Closed:item.closed
             }));
 
             setDataSet(formattedData);
