@@ -562,7 +562,7 @@ const AssignSidePanel = ({ ticketId }) => {
                                             className="bg-custom-lightgreen text-white rounded-full px-3 py-1 text-xs flex-shrink-0 flex mb-[4px]"
                                         >
                                             {assignee.name}
-                                            {!ALLOWED_EMPLOYEES_CRS.includes(userLoggedInEmail) && (
+                                            {ALLOWED_EMPLOYEES_CRS.includes(userLoggedInEmail) && (
                                                 <button
                                                     onClick={() =>
                                                         removeTag(assignee)
