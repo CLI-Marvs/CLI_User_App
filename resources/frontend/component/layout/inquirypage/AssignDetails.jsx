@@ -11,6 +11,7 @@ import { showToast } from "../../../util/toastUtil";
 import CircularProgress from "@mui/material/CircularProgress";
 
 import { FaTrash } from "react-icons/fa";
+import { Link } from "react-router-dom";
 const AssignDetails = ({ logMessages, ticketId }) => {
     const {
         user,
