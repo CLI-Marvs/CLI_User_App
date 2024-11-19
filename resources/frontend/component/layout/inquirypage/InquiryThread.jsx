@@ -3,11 +3,8 @@ import Backbtn from "../../../../../public/Images/Expand_up.svg";
 import { FaTrash } from "react-icons/fa";
 import UserMessages from "./UserMessages";
 import AdminMessages from "./AdminMessages";
-import Sho from "../../../../../public/Images/rodfil.png";
-import Kent from "../../../../../public/Images/kent.png";
-import FolderFile from "../../../../../public/Images/folder_file.svg";
 import { BsPaperclip } from "react-icons/bs";
-import { IoIosArrowDown, IoIosSend } from "react-icons/io";
+import { IoIosArrowDown } from "react-icons/io";
 import AssignSidePanel from "./AssignSidePanel";
 import ResolveModal from "./ResolveModal";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
@@ -19,7 +16,8 @@ import DateLogo from "../../../../../public/Images/Date_range.svg";
 import CircularProgress from "@mui/material/CircularProgress";
 import { AiFillInfoCircle } from "react-icons/ai";
 import { IoIosCheckmarkCircle } from "react-icons/io";
-import { toast, ToastContainer, Bounce } from "react-toastify";
+import { toast } from "react-toastify";
+import { showToast } from "../../../util/toastUtil"
 import Alert from "../mainComponent/Alert";
 import AddInfoModal from "./AddInfoModal";
 import { VALID_FILE_EXTENSIONS } from "../../../constant/data/validFile";
@@ -103,15 +101,7 @@ const InquiryThread = () => {
         }
     }, []);
 
-    /*   console.log("data", data); */
-
     /*  const dataConcern = data?.find((item) => item.ticket_id === ticketId) || {}; */
-
-    /*  console.log("dataConcern", data); */
-    /*  console.log("data", data);
-
-    console.log("dataConcern", dataConcern);
-    console.log("ticketId", ticketId); */
 
     const toggleFilterBox = () => {
         setIsFilterVisible((prev) => !prev);
@@ -120,6 +110,8 @@ const InquiryThread = () => {
     const handleFileAttach = (event) => {
         const files = Array.from(event.target.files);
         setAttachedFiles((prevFiles) => [...prevFiles, ...files]);
+        event.target.value = "";
+
     };
 
     const formatFunc = (name) => {
@@ -321,39 +313,17 @@ const InquiryThread = () => {
 
             // Show toast for invalid extensions if any are found
             if (invalidExtensions.length > 0) {
-                toast.warning(
-                    `.${invalidExtensions.join(
-                        ", ."
-                    )} file type(s) are not allowed.`,
-                    {
-                        position: "top-right",
-                        autoClose: 1500,
-                        hideProgressBar: false,
-                        closeOnClick: true,
-                        pauseOnHover: true,
-                        draggable: true,
-                        progress: undefined,
-                        theme: "dark",
-                        transition: Bounce,
-                    }
-                );
+                showToast(`.${invalidExtensions.join(
+                    ", ."
+                )} file type(s) are not allowed.`, "warning");
+
                 setLoading(false);
                 return;
             }
 
             // Show toast for oversized files if any are found
             if (oversizedFiles.length > 0) {
-                toast.warning(` File is too large. Maximum size is 100MB.`, {
-                    position: "top-right",
-                    autoClose: 1500,
-                    hideProgressBar: false,
-                    closeOnClick: true,
-                    pauseOnHover: true,
-                    draggable: true,
-                    progress: undefined,
-                    theme: "dark",
-                    transition: Bounce,
-                });
+                showToast("File is too large. Maximum size is 100MB.", "warning");
                 setLoading(false);
                 return;
             }
@@ -389,13 +359,12 @@ const InquiryThread = () => {
                     "Content-Type": "multipart/form-data",
                 },
             });
-            console.log("triger here");
+
 
             setAttachedFiles([]);
             setLoading(false);
             callBackHandler();
         } catch (error) {
-            console.log("error sending message", error);
         } finally {
             setLoading(false);
         }
@@ -413,7 +382,6 @@ const InquiryThread = () => {
     }, [ticketId, setTicketId]);
 
     useEffect(() => {
-        console.log("This is fetching");
         getAllConcerns();
     }, []);
 
@@ -458,7 +426,6 @@ const InquiryThread = () => {
 
     const messageIdChannelFunc = (channel) => {
         channel.listen("MessageID", (event) => {
-            console.log("message id event", event.data);
             setEmailMessageID(event.data.message_id);
             /*  setDataConcern((prevDataConcern) => ({
                  ...prevDataConcern,
@@ -569,8 +536,6 @@ const InquiryThread = () => {
     return (
         <>
             <div className="flex h-full bg-custom-grayFA">
-                <ToastContainer />
-
                 <div className="bg-custom-grayFA w-[601px] px-[20px] pb-[103px] ">
                     {" "}
                     {/* boxdevref */}

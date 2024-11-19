@@ -6,8 +6,8 @@ import { BsPaperclip } from "react-icons/bs";
 import FolderFile from "../../../../../public/Images/folder_file.svg";
 import FolderFile2 from "../../../../../public/Images/Folder_file_light.svg";
 import { VALID_FILE_EXTENSIONS } from "../../../constant/data/validFile";
-import { toast, ToastContainer, Bounce } from "react-toastify";
-import { useNavigate, Link } from "react-router-dom";
+import { toast } from "react-toastify";
+import { showToast } from "../../../util/toastUtil";
 import CircularProgress from "@mui/material/CircularProgress";
 
 import { FaTrash } from "react-icons/fa";
@@ -47,39 +47,17 @@ const AssignDetails = ({ logMessages, ticketId }) => {
 
             // Show toast for invalid extensions if any are found
             if (invalidExtensions.length > 0) {
-                toast.warning(
-                    `.${invalidExtensions.join(
-                        ", ."
-                    )} file type(s) are not allowed.`,
-                    {
-                        position: "top-right",
-                        autoClose: 1500,
-                        hideProgressBar: false,
-                        closeOnClick: true,
-                        pauseOnHover: true,
-                        draggable: true,
-                        progress: undefined,
-                        theme: "dark",
-                        transition: Bounce,
-                    }
-                );
+                showToast(`.${invalidExtensions.join(
+                    ", ."
+                )} file type(s) are not allowed.`, "warning");
                 setLoading(false);
                 return;
             }
 
             // Show toast for oversized files if any are found
             if (oversizedFiles.length > 0) {
-                toast.warning(` File is too large. Maximum size is 100MB.`, {
-                    position: "top-right",
-                    autoClose: 1500,
-                    hideProgressBar: false,
-                    closeOnClick: true,
-                    pauseOnHover: true,
-                    draggable: true,
-                    progress: undefined,
-                    theme: "dark",
-                    transition: Bounce,
-                });
+                showToast("File is too large. Maximum size is 100MB.", "warning");
+
                 setLoading(false);
                 return;
             }
@@ -142,7 +120,7 @@ const AssignDetails = ({ logMessages, ticketId }) => {
 
     };
 
-    console.log("assignpersonales", assigneesPersonnel[ticketId]);
+    // console.log("assignpersonales", assigneesPersonnel[ticketId]);
 
     useEffect(() => {
         getInquiryLogs(ticketId)
@@ -967,7 +945,6 @@ const AssignDetails = ({ logMessages, ticketId }) => {
 
     return (
         <>
-            <ToastContainer />
 
             <div className="px-[20px] mt-[16px]">
                 <div className="flex h-[49px] w-full gradient-btn2 p-[2px] rounded-[10px] items-center justify-center  ">

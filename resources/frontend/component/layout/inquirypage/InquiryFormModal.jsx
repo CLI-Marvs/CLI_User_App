@@ -1,11 +1,13 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import ReCAPTCHA from "react-google-recaptcha";
 import { IoIosSend, IoMdArrowDropdown, IoMdTrash } from "react-icons/io";
 import apiService from "../../servicesApi/apiService";
 import { useStateContext } from "../../../context/contextprovider";
 import CircularProgress from "@mui/material/CircularProgress";
-import { toast, ToastContainer, Bounce } from "react-toastify";
+import { toast, } from "react-toastify";
 import { VALID_FILE_EXTENSIONS } from "../../../constant/data/validFile";
+import { showToast } from "../../../util/toastUtil"
+
 const formDataState = {
     fname: "",
     mname: "",
@@ -42,7 +44,7 @@ const InquiryFormModal = ({ modalRef }) => {
     const { propertyNamesList } = useStateContext();
     const [specificInputErrors, setSpecificInputErrors] = useState({});
     const [isSendEmail, setIsSendEmail] = useState(false);
-     
+
     const handleFileChange = (event) => {
         const selectedFiles = Array.from(event.target.files);
         setFiles((prevFiles) => {
@@ -123,7 +125,6 @@ const InquiryFormModal = ({ modalRef }) => {
         }));
         setHasErrors(false);
         setIsSubmitted(false);
-
         if (name === "buyer_email") {
             setErrors((prevErrors) => ({
                 ...prevErrors,
@@ -133,35 +134,38 @@ const InquiryFormModal = ({ modalRef }) => {
             }));
         }
     };
+
     const handleMiddleNameCheckboxChange = (event) => {
         setIsMiddleNameChecked(event.target.checked);
         setFormData((prevData) => ({
             ...prevData,
             mname: isMiddleNameChecked ? "" : "",
         }));
-        // setHasErrors(false);
         setResetSuccess(true);
         setIsSubmitted(false);
     };
+
     const handleSendEmailChange = (event) => {
         setIsSendEmail(event.target.checked);
     };
+
     const handleSuffixNameCheckboxChange = (event) => {
         setIsSuffixChecked(event.target.checked);
         setFormData((prevData) => ({
             ...prevData,
             suffix: isSuffixChecked ? "" : "",
         }));
-        // setHasErrors(false);
         setResetSuccess(true);
         setIsSubmitted(false);
     };
+
     const isTextareaValid = message.trim().length > 0;
 
     const validateEmail = (email) => {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return emailRegex.test(email);
     };
+
     const handleCloseModal = () => {
         setFormData(formDataState);
         setMessage("");
@@ -204,7 +208,6 @@ const InquiryFormModal = ({ modalRef }) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-
         setIsSubmitted(true);
         const isMnameValid = isMiddleNameChecked || mname.trim() !== "";
         const isSuffixValid = isSuffixChecked || suffix.trim() !== "";
@@ -224,17 +227,7 @@ const InquiryFormModal = ({ modalRef }) => {
                 if (file.size > 100 * 1024 * 1024) {
                     // Check size (100 MB)
                     setLoading(false);
-                    toast.warning(`File is too large. Maximum size is 100MB.`, {
-                        position: "top-right",
-                        autoClose: 1500,
-                        hideProgressBar: false,
-                        closeOnClick: true,
-                        pauseOnHover: true,
-                        draggable: true,
-                        progress: undefined,
-                        theme: "dark",
-                        transition: Bounce
-                    });
+                    showToast("File is too large. Maximum size is 100MB.", "warning");
                     allFilesValid = false;
                     return;
                 }
@@ -248,22 +241,9 @@ const InquiryFormModal = ({ modalRef }) => {
 
             // If there are any invalid extensions, show a message
             if (invalidExtensions.length > 0) {
-                toast.warning(
-                    `.${invalidExtensions.join(
-                        ", ."
-                    )} file type(s) are not allowed.`,
-                    {
-                        position: "top-right",
-                        autoClose: 1500,
-                        hideProgressBar: false,
-                        closeOnClick: true,
-                        pauseOnHover: true,
-                        draggable: true,
-                        progress: undefined,
-                        theme: "dark",
-                        transition: Bounce,
-                    }
-                );
+                showToast(`.${invalidExtensions.join(
+                    ", ."
+                )} file type(s) are not allowed.`, "warning");
                 setLoading(false);
                 return;
             }
@@ -291,7 +271,6 @@ const InquiryFormModal = ({ modalRef }) => {
                 files.forEach((file) => {
                     fileData.append("files[]", file);
                 });
-
                 Object.keys(formData).forEach((key) => {
                     fileData.append(key, formData[key]);
                 });
@@ -312,40 +291,24 @@ const InquiryFormModal = ({ modalRef }) => {
                     }
                 );
                 setSpecificInputErrors([]);
-                setResetSuccess(true);
                 if (modalRef.current) {
                     modalRef.current.close();
                 }
+                showToast("Concern added successfully!", "success");
+                setResetSuccess(true);
                 callBackHandler();
                 setLoading(false);
                 setFiles([]);
             } catch (error) {
+                console.log("error saving concerns", error);
                 console.log("error saving concerns", error.response);
 
                 if (error.response) {
                     if (error?.response?.status === 422) {
                         const validationErrors = error.response?.data.error;
-                        // Set the validation errors returned from the backend
-                        //  setSpecificInputErrors(error.response.data.errors);
-                        // const errorMessages = [];
-                        // for (const field in validationErrors) {
-                        //     if (validationErrors.hasOwnProperty(field)) {
-                        //         validationErrors.forEach((error) => {
-                        //             errorMessages.push(error); // Add each error message for the field
-                        //         });
-                        //     }
-                        // }
-                        // console.log(
-                        //     "All Validation Error Messages:",
-                        //     errorMessages
-                        // );
                         console.log("180", error.response?.data.error);
                         setHasErrors(false);
                         setLoading(false);
-                        // setSpecificInputErrors(error.response?.data.error);
-                        // if (topRef.current) {
-                        //     topRef.current.scrollTop = 0;
-                        // }
                     }
                 }
                 {
@@ -364,7 +327,6 @@ const InquiryFormModal = ({ modalRef }) => {
                 setResetSuccess(false);
                 setHasErrors(false);
             }
-            // console.log("(!isMiddleNameChecked", isMiddleNameChecked);
             console.log("Form validation failed");
         }
     };
@@ -375,7 +337,7 @@ const InquiryFormModal = ({ modalRef }) => {
             className="modal w-[589px] rounded-[10px] shadow-custom5 backdrop:bg-black/50"
             ref={modalRef}
         >
-            <ToastContainer />
+
             <div className="px-[50px] rounded-lg overflow-hidden">
                 <div className="">
                     <form

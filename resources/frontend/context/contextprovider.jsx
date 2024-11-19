@@ -7,6 +7,7 @@ import React, {
 } from "react";
 import apiService from "../component/servicesApi/apiService";
 import debounce from "lodash/debounce";
+ 
 
 const StateContext = createContext({
     user: null,
@@ -81,6 +82,7 @@ export const ContextProvider = ({ children }) => {
     const [bankList, setBankList] = useState([]);
     const [filterDueDate, setFilterDueDate] = useState(null);
     const [loading, setLoading] = useState(false);
+ 
 
     useEffect(() => {
         if (user && user.department && !isDepartmentInitialized) {
@@ -718,7 +720,8 @@ export const ContextProvider = ({ children }) => {
                 inquiriesPerChannelMonth,
                 setInquiriesPerChannelMonth,
                 getInquiriesPerChannel,
-                inquriesPerChannelData
+                inquriesPerChannelData,
+               
             }}
 
         >
