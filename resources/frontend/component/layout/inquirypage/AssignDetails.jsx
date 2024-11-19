@@ -6,10 +6,12 @@ import { BsPaperclip } from "react-icons/bs";
 import FolderFile from "../../../../../public/Images/folder_file.svg";
 import FolderFile2 from "../../../../../public/Images/Folder_file_light.svg";
 import { VALID_FILE_EXTENSIONS } from "../../../constant/data/validFile";
-import { toast, ToastContainer, Bounce } from "react-toastify";
-import { useNavigate, Link } from "react-router-dom";
+import { toast } from "react-toastify";
+import { showToast } from "../../../util/toastUtil";
+import CircularProgress from "@mui/material/CircularProgress";
 
 import { FaTrash } from "react-icons/fa";
+import { Link } from "react-router-dom";
 const AssignDetails = ({ logMessages, ticketId }) => {
     const {
         user,
@@ -26,7 +28,7 @@ const AssignDetails = ({ logMessages, ticketId }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [attachedFiles, setAttachedFiles] = useState([]);
     const [loading, setLoading] = useState(false);
-    console.log("attachedFiles", attachedFiles);
+
 
     const handleSendMessage = async () => {
         const formData = new FormData();
@@ -46,39 +48,17 @@ const AssignDetails = ({ logMessages, ticketId }) => {
 
             // Show toast for invalid extensions if any are found
             if (invalidExtensions.length > 0) {
-                toast.warning(
-                    `.${invalidExtensions.join(
-                        ", ."
-                    )} file type(s) are not allowed.`,
-                    {
-                        position: "top-right",
-                        autoClose: 1500,
-                        hideProgressBar: false,
-                        closeOnClick: true,
-                        pauseOnHover: true,
-                        draggable: true,
-                        progress: undefined,
-                        theme: "dark",
-                        transition: Bounce,
-                    }
-                );
+                showToast(`.${invalidExtensions.join(
+                    ", ."
+                )} file type(s) are not allowed.`, "warning");
                 setLoading(false);
                 return;
             }
 
             // Show toast for oversized files if any are found
             if (oversizedFiles.length > 0) {
-                toast.warning(` File is too large. Maximum size is 100MB.`, {
-                    position: "top-right",
-                    autoClose: 1500,
-                    hideProgressBar: false,
-                    closeOnClick: true,
-                    pauseOnHover: true,
-                    draggable: true,
-                    progress: undefined,
-                    theme: "dark",
-                    transition: Bounce,
-                });
+                showToast("File is too large. Maximum size is 100MB.", "warning");
+
                 setLoading(false);
                 return;
             }
@@ -98,7 +78,7 @@ const AssignDetails = ({ logMessages, ticketId }) => {
         formData.append("sender_id", user?.id);
         formData.append("ticketId", ticketId);
         formData.append("message", message);
-        formData.append("assignees", assigneesPersonnel[ticketId]);
+        formData.append("assignees", JSON.stringify(assigneesPersonnel[ticketId] || []));
         formData.append("admin_name", `${user?.firstname} ${user?.lastname}`);
         console.log('formData', formData);
 
@@ -134,9 +114,14 @@ const AssignDetails = ({ logMessages, ticketId }) => {
             } catch (error) {
                 console.error("Failed to send message:", error);
             }
+            finally {
+                setLoading(false);
+            }
         }
 
     };
+
+    // console.log("assignpersonales", assigneesPersonnel[ticketId]);
 
     useEffect(() => {
         getInquiryLogs(ticketId)
@@ -961,7 +946,6 @@ const AssignDetails = ({ logMessages, ticketId }) => {
 
     return (
         <>
-            <ToastContainer />
 
             <div className="px-[20px] mt-[16px]">
                 <div className="flex h-[49px] w-full gradient-btn2 p-[2px] rounded-[10px] items-center justify-center  ">
@@ -973,7 +957,10 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                             maxLength={255}
                             value={message}
                         />
-                        <div className="relative w-auto flex gap-[10px]" ref={dropdownRef}>
+                        <div
+                            className="relative w-auto flex gap-[10px]"
+                            ref={dropdownRef}
+                        >
                             <div className="flex items-center">
                                 <input
                                     type="file"
@@ -986,9 +973,7 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                                     type="button"
                                     onClick={() =>
                                         document
-                                            .getElementById(
-                                                "commentFileInput"
-                                            )
+                                            .getElementById("commentFileInput")
                                             .click()
                                     }
                                 >
@@ -996,80 +981,113 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                                 </button>
                             </div>
 
-                            <button onClick={() => attachedFiles?.length > 0 && setIsOpen(!isOpen)} className=" flex justify-center items-center rounded-full bg-custom-bluegreen size-[24px]">
+                            <button
+                                onClick={() =>
+                                    attachedFiles?.length > 0 &&
+                                    setIsOpen(!isOpen)
+                                }
+                                className=" flex justify-center items-center rounded-full bg-custom-bluegreen size-[24px]"
+                            >
                                 <p className="text-sm text-white">
                                     {attachedFiles && attachedFiles.length}
                                 </p>
                             </button>
                             {isOpen && attachedFiles?.length > 0 && (
                                 <div className="absolute right-0 top-full mt-2 w-[331px] h-auto p-[30px] bg-white text-xs rounded-[10px] shadow-custom4 z-10">
-                                    {attachedFiles && attachedFiles.map((item, index) => {
-                                        const fileName = item?.name;
-                                        if (!fileName) {
-                                            // If fileName is undefined or null, return a fallback UI or nothing
-                                            return null;
-                                        }
-                                        const fileType = fileName.split(".").pop(); // Get the file extension
-                                        const baseName = fileName.substring(
-                                            0,
-                                            fileName.lastIndexOf(".")
-                                        );
-                                        const truncatedName =
-                                            baseName.length > 15
-                                                ? `${baseName.slice(0, 15)}...`
-                                                : baseName;
-                                        return (
-                                            <div className="flex flex-col gap-[6px]" key={index}>
-                                                <div className="flex items-center gap-[6px]">
-                                                    <button className="flex items-center gap-2 w-full h-[38px] px-[10px] py-[6px] bg-custom-grayF1 rounded-[4px]" >
-                                                        <img src={FolderFile} alt="folder" />
-                                                        <p>{truncatedName}.{fileType}</p>
-                                                    </button>
-                                                    <button className="flex justify-center items-centersize-[24px]" onClick={() => removeFile(item.name)}>
-                                                        <FaTrash
-                                                            className="text-[#EB4444] hover:text-red-600 cursor-pointer text-[20px]"
-                                                        />
-                                                    </button>
+                                    {attachedFiles &&
+                                        attachedFiles.map((item, index) => {
+                                            const fileName = item?.name;
+                                            if (!fileName) {
+                                                // If fileName is undefined or null, return a fallback UI or nothing
+                                                return null;
+                                            }
+                                            const fileType = fileName
+                                                .split(".")
+                                                .pop(); // Get the file extension
+                                            const baseName = fileName.substring(
+                                                0,
+                                                fileName.lastIndexOf(".")
+                                            );
+                                            const truncatedName =
+                                                baseName.length > 15
+                                                    ? `${baseName.slice(
+                                                          0,
+                                                          15
+                                                      )}...`
+                                                    : baseName;
+                                            return (
+                                                <div
+                                                    className="flex flex-col gap-[6px]"
+                                                    key={index}
+                                                >
+                                                    <div className="flex items-center gap-[6px]">
+                                                        <button className="flex items-center gap-2 w-full h-[38px] px-[10px] py-[6px] bg-custom-grayF1 rounded-[4px]">
+                                                            <img
+                                                                src={FolderFile}
+                                                                alt="folder"
+                                                            />
+                                                            <p>
+                                                                {truncatedName}.
+                                                                {fileType}
+                                                            </p>
+                                                        </button>
+                                                        <button
+                                                            className="flex justify-center items-centersize-[24px]"
+                                                            onClick={() =>
+                                                                removeFile(
+                                                                    item.name
+                                                                )
+                                                            }
+                                                        >
+                                                            <FaTrash className="text-[#EB4444] hover:text-red-600 cursor-pointer text-[20px]" />
+                                                        </button>
+                                                    </div>
                                                 </div>
-
-                                            </div>
-                                        )
-                                    })}
-
+                                            );
+                                        })}
                                 </div>
                             )}
-
                         </div>
 
                         <button
+                            disabled={loading}
                             className={`shrink-0 w-[76px] h-[28px] rounded-[10px] text-xs text-white 
-                                ${!message.trim()
+                            ${
+                                !message.trim()
                                     ? "bg-gray-400 cursor-not-allowed"
                                     : "gradient-btn2"
-                                } 
-                                `}
+                            }  
+                             ${loading ? "cursor-not-allowed" : ""}`}
                             onClick={handleSendMessage}
                         >
-                            Comment
+                            {/* Comment */}
+                            {loading ? (
+                                <CircularProgress className="spinnerSize " />
+                            ) : (
+                                <>
+                                    Comment
+                                    
+                                </>
+                            )}
                         </button>
                     </div>
                 </div>
                 <div className="flex justify-end">
-                    <p className="text-sm my-1 text-custom-gray81">{message.length}/255 characters
-
-
+                    <p className="text-sm my-1 text-custom-gray81">
+                        {message.length}/255 characters
                     </p>
-
                 </div>
             </div>
             <div className="border border-t-1 border-custom-lightestgreen"></div>
             <div className="w-full  mt-[12px] flex flex-col">
                 {combinedMessages && combinedMessages.length > 0 ? (
                     combinedMessages.map((item, index) => {
-
-                        const attachments = item.attachment ? JSON.parse(item.attachment) : [];
+                        const attachments = item.attachment
+                            ? JSON.parse(item.attachment)
+                            : [];
                         // console.log("attachments", attachments);
-                        const alternatingBackground = index % 2 === 0 ? "bg-white" : "bg-custom-grayF1";
+                        const alternatingBackground =
+                            index % 2 === 0 ? "bg-white" : "bg-custom-grayF1";
                         if (item.type === "concern") {
                             const formattedDate = moment(
                                 item.created_at
@@ -1108,51 +1126,68 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                                         </p>
                                     </div>
 
+                                    {attachments &&
+                                        attachments.map((attachment, index) => {
+                                            const fileName =
+                                                attachment?.original_file_name;
+                                            if (!fileName) {
+                                                // If fileName is undefined or null, return a fallback UI or nothing
+                                                return null;
+                                            }
+                                            const fileType = fileName
+                                                .split(".")
+                                                .pop(); // Get the file extension
+                                            const baseName = fileName.substring(
+                                                0,
+                                                fileName.lastIndexOf(".")
+                                            );
 
-                                    {attachments && attachments.map((attachment, index) => {
-                                        const fileName = attachment?.original_file_name;
-                                        if (!fileName) {
-                                            // If fileName is undefined or null, return a fallback UI or nothing
-                                            return null;
-                                        }
-                                        const fileType = fileName.split(".").pop(); // Get the file extension
-                                        const baseName = fileName.substring(
-                                            0,
-                                            fileName.lastIndexOf(".")
-                                        );
+                                            // Truncate the base name to 15 characters
+                                            const truncatedName =
+                                                baseName.length > 15
+                                                    ? `${baseName.slice(
+                                                          0,
+                                                          15
+                                                      )}...`
+                                                    : baseName;
 
-                                        // Truncate the base name to 15 characters
-                                        const truncatedName =
-                                            baseName.length > 15
-                                                ? `${baseName.slice(0, 15)}...`
-                                                : baseName;
-
-                                        return (
-                                            <div className="flex flex-col gap-[5px]" key={index}>
-                                                <Link
-                                                    to={`/file-viewer/attachment/${item.id}`}
-                                                    onClick={(e) => {
-                                                        e.preventDefault(); // Prevent immediate navigation
-                                                        localStorage.setItem("fileUrlPath", JSON.stringify(attachment.url));
-                                                        window.open(`/file-viewer/attachment/${item.id}`, "_blank");
-                                                    }}
+                                            return (
+                                                <div
+                                                    className="flex flex-col gap-[5px]"
+                                                    key={index}
                                                 >
-                                                    <button className="w-[218px] h-[42px] rounded-[7px] gradient-btn2 px-[20px] py-[8px] flex items-center justify-start text-white gap-2">
-                                                        <img src={FolderFile2} alt="View Attachment" />
-                                                        <span className="text-xs">
-                                                            {truncatedName}.{fileType}
-                                                        </span>
-                                                    </button>
-                                                </Link>
-                                            </div>
-                                        );
-
-                                    })}
-
-
-
-
-
+                                                    <Link
+                                                        to={`/file-viewer/attachment/${item.id}`}
+                                                        onClick={(e) => {
+                                                            e.preventDefault(); // Prevent immediate navigation
+                                                            localStorage.setItem(
+                                                                "fileUrlPath",
+                                                                JSON.stringify(
+                                                                    attachment.url
+                                                                )
+                                                            );
+                                                            window.open(
+                                                                `/file-viewer/attachment/${item.id}`,
+                                                                "_blank"
+                                                            );
+                                                        }}
+                                                    >
+                                                        <button className="w-[218px] h-[42px] rounded-[7px] gradient-btn2 px-[20px] py-[8px] flex items-center justify-start text-white gap-2">
+                                                            <img
+                                                                src={
+                                                                    FolderFile2
+                                                                }
+                                                                alt="View Attachment"
+                                                            />
+                                                            <span className="text-xs">
+                                                                {truncatedName}.
+                                                                {fileType}
+                                                            </span>
+                                                        </button>
+                                                    </Link>
+                                                </div>
+                                            );
+                                        })}
                                 </div>
                             );
                         } else if (item.type === "log") {
@@ -1167,8 +1202,7 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                                 logData = JSON.parse(item.inquiry_status);
                             } else if (item.removed_assignee) {
                                 logData = JSON.parse(item.removed_assignee);
-                            }
-                            else if (item.edited_by) {
+                            } else if (item.edited_by) {
                                 logData = JSON.parse(item.edited_by);
                             }
 

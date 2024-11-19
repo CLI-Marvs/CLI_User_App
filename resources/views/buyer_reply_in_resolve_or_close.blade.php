@@ -136,7 +136,7 @@
         1-2 working days. 
         <br>
         In the meantime, if you have further questions, you may contact us directly at
-        <strong>09324011120</strong>.
+        <strong>0917-825-5790/ 231 4914 loc 113 </strong>.
     </p>
     <p>
         At CLI, We build with you in mind.

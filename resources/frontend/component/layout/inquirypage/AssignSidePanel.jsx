@@ -6,6 +6,7 @@ import TextField from "@mui/material/TextField";
 import Autocomplete from "@mui/material/Autocomplete";
 import apiService from "../../servicesApi/apiService";
 import { AiFillInfoCircle } from "react-icons/ai";
+import { ALLOWED_EMPLOYEES_CRS } from '../../../constant/data/allowedEmployeesCRS';
 
 const AssignSidePanel = ({ ticketId }) => {
     const {
@@ -30,6 +31,8 @@ const AssignSidePanel = ({ ticketId }) => {
     const [tempSelection, setTempSelection] = useState([]);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+    const userLoggedInEmail = user?.employee_email;
+
 
     const modalRef = useRef(null);
     const dropdownRef = useRef(null);
@@ -559,7 +562,7 @@ const AssignSidePanel = ({ ticketId }) => {
                                             className="bg-custom-lightgreen text-white rounded-full px-3 py-1 text-xs flex-shrink-0 flex mb-[4px]"
                                         >
                                             {assignee.name}
-                                            {user?.department === "Customer Relations - Services" && (
+                                            {ALLOWED_EMPLOYEES_CRS.includes(userLoggedInEmail) && (
                                                 <button
                                                     onClick={() =>
                                                         removeTag(assignee)

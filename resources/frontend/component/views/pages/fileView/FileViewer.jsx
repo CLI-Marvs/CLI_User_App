@@ -147,7 +147,7 @@ const FileViewer = () => {
 
     return (
         <div
-            onContextMenu={handleContextMenu}
+           /*  onContextMenu={handleContextMenu} */
             className={`${fileExtension === "txt" ? "bg-white" : "bg-black"}`}
         >
             {fileExtension === "jpg" ||
