@@ -52,18 +52,18 @@ class ConcernController extends Controller
     private $folderName;
 
     public function __construct() {
-        if(config('services.app_url') === 'http://localhost:8001' || 'https://admin-dev.cebulandmasters.com') {
+        if(config('services.app_url') === 'http://localhost:8002' || 'https://admin-dev.cebulandmasters.com') {
             $this->keyJson = config('services.gcs.key_json');
             $this->bucket = 'super-app-storage';
             $this->folderName = 'concerns/';
         }
 
-        if(config('services.app_url') === 'https://admin-uat.cebulandmasters.com') {
+        if(config('services.app_url') ===  'https://admin-uat.cebulandmasters.com') {
             $this->keyJson = config('services.gcs.key_json');
             $this->bucket = 'super-app-uat';
             $this->folderName = 'concerns-uat/';
         }
-        
+
         if (config('services.app_url') === 'https://admin.cebulandmasters.com') {
             $this->keyJson = config('services.gcs.prod');
             $this->bucket = 'concerns-bucket';
@@ -445,7 +445,7 @@ class ConcernController extends Controller
             ]);
             $user = $request->user();
             $isSendEmail = $request->input('isSendEmail', true);
-     
+
             $filesData = [];
             // $files = $validatedData['files'];
             $files = $request->file('files');
@@ -646,7 +646,7 @@ class ConcernController extends Controller
     {
         $fileLinks = [];
         if ($files) {
-          /*   $keyJson = config('services.gcs.key_json');  //Access from services.php */
+            /*   $keyJson = config('services.gcs.key_json');  //Access from services.php */
             $keyArray = json_decode($this->keyJson, true); // Decode the JSON string to an array
             $storage = new StorageClient([
                 'keyFile' => $keyArray
@@ -1766,8 +1766,6 @@ class ConcernController extends Controller
                         'remarks' => $request->remarks
                     ]
                 ];
-
-
                 $newTicketId = str_replace('#', '', $request->ticket_id);
 
                 $inquiry->inquiry_status = json_encode($logData);
@@ -1788,24 +1786,38 @@ class ConcernController extends Controller
                 return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
             }
         } else {
-            $inquiry = new InquiryLogs();
-            $logData = [
-                'log_type' => 'inquiry_status',
-                'details' => [
-                    'message_tag' => 'Marked as Closed by',
-                    'resolve_by' => $request->admin_name,
-                    'department' => $request->department,
+            try {
+                $inquiry = new InquiryLogs();
+                $logData = [
+                    'log_type' => 'inquiry_status',
+                    'details' => [
+                        'message_tag' => 'Marked as Closed by',
+                        'resolve_by' => $request->admin_name,
+                        'department' => $request->department,
+                        'remarks' => $request->remarks
+                    ]
+                ];
 
-                ]
-            ];
 
+                $newTicketId = str_replace('#', '', $request->ticket_id);
 
-            $newTicketId = str_replace('#', '', $request->ticket_id);
+                $inquiry->inquiry_status = json_encode($logData);
+                $inquiry->ticket_id = $request->ticket_id;
+                $inquiry->message_log = "Marked as Closed by" . ' ' . $request->admin_name;
+                $inquiry->save();
 
-            $inquiry->inquiry_status = json_encode($logData);
-            $inquiry->ticket_id = $request->ticket_id;
-            $inquiry->message_log = "Marked as Closed by" . ' ' . $request->admin_name;
-            $inquiry->save();
+                $data = [
+                    'inquiry_status' => json_encode($logData),
+                    'created_at' => $inquiry->created_at,
+                    'ticketId' => $newTicketId,
+                    'logId' => $inquiry->id,
+                    'logRef' => 'inquiry_status'
+                ];
+
+                AdminReplyLogs::dispatch($data);
+            } catch (\Exception $e) {
+                return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
+            }
         }
     }
 
@@ -2287,8 +2299,8 @@ class ConcernController extends Controller
     {
         $fileLinks = [];
         if ($attachments) {
-            $keyJson = config('services.gcs.key_json');
-       /*      $keyJson = config($data['keyjson']); */
+           /*  $keyJson = config('services.gcs.key_json'); */
+            $keyJson = config($data['keyjson']);
             $keyArray = json_decode($keyJson, true);
             $storage = new StorageClient([
                 'keyFile' => $keyArray

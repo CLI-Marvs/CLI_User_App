@@ -7,6 +7,7 @@ import { BsPaperclip } from "react-icons/bs";
 import { IoIosArrowDown } from "react-icons/io";
 import AssignSidePanel from "./AssignSidePanel";
 import ResolveModal from "./ResolveModal";
+import CloseModal from "./CloseModal";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useStateContext } from "../../../context/contextprovider";
 import apiService from "../../servicesApi/apiService";
@@ -59,6 +60,7 @@ const InquiryThread = () => {
     const modalRef = useRef(null);
     const modalRef2 = useRef(null);
     const resolveModalRef = useRef(null);
+    const closeModalRef = useRef(null);
     const navigate = useNavigate();
     const location = useLocation();
     const { itemsData } = location?.state || {};
@@ -164,48 +166,18 @@ const InquiryThread = () => {
             modalRef2.current.showModal();
         }
     };
-
-    /**
-     * To handle mark as closed modal
-     */
-    const handleOpenMarkAsClosedModal = () => {
-        setAlertType("close");
-        setShowAlert(true);
-    };
-
-    /**
-     * To handle delete modal
-     */
-    const handleOpenDeleteModal = () => {
-        setAlertType("delete");
-        setShowAlert(true);
-    };
-
-    /**
-     * To handle confirm delete/close inquiry
-     */
-    const handleConfirm = () => {
-        if (alertType === "delete") {
-            deleteInquiry();
-        } else if (alertType === "close") {
-            closedInquiry();
-        }
-        setShowAlert(false);
-    };
-
-    /**
-     * To handle cancel delete inquiry
-     */
-    const handleCancel = () => {
-        setShowAlert(false);
-    };
+ 
 
     const handleOpenResolveModal = () => {
         if (resolveModalRef.current) {
             resolveModalRef.current.showModal();
         }
     };
-
+    const handleOpenCloseModal = () => {
+        if (closeModalRef.current) {
+            closeModalRef.current.showModal();
+        }
+    };
     const handleConfirmation = () => {
         if (chatMessage.trim()) {
             setIsConfirmModalOpen(true); // open confirmation modal
@@ -1234,27 +1206,25 @@ const InquiryThread = () => {
 
                             <div className="border my-2 border-t-1 border-custom-lightestgreen"></div>
                             <div className="w-full flex justify-end gap-[13px] items-center">
-                                {dataConcern?.status === "Resolved" ||
-                                    (dataConcern?.status == "Closed" && (
+                                {/* {dataConcern?.status === "Resolved" ||
+                                    dataConcern?.status === "Closed" && (
                                         <span
                                             className="w-auto font-semibold text-[13px] text-[#1A73E8] underline cursor-pointer"
                                             onClick={handleOpenAddInfoModal}
                                         >
                                             Create new ticket
                                         </span>
-                                    ))}
-
-                                {/* {dataConcern?.created_by &&
-                                    dataConcern?.created_by === user?.id &&
-                                    ALLOWED_EMPLOYEES_CRS.includes(
-                                        userLoggedInEmail
-                                    ) && (
-                                        <FaTrash
-                                            className="text-[#EB4444] hover:text-red-600 cursor-pointer"
-                                            onClick={handleOpenDeleteModal}
-                                        />
                                     )} */}
-                                
+
+                                {(dataConcern?.status === "Resolved" || dataConcern?.status === "Closed") && (
+                                    <span
+                                        className="w-auto font-semibold text-[13px] text-[#1A73E8] underline cursor-pointer"
+                                        onClick={handleOpenAddInfoModal}
+                                    >
+                                        Create new ticket
+                                    </span>
+                                )}
+
                                 {dataConcern?.status === "Resolved" ? (
                                     <div className="flex justify-start items-center w-[122px] font-semibold text-[13px] text-custom-lightgreen space-x-1">
                                         <p>Ticket Resolved</p>
@@ -1281,12 +1251,13 @@ const InquiryThread = () => {
                                     </div>
                                 ) : (
                                     dataConcern?.status !== "Closed" &&
+                                    dataConcern?.status !== "Resolved" &&
                                     ALLOWED_EMPLOYEES_CRS.includes(
                                         userLoggedInEmail
                                     ) && (
                                         <div
                                             onClick={
-                                                handleOpenMarkAsClosedModal
+                                                    handleOpenCloseModal
                                             }
                                             className="flex justify-start w-auto font-semibold text-[13px] text-[#1A73E8] underline cursor-pointer"
                                         >
@@ -1407,20 +1378,16 @@ const InquiryThread = () => {
                     onupdate={handleUpdate}
                 />
             </div>
+
             <div>
-                <Alert
-                    title={
-                        alertType === "delete"
-                            ? "Are you sure you want to delete this inquiry?"
-                            : alertType === "close"
-                                ? "Are you sure you want to mark this inquiry as closed?"
-                                : ""
-                    }
-                    show={showAlert}
-                    onCancel={handleCancel}
-                    onConfirm={handleConfirm}
+                <CloseModal
+                    modalRef={closeModalRef}
+                    ticketId={ticketId}
+                    dataRef={dataConcern}
+                    onupdate={handleUpdate}
                 />
             </div>
+         
             <div>
                 <ThreadInquiryFormModal
                     modalRef={modalRef2}
