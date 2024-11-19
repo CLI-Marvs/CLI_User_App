@@ -1304,8 +1304,9 @@ const InquiryThread = () => {
                                         <IoIosCheckmarkCircle className="size-[18px] text-custom-lightgreen" />
                                     </div>
                                 ) : (
-                                    user?.department ===
-                                    "Customer Relations - Services" &&
+                                    ALLOWED_EMPLOYEES_CRS.includes(
+                                        userLoggedInEmail
+                                    ) &&
                                     dataConcern?.status !== "Closed" && (
                                         <div
                                             onClick={handleOpenResolveModal}

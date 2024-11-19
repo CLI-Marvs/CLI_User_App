@@ -42,7 +42,7 @@ const InquiryFormModal = ({ modalRef }) => {
     const { propertyNamesList } = useStateContext();
     const [specificInputErrors, setSpecificInputErrors] = useState({});
     const [isSendEmail, setIsSendEmail] = useState(false);
-    console.log("isSendEmail", isSendEmail);
+     
     const handleFileChange = (event) => {
         const selectedFiles = Array.from(event.target.files);
         setFiles((prevFiles) => {
@@ -735,7 +735,7 @@ const InquiryFormModal = ({ modalRef }) => {
                             </div>
                         </div>
                         <div
-                            className={`flex items-center border rounded-[5px] overflow-hidden ${isSubmitted && !formData.type
+                            className={`flex items-center border rounded-[5px] overflow-hidden ${isSubmitted && !formData.channels
                                 ? resetSuccess
                                     ? "border-custom-bluegreen"
                                     : "border-red-500"
