@@ -419,8 +419,8 @@ class ConcernController extends Controller
 
             ]);
             $user = $request->user();
-            $isSendEmail = $request->isSendEmail;
-
+            $isSendEmail = $request->input('isSendEmail', true);
+     
             $filesData = [];
             // $files = $validatedData['files'];
             $files = $request->file('files');
@@ -471,7 +471,7 @@ class ConcernController extends Controller
             $this->concernsCreatedBy($user, $concerns->id);
 
             //If this is True, send a email to the buyer
-            if ($isSendEmail) {
+            if ($isSendEmail === "true") {
                 $data = [
                     'lname'
                     => $request->lname,
@@ -1828,7 +1828,7 @@ class ConcernController extends Controller
                 'month' => $month,
                 'resolved' => $reports->get($month)?->resolved ?? 0,
                 'unresolved' => $reports->get($month)?->unresolved ?? 0,
-                'closed'=> $reports->get($month)?->closed ?? 0,
+                'closed' => $reports->get($month)?->closed ?? 0,
             ];
         });
 
