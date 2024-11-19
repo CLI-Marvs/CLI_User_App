@@ -471,7 +471,7 @@ class ConcernController extends Controller
             $this->concernsCreatedBy($user, $concerns->id);
 
             //If this is True, send a email to the buyer
-            if ($isSendEmail) {
+            if ($isSendEmail === "true") {
                 $data = [
                     'lname'
                     => $request->lname,

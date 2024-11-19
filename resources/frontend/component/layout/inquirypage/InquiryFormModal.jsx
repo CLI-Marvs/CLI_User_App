@@ -42,6 +42,7 @@ const InquiryFormModal = ({ modalRef }) => {
     const { propertyNamesList } = useStateContext();
     const [specificInputErrors, setSpecificInputErrors] = useState({});
     const [isSendEmail, setIsSendEmail] = useState(false);
+    console.log("isSendEmail", isSendEmail);
     const handleFileChange = (event) => {
         const selectedFiles = Array.from(event.target.files);
         setFiles((prevFiles) => {
