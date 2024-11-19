@@ -683,7 +683,7 @@ const InquiryFormModal = ({ modalRef }) => {
                                     className="appearance-none text-sm w-[89%] px-4 py-1 bg-white focus:outline-none border-0 mobile:text-xs"
                                 >
                                     <option value="">(Select)</option>
-                                    <option value="Complain">Complain</option>
+                                    <option value="Complaint">Complaint</option>
                                     <option value="Request">Request</option>
                                     <option value="Inquiry">Inquiry</option>
                                     <option value="Suggestion or Recommendation">

@@ -383,7 +383,7 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
                                     className="appearance-none w-full px-4 text-sm py-1 bg-white focus:outline-none border-0 mobile:text-xs"
                                 >
                                     <option value="">(Select)</option>
-                                    <option value="Complain">Complain</option>
+                                    <option value="Complaint">Complaint</option>
                                     <option value="Request">Request</option>
                                     <option value="Inquiry">Inquiry</option>
                                     <option value="Suggestion or recommendation">

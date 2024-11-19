@@ -496,8 +496,8 @@ const InquiryList = () => {
                                                 <option value="">
                                                     Select Type
                                                 </option>
-                                                <option value="Complain">
-                                                    Complain
+                                                <option value="Complaint">
+                                                    Complaint
                                                 </option>
                                                 <option value="Request">
                                                     Request
