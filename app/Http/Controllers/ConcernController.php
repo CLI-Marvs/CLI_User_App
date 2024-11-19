@@ -579,7 +579,7 @@ class ConcernController extends Controller
             $dataId = $request->dataId;
 
             // Find the concern record by ID and update its fields
-            $concern = Concerns::find($dataId);
+            $concern = Concerns::where('ticket_id', $ticket_id)->first();
             if (!$concern) {
                 return response()->json(['message' => 'Concern not found'], 404);
             }
