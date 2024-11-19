@@ -417,7 +417,7 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
                                     <option value="Walk in">Walk-in</option>
                                     <option value="Website">Website</option>
                                     <option value="Social media">Social media</option>
-                                    <option value="Branch Tablet">Branch Tablet (Jotform created by IT)</option>
+                                    <option value="Branch Tablet">Branch Tablet</option>
                                     <option value="Internal Endorsement">Internal Endorsement</option>
                                 </select>
                                 <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3 bg-[#EDEDED] text-custom-gray81 pointer-events-none">

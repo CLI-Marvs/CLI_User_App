@@ -36,6 +36,7 @@ import TransactionView from "./views/pages/transactionViews/TransactionView";
 import TransactionSidebar from "./views/pages/transactionViews/TransactionSidebar";
 import BankStatementView from "./views/pages/transactionViews/BankStatementView";
 import AutoAssignView from "./views/pages/raiseaconcernViews/AutoAssignView";
+import UserRightsAndPermissionsView from "./views/pages/userrightsandpermissionsViews/UserRightsAndPermissionsView";
 
 // PrivateRoute component to check authentication
 const PrivateRoute = () => {
@@ -340,6 +341,10 @@ const App = () => {
                         {
                             path: "adminsettings",
                             element: <AdminSettingView />,
+                        },
+                        {
+                            path: "superadmin/userrightsandpermissions",
+                            element: <UserRightsAndPermissionsView />,
                         },
                     ],
                 },

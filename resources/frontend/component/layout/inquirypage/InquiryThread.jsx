@@ -782,8 +782,7 @@ const InquiryThread = () => {
                                                     Social media
                                                 </option>
                                                 <option value="Branch Tablet">
-                                                    Branch Tablet (Jotform
-                                                    created by IT)
+                                                    Branch Tablet
                                                 </option>
                                                 <option value="Internal Endorsement">
                                                     Internal Endorsement
