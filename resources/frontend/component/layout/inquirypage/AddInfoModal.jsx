@@ -138,8 +138,8 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
 
     const addInfo = async () => {
         try {
-            const response = await apiService.put(
-                `update-info?dataId=${dataConcern.id}`,
+            const response = await apiService.post(
+                'update-info',
                 {
                     buyerOldData,
                     ...dataToUpdate,
@@ -148,7 +148,6 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
                 }
             );
 
-            console.log("response", response);
             const updatedData = { ...dataToUpdate };
             localStorage.removeItem("dataConcern");
             localStorage.removeItem("closeConcern");
@@ -195,6 +194,7 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
                     ? dataConcern.other_user_type
                     : "",
                 channels: dataConcern.channels,
+                ticket_id: dataConcern.ticket_id,
             });
             setMessage(dataConcern.admin_remarks || "");
         }

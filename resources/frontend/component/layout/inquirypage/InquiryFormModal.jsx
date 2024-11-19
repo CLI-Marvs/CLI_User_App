@@ -15,7 +15,7 @@ const formDataState = {
     mobile_number: "",
     property: "",
     type: "",
-    channels:"",
+    channels: "",
     user_type: "",
     other_user_type: "",
     contract_number: "",
@@ -42,7 +42,7 @@ const InquiryFormModal = ({ modalRef }) => {
     const { propertyNamesList } = useStateContext();
     const [specificInputErrors, setSpecificInputErrors] = useState({});
     const [isSendEmail, setIsSendEmail] = useState(false);
-
+    console.log("isSendEmail", isSendEmail);
     const handleFileChange = (event) => {
         const selectedFiles = Array.from(event.target.files);
         setFiles((prevFiles) => {
@@ -162,6 +162,14 @@ const InquiryFormModal = ({ modalRef }) => {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return emailRegex.test(email);
     };
+    const handleCloseModal = () => {
+        setFormData(formDataState);
+        setMessage("");
+        setFiles([]);
+        setFileName("");
+        setIsSendEmail(false);
+
+    }
 
     const handleChangeValue = (e) => {
         const newValue = e.target.value;
@@ -376,12 +384,7 @@ const InquiryFormModal = ({ modalRef }) => {
                     >
                         <button
                             className="flex justify-center w-10 h-10 items-center rounded-full text-custom-bluegreen hover:bg-custombg"
-                            onClick={() => {
-                                setFormData(formDataState);
-                                setMessage("");
-                                setFiles([]);
-                                setFileName("");
-                            }}
+                            onClick={handleCloseModal}
                         >
                             ✕
                         </button>
@@ -575,7 +578,8 @@ const InquiryFormModal = ({ modalRef }) => {
                             />
                         </div>
                         <div className="flex gap-[6px] items-center">
-                            <input type="checkbox" className="h-[16px] w-[16px] rounded-[2px] border border-gray-400 checked:bg-transparent flex items-center justify-center accent-custom-lightgreen" onChange={handleSendEmailChange} />
+                            <input type="checkbox" className="h-[16px] w-[16px] rounded-[2px] border border-gray-400 checked:bg-transparent flex items-center justify-center accent-custom-lightgreen" onChange={handleSendEmailChange} value="checkbox"
+                                checked={isSendEmail} />
                             <p className="text-sm text-custom-bluegreen font-semibold">Email will be sent.</p>
                         </div>
                         <div
@@ -681,7 +685,7 @@ const InquiryFormModal = ({ modalRef }) => {
                                     <option value="Title and Other Registration Documents" className="pr-8  ">
                                         Title and Other Registration Documents
                                     </option>
-                                   
+
                                     <option value="Commissions" className="pr-8">
                                         Commissions
                                     </option>
