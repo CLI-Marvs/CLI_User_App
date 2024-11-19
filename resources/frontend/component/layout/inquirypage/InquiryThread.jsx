@@ -668,8 +668,8 @@ const InquiryThread = () => {
                                                 <option value="">
                                                     Select Type
                                                 </option>
-                                                <option value="Complain">
-                                                    Complain
+                                                <option value="Complaint">
+                                                    Complaint
                                                 </option>
                                                 <option value="Request">
                                                     Request
@@ -1254,15 +1254,7 @@ const InquiryThread = () => {
                                             onClick={handleOpenDeleteModal}
                                         />
                                     )} */}
-                                {
-                                    ALLOWED_EMPLOYEES_CRS.includes(
-                                        userLoggedInEmail
-                                    ) && (
-                                        <FaTrash
-                                            className="text-[#EB4444] hover:text-red-600 cursor-pointer"
-                                            onClick={handleOpenDeleteModal}
-                                        />
-                                    )}
+                                
                                 {dataConcern?.status === "Resolved" ? (
                                     <div className="flex justify-start items-center w-[122px] font-semibold text-[13px] text-custom-lightgreen space-x-1">
                                         <p>Ticket Resolved</p>

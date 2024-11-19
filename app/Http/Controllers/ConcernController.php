@@ -1919,7 +1919,7 @@ class ConcernController extends Controller
         // Query to count each <communication_t></communication_t>ype grouped by property
         $query = Concerns::select(
             'property',
-            DB::raw("SUM(case when communication_type = 'Complain' then 1 else 0 end) as Complain"),
+            DB::raw("SUM(case when communication_type = 'Complaint' then 1 else 0 end) as Complaint"),
             DB::raw("SUM(case when communication_type = 'Request' then 1 else 0 end) as Request"),
             DB::raw("SUM(case when communication_type = 'Inquiry' then 1 else 0 end) as Inquiry"),
             DB::raw("SUM(case when communication_type = 'Suggestion or recommendation' then 1 else 0 end) as Suggestion"),
