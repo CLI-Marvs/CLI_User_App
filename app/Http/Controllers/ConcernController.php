@@ -52,17 +52,17 @@ class ConcernController extends Controller
     private $folderName;
 
     public function __construct() {
-        if(config('services.app_url') === 'http://localhost:8002' || 'https://admin-dev.cebulandmasters.com') {
+        if(config('services.app_url') === 'http://localhost:8002' || 'https://admin-dev.cebulandmasters.com' || 'https://admin-uat.cebulandmasters.com') {
             $this->keyJson = config('services.gcs.key_json');
             $this->bucket = 'super-app-storage';
             $this->folderName = 'concerns/';
         }
 
-        if(config('services.app_url') ===  'https://admin-uat.cebulandmasters.com') {
+       /*  if(config('services.app_url') ===  'https://admin-uat.cebulandmasters.com') {
             $this->keyJson = config('services.gcs.key_json');
             $this->bucket = 'super-app-uat';
             $this->folderName = 'concerns-uat/';
-        }
+        } */
 
         if (config('services.app_url') === 'https://admin.cebulandmasters.com') {
             $this->keyJson = config('services.gcs.prod');
