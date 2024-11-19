@@ -122,7 +122,7 @@
 
 
 <body style="font-family: Arial, sans-serif; font-size: 14px; color: #333; line-height: 1.6;">
-    <p>Hi Mr./Ms. {{ ucwords($buyer_lname) }},</p>
+    {{-- <p>Hi Mr./Ms. {{ ucwords($buyer_lname) }},</p> --}}
 
     <p>{!! $details_message !!}</p>
 

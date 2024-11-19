@@ -46,6 +46,31 @@ class ConcernController extends Controller
 {
     //*Add concern and get
 
+
+    private $keyJson;
+    private $bucket;
+    private $folderName;
+
+    public function __construct() {
+        if(config('services.app_url') === 'http://localhost:8002' || 'https://admin-dev.cebulandmasters.com') {
+            $this->keyJson = config('services.gcs.key_json');
+            $this->bucket = 'super-app-storage';
+            $this->folderName = 'concerns/';
+        }
+
+        if(config('services.app_url') ===  'https://admin-uat.cebulandmasters.com') {
+            $this->keyJson = config('services.gcs.key_json');
+            $this->bucket = 'super-app-uat';
+            $this->folderName = 'concerns-uat/';
+        }
+
+        if (config('services.app_url') === 'https://admin.cebulandmasters.com') {
+            $this->keyJson = config('services.gcs.prod');
+            $this->bucket = 'concerns-bucket';
+            $this->folderName = 'concerns-attachments/';
+        }
+    }
+
     public function token()
     {
         $client_id = \Config('services.google.client_id_gdrive');
@@ -420,7 +445,7 @@ class ConcernController extends Controller
             ]);
             $user = $request->user();
             $isSendEmail = $request->input('isSendEmail', true);
-     
+
             $filesData = [];
             // $files = $validatedData['files'];
             $files = $request->file('files');
@@ -621,15 +646,15 @@ class ConcernController extends Controller
     {
         $fileLinks = [];
         if ($files) {
-            $keyJson = config('services.gcs.key_json');  //Access from services.php
-            $keyArray = json_decode($keyJson, true); // Decode the JSON string to an array
+            /*   $keyJson = config('services.gcs.key_json');  //Access from services.php */
+            $keyArray = json_decode($this->keyJson, true); // Decode the JSON string to an array
             $storage = new StorageClient([
                 'keyFile' => $keyArray
             ]);
-            $bucket = $storage->bucket('super-app-storage');
+            $bucket = $storage->bucket($this->bucket);
             foreach ($files as $file) {
                 $fileName = uniqid() . '.' . $file->getClientOriginalExtension();
-                $filePath = 'concerns/' . $fileName;
+                $filePath = $this->folderName . $fileName;
 
                 $bucket->upload(
                     fopen($file->getPathname(), 'r'),
@@ -655,14 +680,14 @@ class ConcernController extends Controller
                 return response()->json(['message' => 'File path is required.'], 400);
             }
 
-            $keyJson = config('services.gcs.key_json');  //Access from services.php
-            $keyArray = json_decode($keyJson, true); // Decode the JSON string to an array
+            /* $keyJson = config('services.gcs.key_json'); */  //Access from services.php
+            $keyArray = json_decode($this->keyJson, true); // Decode the JSON string to an array
             $storage = new StorageClient([
                 'keyFile' => $keyArray
             ]);
 
-            $bucket = $storage->bucket('super-app-storage');
-            $filePath = 'concerns/' . $fileUrlPath;
+            $bucket = $storage->bucket($this->bucket);
+            $filePath = $this->folderName . $fileUrlPath;
             $object = $bucket->object($filePath);
             if (!$object->exists()) {
                 return response()->json(['message' => 'File not found in cloud storage.'], 404);
@@ -679,6 +704,7 @@ class ConcernController extends Controller
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
         }
     }
+
 
     // public function uploadToGCS($files)
     // {
@@ -1740,8 +1766,6 @@ class ConcernController extends Controller
                         'remarks' => $request->remarks
                     ]
                 ];
-
-
                 $newTicketId = str_replace('#', '', $request->ticket_id);
 
                 $inquiry->inquiry_status = json_encode($logData);
@@ -1762,24 +1786,38 @@ class ConcernController extends Controller
                 return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
             }
         } else {
-            $inquiry = new InquiryLogs();
-            $logData = [
-                'log_type' => 'inquiry_status',
-                'details' => [
-                    'message_tag' => 'Marked as Closed by',
-                    'resolve_by' => $request->admin_name,
-                    'department' => $request->department,
+            try {
+                $inquiry = new InquiryLogs();
+                $logData = [
+                    'log_type' => 'inquiry_status',
+                    'details' => [
+                        'message_tag' => 'Marked as Closed by',
+                        'resolve_by' => $request->admin_name,
+                        'department' => $request->department,
+                        'remarks' => $request->remarks
+                    ]
+                ];
 
-                ]
-            ];
 
+                $newTicketId = str_replace('#', '', $request->ticket_id);
 
-            $newTicketId = str_replace('#', '', $request->ticket_id);
+                $inquiry->inquiry_status = json_encode($logData);
+                $inquiry->ticket_id = $request->ticket_id;
+                $inquiry->message_log = "Marked as Closed by" . ' ' . $request->admin_name;
+                $inquiry->save();
 
-            $inquiry->inquiry_status = json_encode($logData);
-            $inquiry->ticket_id = $request->ticket_id;
-            $inquiry->message_log = "Marked as Closed by" . ' ' . $request->admin_name;
-            $inquiry->save();
+                $data = [
+                    'inquiry_status' => json_encode($logData),
+                    'created_at' => $inquiry->created_at,
+                    'ticketId' => $newTicketId,
+                    'logId' => $inquiry->id,
+                    'logRef' => 'inquiry_status'
+                ];
+
+                AdminReplyLogs::dispatch($data);
+            } catch (\Exception $e) {
+                return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
+            }
         }
     }
 
@@ -1893,7 +1931,7 @@ class ConcernController extends Controller
         // Query to count each <communication_t></communication_t>ype grouped by property
         $query = Concerns::select(
             'property',
-            DB::raw("SUM(case when communication_type = 'Complain' then 1 else 0 end) as Complain"),
+            DB::raw("SUM(case when communication_type = 'Complaint' then 1 else 0 end) as Complaint"),
             DB::raw("SUM(case when communication_type = 'Request' then 1 else 0 end) as Request"),
             DB::raw("SUM(case when communication_type = 'Inquiry' then 1 else 0 end) as Inquiry"),
             DB::raw("SUM(case when communication_type = 'Suggestion or recommendation' then 1 else 0 end) as Suggestion"),
@@ -2261,12 +2299,14 @@ class ConcernController extends Controller
     {
         $fileLinks = [];
         if ($attachments) {
-            $keyJson = config('services.gcs.key_json');
+           /*  $keyJson = config('services.gcs.key_json'); */
+            $keyJson = config($data['keyjson']);
             $keyArray = json_decode($keyJson, true);
             $storage = new StorageClient([
                 'keyFile' => $keyArray
             ]);
             $bucket = $storage->bucket('super-app-storage');
+           /*  $bucket = $storage->bucket($data['bucketName']); */
 
             foreach ($attachments as $fileData) {
                 $fileName = uniqid() . '.' . $fileData['extension'];

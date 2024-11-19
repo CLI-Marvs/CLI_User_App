@@ -1,16 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { IoMdArrowDropdown } from "react-icons/io";
 import apiService from "../../servicesApi/apiService";
-import { data } from "autoprefixer";
 import { useStateContext } from "../../../context/contextprovider";
 import Alert from "../mainComponent/Alert";
+import { showToast } from "../../../util/toastUtil"
+
 const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
     const predefinedUserTypes = ["Property Owner", "Buyer", "Broker", "Seller", "Lessee"];
     const { getAllConcerns, propertyNamesList, updateConcern, user, getInquiryLogs } =
         useStateContext();
- 
     const [message, setMessage] = useState(dataConcern.admin_remarks || "");
- 
     const [dataToUpdate, setDataToUpdate] = useState({
         ticket_id: dataConcern.ticket_id,
         details_concern: dataConcern.details_concern || "",
@@ -147,17 +146,14 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
                     updated_by: user?.firstname + " " + user?.lastname,
                 }
             );
-
             const updatedData = { ...dataToUpdate };
             localStorage.removeItem("dataConcern");
             localStorage.removeItem("closeConcern");
             localStorage.setItem("updatedData", JSON.stringify(updatedData)); 
-
+            showToast("Concern updated successfully!", "success");
             onupdate({ ...dataToUpdate, dataConcern });
             getInquiryLogs(dataConcern.ticket_id);
             getAllConcerns();
-
-
         } catch (error) {
             console.log("error", error);
         }
@@ -387,7 +383,7 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
                                     className="appearance-none w-full px-4 text-sm py-1 bg-white focus:outline-none border-0 mobile:text-xs"
                                 >
                                     <option value="">(Select)</option>
-                                    <option value="Complain">Complain</option>
+                                    <option value="Complaint">Complaint</option>
                                     <option value="Request">Request</option>
                                     <option value="Inquiry">Inquiry</option>
                                     <option value="Suggestion or recommendation">
