@@ -3,21 +3,17 @@ import TicketTable from "./TicketTable";
 import {
     IoIosArrowUp,
     IoIosArrowDown,
-    IoMdArrowDropdown,
 } from "react-icons/io";
 import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md";
 import ReactPaginate from "react-paginate";
 import { useStateContext } from "../../../context/contextprovider";
-import apiService from "../../servicesApi/apiService";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import DateLogo from "../../../../../public/Images/Date_range.svg";
-import moment from "moment";
 import { MdRefresh } from "react-icons/md";
-import { Alert } from "@mui/material";
 import InquiryFormModal from "./InquiryFormModal";
 import axios from "axios";
-
+import {toast } from 'react-toastify';
 const InquiryList = () => {
     const {
         currentPage,
@@ -208,6 +204,7 @@ const InquiryList = () => {
     const modalRef = useRef(null);
 
     const handleOpenModal = () => {
+        toast.dismiss();
         if (modalRef.current) {
             modalRef.current.showModal();
         }
