@@ -136,11 +136,12 @@
     <p>
         Our team is reviewing your concern and you can expect a
         response within
-        1-2 working days. In the meantime, if you have further questions, you may contact us directly at
+        1-2 working days. <br>
+        In the meantime, if you have further questions, you may contact us directly at
         <strong>09324011120</strong>.
     </p>
     <p>
-        At CLI, we build with you in mind.
+       At CLI, We build with you in mind.
     </p>
 
 
@@ -155,6 +156,7 @@
         <strong>
             Reminder:
             This is an automated message from a no-reply email address.
+            <br>
             Please do not reply directly to this email as your message will not be received.
             <br>
             If you need assistance, contact our support team at customer service support.
