@@ -2299,8 +2299,8 @@ class ConcernController extends Controller
     {
         $fileLinks = [];
         if ($attachments) {
-           /*  $keyJson = config('services.gcs.key_json'); */
-            $keyJson = config($data['keyjson']);
+            $keyJson = config('services.gcs.key_json');
+            /* $keyJson = config($data['keyjson']); */
             $keyArray = json_decode($keyJson, true);
             $storage = new StorageClient([
                 'keyFile' => $keyArray
