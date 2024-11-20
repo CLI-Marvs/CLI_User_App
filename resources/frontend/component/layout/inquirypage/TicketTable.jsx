@@ -110,7 +110,7 @@ const TicketTable = ({ concernData }) => {
                         </td> */}
                             <td
                                 className={`w-[60px] shrink-0 flex justify-center text-xl  ${
-                                    row.status === "Resolved"
+                                    row.status === "Resolved" || row.status === "Closed"
                                         ? "text-gray-500"
                                         : "text-custom-bluegreen"
                                 }`}
@@ -132,7 +132,7 @@ const TicketTable = ({ concernData }) => {
                             <td
                                 className={`shrink-0 
                                 ${
-                                    row.status === "Resolved"
+                                    row.status === "Resolved" || row.status === "Closed"
                                         ? "text-black font-normal"
                                         : "text-custom-bluegreen font-semibold"
                                 }
@@ -207,7 +207,7 @@ const TicketTable = ({ concernData }) => {
                                 <p
                                     className={`truncate
                                     ${
-                                        row.status === "Resolved"
+                                        row.status === "Resolved" || row.status === "Closed"
                                             ? "text-black font-normal"
                                             : "text-custom-bluegreen font-semibold"
                                     }
@@ -233,7 +233,7 @@ const TicketTable = ({ concernData }) => {
                             </td>
                             <td
                                 className={`w-[210px] flex items-center  ${
-                                    row.status === "Resolved"
+                                    row.status === "Resolved" || row.status === "Closed"
                                         ? "text-gray-500"
                                         : "text-custom-lightgreen"
                                 }`}
@@ -242,7 +242,7 @@ const TicketTable = ({ concernData }) => {
                             </td>
                             <td
                                 className={`w-[110px] flex justify-end pr-3 ${
-                                    row.status === "Resolved"
+                                    row.status === "Resolved" || row.status === "Closed"
                                         ? "text-black"
                                         : "text-custom-bluegreen"
                                 } font-semibold`}
