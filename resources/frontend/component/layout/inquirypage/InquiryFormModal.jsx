@@ -542,7 +542,7 @@ const InquiryFormModal = ({ modalRef }) => {
                         <div className="flex gap-[6px] items-center">
                             <input type="checkbox" className="h-[16px] w-[16px] rounded-[2px] border border-gray-400 checked:bg-transparent flex items-center justify-center accent-custom-lightgreen" onChange={handleSendEmailChange} value="checkbox"
                                 checked={isSendEmail} />
-                            <p className="text-sm text-custom-bluegreen font-semibold">Email will be sent.</p>
+                            <p className="text-sm text-custom-bluegreen font-semibold">Enable the email to be sent.</p>
                         </div>
                         <div
                             className={`flex items-center border rounded-[5px] overflow-hidden ${isSubmitted && !formData.mobile_number
@@ -720,7 +720,7 @@ const InquiryFormModal = ({ modalRef }) => {
                                     <option value="Walk in">Walk-in</option>
                                     <option value="Website">Website</option>
                                     <option value="Social media">Social Media</option>
-                                    <option value="Branch Tablet">Branch Tablet (Jotform created by IT)</option>
+                                    <option value="Branch Tablet">Branch Tablet</option>
                                     <option value="Internal Endorsement">Internal Endorsement</option>
 
                                 </select>
