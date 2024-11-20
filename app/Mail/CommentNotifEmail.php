@@ -2,6 +2,7 @@
 
 namespace App\Mail;
 
+use App\Models\Conversations;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
@@ -44,7 +45,6 @@ class CommentNotifEmail extends Mailable
 
     public function headers(): Headers
     {
-
         $headers = new Headers();
 
         if ($this->generateMessageId()) {
@@ -58,8 +58,12 @@ class CommentNotifEmail extends Mailable
 
     protected function generateMessageId()
     {
-        return uniqid() . '@cebulandmasters.com';
+        $domain = '@cebulandmasters.com';
+        // return  uniqid() . $domain;
+        return 'ticket-' . $this->data['ticket_id'] . $domain;
+        // return uniqid() . '@cebulandmasters.com';
     }
+
     /**
      * Get the message content definition.
      */
@@ -71,11 +75,12 @@ class CommentNotifEmail extends Mailable
                 'ticket_id' => $this->data['ticket_id'],
                 'commenter_name' => $this->data['commenter_name'],
                 'assignee_name' => $this->assignee_name,
-                'commenter_message' => $this->data['commenter_message']
+                'commenter_message' => $this->data['commenter_message'],
+
             ],
         );
     }
-
+ 
     /**
      * Get the attachments for the message.
      *

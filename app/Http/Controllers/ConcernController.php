@@ -60,7 +60,6 @@ class ConcernController extends Controller
 
         if(config('services.app_url') ===  'https://admin-uat.cebulandmasters.com') {
             $this->keyJson = config('services.gcs.key_json');
-            $this->bucket = 'super-app-uat';
             $this->folderName = 'concerns-uat/';
         }
 
@@ -2074,12 +2073,16 @@ class ConcernController extends Controller
                 'ticketId' => $newTicketId,
             ];
 
+            
+          
             $dataToComment = [
                 'ticket_id' => $ticketIdEmail,
                 'commenter_message' => $conversation->message,
                 'commenter_name' => $request->admin_name,
+               
 
             ];
+
             if (!empty($assigness)) {
                 foreach ($assigness as $assignee) {
                     CommentNotifJob::dispatch($assignee['employee_email'], $assignee['name'], $dataToComment);
@@ -2307,7 +2310,7 @@ class ConcernController extends Controller
                 'keyFile' => $keyArray
             ]);
             $bucket = $storage->bucket('super-app-storage');
-           /*  $bucket = $storage->bucket($data['bucketName']); */
+            /*  $bucket = $storage->bucket($data['bucketName']); */
 
             foreach ($attachments as $fileData) {
                 $fileName = uniqid() . '.' . $fileData['extension'];
