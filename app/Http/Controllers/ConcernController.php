@@ -61,6 +61,7 @@ class ConcernController extends Controller
 
         if (config('services.app_url') ===  'https://admin-uat.cebulandmasters.com') {
             $this->keyJson = config('services.gcs.key_json');
+            $this->bucket = 'super-app-uat';
             $this->folderName = 'concerns-uat/';
         }
 
@@ -676,6 +677,7 @@ class ConcernController extends Controller
     {
         try {
             $fileUrlPath = $request->fileUrlPath;
+            dd($fileUrlPath);
             if (!$fileUrlPath) {
                 return response()->json(['message' => 'File path is required.'], 400);
             }
