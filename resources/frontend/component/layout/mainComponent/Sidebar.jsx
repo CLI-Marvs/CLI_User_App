@@ -194,7 +194,7 @@ const Sidebar = () => {
 
           <Link to="superadmin/userrightsandpermissions">
             <ListItem
-              className={`h-[35px] w-[185px] text-sm pl-[12px] transition-all duration-300 ease-in-out 
+              className={`h-[35px] w-[185px] text-sm pl-[12px] transition-all duration-300 ease-in-out hidden
                   ${activeItem === "superadmin" ||
                   location.pathname.startsWith("/superadmin")
                   ? "bg-custom-lightestgreen text-custom-solidgreen font-semibold"
