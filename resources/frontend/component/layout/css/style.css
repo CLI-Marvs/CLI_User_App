@@ -1,7 +1,19 @@
-.bg-left-side{
-    background-image: url('/Images/PcBldg.jpeg');
-    background-size: cover;
-    background-position: center;
+.bg-left-side {
+  background-image: url('/Images/Imagebg.jpg');
+  background-size: cover;
+  background-position: center;
+  position: relative; /* Ensure the pseudo-element is positioned correctly */
+}
+
+.bg-left-side::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background: linear-gradient(to right, rgba(255, 255, 255, 0) 50%, rgba(255, 255, 255, 1));
+  pointer-events: none; /* Ensure it doesn't interfere with interactions */
 }
 
 
