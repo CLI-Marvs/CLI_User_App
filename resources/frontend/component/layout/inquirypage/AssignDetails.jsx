@@ -1011,9 +1011,9 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                                             const truncatedName =
                                                 baseName.length > 15
                                                     ? `${baseName.slice(
-                                                          0,
-                                                          15
-                                                      )}...`
+                                                        0,
+                                                        15
+                                                    )}...`
                                                     : baseName;
                                             return (
                                                 <div
@@ -1052,11 +1052,10 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                         <button
                             disabled={loading}
                             className={`shrink-0 w-[76px] h-[28px] rounded-[10px] text-xs text-white 
-                            ${
-                                !message.trim()
+                            ${!message.trim()
                                     ? "bg-gray-400 cursor-not-allowed"
                                     : "gradient-btn2"
-                            }  
+                                }  
                              ${loading ? "cursor-not-allowed" : ""}`}
                             onClick={handleSendMessage}
                         >
@@ -1066,7 +1065,7 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                             ) : (
                                 <>
                                     Comment
-                                    
+
                                 </>
                             )}
                         </button>
@@ -1146,9 +1145,9 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                                             const truncatedName =
                                                 baseName.length > 15
                                                     ? `${baseName.slice(
-                                                          0,
-                                                          15
-                                                      )}...`
+                                                        0,
+                                                        15
+                                                    )}...`
                                                     : baseName;
 
                                             return (
