@@ -269,10 +269,9 @@ export const ContextProvider = ({ children }) => {
                 },
             });
             const result = response.data;
-
             const formattedData = result.map((item) => ({
                 name: item.property,
-                complainCount: item.complain,
+                complainCount: item.complaint,
                 requestCount: item.request,
                 inquiryCount: item.inquiry,
                 suggestionCount: item.suggestion,
