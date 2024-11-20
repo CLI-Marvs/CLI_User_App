@@ -91,7 +91,7 @@ const TicketTable = ({ concernData }) => {
                             className={`flex items-center h-7 cursor-pointer mb-1 text-sm 
                             hover:shadow-custom
                             ${
-                                row.status === "Resolved"
+                                row.status === "Resolved" || row.status === "Closed"
                                     ? row.ispinned === 1
                                         ? "bg-custom-lightestgreen"
                                         : "bg-custom-grayF1"
