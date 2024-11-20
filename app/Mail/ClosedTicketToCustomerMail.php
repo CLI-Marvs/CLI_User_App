@@ -3,41 +3,37 @@
 namespace App\Mail;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
+use Illuminate\Mail\Mailables\Address;
 use Illuminate\Mail\Mailables\Content;
-use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Mail\Mailables\Headers;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Mail\Mailables\Attachment;
-use Illuminate\Mail\Mailables\Address;
+use Illuminate\Mail\Mailables\Envelope;
+use Illuminate\Contracts\Queue\ShouldQueue;
 
-
-class SendReplyFromAdmin extends Mailable
+class ClosedTicketToCustomerMail extends Mailable
 {
     use Queueable, SerializesModels;
-
     protected $ticket_id;
     protected $email;
-    protected $details_message;
     protected $message_id;
-    protected $files;
+    protected $buyer_lastname;
     protected $admin_name;
-    protected $buyer_lname;
     protected $department;
+    protected $modifiedTicketId;
 
-
-    public function __construct($ticket_id, $email, $details_message, $message_id = null, $files, $admin_name, $buyer_lname, $department)
+    /**
+     * Create a new message instance.
+     */
+    public function __construct($ticket_id, $email, $buyer_lastname, $message_id, $admin_name, $department, $modifiedTicketId,)
     {
         $this->ticket_id = $ticket_id;
         $this->email = $email;
-        $this->details_message = $details_message;
         $this->message_id = $message_id;
-        $this->files = $files;
+        $this->buyer_lastname = $buyer_lastname;
         $this->admin_name = $admin_name;
-        $this->buyer_lname = $buyer_lname;
         $this->department = $department;
+        $this->modifiedTicketId = $modifiedTicketId;
     }
 
     /**
@@ -45,6 +41,7 @@ class SendReplyFromAdmin extends Mailable
      */
     public function envelope(): Envelope
     {
+
         if (config('services.APP_URL') === 'https://admin-dev.cebulandmasters.com' || config('services.APP_URL') === 'http://localhost:8001') {
             return new Envelope(
                 from: new Address('ask@cebulandmasters.com', 'Cebu Landmasters Inc.'),
@@ -57,6 +54,7 @@ class SendReplyFromAdmin extends Mailable
             );
         }
     }
+
 
     public function headers(): Headers
     {
@@ -75,23 +73,22 @@ class SendReplyFromAdmin extends Mailable
 
         return $headers;
     }
-
     /**
      * Get the message content definition.
      */
     public function content(): Content
     {
         return new Content(
-            view: 'message',
+            view: 'close_inquiry_customer',
             with: [
-                'details_message' => $this->details_message,
+                'buyer_lname' => $this->buyer_lastname,
+                'ticket_id' => $this->ticket_id,
                 'admin_name' => $this->admin_name,
-                'buyer_lname' => $this->buyer_lname,
-                'department' => $this->department
+                'department' => $this->department,
+                'modifiedTicketId' => $this->modifiedTicketId,
             ],
         );
     }
-
     /**
      * Get the attachments for the message.
      *
@@ -99,34 +96,6 @@ class SendReplyFromAdmin extends Mailable
      */
     public function attachments(): array
     {
-        // $attachments = [];
-        // foreach ($this->files as $file) {
-        //     if (file_exists($file)) {
-        //         $attachments[] = Attachment::fromPath(public_path($file));
-        //     } else {
-        //         Log::error("File does not exist: " . $file);
-        //     }
-        // }
-
-        // return $attachments;
-
-        // $attachments = [];
-        // if($this->files) {
-        //     foreach ($this->files as $file) {
-        //         $attachments[] = Attachment::fromData(
-        //             fn() => $file['contents'], // Closure returning file contents
-        //             $file['name'] // File name
-        //         );
-        //     }
-        // }
-
-
-        $attachments = [];
-        if ($this->files) {
-            foreach ($this->files as $file) {
-                $attachments[] = Attachment::fromPath($file['path']);
-            }
-        }
-        return $attachments;
+        return [];
     }
 }

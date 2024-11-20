@@ -3,21 +3,17 @@ import TicketTable from "./TicketTable";
 import {
     IoIosArrowUp,
     IoIosArrowDown,
-    IoMdArrowDropdown,
 } from "react-icons/io";
 import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md";
 import ReactPaginate from "react-paginate";
 import { useStateContext } from "../../../context/contextprovider";
-import apiService from "../../servicesApi/apiService";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import DateLogo from "../../../../../public/Images/Date_range.svg";
-import moment from "moment";
 import { MdRefresh } from "react-icons/md";
-import { Alert } from "@mui/material";
 import InquiryFormModal from "./InquiryFormModal";
 import axios from "axios";
-
+import {toast } from 'react-toastify';
 const InquiryList = () => {
     const {
         currentPage,
@@ -34,21 +30,24 @@ const InquiryList = () => {
         user,
         setSpecificAssigneeCsr,
         specificAssigneeCsr,
+        loading
         /*  setHasAttachments,
         hasAttachments */
     } = useStateContext();
 
     const [name, setName] = useState("");
     const [category, setCategory] = useState("");
+
     const [email, setEmail] = useState("");
     const [ticket, setTicket] = useState("");
     const [status, setStatus] = useState("");
+    const [type, setType] = useState("");
+    const [channels, setChannels] = useState("");
     const [selectedProperty, setSelectedProperty] = useState("");
     const [hasAttachments, setHasAttachments] = useState(false);
     const { propertyNamesList } = useStateContext();
     const [activeDayButton, setActiveDayButton] = useState(null);
     const [assignedToMeActive, setAssignedToMeActive] = useState(false);
-
     const [startDate, setStartDate] = useState(null);
     const [isFilterVisible, setIsFilterVisible] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
@@ -81,6 +80,8 @@ const InquiryList = () => {
             setSpecificAssigneeCsr("");
             setAssignedToMeActive(false);
         }
+        setStartDate(null);
+
         if (specificAssigneeCsr !== "" && daysFilter !== null) {
             setSpecificAssigneeCsr("");
             setAssignedToMeActive(false);
@@ -203,6 +204,7 @@ const InquiryList = () => {
     const modalRef = useRef(null);
 
     const handleOpenModal = () => {
+        toast.dismiss();
         if (modalRef.current) {
             modalRef.current.showModal();
         }
@@ -251,7 +253,10 @@ const InquiryList = () => {
         setSearchFilter({
             name,
             category,
+            type,
+            status,
             email,
+            channels,
             ticket,
             startDate,
             selectedProperty,
@@ -265,7 +270,9 @@ const InquiryList = () => {
         setCategory("");
         setEmail("");
         setTicket("");
-        //setStatus("");
+        setStatus("");
+        setType("");
+        setChannels("");
         setSelectedProperty("");
         setHasAttachments(false);
         setSpecificAssigneeCsr("");
@@ -330,6 +337,7 @@ const InquiryList = () => {
         }
     }; */
 
+
     return (
         <>
             <div className="h-screen max-w-full bg-custom-grayFA px-[20px]">
@@ -374,14 +382,17 @@ const InquiryList = () => {
                             </svg>
                         </div>
                         <div className="flex items-center">
-                            <button
-                                onClick={handleOpenModal}
-                                className="h-[38px] w-[121px] gradient-btn5 text-white  text-xs rounded-[10px]"
-                            >
-                                {" "}
-                                <span className="text-[18px]">+</span> Add
-                                Inquiry
-                            </button>
+                            {user?.department === 'Customer Relations - Services' && (
+                                <button
+                                    onClick={handleOpenModal}
+                                    className="h-[38px] w-[121px] gradient-btn5 text-white  text-xs rounded-[10px]"
+                                >
+                                    {" "}
+                                    <span className="text-[18px]">+</span> Add
+                                    Inquiry
+                                </button> 
+                            )}
+                        
                         </div>
 
                         {isFilterVisible && (
@@ -409,51 +420,7 @@ const InquiryList = () => {
                                             {" "}
                                             Category
                                         </label>
-                                        {/* 
-                                        <select
-                                            className="w-full border-b-1 outline-none appearance-none text-sm   "
-                                            value={category}
-                                            onChange={(e) =>
-                                                setCategory(e.target.value)
-                                            }
-                                        >
-                                            <option value=" ">
-                                                 Select Category
-                                            </option>
-                                            <option
-                                                value="Reservation Documents"
-                                                className="bg-red-900"
-                                            >
-                                                &nbsp;&nbsp;Reservation
-                                                Documents
-                                            </option>
-                                            <option value="Payment Issues">
-                                                Payment Issues
-                                            </option>
-                                            <option value="SOA/ Billing Statement/ Buyer's Ledger">
-                                                SOA/ Billing Statement/ Buyer's
-                                                Ledger
-                                            </option>
-                                            <option value="Turn Over Status">
-                                                Turn Over Status
-                                            </option>
-                                            <option value="Unit Status">
-                                                Unit Status
-                                            </option>
-                                            <option value="Loan Application">
-                                                Loan Application
-                                            </option>
-                                            <option value="Title and Other Registration Documents">
-                                                Title and Other Registration
-                                                Documents
-                                            </option>
-                                            <option value="Commissions">
-                                                Commissions
-                                            </option>
-                                            <option value="Other Concerns">
-                                                Other Concerns
-                                            </option>
-                                        </select> */}
+                                      
                                         <div className="flex bg-red-900 justify-start w-full relative">
                                             <label
                                                 htmlFor=""
@@ -468,16 +435,18 @@ const InquiryList = () => {
                                                     setCategory(e.target.value)
                                                 }
                                             >
-                                               
-                                                <option value=" ">Select Category</option>
-                                                <option value="Reservation Documents" >
-                                                   Reservation Documents
+                                                <option value=" ">
+                                                    Select Category
+                                                </option>
+                                                <option value="Reservation Documents">
+                                                    Reservation Documents
                                                 </option>
                                                 <option value="Payment Issues">
                                                     Payment Issues
                                                 </option>
-                                                <option value="SOA/ Billing Statement/ Buyer's Ledger" >
-                                                    SOA/ Billing Statement/ Buyer's Ledger
+                                                <option value="SOA/ Buyer's Ledger">
+                                                    SOA/
+                                                    Buyer's Ledger
                                                 </option>
                                                 <option value="Turn Over Status">
                                                     Turn Over Status
@@ -489,7 +458,8 @@ const InquiryList = () => {
                                                     Loan Application
                                                 </option>
                                                 <option value="Title and Other Registration Documents">
-                                                    Title and Other Registration Documents
+                                                    Title and Other Registration
+                                                    Documents
                                                 </option>
                                                 <option value="Commissions">
                                                     Commissions
@@ -497,6 +467,117 @@ const InquiryList = () => {
                                                 <option value="Other Concerns">
                                                     Other Concerns
                                                 </option>
+                                            </select>
+                                        </div>
+
+                                        <span className="absolute inset-y-0 right-0 flex items-center  pl-3 pointer-events-none">
+                                            <IoIosArrowDown />
+                                        </span>
+                                    </div>
+                                    <div className="flex relative">
+                                        <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
+                                            {" "}
+                                            Type
+                                        </label>
+                                        <div className="flex bg-red-900 justify-start w-full relative">
+                                            <label
+                                                htmlFor=""
+                                                className="w-full border-b-2"
+                                            >
+                                                {""}
+                                            </label>
+                                            <select
+                                                className="w-full border-b-1 outline-none appearance-none text-sm absolute px-[8px]"
+                                                value={type}
+                                                onChange={(e) =>
+                                                    setType(e.target.value)
+                                                }
+                                            >
+                                                <option value="">
+                                                    Select Type
+                                                </option>
+                                                <option value="Complaint">
+                                                    Complaint
+                                                </option>
+                                                <option value="Request">
+                                                    Request
+                                                </option>
+                                                <option value="Inquiry">
+                                                    Inquiry
+                                                </option>
+                                                <option value="Suggestion or Recommendation">
+                                                    Suggestion or Recommendation
+                                                </option>
+                                            </select>
+                                        </div>
+
+                                        <span className="absolute inset-y-0 right-0 flex items-center  pl-3 pointer-events-none">
+                                            <IoIosArrowDown />
+                                        </span>
+                                    </div>
+                                    <div className="flex relative">
+                                        <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
+                                            {" "}
+                                            Status
+                                        </label>
+                                        <div className="flex bg-red-900 justify-start w-full relative">
+                                            <label
+                                                htmlFor=""
+                                                className="w-full border-b-2"
+                                            >
+                                                {""}
+                                            </label>
+                                            <select
+                                                className="w-full border-b-1 outline-none appearance-none text-sm absolute px-[8px]"
+                                                value={status}
+                                                onChange={(e) =>
+                                                    setStatus(e.target.value)
+                                                }
+                                            >
+                                                <option value=" ">
+                                                    Select Status
+                                                </option>
+                                                <option value="Resolved">
+                                                    Resolved
+                                                </option>
+                                                <option value="unresolved">
+                                                    Unresolved
+                                                </option>
+                                            </select>
+                                        </div>
+
+                                        <span className="absolute inset-y-0 right-0 flex items-center  pl-3 pointer-events-none">
+                                            <IoIosArrowDown />
+                                        </span>
+                                    </div>
+
+                                    <div className="flex relative">
+                                        <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
+                                            {" "}
+                                            Channels
+                                        </label>
+                                        <div className="flex bg-red-900 justify-start w-full relative">
+                                            <label
+                                                htmlFor=""
+                                                className="w-full border-b-2"
+                                            >
+                                                {""}
+                                            </label>
+                                            <select
+                                                className="w-full border-b-1 outline-none appearance-none text-sm absolute px-[8px]"
+                                                value={channels}
+                                                onChange={(e) =>
+                                                    setChannels(e.target.value)
+                                                }
+                                            >
+                                                <option value=""> Select Channels</option>
+                                                <option value="Email">Email</option>
+                                                <option value="Call">Call</option>
+                                                <option value="Walk in">Walk-in</option>
+                                                <option value="Website">Website</option>
+                                                <option value="Social media">Social media</option>
+                                                <option value="Branch Tablet">Branch Tablet (Jotform created by IT)</option>
+                                                <option value="Internal Endorsement">Internal Endorsement</option>
                                             </select>
                                         </div>
 
@@ -725,7 +806,6 @@ const InquiryList = () => {
                             <TicketTable concernData={data || []} />
                         )}
                     </div>
-
                     <div className="flex justify-end items-center h-12 px-6 gap-2 bg-white rounded-b-lg">
                         <p className="text-sm text-gray-400 hidden">
                             Last account activity: {getTimeDifference()}

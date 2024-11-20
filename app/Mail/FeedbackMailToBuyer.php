@@ -3,33 +3,27 @@
 namespace App\Mail;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
-use Illuminate\Mail\Mailables\Envelope;
-use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Mail\Mailables\Headers;
+use Illuminate\Queue\SerializesModels;
+use Illuminate\Mail\Mailables\Envelope;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailables\Address;
 
-
-class AssignedCliResolvedInquiryNotification extends Mailable
+class FeedbackMailToBuyer extends Mailable
 {
     use Queueable, SerializesModels;
-   
-    protected $employee_email;
-    protected $assignee_name;
-    protected $data;
- 
+    protected $requestData;
+    protected $email;
     /**
      * Create a new message instance.
      */
-    public function __construct($employee_email, $assignee_name, $data)
+
+    public function __construct($requestData, $email)
     {
-        $this->employee_email = $employee_email;
-        $this->assignee_name = $assignee_name;
-        $this->data = $data;
-        
+        $this->requestData = $requestData;
+        $this->email = $email;
     }
 
     /**
@@ -39,20 +33,14 @@ class AssignedCliResolvedInquiryNotification extends Mailable
     {
         return new Envelope(
             from: new Address('noreply@cebulandmasters.com', 'noreply@cebulandmasters.com'),
-            subject: "Resolved [{$this->data['ticket_id']}]"
+            subject: '[No Reply] CLI Notification',
 
         );
     }
-
-    /**
-     * Get the message content definition.
-     */
-
     public function headers(): Headers
     {
 
         $headers = new Headers();
-
         if ($this->generateMessageId()) {
             $headers->messageId = $this->generateMessageId();
             $headers->references = [$this->generateMessageId()];
@@ -65,19 +53,15 @@ class AssignedCliResolvedInquiryNotification extends Mailable
     {
         return uniqid() . '@cebulandmasters.com';
     }
-
+    /**
+     * Get the message content definition.
+     */
     public function content(): Content
     {
         return new Content(
-            view: 'assigned_cli_resolved_inquiry',
+            view: 'message_to_buyer',
             with: [
-                'assignee_name' => $this->assignee_name,
-                'buyer_name' => $this->data['buyer_name'],
-                'ticket_id' => $this->data['ticket_id'],
-                'admin_name' => $this->data['admin_name'],
-                'details_concern' => $this->data['details_concern'],
-                'modifiedTicketId' => $this->data['modifiedTicketId']
-
+                'data' => $this->requestData
             ],
         );
     }

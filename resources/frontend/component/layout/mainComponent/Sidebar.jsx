@@ -43,25 +43,26 @@ const Sidebar = () => {
   };
 
   useEffect(() => {
+    if (!location.pathname.startsWith("/inquirymanagement/thread")) {
+      localStorage.removeItem("dataConcern");
+      localStorage.removeItem("updatedData"); 
+      localStorage.removeItem("closeConcern"); 
+    }
+  }, [location]);
+  useEffect(() => {
     getCount();
   }, [location]);
 
   useEffect(() => {
-
     switch (location.pathname) {
       case "/transactionmanagement/invoices":
-        setInquiryOpen(false);
-        setIsInvoiceOpen(true);
-        break;
       case "/transactionmanagement/transactionrecords":
         setInquiryOpen(false);
         setIsInvoiceOpen(true);
         break;
       case "/inquirymanagement/inquirylist":
-        setIsInvoiceOpen(false);
-        setInquiryOpen(true);
-        break;
       case "/inquirymanagement/report":
+      case "/inquirymanagement/autoassign":
         setIsInvoiceOpen(false);
         setInquiryOpen(true);
         break;
@@ -70,7 +71,6 @@ const Sidebar = () => {
         setIsInvoiceOpen(false);
         break;
     }
-
   }, [location.pathname]);
 
   return (
@@ -80,9 +80,9 @@ const Sidebar = () => {
           <Link to="/notification">
             <ListItem
               className={`flex text-sm items-center w-[185px] h-[36px] pl-[12px] pr-[60px] gap-2 rounded-[10px] ${activeItem === "notification" &&
-                  location.pathname.startsWith("/notification")
-                  ? "bg-custom-lightestgreen text-custom-solidgreen font-semibold"
-                  : " hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
+                location.pathname.startsWith("/notification")
+                ? "bg-custom-lightestgreen text-custom-solidgreen font-semibold"
+                : " hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
                 } `}
               onClick={() => handleItemClick("notification")}
             >
@@ -130,11 +130,11 @@ const Sidebar = () => {
                     className={`h-[32px] w-full py-[8px] px-[18px]  text-sm rounded-[50px] ${location.pathname.startsWith(
                       "/inquirymanagement/inquirylist"
                     ) ||
-                        location.pathname.startsWith(
-                          "/inquirymanagement/thread"
-                        )
-                        ? "bg-white text-custom-solidgreen font-semibold"
-                        : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
+                      location.pathname.startsWith(
+                        "/inquirymanagement/thread"
+                      )
+                      ? "bg-white text-custom-solidgreen font-semibold"
+                      : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
                       }`}
                     onClick={() =>
                       handleItemClick(
@@ -150,8 +150,8 @@ const Sidebar = () => {
                     className={`h-[32px] w-full py-[8px] px-[18px] text-sm rounded-[50px] ${location.pathname.startsWith(
                       "/inquirymanagement/report"
                     )
-                        ? "bg-white text-custom-solidgreen font-semibold"
-                        : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
+                      ? "bg-white text-custom-solidgreen font-semibold"
+                      : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
                       }`}
                     onClick={() =>
                       handleItemClick("/reports")
@@ -160,10 +160,24 @@ const Sidebar = () => {
                     Reports
                   </ListItem>
                 </Link>
+                <Link to="/inquirymanagement/autoassign">
+                  <ListItem
+                    className={`h-[32px] w-full py-[8px] px-[18px] text-sm rounded-[50px] hidden ${location.pathname.startsWith(
+                      "/inquirymanagement/autoassign"
+                    )
+                      ? "bg-white text-custom-solidgreen font-semibold"
+                      : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
+                      }`}
+                    onClick={() =>
+                      handleItemClick("/autoassign")
+                    }
+                  >
+                    Auto Assign
+                  </ListItem>
+                </Link>
               </div>
             )}
-
-         {/*  <Link to="/transactionmanagement/invoices">
+          {/* <Link to="/transactionmanagement/invoices">
             <ListItem
               className={`h-[35px] w-[210px] text-sm pl-[12px] transition-all duration-300 ease-in-out 
             ${activeItemTransaction === "invoices" ||
@@ -183,8 +197,8 @@ const Sidebar = () => {
                 />
               </ListItemSuffix>
             </ListItem>
-          </Link>
-
+          </Link> */}
+          {/* 
           {isInvoiceOpen &&
             location.pathname.startsWith(
               "/transactionmanagement"
@@ -237,7 +251,7 @@ const Sidebar = () => {
             <p>Property & Pricing</p>
             <p>Sales Management</p>
             <p>Broker Management</p>
-              <p className='leading-none'>Transaction <br />Management</p>
+            <p className='leading-none'>Transaction <br />Management</p>
             <p className="leading-none">
               Document
               <br /> Management

@@ -25,7 +25,7 @@ const FillOutDetails = () => {
         </div>
         <div className=' flex flex-col gap-[4px] '>
           <label htmlFor="unitNumber" className='text-xs montserrat-semibold'>Unit Number</label>
-          <input id='unitNumber' type="number" placeholder='Please input...' className='w-full h-[40px] rounded-[6px] border border-[#F4F3F3] pl-[11px] no-spinner focus:outline-none'/>
+          <input id='unitNumber' onInput={(e) => e.target.value = e.target.value.replace(/[^0-9]/g, '')} type="number" placeholder='Please input...' className='w-full h-[40px] rounded-[6px] border border-[#F4F3F3] pl-[11px] no-spinner focus:outline-none'/>
         </div>
         <div className=' flex flex-col gap-[4px] '>
           <label htmlFor="amountDue" className='text-xs montserrat-semibold'>Amount Due</label>
@@ -33,7 +33,7 @@ const FillOutDetails = () => {
             <span className="absolute inset-y-0 left-[1px] rounded-l-[6px] top-[1px] flex items-center px-[8px] h-[38px] text-xs bg-[#F7F7F7] text-custom-gray81 pointer-events-none montserrat-bold">
               PHP
             </span>
-            <input id='amountDue' type="number" placeholder='Please input...' className='w-full h-[40px] rounded-[6px] border border-[#F4F3F3] pl-[51px] no-spinner focus:outline-none'/>
+            <input id='amountDue' type="number" onInput={(e) => e.target.value = e.target.value.replace(/[^0-9]/g, '')} placeholder='Please input...' className='w-full h-[40px] rounded-[6px] border border-[#F4F3F3] pl-[51px] no-spinner focus:outline-none'/>
           </div>
         </div>
         <div className=' flex flex-col gap-[4px] '>

@@ -16,6 +16,7 @@ const Notification = () => {
         getAllConcerns,
         getNotifications,
         setNotifStatus,
+        notifStatus
     } = useStateContext();
     const [activeButton, setActiveButton] = useState("All");
     
@@ -45,7 +46,11 @@ const Notification = () => {
         getNotifications();
         getMessages(ticketId);
         getAllConcerns();
-        navigate(`/inquirymanagement/thread/${encodedTicketId}`);
+        navigate(
+            `/inquirymanagement/thread/${encodedTicketId}` , {
+            state: { itemsData: items },
+         }
+        );
         updateIsReadStatus(items);
     };
 
@@ -70,9 +75,17 @@ const Notification = () => {
         }
     };
 
+    console.log("activeButton", activeButton);
+    console.log("notifStatus", notifStatus);
+
+
     useEffect(() => {
         getNotifications();
     }, []);
+
+    useEffect(() => {
+        setNotifStatus("All");
+    }, [location.pathname]);
 
 
     return (

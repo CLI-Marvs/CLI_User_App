@@ -6,6 +6,7 @@ import TextField from "@mui/material/TextField";
 import Autocomplete from "@mui/material/Autocomplete";
 import apiService from "../../servicesApi/apiService";
 import { AiFillInfoCircle } from "react-icons/ai";
+import { ALLOWED_EMPLOYEES_CRS } from '../../../constant/data/allowedEmployeesCRS';
 
 const AssignSidePanel = ({ ticketId }) => {
     const {
@@ -20,7 +21,7 @@ const AssignSidePanel = ({ ticketId }) => {
         getAssigneesPersonnel,
         getInquiryLogs,
     } = useStateContext();
- 
+
     const [isSelected, setIsSelected] = useState({});
     const [isAssign, setIsAssign] = useState(false);
     const logsMessages = logs[ticketId] || [];
@@ -30,6 +31,8 @@ const AssignSidePanel = ({ ticketId }) => {
     const [tempSelection, setTempSelection] = useState([]);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+    const userLoggedInEmail = user?.employee_email;
+
 
     const modalRef = useRef(null);
     const dropdownRef = useRef(null);
@@ -183,8 +186,8 @@ const AssignSidePanel = ({ ticketId }) => {
                     selectedOptions: newAssignees,
                     assign_by: user?.firstname + " " + user?.lastname,
                     assign_by_department: user?.department,
-                    details_concern: dataConcern.details_concern,
-                    buyer_name: dataConcern.buyer_name,
+                    /*  details_concern: dataConcern.details_concern,
+                     buyer_name: dataConcern.buyer_name, */
                 });
                 console.log("Assignees saved successfully:", response);
             } else {
@@ -350,21 +353,23 @@ const AssignSidePanel = ({ ticketId }) => {
             <div className="mb-3 mt-[2px]">
                 <div className="relative w-[623px]" ref={dropdownRef}>
                     <div className="relative">
-                        <input
-                            type="text"
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                            placeholder="Assign to..."
-                            className={` 
-                            ${
-                                isDropdownOpen
-                                    ? "rounded-[10px] rounded-b-none"
-                                    : "rounded-[10px]"
-                            }
+                        {user?.department == 'Customer Relations - Services' && (
+                            <input
+                                type="text"
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
+                                placeholder="Assign to..."
+                                className={` 
+                            ${isDropdownOpen
+                                        ? "rounded-[10px] rounded-b-none"
+                                        : "rounded-[10px]"
+                                    }
                         
                                  h-[48px] px-[20px] pr-[40px] rounded-[10px] bg-custom-grayF1 w-full outline-none`}
-                            onFocus={() => setIsDropdownOpen(true)}
-                        />
+                                onFocus={() => setIsDropdownOpen(true)}
+                            />
+                        )}
+
 
                         {/* Absolute button inside the input, aligned to the right */}
                         {isDropdownOpen && (
@@ -557,7 +562,7 @@ const AssignSidePanel = ({ ticketId }) => {
                                             className="bg-custom-lightgreen text-white rounded-full px-3 py-1 text-xs flex-shrink-0 flex mb-[4px]"
                                         >
                                             {assignee.name}
-                                            {user?.department === "Customer Relations - Services" && (
+                                            {ALLOWED_EMPLOYEES_CRS.includes(userLoggedInEmail) && (
                                                 <button
                                                     onClick={() =>
                                                         removeTag(assignee)

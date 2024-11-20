@@ -236,6 +236,7 @@ const FloorPremiums = ({ propertyId }) => {
                                     name="newFloor"
                                     value={newFloor}
                                     className="outline-none  -mr-3 pl-3 py-1 bg-custom-grayFA text-custom-gray81 w-full "
+                                    onInput={(e) => e.target.value = e.target.value.replace(/[^0-9]/g, '')}
                                 />
                                 {/* <div className="relative w-full">
                                     <select
@@ -267,6 +268,7 @@ const FloorPremiums = ({ propertyId }) => {
                                     className="w-full px-4 focus:outline-none "
                                     placeholder=""
                                     value={newPremiumCost}
+                                    onInput={(e) => e.target.value = e.target.value.replace(/[^0-9]/g, '')}
                                 />
                             </div>
                             <div>

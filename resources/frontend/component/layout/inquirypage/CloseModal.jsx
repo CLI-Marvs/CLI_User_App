@@ -5,7 +5,7 @@ import { AiFillInfoCircle } from "react-icons/ai";
 import { IoMdArrowDropdown } from "react-icons/io";
 import { SURVEY_LINKS } from '../../../constant/data/surveyLink';
 
-const ResolveModal = ({ modalRef, ticketId, dataRef, onupdate }) => {
+const CloseModal = ({ modalRef, ticketId, dataRef, onupdate }) => {
     const { getAllConcerns, user, getInquiryLogs, data, assigneesPersonnel } =
         useStateContext();
     const [remarks, setRemarks] = useState("");
@@ -63,6 +63,7 @@ const ResolveModal = ({ modalRef, ticketId, dataRef, onupdate }) => {
         }
     };
     const updateStatus = async (status) => {
+     
         if (communicationType === null || communicationType === "") {
             {
                 setIsCommunicationTypeRequired(true);
@@ -71,7 +72,7 @@ const ResolveModal = ({ modalRef, ticketId, dataRef, onupdate }) => {
         }
         try {
 
-            const response = await apiService.post("resolve", {
+            const response = await apiService.post("close-concerns", {
                 ticket_id: ticketId,
                 admin_name: `${user?.firstname} ${user?.lastname}`,
                 department: user?.department,
@@ -89,7 +90,7 @@ const ResolveModal = ({ modalRef, ticketId, dataRef, onupdate }) => {
 
             setRemarks("");
             getInquiryLogs(ticketId);
-            const updatedData = { ...dataRef, status: "Resolved", communication_type: communicationType };
+            const updatedData = { ...dataRef, status: "Closed", communication_type: communicationType };
             localStorage.removeItem("updatedData");
             localStorage.removeItem("closeConcern");
             localStorage.setItem("dataConcern", JSON.stringify(updatedData));
@@ -140,7 +141,7 @@ const ResolveModal = ({ modalRef, ticketId, dataRef, onupdate }) => {
                 </div>
                 <div className="flex justify-center mt-[30px] mb-[26px] flex-col items-center">
                     <p className="montserrat-medium text-[20px]">
-                        You want to mark this as resolved?
+                        You want to mark this as closed?
                     </p>
                     <div className="w-full mt-2">
                         {
@@ -240,11 +241,11 @@ const ResolveModal = ({ modalRef, ticketId, dataRef, onupdate }) => {
                                 </div>
                             </button>
                             <button
-                                onClick={()=>updateStatus('Resolved')}
+                                onClick={()=>updateStatus('Closed')}
                                 className="h-[35px] w-[185px] text-white rounded-[10px] gradient-btn2 hover:shadow-custom4"
                                 type="submit"
                             >
-                                Mark as Resolved
+                                Mark as Closed
                             </button>
                         </div>
                     </div>
@@ -252,6 +253,6 @@ const ResolveModal = ({ modalRef, ticketId, dataRef, onupdate }) => {
             </div>
         </dialog>
     );
-};
+}
 
-export default ResolveModal;
+export default CloseModal

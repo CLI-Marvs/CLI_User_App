@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useRef, useEffect } from "react";
 import CLILogo from "../../../../../public/Images/CLILogo.png";
 import Kent from "../../../../../public/Images/kent.png";
 import apiService from "../../servicesApi/apiService";
@@ -10,13 +10,23 @@ import { FaAngleRight } from "react-icons/fa";
 import Stack from "@mui/material/Stack";
 import { startsWith } from "lodash";
 import Alert from "@mui/material/Alert";
+import { MdOutlineMail } from "react-icons/md";
+import FeedbackModal from "./FeedbackModal";
+
 
 const Navbar = () => {
     const { data } = useStateContext();
-
+    const [isOpen, setIsOpen] = useState(false);
     const location = useLocation();
+    const modalRef = useRef(null);
 
     const pathnames = location.pathname.split("/").filter((x) => x);
+
+    const handleOpenModal = () => {
+        if (modalRef.current) {
+            modalRef.current.showModal();
+        }
+    };
 
     const breadcrumbs = [
         ...pathnames.map((value, index) => {
@@ -99,6 +109,8 @@ const Navbar = () => {
         }),
     ];
 
+    
+
     const { user } = useStateContext();
 
     const handleLogout = async () => {
@@ -116,6 +128,27 @@ const Navbar = () => {
             console.log("Error", error);
         }
     };
+
+
+    const dropdownRef = useRef(null);
+
+    const handleClickOutside = (event) => {
+        if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+            setIsOpen(false);
+        }
+    };
+
+    useEffect(() => {
+        if (isOpen) {
+            document.addEventListener('mousedown', handleClickOutside);
+        } else {
+            document.removeEventListener('mousedown', handleClickOutside);
+        }
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [isOpen]);
+    
 
     return (
         <>
@@ -162,12 +195,34 @@ const Navbar = () => {
                                 Logout
                             </button>
                         </div>
-                        <div className="flex justify-center w-[67px]">
+                        <div className="relative flex justify-center w-[67px]" ref={dropdownRef}>
                             <img
                                 src={user.profile_picture}
                                 alt="image"
                                 className="h-[63px] w-[63px] rounded-full border-8"
+                                onClick={() => setIsOpen(!isOpen)}
                             />
+                            {/* {isOpen && (
+                                <div className="absolute top-full right-0 mt-2 w-[262px] h-auto px-[14px] py-[12px] bg-white text-custom-gray81 text-sm rounded-[10px] shadow-custom4 z-10">
+                                   <div className="h-[29px] px-[10px] py-[6px]">
+                                        <p>Jannet T. Doe</p>
+                                   </div>
+                                   <div className="h-[29px] px-[10px] py-[6px]">
+                                        <p>jtdoe@gmail.com</p>
+                                   </div>
+                                   <div className="h-[29px] px-[10px] py-[6px]">
+                                        <p>Customer Relation</p>
+                                   </div>
+                                   <div onClick={handleOpenModal} className="h-[29px] px-[10px] py-[6px] cursor-pointer hover:shadow-custom5">
+                                        <p className="flex items-cemter gap-1 text-custom-solidgreen">
+                                            <div className="flex items-center">
+                                                <MdOutlineMail />
+                                            </div>
+                                            Send Feedback/Suggestion
+                                        </p>
+                                   </div>
+                                </div>
+                            )} */}
                         </div>
                         <div className="flex items-center">
                             <svg
@@ -192,19 +247,22 @@ const Navbar = () => {
                         </div>
                         <div>
                             {/*  <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              className="inline-block h-5 w-5 stroke-current">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z"></path>
-            </svg> */}
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            className="inline-block h-5 w-5 stroke-current">
+                            <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth="2"
+                                d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z"></path>
+                            </svg> */}
                         </div>
                     </div>
                 </div>
+            </div>
+            <div>
+                <FeedbackModal modalRef={modalRef}/>
             </div>
         </>
     );
