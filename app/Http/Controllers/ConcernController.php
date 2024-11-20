@@ -52,20 +52,20 @@ class ConcernController extends Controller
     private $folderName;
 
     public function __construct() {
-        if(config('services.app_url') === 'http://localhost:8002' || 'https://admin-dev.cebulandmasters.com' || 'https://admin-uat.cebulandmasters.com') {
+        if(config('services.app_url') === 'http://localhost:8001' || 'https://admin-dev.cebulandmasters.com') {
             $this->keyJson = config('services.gcs.key_json');
             $this->bucket = 'super-app-storage';
             $this->folderName = 'concerns/';
         }
 
-       /*  if(config('services.app_url') ===  'https://admin-uat.cebulandmasters.com') {
+        if(config('services.app_url') ===  'https://admin-uat.cebulandmasters.com') {
             $this->keyJson = config('services.gcs.key_json');
             $this->bucket = 'super-app-uat';
             $this->folderName = 'concerns-uat/';
-        } */
+        }
 
-        if (config('services.app_url') === 'https://admin.cebulandmasters.com') {
-            $this->keyJson = config('services.gcs.prod');
+        if (config('services.app_url') === 'https://ask.cebulandmasters.com') {
+            $this->keyJson = config('services.gcs_prod');
             $this->bucket = 'concerns-bucket';
             $this->folderName = 'concerns-attachments/';
         }
@@ -647,7 +647,7 @@ class ConcernController extends Controller
         $fileLinks = [];
         if ($files) {
             /*   $keyJson = config('services.gcs.key_json');  //Access from services.php */
-            $keyArray = json_decode($this->keyJson, true); // Decode the JSON string to an array
+            $keyArray = json_decode($this->keyJson, true); 
             $storage = new StorageClient([
                 'keyFile' => $keyArray
             ]);
