@@ -21,17 +21,18 @@
     <link rel="stylesheet" type="text/css"
         href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.6.0/slick-theme.min.css" />
 
-  
     <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZSZHQM07V1"></script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-FEBK3DY06V"></script>
     <script>
         window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
 
-  gtag('config', 'G-ZSZHQM07V1');
+        function gtag() {
+            dataLayer.push(arguments);
+        }
+        gtag('js', new Date());
+
+        gtag('config', 'G-FEBK3DY06V');
     </script>
-    <!-- End Google Tag Manager -->
 </head>
 @vite('resources/css/app.css')
 

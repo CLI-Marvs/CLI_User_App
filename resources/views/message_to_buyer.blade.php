@@ -159,7 +159,7 @@
             <br>
             Please do not reply directly to this email as your message will not be received.
             <br>
-            If you need assistance, contact our support team at customer service support.
+            {{-- If you need assistance, contact our support team at customer service support. --}}
         </strong>
     </p>
 

@@ -1,3 +1,4 @@
+import React, {Component, Suspense, lazy} from 'react';
 import {
     Outlet,
     RouterProvider,
@@ -6,7 +7,8 @@ import {
 } from "react-router-dom";
 import { useEffect } from 'react';
 import DasboardView from "../views/Dashboard/DasboardView";
-import LoginView from "./views/pages/loginViews/LoginView";
+const LoginView = lazy(() => import("./views/pages/loginViews/LoginView"))
+import CLILoader from '../../../public/Images/CLI-Logo-Loading-Screen.gif';
 import "./layout/css/font.css";
 import "./layout/css/style.css";
 import Home from "./layout/Home";
@@ -244,11 +246,29 @@ const App = () => {
     const router = createBrowserRouter([
         {
             path: "/",
-            element: <LoginView />,
+            element: (
+                <Suspense 
+                    fallback={
+                    <div className="flex justify-center items-center h-screen w-screen">
+                        <img src={CLILoader} alt="cli loader" className="w-[280px]"/>
+                    </div>}
+                >
+                    <LoginView/>
+                </Suspense>
+            ),
         },
         {
             path: "/login",
-            element: <LoginView />,
+            element: (
+                <Suspense 
+                    fallback={
+                    <div className="flex justify-center items-center h-screen w-screen">
+                        <img src={CLILoader} alt="cli loader" className="w-[280px]"/>
+                    </div>}
+                >
+                    <LoginView/>
+                </Suspense>
+            ),
         },
         {
             path: "/callback",
