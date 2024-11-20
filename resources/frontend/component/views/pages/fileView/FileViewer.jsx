@@ -25,6 +25,8 @@ const FileViewer = () => {
         }
     }, []);
 
+    console.log("fileUrlPath", fileUrlPath);
+
     /**
      * Check if the user is authenticated, place this function here to early check if the user is authenticated or not
      */
@@ -147,7 +149,7 @@ const FileViewer = () => {
 
     return (
         <div
-           /*  onContextMenu={handleContextMenu} */
+            onContextMenu={handleContextMenu}
             className={`${fileExtension === "txt" ? "bg-white" : "bg-black"}`}
         >
             {fileExtension === "jpg" ||
