@@ -156,7 +156,7 @@
         <br>
         Please do not reply directly to this email as your message will not be received.
         <br>
-        For assistance, please contact Customer Service Support.
+        {{-- For assistance, please contact Customer Service Support. --}}
        </strong>
     </p>
 
