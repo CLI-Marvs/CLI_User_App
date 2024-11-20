@@ -2092,9 +2092,9 @@ class ConcernController extends Controller
             ];
 
 
-            $conversation  = Conversations::where('ticket_id', $request->ticketId)
-                ->orderBy('created_at', 'asc')
-                ->get();
+            // $conversation  = Conversations::where('ticket_id', $request->ticketId)
+            //     ->orderBy('created_at', 'asc')
+            //     ->get();
             
             $dataToComment = [
                 'ticket_id' => $ticketIdEmail,
