@@ -63,9 +63,9 @@ class ConcernController extends Controller
             $this->folderName = 'concerns-uat/';
         }
 
-        
+
         if (config('services.app_url') === 'https://admin.cebulandmasters.com') {
-            $this->keyJson = config('services.gcs_prod');
+            $this->keyJson = config('services.gcs_prod.key_json');
             $this->bucket = 'concerns-bucket';
             $this->folderName = 'concerns-attachments/';
         }
