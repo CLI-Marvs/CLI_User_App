@@ -51,18 +51,18 @@ class ConcernController extends Controller
     private $bucket;
     private $folderName;
 
-    public function __construct() {
-        if(config('services.app_url') === 'http://localhost:8001' || 'https://admin-dev.cebulandmasters.com') {
+    public function __construct()
+    {
+        if (config('services.app_url') === 'http://localhost:8001' || 'https://admin-dev.cebulandmasters.com') {
             $this->keyJson = config('services.gcs.key_json');
             $this->bucket = 'super-app-storage';
             $this->folderName = 'concerns/';
         }
 
-        if(config('services.app_url') ===  'https://admin-uat.cebulandmasters.com') {
+        if (config('services.app_url') ===  'https://admin-uat.cebulandmasters.com') {
             $this->keyJson = config('services.gcs.key_json');
             $this->folderName = 'concerns-uat/';
         }
-
 
         if (config('services.app_url') === 'https://admin.cebulandmasters.com') {
             $this->keyJson = config('services.gcs_prod.key_json');
@@ -1445,6 +1445,21 @@ class ConcernController extends Controller
                     $concernData->assign_to = json_encode($currentAssignTo);
                     $concernData->resolve_from = json_encode($currentAssignTo);
                     $concernData->save();
+
+                    //dynamic email
+                    $adminLink = "";
+                    if (config('services.app_url') === 'http://localhost:8001' || 'https://admin-dev.cebulandmasters.com') {
+                        $adminLink = "https://admin-dev.cebulandmasters.com";
+                    }
+
+                    if (config('services.app_url') ===  'https://admin-uat.cebulandmasters.com') {
+                        $adminLink = 'https://admin-uat.cebulandmasters.com';
+                    }
+
+
+                    if (config('services.app_url') === 'https://admin.cebulandmasters.com') {
+                        $adminLink = 'https://admin-uat.cebulandmasters.com';
+                    }
                     $dataToEmail = [
                         'ticketId' => $modifiedTicketId,
                         'details_concern' => $concernData->details_concern,
@@ -1452,6 +1467,7 @@ class ConcernController extends Controller
                         'department' => $request->assign_by_department,
                         'buyer_name' => $concernData->buyer_name,
                         'assignee_name' => $selectedOption['name'],
+                        'adminLink'=> $adminLink
                     ];
                     $data = [
                         'ticketId' => $newTicketId,
@@ -2073,14 +2089,15 @@ class ConcernController extends Controller
                 'ticketId' => $newTicketId,
             ];
 
+
+            $conversation  = Conversations::where('ticket_id', $request->ticketId)
+                ->orderBy('created_at', 'asc')
+                ->get();
             
-          
             $dataToComment = [
                 'ticket_id' => $ticketIdEmail,
                 'commenter_message' => $conversation->message,
                 'commenter_name' => $request->admin_name,
-               
-
             ];
 
             if (!empty($assigness)) {
