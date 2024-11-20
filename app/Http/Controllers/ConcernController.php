@@ -64,7 +64,6 @@ class ConcernController extends Controller
             $this->folderName = 'concerns-uat/';
         }
 
-
         if (config('services.app_url') === 'https://admin.cebulandmasters.com') {
             $this->keyJson = config('services.gcs_prod.key_json');
             $this->bucket = 'concerns-bucket';
@@ -649,6 +648,7 @@ class ConcernController extends Controller
         if ($files) {
             /*   $keyJson = config('services.gcs.key_json');  //Access from services.php */
             $keyArray = json_decode($this->keyJson, true); 
+            dd($keyArray);
             $storage = new StorageClient([
                 'keyFile' => $keyArray
             ]);
