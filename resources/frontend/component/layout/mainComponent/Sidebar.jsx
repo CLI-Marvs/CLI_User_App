@@ -23,12 +23,17 @@ const Sidebar = () => {
   const [activeItem, setActiveItem] = useState(null);
   const location = useLocation();
   const [isInquiryOpen, setInquiryOpen] = useState(false);
+  const [isSuperAdminOpen, setSuperAdminOpen] = useState(false);
   const [isInvoiceOpen, setIsInvoiceOpen] = useState(false);
 
   const [activeItemTransaction, setActiveItemTransaction] = useState(null);
 
-  const handleDropdownClick = () => {
+  const handleInquiryDropdownClick = () => {
     setInquiryOpen(!isInquiryOpen);
+  };
+
+  const handleSuperAdminDropdownClick = () => {
+    setSuperAdminOpen(!isSuperAdminOpen);
   };
 
   const handleInvoiceDropdownClick = () => {
@@ -55,20 +60,28 @@ const Sidebar = () => {
 
   useEffect(() => {
     switch (location.pathname) {
+      case "/superadmin/userrightsandpermissions":
+        setInquiryOpen(false);
+        setIsInvoiceOpen(false);
+        setSuperAdminOpen(true);
+        break;
       case "/transactionmanagement/invoices":
       case "/transactionmanagement/transactionrecords":
         setInquiryOpen(false);
         setIsInvoiceOpen(true);
+        setSuperAdminOpen(false);
         break;
       case "/inquirymanagement/inquirylist":
       case "/inquirymanagement/report":
       case "/inquirymanagement/autoassign":
         setIsInvoiceOpen(false);
         setInquiryOpen(true);
+        setSuperAdminOpen(false);
         break;
       default:
         setInquiryOpen(false);
         setIsInvoiceOpen(false);
+        setSuperAdminOpen(false);
         break;
     }
   }, [location.pathname]);
@@ -111,7 +124,7 @@ const Sidebar = () => {
                   : "rounded-[10px]"
                 }
                     `}
-              onClick={handleDropdownClick}
+              onClick={handleInquiryDropdownClick}
             >
               Inquiry Management
               <ListItemSuffix>
@@ -176,7 +189,59 @@ const Sidebar = () => {
                   </ListItem>
                 </Link>
               </div>
-            )}
+            )
+          }
+
+          <Link to="superadmin/userrightsandpermissions">
+            <ListItem
+              className={`h-[35px] w-[185px] text-sm pl-[12px] transition-all duration-300 ease-in-out 
+                  ${activeItem === "superadmin" ||
+                  location.pathname.startsWith("/superadmin")
+                  ? "bg-custom-lightestgreen text-custom-solidgreen font-semibold"
+                  : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
+                }
+                    ${isSuperAdminOpen
+                  ? "rounded-[10px] rounded-b-none"
+                  : "rounded-[10px]"
+                }
+                    `}
+              onClick={handleSuperAdminDropdownClick}
+            >
+              Super Admin
+              <ListItemSuffix>
+                <IoIosArrowDown
+                  className={`text-custom-solidgreen  transition-transform duration-200 ease-in-out ${isSuperAdminOpen ? "rotate-180" : ""
+                    }`}
+                />
+              </ListItemSuffix>
+            </ListItem>
+          </Link>
+          {isSuperAdminOpen &&
+            location.pathname.startsWith("/superadmin") && (
+              <div className="px-[12px] py-[20px] w-[185px] min-h-[122px] flex flex-col gap-[5px] bg-custom-lightestgreen border-t rounded-t-none rounded-b-[10px] border-custom-solidgreen transition-all duration-300 ease-in-out">
+                <Link to="/superadmin/userrightsandpermissions">
+                  <ListItem
+                    className={`h-[48px] w-full py-[8px] px-[18px]  text-sm rounded-[10px] ${
+                      location.pathname.startsWith(
+                        "/superadmin/userrightsandpermissions"
+                      )
+                      ? "bg-white text-custom-solidgreen font-semibold "
+                      : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
+                      }`}
+                    onClick={() =>
+                      handleItemClick(
+                        "superadmin"
+                      )
+                    }
+                  >
+                    User Rights & Permissions
+                  </ListItem>
+                </Link>
+                
+              </div>
+            )
+          } 
+
           {/* <Link to="/transactionmanagement/invoices">
             <ListItem
               className={`h-[35px] w-[210px] text-sm pl-[12px] transition-all duration-300 ease-in-out 

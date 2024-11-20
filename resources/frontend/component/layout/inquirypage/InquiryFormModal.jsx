@@ -720,7 +720,7 @@ const InquiryFormModal = ({ modalRef }) => {
                                     <option value="Walk in">Walk-in</option>
                                     <option value="Website">Website</option>
                                     <option value="Social media">Social Media</option>
-                                    <option value="Branch Tablet">Branch Tablet (Jotform created by IT)</option>
+                                    <option value="Branch Tablet">Branch Tablet</option>
                                     <option value="Internal Endorsement">Internal Endorsement</option>
 
                                 </select>
