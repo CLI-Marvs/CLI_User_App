@@ -132,7 +132,7 @@
         <li><strong>From:</strong> {{ ucwords($data['buyer_name']) }}</li>
     </ul>
 
-    <p>Please review the concern in your <span> <a href="https://admin-uat.cebulandmasters.com/">Masters Admin
+    <p>Please review the concern in your <span> <a href="{{ $data['adminLink'] }}">Masters Admin
                 Dashboard.</a> </span> </p>
 
     <p style="margin: 0; padding: 0;">Thank you,</p>
@@ -146,6 +146,7 @@
         <strong>
             Reminder:
             This is an automated message from a no-reply email address.
+        <br>
             Please do not reply directly to this email as your message will not be received.
         </strong>
     </p>
