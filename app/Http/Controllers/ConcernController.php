@@ -1489,7 +1489,7 @@ class ConcernController extends Controller
 
                     //dynamic email
                     $adminLink = "";
-                    if (config('services.app_url') === 'http://localhost:8001' || config('https://admin-dev.cebulandmasters.com')) {
+                    if (config('services.app_url') === 'http://localhost:8001' || config('services.app_url') === 'https://admin-dev.cebulandmasters.com') {
                         $adminLink = "https://admin-dev.cebulandmasters.com";
                     }
 
