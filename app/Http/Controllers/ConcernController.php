@@ -56,7 +56,7 @@ class ConcernController extends Controller
         \Log::info("setcvices app url", [
             'app_url' => config('services.app_url')
         ]);
-        if (config('services.app_url') === 'http://localhost:8001' || config('https://admin-dev.cebulandmasters.com')) {
+        if (config('services.app_url') === 'http://localhost:8001' || config('services.app_url') === 'https://admin-dev.cebulandmasters.com') {
             $this->keyJson = config('services.gcs.key_json');
             $this->bucket = 'super-app-storage';
             $this->folderName = 'concerns/';
@@ -1502,7 +1502,7 @@ class ConcernController extends Controller
 
 
                     if (config('services.app_url') === 'https://admin.cebulandmasters.com') {
-                        $adminLink = 'https://admin-uat.cebulandmasters.com';
+                        $adminLink = 'https://admin.cebulandmasters.com';
                     }
                     $dataToEmail = [
                         'ticketId' => $modifiedTicketId,
