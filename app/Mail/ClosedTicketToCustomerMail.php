@@ -42,12 +42,20 @@ class ClosedTicketToCustomerMail extends Mailable
     public function envelope(): Envelope
     {
 
-        if (config('services.APP_URL') === 'https://admin-dev.cebulandmasters.com' || config('services.APP_URL') === 'http://localhost:8001') {
+        if (config('services.app_url') === 'https://admin-dev.cebulandmasters.com' || config('services.app_url') === 'http://localhost:8001') {
             return new Envelope(
                 from: new Address('ask@cebulandmasters.com', 'Cebu Landmasters Inc.'),
                 subject: "[Test] [CLI Inquiry] Transaction {$this->ticket_id}",
             );
-        } else {
+        } 
+        if(config('services.app_url') === 'https://admin-uat.cebulandmasters.com') {
+            return new Envelope(
+                from: new Address('ask@cebulandmasters.com', 'Cebu Landmasters Inc.'),
+                subject: "[SML] [CLI Inquiry] Transaction {$this->ticket_id}",
+            );
+        }
+
+        if(config('services.app_url') === 'https://admin.cebulandmasters.com') {
             return new Envelope(
                 from: new Address('ask@cebulandmasters.com', 'Cebu Landmasters Inc.'),
                 subject: "[CLI Inquiry] Transaction {$this->ticket_id}",

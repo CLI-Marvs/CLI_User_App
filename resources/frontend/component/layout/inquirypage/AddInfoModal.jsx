@@ -150,7 +150,7 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
             localStorage.removeItem("dataConcern");
             localStorage.removeItem("closeConcern");
             localStorage.setItem("updatedData", JSON.stringify(updatedData)); 
-            showToast("Concern updated successfully!", "success");
+            showToast("Data updated successfully!", "success");
             onupdate({ ...dataToUpdate, dataConcern });
             getInquiryLogs(dataConcern.ticket_id);
             getAllConcerns();

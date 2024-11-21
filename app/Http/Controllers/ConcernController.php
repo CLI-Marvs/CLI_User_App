@@ -51,18 +51,19 @@ class ConcernController extends Controller
     private $bucket;
     private $folderName;
 
-    public function __construct() {
-        if(config('services.app_url') === 'http://localhost:8001' || 'https://admin-dev.cebulandmasters.com') {
+    public function __construct()
+    {
+        if (config('services.app_url') === 'http://localhost:8001' || config('services.app_url') === 'https://admin-dev.cebulandmasters.com') {
             $this->keyJson = config('services.gcs.key_json');
             $this->bucket = 'super-app-storage';
             $this->folderName = 'concerns/';
         }
 
-        if(config('services.app_url') ===  'https://admin-uat.cebulandmasters.com') {
+        if (config('services.app_url') === 'https://admin-uat.cebulandmasters.com') {
             $this->keyJson = config('services.gcs.key_json');
+            $this->bucket = 'super-app-uat';
             $this->folderName = 'concerns-uat/';
         }
-
 
         if (config('services.app_url') === 'https://admin.cebulandmasters.com') {
             $this->keyJson = config('services.gcs_prod.key_json');
@@ -672,6 +673,39 @@ class ConcernController extends Controller
     /**
      * Function to handle download of the file from the google cloud 
      */
+
+    //  public function downloadFileFromGCS(Request $request)
+    //  {
+    //      try {
+    //          $fileUrlPath = $request->fileUrlPath;
+    //          if (!$fileUrlPath) {
+    //              return response()->json(['message' => 'File path is required.'], 400);
+    //          }
+ 
+    //          $keyJson = config('services.gcs.key_json');  //Access from services.php
+    //          $keyArray = json_decode($keyJson, true); // Decode the JSON string to an array
+    //          $storage = new StorageClient([
+    //              'keyFile' => $keyArray
+    //          ]);
+ 
+    //          $bucket = $storage->bucket('super-app-storage');
+    //          $filePath = 'concerns/' . $fileUrlPath;
+    //          $object = $bucket->object($filePath);
+    //          if (!$object->exists()) {
+    //              return response()->json(['message' => 'File not found in cloud storage.'], 404);
+    //          }
+ 
+    //          // Get the file content from GCS
+    //          $fileContent = $object->downloadAsStream()->getContents();
+ 
+    //          return response($fileContent)
+    //              ->header('Content-Type', $object->info()['contentType'] ?? 'application/octet-stream')
+    //              ->header('Content-Disposition', 'attachment; filename="' . basename($fileUrlPath) . '"');
+    //          return response()->download($object);
+    //      } catch (\Exception $e) {
+    //          return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
+    //      }
+    //  }
     public function downloadFileFromGCS(Request $request)
     {
         try {
@@ -680,15 +714,22 @@ class ConcernController extends Controller
                 return response()->json(['message' => 'File path is required.'], 400);
             }
 
+
+            $fileName = basename($fileUrlPath);
             /* $keyJson = config('services.gcs.key_json'); */  //Access from services.php
             $keyArray = json_decode($this->keyJson, true); // Decode the JSON string to an array
             $storage = new StorageClient([
                 'keyFile' => $keyArray
             ]);
 
+
+           /*  dd($this->bucket); */
             $bucket = $storage->bucket($this->bucket);
             $filePath = $this->folderName . $fileUrlPath;
+
+          /*   dd($filePath); */
             $object = $bucket->object($filePath);
+           /*  dd($object); */
             if (!$object->exists()) {
                 return response()->json(['message' => 'File not found in cloud storage.'], 404);
             }
@@ -1445,6 +1486,21 @@ class ConcernController extends Controller
                     $concernData->assign_to = json_encode($currentAssignTo);
                     $concernData->resolve_from = json_encode($currentAssignTo);
                     $concernData->save();
+
+                    //dynamic email
+                    $adminLink = "";
+                    if (config('services.app_url') === 'http://localhost:8001' || config('services.app_url') === 'https://admin-dev.cebulandmasters.com') {
+                        $adminLink = "https://admin-dev.cebulandmasters.com";
+                    }
+
+                    if (config('services.app_url') ===  'https://admin-uat.cebulandmasters.com') {
+                        $adminLink = 'https://admin-uat.cebulandmasters.com';
+                    }
+
+
+                    if (config('services.app_url') === 'https://admin.cebulandmasters.com') {
+                        $adminLink = 'https://admin.cebulandmasters.com';
+                    }
                     $dataToEmail = [
                         'ticketId' => $modifiedTicketId,
                         'details_concern' => $concernData->details_concern,
@@ -1452,6 +1508,7 @@ class ConcernController extends Controller
                         'department' => $request->assign_by_department,
                         'buyer_name' => $concernData->buyer_name,
                         'assignee_name' => $selectedOption['name'],
+                        'adminLink'=> $adminLink
                     ];
                     $data = [
                         'ticketId' => $newTicketId,
@@ -2073,14 +2130,15 @@ class ConcernController extends Controller
                 'ticketId' => $newTicketId,
             ];
 
+
+            // $conversation  = Conversations::where('ticket_id', $request->ticketId)
+            //     ->orderBy('created_at', 'asc')
+            //     ->get();
             
-          
             $dataToComment = [
                 'ticket_id' => $ticketIdEmail,
                 'commenter_message' => $conversation->message,
                 'commenter_name' => $request->admin_name,
-               
-
             ];
 
             if (!empty($assigness)) {
@@ -2145,7 +2203,7 @@ class ConcernController extends Controller
                         $messagesRef = new Messages();
                         $messagesRef->details_message = $message['details_message'];
                         $messagesRef->ticket_id = $message['ticket_id'];
-                        $fileLinks = $this->uploadToGCSFromScript($message['attachment']);
+                        $fileLinks = $this->uploadToGCSFromScript($message['attachment'], $message);
                         $messagesRef->buyer_email = $message['buyer_email'];
                         $messagesRef->attachment = json_encode($fileLinks);
                         $messagesRef->created_at = Carbon::parse(now())->setTimezone('Asia/Manila');
@@ -2240,7 +2298,7 @@ class ConcernController extends Controller
                     $messagesRef = new Messages();
                     $messagesRef->details_message = $buyer['details_message'];
                     $messagesRef->ticket_id = $ticketId;
-                    $fileLinks = $this->uploadToGCSFromScript($buyer['attachment']);
+                    $fileLinks = $this->uploadToGCSFromScript($buyer['attachment'], $buyer);
                     $messagesRef->buyer_email = $buyer['buyer_email'];
                     $messagesRef->attachment = json_encode($fileLinks);
                     $messagesRef->created_at = Carbon::parse(now())->setTimezone('Asia/Manila');
@@ -2266,7 +2324,7 @@ class ConcernController extends Controller
                         $messagesRef = new Messages();
                         $messagesRef->details_message = $buyer['details_message'];
                         $messagesRef->ticket_id = $existingTicket->ticket_id;
-                        $fileLinks = $this->uploadToGCSFromScript($buyer['attachment']);
+                        $fileLinks = $this->uploadToGCSFromScript($buyer['attachment'], $buyer);
                         $messagesRef->buyer_email = $buyer['buyer_email'];
                         $messagesRef->attachment = json_encode($fileLinks);
                         $messagesRef->created_at = Carbon::parse(now())->setTimezone('Asia/Manila');
@@ -2299,22 +2357,22 @@ class ConcernController extends Controller
     }
 
 
-    public function uploadToGCSFromScript($attachments)
+    public function uploadToGCSFromScript($attachments, $data)
     {
         $fileLinks = [];
         if ($attachments) {
-            $keyJson = config('services.gcs.key_json');
-            /* $keyJson = config($data['keyjson']); */
+         /*    $keyJson = config('services.gcs.key_json'); */
+            $keyJson = config($data['keyjson']);
             $keyArray = json_decode($keyJson, true);
             $storage = new StorageClient([
                 'keyFile' => $keyArray
             ]);
-            $bucket = $storage->bucket('super-app-storage');
-            /*  $bucket = $storage->bucket($data['bucketName']); */
+          /*   $bucket = $storage->bucket('super-app-storage'); */
+             $bucket = $storage->bucket($data['bucketName']);
 
             foreach ($attachments as $fileData) {
                 $fileName = uniqid() . '.' . $fileData['extension'];
-                $filePath = 'concerns/' . $fileName;
+                $filePath = /* 'concerns/'  */ $data['folderName'] . '/' . $fileName;
 
                 $fileContent = base64_decode($fileData['URL']);
                 $tempFile = tempnam(sys_get_temp_dir(), 'upload');

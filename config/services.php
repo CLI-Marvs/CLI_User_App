@@ -53,6 +53,6 @@ return [
         'key_json' => env('GCS_KEY_PROD'),
     ],
 
-    'APP_URL' => env('APP_URL'),
+    'app_url' => env('APP_URL'),
 
 ];

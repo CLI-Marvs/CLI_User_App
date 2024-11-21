@@ -8,15 +8,28 @@ const FileViewer = () => {
     const [fileUrlPath, setFileUrlPath] = useState(null);
     const [loading, setLoading] = useState(false);
     const { token } = useStateContext();
+    const [folderName, setFolderName] = useState('');
     const [imageDimensions, setImageDimensions] = useState({
         width: 0,
         height: 100,
     });
 
+    const APP_URL = import.meta.env.VITE_API_BASE_URL;
+
     //Hooks
     /**
      *  Get the file URL from localStorage when the page loads
      */
+    useEffect(() => {
+        if (APP_URL === 'http://localhost:8001' || APP_URL === 'https://admin-dev.cebulandmasters.com') {
+            setFolderName('concerns/');
+        } else if (APP_URL === 'https://admin-uat.cebulandmasters.com') {
+            setFolderName('concerns-uat/');
+        } else if (APP_URL === 'https://admin.cebulandmasters.com') {
+            setFolderName('concerns-attachments/');
+        }
+    }, [])
+
     useEffect(() => {
         const storedFileUrlPath = localStorage.getItem("fileUrlPath");
         if (storedFileUrlPath) {
@@ -24,6 +37,8 @@ const FileViewer = () => {
             localStorage.removeItem("fileUrlPath");
         }
     }, []);
+
+
 
     /**
      * Check if the user is authenticated, place this function here to early check if the user is authenticated or not
@@ -87,9 +102,10 @@ const FileViewer = () => {
         );
     }
 
+
     // Get the file name including the path after 'concerns/'
     const concernsPathIndex =
-        fileUrlPath.indexOf("concerns/") + "concerns/".length;
+        fileUrlPath.indexOf(folderName) + folderName.length;
     const fullFilePath = fileUrlPath.slice(concernsPathIndex);
 
     // Get the full URL and determine the extension
@@ -147,13 +163,13 @@ const FileViewer = () => {
 
     return (
         <div
-           /*  onContextMenu={handleContextMenu} */
+            onContextMenu={handleContextMenu}
             className={`${fileExtension === "txt" ? "bg-white" : "bg-black"}`}
         >
             {fileExtension === "jpg" ||
-            fileExtension === "bmp" ||
-            fileExtension === "png" ||
-            fileExtension === "jpeg" ? (
+                fileExtension === "bmp" ||
+                fileExtension === "png" ||
+                fileExtension === "jpeg" ? (
                 <div className="flex items-center justify-center min-h-screen">
                     <img
                         onLoad={handleImageLoad}
@@ -179,21 +195,20 @@ const FileViewer = () => {
                     className="min-h-screen "
                 ></iframe>
             ) : fileExtension === "xls" ||
-              fileExtension === "xlsx" ||
-              fileExtension === "xlsm" ||
-              fileExtension === "xml" ||
-              fileExtension === "doc" ||
-              fileExtension === "docx" ||
-              fileExtension === "csv" ? (
+                fileExtension === "xlsx" ||
+                fileExtension === "xlsm" ||
+                fileExtension === "xml" ||
+                fileExtension === "doc" ||
+                fileExtension === "docx" ||
+                fileExtension === "csv" ? (
                 <div className="flex flex-col items-center justify-center min-h-screen text-white">
                     <p>Only images, text documents and pdf are viewable.</p>
                     <button
                         onClick={() => handleDownloadFile(fileName)}
                         disabled={loading}
                         type="submit"
-                        className={` mt-4 w-[133px] text-sm montserrat-semibold text-white h-[49px] rounded-[10px] gradient-btn2 flex justify-center items-center gap-2 tablet:w-full hover:shadow-custom4  ${
-                            loading ? "cursor-not-allowed" : ""
-                        }`}
+                        className={` mt-4 w-[133px] text-sm montserrat-semibold text-white h-[49px] rounded-[10px] gradient-btn2 flex justify-center items-center gap-2 tablet:w-full hover:shadow-custom4  ${loading ? "cursor-not-allowed" : ""
+                            }`}
                     >
                         {loading ? (
                             <CircularProgress className="spinnerSize" />
@@ -209,9 +224,8 @@ const FileViewer = () => {
                         onClick={() => handleDownloadFile(fileName)}
                         disabled={loading}
                         type="submit"
-                        className={` mt-4 w-[133px] text-sm montserrat-semibold text-white h-[49px] rounded-[10px] gradient-btn2 flex justify-center items-center gap-2 tablet:w-full hover:shadow-custom4  ${
-                            loading ? "cursor-not-allowed" : ""
-                        }`}
+                        className={` mt-4 w-[133px] text-sm montserrat-semibold text-white h-[49px] rounded-[10px] gradient-btn2 flex justify-center items-center gap-2 tablet:w-full hover:shadow-custom4  ${loading ? "cursor-not-allowed" : ""
+                            }`}
                     >
                         {loading ? (
                             <CircularProgress className="spinnerSize" />
