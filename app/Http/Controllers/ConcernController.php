@@ -53,13 +53,16 @@ class ConcernController extends Controller
 
     public function __construct()
     {
-        if (config('services.app_url') === 'http://localhost:8001' || 'https://admin-dev.cebulandmasters.com') {
+        \Log::info("setcvices app url", [
+            'app_url' => config('services.app_url')
+        ]);
+        if (config('services.app_url') === 'http://localhost:8001' || config('https://admin-dev.cebulandmasters.com')) {
             $this->keyJson = config('services.gcs.key_json');
             $this->bucket = 'super-app-storage';
             $this->folderName = 'concerns/';
         }
 
-        if (config('services.app_url') ===  'https://admin-uat.cebulandmasters.com') {
+        if (config('services.app_url') === 'https://admin-uat.cebulandmasters.com') {
             $this->keyJson = config('services.gcs.key_json');
             $this->bucket = 'super-app-uat';
             $this->folderName = 'concerns-uat/';
@@ -723,8 +726,9 @@ class ConcernController extends Controller
             ]);
 
 
+           /*  dd($this->bucket); */
             $bucket = $storage->bucket($this->bucket);
-            $filePath = $this->folderName . $fileName;
+            $filePath = $this->folderName . $fileUrlPath;
 
           /*   dd($filePath); */
             $object = $bucket->object($filePath);
@@ -738,7 +742,7 @@ class ConcernController extends Controller
 
             return response($fileContent)
                 ->header('Content-Type', $object->info()['contentType'] ?? 'application/octet-stream')
-                ->header('Content-Disposition', 'attachment; filename="' . $fileUrlPath . '"');
+                ->header('Content-Disposition', 'attachment; filename="' . basename($fileUrlPath) . '"');
             return response()->download($object);
         } catch (\Exception $e) {
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
@@ -1488,7 +1492,7 @@ class ConcernController extends Controller
 
                     //dynamic email
                     $adminLink = "";
-                    if (config('services.app_url') === 'http://localhost:8001' || 'https://admin-dev.cebulandmasters.com') {
+                    if (config('services.app_url') === 'http://localhost:8001' || config('https://admin-dev.cebulandmasters.com')) {
                         $adminLink = "https://admin-dev.cebulandmasters.com";
                     }
 
