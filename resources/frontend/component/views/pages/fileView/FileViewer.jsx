@@ -8,15 +8,29 @@ const FileViewer = () => {
     const [fileUrlPath, setFileUrlPath] = useState(null);
     const [loading, setLoading] = useState(false);
     const { token } = useStateContext();
+    const [folderName, setFolderName] = useState('');
     const [imageDimensions, setImageDimensions] = useState({
         width: 0,
         height: 100,
     });
 
+    const APP_URL = import.meta.env.VITE_API_BASE_URL; 
+
     //Hooks
     /**
      *  Get the file URL from localStorage when the page loads
      */
+
+    useEffect(() => {
+        if (APP_URL === 'http://localhost:8002') {
+            setFolderName('concerns/');
+        } else if (APP_URL === 'https://admin-uat.cebulandmasters.com') {
+            setFolderName('concerns-uat/');
+        } else if (APP_URL === 'http://localhost:8001') {
+            setFolderName('concerns-attachments/');
+        }
+    }, [])
+
     useEffect(() => {
         const storedFileUrlPath = localStorage.getItem("fileUrlPath");
         if (storedFileUrlPath) {
@@ -89,13 +103,15 @@ const FileViewer = () => {
         );
     }
 
+   
     // Get the file name including the path after 'concerns/'
     const concernsPathIndex =
-        fileUrlPath.indexOf("concerns/") + "concerns/".length;
+        fileUrlPath.indexOf(folderName) + folderName.length;
     const fullFilePath = fileUrlPath.slice(concernsPathIndex);
 
     // Get the full URL and determine the extension
     const fileName = fullFilePath.split("?")[0];
+    console.log("fileName", fileName);
     const fileExtension = fileName.split(".").pop().toLowerCase();
 
     /**
@@ -149,7 +165,7 @@ const FileViewer = () => {
 
     return (
         <div
-            onContextMenu={handleContextMenu}
+           /*  onContextMenu={handleContextMenu} */
             className={`${fileExtension === "txt" ? "bg-white" : "bg-black"}`}
         >
             {fileExtension === "jpg" ||
