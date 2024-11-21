@@ -353,7 +353,7 @@ const AssignSidePanel = ({ ticketId }) => {
             <div className="mb-3 mt-[2px]">
                 <div className="relative w-[623px]" ref={dropdownRef}>
                     <div className="relative">
-                        {user?.department == 'Customer Relations - Services' && (
+                        {ALLOWED_EMPLOYEES_CRS.includes(user?.employee_email) && (
                             <input
                                 type="text"
                                 value={search}

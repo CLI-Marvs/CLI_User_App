@@ -881,6 +881,7 @@ class ConcernController extends Controller
             $this->applyFilters($query, $request, $employee);
 
             $latestLogs = $this->getLatestLogsSubquery();
+            $latestMessages = $this->getLatestMessage();
             $pinnedSubquery = $this->getPinnedConcernsSubquery($employee);
             $createdBySubQuery = ConcernsCreatedBy::select('concern_id', 'user_id as created_by');
 
@@ -894,7 +895,10 @@ class ConcernController extends Controller
                 ->leftJoinSub($createdBySubQuery, 'created_by_subquery', function ($join) {
                     $join->on('concerns.id', '=', 'created_by_subquery.concern_id');
                 })
-                ->select('concerns.*', 'latest_logs.message_log', DB::raw('CASE WHEN pinned.concern_id IS NOT NULL THEN 1 ELSE 0 END AS isPinned'), 'created_by_subquery.created_by')
+                ->leftJoinSub($latestMessages, 'latest_messages', function ($join) {
+                    $join->on('concerns.ticket_id', '=', 'latest_messages.ticket_id');
+                })
+                ->select('concerns.*', 'latest_logs.message_log', DB::raw('CASE WHEN pinned.concern_id IS NOT NULL THEN 1 ELSE 0 END AS isPinned'), 'created_by_subquery.created_by', 'latest_messages.latest_message')
                 ->paginate(20);
 
             return response()->json($allConcerns);
@@ -903,6 +907,16 @@ class ConcernController extends Controller
         }
     }
 
+
+    private function getLatestMessage()
+    {
+        return Messages::select('details_message as latest_message', 'ticket_id')
+            ->whereIn('id', function ($subquery) {
+                $subquery->select(DB::raw('MAX(id)'))
+                    ->from('messages')
+                    ->groupBy('ticket_id');
+            });
+    }
 
     private function applyFilters($query, Request $request, $employee)
     {
@@ -1002,6 +1016,8 @@ class ConcernController extends Controller
                     ->groupBy('ticket_id');
             });
     }
+
+  
 
     private function getPinnedConcernsSubquery($employee)
     {
