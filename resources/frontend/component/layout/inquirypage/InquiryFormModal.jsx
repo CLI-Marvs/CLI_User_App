@@ -294,7 +294,7 @@ const InquiryFormModal = ({ modalRef }) => {
                 if (modalRef.current) {
                     modalRef.current.close();
                 }
-                showToast("Concern added successfully!", "success");
+                showToast("Data added successfully!", "success");
                 setResetSuccess(true);
                 callBackHandler();
                 setLoading(false);
