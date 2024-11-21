@@ -1,6 +1,24 @@
-import React from 'react'
+import React, { useRef } from 'react'
+import DepartmentModal from './modals/DepartmentModal';
+import UserModals from './modals/UserModals';
 
 const UserRightsAndPermissions = () => {
+
+  const modalRef = useRef(null);
+  const modalref2 = useRef(null);
+
+const handleDepartmentModal = () => {
+    if (modalRef.current) {
+        modalRef.current.showModal();
+    }
+};
+
+const handleUserModal = () => {
+    if (modalref2.current) {
+        modalref2.current.showModal();
+    }
+};
+
   return (
     <div className='h-screen max-w-full bg-custom-grayFA p-[20px]'>
       <div className='flex flex-col gap-[30px]'>
@@ -8,7 +26,7 @@ const UserRightsAndPermissions = () => {
           <div className='montserrat-regular text-sm'>
             Specific Department
           </div>
-          <button className='h-[31px] w-[140px] py-[7px] px-[20px] gradient-btn5 text-white text-sm montserrat-medium rounded-[6px]'>
+          <button onClick={handleDepartmentModal} className='h-[31px] w-[140px] py-[7px] px-[20px] gradient-btn5 text-white text-sm montserrat-medium rounded-[6px]'>
             Add & Update
           </button>
         </div>
@@ -217,7 +235,7 @@ const UserRightsAndPermissions = () => {
           <div className='montserrat-regular text-sm'>
             Specific User
           </div>
-          <button className='h-[31px] w-[140px] py-[7px] px-[20px] gradient-btn5 text-white text-sm montserrat-medium rounded-[6px]'>
+          <button onClick={handleUserModal} className='h-[31px] w-[140px] py-[7px] px-[20px] gradient-btn5 text-white text-sm montserrat-medium rounded-[6px]'>
             Add & Update
           </button>
         </div>
@@ -308,10 +326,7 @@ const UserRightsAndPermissions = () => {
                     </div>
                   </div>
                 </td>
-
               </tr>
-
-
               <tr className='flex gap-[57px] mt-[6px] h-[64px] overflow-hidden px-[16px] py-[10px] bg-custom-lightestgreen text-custom-bluegreen text-sm'>
                 <td className='w-[200px] flex flex-col items-start justify-center gap-2'>
                   <div className='w-full h-[31px] flex items-center justify-center bg-white rounded-[5px]'>
@@ -385,6 +400,12 @@ const UserRightsAndPermissions = () => {
 
           </div>
         </div>
+      </div>
+      <div>
+        <DepartmentModal modalRef={modalRef}/>
+      </div>
+      <div>
+        <UserModals modalRef={modalref2}/>
       </div>
     </div>
   )
