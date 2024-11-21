@@ -39,6 +39,8 @@ import TransactionSidebar from "./views/pages/transactionViews/TransactionSideba
 import BankStatementView from "./views/pages/transactionViews/BankStatementView";
 import AutoAssignView from "./views/pages/raiseaconcernViews/AutoAssignView";
 import UserRightsAndPermissionsView from "./views/pages/userrightsandpermissionsViews/UserRightsAndPermissionsView";
+import FallbackLoader from './FallbackLoader';
+import PreloadWrapper from "./PreloadWrapper";
 
 // PrivateRoute component to check authentication
 const PrivateRoute = () => {
@@ -247,26 +249,24 @@ const App = () => {
         {
             path: "/",
             element: (
-                <Suspense 
-                    fallback={
-                    <div className="flex justify-center items-center h-screen w-screen">
-                        <img src={CLILoader} alt="cli loader" className="w-[280px]"/>
-                    </div>}
-                >
+                <Suspense fallback={<FallbackLoader />}>
+                    <PreloadWrapper  resources={[
+                        "/Images/Imagebg.webp", 
+                    ]}>
                     <LoginView/>
+                    </PreloadWrapper>
                 </Suspense>
             ),
         },
         {
             path: "/login",
             element: (
-                <Suspense 
-                    fallback={
-                    <div className="flex justify-center items-center h-screen w-screen">
-                        <img src={CLILoader} alt="cli loader" className="w-[280px]"/>
-                    </div>}
-                >
+                <Suspense fallback={<FallbackLoader />}>
+                    <PreloadWrapper  resources={[
+                        "/Images/Imagebg.webp", 
+                    ]}>
                     <LoginView/>
+                    </PreloadWrapper>
                 </Suspense>
             ),
         },
