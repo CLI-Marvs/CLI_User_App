@@ -8,8 +8,8 @@ export const ALLOWED_EMPLOYEES_CRS = [
     //DGT Employees
     "jsuhot@cebulandmasters.com",
     "rttayong@cebulandmasters.com",
-    "qcmahipos@cebulandmasters.com",
+    // "qcmahipos@cebulandmasters.com",
     "jnnadela@cebulandmasters.com",
-    "pcbornea@cebulandmasters.com",
+     //"pcbornea@cebulandmasters.com", 
     "kaarmelia@cebulandmasters.com"
 ];
