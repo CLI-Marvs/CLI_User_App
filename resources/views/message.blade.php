@@ -127,7 +127,7 @@
     <p>{!! $details_message !!}</p>
 
     
-    <p style="margin: 0; padding: 0;">Best Regards,</p>
+    <p style="margin: 0; padding: 0;">Best regards,</p>
     <p style="margin: 0; padding: 0;">
         {{ ucwords($admin_name) }}<br>
         CLI - {{ $department ?? "" }}
