@@ -137,7 +137,7 @@
     <p style="font-weight: bold;">{{ ucwords($admin_name) }}</p>
     <p style="font-weight: bold; margin-bottom: 10px;">CLI - Customer Relations Services</p> --}}
     {{-- <p>Please click this link {{$surveyLink}}</p> --}}
-    <p style="margin: 0; padding: 0;">Best Regards,</p>
+    <p style="margin: 0; padding: 0;">Best regards,</p>
     <p style="margin: 0; padding: 0;">{{ ucwords($admin_name) }}</p>
     <p style="margin: 0; padding: 0;">CLI - {{$department}}</p>
     <br>
