@@ -22,11 +22,11 @@ const FileViewer = () => {
      */
 
     useEffect(() => {
-        if (APP_URL === 'http://localhost:8002') {
+        if (APP_URL === 'http://localhost:8001' || APP_URL === 'https://admin-dev.cebulandmasters.com') {
             setFolderName('concerns/');
         } else if (APP_URL === 'https://admin-uat.cebulandmasters.com') {
             setFolderName('concerns-uat/');
-        } else if (APP_URL === 'http://localhost:8001') {
+        } else if (APP_URL === 'https://admin.cebulandmasters.com') {
             setFolderName('concerns-attachments/');
         }
     }, [])
