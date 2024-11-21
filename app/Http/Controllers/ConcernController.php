@@ -53,9 +53,6 @@ class ConcernController extends Controller
 
     public function __construct()
     {
-        \Log::info("setcvices app url", [
-            'app_url' => config('services.app_url')
-        ]);
         if (config('services.app_url') === 'http://localhost:8001' || config('services.app_url') === 'https://admin-dev.cebulandmasters.com') {
             $this->keyJson = config('services.gcs.key_json');
             $this->bucket = 'super-app-storage';
