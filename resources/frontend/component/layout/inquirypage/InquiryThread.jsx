@@ -37,6 +37,7 @@ const InquiryThread = () => {
     const [ticket, setTicket] = useState("");
     const [status, setStatus] = useState("");
     const [type, setType] = useState("");
+    const [channels,setChannels] = useState("");
     const [selectedProperty, setSelectedProperty] = useState("");
     const [fileName, setFileName] = useState("");
     const [hasAttachments, setHasAttachments] = useState(false);
@@ -56,7 +57,7 @@ const InquiryThread = () => {
     } = useStateContext();
     const [chatMessage, setChatMessage] = useState("");
     const userLoggedInEmail = user?.employee_email;
-
+    const [isSearchLoading, setIsSearchLoading] = useState(false);
     const modalRef = useRef(null);
     const modalRef2 = useRef(null);
     const resolveModalRef = useRef(null);
@@ -66,9 +67,6 @@ const InquiryThread = () => {
     const { itemsData } = location?.state || {};
     const params = useParams();
     const ticketId = decodeURIComponent(params.id);
-    const [isResolved, setIsResolved] = useState(false);
-    const [showAlert, setShowAlert] = useState(false);
-    const [alertType, setAlertType] = useState(""); // "delete", "close", or "resolve"
     const [dataConcern, setDataConcern] = useState(itemsData || {});
     const [emailMessageID, setEmailMessageID] = useState(null);
     const handleDateChange = (date) => {
@@ -166,7 +164,7 @@ const InquiryThread = () => {
             modalRef2.current.showModal();
         }
     };
- 
+
 
     const handleOpenResolveModal = () => {
         if (resolveModalRef.current) {
@@ -194,25 +192,38 @@ const InquiryThread = () => {
 
     const messageId = dataConcern?.message_id || null;
 
-    const handleSearch = () => {
-        setSearchFilter({
-            name,
-            category,
-            email,
-            ticket,
-            startDate,
-            selectedProperty,
-            hasAttachments,
-        });
-        setIsFilterVisible(false);
-        /*  setCurrentPage(0); */
-        setSelectedProperty("");
-        setName("");
-        setCategory("");
-        setEmail("");
-        setTicket("");
-        setHasAttachments(false);
-        navigate("/inquirymanagement/inquirylist");
+    const handleSearch = async () => {
+        try {
+            setSearchFilter({
+                name,
+                category,
+                type,
+                status,
+                email,
+                channels,
+                ticket,
+                startDate,
+                selectedProperty,
+                hasAttachments,
+            });
+            setIsSearchLoading(true);
+            await getAllConcerns();
+            setIsFilterVisible(false);
+            /*  setCurrentPage(0); */
+            setSelectedProperty("");
+            setName("");
+            setCategory("");
+            setEmail("");
+            setTicket("");
+            setHasAttachments(false);
+            navigate("/inquirymanagement/inquirylist");
+        } catch (error) {
+            console.log(error)
+        } finally {
+            setIsSearchLoading(false);
+
+        }
+
     };
 
     const formatChatMessage = (message) => {
@@ -226,44 +237,7 @@ const InquiryThread = () => {
         }
     };
 
-    /**
-     * Function to delete inquiry
-     */
-    const deleteInquiry = async () => {
-        await apiService.post("delete-concerns", { ticketId });
-        navigate("/inquirymanagement/inquirylist");
-        getAllConcerns();
-    };
-    /**
-     * To handle close inquiry
-     */
-    const closedInquiry = async () => {
-        // await apiService.post("close-concerns", { ticketId });
-        await apiService.post("close-concerns", {
-            ticket_id: ticketId,
-            admin_name: `${user?.firstname} ${user?.lastname}`,
-            department: user?.department,
-            buyer_email: dataConcern.buyer_email,
-            buyer_lastname: dataConcern.buyer_lastname,
-            buyer_name: `${capitalizeWords(
-                `${dataConcern.buyer_firstname} ${dataConcern.buyer_lastname}`
-            )}`,
-            // details_concern: dataRef.details_concern,
-            //  remarks: remarks,
-            //communication_type: communicationType,
-            //surveyLink: selectedSurveyName,
-            //assignees: assigneesPersonnel[ticketId],
-            //message_id: messageId,
-        });
-        const updatedData = { ...dataConcern, status: "Closed" };
-        localStorage.removeItem("updatedData");
-        localStorage.removeItem("dataConcern");
-        localStorage.setItem("closeConcern", JSON.stringify(updatedData));
 
-        handleUpdate(updatedData);
-
-        getAllConcerns();
-    };
     const submitMessage = async () => {
         setLoading(true);
         setIsConfirmModalOpen(false);
@@ -634,7 +608,7 @@ const InquiryThread = () => {
                                                 className="w-full border-b-1 outline-none appearance-none text-sm absolute px-[8px]"
                                                 value={type}
                                                 onChange={(e) =>
-                                                    setStatus(e.target.value)
+                                                    setType(e.target.value)
                                                 }
                                             >
                                                 <option value="">
@@ -707,10 +681,10 @@ const InquiryThread = () => {
                                             </label>
                                             <select
                                                 className="w-full border-b-1 outline-none appearance-none text-sm absolute px-[8px]"
-                                            /* value={status}
-                                    onChange={(e) =>
-                                        setStatus(e.target.value)
-                                    } */
+                                                value={channels}
+                                                onChange={(e) =>
+                                                    setChannels(e.target.value)
+                                                }
                                             >
                                                 <option value=" ">
                                                     Select Channel
@@ -837,7 +811,12 @@ const InquiryThread = () => {
                                             className="h-[37px] w-[88px] gradient-btn rounded-[10px] text-white text-sm"
                                             onClick={handleSearch}
                                         >
-                                            Search
+                                            {/* Search */}
+                                            {isSearchLoading ? (
+                                                <CircularProgress className="spinnerSize" />
+                                            ) : (
+                                                <>Search</>
+                                            )}
                                         </button>
                                     </div>
                                 </div>
@@ -1256,7 +1235,7 @@ const InquiryThread = () => {
                                     ) && (
                                         <div
                                             onClick={
-                                                    handleOpenCloseModal
+                                                handleOpenCloseModal
                                             }
                                             className="flex justify-start w-auto font-semibold text-[13px] text-[#1A73E8] underline cursor-pointer"
                                         >
@@ -1386,7 +1365,7 @@ const InquiryThread = () => {
                     onupdate={handleUpdate}
                 />
             </div>
-         
+
             <div>
                 <ThreadInquiryFormModal
                     modalRef={modalRef2}
