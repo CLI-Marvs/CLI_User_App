@@ -150,6 +150,7 @@
             <strong>
                 Reminder:
                 This is an automated message from a no-reply email address.
+                <br>
                 Please do not reply directly to this email as your message will not be received.
             </strong>
         </p>
