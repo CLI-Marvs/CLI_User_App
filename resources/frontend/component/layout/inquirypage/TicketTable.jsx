@@ -77,7 +77,7 @@ const TicketTable = ({ concernData }) => {
         }
     };
 
-    console.log("concernData", concernData);
+    // console.log("concernData", concernData);
     useEffect(() => {
         getAllConcerns();
     }, []);
