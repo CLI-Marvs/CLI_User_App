@@ -13,7 +13,8 @@ import DateLogo from "../../../../../public/Images/Date_range.svg";
 import { MdRefresh } from "react-icons/md";
 import InquiryFormModal from "./InquiryFormModal";
 import axios from "axios";
-import {toast } from 'react-toastify';
+import { toast } from 'react-toastify';
+import { useSearchParams } from "react-router-dom";
 const InquiryList = () => {
     const {
         currentPage,
@@ -43,6 +44,7 @@ const InquiryList = () => {
     const [status, setStatus] = useState("");
     const [type, setType] = useState("");
     const [channels, setChannels] = useState("");
+
     const [selectedProperty, setSelectedProperty] = useState("");
     const [hasAttachments, setHasAttachments] = useState(false);
     const { propertyNamesList } = useStateContext();
@@ -55,7 +57,7 @@ const InquiryList = () => {
     const [lastActivity, setLastActivity] = useState(null);
     const filterBoxRef = useRef(null);
     const [isOpenSelect, setIsOpenSelect] = useState(false);
-
+ 
     const handleSelect = (option) => {
         onChange(option);
         setIsOpenSelect(false);
@@ -292,7 +294,7 @@ const InquiryList = () => {
             document.removeEventListener("keydown", handleKeyDown);
         };
     }, [isFilterVisible]);
-
+ 
     useEffect(() => {
         updateLastActivity();
     }, [
