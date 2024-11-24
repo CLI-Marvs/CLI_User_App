@@ -16,7 +16,7 @@ const Notification = () => {
         getAllConcerns,
         getNotifications,
         setNotifStatus,
-        notifStatus
+        notifStatus,
     } = useStateContext();
     const [activeButton, setActiveButton] = useState("All");
     

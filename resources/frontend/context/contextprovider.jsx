@@ -82,8 +82,8 @@ export const ContextProvider = ({ children }) => {
     const [bankList, setBankList] = useState([]);
     const [filterDueDate, setFilterDueDate] = useState(null);
     const [loading, setLoading] = useState(false);
+    const [navBarData, setNavBarData] = useState([]);
  
-
     useEffect(() => {
         if (user && user.department && !isDepartmentInitialized) {
             setDepartment(user.department === "Customer Relations - Services" ? "All" : user.department);
@@ -344,6 +344,25 @@ export const ContextProvider = ({ children }) => {
         }
     };
 
+    const getNavBarData = async() => {
+        if(token) {
+            try {
+                const encodedTicketId = encodeURIComponent(ticketId);
+                
+                const response = await apiService.get(`navbar-data?ticketId=${encodedTicketId}`);
+                
+                const data = response.data;
+
+                setNavBarData((prevData) => ({
+                    ...prevData,
+                    [ticketId]: data,
+                }));
+            } catch (error) {
+                console.log("error retrieving", error);
+            }
+        }
+    };
+
     const getAssigneesPersonnel = async () => {
         if (ticketId) {
             try {
@@ -382,6 +401,7 @@ export const ContextProvider = ({ children }) => {
             }
         }
     };
+
 
     const getMessages = async (ticketId) => {
         /* if (messages[id]) return; */
@@ -568,6 +588,7 @@ export const ContextProvider = ({ children }) => {
             getInquiryLogs(ticketId);
             getConcernMessages();
             getAssigneesPersonnel();
+            getNavBarData();
         }
     }, [ticketId]);
 
@@ -720,6 +741,8 @@ export const ContextProvider = ({ children }) => {
                 setInquiriesPerChannelMonth,
                 getInquiriesPerChannel,
                 inquriesPerChannelData,
+                navBarData,
+                getNavBarData
                
             }}
 

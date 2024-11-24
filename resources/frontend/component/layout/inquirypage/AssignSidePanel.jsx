@@ -93,12 +93,14 @@ const AssignSidePanel = ({ ticketId }) => {
     };
 
     const removeTag = (option) => {
+        console.log("option", option);
         if (
             option.employee_email ||
             option.fromEvent ||
             option.name ||
             option.department
         ) {
+            console.log("trigger first");
             removeAssignee(
                 option.ticketId,
                 option.employee_email,
@@ -106,6 +108,7 @@ const AssignSidePanel = ({ ticketId }) => {
                 option.department
             );
         } else {
+            console.log("trigger second");
             setSelectedOptions((prevSelected) =>
                 prevSelected.filter((item) => item !== option)
             );
