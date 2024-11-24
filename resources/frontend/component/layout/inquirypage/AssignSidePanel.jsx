@@ -356,7 +356,7 @@ const AssignSidePanel = ({ ticketId }) => {
             <div className="mb-3 mt-[2px]">
                 <div className="relative w-[623px]" ref={dropdownRef}>
                     <div className="relative">
-                        {ALLOWED_EMPLOYEES_CRS.includes(user?.employee_email) && (
+                        {user?.department === "Customer Relations - Services" && (
                             <input
                                 type="text"
                                 value={search}
@@ -425,33 +425,54 @@ const AssignSidePanel = ({ ticketId }) => {
                             <div className="absolute w-[623px] min-h-[550px] space-y-2 border-t-0 border-gray-300 p-2 py-[20px] shadow-custom6 rounded-t-none rounded-[10px] bg-custom-grayF1 z-20">
                                 <div className="mb-4 flex flex-wrap gap-2 min-h-[26px]">
                                     {selectedOptions.map((option, index) => (
-                                        <div
-                                            key={index}
-                                            className="flex justify-between items-center text-xs bg-custom-solidgreen text-white min-w-[99px] h-[26px] rounded-full pr-[10px] pl-[10px]"
-                                        >
-                                            <span>{option.name}</span>
-                                            {user?.department === "Customer Relations - Services" && (
-                                                <button
-                                                    onClick={() =>
-                                                        removeTag(option)
-                                                    }
-                                                    className="ml-2 pb-[2px] border border-white text-[15px] text-white bg-custom-solidgreen rounded-full h-5 w-5 flex items-center justify-center"
+                                        <>
+                                            {option.employee_email ? (
+                                                <div
+                                                    key={index}
+                                                    className="flex justify-between items-center text-xs bg-custom-solidgreen text-white min-w-[99px] h-[26px] rounded-full pr-[10px] pl-[10px]"
                                                 >
-                                                    &times;
-                                                </button>
+                                                    <span className="flex-1 text-center">{option.name}</span>
+                                                    {ALLOWED_EMPLOYEES_CRS.includes(userLoggedInEmail) && (
+                                                        <button
+                                                            onClick={() =>
+                                                                removeTag(option)
+                                                            }
+                                                            className="ml-2 pb-[2px] border border-white text-[15px] text-white bg-custom-solidgreen rounded-full h-5 w-5 flex items-center justify-center  "
+                                                        >
+                                                            &times;
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            ) : (
+                                                <div
+                                                    key={index}
+                                                    className="flex justify-between items-center text-xs bg-custom-solidgreen text-white min-w-[99px] h-[26px] rounded-full pr-[10px] pl-[10px]"
+                                                >
+                                                    <span>{option.name}</span>
+                                                    {user?.department === "Customer Relations - Services" && (
+                                                        <button
+                                                            onClick={() =>
+                                                                removeTag(option)
+                                                            }
+                                                            className="ml-2 pb-[2px] border border-white text-[15px] text-white bg-custom-solidgreen rounded-full h-5 w-5 flex items-center justify-center"
+                                                        >
+                                                            &times;
+                                                        </button>
+                                                    )}
+                                                </div>
                                             )}
-                                        </div>
+                                        </>
                                     ))}
                                 </div>
                                 <ul className="flex flex-col space-y-2 max-h-[550px] overflow-auto">
                                     {filteredOptions.map((option, index) => {
+                                        console.log("option", option);
                                         const matchAssignee =
                                             assigneesPersonnel[ticketId]?.find(
                                                 (assignee) =>
                                                     assignee.employee_email ===
                                                     option.email
                                             );
-
                                         return (
                                             <li
                                                 key={index}
@@ -460,11 +481,12 @@ const AssignSidePanel = ({ ticketId }) => {
                                                 <div className="flex items-start py-[5px]">
                                                     <input
                                                         type="checkbox"
-                                                        /* checked={selectedOptions.some(
-                                                    (selected) =>
-                                                        selected.email ===
-                                                        option.email 
-                                                )} */
+                                                        disabled={
+                                                            assigneesPersonnel[ticketId]?.some(
+                                                                (assignee) => assignee.employee_email === option.email
+                                                            ) &&
+                                                            !ALLOWED_EMPLOYEES_CRS.includes(userLoggedInEmail)
+                                                        }
                                                         checked={
                                                             selectedOptions.some(
                                                                 (selected) =>
@@ -479,11 +501,17 @@ const AssignSidePanel = ({ ticketId }) => {
                                                                     option.email
                                                             )
                                                         }
+
                                                         onChange={() => {
-                                                            handleCheckboxChange(
-                                                                option,
-                                                                matchAssignee
-                                                            );
+                                                            // Allow the change only if the assignee is not pre-assigned OR if the user is in ALLOWED_EMPLOYEES_CRS
+                                                            if (
+                                                                !assigneesPersonnel[ticketId]?.some(
+                                                                    (assignee) => assignee.employee_email === option.email
+                                                                ) ||
+                                                                ALLOWED_EMPLOYEES_CRS.includes(userLoggedInEmail)
+                                                            ) {
+                                                                handleCheckboxChange(option, matchAssignee);
+                                                            }
                                                         }}
                                                         className="form-checkbox custom-checkbox accent-custom-lightgreen text-white"
                                                     />
