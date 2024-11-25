@@ -15,6 +15,7 @@ const TicketTable = ({ concernData }) => {
         setData,
         getInquiryLogs,
         getConcernMessages,
+        getNavBarData
     } = useStateContext();
     const handleCheckboxChange = (index) => {
         setCheckedRows((prevCheckedRows) =>
@@ -43,6 +44,7 @@ const TicketTable = ({ concernData }) => {
         getAllConcerns();
         getInquiryLogs(items.ticket_id);
         getConcernMessages();
+        getNavBarData();
         const encodedTicketId = encodeURIComponent(items.ticket_id);
         navigate(
             `/inquirymanagement/thread/${encodedTicketId}` , {
@@ -77,7 +79,6 @@ const TicketTable = ({ concernData }) => {
         }
     };
 
-    // console.log("concernData", concernData);
     useEffect(() => {
         getAllConcerns();
     }, []);

@@ -386,7 +386,7 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
                                     <option value="Complaint">Complaint</option>
                                     <option value="Request">Request</option>
                                     <option value="Inquiry">Inquiry</option>
-                                    <option value="Suggestion or recommendation">
+                                    <option value="Suggestion or Recommendation">
                                         Suggestion or Recommendation
                                     </option>
                                 </select>
