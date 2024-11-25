@@ -26,7 +26,7 @@ const handleUserModal = () => {
           <div className='montserrat-regular text-sm'>
             Specific Department
           </div>
-          <button onClick={handleDepartmentModal} className='h-[31px] w-[140px] py-[7px] px-[20px] gradient-btn5 text-white text-sm montserrat-medium rounded-[6px]'>
+          <button  onClick={handleDepartmentModal} className=' h-[31px] w-[140px] py-[7px] px-[20px] gradient-btn5 text-white text-sm montserrat-medium rounded-[6px]'>
             Add & Update
           </button>
         </div>
