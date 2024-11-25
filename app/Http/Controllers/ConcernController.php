@@ -490,6 +490,7 @@ class ConcernController extends Controller
             $concerns->buyer_email = $request->buyer_email;
             $concerns->communication_type = $request->type;
             $concerns->channels = $request->channels;
+            $concerns->suffix_name = $request->suffix;
             $concerns->inquiry_type = "from_admin";
             $concerns->save();
 
@@ -532,7 +533,8 @@ class ConcernController extends Controller
     public function addConcernFromPreviousInquiry(Request $request)
     {
         try {
-
+/* 
+            dd($request->all()); */
             $user = $request->user();
             $lastConcern = Concerns::latest()->first();
             $messageRef = Messages::where('ticket_id', $request->ticket_id)
@@ -545,6 +547,7 @@ class ConcernController extends Controller
             $ticketId = 'Ticket#24' . $formattedId;
 
 
+
             $concerns = new Concerns();
             $concerns->details_concern = $request->details_concern;
             $concerns->property = $request->property;
@@ -555,17 +558,17 @@ class ConcernController extends Controller
             if ($request->user_type === "Others") {
                 $concerns->user_type = $request->other_user_type;
             }
-            $concerns->buyer_name
-                = $request->fname . ' ' . $request->mname . ' ' .  $request->lname;
-            $concerns->buyer_firstname = $request->fname;
+            $concerns->buyer_name = $request->buyer_firstname . ' ' . $request->buyer_middlename . ' ' . $request->buyer_lastname;
+            $concerns->suffix_name= $request->suffix_name;
+            $concerns->buyer_firstname = $request->buyer_firstname;
             $concerns->buyer_middlename =
-                $request->mname;
-            $concerns->buyer_lastname = $request->lname;
+                $request->buyer_middlename;
+            $concerns->buyer_lastname = $request->buyer_lastname;
             $concerns->mobile_number = $request->mobile_number;
             $concerns->contract_number = $request->contract_number;
             $concerns->unit_number = $request->unit_number;
             $concerns->buyer_email = $request->buyer_email;
-            $concerns->communication_type = $request->type;
+            $concerns->communication_type = $request->communication_type;
             $concerns->channels = $request->channels;
             $concerns->inquiry_type = "new_ticket";
             $concerns->save();
@@ -881,6 +884,7 @@ class ConcernController extends Controller
             $this->applyFilters($query, $request, $employee);
 
             $latestLogs = $this->getLatestLogsSubquery();
+            $latestMessages = $this->getLatestMessage();
             $pinnedSubquery = $this->getPinnedConcernsSubquery($employee);
             $createdBySubQuery = ConcernsCreatedBy::select('concern_id', 'user_id as created_by');
 
@@ -894,7 +898,10 @@ class ConcernController extends Controller
                 ->leftJoinSub($createdBySubQuery, 'created_by_subquery', function ($join) {
                     $join->on('concerns.id', '=', 'created_by_subquery.concern_id');
                 })
-                ->select('concerns.*', 'latest_logs.message_log', DB::raw('CASE WHEN pinned.concern_id IS NOT NULL THEN 1 ELSE 0 END AS isPinned'), 'created_by_subquery.created_by')
+                ->leftJoinSub($latestMessages, 'latest_messages', function ($join) {
+                    $join->on('concerns.ticket_id', '=', 'latest_messages.ticket_id');
+                })
+                ->select('concerns.*', 'latest_logs.message_log', DB::raw('CASE WHEN pinned.concern_id IS NOT NULL THEN 1 ELSE 0 END AS isPinned'), 'created_by_subquery.created_by', 'latest_messages.latest_message')
                 ->paginate(20);
 
             return response()->json($allConcerns);
@@ -903,6 +910,16 @@ class ConcernController extends Controller
         }
     }
 
+
+    private function getLatestMessage()
+    {
+        return Messages::select('details_message as latest_message', 'ticket_id')
+            ->whereIn('id', function ($subquery) {
+                $subquery->select(DB::raw('MAX(id)'))
+                    ->from('messages')
+                    ->groupBy('ticket_id');
+            });
+    }
 
     private function applyFilters($query, Request $request, $employee)
     {
@@ -1002,6 +1019,8 @@ class ConcernController extends Controller
                     ->groupBy('ticket_id');
             });
     }
+
+  
 
     private function getPinnedConcernsSubquery($employee)
     {
@@ -1508,7 +1527,8 @@ class ConcernController extends Controller
                         'department' => $request->assign_by_department,
                         'buyer_name' => $concernData->buyer_name,
                         'assignee_name' => $selectedOption['name'],
-                        'adminLink'=> $adminLink
+                        'adminLink'=> $adminLink,
+                        'property' => $concernData->property
                     ];
                     $data = [
                         'ticketId' => $newTicketId,
@@ -2430,5 +2450,18 @@ class ConcernController extends Controller
         } catch (\Exception $e) {
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
         }
+    }
+
+    public function getNavBarData(Request $request)
+    {
+       try {
+        $ticketId = $request->ticketId;
+        $concernData = Concerns::where('ticket_id', $ticketId)->
+                                select('buyer_firstname', 'buyer_middlename', 'buyer_lastname', 'suffix_name', 'details_concern', 'property')
+                               ->first();
+        return response()->json($concernData);
+       } catch (\Exception $e) {
+           return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
+       }
     }
 }

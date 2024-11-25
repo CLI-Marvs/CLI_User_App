@@ -95,6 +95,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/notifications', [ConcernController::class, 'listOfNotifications']);
     Route::get('/unread-count', [ConcernController::class, 'countUnreadNotifications']);
     Route::post('/pin-concern/{id}', [ConcernController::class, 'pinConcern']);
+    Route::get('/navbar-data', [ConcernController::class, 'getNavBarData']);
     Route::post('/isread/{concernId}', [ConcernController::class, 'readNotifByUser']);
     Route::get('/specific-assignee', [ConcernController::class, 'getSpecificInquiry']);
     Route::post('/remove-assignee', [ConcernController::class, 'removeAssignee']);

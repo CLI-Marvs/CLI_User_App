@@ -15,6 +15,7 @@ const TicketTable = ({ concernData }) => {
         setData,
         getInquiryLogs,
         getConcernMessages,
+        getNavBarData
     } = useStateContext();
     const handleCheckboxChange = (index) => {
         setCheckedRows((prevCheckedRows) =>
@@ -43,6 +44,7 @@ const TicketTable = ({ concernData }) => {
         getAllConcerns();
         getInquiryLogs(items.ticket_id);
         getConcernMessages();
+        getNavBarData();
         const encodedTicketId = encodeURIComponent(items.ticket_id);
         navigate(
             `/inquirymanagement/thread/${encodedTicketId}` , {
@@ -225,7 +227,7 @@ const TicketTable = ({ concernData }) => {
                                     </span>
                                 </p>
                                 <p className="flex-1 truncate overflow-hidden text-sm text-gray-400">
-                                    {row.details_message.replace(
+                                    {row.latest_message.replace(
                                         /<br\s*\/?>/gi,
                                         " "
                                     )}
