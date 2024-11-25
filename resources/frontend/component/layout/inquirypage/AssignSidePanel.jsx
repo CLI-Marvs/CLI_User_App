@@ -32,7 +32,7 @@ const AssignSidePanel = ({ ticketId }) => {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
     const userLoggedInEmail = user?.employee_email;
-
+     
 
     const modalRef = useRef(null);
     const dropdownRef = useRef(null);
