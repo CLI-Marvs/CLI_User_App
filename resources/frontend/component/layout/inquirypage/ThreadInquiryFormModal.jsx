@@ -8,7 +8,6 @@ import CircularProgress from "@mui/material/CircularProgress";
 
 const ThreadInquiryFormModal = ({ modalRef, dataConcern, messageRef }) => {
     const attachmentData = JSON.parse(messageRef?.attachment || "[]");
-    console.log("attachmentData", attachmentData);
     const predefinedUserTypes = [
         "Property Owner",
         "Buyer",
@@ -25,6 +24,12 @@ const ThreadInquiryFormModal = ({ modalRef, dataConcern, messageRef }) => {
     const [isMiddleNameChecked, setIsMiddleNameChecked] = useState(false);
     const [isSuffixChecked, setIsSuffixChecked] = useState(false);
     const maxCharacters = 500;
+
+    useEffect(() => {
+        if (messageRef?.details_message) {
+            setMessage(messageRef.details_message); 
+        }
+    }, [messageRef?.details_message]); 
 
     const [dataToUpdate, setDataToUpdate] = useState({
         ticket_id: dataConcern.ticket_id,

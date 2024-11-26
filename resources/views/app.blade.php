@@ -5,7 +5,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CLI</title>
-    <link rel="icon" type="image/svg+xml" href="%PUBLIC_URL%/Images/CLI_Stacked2.svg">
     <link rel="icon" type="image/svg+xml" href="/Images/CLI_Stacked2.svg">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
