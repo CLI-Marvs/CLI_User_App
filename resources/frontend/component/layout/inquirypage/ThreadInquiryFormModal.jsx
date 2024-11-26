@@ -269,7 +269,7 @@ const ThreadInquiryFormModal = ({ modalRef, dataConcern, messageRef }) => {
                         )}
                         <div className="flex justify-center items-center my-2 mobile:mb-7 mobile:my-0">
                             <p className="montserrat-bold text-[19px] text-custom-solidgreen mobile:text-sm">
-                                Feedback / Inquiry Form
+                                Create New Ticket
                             </p>
                         </div>
 
