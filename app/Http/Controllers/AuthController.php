@@ -93,8 +93,9 @@ class AuthController extends Controller
 
             
             if (!$user) {
-                return redirect('/?error=' . urlencode('Email does not exist'));
-
+                // return redirect('/?error=' . urlencode('Email does not exist'));
+                return redirect('/?error=' .
+                urlencode('Email ' . $googleUser->email . ' doest not exist',));
             } else {
                 $user->update([
                     'google_id' => $googleUser->id,
