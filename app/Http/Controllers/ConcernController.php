@@ -39,6 +39,7 @@ use App\Jobs\MarkClosedToCustomerJob;
 use App\Jobs\MarkResolvedToCustomerJob;
 use Google\Cloud\Storage\StorageClient;
 use App\Jobs\BuyerReplyInResolveOrClose;
+use App\Jobs\SendFeedbackNotificationJob;
 use Illuminate\Pagination\LengthAwarePaginator;
 use App\Jobs\NotifyAssignedCliOfResolvedInquiryJob;
 
@@ -505,9 +506,12 @@ class ConcernController extends Controller
                     'details_concern' => $request->details_concern,
                     'property' => $request->property,
                     'unit_number' => $request->unit_number,
+                    'ticket_id' => $ticketId
+
                 ];
 
-                FeedbackJobToBuyer::dispatch($data, $request->buyer_email);
+                //Sending the email to the user
+                SendFeedbackNotificationJob::dispatch($data, $request->buyer_email);
             }
 
 
