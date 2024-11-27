@@ -31,19 +31,27 @@ class FeedbackReplyNotificationMail extends Mailable
      * Get the message envelope.
      * Create an envelope object for the message.
      */
+         
     public function envelope(): Envelope
     {
         Log::info('App URL: ' . config('services.app_url'));
 
         //Check Environment Based on app_url
-        
-        if(config('services.app_url') === 'http://localhost:8001' || config('services.app_url') === 'https://admin-dev.cebulandmasters.com') {
+
+        if (config('services.app_url') === 'http://localhost:8001') {
             return new Envelope(
                 from: new Address('ask@cebulandmasters.com', 'Cebu Landmasters Inc.'),
                 subject: "[Test] [CLI Inquiry] Transaction {$this->data['ticket_id']}",
             );
         }
 
+        if (config('services.app_url') === 'https://admin-dev.cebulandmasters.com') {
+            return new Envelope(
+                from: new Address('ask@cebulandmasters.com', 'Cebu Landmasters Inc.'),
+                subject: "[Test] [CLI Inquiry] Transaction {$this->data['ticket_id']}",
+            );
+        }
+        
         if (config('services.app_url') === 'https://admin-uat.cebulandmasters.com') {
             return new Envelope(
                 from: new Address('ask@cebulandmasters.com', 'Cebu Landmasters Inc.'),
