@@ -96,7 +96,6 @@ const ResolveModal = ({ modalRef, ticketId, dataRef, onupdate }) => {
             onupdate(updatedData); // Call handleUpdate with the updated data
             /* onupdate({...dataRef, status: "Resolved"}); */
             getAllConcerns();
-            console.log("sucess", response);
             //Close the modal
             if (modalRef.current) {
                 modalRef.current.close();

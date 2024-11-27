@@ -70,8 +70,6 @@ const AssignDetails = ({ logMessages, ticketId }) => {
             // If all files are valid, proceed with further processing
             setLoading(true);
         }
-        console.log('atachedFiles', attachedFiles);
-
 
         if (attachedFiles && attachedFiles.length > 0) {
             attachedFiles.forEach((file) => {
@@ -84,8 +82,6 @@ const AssignDetails = ({ logMessages, ticketId }) => {
         formData.append("message", message);
         formData.append("assignees", JSON.stringify(assigneesPersonnel[ticketId] || []));
         formData.append("admin_name", `${user?.firstname} ${user?.lastname}`);
-        console.log('formData', formData);
-
 
         if (message.trim()) {
             try {
@@ -110,7 +106,6 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                         "Content-Type": "multipart/form-data",
                     },
                 });
-                console.log("Response:", response);
                 setMessage("");
                 getConcernMessages();
                 setAttachedFiles([]);
@@ -125,7 +120,6 @@ const AssignDetails = ({ logMessages, ticketId }) => {
 
     };
 
-    // console.log("assignpersonales", assigneesPersonnel[ticketId]);
 
     useEffect(() => {
         getInquiryLogs(ticketId)
@@ -133,7 +127,6 @@ const AssignDetails = ({ logMessages, ticketId }) => {
 
     const concernChannelFunc = (channel) => {
         channel.listen("ConcernMessages", (event) => {
-            console.log("event", event);
             setConcernMessages((prevMessages) => {
                 const messagesForTicket = prevMessages[ticketId] || [];
                 if (
@@ -189,7 +182,6 @@ const AssignDetails = ({ logMessages, ticketId }) => {
      */
     const removeFile = (fileNameToDelete) => {
         if (fileNameToDelete) {
-            console.log("fileNameToDelete", fileNameToDelete);
             setAttachedFiles((prevFiles) =>
                 prevFiles.filter((file) => file.name !== fileNameToDelete)
             );
@@ -198,7 +190,6 @@ const AssignDetails = ({ logMessages, ticketId }) => {
 
     const adminReplyChannelFunc = (channel) => {
         channel.listen("AdminReplyLogs", (event) => {
-            console.log("event reply logs data", event.data);
             setLogs((prevLogs) => {
                 const prevLogsReply = prevLogs[ticketId] || [];
                 if (prevLogsReply.find((log) => log.id === event.data.logId)) {
@@ -1094,7 +1085,6 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                         const attachments = item.attachment
                             ? JSON.parse(item.attachment)
                             : [];
-                        // console.log("attachments", attachments);
                         const alternatingBackground =
                             index % 2 === 0 ? "bg-white" : "bg-custom-grayF1";
                         if (item.type === "concern") {

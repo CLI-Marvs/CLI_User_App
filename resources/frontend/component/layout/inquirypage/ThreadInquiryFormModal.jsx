@@ -30,6 +30,14 @@ const ThreadInquiryFormModal = ({ modalRef, dataConcern, messageRef }) => {
             setMessage(messageRef.details_message); 
         }
     }, [messageRef?.details_message]); 
+    
+    useEffect(() => {
+        setIsMiddleNameChecked(!dataConcern.buyer_middlename);
+    }, [dataConcern]);
+
+    useEffect(() => {
+        setIsSuffixChecked(!dataConcern.suffix_name);
+    }, [dataConcern]);
 
     const [dataToUpdate, setDataToUpdate] = useState({
         ticket_id: dataConcern.ticket_id,
@@ -236,16 +244,7 @@ const ThreadInquiryFormModal = ({ modalRef, dataConcern, messageRef }) => {
             console.log("error", error);
         }
     };
-
-    useEffect(() => {
-        setIsMiddleNameChecked(!dataConcern.buyer_middlename);
-    }, [dataConcern]);
-
-    useEffect(() => {
-        setIsSuffixChecked(!dataConcern.suffix_name);
-    }, [dataConcern]);
-
-
+  
     return (
         <dialog
             id="Employment"

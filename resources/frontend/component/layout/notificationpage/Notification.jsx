@@ -75,10 +75,6 @@ const Notification = () => {
         }
     };
 
-    console.log("activeButton", activeButton);
-    console.log("notifStatus", notifStatus);
-
-
     useEffect(() => {
         getNotifications();
     }, []);

@@ -93,14 +93,12 @@ const AssignSidePanel = ({ ticketId }) => {
     };
 
     const removeTag = (option) => {
-        console.log("option", option);
         if (
             option.employee_email ||
             option.fromEvent ||
             option.name ||
             option.department
         ) {
-            console.log("trigger first");
             removeAssignee(
                 option.ticketId,
                 option.employee_email,
@@ -108,7 +106,6 @@ const AssignSidePanel = ({ ticketId }) => {
                 option.department
             );
         } else {
-            console.log("trigger second");
             setSelectedOptions((prevSelected) =>
                 prevSelected.filter((item) => item !== option)
             );
@@ -192,7 +189,6 @@ const AssignSidePanel = ({ ticketId }) => {
                     /*  details_concern: dataConcern.details_concern,
                      buyer_name: dataConcern.buyer_name, */
                 });
-                console.log("Assignees saved successfully:", response);
             } else {
                 console.log("No new assignees to save");
             }
@@ -207,7 +203,6 @@ const AssignSidePanel = ({ ticketId }) => {
     };
 
     const removeAssignee = async (ticket, email, name, department) => {
-        console.log("ticket", ticket, email, name, department);
         try {
             const response = await apiService.post("remove-assignee", {
                 ticketId: ticket,
@@ -224,8 +219,6 @@ const AssignSidePanel = ({ ticketId }) => {
                 getInquiryLogs(ticketId);
                 getAssigneesPersonnel();
             }
-
-            console.log("Assignee removed:", response);
         } catch (error) {
             console.log("Error removing assignee:", error);
         }
@@ -243,12 +236,8 @@ const AssignSidePanel = ({ ticketId }) => {
         }
     }, [assigneesPersonnel[ticketId]]);
 
-
-    console.log("assigneesPersonnel", assigneesPersonnel[ticketId]);  
-
     const assigneeChannelFunc = (channel) => {
         channel.listen("RetrieveAssignees", (event) => {
-            console.log("event data for assigning", event.data);
             setAssigneesPersonnel((prevAssignees) => {
                 const prevAssigneesTicket = prevAssignees[ticketId] || [];
                 if (
@@ -269,7 +258,6 @@ const AssignSidePanel = ({ ticketId }) => {
 
     const removeAChannelFunc = (channel) => {
         channel.listen("RemoveAssignees", (event) => {
-            console.log("event data for removing", event.data);
             setAssigneesPersonnel((prevAssignees) => {
                 const prevAssigneess = prevAssignees[ticketId] || [];
                 const updatedAssignees = prevAssigneess.filter(
@@ -353,7 +341,6 @@ const AssignSidePanel = ({ ticketId }) => {
             }
         };
     }, [ticketId]);
-    //console.log("assignpersonnel", assigneesPersonnel[ticketId]);
     return (
         <>
             <div className="mb-3 mt-[2px]">
@@ -469,7 +456,6 @@ const AssignSidePanel = ({ ticketId }) => {
                                 </div>
                                 <ul className="flex flex-col space-y-2 max-h-[550px] overflow-auto">
                                     {filteredOptions.map((option, index) => {
-                                        console.log("option", option);
                                         const matchAssignee =
                                             assigneesPersonnel[ticketId]?.find(
                                                 (assignee) =>

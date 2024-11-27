@@ -747,8 +747,6 @@ export const ContextProvider = ({ children }) => {
                 inquriesPerChannelData,
                 navBarData,
                 getNavBarData,
-                loading
-               
             }}
 
         >
