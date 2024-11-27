@@ -901,7 +901,13 @@ class ConcernController extends Controller
                 ->leftJoinSub($latestMessages, 'latest_messages', function ($join) {
                     $join->on('concerns.ticket_id', '=', 'latest_messages.ticket_id');
                 })
-                ->select('concerns.*', 'latest_logs.message_log', DB::raw('CASE WHEN pinned.concern_id IS NOT NULL THEN 1 ELSE 0 END AS isPinned'), 'created_by_subquery.created_by', 'latest_messages.latest_message')
+                ->select(
+                        'concerns.*', 
+                        'latest_logs.message_log', 
+                        DB::raw('CASE WHEN pinned.concern_id IS NOT NULL THEN 1 ELSE 0 END AS isPinned'), 
+                        'created_by_subquery.created_by', 
+                        'latest_messages.latest_message'
+                         )
                 ->paginate(20);
 
             return response()->json($allConcerns);
@@ -2457,7 +2463,7 @@ class ConcernController extends Controller
        try {
         $ticketId = $request->ticketId;
         $concernData = Concerns::where('ticket_id', $ticketId)->
-                                select('buyer_firstname', 'buyer_middlename', 'buyer_lastname', 'suffix_name', 'details_concern', 'property')
+                                select('buyer_firstname', 'buyer_middlename', 'buyer_lastname', 'suffix_name', 'details_concern', 'property', 'ticket_id')
                                ->first();
         return response()->json($concernData);
        } catch (\Exception $e) {

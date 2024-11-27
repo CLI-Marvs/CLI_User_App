@@ -243,6 +243,9 @@ const AssignSidePanel = ({ ticketId }) => {
         }
     }, [assigneesPersonnel[ticketId]]);
 
+
+    console.log("assigneesPersonnel", assigneesPersonnel[ticketId]);  
+
     const assigneeChannelFunc = (channel) => {
         channel.listen("RetrieveAssignees", (event) => {
             console.log("event data for assigning", event.data);

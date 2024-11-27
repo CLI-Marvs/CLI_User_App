@@ -12,6 +12,10 @@ import CircularProgress from "@mui/material/CircularProgress";
 
 import { FaTrash } from "react-icons/fa";
 import { Link } from "react-router-dom";
+
+import Skeleton from 'react-loading-skeleton'
+import 'react-loading-skeleton/dist/skeleton.css'
+
 const AssignDetails = ({ logMessages, ticketId }) => {
     const {
         user,
@@ -330,6 +334,7 @@ const AssignDetails = ({ logMessages, ticketId }) => {
 
     const renderDetails = (actionType, details, inquiry_createdAt) => {
 
+     
         switch (actionType) {
             case "admin_reply":
                 return (
@@ -1228,7 +1233,15 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                         return null;
                     })
                 ) : (
-                    <div></div>
+                 <div className="flex flex-col gap-[20px] py-[20px] px-[30px]">
+                    {[...Array(5)].map((_, idx) => (
+                        <div className="flex flex-col gap-[10px]" key={idx}>
+                            <Skeleton height={20} width="80%" />
+                            <Skeleton height={20} width="80%" />
+                            <Skeleton height={50} width="100%" />
+                        </div>
+                    ))}
+                </div>
                 )}
             </div>
         </>
