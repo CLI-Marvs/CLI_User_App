@@ -466,9 +466,14 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                                     )}
                                 </span>
                             </div>
-                            <div className="w-full h-auto min-h-[39px] border-[2px] border-custom-grayF1 bg-white p-[10px] rounded-[10px] mb-[10px]">
+                            {details.remarks && (
+                                <div className="w-full h-auto min-h-[39px] border-[2px] border-custom-grayF1 bg-white p-[10px] rounded-[10px] mb-[10px]">
+                                    <p className="text-sm break-words whitespace-pre-wrap">{details.remarks}</p>
+                                </div>
+                            )}
+                            {/* <div className="w-full h-auto min-h-[39px] border-[2px] border-custom-grayF1 bg-white p-[10px] rounded-[10px] mb-[10px]">
                                 <p className="text-sm break-words whitespace-pre-wrap">{details.remarks}</p>
-                            </div>
+                            </div> */}
                             <div>
                                 {details?.message_tag === 'Marked as resolved by' ? (
                                     <p className="text-custom-solidgreen mb-1">

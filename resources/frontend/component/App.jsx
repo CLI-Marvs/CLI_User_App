@@ -41,6 +41,7 @@ import AutoAssignView from "./views/pages/raiseaconcernViews/AutoAssignView";
 import UserRightsAndPermissionsView from "./views/pages/userrightsandpermissionsViews/UserRightsAndPermissionsView";
 import FallbackLoader from './FallbackLoader';
 import PreloadWrapper from "./PreloadWrapper";
+import BannerSettingsView from './views/pages/bannersettingsViews/BannerSettingsView';
 
 // PrivateRoute component to check authentication
 const PrivateRoute = () => {
@@ -357,6 +358,10 @@ const App = () => {
                                     element: <ReservationPageView />,
                                 },
                             ],
+                        },
+                        {
+                            path: "bannersettings",
+                            element: <BannerSettingsView />,
                         },
                         {
                             path: "adminsettings",
