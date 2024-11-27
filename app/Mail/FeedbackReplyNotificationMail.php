@@ -34,8 +34,7 @@ class FeedbackReplyNotificationMail extends Mailable
          
     public function envelope(): Envelope
     {
-        Log::info('App URL: ' . config('services.app_url'));
-
+    
         //Check Environment Based on app_url
 
         if (config('services.app_url') === 'http://localhost:8001') {
