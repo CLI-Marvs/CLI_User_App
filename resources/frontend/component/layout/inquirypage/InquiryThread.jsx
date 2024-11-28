@@ -3,7 +3,7 @@ import Backbtn from "../../../../../public/Images/Expand_up.svg";
 import { FaTrash } from "react-icons/fa";
 import UserMessages from "./UserMessages";
 import AdminMessages from "./AdminMessages";
-import { BsPaperclip } from "react-icons/bs";
+import { BsPaperclip, BsDownload } from "react-icons/bs";
 import { IoIosArrowDown } from "react-icons/io";
 import AssignSidePanel from "./AssignSidePanel";
 import ResolveModal from "./ResolveModal";
