@@ -6,7 +6,7 @@ import TextField from "@mui/material/TextField";
 import Autocomplete from "@mui/material/Autocomplete";
 import apiService from "../../servicesApi/apiService";
 import { AiFillInfoCircle } from "react-icons/ai";
-import { ALLOWED_EMPLOYEES_CRS } from '../../../constant/data/allowedEmployeesCRS';
+import { ALLOWED_EMPLOYEES_CRS } from "../../../constant/data/allowedEmployeesCRS";
 
 const AssignSidePanel = ({ ticketId }) => {
     const {
@@ -32,7 +32,7 @@ const AssignSidePanel = ({ ticketId }) => {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
     const userLoggedInEmail = user?.employee_email;
-     
+    console.log("selectedOptions", selectedOptions);
 
     const modalRef = useRef(null);
     const dropdownRef = useRef(null);
@@ -93,12 +93,7 @@ const AssignSidePanel = ({ ticketId }) => {
     };
 
     const removeTag = (option) => {
-        if (
-            option.employee_email ||
-            option.fromEvent ||
-            option.name ||
-            option.department
-        ) {
+        if (option.employee_email) {
             removeAssignee(
                 option.ticketId,
                 option.employee_email,
@@ -231,7 +226,7 @@ const AssignSidePanel = ({ ticketId }) => {
 
     useEffect(() => {
         if (assigneesPersonnel[ticketId]) {
-            const assignees = assigneesPersonnel[ticketId]; 
+            const assignees = assigneesPersonnel[ticketId];
             setSelectedOptions(assignees);
         }
     }, [assigneesPersonnel, ticketId]);
@@ -346,23 +341,24 @@ const AssignSidePanel = ({ ticketId }) => {
             <div className="mb-3 mt-[2px]">
                 <div className="relative w-[623px]" ref={dropdownRef}>
                     <div className="relative">
-                        {user?.department === "Customer Relations - Services" && (
+                        {user?.department ===
+                            "Customer Relations - Services" && (
                             <input
                                 type="text"
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
                                 placeholder="Assign to..."
                                 className={` 
-                            ${isDropdownOpen
-                                        ? "rounded-[10px] rounded-b-none"
-                                        : "rounded-[10px]"
-                                    }
+                            ${
+                                isDropdownOpen
+                                    ? "rounded-[10px] rounded-b-none"
+                                    : "rounded-[10px]"
+                            }
                         
                                  h-[48px] px-[20px] pr-[40px] rounded-[10px] bg-custom-grayF1 w-full outline-none`}
                                 onFocus={() => setIsDropdownOpen(true)}
                             />
                         )}
-
 
                         {/* Absolute button inside the input, aligned to the right */}
                         {isDropdownOpen && (
@@ -421,11 +417,17 @@ const AssignSidePanel = ({ ticketId }) => {
                                                     key={index}
                                                     className="flex justify-between items-center text-xs bg-custom-solidgreen text-white min-w-[99px] h-[26px] rounded-full pr-[10px] pl-[10px]"
                                                 >
-                                                    <span className="flex-1 text-center">{option.name}</span>
-                                                    {ALLOWED_EMPLOYEES_CRS.includes(userLoggedInEmail) && (
+                                                    <span className="flex-1 text-center">
+                                                        {option.name}
+                                                    </span>
+                                                    {ALLOWED_EMPLOYEES_CRS.includes(
+                                                        userLoggedInEmail
+                                                    ) && (
                                                         <button
                                                             onClick={() =>
-                                                                removeTag(option)
+                                                                removeTag(
+                                                                    option
+                                                                )
                                                             }
                                                             className="ml-2 pb-[2px] border border-white text-[15px] text-white bg-custom-solidgreen rounded-full h-5 w-5 flex items-center justify-center  "
                                                         >
@@ -439,10 +441,13 @@ const AssignSidePanel = ({ ticketId }) => {
                                                     className="flex justify-between items-center text-xs bg-custom-solidgreen text-white min-w-[99px] h-[26px] rounded-full pr-[10px] pl-[10px]"
                                                 >
                                                     <span>{option.name}</span>
-                                                    {user?.department === "Customer Relations - Services" && (
+                                                    {user?.department ===
+                                                        "Customer Relations - Services" && (
                                                         <button
                                                             onClick={() =>
-                                                                removeTag(option)
+                                                                removeTag(
+                                                                    option
+                                                                )
                                                             }
                                                             className="ml-2 pb-[2px] border border-white text-[15px] text-white bg-custom-solidgreen rounded-full h-5 w-5 flex items-center justify-center"
                                                         >
@@ -471,10 +476,16 @@ const AssignSidePanel = ({ ticketId }) => {
                                                     <input
                                                         type="checkbox"
                                                         disabled={
-                                                            assigneesPersonnel[ticketId]?.some(
-                                                                (assignee) => assignee.employee_email === option.email
+                                                            assigneesPersonnel[
+                                                                ticketId
+                                                            ]?.some(
+                                                                (assignee) =>
+                                                                    assignee.employee_email ===
+                                                                    option.email
                                                             ) &&
-                                                            !ALLOWED_EMPLOYEES_CRS.includes(userLoggedInEmail)
+                                                            !ALLOWED_EMPLOYEES_CRS.includes(
+                                                                userLoggedInEmail
+                                                            )
                                                         }
                                                         checked={
                                                             selectedOptions.some(
@@ -490,16 +501,26 @@ const AssignSidePanel = ({ ticketId }) => {
                                                                     option.email
                                                             )
                                                         }
-
                                                         onChange={() => {
                                                             // Allow the change only if the assignee is not pre-assigned OR if the user is in ALLOWED_EMPLOYEES_CRS
                                                             if (
-                                                                !assigneesPersonnel[ticketId]?.some(
-                                                                    (assignee) => assignee.employee_email === option.email
+                                                                !assigneesPersonnel[
+                                                                    ticketId
+                                                                ]?.some(
+                                                                    (
+                                                                        assignee
+                                                                    ) =>
+                                                                        assignee.employee_email ===
+                                                                        option.email
                                                                 ) ||
-                                                                ALLOWED_EMPLOYEES_CRS.includes(userLoggedInEmail)
+                                                                ALLOWED_EMPLOYEES_CRS.includes(
+                                                                    userLoggedInEmail
+                                                                )
                                                             ) {
-                                                                handleCheckboxChange(option, matchAssignee);
+                                                                handleCheckboxChange(
+                                                                    option,
+                                                                    matchAssignee
+                                                                );
                                                             }
                                                         }}
                                                         className="form-checkbox custom-checkbox accent-custom-lightgreen text-white"
@@ -582,7 +603,9 @@ const AssignSidePanel = ({ ticketId }) => {
                                             className="bg-custom-lightgreen text-white rounded-full px-3 py-1 text-xs flex-shrink-0 flex mb-[4px]"
                                         >
                                             {assignee.name}
-                                            {ALLOWED_EMPLOYEES_CRS.includes(userLoggedInEmail) && (
+                                            {ALLOWED_EMPLOYEES_CRS.includes(
+                                                userLoggedInEmail
+                                            ) && (
                                                 <button
                                                     onClick={() =>
                                                         removeTag(assignee)
