@@ -715,34 +715,30 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                                 )}
 
                                 {/*User type*/}
-                                {(details.buyer_old_data.user_type !== details.buyer_updated_data.user_type) && (
+                                {details.buyer_old_data.user_type !== details.buyer_updated_data.user_type ||
+                                    (details.buyer_old_data.other_user_type !== details.buyer_updated_data.other_user_type &&
+                                        details.buyer_updated_data.user_type === "Others") ? (
                                     <p className="text-sm text-custom-bluegreen">
                                         User Type:
-                                        {details.buyer_old_data.user_type &&
-                                            details.buyer_old_data.user_type !== details.buyer_updated_data.user_type ? (
+                                        {details.buyer_old_data.user_type && details.buyer_updated_data.user_type ? (
                                             <>
                                                 <span className="text-custom-grayA5">{" "}From{" "}{"{"}</span>
                                                 <span className="text-red-500">
-                                                    {" "}{details.buyer_old_data.user_type}{" "}
+                                                    {details.buyer_old_data.user_type === "Others"
+                                                        ? details.buyer_old_data.other_user_type
+                                                        : details.buyer_old_data.user_type}
                                                 </span>
                                                 <span className="text-custom-grayA5">{"}"}{" "}To{" "}{"{"}</span>
                                                 <span className="text-black">
-                                                    {" "}{details.buyer_updated_data.user_type === "Others" ? details.buyer_updated_data.other_user_type : details.buyer_updated_data.user_type}{" "}
+                                                    {details.buyer_updated_data.user_type === "Others"
+                                                        ? details.buyer_updated_data.other_user_type
+                                                        : details.buyer_updated_data.user_type}
                                                 </span>
                                                 <span className="text-custom-grayA5">{"}"}</span>
                                             </>
-                                        ) : (
-                                            <>
-                                                <span className="text-custom-grayA5">
-                                                    {details.buyer_old_data.user_type ? " " : " Added "}
-                                                </span>
-                                                <span className="text-black">
-                                                    {" "}{details.buyer_updated_data.user_type === "Others" ? details.buyer_updated_data.other_user_type : details.buyer_updated_data.user_type}{" "}
-                                                </span>
-                                            </>
-                                        )}
+                                        ) : null}
                                     </p>
-                                )}
+                                ) : null}
 
                                 {/* Communication type */}
                                 {(details.buyer_old_data.communication_type !== details.buyer_updated_data.communication_type) && (
