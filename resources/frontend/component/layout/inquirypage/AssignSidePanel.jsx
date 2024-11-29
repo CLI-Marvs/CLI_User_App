@@ -32,6 +32,7 @@ const AssignSidePanel = ({ ticketId }) => {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
     const userLoggedInEmail = user?.employee_email;
+ 
 
     const modalRef = useRef(null);
     const dropdownRef = useRef(null);
@@ -92,12 +93,7 @@ const AssignSidePanel = ({ ticketId }) => {
     };
 
     const removeTag = (option) => {
-        if (
-            option.employee_email ||
-            option.fromEvent ||
-            option.name ||
-            option.department
-        ) {
+        if (option.employee_email) {
             removeAssignee(
                 option.ticketId,
                 option.employee_email,
