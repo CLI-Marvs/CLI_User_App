@@ -300,19 +300,14 @@ const InquiryFormModal = ({ modalRef }) => {
                 setLoading(false);
                 setFiles([]);
             } catch (error) {
-                console.log("error saving concerns", error);
-                console.log("error saving concerns", error.response);
-
                 if (error.response) {
                     if (error?.response?.status === 422) {
                         const validationErrors = error.response?.data.error;
-                        console.log("180", error.response?.data.error);
                         setHasErrors(false);
                         setLoading(false);
                     }
                 }
                 {
-                    console.log("192");
                     setHasErrors(true);
                     setResetSuccess(false);
                 }
@@ -326,8 +321,7 @@ const InquiryFormModal = ({ modalRef }) => {
                 //setIsValid(false);
                 setResetSuccess(false);
                 setHasErrors(false);
-            }
-            console.log("Form validation failed");
+            };
         }
     };
 

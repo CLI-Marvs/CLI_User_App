@@ -419,10 +419,10 @@ const AutoAssign = () => {
           </table>
         </div>
         <div className='w-[1122px] h-auto mt-[10px] flex justify-center'>
-            <button className='h-[51px] w-[52px] flex justify-center items-center gradient-btn rounded-full text-white text-sm'>
-              <IoMdAdd className='text-[30px]' />
-            </button>   
-          </div>
+          <button className='h-[51px] w-[52px] flex justify-center items-center gradient-btn rounded-full text-white text-sm'>
+            <IoMdAdd className='text-[30px]' />
+          </button>
+        </div>
       </div>
     </div>
   )

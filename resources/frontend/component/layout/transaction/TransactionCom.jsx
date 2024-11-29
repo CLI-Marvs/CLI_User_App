@@ -49,7 +49,6 @@ const TransactionCom = () => {
         setFilterDueDate(formattedDate);
         setIsDate(date);
     };
-    console.log("startDate", sapDate);
 
     const sendSoapRequest = async () => {
         setSapLoader(true);
@@ -66,7 +65,6 @@ const TransactionCom = () => {
 
         try {
             const response = await apiServiceSap.post("proxy-sap", soapBody);
-            console.log("Response:", response.data);
             getInvoices();
             setSapLoader(false);
             toast.success("Data retrieved from SAP successfully!");

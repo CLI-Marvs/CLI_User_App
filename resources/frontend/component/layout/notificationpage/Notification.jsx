@@ -75,13 +75,13 @@ const Notification = () => {
         }
     };
 
-    console.log("activeButton", activeButton);
-    console.log("notifStatus", notifStatus);
-
+    /* useEffect(() => {
+        getNotifications();
+    }, []); */
 
     useEffect(() => {
         getNotifications();
-    }, []);
+    }, [notifCurrentPage, notifStatus]);
 
     useEffect(() => {
         setNotifStatus("All");

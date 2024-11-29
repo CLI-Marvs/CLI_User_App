@@ -79,9 +79,9 @@ const TicketTable = ({ concernData }) => {
         }
     };
 
-    useEffect(() => {
+   /*  useEffect(() => {
         getAllConcerns();
-    }, []);
+    }, []); */
     return (
         <table className="flex flex-col gap-1 w-full">
             <tbody>
@@ -227,7 +227,7 @@ const TicketTable = ({ concernData }) => {
                                     </span>
                                 </p>
                                 <p className="flex-1 truncate overflow-hidden text-sm text-gray-400">
-                                    {row.latest_message.replace(
+                                    {row.latest_message && row.latest_message.replace(
                                         /<br\s*\/?>/gi,
                                         " "
                                     )}
