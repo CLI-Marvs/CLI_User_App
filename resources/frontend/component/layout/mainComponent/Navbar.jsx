@@ -16,7 +16,7 @@ import Skeleton from 'react-loading-skeleton'
 import 'react-loading-skeleton/dist/skeleton.css'
 
 const Navbar = () => {
-    const { data, ticketId, navBarData, loading, user } = useStateContext();
+    const { data, ticketId, navBarData, loading, user, getNavBarData } = useStateContext();
     const [isOpen, setIsOpen] = useState(false);
     const location = useLocation();
     const modalRef = useRef(null);
@@ -41,6 +41,11 @@ const Navbar = () => {
             document.removeEventListener("mousedown", handleClickOutside);
         };
     }, [isOpen]);
+
+
+    useEffect(() => {
+        getNavBarData();
+    }, [ticketId]);
 
 
     const capitalizeWords = (name) => {
@@ -183,7 +188,7 @@ const Navbar = () => {
         }
     };
 
-
+   
     return (
         <>
             <div className="flex h-[100px] pr-16 w-screen bg-custom-grayFA">

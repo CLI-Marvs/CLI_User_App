@@ -231,10 +231,10 @@ const AssignSidePanel = ({ ticketId }) => {
 
     useEffect(() => {
         if (assigneesPersonnel[ticketId]) {
-            const assignees = assigneesPersonnel[ticketId]; /* || [] */
+            const assignees = assigneesPersonnel[ticketId]; 
             setSelectedOptions(assignees);
         }
-    }, [assigneesPersonnel[ticketId]]);
+    }, [assigneesPersonnel, ticketId]);
 
     const assigneeChannelFunc = (channel) => {
         channel.listen("RetrieveAssignees", (event) => {

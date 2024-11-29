@@ -75,9 +75,13 @@ const Notification = () => {
         }
     };
 
+    /* useEffect(() => {
+        getNotifications();
+    }, []); */
+
     useEffect(() => {
         getNotifications();
-    }, []);
+    }, [notifCurrentPage, notifStatus]);
 
     useEffect(() => {
         setNotifStatus("All");

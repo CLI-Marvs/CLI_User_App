@@ -295,6 +295,7 @@ const InquiryList = () => {
 
     useEffect(() => {
         updateLastActivity();
+        getAllConcerns();
     }, [
         searchFilter,
         statusFilter,
@@ -302,6 +303,8 @@ const InquiryList = () => {
         specificAssigneeCsr,
         currentPage,
     ]);
+
+    console.log("loading", loading);
 
     return (
         <>
@@ -784,13 +787,30 @@ const InquiryList = () => {
                         </div>
                     </div>
                     <div className="w-[1260px]">
-                        {data && data.length === 0 ? (
-                            <p className="text-center text-gray-500 py-4">
-                                No records found.
-                            </p>
+                       {/*  {loading ? (
+                            <>
+                             <p className="text-center">
+                               <Spinner/>
+                             </p>
+                            </>
                         ) : (
-                            <TicketTable concernData={data || []} />
-                        )}
+                           <>
+                            {data && data.length === 0 ? (
+                                <p className="text-center text-gray-500 py-4">
+                                    No records found.
+                                </p>
+                            ) : (
+                                <TicketTable concernData={data || []} />
+                            )}
+                           </>
+                        )} */}
+                        {data && data.length === 0 ? (
+                                <p className="text-center text-gray-500 py-4">
+                                    No records found.
+                                </p>
+                            ) : (
+                                <TicketTable concernData={data || []} />
+                            )}
                     </div>
                     <div className="flex justify-end items-center h-12 px-6 gap-2 bg-white rounded-b-lg">
                         <p className="text-sm text-gray-400 hidden">
