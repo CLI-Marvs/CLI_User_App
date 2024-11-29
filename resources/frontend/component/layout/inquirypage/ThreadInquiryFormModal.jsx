@@ -171,6 +171,14 @@ const ThreadInquiryFormModal = ({ modalRef, dataConcern, messageRef }) => {
                     [name]: value,
                 };
             }
+
+            if (name === "mobile_number") {
+                const value = e.target.value.replace(/\D/g, "");
+                return {
+                    ...prevState,
+                    [name]: value,
+                };
+            }
             return {
                 ...prevState,
                 [name]: value,
@@ -447,11 +455,16 @@ const ThreadInquiryFormModal = ({ modalRef, dataConcern, messageRef }) => {
                             </span>
                             <input
                                 name="mobile_number"
-                                type="number"
                                 className="w-full px-4 text-sm focus:outline-none mobile:text-xs"
                                 placeholder=""
                                 value={dataToUpdate.mobile_number || ""}
-                                onChange={handleChange}
+                                onChange={(e) => {
+                                    if (
+                                        e.target.value.length <= 13
+                                    ) {
+                                        handleChange(e);
+                                    }
+                                }}
                             />
                         </div>
                         <div
