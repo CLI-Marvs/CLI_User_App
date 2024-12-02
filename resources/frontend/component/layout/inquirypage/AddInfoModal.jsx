@@ -4,7 +4,7 @@ import apiService from "../../servicesApi/apiService";
 import { useStateContext } from "../../../context/contextprovider";
 import Alert from "../mainComponent/Alert";
 import { showToast } from "../../../util/toastUtil"
-
+import _ from "lodash";
 const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
     const predefinedUserTypes = ["Property Owner", "Buyer", "Broker", "Seller", "Lessee"];
     const { getAllConcerns, propertyNamesList, updateConcern, user, getInquiryLogs } =
@@ -51,41 +51,55 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
     /* Buyers old data to be used in AssignDetails.jsx 
      * to compare the values and show the differences
      */
-    // const buyerOldData = {
-    //     buyer_firstname: dataConcern.buyer_firstname,
-    //     buyer_lastname: dataConcern.buyer_lastname,
-    //     buyer_middlename: dataConcern.buyer_middlename,
-    //     details_concern: dataConcern.details_concern,
-    //     suffix_name: dataConcern.suffix_name,
-    //     buyer_email: dataConcern.buyer_email,
-    //     mobile_number: dataConcern.mobile_number,
-    //     // user_type: dataConcern.user_type === "Others" ? dataConcern.user_type : dataConcern.user_type,
-    //     user_type: dataConcern.user_type || "",
-    //     channels: dataConcern.channels,
-    //     other_user_type: dataConcern.user_type === "Others" ? dataConcern.other_user_type : dataConcern.user_type,
-    //     communication_type: dataConcern.communication_type,
-    //     contract_number: dataConcern.contract_number,
-    //     property: dataConcern.property,
-    //     unit_number: dataConcern.unit_number,
-    //     admin_remarks: dataConcern.admin_remarks,
-    // };
     const buyerOldData = {
-        buyer_firstname: dataConcern.buyer_firstname || "",
-        buyer_lastname: dataConcern.buyer_lastname || "",
-        buyer_middlename: dataConcern.buyer_middlename || "",
+        ticket_id: dataConcern.ticket_id,
         details_concern: dataConcern.details_concern || "",
-        suffix_name: dataConcern.suffix_name || "",
+        contract_number: dataConcern.contract_number || "",
+        unit_number: dataConcern.unit_number || "",
+        property: dataConcern.property || "",
+        admin_remarks: dataConcern.admin_remarks || "",
         buyer_email: dataConcern.buyer_email || "",
         mobile_number: dataConcern.mobile_number || "",
-        user_type: dataConcern.user_type || "",
-        channels: dataConcern.channels || "",
-        other_user_type: dataConcern.user_type === "Others" ? dataConcern.other_user_type || "" : "",
+        buyer_firstname: dataConcern.buyer_firstname || "",
+        buyer_middlename: dataConcern.buyer_middlename || "",
+        buyer_lastname: dataConcern.buyer_lastname || "",
+        suffix_name: dataConcern.suffix_name || "",
         communication_type: dataConcern.communication_type || "",
-        contract_number: dataConcern.contract_number || "",
-        property: dataConcern.property || "",
-        unit_number: dataConcern.unit_number || "",
-        admin_remarks: dataConcern.admin_remarks || "",
+        channels: dataConcern.channels || "",
+        user_type: dataConcern.user_type || "",
+        other_user_type: dataConcern.user_type === "Others" ? dataConcern.other_user_type || "" : "",
     };
+    
+    // Strip out fields that you don't want to compare (like `id`, `status`, `created_at`, `updated_at`, etc.)
+    const normalizeData = (data) => {
+        return {
+            ticket_id: data.ticket_id,
+            details_concern: data.details_concern || "",
+            contract_number: data.contract_number || "",
+            unit_number: data.unit_number || "",
+            property: data.property || "",
+            admin_remarks: data.admin_remarks || "",
+            buyer_email: data.buyer_email || "",
+            mobile_number: data.mobile_number || "",
+            buyer_firstname: data.buyer_firstname || "",
+            buyer_middlename: data.buyer_middlename || "",
+            buyer_lastname: data.buyer_lastname || "",
+            suffix_name: data.suffix_name || "",
+            communication_type: data.communication_type || "",
+            channels: data.channels || "",
+            user_type: data.user_type || "",
+            other_user_type: data.other_user_type || ""
+        };
+    };
+    // Normalized data for comparison
+    const normalizedBuyerOldData = normalizeData(buyerOldData);
+    const normalizedDataToUpdate = normalizeData(dataToUpdate);
+
+    // Deep comparison to check for changes
+    // const hasChanges = !_.isEqual(normalizedBuyerOldData, normalizedDataToUpdate);
+    const hasChanges = JSON.stringify(normalizedBuyerOldData) !== JSON.stringify(normalizedDataToUpdate);
+
+
     const [showAlert, setShowAlert] = useState(false);
 
     const formatFunc = (name) => {
@@ -612,9 +626,14 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
                         <form method="">
                             {user?.department === "Customer Relations - Services" && (
                                 <button
+                                    disabled={!hasChanges} 
                                     className="w-[133px] h-[39px] font-semibold text-sm text-white rounded-[10px] gradient-btn5"
                                     type="button"
                                     onClick={handleShowUpdateAlert}
+                                    style={{
+                                        opacity: hasChanges  ? 1 : 0.5,
+                                        cursor: hasChanges  ? 'pointer' : 'not-allowed'
+                                    }}
                                 >
                                     Update
                                 </button>
