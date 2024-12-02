@@ -1589,6 +1589,7 @@ class ConcernController extends Controller
                 'content' => $request->all()
             ]);
             $testData = new BankTransaction();
+           
             $testData->bank_name = $request->input('burks');
             $testData->payment_channel = $request->input('recnnr');
             $testData->transact_by = $request->input('objnr');

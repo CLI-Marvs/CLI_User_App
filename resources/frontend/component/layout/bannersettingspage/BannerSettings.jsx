@@ -1,61 +1,89 @@
-import React,{useEffect, useState, useRef} from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import ImageSlideshow from './ImageSlideshow'
 import { useStateContext } from '../../../context/contextprovider'
 import apiService from '../../servicesApi/apiService'
+import { showToast } from "../../../util/toastUtil"
+import { CircularProgress } from '@mui/material'
 const BannerSettings = () => {
     const fileInputRef = useRef(null);
 
     const { getBannerData, bannerLists } = useStateContext();
-
+    const [isEdit, setIsEdit] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [bannerId, setBannerId] = useState("");
     const [file, setFile] = useState(null);
     const [link, setLink] = useState("");
+    const [indexFlag, setIndexFlag] = useState(null);
+
     useEffect(() => {
         getBannerData();
+        
     }, []);
-    
 
     const [fileName, setFileName] = useState('No file selected');
 
-    
+
     const submitHandler = async (e) => {
         e.preventDefault();
+        setLoading(true);
 
         const formData = new FormData();
-        formData.append('banner_image', file);
-        formData.append('banner_link', link);
+       
+        if (isEdit) {
+            formData.append('id', bannerId);
+            if (file) formData.append('banner_image', file); // Skip if no new file
+            formData.append('banner_link', link);
+        } else {
+            formData.append('banner_image', file);
+            formData.append('banner_link', link);
+        }
+
+
         try {
-            const response = await apiService.post("store-banner", formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
+            const endpoint = isEdit ? "update-banner" : "store-banner";
+            const response = await apiService.post(endpoint, formData, {
+                headers: { 'Content-Type': 'multipart/form-data' },
             });
+
             getBannerData();
-            setFileName('');
-            setFile(null);                    
-            setLink('');   
-            console.log('Success:', response);
+            removeData();
+            showToast("Data updated successfully!", "success");
         } catch (error) {
-            setFileName('');
-            setFile(null);                     
-            setLink('');   
+            removeData();
+            console.log("error", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const removeData = () => {
+        setIsEdit(false);
+        setFileName('');
+        setFile(null);
+        setLink('');
+        setLoading(false);
+    }
+    /* console.log("banner data",bannerListsData); */
+    const deleteBanner = async (id) => {
+        try {
+            const response = await apiService.delete(`/banner/${id}`);
+            removeData();
+            getBannerData();
+            showToast("Data deleted successfully!", "success");
+        } catch (error) {
+            removeData();
             console.log("error", error);
         }
     };
 
-    const deleteBanner = async (id) => {     
-        try {
-            const response = await apiService.delete(`/banner/${id}`);
-            setFileName('');
-            setFile(null);                     
-            setLink('');   
-            console.log('Success:', response);
-        } catch (error) {
-            setFileName('');
-            setFile(null);                     
-            setLink('');   
-            console.log("error", error);
-        }
-    };
+    const editForm = (item) => {
+        const {id, banner_link, banner_image, original_file_name } = item;
+        setBannerId(id);
+        setIsEdit(true);
+        setLink(banner_link);
+        setFile(banner_image);
+        setFileName(original_file_name);
+    }
 
     const handleFileChange = (e) => {
         const file = e.target.files[0];
@@ -81,30 +109,37 @@ const BannerSettings = () => {
                     <p className='montserrat-medium'>Settings</p>
                     {/* should be dynamic below */}
                     {bannerLists && bannerLists.length > 0 && bannerLists.map((item, index) => (
-                    <div key={index} className='w-full h-[112px] rounded-[10px] bg-custom-lightestgreen p-[20px]'>
-                        <div className=' flex flex-col w-full h-full bg-white rounded-[10px] justify-center'>
-                            <div className='flex h-[31px] px-[16px] items-center gap-[11px] text-sm'>
-                                <p className='montserrat-medium '>Image:</p>
-                                <div className='w-[345px] montserrat-light'>
-                                    {item.original_file_name}
+                        <div key={index} className='w-full h-[112px] rounded-[10px] bg-custom-lightestgreen p-[20px]'>
+                            <div className=' flex flex-col w-full h-full bg-white rounded-[10px] justify-center'>
+                                <div className='flex h-[31px] px-[16px] items-center gap-[11px] text-sm'>
+                                    <p className='montserrat-medium '>Image:</p>
+                                    <div className='w-[345px] shrink-0 montserrat-light'>
+                                        {item.original_file_name}
+                                    </div>
+                                    <div className='flex w-full justify-end items-center'>
+                                        <div className='flex gap-[19px] text-sm'>
+                                            {(!isEdit || indexFlag !== index) && (                                        
+                                                <button onClick={() =>{
+                                                    editForm(item);
+                                                    setIndexFlag(index);
+                                                }} className='montserrat-medium bg-gradient-to-r from-custom-bluegreen to-custom-solidgreen bg-clip-text text-transparent'>Edit</button>
+                                            ) }
+                                            <button onClick={() => deleteBanner(item.id)} className='montserrat-medium text-[#EB4444]'>Delete</button>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div className='flex gap-[19px] text-sm'>
-                                    <button className='montserrat-medium bg-gradient-to-r from-custom-bluegreen to-custom-solidgreen bg-clip-text text-transparent'>Edit</button>
-                                    <button onClick={() => deleteBanner(item.id)} className='montserrat-medium text-[#EB4444]'>Delete</button>
+                                <div className='flex h-[31px] px-[16px] items-center gap-[25px] text-sm'>
+                                    <p className='montserrat-medium'>Link:</p>
+                                    <a href={item.banner_link} target="_blank" rel="noreferrer" className='text-blue-500'>{item.banner_link}</a>
                                 </div>
-                            </div>
-                            <div className='flex h-[31px] px-[16px] items-center gap-[25px] text-sm'>
-                                <p className='montserrat-medium'>Link:</p>
-                                <a href={item.banner_link} target="_blank" rel="noreferrer" className='text-blue-500'>{item.banner_link}</a>
                             </div>
                         </div>
-                    </div>
                     ))}
                 </div>
                 <div className='w-full border-t-[1px] border-custom-grayA5'></div>
                 <div className='flex flex-col gap-[10px] w-full bg-[#EBEBEB] p-[20px] rounded-[10px]'>
                     <div className='flex w-full rounded-[10px] relative bg-white overflow-hidden'>
-                        <div className='flex w-[108px] justify-start items-center px-[15px] py-[6px] text-white bg-[#273B4A] rounded-l-[10px]'>
+                        <div className='flex w-[108px] justify-center items-center px-[15px] py-[6px] text-white bg-[#273B4A] rounded-l-[10px]'>
                             Image
                         </div>
                         <div className="flex w-[335px] justify-start items-center px-[15px] py-[6px] bg-white overflow-hidden">
@@ -125,15 +160,34 @@ const BannerSettings = () => {
                         </div>
                     </div>
                     <div className='flex w-full rounded-[10px] relative bg-white overflow-hidden'>
-                        <div className='flex w-[108px] justify-start items-center px-[15px] py-[6px] text-white bg-[#273B4A] shrink-0 rounded-l-[10px]'>
+                        <div className='flex w-[108px] justify-center items-center px-[15px] py-[6px] text-white bg-[#273B4A] shrink-0 rounded-l-[10px]'>
                             Link
                         </div>
                         <input onChange={(e) => setLink(e.target.value)} value={link} name='banner-link' type="text" className='w-full px-[15px] outline-none' />
                     </div>
                     <div className='w-full flex justify-center items-center text-sm'>
-                        <button onClick={submitHandler} className='flex justify-center items-center gradient-btn2 w-[104px] h-[31px] text-white rounded-[5px] py-[10px]'>
-                            Save
-                        </button>
+                        {loading ? (
+                            <CircularProgress className="spinnerSize2" />
+                        ) : (
+                            <>
+                                {isEdit ? (
+                                    <>
+                                        <div className='flex gap-[10px]'>
+                                            <button disabled={loading} onClick={submitHandler} className={`flex justify-center items-center gradient-btn2 w-[104px] h-[31px] text-white rounded-[5px] py-[10px] ${loading ? 'cursor-not-allowed' : ''}`}>
+                                                Update
+                                            </button>
+                                            <button onClick={removeData} className='flex justify-center items-center gradient-btn2 w-[104px] h-[31px] text-white rounded-[5px] py-[10px]'>
+                                                Cancel
+                                            </button>
+                                        </div>
+                                    </>
+                                ) : (
+                                    <button disabled={loading} onClick={submitHandler} className={`flex justify-center items-center gradient-btn2 w-[104px] h-[31px] text-white rounded-[5px] py-[10px] ${loading ? 'cursor-not-allowed' : ''}`}>
+                                        Save
+                                    </button>
+                                )}
+                            </>
+                        )}  
                     </div>
                 </div>
             </div>

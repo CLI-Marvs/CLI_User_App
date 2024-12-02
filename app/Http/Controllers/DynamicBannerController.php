@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\DynamicBanner;
 use Illuminate\Http\Request;
 use Google\Cloud\Storage\StorageClient;
+use Illuminate\View\DynamicComponent;
 
+use function React\Promise\all;
 
 class DynamicBannerController extends Controller
 {
@@ -99,10 +101,37 @@ class DynamicBannerController extends Controller
         }
     }
 
-    public function deleteBanner($id)
+    public function updateBanner(Request $request)
     {
         try {
            
+            $dynamicBanner = DynamicBanner::find($request->id);
+            if (!$dynamicBanner) {
+                return response()->json(['message' => 'Banner not found'], 404);
+            }
+            
+            if ($request->hasFile('banner_image')) {
+                $fileLinks = $this->uploadToGCS($request->file('banner_image'));
+                $dynamicBanner->banner_image = $fileLinks['fileLink'];
+                $dynamicBanner->original_file_name = $fileLinks['originalFileName'];
+            }
+    
+            // Update banner link
+            $dynamicBanner->banner_link = $request->banner_link;
+            $dynamicBanner->save();
+
+
+            return response()->json(['message' => 'Banner updated successfully!', 'data' => $dynamicBanner], 200);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Error updating banner', 'error' => $e->getMessage()], 500);
+        }
+    }
+
+
+    /* $testData = BankTransaction::where('id', $request->id)->first(); */
+    public function deleteBanner($id)
+    {
+        try {
             $banner = DynamicBanner::find($id);
     
             
@@ -110,8 +139,7 @@ class DynamicBannerController extends Controller
                 return response()->json(['message' => 'Banner not found'], 404);
             }
     
-            
-            $this->deleteFromGCS($banner->banner_image);
+            //$this->deleteFromGCS($banner->banner_image);
     
             $banner->delete();
     
