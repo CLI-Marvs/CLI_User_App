@@ -36,7 +36,6 @@ const FloorPremiums = ({ propertyId }) => {
 
         // Function to fetch floor data
         const fetchFloorData = async () => {
-            console.log("37");
             const response = await getPropertyFloors(towerPhaseId);
             setPropertyFloors((prev) => ({
                 ...prev,
@@ -50,7 +49,6 @@ const FloorPremiums = ({ propertyId }) => {
             propertyFloors[towerPhaseId] &&
             propertyFloors[towerPhaseId].floors
         ) {
-            console.log("it runs here");
             const floors = propertyFloors[towerPhaseId].floors || [];
 
             // Initialize floor data with the required structure from FloorPremiumContext

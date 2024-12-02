@@ -55,7 +55,6 @@ const AddPropertyModal = ({ modalRef }) => {
             });
             const propertyId = response?.data?.propertyData?.propertyMaster?.id;
             const passData = response?.data;
-            console.log("passData 50 handleSubmit", passData);
             alert(response.data.message);
             //Close modal and call callback handler
             if (modalRef.current) {

@@ -26,7 +26,6 @@ const FloorPremiumAssignModal = ({ modalRef }) => {
     };
 
     const handleUnitSelect = (id) => {
-        console.log("id", id);
         setSelectedUnit((prevSelectedUnits) => {
             if (prevSelectedUnits.includes(id)) {
                 // Deselect unit if it's already selected

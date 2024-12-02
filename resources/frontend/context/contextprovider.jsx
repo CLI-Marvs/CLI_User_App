@@ -107,7 +107,6 @@ export const ContextProvider = ({ children }) => {
         if (token) {
             setLoading(true);
             try {
-               
                 const searchParams = new URLSearchParams({
                     search: JSON.stringify(searchFilter),
                     page: currentPage + 1,
@@ -122,9 +121,10 @@ export const ContextProvider = ({ children }) => {
                 );
                 setData(response.data.data);
                 setPageCount(response.data.last_page);
-                setLoading(false);
             } catch (error) {
                 console.error("Error fetching data: ", error);
+            } finally {
+                setLoading(false);
             }
         }
     };
@@ -361,7 +361,10 @@ export const ContextProvider = ({ children }) => {
                 }));
             } catch (error) {
                 console.log("error retrieving", error);
-            }
+            } /* finally {
+                setLoading(false); 
+            } */
+            
         }
     };
 
@@ -572,7 +575,7 @@ export const ContextProvider = ({ children }) => {
         }
     }, [token]);
 
-    useEffect(() => {
+    /* useEffect(() => {
         getAllConcerns();
     }, [
         currentPage,
@@ -582,7 +585,7 @@ export const ContextProvider = ({ children }) => {
         searchFilter,
         hasAttachments,
         specificAssigneeCsr,
-    ]);
+    ]); */
 
     useEffect(() => {
         getBankName();
@@ -593,9 +596,9 @@ export const ContextProvider = ({ children }) => {
         getInvoices();
     }, [currentPageInvoices, filterDueDate])
 
-    useEffect(() => {
+   /*  useEffect(() => {
         getNotifications();
-    }, [notifCurrentPage, notifStatus, token]);
+    }, [notifCurrentPage, notifStatus, token]); */
 
     useEffect(() => {
         if (ticketId) {
@@ -603,13 +606,13 @@ export const ContextProvider = ({ children }) => {
             getInquiryLogs(ticketId);
             getConcernMessages();
             getAssigneesPersonnel();
-            getNavBarData();
+            /* getNavBarData(); */
         }
     }, [ticketId]);
 
-    useEffect(() => {
+    /* useEffect(() => {
         getCount();
-    }, [unreadCount, token]);
+    }, [unreadCount, token]); */
 
     useEffect(() => { }, [user, token]);
 
@@ -759,8 +762,7 @@ export const ContextProvider = ({ children }) => {
                 getInquiriesPerChannel,
                 inquriesPerChannelData,
                 navBarData,
-                getNavBarData
-               
+                getNavBarData,
             }}
 
         >

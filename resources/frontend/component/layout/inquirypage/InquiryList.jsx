@@ -1,9 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import TicketTable from "./TicketTable";
-import {
-    IoIosArrowUp,
-    IoIosArrowDown,
-} from "react-icons/io";
+import { IoIosArrowUp, IoIosArrowDown } from "react-icons/io";
 import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md";
 import ReactPaginate from "react-paginate";
 import { useStateContext } from "../../../context/contextprovider";
@@ -13,8 +10,9 @@ import DateLogo from "../../../../../public/Images/Date_range.svg";
 import { MdRefresh } from "react-icons/md";
 import InquiryFormModal from "./InquiryFormModal";
 import axios from "axios";
-import { toast } from 'react-toastify';
+import { toast } from "react-toastify";
 import { useSearchParams } from "react-router-dom";
+import Spinner from "../../../util/Spinner";
 const InquiryList = () => {
     const {
         currentPage,
@@ -31,7 +29,7 @@ const InquiryList = () => {
         user,
         setSpecificAssigneeCsr,
         specificAssigneeCsr,
-        loading
+        loading,
         /*  setHasAttachments,
         hasAttachments */
     } = useStateContext();
@@ -57,7 +55,7 @@ const InquiryList = () => {
     const [lastActivity, setLastActivity] = useState(null);
     const filterBoxRef = useRef(null);
     const [isOpenSelect, setIsOpenSelect] = useState(false);
- 
+
     const handleSelect = (option) => {
         onChange(option);
         setIsOpenSelect(false);
@@ -316,9 +314,10 @@ const InquiryList = () => {
             document.removeEventListener("keydown", handleKeyDown);
         };
     }, [isFilterVisible]);
- 
+
     useEffect(() => {
         updateLastActivity();
+        getAllConcerns();
     }, [
         searchFilter,
         statusFilter,
@@ -327,40 +326,7 @@ const InquiryList = () => {
         currentPage,
     ]);
 
-    /*  const sendSoapRequest = async () => {
-        const soapBody = `
-        <soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:urn="urn:sap-com:document:sap:soap:functions:mc-style">
-           <soap:Header/>
-           <soap:Body>
-              <urn:Zapptosap>
-                 <Ecode>5555</Ecode>
-                 <Ename>Test</Ename>
-              </urn:Zapptosap>
-           </soap:Body>
-        </soap:Envelope>
-        `;
-    
-        const username = "KBELMONTE";
-        const password = "Tomorrowbytogether2019!";
-        const authHeader = "Basic " + btoa(`${username}:${password}`);
-    
-        const config = {
-            headers: {
-                "Content-Type": "application/soap+xml",
-                "SOAPAction": "urn:sap-com:document:sap:soap:functions:mc-style",
-                Authorization: authHeader,
-            },
-        };
-    
-        try {
-            const response = await axios.post("http://localhost:8001/proxy-sap", soapBody, config);
-
-            console.log("Response:", response.data);
-        } catch (error) {
-            console.log("Error:", error.response.data);
-        }
-    }; */
-
+    console.log("loading", loading);
 
     return (
         <>
@@ -406,7 +372,8 @@ const InquiryList = () => {
                             </svg>
                         </div>
                         <div className="flex items-center">
-                            {user?.department === 'Customer Relations - Services' && (
+                            {user?.department ===
+                                "Customer Relations - Services" && (
                                 <button
                                     onClick={handleOpenModal}
                                     className="h-[38px] w-[121px] gradient-btn5 text-white  text-xs rounded-[10px]"
@@ -414,9 +381,8 @@ const InquiryList = () => {
                                     {" "}
                                     <span className="text-[18px]">+</span> Add
                                     Inquiry
-                                </button> 
+                                </button>
                             )}
-                        
                         </div>
 
                         {isFilterVisible && (
@@ -444,7 +410,7 @@ const InquiryList = () => {
                                             {" "}
                                             Category
                                         </label>
-                                      
+
                                         <div className="flex bg-red-900 justify-start w-full relative">
                                             <label
                                                 htmlFor=""
@@ -469,8 +435,7 @@ const InquiryList = () => {
                                                     Payment Issues
                                                 </option>
                                                 <option value="SOA/ Buyer's Ledger">
-                                                    SOA/
-                                                    Buyer's Ledger
+                                                    SOA/ Buyer's Ledger
                                                 </option>
                                                 <option value="Turn Over Status">
                                                     Turn Over Status
@@ -594,14 +559,31 @@ const InquiryList = () => {
                                                     setChannels(e.target.value)
                                                 }
                                             >
-                                                <option value=""> Select Channels</option>
-                                                <option value="Email">Email</option>
-                                                <option value="Call">Call</option>
-                                                <option value="Walk in">Walk-in</option>
-                                                <option value="Website">Website</option>
-                                                <option value="Social media">Social media</option>
-                                                <option value="Branch Tablet">Branch Table</option>
-                                                <option value="Internal Endorsement">Internal Endorsement</option>
+                                                <option value="">
+                                                    {" "}
+                                                    Select Channels
+                                                </option>
+                                                <option value="Email">
+                                                    Email
+                                                </option>
+                                                <option value="Call">
+                                                    Call
+                                                </option>
+                                                <option value="Walk in">
+                                                    Walk-in
+                                                </option>
+                                                <option value="Website">
+                                                    Website
+                                                </option>
+                                                <option value="Social media">
+                                                    Social media
+                                                </option>
+                                                <option value="Branch Tablet">
+                                                    Branch Table
+                                                </option>
+                                                <option value="Internal Endorsement">
+                                                    Internal Endorsement
+                                                </option>
                                             </select>
                                         </div>
 
@@ -763,46 +745,51 @@ const InquiryList = () => {
                                 <div className="flex items-center space-x-2">
                                     {user?.department ===
                                         "Customer Relations - Services" && (
-                                            <button
-                                                onClick={handleAssignedToMeClick}
-                                                className={`flex items-center text-custom-lightgreen h-[25px] w-[125px] rounded-[55px] p-[2px] ${assignedToMeActive
+                                        <button
+                                            onClick={handleAssignedToMeClick}
+                                            className={`flex items-center text-custom-lightgreen h-[25px] w-[125px] rounded-[55px] p-[2px] ${
+                                                assignedToMeActive
+                                                    ? "bglightgreen-btn"
+                                                    : "gradient-btn2hover "
+                                            }`}
+                                        >
+                                            <p
+                                                className={`h-full w-full flex justify-center items-center text-xs montserrat-semibold rounded-[50px]   ${
+                                                    assignedToMeActive
                                                         ? "bglightgreen-btn"
-                                                        : "gradient-btn2hover "
-                                                    }`}
-                                            >
-                                                <p
-                                                    className={`h-full w-full flex justify-center items-center text-xs montserrat-semibold rounded-[50px]   ${assignedToMeActive
-                                                            ? "bglightgreen-btn"
-                                                            : "bg-white hover:bg-custom-lightestgreen"
-                                                        }
+                                                        : "bg-white hover:bg-custom-lightestgreen"
+                                                }
                                         `}
-                                                >
-                                                    Assigned to me
-                                                </p>
-                                            </button>
-                                        )}
+                                            >
+                                                Assigned to me
+                                            </p>
+                                        </button>
+                                    )}
                                     {dayButtonLabels.map((label) => (
                                         <button
                                             key={label}
                                             onClick={() =>
                                                 handleDayClick(label)
                                             }
-                                            className={`flex justify-center items-center  text-custom-lightgreen h-[25px] rounded-[55px] p-[2px] ${activeDayButton === label
+                                            className={`flex justify-center items-center  text-custom-lightgreen h-[25px] rounded-[55px] p-[2px] ${
+                                                activeDayButton === label
                                                     ? "bglightgreen-btn hover:bg-custom-lightgreen"
                                                     : "gradient-btn2hover border-custom-lightgreen"
-                                                } hover:bg-custom-lightestgreen ${label === "3+ Days"
+                                            } hover:bg-custom-lightestgreen ${
+                                                label === "3+ Days"
                                                     ? "w-[76px]"
                                                     : label === "2 Days"
-                                                        ? "w-[69px]"
-                                                        : "w-[60px]"
-                                                }`}
+                                                    ? "w-[69px]"
+                                                    : "w-[60px]"
+                                            }`}
                                         >
                                             <p
                                                 className={`h-full w-full flex justify-center items-center text-xs montserrat-semibold rounded-[50px]
-                                            ${activeDayButton === label
-                                                        ? "bglightgreen-btn"
-                                                        : "bg-white hover:bg-custom-lightestgreen"
-                                                    }
+                                            ${
+                                                activeDayButton === label
+                                                    ? "bglightgreen-btn"
+                                                    : "bg-white hover:bg-custom-lightestgreen"
+                                            }
                                             `}
                                             >
                                                 {label}
@@ -822,13 +809,30 @@ const InquiryList = () => {
                         </div>
                     </div>
                     <div className="w-[1260px]">
-                        {data && data.length === 0 ? (
-                            <p className="text-center text-gray-500 py-4">
-                                No data found
-                            </p>
+                       {/*  {loading ? (
+                            <>
+                             <p className="text-center">
+                               <Spinner/>
+                             </p>
+                            </>
                         ) : (
-                            <TicketTable concernData={data || []} />
-                        )}
+                           <>
+                            {data && data.length === 0 ? (
+                                <p className="text-center text-gray-500 py-4">
+                                    No records found.
+                                </p>
+                            ) : (
+                                <TicketTable concernData={data || []} />
+                            )}
+                           </>
+                        )} */}
+                        {data && data.length === 0 ? (
+                                <p className="text-center text-gray-500 py-4">
+                                    No records found.
+                                </p>
+                            ) : (
+                                <TicketTable concernData={data || []} />
+                            )}
                     </div>
                     <div className="flex justify-end items-center h-12 px-6 gap-2 bg-white rounded-b-lg">
                         <p className="text-sm text-gray-400 hidden">

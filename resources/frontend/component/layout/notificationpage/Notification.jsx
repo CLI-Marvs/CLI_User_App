@@ -19,7 +19,7 @@ const Notification = () => {
         notifStatus,
     } = useStateContext();
     const [activeButton, setActiveButton] = useState("All");
-    
+
     const handleClick = (button) => {
         setNotifStatus((prev) => (prev === button ? "All" : button));
         setNotifCurrentPage(0);
@@ -46,11 +46,9 @@ const Notification = () => {
         getNotifications();
         getMessages(ticketId);
         getAllConcerns();
-        navigate(
-            `/inquirymanagement/thread/${encodedTicketId}` , {
+        navigate(`/inquirymanagement/thread/${encodedTicketId}`, {
             state: { itemsData: items },
-         }
-        );
+        });
         updateIsReadStatus(items);
     };
 
@@ -60,14 +58,17 @@ const Notification = () => {
             const messageLog = item.message_log;
             const assigneeId = item.assignee_id;
             if (messageLog && item.buyer_notif_id) {
-                const response = apiService.post(`isread/${item.buyer_notif_id}`, {
-                    buyerReply: true,
-                });
-            } else if(assigneeId) {
-                const response = apiService.post(`isread/${assigneeId}`,{
+                const response = apiService.post(
+                    `isread/${item.buyer_notif_id}`,
+                    {
+                        buyerReply: true,
+                    }
+                );
+            } else if (assigneeId) {
+                const response = apiService.post(`isread/${assigneeId}`, {
                     assigneeNotif: true,
                 });
-            }else {
+            } else {
                 const response = apiService.post(`isread/${concernId}`);
             }
         } catch (error) {
@@ -75,18 +76,17 @@ const Notification = () => {
         }
     };
 
-    console.log("activeButton", activeButton);
-    console.log("notifStatus", notifStatus);
-
+    /* useEffect(() => {
+        getNotifications();
+    }, []); */
 
     useEffect(() => {
         getNotifications();
-    }, []);
+    }, [notifCurrentPage, notifStatus]);
 
     useEffect(() => {
         setNotifStatus("All");
     }, [location.pathname]);
-
 
     return (
         <div className=" bg-custom-grayFA ">
@@ -146,9 +146,12 @@ const Notification = () => {
                                                 <p className="montserrat-medium text-[13px] text-custom-bluegreen">
                                                     {item.details_concern}
                                                 </p>
-                                                <p className="text-xs text-custom-grayA5 truncate">
-                                                    <p dangerouslySetInnerHTML={{ __html: item.details_message }} />
-                                                </p>
+                                                <p
+                                                    className="text-xs text-custom-grayA5 truncate overflow-hidden max-h-5"
+                                                    dangerouslySetInnerHTML={{
+                                                        __html: item.details_message,
+                                                    }}
+                                                />
                                             </div>
                                         </td>
                                         <td className="w-[320px] shrink-0 h-full px-10 flex items-center">

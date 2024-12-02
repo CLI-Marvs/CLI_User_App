@@ -3,7 +3,7 @@ import Backbtn from "../../../../../public/Images/Expand_up.svg";
 import { FaTrash } from "react-icons/fa";
 import UserMessages from "./UserMessages";
 import AdminMessages from "./AdminMessages";
-import { BsPaperclip } from "react-icons/bs";
+import { BsPaperclip, BsDownload } from "react-icons/bs";
 import { IoIosArrowDown } from "react-icons/io";
 import AssignSidePanel from "./AssignSidePanel";
 import ResolveModal from "./ResolveModal";
@@ -25,6 +25,9 @@ import { VALID_FILE_EXTENSIONS } from "../../../constant/data/validFile";
 import InquiryFormModal from "./InquiryFormModal";
 import ThreadInquiryFormModal from "./ThreadInquiryFormModal";
 import { ALLOWED_EMPLOYEES_CRS } from "../../../constant/data/allowedEmployeesCRS";
+import Skeleton from 'react-loading-skeleton'
+import 'react-loading-skeleton/dist/skeleton.css'
+
 const InquiryThread = () => {
     const [attachedFiles, setAttachedFiles] = useState([]);
     const [startDate, setStartDate] = useState(null);
@@ -1270,7 +1273,7 @@ const InquiryThread = () => {
                             </div>
                             <div className="">
                                 <div className="">
-                                    {combineThreadMessages.length > 0 &&
+                                    {combineThreadMessages.length > 0 ?
                                         combineThreadMessages.map(
                                             (item, index) =>
                                                 item.buyer_email ? (
@@ -1287,6 +1290,16 @@ const InquiryThread = () => {
                                                         key={index}
                                                     />
                                                 )
+                                        ) : (
+                                            <div className="flex flex-col gap-[20px] py-[20px] px-[30px]">
+                                            {[...Array(5)].map((_, idx) => (
+                                                <div className="flex flex-col gap-[10px]" key={idx}>
+                                                    <Skeleton height={20} width="80%" />
+                                                    <Skeleton height={20} width="80%" />
+                                                    <Skeleton height={50} width="100%" />
+                                                </div>
+                                            ))}
+                                        </div>
                                         )}
                                 </div>
                             </div>

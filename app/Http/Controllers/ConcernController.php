@@ -39,6 +39,7 @@ use App\Jobs\MarkClosedToCustomerJob;
 use App\Jobs\MarkResolvedToCustomerJob;
 use Google\Cloud\Storage\StorageClient;
 use App\Jobs\BuyerReplyInResolveOrClose;
+use App\Jobs\SendFeedbackNotificationJob;
 use Illuminate\Pagination\LengthAwarePaginator;
 use App\Jobs\NotifyAssignedCliOfResolvedInquiryJob;
 
@@ -505,9 +506,12 @@ class ConcernController extends Controller
                     'details_concern' => $request->details_concern,
                     'property' => $request->property,
                     'unit_number' => $request->unit_number,
+                    'ticket_id' => $ticketId
+
                 ];
 
-                FeedbackJobToBuyer::dispatch($data, $request->buyer_email);
+                //Sending the email to the user
+                SendFeedbackNotificationJob::dispatch($data, $request->buyer_email);
             }
 
 
@@ -901,7 +905,13 @@ class ConcernController extends Controller
                 ->leftJoinSub($latestMessages, 'latest_messages', function ($join) {
                     $join->on('concerns.ticket_id', '=', 'latest_messages.ticket_id');
                 })
-                ->select('concerns.*', 'latest_logs.message_log', DB::raw('CASE WHEN pinned.concern_id IS NOT NULL THEN 1 ELSE 0 END AS isPinned'), 'created_by_subquery.created_by', 'latest_messages.latest_message')
+                ->select(
+                        'concerns.*', 
+                        'latest_logs.message_log', 
+                        DB::raw('CASE WHEN pinned.concern_id IS NOT NULL THEN 1 ELSE 0 END AS isPinned'), 
+                        'created_by_subquery.created_by', 
+                        'latest_messages.latest_message'
+                         )
                 ->paginate(20);
 
             return response()->json($allConcerns);
@@ -2371,6 +2381,7 @@ class ConcernController extends Controller
             $reply->details_message = $message;
             $reply->save();
         } catch (\Throwable $e) {
+            Log::error('Error in BuyerReplyNotif', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
         }
     }
@@ -2456,7 +2467,7 @@ class ConcernController extends Controller
        try {
         $ticketId = $request->ticketId;
         $concernData = Concerns::where('ticket_id', $ticketId)->
-                                select('buyer_firstname', 'buyer_middlename', 'buyer_lastname', 'suffix_name', 'details_concern', 'property')
+                                select('buyer_firstname', 'buyer_middlename', 'buyer_lastname', 'suffix_name', 'details_concern', 'property', 'ticket_id')
                                ->first();
         return response()->json($concernData);
        } catch (\Exception $e) {

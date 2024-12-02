@@ -12,12 +12,16 @@ import { startsWith } from "lodash";
 import Alert from "@mui/material/Alert";
 import { MdOutlineMail } from "react-icons/md";
 import FeedbackModal from "./FeedbackModal";
+import Skeleton from 'react-loading-skeleton'
+import 'react-loading-skeleton/dist/skeleton.css'
 
 const Navbar = () => {
-    const { data, ticketId, navBarData } = useStateContext();
+    const { data, ticketId, navBarData, loading, user, getNavBarData } = useStateContext();
     const [isOpen, setIsOpen] = useState(false);
     const location = useLocation();
     const modalRef = useRef(null);
+    const dropdownRef = useRef(null);
+
 
     const pathnames = location.pathname.split("/").filter((x) => x);
 
@@ -27,7 +31,22 @@ const Navbar = () => {
         }
     };
 
-    const concernData = navBarData[ticketId] || [];
+    useEffect(() => {
+        if (isOpen) {
+            document.addEventListener("mousedown", handleClickOutside);
+        } else {
+            document.removeEventListener("mousedown", handleClickOutside);
+        }
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [isOpen]);
+
+
+    useEffect(() => {
+        getNavBarData();
+    }, [ticketId]);
+
 
     const capitalizeWords = (name) => {
         if (name) {
@@ -41,6 +60,7 @@ const Navbar = () => {
                 .join(" ");
         }
     };
+
 
     const breadcrumbs = [
         ...pathnames.map((value, index) => {
@@ -97,11 +117,23 @@ const Navbar = () => {
                 );
             }
 
+            
+
             if (breadcrumbLabel.startsWith("Ticket#")) {
                 const ticketId = breadcrumbLabel;
                 const dataProperty =
                     data?.find((item) => item.ticket_id === ticketId) || {};
 
+                const concernData = navBarData[ticketId] || [];
+
+                if (concernData.length === 0) {
+                    // Render skeleton while loading
+                    return (
+                        <span key={routeTo} className="text-custom-solidgreen">
+                            <Skeleton width={200} />
+                        </span>
+                    );
+                }
                 return (
                     <span
                         key={routeTo}
@@ -114,7 +146,7 @@ const Navbar = () => {
                         )}{" "}
                         {capitalizeWords(concernData?.suffix_name || "")} {""}
                         ({concernData?.details_concern || ""}) {" "} 
-                        {concernData?.property || ""} ({breadcrumbLabel})
+                        {concernData?.property || ""} ({concernData?.ticket_id})
                     </span>
                 );
             }
@@ -129,8 +161,6 @@ const Navbar = () => {
             );
         }),
     ];
-
-    const { user } = useStateContext();
 
     const handleLogout = async () => {
         try {
@@ -148,7 +178,6 @@ const Navbar = () => {
         }
     };
 
-    const dropdownRef = useRef(null);
 
     const handleClickOutside = (event) => {
         if (
@@ -159,17 +188,7 @@ const Navbar = () => {
         }
     };
 
-    useEffect(() => {
-        if (isOpen) {
-            document.addEventListener("mousedown", handleClickOutside);
-        } else {
-            document.removeEventListener("mousedown", handleClickOutside);
-        }
-        return () => {
-            document.removeEventListener("mousedown", handleClickOutside);
-        };
-    }, [isOpen]);
-
+   
     return (
         <>
             <div className="flex h-[100px] pr-16 w-screen bg-custom-grayFA">
