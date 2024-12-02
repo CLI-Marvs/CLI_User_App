@@ -1497,7 +1497,6 @@ class ConcernController extends Controller
                     $modifiedTicketId = str_replace('Ticket#', '', $ticketId);
                     $concernData = Concerns::where('ticket_id', $ticketId)->first();
 
-
                     $assigneeData = [
                         'name' => $selectedOption['name'],
                         'email' => $selectedOption['email'],
@@ -2382,6 +2381,7 @@ class ConcernController extends Controller
             $reply->details_message = $message;
             $reply->save();
         } catch (\Throwable $e) {
+            Log::error('Error in BuyerReplyNotif', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
         }
     }

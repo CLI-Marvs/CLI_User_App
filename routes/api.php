@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 
 use App\Http\Controllers\ConcernController;
+use App\Http\Controllers\DynamicBannerController;
 use App\Http\Controllers\PaymentSchemeController;
 use App\Http\Controllers\PriceBasicDetailController;
 
@@ -10,6 +11,7 @@ use App\Http\Controllers\PriceListMasterController;
 use App\Http\Controllers\PropertyMasterController;
 use App\Http\Controllers\SapController;
 use App\Http\Controllers\UnitController;
+use App\Models\DynamicBanner;
 use App\Models\PropertyMaster;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -118,4 +120,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/upload-units', [UnitController::class, 'uploadUnits']);
     Route::get('/property-floors/{towerPhaseId}', [UnitController::class, 'countFloors']);
     Route::post('/property-units', [UnitController::class, 'getUnits']);
+
+    //for banner
+    Route::post('/store-banner', [DynamicBannerController::class, 'storeBanner']);
+    Route::get('/get-banner', [DynamicBannerController::class, 'getBanner']);
+    Route::delete('/banner/{id}', [DynamicBannerController::class, 'deleteBanner']);
 });
