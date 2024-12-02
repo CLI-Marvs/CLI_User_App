@@ -131,10 +131,27 @@ const ThreadInquiryFormModal = ({ modalRef, dataConcern, messageRef }) => {
             ? propertyNamesList
                 .filter((item) => !item.toLowerCase().includes("phase"))
                 .map((item) => {
-                    const formattedItem = formatFunc(item);
-                    return formattedItem === "Casamira South"
-                        ? "Casa Mira South"
-                        : formattedItem;
+                    let formattedItem = formatFunc(item);
+
+                // Capitalize each word in the string
+                formattedItem = formattedItem
+                    .split(" ")
+                    .map((word) => {
+                        // Check for specific words that need to be fully capitalized
+                        if (/^(Sjmv|Lpu|Cdo|Dgt)$/i.test(word)) {
+                            return word.toUpperCase();
+                        }
+                        // Capitalize the first letter of all other words
+                        return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+                    })
+                    .join(" ");
+
+                // Replace specific names if needed
+                if (formattedItem === "Casamira South") {
+                    formattedItem = "Casa Mira South";
+                }
+
+                return formattedItem;
                 })
                 .sort((a, b) => {
                     if (a === "N/A") return -1;

@@ -7,6 +7,7 @@ import React, {
 } from "react";
 import apiService from "../component/servicesApi/apiService";
 import debounce from "lodash/debounce";
+import { set } from "lodash";
  
 
 const StateContext = createContext({
@@ -57,6 +58,7 @@ export const ContextProvider = ({ children }) => {
     const [inquiriesPerChanelYear, setInquiriesPerChanelYear] = useState("");
     const [inquiriesPerChannelMonth, setInquiriesPerChannelMonth] = useState("");
     const [pricingMasterLists, setPricingMasterLists] = useState([]);
+    const [bannerLists, setBannerLists] = useState([]);
     const [paymentSchemes, setPaymentSchemes] = useState([]);
     const [propertyId, setPropertyId] = useState(null);
     const [floorPremiumsAccordionOpen, setFloorPremiumsAccordionOpen] =
@@ -519,6 +521,19 @@ export const ContextProvider = ({ children }) => {
         }
     };
 
+    const getBannerData = async () => {
+        try{
+            const response = await apiService.get(
+                "get-banner"
+            );
+            setBannerLists(response.data.data);
+        }catch(error){
+            console.log("error", error);
+        }
+    }
+
+
+
     useEffect(() => {
         getPropertyUnits(towerPhaseId, selectedFloor);
     }, [towerPhaseId, selectedFloor]);
@@ -642,6 +657,7 @@ export const ContextProvider = ({ children }) => {
                 logs,
                 setLogs,
                 allEmployees,
+                getBannerData,
                 setStatusFilter,
                 setNotifCurrentPage,
                 notifPageCount,
@@ -707,6 +723,7 @@ export const ContextProvider = ({ children }) => {
                 getAssigneesPersonnel,
                 propertyNamesList,
                 invoices,
+                bannerLists,
                 transactions,
                 currentPageTransaction,
                 setCurrentPageTransaction,

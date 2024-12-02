@@ -1487,7 +1487,6 @@ class ConcernController extends Controller
                     $modifiedTicketId = str_replace('Ticket#', '', $ticketId);
                     $concernData = Concerns::where('ticket_id', $ticketId)->first();
 
-
                     $assigneeData = [
                         'name' => $selectedOption['name'],
                         'email' => $selectedOption['email'],
