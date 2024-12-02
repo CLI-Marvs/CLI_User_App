@@ -15,6 +15,7 @@ const TicketTable = ({ concernData }) => {
         setData,
         getInquiryLogs,
         getConcernMessages,
+        getNavBarData
     } = useStateContext();
     const handleCheckboxChange = (index) => {
         setCheckedRows((prevCheckedRows) =>
@@ -43,6 +44,7 @@ const TicketTable = ({ concernData }) => {
         getAllConcerns();
         getInquiryLogs(items.ticket_id);
         getConcernMessages();
+        getNavBarData();
         const encodedTicketId = encodeURIComponent(items.ticket_id);
         navigate(
             `/inquirymanagement/thread/${encodedTicketId}` , {
@@ -77,10 +79,9 @@ const TicketTable = ({ concernData }) => {
         }
     };
 
-    console.log("concernData", concernData);
-    useEffect(() => {
+   /*  useEffect(() => {
         getAllConcerns();
-    }, []);
+    }, []); */
     return (
         <table className="flex flex-col gap-1 w-full">
             <tbody>
@@ -226,7 +227,7 @@ const TicketTable = ({ concernData }) => {
                                     </span>
                                 </p>
                                 <p className="flex-1 truncate overflow-hidden text-sm text-gray-400">
-                                    {row.latest_message.replace(
+                                    {row.latest_message && row.latest_message.replace(
                                         /<br\s*\/?>/gi,
                                         " "
                                     )}

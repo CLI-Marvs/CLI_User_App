@@ -24,7 +24,6 @@ const AssignModal = ({ modalRef, employeeData, isAssign }) => {
             });
             getInquiryLogs(employeeData.ticketId);
             getAllConcerns();
-            console.log("sucess");
         } catch (error) {
             console.log("error assigning", error);
         }

@@ -64,7 +64,6 @@ const BankStatementCom = () => {
                     "Content-Type": "multipart/form-data",
                 },
             });
-            console.log("response", response);
             setLoading(false);
             if (modalRef.current) {
                 modalRef.current.close();
@@ -84,7 +83,6 @@ const BankStatementCom = () => {
         }
     };
 
-    console.log("datamatches", matchesData);
     const handleSubmitSap = async () => {
         setLoading(true);
         try {
@@ -115,9 +113,6 @@ const BankStatementCom = () => {
                     "post-data-sap",
                     soapBody
                 );
-
-                // Optionally, handle the response here if needed
-                console.log(`Item ${item.ID} posted:`, response.data);
             }
 
             getMatches();

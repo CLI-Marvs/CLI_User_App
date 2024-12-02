@@ -28,6 +28,19 @@ const Sidebar = () => {
 
   const [activeItemTransaction, setActiveItemTransaction] = useState(null);
 
+  useEffect(() => {
+    if (!location.pathname.startsWith("/inquirymanagement/thread")) {
+      localStorage.removeItem("dataConcern");
+      localStorage.removeItem("updatedData"); 
+      localStorage.removeItem("closeConcern"); 
+    }
+  }, [location]);
+  
+  useEffect(() => {
+    getCount();
+  }, [location]);
+
+
   const handleInquiryDropdownClick = () => {
     setInquiryOpen(!isInquiryOpen);
   };
@@ -47,17 +60,7 @@ const Sidebar = () => {
     setActiveItemTransaction(item);
   };
 
-  useEffect(() => {
-    if (!location.pathname.startsWith("/inquirymanagement/thread")) {
-      localStorage.removeItem("dataConcern");
-      localStorage.removeItem("updatedData"); 
-      localStorage.removeItem("closeConcern"); 
-    }
-  }, [location]);
-  useEffect(() => {
-    getCount();
-  }, [location]);
-
+ 
   useEffect(() => {
     switch (location.pathname) {
       case "/superadmin/userrightsandpermissions":

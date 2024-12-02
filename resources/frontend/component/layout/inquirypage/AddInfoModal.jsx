@@ -4,7 +4,7 @@ import apiService from "../../servicesApi/apiService";
 import { useStateContext } from "../../../context/contextprovider";
 import Alert from "../mainComponent/Alert";
 import { showToast } from "../../../util/toastUtil"
-
+import _ from "lodash";
 const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
     const predefinedUserTypes = ["Property Owner", "Buyer", "Broker", "Seller", "Lessee"];
     const { getAllConcerns, propertyNamesList, updateConcern, user, getInquiryLogs } =
@@ -23,37 +23,82 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
         buyer_middlename: dataConcern.buyer_middlename || "",
         buyer_lastname: dataConcern.buyer_lastname || "",
         suffix_name: dataConcern.suffix_name || "",
+        communication_type: dataConcern.communication_type || "",
+        channels: dataConcern.channels,
+
         user_type: predefinedUserTypes.includes(dataConcern.user_type)
             ? dataConcern.user_type
             : "Others",
-        communication_type: dataConcern.communication_type || "",
-        channels: dataConcern.channels,
         other_user_type: !predefinedUserTypes.includes(dataConcern.user_type)
             ? dataConcern.user_type
             : "",
-
     });
- 
+
+    useEffect(() => {
+        if (dataConcern) {
+            setDataToUpdate((prevState) => ({
+                ...prevState,
+                ...dataConcern,
+                user_type: predefinedUserTypes.includes(dataConcern.user_type)
+                    ? dataConcern.user_type
+                    : "Others",
+
+            }));
+        }
+    }, [dataConcern]);
+
+    
     /* Buyers old data to be used in AssignDetails.jsx 
      * to compare the values and show the differences
      */
     const buyerOldData = {
-        buyer_firstname: dataConcern.buyer_firstname,
-        buyer_lastname: dataConcern.buyer_lastname,
-        buyer_middlename: dataConcern.buyer_middlename,
-        details_concern: dataConcern.details_concern,
-        suffix_name: dataConcern.suffix_name,
-        buyer_email: dataConcern.buyer_email,
-        mobile_number: dataConcern.mobile_number,
-        user_type: dataConcern.user_type === "Others" ? dataConcern.other_user_type : dataConcern.user_type,
-        channels: dataConcern.channels,
-        other_user_type: dataConcern.user_type === "Others" ? dataConcern.other_user_type : dataConcern.user_type,
-        communication_type: dataConcern.communication_type,
-        contract_number: dataConcern.contract_number,
-        property: dataConcern.property,
-        unit_number: dataConcern.unit_number,
-        admin_remarks: dataConcern.admin_remarks,
+        ticket_id: dataConcern.ticket_id,
+        details_concern: dataConcern.details_concern || "",
+        contract_number: dataConcern.contract_number || "",
+        unit_number: dataConcern.unit_number || "",
+        property: dataConcern.property || "",
+        admin_remarks: dataConcern.admin_remarks || "",
+        buyer_email: dataConcern.buyer_email || "",
+        mobile_number: dataConcern.mobile_number || "",
+        buyer_firstname: dataConcern.buyer_firstname || "",
+        buyer_middlename: dataConcern.buyer_middlename || "",
+        buyer_lastname: dataConcern.buyer_lastname || "",
+        suffix_name: dataConcern.suffix_name || "",
+        communication_type: dataConcern.communication_type || "",
+        channels: dataConcern.channels || "",
+        user_type: dataConcern.user_type || "",
+        other_user_type: dataConcern.user_type === "Others" ? dataConcern.other_user_type || "" : "",
     };
+    
+    // Strip out fields that you don't want to compare (like `id`, `status`, `created_at`, `updated_at`, etc.)
+    const normalizeData = (data) => {
+        return {
+            ticket_id: data.ticket_id,
+            details_concern: data.details_concern || "",
+            contract_number: data.contract_number || "",
+            unit_number: data.unit_number || "",
+            property: data.property || "",
+            admin_remarks: data.admin_remarks || "",
+            buyer_email: data.buyer_email || "",
+            mobile_number: data.mobile_number || "",
+            buyer_firstname: data.buyer_firstname || "",
+            buyer_middlename: data.buyer_middlename || "",
+            buyer_lastname: data.buyer_lastname || "",
+            suffix_name: data.suffix_name || "",
+            communication_type: data.communication_type || "",
+            channels: data.channels || "",
+            user_type: data.user_type || "",
+            other_user_type: data.other_user_type || ""
+        };
+    };
+    // Normalized data for comparison
+    const normalizedBuyerOldData = normalizeData(buyerOldData);
+    const normalizedDataToUpdate = normalizeData(dataToUpdate);
+
+    // Deep comparison to check for changes
+    // const hasChanges = !_.isEqual(normalizedBuyerOldData, normalizedDataToUpdate);
+    const hasChanges = JSON.stringify(normalizedBuyerOldData) !== JSON.stringify(normalizedDataToUpdate);
+
 
     const [showAlert, setShowAlert] = useState(false);
 
@@ -69,10 +114,27 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
             ? propertyNamesList
                 .filter((item) => !item.toLowerCase().includes("phase"))
                 .map((item) => {
-                    const formattedItem = formatFunc(item);
-                    return formattedItem === "Casamira South"
-                        ? "Casa Mira South"
-                        : formattedItem;
+                    let formattedItem = formatFunc(item);
+
+                // Capitalize each word in the string
+                formattedItem = formattedItem
+                    .split(" ")
+                    .map((word) => {
+                        // Check for specific words that need to be fully capitalized
+                        if (/^(Sjmv|Lpu|Cdo|Dgt)$/i.test(word)) {
+                            return word.toUpperCase();
+                        }
+                        // Capitalize the first letter of all other words
+                        return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+                    })
+                    .join(" ");
+
+                // Replace specific names if needed
+                if (formattedItem === "Casamira South") {
+                    formattedItem = "Casa Mira South";
+                }
+
+                return formattedItem;
                 })
                 .sort((a, b) => {
                     if (a === "N/A") return -1;
@@ -91,15 +153,25 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
 
     const handleCloseModal = () => {
         if (dataConcern) {
-            setDataToUpdate(dataConcern);
-            setMessage(dataConcern.admin_remarks || "");
-            getAllConcerns();
+            setDataToUpdate({
+                ...dataConcern,
+                user_type: predefinedUserTypes.includes(dataConcern.user_type)
+                    ? dataConcern.user_type
+                    : "Others",
+                other_user_type: !predefinedUserTypes.includes(dataConcern.user_type)
+                    ? dataConcern.user_type
+                    : dataToUpdate.other_user_type, // Preserve other_user_type
+            });
+            if (modalRef.current) {
+                modalRef.current.close();
+            }
         }
     };
 
+
     const handleChange = (e) => {
         const { name, value } = e.target;
-
+        console.log("Field being updated:", name, "Value:", value);
         setDataToUpdate((prevState) => {
             // When switching to "Others," retain the current other_user_type if it exists
             if (name === "user_type") {
@@ -107,6 +179,13 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
                     ...prevState,
                     user_type: value,
                     other_user_type: value === "Others" ? prevState.other_user_type : "",
+                };
+            }
+
+            if (name === "other_user_type" && prevState.user_type === "Others") {
+                return {
+                    ...prevState,
+                    other_user_type: value,
                 };
             }
 
@@ -149,11 +228,10 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
             const updatedData = { ...dataToUpdate };
             localStorage.removeItem("dataConcern");
             localStorage.removeItem("closeConcern");
-            localStorage.setItem("updatedData", JSON.stringify(updatedData)); 
+            localStorage.setItem("updatedData", JSON.stringify(updatedData));
             showToast("Data updated successfully!", "success");
             onupdate({ ...dataToUpdate, dataConcern });
-            getInquiryLogs(dataConcern.ticket_id);
-            getAllConcerns();
+            await Promise.all([getInquiryLogs(dataConcern.ticket_id), getAllConcerns()]);
         } catch (error) {
             console.log("error", error);
         }
@@ -166,35 +244,6 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
         }));
     }, [message]);
 
-    useEffect(() => {
-        if (dataConcern) {
-            setDataToUpdate({
-                contract_number: dataConcern.contract_number || "",
-                unit_number: dataConcern.unit_number || "",
-                property: dataConcern.property || "",
-                details_concern: dataConcern.details_concern || "",
-                admin_remarks: dataConcern.admin_remarks || "",
-                buyer_email: dataConcern.buyer_email || "",
-                mobile_number: dataConcern.mobile_number || "",
-                buyer_firstname: dataConcern.buyer_firstname || "",
-                buyer_middlename: dataConcern.buyer_middlename || "",
-                buyer_lastname: dataConcern.buyer_lastname || "",
-                suffix_name: dataConcern.suffix_name || "",
-                user_type: predefinedUserTypes.includes(dataConcern.user_type)
-                    ? dataConcern.user_type
-                    : "Others", // Set to "Others" for any non-standard user_type
-                communication_type: dataConcern.communication_type || "",
-                other_user_type: !predefinedUserTypes.includes(
-                    dataConcern.other_user_type
-                )
-                    ? dataConcern.other_user_type
-                    : "",
-                channels: dataConcern.channels,
-                ticket_id: dataConcern.ticket_id,
-            });
-            setMessage(dataConcern.admin_remarks || "");
-        }
-    }, [dataConcern]);
     return (
         <dialog
             id="Resolved"
@@ -203,17 +252,14 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
         >
             <div className="rounded-[10px]">
                 <div className="absolute right-0">
-                    <form
-                        method="dialog"
-                        className="pt-3 flex justify-end mr-2"
-                    >
+                   
                         <button
                             className="flex justify-center w-10 h-10 items-center rounded-full bg-custom-grayFA text-custom-bluegreen hover:bg-custombg"
                             onClick={handleCloseModal}
                         >
                             ✕
                         </button>
-                    </form>
+                    
                 </div>
                 <div className=" px-[50px] py-[77px] flex flex-col gap-[40px] ">
                     <div className="flex flex-col gap-[10px]">
@@ -332,7 +378,7 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
                                 I am a
                             </span>
                             <div className="relative w-full">
-                                <select
+                                {/* <select
                                     name="user_type"
                                     value={dataToUpdate.user_type || ""}
                                     onChange={handleChange}
@@ -346,6 +392,20 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
                                     <option value="Broker">Broker</option>
                                     <option value="Seller">Seller</option>
                                     <option value="Lessee">Lessee</option>
+                                    <option value="Others">Others</option>
+                                </select> */}
+                                <select
+                                    name="user_type"
+                                    value={dataToUpdate.user_type || ""}
+                                    onChange={handleChange}
+                                    className="appearance-none w-full px-4 text-sm py-1 bg-white focus:outline-none border-0 mobile:text-xs"
+                                >
+                                    <option value="">(Select)</option>
+                                    {predefinedUserTypes.map((type) => (
+                                        <option key={type} value={type}>
+                                            {type}
+                                        </option>
+                                    ))}
                                     <option value="Others">Others</option>
                                 </select>
                                 <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3 bg-[#EDEDED] text-custom-gray81 pointer-events-none">
@@ -386,7 +446,7 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
                                     <option value="Complaint">Complaint</option>
                                     <option value="Request">Request</option>
                                     <option value="Inquiry">Inquiry</option>
-                                    <option value="Suggestion or recommendation">
+                                    <option value="Suggestion or Recommendation">
                                         Suggestion or Recommendation
                                     </option>
                                 </select>
@@ -566,9 +626,14 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
                         <form method="">
                             {user?.department === "Customer Relations - Services" && (
                                 <button
+                                    disabled={!hasChanges} 
                                     className="w-[133px] h-[39px] font-semibold text-sm text-white rounded-[10px] gradient-btn5"
                                     type="button"
                                     onClick={handleShowUpdateAlert}
+                                    style={{
+                                        opacity: hasChanges  ? 1 : 0.5,
+                                        cursor: hasChanges  ? 'pointer' : 'not-allowed'
+                                    }}
                                 >
                                     Update
                                 </button>

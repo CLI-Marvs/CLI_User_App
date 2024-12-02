@@ -166,7 +166,6 @@ const BasicPricing = ({ props }) => {
             priceBasicDetailsFormData.reservationFee
         ) {
             try {
-                console.log("user?.id", user?.id);
                 const payload = {
                     priceList: buildPriceListPayload(
                         priceBasicDetailsFormData,
@@ -179,7 +178,6 @@ const BasicPricing = ({ props }) => {
                     //Later to add price versions
                     // priceVersion: buildPriceVersionPayload(priceVersionFormData),
                 };
-                console.log("payload", payload);
                 const response = await apiService.post(
                     "basic-pricing",
                     payload,

@@ -15,7 +15,6 @@ class ApiController extends Controller
             if ($existingEmail) {
                 return response()->json(['message' => 'Employee already exists'], 400);
             }
-
             $employeeData = new Employee();
             $employeeData->firstname = $request->firstname;
             $employeeData->lastname = $request->lastname;

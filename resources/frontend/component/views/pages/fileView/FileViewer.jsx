@@ -129,7 +129,7 @@ const FileViewer = () => {
     };
 
     /**
-     * Function to handle download of the file from the google
+     * Function to handle download of the file from the google cloud
      */
     const handleDownloadFile = async (fileName) => {
         try {

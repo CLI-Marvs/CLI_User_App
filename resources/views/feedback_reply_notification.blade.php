@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 
 <head>
     <meta charset="UTF-8">
@@ -10,7 +10,6 @@
         href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap"
         rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;700&display=swap" rel="stylesheet">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <style>
         @font-face {
             font-family: 'Barlow';
@@ -122,41 +121,36 @@
     </style>
 </head>
 
-<body style="font-family: Arial, sans-serif; font-size: 14px; color: #333; line-height: 1.6; padding: 10px;">
-    <div class="container">
-        <span>Hi {{ $assignee_name }},</span>
-        <p>A feedback ticket that is assigned to you is marked as resolved by {{ $admin_name }}.
-        </p>
-        <p><strong>Ticket info:</strong></p>
-        <ul style="list-style-type: none; padding: 0;">
-            <li><strong>Ticket No:</strong> {{ $modifiedTicketId }}</li>
-            <li><strong>Concern: </strong> {{ $details_concern }}</li>
-            <li><strong>From:</strong> {{ ucwords($buyer_name) }}</li>
-        </ul>
-        {{-- <div class="footer">
-            Best regards,
-            Cebu Landmasters, Inc.
-        </div> --}}
+<body style="font-family: Arial, sans-serif; font-size: 14px; color: #333; line-height: 1.6;">
+    <p>Hi Mr./Ms. {{ ucwords($data['lname']) }},</p>
 
-        <p style="margin: 0; padding: 0;">Thank you,</p>
-        <p style="margin: 0; padding: 0;">Cebu Landmasters, Inc.</p>
+    <p>
+        Thank you for reaching out to us. We have received your feedback about <strong>
+            {{ implode(', ', array_filter([
+            $data['details_concern'],
+            ($data['property'] ?? 'N/A') !== 'N/A' ? $data['property'] : null,
+            $data['unit_number'] ?? null
+            ])) }}.
+        </strong>
+    </p>
+    <p>
+        Our team is reviewing your concern and you can expect a
+        response within
+        1-2 working days.
         <br>
-        <img style="margin-top; 5px"
-            src="https://storage.googleapis.com/super-app-storage/concerns/67219ce89c592.png?GoogleAccessId=799945112092-compute%40developer.gserviceaccount.com&Expires=2045788905&Signature=aIFtdGmczZSDdCikC8VR%2FIEnS6g0bLs%2BXhOP7lekJ5m10Qktmc%2FotqfUrpYCFyC9qBizDk5zo4jhc1ebO54YBPc45h1qYf%2B96R8m2v0AWzo9NED1sD6i4qgKPd4Nn5wJ19iZFPPpSXWrht7idXcg9Ja05hd%2BpuxoknvV0%2BP%2Fnh9W%2B4pucqoT%2Fo6C7jN9Rp2gvrkH04EgjgrsSfgTkxraaURAs0IcUlmq7Ma4eBQU%2FDL2uMuSsupk9%2FyxisXoI2PT%2FOAdjanl9uxSNFqnR2dg8YUmF2NcxRPaSjcojZfcwZEiuz%2B9Pc50f1DvqVNOe06hl%2BCw9i7dJMsKUNN0tgkz0w%3D%3D"
-            title="clisignature" />
+        In the meantime, if you have further questions, you may contact us directly at
+        <strong>0917-825-5790/ 231 4914 loc 113.</strong>
+    </p>
+    <p>
+        At CLI, we build with you in mind.
+    </p>
 
 
-        <p style="margin-top: 5px;">
-            <strong>
-                Reminder:
-                This is an automated message from a no-reply email address.
-                <br>
-                Please do not reply directly to this email as your message will not be received.
-            </strong>
-        </p>
-
-        {{-- <p style="font-weight: bold;">CLI - {{$department}}</p> --}}
-    </div>
+    <p style="margin: 0; padding: 0;">Best regards,</p>
+    <p style="margin: 0; padding: 0;">Cebu Landmasters, Inc.</p>
+    <p style="margin: 0; padding: 0;">Customer Relations - Services</p>
+    <br>
+    <img style="margin-top; 5px;"
+        src="https://storage.googleapis.com/super-app-storage/concerns/67219ce89c592.png?GoogleAccessId=799945112092-compute%40developer.gserviceaccount.com&Expires=2045788905&Signature=aIFtdGmczZSDdCikC8VR%2FIEnS6g0bLs%2BXhOP7lekJ5m10Qktmc%2FotqfUrpYCFyC9qBizDk5zo4jhc1ebO54YBPc45h1qYf%2B96R8m2v0AWzo9NED1sD6i4qgKPd4Nn5wJ19iZFPPpSXWrht7idXcg9Ja05hd%2BpuxoknvV0%2BP%2Fnh9W%2B4pucqoT%2Fo6C7jN9Rp2gvrkH04EgjgrsSfgTkxraaURAs0IcUlmq7Ma4eBQU%2FDL2uMuSsupk9%2FyxisXoI2PT%2FOAdjanl9uxSNFqnR2dg8YUmF2NcxRPaSjcojZfcwZEiuz%2B9Pc50f1DvqVNOe06hl%2BCw9i7dJMsKUNN0tgkz0w%3D%3D"
+        title="clisignature" />
 </body>
-
-</html>

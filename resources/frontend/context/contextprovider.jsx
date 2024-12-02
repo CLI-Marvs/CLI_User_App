@@ -7,6 +7,7 @@ import React, {
 } from "react";
 import apiService from "../component/servicesApi/apiService";
 import debounce from "lodash/debounce";
+import { set } from "lodash";
  
 
 const StateContext = createContext({
@@ -57,6 +58,7 @@ export const ContextProvider = ({ children }) => {
     const [inquiriesPerChanelYear, setInquiriesPerChanelYear] = useState("");
     const [inquiriesPerChannelMonth, setInquiriesPerChannelMonth] = useState("");
     const [pricingMasterLists, setPricingMasterLists] = useState([]);
+    const [bannerLists, setBannerLists] = useState([]);
     const [paymentSchemes, setPaymentSchemes] = useState([]);
     const [propertyId, setPropertyId] = useState(null);
     const [floorPremiumsAccordionOpen, setFloorPremiumsAccordionOpen] =
@@ -82,8 +84,8 @@ export const ContextProvider = ({ children }) => {
     const [bankList, setBankList] = useState([]);
     const [filterDueDate, setFilterDueDate] = useState(null);
     const [loading, setLoading] = useState(false);
+    const [navBarData, setNavBarData] = useState([]);
  
-
     useEffect(() => {
         if (user && user.department && !isDepartmentInitialized) {
             setDepartment(user.department === "Customer Relations - Services" ? "All" : user.department);
@@ -105,7 +107,6 @@ export const ContextProvider = ({ children }) => {
         if (token) {
             setLoading(true);
             try {
-               
                 const searchParams = new URLSearchParams({
                     search: JSON.stringify(searchFilter),
                     page: currentPage + 1,
@@ -120,9 +121,10 @@ export const ContextProvider = ({ children }) => {
                 );
                 setData(response.data.data);
                 setPageCount(response.data.last_page);
-                setLoading(false);
             } catch (error) {
                 console.error("Error fetching data: ", error);
+            } finally {
+                setLoading(false);
             }
         }
     };
@@ -344,6 +346,28 @@ export const ContextProvider = ({ children }) => {
         }
     };
 
+    const getNavBarData = async() => {
+        if(token) {
+            try {
+                const encodedTicketId = encodeURIComponent(ticketId);
+                
+                const response = await apiService.get(`navbar-data?ticketId=${encodedTicketId}`);
+                
+                const data = response.data;
+
+                setNavBarData((prevData) => ({
+                    ...prevData,
+                    [ticketId]: data,
+                }));
+            } catch (error) {
+                console.log("error retrieving", error);
+            } /* finally {
+                setLoading(false); 
+            } */
+            
+        }
+    };
+
     const getAssigneesPersonnel = async () => {
         if (ticketId) {
             try {
@@ -382,6 +406,7 @@ export const ContextProvider = ({ children }) => {
             }
         }
     };
+
 
     const getMessages = async (ticketId) => {
         /* if (messages[id]) return; */
@@ -499,6 +524,19 @@ export const ContextProvider = ({ children }) => {
         }
     };
 
+    const getBannerData = async () => {
+        try{
+            const response = await apiService.get(
+                "get-banner"
+            );
+            setBannerLists(response.data.data);
+        }catch(error){
+            console.log("error", error);
+        }
+    }
+
+
+
     useEffect(() => {
         getPropertyUnits(towerPhaseId, selectedFloor);
     }, [towerPhaseId, selectedFloor]);
@@ -537,7 +575,7 @@ export const ContextProvider = ({ children }) => {
         }
     }, [token]);
 
-    useEffect(() => {
+    /* useEffect(() => {
         getAllConcerns();
     }, [
         currentPage,
@@ -547,7 +585,7 @@ export const ContextProvider = ({ children }) => {
         searchFilter,
         hasAttachments,
         specificAssigneeCsr,
-    ]);
+    ]); */
 
     useEffect(() => {
         getBankName();
@@ -558,9 +596,9 @@ export const ContextProvider = ({ children }) => {
         getInvoices();
     }, [currentPageInvoices, filterDueDate])
 
-    useEffect(() => {
+   /*  useEffect(() => {
         getNotifications();
-    }, [notifCurrentPage, notifStatus, token]);
+    }, [notifCurrentPage, notifStatus, token]); */
 
     useEffect(() => {
         if (ticketId) {
@@ -568,12 +606,13 @@ export const ContextProvider = ({ children }) => {
             getInquiryLogs(ticketId);
             getConcernMessages();
             getAssigneesPersonnel();
+            /* getNavBarData(); */
         }
     }, [ticketId]);
 
-    useEffect(() => {
+    /* useEffect(() => {
         getCount();
-    }, [unreadCount, token]);
+    }, [unreadCount, token]); */
 
     useEffect(() => { }, [user, token]);
 
@@ -621,6 +660,7 @@ export const ContextProvider = ({ children }) => {
                 logs,
                 setLogs,
                 allEmployees,
+                getBannerData,
                 setStatusFilter,
                 setNotifCurrentPage,
                 notifPageCount,
@@ -686,6 +726,7 @@ export const ContextProvider = ({ children }) => {
                 getAssigneesPersonnel,
                 propertyNamesList,
                 invoices,
+                bannerLists,
                 transactions,
                 currentPageTransaction,
                 setCurrentPageTransaction,
@@ -720,7 +761,8 @@ export const ContextProvider = ({ children }) => {
                 setInquiriesPerChannelMonth,
                 getInquiriesPerChannel,
                 inquriesPerChannelData,
-               
+                navBarData,
+                getNavBarData,
             }}
 
         >

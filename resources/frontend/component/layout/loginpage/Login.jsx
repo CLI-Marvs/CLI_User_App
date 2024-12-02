@@ -31,7 +31,6 @@ const Login = () => {
 
     const signinGoogle = async () => {
         window.location.href = `${API_PROVIDER}/google/redirect`;
-        console.log('Sign in with google');
     };
 
     return (
