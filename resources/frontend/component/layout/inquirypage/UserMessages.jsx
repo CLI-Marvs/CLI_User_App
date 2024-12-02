@@ -144,7 +144,7 @@ const UserMessages = ({ items, dataConcern }) => {
                                     : baseName;
                             return (
                                 <div
-                                    className="mt-4 w-[219px] overflow-hidden font-light flex items-center gap-x-4 "
+                                    className="mt-4 w-[300px] overflow-hidden font-light flex items-center gap-x-4 "
                                     key={index}
                                 >
                                     <Link
@@ -172,6 +172,7 @@ const UserMessages = ({ items, dataConcern }) => {
                                         </span>
                                     </Link>
                                     <div>
+                                        
                                         <button
                                             onClick={() => handleDownloadFile(attachment.url)}
                                             disabled={loadingStates[attachment.url]}
