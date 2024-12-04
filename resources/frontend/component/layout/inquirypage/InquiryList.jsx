@@ -325,8 +325,7 @@ const InquiryList = () => {
         specificAssigneeCsr,
         currentPage,
     ]);
-
-    console.log("loading", loading);
+ 
 
     return (
         <>
