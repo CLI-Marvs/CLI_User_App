@@ -189,30 +189,7 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
 
     const handleCloseModal = () => {
         if (dataConcern) {
-            // setDataToUpdate({
-            //     ...dataConcern,
-            //     user_type: predefinedUserTypes.includes(dataConcern.user_type)
-            //         ? dataConcern.user_type
-            //         : "Others",
-            //     other_user_type: !predefinedUserTypes.includes(dataConcern.user_type)
-            //         ? dataConcern.user_type
-            //         : dataToUpdate.other_user_type, // Preserve other_user_type
-            // });
-
-            // setDataToUpdate((prevState) => ({
-            //     ...prevState,
-            //     ...dataConcern, // Spread the dataConcern values into the state
-            //     user_type: dataConcern.user_type === null || dataConcern.user_type === ""
-            //         ? null // Keep null if user_type is null or empty
-            //         : predefinedUserTypes.includes(dataConcern.user_type)
-            //             ? dataConcern.user_type // Keep if it's a predefined user type
-            //             : "Others", // Otherwise, set to "Others"
-
-            //     other_user_type: !predefinedUserTypes.includes(dataConcern.user_type) && dataConcern.user_type
-            //         ? dataConcern.user_type : "",
-
-            // }));
-
+            
             setDataToUpdate((prevState) => ({
                 ...prevState,
                 ...dataConcern, // Spread the dataConcern values into the state
