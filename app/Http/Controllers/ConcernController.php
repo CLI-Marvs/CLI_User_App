@@ -1787,15 +1787,17 @@ class ConcernController extends Controller
     }
 
 
-
+    /**
+     * Implement a function to resolve a ticket
+     */
     public function markAsResolve(Request $request)
     {
 
         try {
-            /*dd($request->all()); */
+            // dd($request);
             $assignees = $request->assignees;
             $concerns = Concerns::where('ticket_id', $request->ticket_id)->first();
-            $surveyLink = $request->surveyLink;
+            $selectedSurveyType = $request->selectedSurveyType;
             $allFiles = null;
             $messageId = $request->message_id;
             $modifiedTicketId = str_replace('Ticket#', '', $request->ticket_id);
@@ -1806,7 +1808,7 @@ class ConcernController extends Controller
             $buyer_name = $request->buyer_name;
             $concerns->communication_type = $request->communication_type;
             $concerns->status = "Resolved";
-            $concerns->survey_link = $surveyLink;
+            $concerns->survey_link = $selectedSurveyType['surveyName']; //Save the survey name to database
             $buyer_lastname = $request->buyer_lastname;
             $message_id = $request->message_id;
             $concerns->save();
@@ -1832,8 +1834,8 @@ class ConcernController extends Controller
             // ReplyFromAdminJob::dispatch($request->ticket_id, $buyerEmail, $request->remarks, $messageId, $allFiles, $admin_name, $buyer_lastname);
             // dd($request->ticket_id, $buyerEmail, $buyer_lastname, $message_id, $admin_name, $department);
 
-
-            MarkResolvedToCustomerJob::dispatch($request->ticket_id, $buyerEmail, $buyer_lastname, $message_id, $admin_name, $department, $modifiedTicketId, $surveyLink);
+            //Pass the selectedSurveyType as arguments to MarkResolvedToCustomerJob job 
+            MarkResolvedToCustomerJob::dispatch($request->ticket_id, $buyerEmail, $buyer_lastname, $message_id, $admin_name, $department, $modifiedTicketId, $selectedSurveyType);
         } catch (\Exception $e) {
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
         }
@@ -2086,24 +2088,52 @@ class ConcernController extends Controller
     }
 
     /**
-     * Function to mark as closed
+     * Implement a function to resolve a ticket
      */
     public function markAsClosed(Request $request)
     {
-
         try {
-            $ticket_id = $request->ticket_id;
-            $modifiedTicketId = str_replace('Ticket#', '', $ticket_id);
-            $concerns = Concerns::where('ticket_id', $ticket_id)->first();
+            $assignees = $request->assignees;
+            $concerns = Concerns::where('ticket_id', $request->ticket_id)->first();
+            $selectedSurveyType = $request->selectedSurveyType;
+            $modifiedTicketId = str_replace('Ticket#', '', $request->ticket_id);
+            $buyerEmail = $request->buyer_email;
+            $admin_name = $request->admin_name;
+            $department = $request->department;
+            $details_concern = $request->details_concern;
+            $buyer_name = $request->buyer_name;
+            $concerns->communication_type = $request->communication_type;
             $concerns->status = "Closed";
+            $concerns->survey_link = $selectedSurveyType['surveyName'];// Save the survey name to database
+            $buyer_lastname = $request->buyer_lastname;
+            $message_id = $request->message_id;
             $concerns->save();
-            $this->inquiryResolveLogs($request, 'close');
-            MarkClosedToCustomerJob::dispatch($request->ticket_id, $request->buyer_email, $request->buyer_lastname, $request->message_id, $request->admin_name, $request->department, $modifiedTicketId, $request->surveyLink);
 
-            return response()->json('Successfully marked as closed');
+            if (!empty($assignees)) {
+                foreach ($assignees as $assignee) {
+                    $data = [
+                        'ticket_id' => $request->ticket_id,
+                        'buyer_name' => $buyer_name,
+                        'admin_name' => $admin_name,
+                        'details_concern' => $details_concern,
+                        'modifiedTicketId' => $modifiedTicketId
+                    ];
+                    NotifyAssignedCliOfResolvedInquiryJob::dispatch(
+                        $assignee['employee_email'],
+                        $assignee['name'],
+                        $data
+                    );
+                }
+            }
+
+            $this->inquiryResolveLogs($request, 'close');
+
+            //Pass the selectedSurveyType as arguments to MarkResolvedToCustomerJob job 
+            MarkClosedToCustomerJob::dispatch($request->ticket_id, $buyerEmail, $buyer_lastname, $message_id, $admin_name, $department, $modifiedTicketId, $selectedSurveyType);
         } catch (\Exception $e) {
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
         }
+
     }
 
     public function sendMessageConcerns(Request $request)
