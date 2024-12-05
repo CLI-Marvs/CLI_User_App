@@ -27,6 +27,14 @@ const BannerSettings = () => {
         e.preventDefault();
         setLoading(true);
 
+        if ((file === null && link === "") || (file === null && link !== "")) {
+            setLoading(false);
+            return showToast("Please upload an image as it is required.", "error");
+        } 
+
+        formData.append('banner_image', file);
+        formData.append('banner_link', link);
+
         const formData = new FormData();
        
         if (isEdit) {
