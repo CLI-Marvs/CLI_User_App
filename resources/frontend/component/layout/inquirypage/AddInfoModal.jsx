@@ -5,9 +5,12 @@ import { useStateContext } from "../../../context/contextprovider";
 import Alert from "../mainComponent/Alert";
 import { showToast } from "../../../util/toastUtil"
 import _ from "lodash";
+import { data } from "autoprefixer";
 const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
     const predefinedUserTypes = ["Property Owner", "Buyer", "Broker", "Seller", "Lessee"];
-    const { getAllConcerns, propertyNamesList, updateConcern, user, getInquiryLogs } =
+    const [isUserTypeChange, setIsUserTypeChange] = useState(false);
+    const [showAlert, setShowAlert] = useState(false);
+    const { getAllConcerns, propertyNamesList, user, getInquiryLogs } =
         useStateContext();
     const [message, setMessage] = useState(dataConcern.admin_remarks || "");
     const [dataToUpdate, setDataToUpdate] = useState({
@@ -25,10 +28,14 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
         suffix_name: dataConcern.suffix_name || "",
         communication_type: dataConcern.communication_type || "",
         channels: dataConcern.channels,
-
-        user_type: predefinedUserTypes.includes(dataConcern.user_type)
-            ? dataConcern.user_type
-            : "Others",
+        // user_type: predefinedUserTypes.includes(dataConcern.user_type)
+        //     ? dataConcern.user_type
+        //     : "Others", // Set to Others if not in predefined list
+        user_type: dataConcern.user_type === null || dataConcern.user_type === ""
+            ? null // Leave as null if user_type is null or empty
+            : predefinedUserTypes.includes(dataConcern.user_type)
+                ? dataConcern.user_type // Keep it if it's in the predefined list
+                : "Others", // Otherwise, set to "Others"
         other_user_type: !predefinedUserTypes.includes(dataConcern.user_type)
             ? dataConcern.user_type
             : "",
@@ -38,16 +45,19 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
         if (dataConcern) {
             setDataToUpdate((prevState) => ({
                 ...prevState,
-                ...dataConcern,
-                user_type: predefinedUserTypes.includes(dataConcern.user_type)
-                    ? dataConcern.user_type
-                    : "Others",
-
+                ...dataConcern, // Spread the dataConcern values into the state
+                user_type: dataConcern.user_type === null || dataConcern.user_type === ""
+                    ? null // Keep null if user_type is null or empty
+                    : predefinedUserTypes.includes(dataConcern.user_type)
+                        ? dataConcern.user_type // Keep if it's a predefined user type
+                        : "Others", // Otherwise, set to "Others"
+                // other_user_type: !predefinedUserTypes.includes(dataConcern.user_type) && dataConcern.user_type
+                //     ? dataConcern.user_type // Set this only if the user_type is not in the predefined list
+                //     : "",
             }));
         }
     }, [dataConcern]);
 
-    
     /* Buyers old data to be used in AssignDetails.jsx 
      * to compare the values and show the differences
      */
@@ -69,14 +79,18 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
         user_type: dataConcern.user_type || "",
         other_user_type: dataConcern.user_type === "Others" ? dataConcern.other_user_type || "" : "",
     };
-    
-    // Strip out fields that you don't want to compare (like `id`, `status`, `created_at`, `updated_at`, etc.)
+
+
+    /**
+     * Function to normalizeData, that returns;
+     * Strip out fields that needed to compare (like `id`, `status`, `created_at`, `updated_at`, etc.)
+     */
     const normalizeData = (data) => {
         return {
-            ticket_id: data.ticket_id,
+            ticket_id: data.ticket_id || "",
             details_concern: data.details_concern || "",
-            contract_number: data.contract_number || "",
-            unit_number: data.unit_number || "",
+            contract_number: data.contract_number || null,
+            unit_number: data.unit_number || null,
             property: data.property || "",
             admin_remarks: data.admin_remarks || "",
             buyer_email: data.buyer_email || "",
@@ -85,22 +99,43 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
             buyer_middlename: data.buyer_middlename || "",
             buyer_lastname: data.buyer_lastname || "",
             suffix_name: data.suffix_name || "",
-            communication_type: data.communication_type || "",
-            channels: data.channels || "",
-            user_type: data.user_type || "",
-            other_user_type: data.other_user_type || ""
+            communication_type: data.communication_type || null,
+            channels: data.channels || null,
+            // user_type: data.user_type || null,
+            user_type: predefinedUserTypes.includes(data.user_type)
+                ? data.user_type
+                : data.user_type === null || data.user_type === ""
+                    ? null
+                    : "Others",
+            // user_type: data.user_type === null || data.user_type === ""
+            //     ? null
+            //     : predefinedUserTypes.includes(data.user_type)
+            //         ? data.user_type
+            //         : "Others", // Otherwise, set to "Others"
+            // other_user_type: data.other_user_type && data.other_user_type.trim() !== ""
+            //     ? data.other_user_type
+            //     : "vendor", // Default value if empty or undefined
+            // other_user_type: data.user_type && data.user_type.trim() !== ""
+            //     ? data.other_user_type // If provided and non-empty, use it
+            //     : null,
         };
     };
-    // Normalized data for comparison
-    const normalizedBuyerOldData = normalizeData(buyerOldData);
-    const normalizedDataToUpdate = normalizeData(dataToUpdate);
 
-    // Deep comparison to check for changes
-    // const hasChanges = !_.isEqual(normalizedBuyerOldData, normalizedDataToUpdate);
-    const hasChanges = JSON.stringify(normalizedBuyerOldData) !== JSON.stringify(normalizedDataToUpdate);
+    const normalizedBuyerOldData = normalizeData(buyerOldData);   //Normalize existing buyer data
+    const normalizedDataToUpdate = normalizeData(dataToUpdate);   //Normalize data to be updated
+    const hasChanges = JSON.stringify(normalizedBuyerOldData) !== JSON.stringify(normalizedDataToUpdate); //Check if there are any changes between the two normalized datasets
 
-
-    const [showAlert, setShowAlert] = useState(false);
+    /**
+     * Detect changes in user type, specifically when the user type is set to "Others"
+     */
+    useEffect(() => {
+        //const isOtherUserTypeChanged = dataToUpdate.other_user_type !== buyerOldData.user_type;
+        const isOtherUserTypeChanged =
+            normalizedDataToUpdate.user_type === "Others" &&
+            normalizedBuyerOldData.other_user_type !==
+            normalizedDataToUpdate.other_user_type;
+        setIsUserTypeChange(isOtherUserTypeChanged);
+    }, [buyerOldData, dataToUpdate]);
 
     const formatFunc = (name) => {
         return name
@@ -116,25 +151,25 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
                 .map((item) => {
                     let formattedItem = formatFunc(item);
 
-                // Capitalize each word in the string
-                formattedItem = formattedItem
-                    .split(" ")
-                    .map((word) => {
-                        // Check for specific words that need to be fully capitalized
-                        if (/^(Sjmv|Lpu|Cdo|Dgt)$/i.test(word)) {
-                            return word.toUpperCase();
-                        }
-                        // Capitalize the first letter of all other words
-                        return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
-                    })
-                    .join(" ");
+                    // Capitalize each word in the string
+                    formattedItem = formattedItem
+                        .split(" ")
+                        .map((word) => {
+                            // Check for specific words that need to be fully capitalized
+                            if (/^(Sjmv|Lpu|Cdo|Dgt)$/i.test(word)) {
+                                return word.toUpperCase();
+                            }
+                            // Capitalize the first letter of all other words
+                            return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+                        })
+                        .join(" ");
 
-                // Replace specific names if needed
-                if (formattedItem === "Casamira South") {
-                    formattedItem = "Casa Mira South";
-                }
+                    // Replace specific names if needed
+                    if (formattedItem === "Casamira South") {
+                        formattedItem = "Casa Mira South";
+                    }
 
-                return formattedItem;
+                    return formattedItem;
                 })
                 .sort((a, b) => {
                     if (a === "N/A") return -1;
@@ -151,27 +186,34 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
         setMessage(newValue);
     };
 
+
     const handleCloseModal = () => {
         if (dataConcern) {
-            setDataToUpdate({
-                ...dataConcern,
-                user_type: predefinedUserTypes.includes(dataConcern.user_type)
-                    ? dataConcern.user_type
-                    : "Others",
-                other_user_type: !predefinedUserTypes.includes(dataConcern.user_type)
-                    ? dataConcern.user_type
-                    : dataToUpdate.other_user_type, // Preserve other_user_type
-            });
+            
+            setDataToUpdate((prevState) => ({
+                ...prevState,
+                ...dataConcern, // Spread the dataConcern values into the state
+                user_type: dataConcern.user_type === null || dataConcern.user_type === ""
+                    ? null // Keep null if user_type is null or empty
+                    : predefinedUserTypes.includes(dataConcern.user_type)
+                        ? dataConcern.user_type // Keep if it's a predefined user type
+                        : "Others", // Otherwise, set to "Others"
+
+                other_user_type: dataConcern.user_type && !predefinedUserTypes.includes(dataConcern.user_type)
+                    ? dataConcern.user_type // Keep the value if it's not a predefined type
+                    : prevState.other_user_type, // Preserve the previous value of other_user_type
+            }));
+            if (message) {
+                setMessage(dataConcern.admin_remarks || ""); // Clear the message if it's empty
+            }
             if (modalRef.current) {
                 modalRef.current.close();
             }
         }
     };
 
-
     const handleChange = (e) => {
         const { name, value } = e.target;
-        console.log("Field being updated:", name, "Value:", value);
         setDataToUpdate((prevState) => {
             // When switching to "Others," retain the current other_user_type if it exists
             if (name === "user_type") {
@@ -252,14 +294,14 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
         >
             <div className="rounded-[10px]">
                 <div className="absolute right-0">
-                   
-                        <button
-                            className="flex justify-center w-10 h-10 items-center rounded-full bg-custom-grayFA text-custom-bluegreen hover:bg-custombg"
-                            onClick={handleCloseModal}
-                        >
-                            ✕
-                        </button>
-                    
+
+                    <button
+                        className="flex justify-center w-10 h-10 items-center rounded-full bg-custom-grayFA text-custom-bluegreen hover:bg-custombg"
+                        onClick={handleCloseModal}
+                    >
+                        ✕
+                    </button>
+
                 </div>
                 <div className=" px-[50px] py-[77px] flex flex-col gap-[40px] ">
                     <div className="flex flex-col gap-[10px]">
@@ -378,22 +420,6 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
                                 I am a
                             </span>
                             <div className="relative w-full">
-                                {/* <select
-                                    name="user_type"
-                                    value={dataToUpdate.user_type || ""}
-                                    onChange={handleChange}
-                                    className="appearance-none w-full px-4 text-sm py-1 bg-white focus:outline-none border-0 mobile:text-xs"
-                                >
-                                    <option value="">(Select)</option>
-                                    <option value="Property Owner">
-                                        Property Owner
-                                    </option>
-                                    <option value="Buyer">Buyer</option>
-                                    <option value="Broker">Broker</option>
-                                    <option value="Seller">Seller</option>
-                                    <option value="Lessee">Lessee</option>
-                                    <option value="Others">Others</option>
-                                </select> */}
                                 <select
                                     name="user_type"
                                     value={dataToUpdate.user_type || ""}
@@ -623,23 +649,28 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
                         </div>
                     </div>
                     <div className="flex justify-end">
-                        <form method="">
+                        <div>
+                            {/**
+                             * Disable button if no changes detected
+                             * Visually indicate button is non-interactive when no changes exist
+                             */}
                             {user?.department === "Customer Relations - Services" && (
                                 <button
-                                    disabled={!hasChanges} 
+                                    disabled={!isUserTypeChange && !hasChanges}
                                     className="w-[133px] h-[39px] font-semibold text-sm text-white rounded-[10px] gradient-btn5"
                                     type="button"
                                     onClick={handleShowUpdateAlert}
+                                  
                                     style={{
-                                        opacity: hasChanges  ? 1 : 0.5,
-                                        cursor: hasChanges  ? 'pointer' : 'not-allowed'
+                                        opacity: !isUserTypeChange && !hasChanges ? 0.5 : 1,
+                                        cursor: !isUserTypeChange && !hasChanges ? 'not-allowed' : 'pointer',
                                     }}
                                 >
                                     Update
                                 </button>
-                            )}
 
-                        </form>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>
