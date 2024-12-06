@@ -689,6 +689,9 @@ const InquiryThread = () => {
                                                 <option value="Unresolved">
                                                     Unresolved
                                                 </option>
+                                                <option value="Closed">
+                                                    Closed
+                                                </option>
                                             </select>
                                         </div>
                                         <span className="absolute inset-y-0 right-0 flex items-center  pl-3 pointer-events-none">

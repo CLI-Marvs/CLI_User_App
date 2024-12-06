@@ -124,24 +124,32 @@
 <body style="font-family: Arial, sans-serif; font-size: 14px; color: #333; line-height: 1.6;">
     <p>Hi Mr./Ms. {{ ucwords($buyer_lname) }},</p>
 
-    <p>We are pleased to inform you that your feedback ticket#{{$modifiedTicketId}} has been resolved. Thank you for bringing this
-    matter to our attention and for your patience as we addressed it.
+    <p>We are pleased to inform you that your feedback ticket#{{$modifiedTicketId}} has been resolved. Thank you for
+        bringing this
+        matter to our attention and for your patience as we addressed it.
     </p>
 
     <p>
         If you have any further questions or need additional assistance, please don't hesitate to contact us.
     </p>
     <p>Thank you for choosing Cebu Landmasters. We build with you in mind.</p>
-{{-- {!! $details_message !!} --}}
+    {{-- {!! $details_message !!} --}}
     {{-- <p style="font-size: 16px;">Sincerely,</p>
     <p style="font-weight: bold;">{{ ucwords($admin_name) }}</p>
     <p style="font-weight: bold; margin-bottom: 10px;">CLI - Customer Relations Services</p> --}}
     {{-- <p>Please click this link {{$surveyLink}}</p> --}}
+    <p>
+        Please click this link
+        <a href="{{ $selectedSurveyType['surveyLink']}}">
+            {{$selectedSurveyType['surveyName']}}
+        </a>
+    </p>
     <p style="margin: 0; padding: 0;">Best regards,</p>
     <p style="margin: 0; padding: 0;">{{ ucwords($admin_name) }}</p>
     <p style="margin: 0; padding: 0;">CLI - {{$department}}</p>
     <br>
-    <img style="margin-top; 5px" src="https://storage.googleapis.com/super-app-storage/concerns/67219ce89c592.png?GoogleAccessId=799945112092-compute%40developer.gserviceaccount.com&Expires=2045788905&Signature=aIFtdGmczZSDdCikC8VR%2FIEnS6g0bLs%2BXhOP7lekJ5m10Qktmc%2FotqfUrpYCFyC9qBizDk5zo4jhc1ebO54YBPc45h1qYf%2B96R8m2v0AWzo9NED1sD6i4qgKPd4Nn5wJ19iZFPPpSXWrht7idXcg9Ja05hd%2BpuxoknvV0%2BP%2Fnh9W%2B4pucqoT%2Fo6C7jN9Rp2gvrkH04EgjgrsSfgTkxraaURAs0IcUlmq7Ma4eBQU%2FDL2uMuSsupk9%2FyxisXoI2PT%2FOAdjanl9uxSNFqnR2dg8YUmF2NcxRPaSjcojZfcwZEiuz%2B9Pc50f1DvqVNOe06hl%2BCw9i7dJMsKUNN0tgkz0w%3D%3D"
-    title="clisignature" />
+    <img style="margin-top; 5px"
+        src="https://storage.googleapis.com/super-app-storage/concerns/67219ce89c592.png?GoogleAccessId=799945112092-compute%40developer.gserviceaccount.com&Expires=2045788905&Signature=aIFtdGmczZSDdCikC8VR%2FIEnS6g0bLs%2BXhOP7lekJ5m10Qktmc%2FotqfUrpYCFyC9qBizDk5zo4jhc1ebO54YBPc45h1qYf%2B96R8m2v0AWzo9NED1sD6i4qgKPd4Nn5wJ19iZFPPpSXWrht7idXcg9Ja05hd%2BpuxoknvV0%2BP%2Fnh9W%2B4pucqoT%2Fo6C7jN9Rp2gvrkH04EgjgrsSfgTkxraaURAs0IcUlmq7Ma4eBQU%2FDL2uMuSsupk9%2FyxisXoI2PT%2FOAdjanl9uxSNFqnR2dg8YUmF2NcxRPaSjcojZfcwZEiuz%2B9Pc50f1DvqVNOe06hl%2BCw9i7dJMsKUNN0tgkz0w%3D%3D"
+        title="clisignature" />
 
 </body>
