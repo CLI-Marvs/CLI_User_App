@@ -537,20 +537,21 @@ export const ContextProvider = ({ children }) => {
 
 
 
-    useEffect(() => {
-        getPropertyUnits(towerPhaseId, selectedFloor);
-    }, [towerPhaseId, selectedFloor]);
+    // useEffect(() => {
+    //     getPropertyUnits(towerPhaseId, selectedFloor);
+    // }, [towerPhaseId, selectedFloor]);
 
-    useEffect(() => {
-        getPricingMasterLists();
-        getPaymentSchemes();
-    }, []);
+    // useEffect(() => {
+    //     getPricingMasterLists();
+    //     getPaymentSchemes();
+    // }, []);
 
-    useEffect(() => {
-        if (towerPhaseId) {
-            getPropertyFloors(towerPhaseId);
-        }
-    }, [towerPhaseId, token]);
+    // useEffect(() => {
+    //     if (towerPhaseId) {
+    //         getPropertyFloors(towerPhaseId);
+    //     }
+    // }, [towerPhaseId, token]);
+
     // useEffect(() => {
     //     getPaymentSchemes();
     // }, [token]);
@@ -614,7 +615,7 @@ export const ContextProvider = ({ children }) => {
         getCount();
     }, [unreadCount, token]); */
 
-    useEffect(() => { }, [user, token]);
+    // useEffect(() => { }, [user, token]);
 
     useEffect(() => {
         getSpecificInquiry();

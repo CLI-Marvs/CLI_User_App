@@ -125,4 +125,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/store-banner', [DynamicBannerController::class, 'storeBanner']);
     Route::get('/get-banner', [DynamicBannerController::class, 'getBanner']);
     Route::delete('/banner/{id}', [DynamicBannerController::class, 'deleteBanner']);
+    Route::post('/update-banner', [DynamicBannerController::class, 'updateBanner']);
 });

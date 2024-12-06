@@ -4,19 +4,21 @@ import apiService from "../../servicesApi/apiService";
 import { AiFillInfoCircle } from "react-icons/ai";
 import { IoMdArrowDropdown } from "react-icons/io";
 import { SURVEY_LINKS } from '../../../constant/data/surveyLink';
+import CircularProgress from "@mui/material/CircularProgress";
 
 const ResolveModal = ({ modalRef, ticketId, dataRef, onupdate }) => {
     const { getAllConcerns, user, getInquiryLogs, data, assigneesPersonnel } =
         useStateContext();
     const [remarks, setRemarks] = useState("");
     const [isCommunicationTypeRequired, setIsCommunicationTypeRequired] = useState(false);
+    const [isSurveyRequired, setIsSurveyRequired] = useState(false);
     const maxCharacters = 500;
     const dataConcern =
         data?.find((items) => items.ticket_id === ticketId) || {};
     const messageId = dataConcern?.message_id || null;
     const [communicationType, setCommunicationType] = useState("");
-    const [selectedSurveyName, setSelectedSurveyName] = useState("");
-
+    const [selectedSurveyType, setSelectedSurveyType] = useState([]);
+    const [isLoading, setIsLoading] = useState(false);
 
     /**
      *  Set initial communication type when dataRef changes
@@ -45,11 +47,15 @@ const ResolveModal = ({ modalRef, ticketId, dataRef, onupdate }) => {
         setCommunicationType(e.target.value);
         setIsCommunicationTypeRequired(false);
     };
-    const handleSurveyChange = (e) => {
-        const surveyName = e.target.value;
-        setSelectedSurveyName(surveyName);
 
+    /**
+     * Function to update selected survey type
+     */
+    const handleSurveyChange = (selectedSurveyType) => {
+        setSelectedSurveyType(selectedSurveyType);
+        setIsSurveyRequired(false);
     };
+
     const capitalizeWords = (name) => {
         if (name) {
             return name
@@ -62,15 +68,27 @@ const ResolveModal = ({ modalRef, ticketId, dataRef, onupdate }) => {
                 .join(" ");
         }
     };
-    const updateStatus = async (status) => {
-        if (communicationType === null || communicationType === "") {
-            {
-                setIsCommunicationTypeRequired(true);
-                return;
-            }
-        }
-        try {
 
+
+    /**
+     * Function to handle marking a ticket as resolved
+     */
+    const handleMarkAsResolved = async (status) => {
+        if (communicationType === null || communicationType === "") {
+            setIsCommunicationTypeRequired(true);
+            return;
+        }
+
+        //Check if a survey type has been selected
+        if (!selectedSurveyType || selectedSurveyType.length === 0) {
+            setIsSurveyRequired(true);
+            return;
+        }
+
+        try {
+            const formattedSurveyType =
+                selectedSurveyType?.surveyName?.split(" (")[0] || "";
+            setIsLoading(true);
             const response = await apiService.post("resolve", {
                 ticket_id: ticketId,
                 admin_name: `${user?.firstname} ${user?.lastname}`,
@@ -81,7 +99,11 @@ const ResolveModal = ({ modalRef, ticketId, dataRef, onupdate }) => {
                 details_concern: dataRef.details_concern,
                 remarks: remarks,
                 communication_type: communicationType,
-                surveyLink: selectedSurveyName,
+                selectedSurveyType:
+                {
+                    surveyName: formattedSurveyType,
+                    surveyLink: selectedSurveyType.surveyLink,
+                },
                 assignees: assigneesPersonnel[ticketId],
                 message_id: messageId,
                 status: status
@@ -94,15 +116,17 @@ const ResolveModal = ({ modalRef, ticketId, dataRef, onupdate }) => {
             localStorage.removeItem("closeConcern");
             localStorage.setItem("dataConcern", JSON.stringify(updatedData));
             onupdate(updatedData); // Call handleUpdate with the updated data
-            /* onupdate({...dataRef, status: "Resolved"}); */
             getAllConcerns();
+
             //Close the modal
             if (modalRef.current) {
                 modalRef.current.close();
             }
-
         } catch (error) {
             console.log("error saving", error);
+        }
+        finally {
+            setIsLoading(false);
         }
     };
 
@@ -110,13 +134,21 @@ const ResolveModal = ({ modalRef, ticketId, dataRef, onupdate }) => {
         setCommunicationType(dataRef.communication_type);
         setRemarks("");
         setIsCommunicationTypeRequired(false);
-        setSelectedSurveyName("");
+        setIsSurveyRequired(false);
+        setSelectedSurveyType([]);
     };
+
     const handleCancel = () => {
         if (modalRef.current) {
+            setCommunicationType(dataRef.communication_type);
+            setRemarks("");
+            setIsCommunicationTypeRequired(false);
+            setIsSurveyRequired(false);
+            setSelectedSurveyType([]);
             modalRef.current.close();
         }
     };
+
     return (
         <dialog
             id="Resolved"
@@ -146,13 +178,23 @@ const ResolveModal = ({ modalRef, ticketId, dataRef, onupdate }) => {
                             isCommunicationTypeRequired && (
                                 <div className="w-full flex justify-center items-center h-12 bg-red-100 mb-4 rounded-lg">
                                     <p className="flex text-[#C42E2E] ">
-                                        Please select  type.
+                                        Please select type.
                                     </p>
                                 </div>
                             )
                         }
                     </div>
-
+                    <div className="w-full mt-2">
+                        {
+                            isSurveyRequired && (
+                                <div className="w-full flex justify-center items-center h-12 bg-red-100 mb-4 rounded-lg">
+                                    <p className="flex text-[#C42E2E] ">
+                                        Please select a survey type.
+                                    </p>
+                                </div>
+                            )
+                        }
+                    </div>
                 </div>
                 <div className=" bg-[#EDEDED] border border-[#D9D9D9]">
                     <div className="flex items-center justify-between">
@@ -200,30 +242,40 @@ const ResolveModal = ({ modalRef, ticketId, dataRef, onupdate }) => {
                         </span>
                     </div>
                 </div>
-                {/* <div
+
+                {/**
+                 * Loop through SURVEY_LINKS to create options;
+                 * Display item.surveyName 
+                */}
+                <div
                     className={`flex items-center border border-[D6D6D6] rounded-[5px] overflow-hidden mt-[12px]`}
                 >
                     <span className="text-custom-gray81 text-sm bg-[#EDEDED] flex items-center w-[308px] tablet:w-[175px] mobile:w-[270px] mobile:text-xs -mr-3 pl-3 py-1">
                         Send Survey
                     </span>
                     <div className="relative w-full">
-
+                        {/**
+                         * SET onChange TO handleSurveyChange with parsed value from the selected option
+                         *SET value TO JSON string of selectedSurveyType
+                        */}
                         <select
-                            onChange={handleSurveyChange}
+                            onChange={(e) => handleSurveyChange(JSON.parse(e.target.value))}
+                            value={JSON.stringify(selectedSurveyType)}
                             className="appearance-none w-full px-4 text-sm py-1 bg-white focus:outline-none border-0 mobile:text-xs"
                         >
                             <option value="">(Select)</option>
                             {SURVEY_LINKS.map((item, index) => (
-                                <option key={index} value={item.surveyLink}>
+                                <option key={index} value={JSON.stringify(item)}>
                                     {item.surveyName}
                                 </option>
                             ))}
                         </select>
+
                         <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3 bg-[#EDEDED] text-custom-gray81 pointer-events-none">
                             <IoMdArrowDropdown />
                         </span>
                     </div>
-                </div> */}
+                </div>
                 <div
 
                 >
@@ -238,12 +290,19 @@ const ResolveModal = ({ modalRef, ticketId, dataRef, onupdate }) => {
                                     </p>
                                 </div>
                             </button>
+
                             <button
-                                onClick={()=>updateStatus('Resolved')}
-                                className="h-[35px] w-[185px] text-white rounded-[10px] gradient-btn2 hover:shadow-custom4"
+                                onClick={() => handleMarkAsResolved('Resolved')}
+                                disabled={isLoading}
                                 type="submit"
+                                className={`className="h-[35px] w-[185px] text-white rounded-[10px] gradient-btn2 hover:shadow-custom4" ${isLoading ? "cursor-not-allowed" : ""
+                                    }`}
                             >
-                                Mark as Resolved
+                                {isLoading ? (
+                                    <CircularProgress className="spinnerSize" />
+                                ) : (
+                                    <> Mark as Resolved</>
+                                )}
                             </button>
                         </div>
                     </div>
