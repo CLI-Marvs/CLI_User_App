@@ -537,8 +537,6 @@ class ConcernController extends Controller
     public function addConcernFromPreviousInquiry(Request $request)
     {
         try {
-            /* 
-            dd($request->all()); */
             $user = $request->user();
             $lastConcern = Concerns::latest()->first();
             $messageRef = Messages::where('ticket_id', $request->ticket_id)
@@ -730,13 +728,10 @@ class ConcernController extends Controller
             ]);
 
 
-            /*  dd($this->bucket); */
+
             $bucket = $storage->bucket($this->bucket);
             $filePath = $this->folderName . $fileUrlPath;
-
-            /*   dd($filePath); */
             $object = $bucket->object($filePath);
-            /*  dd($object); */
             if (!$object->exists()) {
                 return response()->json(['message' => 'File not found in cloud storage.'], 404);
             }
@@ -935,8 +930,8 @@ class ConcernController extends Controller
     {
         $days = $request->query("days", null);
         $status = $request->query("status", null);
+
         // $type = $request->query('type', null);
-        // dd($type, $status);
 
         $search = $request->query("search", null);
         $specificAssignCSR = $request->query('specificAssigneeCsr', null);
@@ -1040,8 +1035,6 @@ class ConcernController extends Controller
 
     public function handleSearchFilter($query, $searchParams)
     {
-
-
         if (!empty($searchParams['name'])) {
             $query->where('buyer_name', 'ILIKE', '%' . $searchParams['name'] . '%');
         }
@@ -1717,7 +1710,6 @@ class ConcernController extends Controller
     public function getInquiryLogs($ticketId)
     {
         try {
-            /*    dd($ticketId); */
             $message = InquiryLogs::where('ticket_id', $ticketId)
                 /*  ->orderBy('created_at', 'desc') */
                 ->get();
@@ -1794,7 +1786,6 @@ class ConcernController extends Controller
     {
 
         try {
-            // dd($request);
             $assignees = $request->assignees;
             $concerns = Concerns::where('ticket_id', $request->ticket_id)->first();
             $selectedSurveyType = $request->selectedSurveyType;
