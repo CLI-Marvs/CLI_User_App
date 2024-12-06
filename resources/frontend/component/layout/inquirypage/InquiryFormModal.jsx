@@ -35,14 +35,12 @@ const InquiryFormModal = ({ modalRef }) => {
     const [isMiddleNameChecked, setIsMiddleNameChecked] = useState(false);
     const [isSuffixChecked, setIsSuffixChecked] = useState(false);
     const [hasErrors, setHasErrors] = useState(false);
-    const [isSuccess, setIsSuccess] = useState(false);
     const [loading, setLoading] = useState(false);
     const [resetSuccess, setResetSuccess] = useState(false);
     const [isSubmitted, setIsSubmitted] = useState(false);
     const [isValid, setIsValid] = useState(true);
     const [errors, setErrors] = useState({});
     const { propertyNamesList } = useStateContext();
-    const [specificInputErrors, setSpecificInputErrors] = useState({});
     const [isSendEmail, setIsSendEmail] = useState(false);
 
     const handleFileChange = (event) => {
@@ -82,25 +80,25 @@ const InquiryFormModal = ({ modalRef }) => {
                 .map((item) => {
                     let formattedItem = formatFunc(item);
 
-                // Capitalize each word in the string
-                formattedItem = formattedItem
-                    .split(" ")
-                    .map((word) => {
-                        // Check for specific words that need to be fully capitalized
-                        if (/^(Sjmv|Lpu|Cdo|Dgt)$/i.test(word)) {
-                            return word.toUpperCase();
-                        }
-                        // Capitalize the first letter of all other words
-                        return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
-                    })
-                    .join(" ");
+                    // Capitalize each word in the string
+                    formattedItem = formattedItem
+                        .split(" ")
+                        .map((word) => {
+                            // Check for specific words that need to be fully capitalized
+                            if (/^(Sjmv|Lpu|Cdo|Dgt)$/i.test(word)) {
+                                return word.toUpperCase();
+                            }
+                            // Capitalize the first letter of all other words
+                            return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+                        })
+                        .join(" ");
 
-                // Replace specific names if needed
-                if (formattedItem === "Casamira South") {
-                    formattedItem = "Casa Mira South";
-                }
+                    // Replace specific names if needed
+                    if (formattedItem === "Casamira South") {
+                        formattedItem = "Casa Mira South";
+                    }
 
-                return formattedItem;
+                    return formattedItem;
                 })
                 .sort((a, b) => {
                     if (a === "N/A") return -1;
@@ -189,7 +187,15 @@ const InquiryFormModal = ({ modalRef }) => {
         setFiles([]);
         setFileName("");
         setIsSendEmail(false);
-
+        setResetSuccess(true);
+        setHasErrors(false);
+        setIsSubmitted(false);
+        setIsMiddleNameChecked(false);
+        setIsSuffixChecked(false);
+        
+        if (modalRef.current) {
+            modalRef.current.close();
+        }
     }
 
     const handleChangeValue = (e) => {
@@ -307,7 +313,7 @@ const InquiryFormModal = ({ modalRef }) => {
                         },
                     }
                 );
-                setSpecificInputErrors([]);
+
                 if (modalRef.current) {
                     modalRef.current.close();
                 }
@@ -323,14 +329,14 @@ const InquiryFormModal = ({ modalRef }) => {
                         setHasErrors(false);
                         setLoading(false);
                     }
-                }
-                {
+                } else {
                     setHasErrors(true);
                     setResetSuccess(false);
                 }
             }
         } else {
             setResetSuccess(false);
+            setLoading(false);
             if (!isTextareaValid) {
                 setIsValid(false);
             }
@@ -351,8 +357,7 @@ const InquiryFormModal = ({ modalRef }) => {
 
             <div className="px-[50px] rounded-lg overflow-hidden">
                 <div className="">
-                    <form
-                        method="dialog"
+                    <div
                         className="pt-1 flex justify-end -mr-[50px]"
                     >
                         <button
@@ -361,7 +366,7 @@ const InquiryFormModal = ({ modalRef }) => {
                         >
                             ✕
                         </button>
-                    </form>
+                    </div>
                     <div>
                         <div className="flex justify-center items-center my-2 mobile:mb-7 mobile:my-0">
                             <p className="montserrat-bold text-[19px] text-custom-solidgreen mobile:text-sm">
@@ -805,7 +810,6 @@ const InquiryFormModal = ({ modalRef }) => {
                                         handleChange(e);
                                     }
                                 }}
-                                type="number"
                                 className="w-full px-4 text-sm focus:outline-none mobile:text-xs"
                                 placeholder=""
                                 onInput={(e) =>

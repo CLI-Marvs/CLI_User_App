@@ -531,6 +531,9 @@ const InquiryList = () => {
                                                 <option value="unresolved">
                                                     Unresolved
                                                 </option>
+                                                <option value="Closed">
+                                                    Closed
+                                                </option>
                                             </select>
                                         </div>
 

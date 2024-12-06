@@ -567,8 +567,11 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
                             </span>
                             <input
                                 name="contract_number"
-                                type="number"
-                                onChange={handleChange}
+                                onChange={(e) => {
+                                    if (e.target.value.length <= 13) {
+                                        handleChange(e);
+                                    }
+                                }}
                                 value={dataToUpdate.contract_number || ""}
                                 className="w-full px-4 text-sm focus:outline-none mobile:text-xs"
                                 placeholder=""
