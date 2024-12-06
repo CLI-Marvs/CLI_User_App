@@ -587,12 +587,12 @@ class ConcernController extends Controller
             $messages->attachment = $messageRef->attachment;
             $messages->ticket_id = $concerns->ticket_id;
             $messages->details_message = $request->message;
-            $messages->buyer_name = $request->fname . ' ' . $request->lname;
+            $messages->buyer_name = $request->buyer_firstname . ' ' . $request->buyer_lastname;
             $messages->save();
 
             $data = [
                 'buyer_email' => $request->buyer_email,
-                'lname' => $request->lname,
+                'lname' => $request->buyer_lastname,
             ];
             BuyerReplyInResolveOrClose::dispatch($data);
 

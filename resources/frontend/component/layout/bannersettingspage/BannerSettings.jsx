@@ -120,15 +120,16 @@ const BannerSettings = () => {
     return (
         <div className='h-screen max-w-full bg-custom-grayFA p-[20px]'>
             <div className='flex mb-[12px]'>
-                <p className='montserrat-semibold text-[20px]'>Live Preview</p>
+                <p className='font-semibold text-[32px]'>Live Preview</p>
             </div>
-            <div className='flex flex-col gap-[20px] max-w-[583px] pb-[100px]'>
+            <div className='flex flex-col gap-[20px] max-w-[787px] pb-[100px]'>
+                {/* image slideshow */}
                 <div className='w-full'>
                     <ImageSlideshow />
                 </div>
                 <div className='w-full border-t-[1px] border-custom-grayA5'></div>
                 <div className='flex flex-col gap-[12px] w-full'>
-                    <p className='montserrat-medium'>Settings</p>
+                    <p className=''>Banners</p>
                     {/* should be dynamic below */}
                     {bannerLists && bannerLists.length > 0 && bannerLists.map((item, index) => (
                         <div key={index} className='w-full h-[112px] rounded-[10px] bg-custom-lightestgreen p-[20px]'>
