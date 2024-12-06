@@ -1,4 +1,4 @@
-import React, {Component, Suspense, lazy} from 'react';
+import React, { Component, Suspense, lazy } from 'react';
 import {
     Outlet,
     RouterProvider,
@@ -42,7 +42,8 @@ import UserRightsAndPermissionsView from "./views/pages/userrightsandpermissions
 import FallbackLoader from './FallbackLoader';
 import PreloadWrapper from "./PreloadWrapper";
 import BannerSettingsView from './views/pages/bannersettingsViews/BannerSettingsView';
-
+import CrsSettingsSidebar from './layout/mainComponent/sidebars/CrsSettingsSidebar';
+import VersionLogsView from './views/pages/raiseaconcernViews/VersionLogsView';
 // PrivateRoute component to check authentication
 const PrivateRoute = () => {
     const authToken = localStorage.getItem("authToken");
@@ -97,11 +98,11 @@ const App = () => {
     const SecondLayout = () => {
         return (
             <>
-                <div className="flex w-full overflow-hidden">
-                    {/* <div className="bg-custom-lightestgreen p-5 w-[100px] mr-10">
-                        <TransactionSidebar/>
-                    </div> */}
-                    <div className="w-full py-4 px-4">
+                <div className="flex bg-white relative h-full">
+                    <div className="fixed h-full z-50">
+                        <CrsSettingsSidebar />
+                    </div>
+                    <div className="relative flex-1 ml-[230px] z-10">
                         <Outlet />
                     </div>
                 </div>
@@ -251,10 +252,10 @@ const App = () => {
             path: "/",
             element: (
                 <Suspense fallback={<FallbackLoader />}>
-                    <PreloadWrapper  resources={[
-                        "/Images/Imagebg.webp", 
+                    <PreloadWrapper resources={[
+                        "/Images/Imagebg.webp",
                     ]}>
-                    <LoginView/>
+                        <LoginView />
                     </PreloadWrapper>
                 </Suspense>
             ),
@@ -263,10 +264,10 @@ const App = () => {
             path: "/login",
             element: (
                 <Suspense fallback={<FallbackLoader />}>
-                    <PreloadWrapper  resources={[
-                        "/Images/Imagebg.webp", 
+                    <PreloadWrapper resources={[
+                        "/Images/Imagebg.webp",
                     ]}>
-                    <LoginView/>
+                        <LoginView />
                     </PreloadWrapper>
                 </Suspense>
             ),
@@ -320,6 +321,24 @@ const App = () => {
                             element: <AutoAssignView />,
                         },
                         {
+                            path: "inquirymanagement/settings",
+                            element: <SecondLayout />,
+                            children: [
+                                {
+                                    path: "autoassign",
+                                    element: <AutoAssignView />,
+                                },
+                                {
+                                    path: "bannersettings",
+                                    element: <BannerSettingsView />,
+                                },
+                                {
+                                    path: "versionlogs",
+                                    element: <VersionLogsView/>,
+                                },
+                            ],
+                        },
+                        {
                             path: "propertyandpricing",
                             element: <PropertyAndPricingLayout />,
                             children: [
@@ -358,10 +377,6 @@ const App = () => {
                                     element: <ReservationPageView />,
                                 },
                             ],
-                        },
-                        {
-                            path: "bannersettings",
-                            element: <BannerSettingsView />,
                         },
                         {
                             path: "adminsettings",

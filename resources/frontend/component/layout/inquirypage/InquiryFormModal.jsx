@@ -597,7 +597,7 @@ const InquiryFormModal = ({ modalRef }) => {
                                     name="property"
                                     value={formData.property}
                                     onChange={handleChange}
-                                    className="appearance-none w-[88%] px-4 text-sm py-1 bg-white focus:outline-none border-0 mobile:text-xs"
+                                    className="appearance-none w-full px-4 text-sm py-1 bg-white focus:outline-none border-0 mobile:text-xs"
                                 >
                                     <option value="">(Select)</option>
                                     {formattedPropertyNames.map(
@@ -619,7 +619,7 @@ const InquiryFormModal = ({ modalRef }) => {
                             </div>
                         </div>
                         <div
-                            className={`flex items-center border rounded-[5px]  ${isSubmitted && !formData.details_concern
+                            className={`flex items-center border rounded-[5px] overflow-hidden  ${isSubmitted && !formData.details_concern
                                 ? resetSuccess
                                     ? "border-custom-bluegreen"
                                     : "border-red-500"
@@ -634,7 +634,7 @@ const InquiryFormModal = ({ modalRef }) => {
                                     value={formData.details_concern}
                                     onChange={handleChange}
                                     name="details_concern"
-                                    className="appearance-none text-sm  px-4 py-1  focus:outline-none border-0 mobile:text-xs   "
+                                    className="w-full appearance-none text-sm  px-4 py-1  focus:outline-none border-0 mobile:text-xs   "
                                 >
                                     <option value="">(Select)</option>
                                     <option value="Reservation Documents" className="pr-8">
@@ -691,7 +691,7 @@ const InquiryFormModal = ({ modalRef }) => {
                                     value={formData.type}
                                     onChange={handleChange}
                                     name="type"
-                                    className="appearance-none text-sm w-[89%] px-4 py-1 bg-white focus:outline-none border-0 mobile:text-xs"
+                                    className="appearance-none text-sm w-full px-4 py-1 bg-white focus:outline-none border-0 mobile:text-xs"
                                 >
                                     <option value="">(Select)</option>
                                     <option value="Complaint">Complaint</option>
@@ -723,7 +723,7 @@ const InquiryFormModal = ({ modalRef }) => {
                                     value={formData.channels}
                                     onChange={handleChange}
                                     name="channels"
-                                    className="appearance-none text-sm w-[89%] px-4 py-1 bg-white focus:outline-none border-0 mobile:text-xs"
+                                    className="appearance-none text-sm w-full px-4 py-1 bg-white focus:outline-none border-0 mobile:text-xs"
                                 >
                                     <option value="">(Select)</option>
                                     <option value="Email">Email</option>
@@ -755,7 +755,7 @@ const InquiryFormModal = ({ modalRef }) => {
                                     name="user_type"
                                     value={formData.user_type}
                                     onChange={handleChange}
-                                    className="appearance-none w-[90%] px-4 py-1 text-sm bg-white focus:outline-none border-0 mobile:text-xs"
+                                    className="appearance-none w-full px-4 py-1 text-sm bg-white focus:outline-none border-0 mobile:text-xs"
                                 >
                                     <option value="">(Select)</option>
                                     <option value="Property Owner">
