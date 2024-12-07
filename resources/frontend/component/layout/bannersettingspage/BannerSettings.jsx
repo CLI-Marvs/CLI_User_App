@@ -4,10 +4,15 @@ import { useStateContext } from '../../../context/contextprovider'
 import apiService from '../../servicesApi/apiService'
 import { showToast } from "../../../util/toastUtil"
 import { CircularProgress } from '@mui/material'
-const BannerSettings = () => {
-    const fileInputRef = useRef(null);
 
+
+const BannerSettings = () => {
+    // ref initialization
+    const fileInputRef = useRef(null);
+    //useStateContext for getting data from context provider
     const { getBannerData, bannerLists } = useStateContext();
+
+    //state initialization
     const [isEdit, setIsEdit] = useState(false);
     const [loading, setLoading] = useState(false);
     const [bannerId, setBannerId] = useState("");
@@ -15,31 +20,36 @@ const BannerSettings = () => {
     const [link, setLink] = useState("");
     const [indexFlag, setIndexFlag] = useState(null);
 
+
+    //useEffect initialization for getting data from context
     useEffect(() => {
         getBannerData();
-        
     }, []);
-
+    //useState initialization for file upload
     const [fileName, setFileName] = useState('No file selected');
 
-
+    //submitHandler for handling form submission
     const submitHandler = async (e) => {
         e.preventDefault();
+        //setLoading for loading state
         setLoading(true);
 
+
+        //check if only the file is null and return if it's true
         if ((file === null && link === "") || (file === null && link !== "")) {
             setLoading(false);
             return showToast("Please upload an image as it is required.", "error");
         } 
+        
 
-        formData.append('banner_image', file);
-        formData.append('banner_link', link);
-
+        //create form data
         const formData = new FormData();
        
+
+        //if edit is true, append the id and file to the form data else append the file and link to create a new banner
         if (isEdit) {
             formData.append('id', bannerId);
-            if (file) formData.append('banner_image', file); // Skip if no new file
+            if (file) formData.append('banner_image', file);
             formData.append('banner_link', link);
         } else {
             formData.append('banner_image', file);
@@ -48,6 +58,7 @@ const BannerSettings = () => {
 
 
         try {
+            //if edit is true, call the update-banner endpoint else call the store-banner endpoint
             const endpoint = isEdit ? "update-banner" : "store-banner";
             const response = await apiService.post(endpoint, formData, {
                 headers: { 'Content-Type': 'multipart/form-data' },
@@ -63,7 +74,7 @@ const BannerSettings = () => {
             setLoading(false);
         }
     };
-
+    //removeData for removing the data from the state after editing or submitting
     const removeData = () => {
         setIsEdit(false);
         setFileName('');
@@ -71,7 +82,9 @@ const BannerSettings = () => {
         setLink('');
         setLoading(false);
     }
-    /* console.log("banner data",bannerListsData); */
+    
+
+    //deleteBanner for deleting the banner
     const deleteBanner = async (id) => {
         try {
             const response = await apiService.delete(`/banner/${id}`);
@@ -84,6 +97,7 @@ const BannerSettings = () => {
         }
     };
 
+    //editForm for editing the form
     const editForm = (item) => {
         const {id, banner_link, banner_image, original_file_name } = item;
         setBannerId(id);
@@ -92,7 +106,7 @@ const BannerSettings = () => {
         setFile(banner_image);
         setFileName(original_file_name);
     }
-
+    //handleFileChange for handling file change in the file input
     const handleFileChange = (e) => {
         const file = e.target.files[0];
         if (file) {
@@ -106,15 +120,16 @@ const BannerSettings = () => {
     return (
         <div className='h-screen max-w-full bg-custom-grayFA p-[20px]'>
             <div className='flex mb-[12px]'>
-                <p className='montserrat-semibold text-[20px]'>Live Preview</p>
+                <p className='font-semibold text-[32px]'>Live Preview</p>
             </div>
-            <div className='flex flex-col gap-[20px] max-w-[583px] pb-[100px]'>
+            <div className='flex flex-col gap-[20px] max-w-[787px] pb-[100px]'>
+                {/* image slideshow */}
                 <div className='w-full'>
                     <ImageSlideshow />
                 </div>
                 <div className='w-full border-t-[1px] border-custom-grayA5'></div>
                 <div className='flex flex-col gap-[12px] w-full'>
-                    <p className='montserrat-medium'>Settings</p>
+                    <p className=''>Banners</p>
                     {/* should be dynamic below */}
                     {bannerLists && bannerLists.length > 0 && bannerLists.map((item, index) => (
                         <div key={index} className='w-full h-[112px] rounded-[10px] bg-custom-lightestgreen p-[20px]'>

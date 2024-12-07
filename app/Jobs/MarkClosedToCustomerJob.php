@@ -21,11 +21,11 @@ class MarkClosedToCustomerJob implements ShouldQueue
     protected $admin_name;
     protected $department;
     protected $modifiedTicketId;
-
+    protected $selectedSurveyType;
     /**
      * Create a new job instance.
      */
-    public function __construct($ticket_id, $email, $buyer_lastname, $message_id, $admin_name, $department, $modifiedTicketId)
+    public function __construct($ticket_id, $email, $buyer_lastname, $message_id, $admin_name, $department, $modifiedTicketId, $selectedSurveyType)
     {
         $this->email = $email;
         $this->ticket_id = $ticket_id;
@@ -34,16 +34,18 @@ class MarkClosedToCustomerJob implements ShouldQueue
         $this->admin_name = $admin_name;
         $this->department = $department;
         $this->modifiedTicketId = $modifiedTicketId;
-         
+        $this->selectedSurveyType = $selectedSurveyType;
     }
 
 
     /**
      * Execute the job.
+     * Call the mailer
+     * Pass the selectedSurveyType as arguments to ClosedTicketToCustomerMail mail 
      */
     public function handle(Mailer $mailer): void
     {
         $mailer->to($this->email)
-            ->send(new ClosedTicketToCustomerMail($this->ticket_id, $this->email, $this->buyer_lastname, $this->message_id, $this->admin_name, $this->department, $this->modifiedTicketId));
+            ->send(new ClosedTicketToCustomerMail($this->ticket_id, $this->email, $this->buyer_lastname, $this->message_id, $this->admin_name, $this->department, $this->modifiedTicketId, $this->selectedSurveyType));
     }
 }

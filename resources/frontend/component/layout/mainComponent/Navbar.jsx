@@ -96,6 +96,45 @@ const Navbar = () => {
                 );
             }
 
+            if (value.toLowerCase() === "autoassign") {
+                breadcrumbLabel = "Auto Assign";
+                // Non-linkable
+                return (
+                    <span
+                        key={routeTo}
+                        className="text-custom-solidgreen cursor-default"
+                    >
+                        {breadcrumbLabel}
+                    </span>
+                );
+            }
+
+            if (value.toLowerCase() === "settings") {
+                breadcrumbLabel = "Settings";
+                // Non-linkable
+                return (
+                    <span
+                        key={routeTo}
+                        className="text-custom-solidgreen cursor-default"
+                    >
+                        {breadcrumbLabel}
+                    </span>
+                );
+            }
+
+            if (value.toLowerCase() === "versionlogs") {
+                breadcrumbLabel = "Version Logs";
+                // Non-linkable
+                return (
+                    <span
+                        key={routeTo}
+                        className="text-custom-solidgreen cursor-default"
+                    >
+                        {breadcrumbLabel}
+                    </span>
+                );
+            }
+
             if (value.toLowerCase() === "transactionmanagement") {
                 breadcrumbLabel = "Transaction Management";
                 // Non-linkable
