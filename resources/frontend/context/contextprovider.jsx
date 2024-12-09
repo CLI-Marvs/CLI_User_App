@@ -8,7 +8,7 @@ import React, {
 import apiService from "../component/servicesApi/apiService";
 import debounce from "lodash/debounce";
 import { set } from "lodash";
- 
+
 
 const StateContext = createContext({
     user: null,
@@ -86,6 +86,8 @@ export const ContextProvider = ({ children }) => {
     const [loading, setLoading] = useState(false);
     const [navBarData, setNavBarData] = useState([]);
     const [isUserTypeChange, setIsUserTypeChange] = useState(false);
+    const [employeeDepartments, setEmployeeDepartments] = useState([]);
+    const [features, setFeatures] = useState([]);
 
     useEffect(() => {
         if (user && user.department && !isDepartmentInitialized) {
@@ -226,12 +228,12 @@ export const ContextProvider = ({ children }) => {
                 params: { department: department, year: departmentStatusYear },
             });
             const result = response.data;
-           
+
             const formattedData = result.map((item) => ({
                 name: item.month.toString().padStart(2, "0"),
                 Resolved: item.resolved,
                 Unresolved: item.unresolved,
-                Closed:item.closed
+                Closed: item.closed
             }));
 
             setDataSet(formattedData);
@@ -299,7 +301,7 @@ export const ContextProvider = ({ children }) => {
                 },
             });
             const result = response.data;
- 
+
             const formattedData = result.map((item) => ({
                 name: item.channels,
                 value: item.total,
@@ -347,13 +349,13 @@ export const ContextProvider = ({ children }) => {
         }
     };
 
-    const getNavBarData = async() => {
-        if(token) {
+    const getNavBarData = async () => {
+        if (token) {
             try {
                 const encodedTicketId = encodeURIComponent(ticketId);
-                
+
                 const response = await apiService.get(`navbar-data?ticketId=${encodedTicketId}`);
-                
+
                 const data = response.data;
 
                 setNavBarData((prevData) => ({
@@ -365,7 +367,7 @@ export const ContextProvider = ({ children }) => {
             } /* finally {
                 setLoading(false); 
             } */
-            
+
         }
     };
 
@@ -526,17 +528,40 @@ export const ContextProvider = ({ children }) => {
     };
 
     const getBannerData = async () => {
-        try{
+        try {
             const response = await apiService.get(
                 "get-banner"
             );
             setBannerLists(response.data.data);
-        }catch(error){
+        } catch (error) {
             console.log("error", error);
         }
     }
 
 
+    //Get all employee departments
+    const getAllEmployeeDepartment = async () => {
+        try {
+            const response = await apiService.get(
+                "get-employees-departments"
+            );
+            setEmployeeDepartments(response.data.data);
+        }
+        catch (error) {
+            console.log("error", error);
+        }
+    }
+
+    //Get all features
+    const getAllFeatures = async () => {
+        try {
+            const response = await apiService.get("get-features");
+            setFeatures(response.data.data);
+        }
+        catch (error) {
+            console.log("error", error);
+        }
+    }
 
     // useEffect(() => {
     //     getPropertyUnits(towerPhaseId, selectedFloor);
@@ -598,9 +623,9 @@ export const ContextProvider = ({ children }) => {
         getInvoices();
     }, [currentPageInvoices, filterDueDate])
 
-   /*  useEffect(() => {
-        getNotifications();
-    }, [notifCurrentPage, notifStatus, token]); */
+    /*  useEffect(() => {
+         getNotifications();
+     }, [notifCurrentPage, notifStatus, token]); */
 
     useEffect(() => {
         if (ticketId) {
@@ -766,7 +791,11 @@ export const ContextProvider = ({ children }) => {
                 navBarData,
                 getNavBarData,
                 setIsUserTypeChange,
-                isUserTypeChange
+                isUserTypeChange,
+                getAllEmployeeDepartment,
+                employeeDepartments,
+                getAllFeatures,
+                features
             }}
 
         >

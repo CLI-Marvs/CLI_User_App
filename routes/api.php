@@ -1,20 +1,22 @@
 <?php
 
-use App\Http\Controllers\AuthController;
+use Illuminate\Http\Request;
 
-use App\Http\Controllers\ConcernController;
-use App\Http\Controllers\DynamicBannerController;
-use App\Http\Controllers\PaymentSchemeController;
-use App\Http\Controllers\PriceBasicDetailController;
-
-use App\Http\Controllers\PriceListMasterController;
-use App\Http\Controllers\PropertyMasterController;
-use App\Http\Controllers\SapController;
-use App\Http\Controllers\UnitController;
 use App\Models\DynamicBanner;
 use App\Models\PropertyMaster;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\SapController;
+
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\UnitController;
+use App\Http\Controllers\ConcernController;
+use App\Http\Controllers\FeatureController;
+use App\Http\Controllers\DynamicBannerController;
+use App\Http\Controllers\PaymentSchemeController;
+use App\Http\Controllers\PropertyMasterController;
+use App\Http\Controllers\PriceListMasterController;
+use App\Http\Controllers\PriceBasicDetailController;
+use App\Http\Controllers\EmployeeDepartmentController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -83,6 +85,13 @@ Route::get('/get-transactions', [SapController::class, 'retrieveTransactions']);
 Route::get('/get-matches', [SapController::class, 'runAutoPosting']);
 
 
+//Employee Department
+Route::get('/get-employees-departments', [EmployeeDepartmentController::class, 'index']);
+
+//Features
+Route::get('/get-features', [FeatureController::class, 'index']);
+
+
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/get-transaction-bank', [SapController::class, 'getTransactionByBankName']);
     Route::post('/upload-notepad', [SapController::class, 'uploadNotepad']);
@@ -126,4 +135,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/get-banner', [DynamicBannerController::class, 'getBanner']);
     Route::delete('/banner/{id}', [DynamicBannerController::class, 'deleteBanner']);
     Route::post('/update-banner', [DynamicBannerController::class, 'updateBanner']);
+
+
+   
 });

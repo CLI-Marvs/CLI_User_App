@@ -37,9 +37,9 @@ const handleUserModal = () => {
                 <th className="flex justify-center w-[200px] shrink-0">
                   Department
                 </th>
-                <th className="flex justify-center w-[200px] shrink-0">
+                {/* <th className="flex justify-center w-[200px] shrink-0">
                   Role
-                </th>
+                </th> */}
                 <th className="flex justify-center w-[200px] shrink-0 ">
                   Notifications
                 </th>
@@ -59,11 +59,11 @@ const handleUserModal = () => {
                     <p className='montserrat-regular text-sm'>CRS</p>
                   </div>
                 </td>
-                <td className='w-[200px] flex flex-col items-start justify-center gap-2'>
+                {/* <td className='w-[200px] flex flex-col items-start justify-center gap-2'>
                   <div className='w-full h-[31px] flex items-center justify-center'>
                     <p className='montserrat-semibold text-custom-solidgreen text-sm'>Role I</p>
                   </div>
-                </td>
+                </td> */}
                 <td className='w-[200px] flex flex-col items-start justify-center gap-2'>
                   <div className='w-full h-[44px] gap-[20px] flex items-center justify-center bg-white rounded-[5px]'>
                     <div className='flex flex-col gap-[2.75px] items-center'>
@@ -136,7 +136,7 @@ const handleUserModal = () => {
                     </div>
                   </div>
                 </td>
-              </tr>
+              </tr> 
 
 
 
@@ -146,11 +146,11 @@ const handleUserModal = () => {
                     <p className='montserrat-regular text-sm'>Treasury</p>
                   </div>
                 </td>
-                <td className='w-[200px] flex flex-col items-start justify-center gap-2'>
+                {/* <td className='w-[200px] flex flex-col items-start justify-center gap-2'>
                   <div className='w-full h-[31px] flex items-center justify-center'>
                     <p className='montserrat-semibold text-custom-solidgreen text-sm'>Role II</p>
                   </div>
-                </td>
+                </td> */}
                 <td className='w-[200px] flex flex-col items-start justify-center gap-2'>
                   <div className='w-full h-[44px] gap-[20px] flex items-center justify-center bg-white rounded-[5px]'>
                     <div className='flex flex-col gap-[2.75px] items-center'>
