@@ -1,60 +1,77 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { IoMdArrowDropdown } from "react-icons/io";
 import apiService from "../../servicesApi/apiService";
 import { useStateContext } from "../../../context/contextprovider";
 import Alert from "../mainComponent/Alert";
 import { showToast } from "../../../util/toastUtil"
-import _ from "lodash";
-import { data } from "autoprefixer";
+import { PREDEFINED_USER_TYPES } from "../../../constant/data/preDefinedUserTypes";
+
+
+/**
+* Function to normalizeData, that returns;
+* Strip out fields that needed to compare (like `id`, `status`, `created_at`, `updated_at`, etc.)
+*/
+const normalizeData = (data) => {
+    return {
+        ticket_id: data.ticket_id || "",
+        details_concern: data.details_concern || "",
+        contract_number: data.contract_number || null,
+        unit_number: data.unit_number || null,
+        property: data.property || "",
+        admin_remarks: data.admin_remarks || "",
+        buyer_email: data.buyer_email || "",
+        mobile_number: data.mobile_number || "",
+        buyer_firstname: data.buyer_firstname || "",
+        buyer_middlename: data.buyer_middlename || "",
+        buyer_lastname: data.buyer_lastname || "",
+        suffix_name: data.suffix_name || "",
+        communication_type: data.communication_type || null,
+        channels: data.channels || null,
+        user_type: PREDEFINED_USER_TYPES.includes(data.user_type)
+            ? data.user_type
+            : data.user_type === null || data.user_type === ""
+                ? null
+                : "Others",
+        // other_user_type: data.user_type === "Others"
+        //     ? data.other_user_type // Keep the existing value (e.g., "vendor") if present
+        //     : null,
+        other_user_type:
+            data.user_type === "Others"
+                ? (data.other_user_type || "")
+                : "",
+    };
+};
+
+
+const checkUserTypeChange = (newData, oldData) => {
+    return newData.user_type === "Others" &&
+        oldData.other_user_type !== newData.other_user_type;
+};
+
+
 const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
-    const predefinedUserTypes = ["Property Owner", "Buyer", "Broker", "Seller", "Lessee"];
-    const [isUserTypeChange, setIsUserTypeChange] = useState(false);
     const [showAlert, setShowAlert] = useState(false);
-    const { getAllConcerns, propertyNamesList, user, getInquiryLogs } =
+    const { getAllConcerns, propertyNamesList, user, getInquiryLogs, isUserTypeChange, setIsUserTypeChange } =
         useStateContext();
+
     const [message, setMessage] = useState(dataConcern.admin_remarks || "");
-    const [dataToUpdate, setDataToUpdate] = useState({
-        ticket_id: dataConcern.ticket_id,
-        details_concern: dataConcern.details_concern || "",
-        contract_number: dataConcern.contract_number || "",
-        unit_number: dataConcern.unit_number || "",
-        property: dataConcern.property || "",
-        admin_remarks: dataConcern.admin_remarks || "",
-        buyer_email: dataConcern.buyer_email || "",
-        mobile_number: dataConcern.mobile_number || "",
-        buyer_firstname: dataConcern.buyer_firstname || "",
-        buyer_middlename: dataConcern.buyer_middlename || "",
-        buyer_lastname: dataConcern.buyer_lastname || "",
-        suffix_name: dataConcern.suffix_name || "",
-        communication_type: dataConcern.communication_type || "",
-        channels: dataConcern.channels,
-        // user_type: predefinedUserTypes.includes(dataConcern.user_type)
-        //     ? dataConcern.user_type
-        //     : "Others", // Set to Others if not in predefined list
-        user_type: dataConcern.user_type === null || dataConcern.user_type === ""
-            ? null // Leave as null if user_type is null or empty
-            : predefinedUserTypes.includes(dataConcern.user_type)
-                ? dataConcern.user_type // Keep it if it's in the predefined list
-                : "Others", // Otherwise, set to "Others"
-        other_user_type: !predefinedUserTypes.includes(dataConcern.user_type)
-            ? dataConcern.user_type
-            : "",
-    });
+    const [dataToUpdate, setDataToUpdate] = useState({});
 
     useEffect(() => {
+        const storedData = JSON.parse(localStorage.getItem("updatedData") || "{}");
         if (dataConcern) {
-            setDataToUpdate((prevState) => ({
-                ...prevState,
-                ...dataConcern, // Spread the dataConcern values into the state
+            console.log("dataConcern", JSON.stringify(dataConcern));
+            setDataToUpdate({
+                ...dataConcern,
                 user_type: dataConcern.user_type === null || dataConcern.user_type === ""
-                    ? null // Keep null if user_type is null or empty
-                    : predefinedUserTypes.includes(dataConcern.user_type)
-                        ? dataConcern.user_type // Keep if it's a predefined user type
+                    ? null // Leave null if user_type is empty
+                    : PREDEFINED_USER_TYPES.includes(dataConcern.user_type)
+                        ? dataConcern.user_type // Use predefined type
                         : "Others", // Otherwise, set to "Others"
-                // other_user_type: !predefinedUserTypes.includes(dataConcern.user_type) && dataConcern.user_type
-                //     ? dataConcern.user_type // Set this only if the user_type is not in the predefined list
-                //     : "",
-            }));
+                other_user_type: dataConcern.user_type !== null && !PREDEFINED_USER_TYPES.includes(dataConcern.user_type)
+                    ? storedData.other_user_type || dataConcern.user_type // Restore from storage or fallback
+                    : "",
+            });
         }
     }, [dataConcern]);
 
@@ -76,66 +93,30 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
         suffix_name: dataConcern.suffix_name || "",
         communication_type: dataConcern.communication_type || "",
         channels: dataConcern.channels || "",
-        user_type: dataConcern.user_type || "",
-        other_user_type: dataConcern.user_type === "Others" ? dataConcern.other_user_type || "" : "",
+        user_type: dataConcern.user_type === null || dataConcern.user_type === ""
+            ? null // Leave as null if user_type is null or empty
+            : PREDEFINED_USER_TYPES.includes(dataConcern.user_type)
+                ? dataConcern.user_type // Keep it if it's in the predefined list
+                : "Others", // Otherwise, set to "Others"
+        other_user_type: dataConcern.user_type === null || dataConcern.user_type === ""
+            ? "" // Leave as empty if user_type is null or empty
+            : !PREDEFINED_USER_TYPES.includes(dataConcern.user_type)
+                ? dataConcern.other_user_type || dataConcern.user_type // Assign `user_type` if it's not predefined
+                : "", // Otherwise, keep empty
     };
-
-
-    /**
-     * Function to normalizeData, that returns;
-     * Strip out fields that needed to compare (like `id`, `status`, `created_at`, `updated_at`, etc.)
-     */
-    const normalizeData = (data) => {
-        return {
-            ticket_id: data.ticket_id || "",
-            details_concern: data.details_concern || "",
-            contract_number: data.contract_number || null,
-            unit_number: data.unit_number || null,
-            property: data.property || "",
-            admin_remarks: data.admin_remarks || "",
-            buyer_email: data.buyer_email || "",
-            mobile_number: data.mobile_number || "",
-            buyer_firstname: data.buyer_firstname || "",
-            buyer_middlename: data.buyer_middlename || "",
-            buyer_lastname: data.buyer_lastname || "",
-            suffix_name: data.suffix_name || "",
-            communication_type: data.communication_type || null,
-            channels: data.channels || null,
-            // user_type: data.user_type || null,
-            user_type: predefinedUserTypes.includes(data.user_type)
-                ? data.user_type
-                : data.user_type === null || data.user_type === ""
-                    ? null
-                    : "Others",
-            // user_type: data.user_type === null || data.user_type === ""
-            //     ? null
-            //     : predefinedUserTypes.includes(data.user_type)
-            //         ? data.user_type
-            //         : "Others", // Otherwise, set to "Others"
-            // other_user_type: data.other_user_type && data.other_user_type.trim() !== ""
-            //     ? data.other_user_type
-            //     : "vendor", // Default value if empty or undefined
-            // other_user_type: data.user_type && data.user_type.trim() !== ""
-            //     ? data.other_user_type // If provided and non-empty, use it
-            //     : null,
-        };
-    };
-
-    const normalizedBuyerOldData = normalizeData(buyerOldData);   //Normalize existing buyer data
-    const normalizedDataToUpdate = normalizeData(dataToUpdate);   //Normalize data to be updated
+ 
+    //Only recompute these values when necessary
+    const normalizedBuyerOldData = useMemo(() => normalizeData(buyerOldData), [buyerOldData]);
+    const normalizedDataToUpdate = useMemo(() => normalizeData(dataToUpdate), [dataToUpdate]);
     const hasChanges = JSON.stringify(normalizedBuyerOldData) !== JSON.stringify(normalizedDataToUpdate); //Check if there are any changes between the two normalized datasets
 
     /**
      * Detect changes in user type, specifically when the user type is set to "Others"
      */
     useEffect(() => {
-        //const isOtherUserTypeChanged = dataToUpdate.other_user_type !== buyerOldData.user_type;
-        const isOtherUserTypeChanged =
-            normalizedDataToUpdate.user_type === "Others" &&
-            normalizedBuyerOldData.other_user_type !==
-            normalizedDataToUpdate.other_user_type;
-        setIsUserTypeChange(isOtherUserTypeChanged);
-    }, [buyerOldData, dataToUpdate]);
+        const hasUserTypeChanged = checkUserTypeChange(normalizedDataToUpdate, normalizedBuyerOldData);
+        setIsUserTypeChange(hasUserTypeChanged);
+    }, [normalizedDataToUpdate, normalizedBuyerOldData, checkUserTypeChange]);
 
     const formatFunc = (name) => {
         return name
@@ -189,23 +170,24 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
 
     const handleCloseModal = () => {
         if (dataConcern) {
-            
             setDataToUpdate((prevState) => ({
                 ...prevState,
                 ...dataConcern, // Spread the dataConcern values into the state
                 user_type: dataConcern.user_type === null || dataConcern.user_type === ""
                     ? null // Keep null if user_type is null or empty
-                    : predefinedUserTypes.includes(dataConcern.user_type)
+                    : PREDEFINED_USER_TYPES.includes(dataConcern.user_type)
                         ? dataConcern.user_type // Keep if it's a predefined user type
                         : "Others", // Otherwise, set to "Others"
-
-                other_user_type: dataConcern.user_type && !predefinedUserTypes.includes(dataConcern.user_type)
-                    ? dataConcern.user_type // Keep the value if it's not a predefined type
-                    : prevState.other_user_type, // Preserve the previous value of other_user_type
+                other_user_type: dataConcern.user_type === null || dataConcern.user_type === ""
+                    ? "" // Leave as empty if user_type is null or empty
+                    : !PREDEFINED_USER_TYPES.includes(dataConcern.user_type)
+                        ? dataConcern.other_user_type || dataConcern.user_type // Set `other_user_type` to `user_type` when not predefined
+                        : "", // Otherwise, keep empty
             }));
             if (message) {
-                setMessage(dataConcern.admin_remarks || ""); // Clear the message if it's empty
+                setMessage(dataConcern.admin_remarks || "");
             }
+            setIsUserTypeChange(false);
             if (modalRef.current) {
                 modalRef.current.close();
             }
@@ -258,6 +240,7 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
 
     const addInfo = async () => {
         try {
+
             const response = await apiService.post(
                 'update-info',
                 {
@@ -272,6 +255,8 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
             localStorage.removeItem("closeConcern");
             localStorage.setItem("updatedData", JSON.stringify(updatedData));
             showToast("Data updated successfully!", "success");
+            setIsUserTypeChange(false);
+
             onupdate({ ...dataToUpdate, dataConcern });
             await Promise.all([getInquiryLogs(dataConcern.ticket_id), getAllConcerns()]);
         } catch (error) {
@@ -427,7 +412,7 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
                                     className="appearance-none w-full px-4 text-sm py-1 bg-white focus:outline-none border-0 mobile:text-xs"
                                 >
                                     <option value="">(Select)</option>
-                                    {predefinedUserTypes.map((type) => (
+                                    {PREDEFINED_USER_TYPES.map((type) => (
                                         <option key={type} value={type}>
                                             {type}
                                         </option>
@@ -663,7 +648,7 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
                                     className="w-[133px] h-[39px] font-semibold text-sm text-white rounded-[10px] gradient-btn5"
                                     type="button"
                                     onClick={handleShowUpdateAlert}
-                                  
+
                                     style={{
                                         opacity: !isUserTypeChange && !hasChanges ? 0.5 : 1,
                                         cursor: !isUserTypeChange && !hasChanges ? 'not-allowed' : 'pointer',

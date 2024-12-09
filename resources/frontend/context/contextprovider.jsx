@@ -85,7 +85,8 @@ export const ContextProvider = ({ children }) => {
     const [filterDueDate, setFilterDueDate] = useState(null);
     const [loading, setLoading] = useState(false);
     const [navBarData, setNavBarData] = useState([]);
- 
+    const [isUserTypeChange, setIsUserTypeChange] = useState(false);
+
     useEffect(() => {
         if (user && user.department && !isDepartmentInitialized) {
             setDepartment(user.department === "Customer Relations - Services" ? "All" : user.department);
@@ -764,6 +765,8 @@ export const ContextProvider = ({ children }) => {
                 inquriesPerChannelData,
                 navBarData,
                 getNavBarData,
+                setIsUserTypeChange,
+                isUserTypeChange
             }}
 
         >

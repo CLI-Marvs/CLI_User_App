@@ -367,9 +367,9 @@ const AssignDetails = ({ logMessages, ticketId }) => {
             type: "log",
             created_at: logReply.created_at,
         })),
-
+    
     ].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-
+     
     const capitalizeWords = (name) => {
         if (name) {
             return name
@@ -796,7 +796,14 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                                                 </span>
                                                 <span className="text-custom-grayA5">{"}"}</span>
                                             </>
-                                        ) : null}
+                                            ) : <>
+                                                <span className="text-custom-grayA5">
+                                                    {details.buyer_old_data.user_type ? " " : " Added "}
+                                                </span>
+                                                <span className="text-black">
+                                                        {" "}{details.buyer_updated_data.user_type}{" "}
+                                                </span>
+                                            </>}
                                     </p>
                                 ) : null}
 

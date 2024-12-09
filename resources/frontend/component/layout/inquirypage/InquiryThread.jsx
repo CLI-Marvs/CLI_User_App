@@ -59,6 +59,8 @@ const InquiryThread = () => {
         setSearchFilter,
         data,
         setMessages,
+        setIsUserTypeChange,
+        isUserTypeChange
     } = useStateContext();
     const [chatMessage, setChatMessage] = useState("");
     const userLoggedInEmail = user?.employee_email;
@@ -182,6 +184,8 @@ const InquiryThread = () => {
         }
     };
     const handleOpenModal = () => {
+        console.log("123", isUserTypeChange);
+        setIsUserTypeChange(false);
         if (modalRef.current) {
             modalRef.current.showModal();
         }
@@ -1215,16 +1219,7 @@ const InquiryThread = () => {
 
                             <div className="border my-2 border-t-1 border-custom-lightestgreen"></div>
                             <div className="w-full flex justify-end gap-[13px] items-center">
-                                {/* {dataConcern?.status === "Resolved" ||
-                                    dataConcern?.status === "Closed" && (
-                                        <span
-                                            className="w-auto font-semibold text-[13px] text-[#1A73E8] underline cursor-pointer"
-                                            onClick={handleOpenAddInfoModal}
-                                        >
-                                            Create new ticket
-                                        </span>
-                                    )} */}
-
+                  
                                 {(dataConcern?.status === "Resolved" || dataConcern?.status === "Closed") && (
                                     <span
                                         className="w-auto font-semibold text-[13px] text-[#1A73E8] underline cursor-pointer"

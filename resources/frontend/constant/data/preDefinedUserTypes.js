@@ -1,0 +1,1 @@
+ export const PREDEFINED_USER_TYPES = ["Property Owner", "Buyer", "Broker", "Seller", "Lessee"];
