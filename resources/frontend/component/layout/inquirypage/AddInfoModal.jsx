@@ -32,9 +32,6 @@ const normalizeData = (data) => {
             : data.user_type === null || data.user_type === ""
                 ? null
                 : "Others",
-        // other_user_type: data.user_type === "Others"
-        //     ? data.other_user_type // Keep the existing value (e.g., "vendor") if present
-        //     : null,
         other_user_type:
             data.user_type === "Others"
                 ? (data.other_user_type || "")
