@@ -56,7 +56,7 @@ const ResolveModal = ({ modalRef, ticketId, dataRef, onupdate }) => {
         setIsSurveyRequired(false);
     };
 
-    const capitalizeWords = (name) => {
+    /* const capitalizeWords = (name) => {
         if (name) {
             return name
                 .split(" ")
@@ -67,7 +67,7 @@ const ResolveModal = ({ modalRef, ticketId, dataRef, onupdate }) => {
                 )
                 .join(" ");
         }
-    };
+    }; */
 
 
     /**
@@ -95,7 +95,7 @@ const ResolveModal = ({ modalRef, ticketId, dataRef, onupdate }) => {
                 department: user?.department,
                 buyer_email: dataRef.buyer_email,
                 buyer_lastname: dataRef.buyer_lastname,
-                buyer_name: `${capitalizeWords(`${dataRef.buyer_firstname} ${dataRef.buyer_lastname}`)}`,
+                buyer_name: `${/* capitalizeWords() */`${dataRef.buyer_firstname} ${dataRef.buyer_lastname}`}`,
                 details_concern: dataRef.details_concern,
                 remarks: remarks,
                 communication_type: communicationType,
