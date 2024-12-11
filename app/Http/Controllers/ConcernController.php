@@ -968,7 +968,8 @@ class ConcernController extends Controller
 
             if (!empty($searchParams['hasAttachments'])) {
                 $query->whereHas('messages', function ($messageQuery) {
-                    $messageQuery->whereNotNull('attachment');
+                    $messageQuery->whereNotNull('attachment')
+                                 ->whereJsonLength('attachment', '>', 0);   
                 });
             }
         }
