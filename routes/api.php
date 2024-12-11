@@ -17,6 +17,7 @@ use App\Http\Controllers\PropertyMasterController;
 use App\Http\Controllers\PriceListMasterController;
 use App\Http\Controllers\PriceBasicDetailController;
 use App\Http\Controllers\EmployeeDepartmentController;
+use App\Http\Controllers\DepartmentFeaturePermissionController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -85,11 +86,11 @@ Route::get('/get-transactions', [SapController::class, 'retrieveTransactions']);
 Route::get('/get-matches', [SapController::class, 'runAutoPosting']);
 
 
-//Employee Department
-Route::get('/get-employees-departments', [EmployeeDepartmentController::class, 'index']);
 
-//Features
-Route::get('/get-features', [FeatureController::class, 'index']);
+
+
+
+
 
 
 Route::middleware('auth:sanctum')->group(function () {
@@ -136,6 +137,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/banner/{id}', [DynamicBannerController::class, 'deleteBanner']);
     Route::post('/update-banner', [DynamicBannerController::class, 'updateBanner']);
 
+    //Employee Department
+    Route::get('/get-employees-departments', [EmployeeDepartmentController::class, 'index']);
 
+    //Features
+    Route::get('/get-features', [FeatureController::class, 'index']);
+
+    //Department Feature Permission
+    Route::post('/departments/assign-feature-permissions', [DepartmentFeaturePermissionController::class, 'store']);
    
 });

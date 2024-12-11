@@ -2,8 +2,11 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\Feature;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+ 
 
 class EmployeeDepartment extends Model
 {
@@ -12,7 +15,12 @@ class EmployeeDepartment extends Model
 
 
     //Relationships
-
+    public function features():BelongsToMany
+    {
+        return $this->belongsToMany(Feature::class, 'department_feature_permissions', 'feature_id', 'department_id')
+            ->withPivot('can_view', 'can_write', 'can_edit', 'can_delete', 'can_share')
+            ->withTimestamps();
+    }
 
     //Custom function
 }
