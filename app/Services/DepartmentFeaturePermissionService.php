@@ -21,4 +21,13 @@ class DepartmentFeaturePermissionService
     {
         return $this->repository->syncPermissions($departmentId, $features);
     }
+
+
+    /**
+     * Get all departments with permissions
+     */ 
+    public function getDepartmentsWithPermissions()
+    {
+        return $this->repository->getDepartmentsWithPermissions();
+    }
 }

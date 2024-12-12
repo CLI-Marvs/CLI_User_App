@@ -81,7 +81,7 @@ const UserMessages = ({ items, dataConcern }) => {
     /*   const location = useLocation();
     const { dataConcern } = location?.state || {}; */
     /*  const dataConcern = data?.find((item) => item.ticket_id === ticketId) || {}; */
-    const capitalizeWords = (name) => {
+    /* const capitalizeWords = (name) => {
         if (name) {
             return name
                 .split(" ")
@@ -92,7 +92,7 @@ const UserMessages = ({ items, dataConcern }) => {
                 )
                 .join(" ");
         }
-    };
+    }; */
     return (
         <div className="w-full">
             <div className="flex w-full mt-[27px] gap-[10px]">
@@ -102,12 +102,12 @@ const UserMessages = ({ items, dataConcern }) => {
                     </p>
                     <p className=" text-sm text-custom-gray81 flex gap-1">
                         <span>From:</span>
-                        {capitalizeWords(
+                        {/* capitalizeWords() */
                             `${dataConcern?.buyer_firstname || ""} ${
                                 dataConcern?.buyer_middlename || ""
                             } ${dataConcern?.buyer_lastname || ""}`
-                        )}{" "}
-                        {capitalizeWords(dataConcern?.suffix_name)}
+                        }{" "}
+                        {/* capitalizeWords()*/dataConcern?.suffix_name}
                     </p>
                     <p className=" text-sm text-custom-gray81 flex gap-1">
                         {dataConcern.buyer_email} <span>|</span>{" "}

@@ -17,6 +17,7 @@ use App\Http\Controllers\PropertyMasterController;
 use App\Http\Controllers\PriceListMasterController;
 use App\Http\Controllers\PriceBasicDetailController;
 use App\Http\Controllers\EmployeeDepartmentController;
+use App\Http\Controllers\EmployeeFeaturePermissionController;
 use App\Http\Controllers\DepartmentFeaturePermissionController;
 
 Route::get('/user', function (Request $request) {
@@ -144,6 +145,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/get-features', [FeatureController::class, 'index']);
 
     //Department Feature Permission
-    Route::post('/departments/assign-feature-permissions', [DepartmentFeaturePermissionController::class, 'store']);
+    Route::get('/get-departments-with-permissions', [DepartmentFeaturePermissionController::class, 'index']);
+    Route::post('/departments-assign-feature-permissions', [DepartmentFeaturePermissionController::class, 'store']);
+
+    //Employee Feature Permission
+   Route::post('/employee-assign-feature-permissions', [EmployeeFeaturePermissionController::class, 'store']);
    
 });

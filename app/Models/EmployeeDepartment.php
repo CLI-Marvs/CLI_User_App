@@ -17,9 +17,9 @@ class EmployeeDepartment extends Model
     //Relationships
     public function features():BelongsToMany
     {
-        return $this->belongsToMany(Feature::class, 'department_feature_permissions', 'feature_id', 'department_id')
-            ->withPivot('can_view', 'can_write', 'can_edit', 'can_delete', 'can_share')
-            ->withTimestamps();
+        return $this->belongsToMany(Feature::class, 'department_feature_permissions', 'department_id', 'feature_id')
+        ->withPivot('can_read', 'can_write', 'can_execute', 'can_delete', 'can_save')
+        ->withTimestamps();
     }
 
     //Custom function

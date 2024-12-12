@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react'
 import { AiFillInfoCircle } from 'react-icons/ai'
 import { IoMdArrowDropdown } from 'react-icons/io'
-import { useStateContext } from '../../../../context/contextprovider';
-import { PERMISSIONS } from '../../../../constant/data/permissions';
-import apiService from "../../../servicesApi/apiService";
-import { showToast } from "../../../../util/toastUtil";
+import { useStateContext } from '../../../../../context/contextprovider';
+import { PERMISSIONS } from '../../../../../constant/data/permissions';
+import apiService from "../../../../servicesApi/apiService";
+import { showToast } from "../../../../../util/toastUtil";
 import CircularProgress from "@mui/material/CircularProgress";
 
-const DepartmentModal = ({ modalRef }) => {
+const AddDepartmentModal = ({ modalRef }) => {
     //States
     const { employeeDepartments, features, getAllEmployeeDepartment, getAllFeatures } = useStateContext();
     const [isLoading, setIsLoading] = useState(false);
@@ -16,6 +16,10 @@ const DepartmentModal = ({ modalRef }) => {
         features: [],   // array of features with permissions
     });
  
+    //TODO:
+    //1. Dont show the department in the select tag  if it already exists in the database
+    //2. Only ONCE TO insert a record/deparment, if already in database, show the label "IF not visible department, it means already inserted"
+
     //Hooks
     useEffect(() => {
         getAllEmployeeDepartment();
@@ -61,9 +65,8 @@ const DepartmentModal = ({ modalRef }) => {
     //Handle the submit/save button click
     const handleSubmit = () => {
         //TODO: disable the button if there is no data in form data
-        //TODO: Only ONCE TO insert a record/deparment, if already in database, show the label "IF not visible department, it means already inserted"
+      
 
-        
         const payload = {
             department_id: formData.department_id,
             features: formData.features
@@ -71,8 +74,7 @@ const DepartmentModal = ({ modalRef }) => {
         console.log("payload", JSON.stringify(payload))
         setIsLoading(true);
         try {
-          
-            const response = apiService.post("departments/assign-feature-permissions", payload);
+            const response = apiService.post("departments-assign-feature-permissions", payload);
             console.log("reponse",response)
             
             if (response.statusCode===200) {
@@ -235,14 +237,15 @@ const DepartmentModal = ({ modalRef }) => {
                             </div>
                         </button>
                         <button
-                            type="button"
+                            type="submit"
                             onClick={
                                 handleSubmit
                             }
                             disabled={
                                 isLoading
                             }
-                            className="gradient-btn5 w-[100px] h-[35px] rounded-[10px] text-sm text-white montserrat-semibold"
+                            className={`gradient-btn5 w-[100px] h-[35px] rounded-[10px] text-sm text-white montserrat-semibold ${isLoading ? "cursor-not-allowed" : ""
+                                }`}
                         >
                             {isLoading ? (
                                 <CircularProgress className="spinnerSize" />
@@ -257,4 +260,4 @@ const DepartmentModal = ({ modalRef }) => {
     )
 }
 
-export default DepartmentModal
+export default AddDepartmentModal

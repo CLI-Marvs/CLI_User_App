@@ -22,7 +22,14 @@ class DepartmentFeaturePermissionController extends Controller
      */
     public function index()
     {
-        //
+        $departmentsWithPermissions = $this->service->getDepartmentsWithPermissions();
+        return response()->json(
+            [
+                'message' => 'Departments with permissions retrieved successfully',
+                'data' => $departmentsWithPermissions
+            ],
+            200
+        );
     }
 
     /**
@@ -32,12 +39,21 @@ class DepartmentFeaturePermissionController extends Controller
     {
         $validatedData = $request->validated();
         try {
-            $this->service->syncPermissions($validatedData['department_id'], $validatedData['features']);
-            return response()->json(['message' => 'Permissions successfully updated', 'statusCode' => 200]);
-        } 
-        catch (\Exception $e) 
-        {
-            return response()->json(['Error saving department permission' => $e->getMessage()], 500);
+            $this->service->syncPermissions(
+                $validatedData['department_id'],
+                $validatedData['features']
+            );
+            return response()->json([
+                'message' => 'Department permission successfully added',
+                'statusCode' => 200
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(
+                [
+                    'Error saving department permission' => $e->getMessage()
+                ],
+                500
+            );
         }
     }
 
