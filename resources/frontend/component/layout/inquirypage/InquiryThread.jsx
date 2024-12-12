@@ -184,7 +184,6 @@ const InquiryThread = () => {
         }
     };
     const handleOpenModal = () => {
-        console.log("123", isUserTypeChange);
         setIsUserTypeChange(false);
         if (modalRef.current) {
             modalRef.current.showModal();
