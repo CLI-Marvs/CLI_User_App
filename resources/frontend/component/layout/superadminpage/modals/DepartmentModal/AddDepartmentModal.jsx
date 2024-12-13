@@ -71,7 +71,7 @@ const AddDepartmentModal = ({ modalRef }) => {
             department_id: formData.department_id,
             features: formData.features
         };
-        console.log("payload", JSON.stringify(payload))
+        // console.log("payload", JSON.stringify(payload))
         setIsLoading(true);
         try {
             const response = apiService.post("departments-assign-feature-permissions", payload);

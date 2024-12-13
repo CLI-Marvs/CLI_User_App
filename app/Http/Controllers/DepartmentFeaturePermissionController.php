@@ -78,6 +78,6 @@ class DepartmentFeaturePermissionController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        
     }
 }

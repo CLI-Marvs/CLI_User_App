@@ -12,7 +12,7 @@ class DepartmentFeaturePermissionRepository
     /**
      *Synchronize feature permissions for a department
      */
-    public function syncDepartmentPermissions($departmentId, $features)
+    public function syncDepartmentPermissions(int $departmentId, array $features)
     {
         // Find the department, or create it if it doesn't exist
         $department = EmployeeDepartment::find($departmentId);
@@ -34,6 +34,7 @@ class DepartmentFeaturePermissionRepository
         // Iterate over each feature and insert it one at a time
         foreach ($features as $feature) {
             $department->features()->attach($feature['featureId'], [
+                'status' => 'Active',
                 'can_read' => $feature['can_read'] ?? false,
                 'can_write' => $feature['can_write'] ?? false,
                 'can_execute' => $feature['can_execute'] ?? false,
@@ -53,11 +54,23 @@ class DepartmentFeaturePermissionRepository
     public function getDepartmentsWithPermissions()
     {
         $departmentPermissions = EmployeeDepartment::query()
-        ->whereHas('features')
-        ->with('features')
-        ->orderBy('created_at', 'desc')
-        ->get();
-        
+            ->whereHas('features')
+            ->with('features')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
         return $departmentPermissions;
+    }
+
+    /**
+     * Delete or update the department's permission status
+     */
+    public function updateDepartmentPermissionStatus(int $departmentId)
+    {
+        $department = EmployeeDepartment::find($departmentId);
+        $department->features()->update(['status' => 'InActive']);
+        return response()->json([
+            'message' => 'Department permissions updated successfully'
+        ], 201);
     }
 }
