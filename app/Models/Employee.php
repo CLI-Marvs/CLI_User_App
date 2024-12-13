@@ -18,7 +18,7 @@ class Employee extends Authenticatable
     //Relationships
     public function features(): BelongsToMany
     {
-        return $this->belongsToMany(Feature::class, 'employee_feature_permissions', 'employee_id', 'feature_id')
+        return $this->belongsToMany(Feature::class, 'employee_feature_permission', 'employee_id', 'feature_id')
         ->withPivot('can_read', 'can_write', 'can_execute', 'can_delete', 'can_save')
         ->withTimestamps();
     }

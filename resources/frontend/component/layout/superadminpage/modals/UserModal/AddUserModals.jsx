@@ -4,6 +4,9 @@ import { IoMdArrowDropdown } from 'react-icons/io'
 import { useStateContext } from '../../../../../context/contextprovider';
 import { PERMISSIONS } from '../../../../../constant/data/permissions';
 import highlightText from '../../../../../util/hightlightText.jsx';
+import CircularProgress from "@mui/material/CircularProgress";
+import apiService from "../../../../servicesApi/apiService.js";
+
 const AddUserModals = ({ modalRef }) => {
     //States
     const { features, getAllFeatures, allEmployees } = useStateContext();
@@ -11,6 +14,7 @@ const AddUserModals = ({ modalRef }) => {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [search, setSearch] = useState("");
     const [selectedEmployee, setSelectedEmployee] = useState([]);
+
     const [formData, setFormData] = useState({
         employee_id: 0, // selected department
         features: [],   // array of features with permissions
@@ -54,13 +58,13 @@ const AddUserModals = ({ modalRef }) => {
     //Event Handler
 
     //Handle select employee
-    const handleSelectEmployee = (option) => {
-        setSelectedEmployee({
-            employee_id: option.id,
-            name: option.name,
-            department: option.department,
-        })
-        setSearch(option.name); // Fill the input with the selected employee's name
+    const handleSelectEmployee = (employee) => {
+        setFormData((prevFormData) => ({
+            ...prevFormData,
+            employee_id: employee?.id || 0,
+        }));
+        setSelectedEmployee(employee);
+        setSearch(employee.name);
         setIsDropdownOpen(false);
     };
 
@@ -93,15 +97,16 @@ const AddUserModals = ({ modalRef }) => {
     //Handle the submit/save button click
     const handleSubmit = () => {
         //TODO: disable the button if there is no data in form data
+        console.log("formData", formData)
         const payload = {
-            employeeId: formData?.employee_id,
+            employee_id: formData?.employee_id,
             features: formData.features
         };
         console.log("payload", JSON.stringify(payload))
-        setIsLoading(true);
         try {
-            // const response = apiService.post("employee-assign-feature-permissions", payload);
-            // console.log("reponse", response)
+            setIsLoading(true);
+            const response = apiService.post("employee-assign-feature-permissions", payload);
+            console.log("reponse", response)
 
             // if (response.statusCode === 200) {
             //     showToast("Data added successfully!", "Data added successfully!");
@@ -136,7 +141,7 @@ const AddUserModals = ({ modalRef }) => {
     };
 
 
-   
+
 
     //Handle click outside the dropdown
     // const handleClickOutside = (event) => {
@@ -319,7 +324,7 @@ const AddUserModals = ({ modalRef }) => {
 
                     </div>
                 </div>
-                <form method="dialog" className="">
+                <div>
                     <div className="flex justify-center mt-[26px] space-x-[19px]">
                         <button
                             className="gradient-btn5 p-[1px] w-[92px] h-[35px] rounded-[10px]"
@@ -348,7 +353,7 @@ const AddUserModals = ({ modalRef }) => {
                             )}
                         </button>
                     </div>
-                </form>
+                </div>
             </div>
         </dialog>
     )

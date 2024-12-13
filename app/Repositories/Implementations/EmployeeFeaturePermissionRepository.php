@@ -21,7 +21,7 @@ class EmployeeFeaturePermissionRepository
         }
 
         // Check if employee already has permissions
-        $existingEmployeePermissions = DB::table('employee_feature_permissions')
+        $existingEmployeePermissions = DB::table('employee_feature_permission')
             ->where('employee_id', $employeeId)
             ->exists();
 

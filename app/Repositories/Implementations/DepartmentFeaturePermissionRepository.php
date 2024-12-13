@@ -12,7 +12,7 @@ class DepartmentFeaturePermissionRepository
     /**
      *Synchronize feature permissions for a department
      */
-    public function syncPermissions($departmentId, $features)
+    public function syncDepartmentPermissions($departmentId, $features)
     {
         // Find the department, or create it if it doesn't exist
         $department = EmployeeDepartment::find($departmentId);

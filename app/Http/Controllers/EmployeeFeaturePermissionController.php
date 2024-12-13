@@ -15,7 +15,21 @@ class EmployeeFeaturePermissionController extends Controller
     {
         $this->service = $service;
     }
-
+    
+    /**
+     * Display a listing of the resource.
+     */
+    public function index()
+    {
+        $employeesWithPermissions = $this->service->getDepartmentsWithPermissions();
+        return response()->json(
+            [
+                'message' => 'Employees with permissions retrieved successfully',
+                'data' => $employeesWithPermissions
+            ],
+            200
+        );
+    }
 
     /**
      * Store a newly created resource in storage.
@@ -25,7 +39,7 @@ class EmployeeFeaturePermissionController extends Controller
         $validatedData = $request->validated();
         try {
             $this->service->syncPermissions(
-                $validatedData['employee'],
+                $validatedData['employee_id'],
                 $validatedData['features']
             );
             return response()->json([

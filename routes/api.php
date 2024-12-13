@@ -149,6 +149,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/departments-assign-feature-permissions', [DepartmentFeaturePermissionController::class, 'store']);
 
     //Employee Feature Permission
-   Route::post('/employee-assign-feature-permissions', [EmployeeFeaturePermissionController::class, 'store']);
-   
+    Route::get('/get-employees-with-permissions', [EmployeeFeaturePermissionController::class, 'index']);
+    Route::post('/employee-assign-feature-permissions', [EmployeeFeaturePermissionController::class, 'store']);
 });

@@ -19,7 +19,7 @@ class DepartmentFeaturePermissionService
      */
     public function syncPermissions($departmentId, $features)
     {
-        return $this->repository->syncPermissions($departmentId, $features);
+        return $this->repository->syncDepartmentPermissions($departmentId, $features);
     }
 
 

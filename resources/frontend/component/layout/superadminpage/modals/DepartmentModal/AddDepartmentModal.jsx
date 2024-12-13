@@ -15,7 +15,7 @@ const AddDepartmentModal = ({ modalRef }) => {
         department_id: 0, // selected department
         features: [],   // array of features with permissions
     });
- 
+
     //TODO:
     //1. Dont show the department in the select tag  if it already exists in the database
     //2. Only ONCE TO insert a record/deparment, if already in database, show the label "IF not visible department, it means already inserted"
@@ -25,7 +25,7 @@ const AddDepartmentModal = ({ modalRef }) => {
         getAllEmployeeDepartment();
         getAllFeatures()
     }, [])
-    
+
 
 
     //Event handler
@@ -65,7 +65,7 @@ const AddDepartmentModal = ({ modalRef }) => {
     //Handle the submit/save button click
     const handleSubmit = () => {
         //TODO: disable the button if there is no data in form data
-      
+
 
         const payload = {
             department_id: formData.department_id,
@@ -75,9 +75,9 @@ const AddDepartmentModal = ({ modalRef }) => {
         setIsLoading(true);
         try {
             const response = apiService.post("departments-assign-feature-permissions", payload);
-            console.log("reponse",response)
-            
-            if (response.statusCode===200) {
+            console.log("reponse", response)
+
+            if (response.statusCode === 200) {
                 showToast("Data added successfully!", "Data added successfully!");
                 setFormData({
                     department_id: 0, // selected department
@@ -87,7 +87,7 @@ const AddDepartmentModal = ({ modalRef }) => {
                     modalRef.current.close();
                 }
             }
-  
+
         } catch (error) {
             console.log("error", error);
         } finally {
@@ -123,8 +123,11 @@ const AddDepartmentModal = ({ modalRef }) => {
                         </button>
                     </div>
                 </div>
-                <div className="flex justify-center items-center mt-[14px] ">
+                <div className="flex justify-center items-center mt-[14px] flex-col gap-y-2">
                     <AiFillInfoCircle className="size-[37px] text-[#5B9BD5]" />
+                    <div className="w-full flex justify-center items-center h-12 bg-red-100 mb-4 rounded-lg">
+                        <p>Validation error here</p>
+                    </div>
                 </div>
                 <div className='flex flex-col gap-[36px] mt-[26px]'>
                     <div className='w-full p-[10px] flex flex-col gap-[10px]'>
@@ -224,7 +227,7 @@ const AddDepartmentModal = ({ modalRef }) => {
 
                     </div>
                 </div>
-                <div method="dialog" className="">
+                <div className="">
                     <div className="flex justify-center mt-[26px] space-x-[19px]">
                         <button
                             className="gradient-btn5 p-[1px] w-[92px] h-[35px] rounded-[10px]"

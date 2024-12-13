@@ -22,7 +22,7 @@ class StoreEmployeeFeaturePermissionRequest extends FormRequest
     public function rules(): array
     {
         return  [
-            'department_id' => 'required|integer',
+            'employee_id' => 'required|integer',
             'features' => 'required|array',
         ];
     }

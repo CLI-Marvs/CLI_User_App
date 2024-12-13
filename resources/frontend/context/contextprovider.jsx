@@ -89,6 +89,7 @@ export const ContextProvider = ({ children }) => {
     const [employeeDepartments, setEmployeeDepartments] = useState([]);
     const [features, setFeatures] = useState([]);
     const [departmentsWithPermissions, setDepartmentsWithPermissions] = useState([]);
+    const [employeesWithPermissions, setEmployeesWithPermissions] = useState([]);
 
     useEffect(() => {
         if (user && user.department && !isDepartmentInitialized) {
@@ -574,6 +575,17 @@ export const ContextProvider = ({ children }) => {
             console.log("error", error);
         }
     }
+
+    //Get all employees with permissions
+    const getEmployeesWithPermissions = async () => {
+        try {
+            const response = await apiService.get("get-employees-with-permissions");
+            setEmployeesWithPermissions(response.data.data);
+        }
+        catch (error) {
+            console.log("error", error);
+        }
+    }
     // useEffect(() => {
     //     getPropertyUnits(towerPhaseId, selectedFloor);
     // }, [towerPhaseId, selectedFloor]);
@@ -808,7 +820,9 @@ export const ContextProvider = ({ children }) => {
                 getAllFeatures,
                 features,
                 getDepartmentsWithPermissions,
-                departmentsWithPermissions
+                departmentsWithPermissions,
+                getEmployeesWithPermissions,
+                employeesWithPermissions
             }}
 
         >

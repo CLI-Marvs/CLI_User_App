@@ -26,8 +26,8 @@ class EmployeeFeaturePermissionService
     /**
      * Get all departments with permissions
      */
-    // public function getDepartmentsWithPermissions()
-    // {
-    //     return $this->repository->getDepartmentsWithPermissions();
-    // }
+    public function getDepartmentsWithPermissions()
+    {
+        return $this->repository->getEmployeessWithPermissions();
+    }
 }
