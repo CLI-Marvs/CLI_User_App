@@ -1,21 +1,26 @@
-import React, { useRef, useEffect } from 'react'
+import React, { useRef, useEffect, useState } from 'react'
 import AddDepartmentModal from './modals/DepartmentModal/AddDepartmentModal';
 import AddUserModals from './modals/UserModal/AddUserModals';
+import EditDepartmentModal from './modals/DepartmentModal/EditDepartmentModal';
 import { useStateContext } from '../../../context/contextprovider';
 import { PERMISSIONS } from '../../../constant/data/permissions';
 import { HiPencil } from "react-icons/hi";
 import { MdDelete } from "react-icons/md";
+import apiService from "../../servicesApi/apiService";
 
 const UserRightsAndPermissions = () => {
 
   //State
   const { departmentsWithPermissions, getDepartmentsWithPermissions, getEmployeesWithPermissions,
     employeesWithPermissions, features } = useStateContext();
+  const [selectedDepartment, setSelectedDepartment] = useState(null);
   const modalRef = useRef(null);
   const modalref2 = useRef(null);
-  // 
-  //Hookes
+  const editDepartmentModalRef = useRef(null);
+
+  //Hooks
   useEffect(() => {
+    console.log("This is fetching", departmentsWithPermissions)
     getDepartmentsWithPermissions();
     getEmployeesWithPermissions();
   }, []);
@@ -40,22 +45,33 @@ const UserRightsAndPermissions = () => {
   };
 
   /**
+   * Handle the click event of the edit department button
+   */
+  const handleEditDepartmentModal = (department) => {
+    setSelectedDepartment(department);
+    if (editDepartmentModalRef.current) {
+      editDepartmentModalRef.current.showModal(department);
+    }
+  };
+
+  /**
    * Handle to delete department permission
    */
-  const handleDeleteDepartmentPermission = (department) => {
-    console.log("id", department);
-    // try {
-    //   const response = apiService.post("departments-assign-feature-permissions", {
-    //     department_id: id,
-    //     features: [],
-    //   });
-    //   if (response.statusCode === 200) {
-    //     showToast("Data deleted successfully!", "Data deleted successfully!");
-    //     getAllEmployeeDepartment();
-    //   }
-    // } catch (error) {
-    //   console.log("error", error);
-    // }
+  const handleUpdateDepartmentPermissionStatus = (department) => {
+    //console.log("id", department.id);
+    const payload = {
+      department_id: department?.id,
+      status: "InActive",
+    };
+    try {
+      const response = apiService.patch("update-departments-feature-permissions", payload);
+      if (response.statusCode === 200) {
+        showToast("Data deleted successfully!", "Data deleted successfully!");
+        getDepartmentsWithPermissions();
+      }
+    } catch (error) {
+      console.log("error", error);
+    }
   };
 
 
@@ -72,9 +88,7 @@ const UserRightsAndPermissions = () => {
               Add
             </button>
           </div>
-          <div className='py-2 w-[343pxpx]'>
-            <label htmlFor="" className='text-red-500 text-sm'>Note: Department not visible in the select tag is already below.</label>
-          </div>
+
         </div>
 
         <div>
@@ -154,6 +168,7 @@ const UserRightsAndPermissions = () => {
                     <div className='flex gap-x-3'>
                       <button
                         className="gradient-btn5 p-[1px] w-[80px] h-[31px] rounded-[10px]"
+                        onClick={() => handleEditDepartmentModal(department)}
                       >
                         <div className="w-full h-full rounded-[9px] bg-white flex justify-center items-center montserrat-semibold text-sm gap-x-2">
                           <p className="text-base font-bold bg-gradient-to-r from-custom-bluegreen via-custom-solidgreen to-custom-solidgreen bg-clip-text text-transparent">
@@ -164,7 +179,7 @@ const UserRightsAndPermissions = () => {
                           </span>
                         </div>
                       </button>
-                      <button onClick={() => handleDeleteDepartmentPermission(department)}>
+                      <button onClick={() => handleUpdateDepartmentPermissionStatus(department)}>
                         <MdDelete className='w-6 h-6 text-red-500' />
                       </button>
                     </div>
@@ -312,6 +327,12 @@ const UserRightsAndPermissions = () => {
       </div>
       <div>
         <AddUserModals modalRef={modalref2} />
+      </div>
+      <div>
+        <EditDepartmentModal
+          editDepartmentModalRef={editDepartmentModalRef}
+          selectedDepartment={selectedDepartment}
+        />
       </div>
     </div>
   )

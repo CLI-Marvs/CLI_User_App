@@ -9,7 +9,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 
 const AddDepartmentModal = ({ modalRef }) => {
     //States
-    const { employeeDepartments, features, getAllEmployeeDepartment, getAllFeatures } = useStateContext();
+    const { employeeDepartments, features, getAllEmployeeDepartment, getAllFeatures, getDepartmentsWithPermissions } = useStateContext();
     const [isLoading, setIsLoading] = useState(false);
     const [formData, setFormData] = useState({
         department_id: 0, // selected department
@@ -65,8 +65,6 @@ const AddDepartmentModal = ({ modalRef }) => {
     //Handle the submit/save button click
     const handleSubmit = () => {
         //TODO: disable the button if there is no data in form data
-
-
         const payload = {
             department_id: formData.department_id,
             features: formData.features
@@ -87,7 +85,7 @@ const AddDepartmentModal = ({ modalRef }) => {
                     modalRef.current.close();
                 }
             }
-
+            getDepartmentsWithPermissions()
         } catch (error) {
             console.log("error", error);
         } finally {
@@ -155,6 +153,9 @@ const AddDepartmentModal = ({ modalRef }) => {
                                     <IoMdArrowDropdown />
                                 </span>
                             </div>
+                        </div>
+                        <div className='py-2 w-[343pxpx]'>
+                            <label htmlFor="" className='text-red-500 text-sm'>Note: Department not visible is already in the list.</label>
                         </div>
                         {/* <div
                             className={`flex items-center border rounded-[5px] overflow-hidden border-custom-bluegreen`}

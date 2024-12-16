@@ -1,72 +1,39 @@
-import React, { useRef, useState, useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { AiFillInfoCircle } from 'react-icons/ai'
 import { IoMdArrowDropdown } from 'react-icons/io'
 import { useStateContext } from '../../../../../context/contextprovider';
 import { PERMISSIONS } from '../../../../../constant/data/permissions';
-import highlightText from '../../../../../util/hightlightText.jsx';
+import apiService from "../../../../servicesApi/apiService";
+import { showToast } from "../../../../../util/toastUtil";
 import CircularProgress from "@mui/material/CircularProgress";
-import apiService from "../../../../servicesApi/apiService.js";
 
-const AddUserModals = ({ modalRef }) => {
+const AddDepartmentModal = ({ modalRef }) => {
     //States
-    const { features, getAllFeatures, allEmployees } = useStateContext();
+    const { employeeDepartments, features, getAllEmployeeDepartment, getAllFeatures } = useStateContext();
     const [isLoading, setIsLoading] = useState(false);
-    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-    const [search, setSearch] = useState("");
-    const [selectedEmployee, setSelectedEmployee] = useState([]);
-
     const [formData, setFormData] = useState({
-        employee_id: 0, // selected department
+        department_id: 0, // selected department
         features: [],   // array of features with permissions
     });
 
-    const employeeOptions = allEmployees.map((employee) => ({
-        id: employee?.id,
-        name: `${employee.firstname} ${employee.lastname}`,
-        email: employee.employee_email,
-        firstname: employee.firstname,
-        department:
-            employee.department === "Customer Relations - Services"
-                ? "Customer Relations - Services"
-                : employee.department,
-        abbreviationDep: employee.department,
-    }));
-
-    const filteredOptions = employeeOptions.filter(
-        (option) =>
-            (option.name &&
-                option.name.toLowerCase().includes(search.toLowerCase())) ||
-            (option.email &&
-                option.email.toLowerCase().includes(search.toLowerCase())) ||
-            (option.department &&
-                option.department.toLowerCase().includes(search.toLowerCase()))
-    );
+    //TODO:
+    //1. Dont show the department in the select tag  if it already exists in the database
+    //2. Only ONCE TO insert a record/deparment, if already in database, show the label "IF not visible department, it means already inserted"
 
     //Hooks
-    //Get all feature
     useEffect(() => {
-        getAllFeatures();
-    }, []);
+        getAllEmployeeDepartment();
+        getAllFeatures()
+    }, [])
 
-    // useEffect(() => {
-    //     document.addEventListener("mousedown", handleClickOutside);
-    //     return () => {
-    //         document.removeEventListener("mousedown", handleClickOutside);
-    //     };
-    // }, []);
 
-    //Event Handler
 
-    //Handle select employee
-    const handleSelectEmployee = (employee) => {
-        setFormData((prevFormData) => ({
-            ...prevFormData,
-            employee_id: employee?.id || 0,
-        }));
-        setSelectedEmployee(employee);
-        setSearch(employee.name);
-        setIsDropdownOpen(false);
-    };
+    //Event handler
+
+    //Handle the change event of select tag for employee department
+    const handleSelectDepartmentChange = (e) => {
+        setFormData({ ...formData, department_id: parseInt(e.target.value) });
+    }
 
     //Handle the permission change
     const handleFeaturePermissionChange = (item, permission, value) => {
@@ -94,30 +61,30 @@ const AddUserModals = ({ modalRef }) => {
         });
     };
 
+
     //Handle the submit/save button click
     const handleSubmit = () => {
         //TODO: disable the button if there is no data in form data
-        console.log("formData", formData)
         const payload = {
-            employee_id: formData?.employee_id,
+            department_id: formData.department_id,
             features: formData.features
         };
-        console.log("payload", JSON.stringify(payload))
+        // console.log("payload", JSON.stringify(payload))
+        setIsLoading(true);
         try {
-            setIsLoading(true);
-            const response = apiService.post("employee-assign-feature-permissions", payload);
+            const response = apiService.post("departments-assign-feature-permissions", payload);
             console.log("reponse", response)
 
-            // if (response.statusCode === 200) {
-            //     showToast("Data added successfully!", "Data added successfully!");
-            //     setFormData({
-            //         employee_id: 0, // selected department
-            //         features: [],
-            //     });
-            //     if (modalRef.current) {
-            //         modalRef.current.close();
-            //     }
-            // }
+            if (response.statusCode === 200) {
+                showToast("Data added successfully!", "Data added successfully!");
+                setFormData({
+                    department_id: 0, // selected department
+                    features: [],
+                });
+                if (modalRef.current) {
+                    modalRef.current.close();
+                }
+            }
 
         } catch (error) {
             console.log("error", error);
@@ -127,48 +94,18 @@ const AddUserModals = ({ modalRef }) => {
 
     }
 
-    //Handle close the modal
+
+    //Handle close the modal and cancel the modal
     const handleCloseModal = () => {
-        //TODO: remove all state if the modal is open
+        //TODO: remove all state if the
         if (modalRef.current) {
             setFormData({
-                employee_id: 0, // selected department
+                department_id: 0, // selected department
                 features: [],
             });
-            setSelectedEmployee([]);
             modalRef.current.close();
         }
-    };
-
-
-
-
-    //Handle click outside the dropdown
-    // const handleClickOutside = (event) => {
-    //     setIsDropdownOpen(false);
-    // };
-    /*  const highlightText = (text) => {
-         if (!text) return text;
-         if (!search) return text;
- 
-         const parts = text.split(new RegExp(`(${search})`, "gi"));
- 
-         return (
-             <span>
-                 {parts.map((part, index) =>
-                     part.toLowerCase() === search.toLowerCase() ? (
-                         <span key={index} className="font-semibold">
-                             {part}
-                         </span>
-                     ) : (
-                         part
-                     )
-                 )}
-             </span>
-         );
-     }; */
-
-
+    }
 
     return (
         <dialog
@@ -179,107 +116,73 @@ const AddUserModals = ({ modalRef }) => {
             <div className='relative p-[20px] mb-5 rounded-lg'>
                 <div className=''>
                     <div>
-                        <button className="absolute top-3 right-3 w-10 h-10 items-center rounded-full bg-custombg3 text-custom-bluegreen hover:bg-custombg"
-                            onClick={handleCloseModal}>
+                        <button className="absolute top-3 right-3 w-10 h-10 items-center rounded-full bg-custombg3 text-custom-bluegreen hover:bg-custombg" onClick={handleCloseModal}>
                             ✕
                         </button>
                     </div>
                 </div>
-                <div className="flex justify-center items-center mt-[14px] ">
+                <div className="flex justify-center items-center mt-[14px] flex-col gap-y-2">
                     <AiFillInfoCircle className="size-[37px] text-[#5B9BD5]" />
+                    <div className="w-full flex justify-center items-center h-12 bg-red-100 mb-4 rounded-lg">
+                        <p>Validation error here</p>
+                    </div>
                 </div>
-
-                <div className='flex flex-col gap-[36px] mt-[24px]'>
-                    <div className='w-full p-[10px] flex flex-col gap-[10px] relative mb-2'>
-                        <p className='text-sm font-semibold'>User</p>
+                <div className='flex flex-col gap-[36px] mt-[26px]'>
+                    <div className='w-full p-[10px] flex flex-col gap-[10px]'>
+                        <p className='text-sm font-semibold'>Department</p>
                         <div
-                            className={`flex items-center border  rounded-[5px] overflow-hidden border-custom-bluegreen`}
+                            className={`flex items-center border rounded-[5px] overflow-hidden border-custom-bluegreen`}
                         >
-                            <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex w-[240px] pl-3 py-1">
-                                Name
-                            </span>
-                            <input
-                                name="name"
-                                type="text"
-                                value={search}
-                                onChange={(e) => setSearch(e.target.value)}
-                                className={` 
-                                    ${isDropdownOpen
-                                        ? "rounded-[10px] rounded-b-none"
-                                        : "rounded-[10px]"
-                                    }
-                                     w-full px-4 text-sm focus:outline-none mobile:text-xs`
-                                }
-                                onFocus={() => setIsDropdownOpen(true)}
-                            />
-
-                        </div>
-                        <div
-                            className={`flex items-center border  rounded-[5px] overflow-hidden border-custom-bluegreen`}
-                        >
-                            <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex w-[240px] pl-3 py-1">
+                            <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex items-center w-[250px] tablet:w-[175px] mobile:w-[270px] mobile:text-xs -mr-3 pl-3 py-1">
                                 Department
                             </span>
-                            <input
-                                name="department"
-                                type="text"
-                                readOnly={true}
-                                value={selectedEmployee?.department}
-                                className="w-full px-4 text-sm focus:outline-none mobile:text-xs"
-                                placeholder=""
-                            />
+                            <div className="relative w-full">
+                                {/* Display the employee department */}
+                                <select
+                                    onChange={handleSelectDepartmentChange}
+                                    name="department"
+                                    value={formData.department_id}
+                                    className="appearance-none text-sm w-full px-4 py-1 bg-white focus:outline-none border-0 mobile:text-xs"
+                                >
+                                    <option value="">(Select)</option>
+                                    {employeeDepartments.map((item) => (
+                                        <option value={item.id}>{item.name}</option>
+                                    ))}
+                                </select>
+                                <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3 text-custom-bluegreen pointer-events-none">
+                                    <IoMdArrowDropdown />
+                                </span>
+                            </div>
                         </div>
-                        <div className='absolute mt-[100px]'>
-                            {/* Absolute button inside the input, aligned to the right */}
-                            {isDropdownOpen && (
-                                <>
-                                    <div className="absolute w-[610px] space-y-2 border-t-0 border-gray-300 p-2 py-[20px] shadow-custom6 rounded-[10px] bg-white z-20 mt-1">
-
-                                        <ul className="flex flex-col space-y-2 max-h-[500px] overflow-auto ">
-                                            {filteredOptions.map((option, index) => {
-                                                return (
-                                                    <li
-                                                        key={index}
-                                                        className="flex h-[110px] w-full py-[20px] px-[30px] gap-[18px] bg-custom-lightestgreen rounded-[10px] cursor-pointer"
-                                                        onClick={() => handleSelectEmployee(option)}
-                                                    >
-                                                        <div>
-                                                            <span>
-                                                                {highlightText(
-                                                                    option.name, search
-                                                                )}
-                                                            </span>
-                                                            <br />
-                                                            <span className="text-sm">
-                                                                {highlightText(
-                                                                    option.email, search
-                                                                )}
-                                                            </span>
-                                                            <br />
-                                                            <span className="text-sm">
-                                                                {highlightText(
-                                                                    option.department, search
-                                                                )}
-                                                            </span>
-                                                        </div>
-                                                    </li>
-                                                );
-                                            })}
-                                            {filteredOptions.length == 0 && (
-                                                <div>
-                                                    <p>No results found</p>
-                                                </div>
-                                            )}
-                                        </ul>
-                                    </div>
-                                </>
-                            )}
+                        <div className='py-2 w-[343pxpx]'>
+                            <label htmlFor="" className='text-red-500 text-sm'>Note: Department not visible is already in the list.</label>
                         </div>
-                        {/* Conditionally render the list when dropdown is open */}
-
+                        {/* <div
+                            className={`flex items-center border rounded-[5px] overflow-hidden border-custom-bluegreen`}
+                        >
+                            <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex items-center w-[250px] tablet:w-[175px] mobile:w-[270px] mobile:text-xs -mr-3 pl-3 py-1">
+                                Role
+                            </span>
+                            <div className="relative w-full">
+                                <select
+                                  
+                                    name="department"
+                                    className="appearance-none text-sm w-full px-4 py-1 bg-white focus:outline-none border-0 mobile:text-xs"
+                                >
+                                    <option value="">(Select)</option>
+                                    <option value="CRS">Role I</option>
+                                    <option value="Treasury">Role II</option>
+                                    <option value="Accounting">Role III</option>
+                                </select>
+                                <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3 text-custom-bluegreen pointer-events-none">
+                                    <IoMdArrowDropdown />
+                                </span>
+                            </div>
+                        </div> */}
                     </div>
                     <div className='w-full p-[10px] flex flex-col gap-[10px]'>
                         <p className='text-sm font-semibold'>Permissions</p>
+                        {/*Display the features */}
                         {features && features.map((item, index) => (
                             <div
                                 className={`flex items-center border rounded-[5px] overflow-hidden border-custom-bluegreen h-[56px]`}
@@ -303,6 +206,7 @@ const AddUserModals = ({ modalRef }) => {
                                                         </p>
                                                         {/* Checkbox for each permission */}
                                                         <input
+                                                            // value={formData && formData.features.find((feature) => feature.featureId === item.id)?.[permission.value]}
                                                             type="checkbox"
                                                             disabled={isDisabled}
                                                             className={`h-[16px] w-[16px] ${isDisabled ? "cursor-not-allowed bg-custom-grayF1" : ""
@@ -324,10 +228,11 @@ const AddUserModals = ({ modalRef }) => {
 
                     </div>
                 </div>
-                <div>
+                <div className="">
                     <div className="flex justify-center mt-[26px] space-x-[19px]">
                         <button
                             className="gradient-btn5 p-[1px] w-[92px] h-[35px] rounded-[10px]"
+                            onClick={handleCloseModal}
                         >
                             <div className="w-full h-full rounded-[9px] bg-white flex justify-center items-center montserrat-semibold text-sm">
                                 <p className="text-base font-bold bg-gradient-to-r from-custom-bluegreen via-custom-solidgreen to-custom-solidgreen bg-clip-text text-transparent">
@@ -359,4 +264,4 @@ const AddUserModals = ({ modalRef }) => {
     )
 }
 
-export default AddUserModals
+export default AddDepartmentModal

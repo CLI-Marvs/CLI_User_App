@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Services\DepartmentFeaturePermissionService;
 use App\Http\Requests\StoreDepartmentFeaturePermissionRequest;
+use App\Http\Requests\UpdateDepartmentFeaturePermissionRequest;
 
 class DepartmentFeaturePermissionController extends Controller
 {
@@ -68,9 +69,25 @@ class DepartmentFeaturePermissionController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(UpdateDepartmentFeaturePermissionRequest $request)
     {
-        //
+        $validatedData = $request->validated();
+        
+        //$validatedData = $request->validated();
+        try {
+            $this->service->updateDepartmentPermissionStatus($validatedData['department_id'], $validatedData['status']);
+            return response()->json([
+                'message' => 'Department permission updated successfully',
+                'statusCode' => 200
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(
+                [
+                    'Error updating department permission' => $e->getMessage()
+                ],
+                500
+            );
+        }
     }
 
     /**
