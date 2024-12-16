@@ -31,10 +31,10 @@ export const SURVEY_LINKS = [
     },
     {
         surveyName: "Survey for Title and Related Concerns",
-        surveyLink: "https://google.com",
+        surveyLink: "https://forms.gle/4GKzkQ4R6A14zFYd8",
     },
     {
         surveyName: "Survey for Other Concerns",
-        surveyLink: "https://facebook.com",
+        surveyLink: "https://forms.gle/LZpoPc7f95BWVfr1A",
     },
 ];
