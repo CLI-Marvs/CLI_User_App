@@ -296,7 +296,7 @@ const CloseModal = ({ modalRef, ticketId, dataRef, onupdate }) => {
                                 {isLoading ? (
                                     <CircularProgress className="spinnerSize" />
                                 ) : (
-                                    <> Mark as Close</>
+                                    <> Mark as Closed</>
                                 )}
                             </button>
                         </div>
