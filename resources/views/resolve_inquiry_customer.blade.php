@@ -132,13 +132,17 @@
     <p>
         If you have any further questions or need additional assistance, please don't hesitate to contact us.
     </p>
+
     <p>Thank you for choosing Cebu Landmasters. We build with you in mind.</p>
-        <p>
-            Please click this link
-            <a href="{{ $selectedSurveyType['surveyLink']}}">
-                {{$selectedSurveyType['surveyName']}}
-            </a>
-        </p>
+    @if (!is_null($selectedSurveyType) && $selectedSurveyType['surveyName'] !== 'N/A')
+    <p>
+        Please click this link
+        <a href="{{ $selectedSurveyType['surveyLink']}}">
+            {{$selectedSurveyType['surveyName']}}
+        </a>
+    </p>
+    @endif
+
     <p style="margin: 0; padding: 0;">Best regards,</p>
     <p style="margin: 0; padding: 0;">{{ ucwords($admin_name) }}</p>
     <p style="margin: 0; padding: 0;">CLI - {{$department}}</p>

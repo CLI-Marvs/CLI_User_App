@@ -1,5 +1,10 @@
 export const SURVEY_LINKS = [
     {
+        //For N/A
+        surveyName: "N/A",
+        surveyLink: "none",
+    },
+    {
         //For sales
         surveyName: "Survey for Reservation (For Sales)",
         surveyLink:
