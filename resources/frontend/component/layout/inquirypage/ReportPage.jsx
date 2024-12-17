@@ -36,11 +36,11 @@ const dataSetType= [
 ];
 
 const dataPerCategory = [
-    { name: 'Category A', value: 40 },
-    { name: 'Category B', value: 30 },
-    { name: 'Category C', value: 20 },
-    { name: 'Category D', value: 10 },
-    { name: 'Category E', value: 13 },
+    { name: 'Category Alpha', value: 40 },
+    { name: 'Category Bravo', value: 30 },
+    { name: 'Category Charlie', value: 20 },
+    { name: 'Category Delta', value: 10 },
+    { name: 'Category Echo', value: 13 },
 
 ];
 
@@ -494,13 +494,8 @@ const ReportPage = () => {
                     <p className="text-lg montserrat-bold">
                         Resolved vs. Unresolved Chart vs. Closed Chart
                     </p>
-                    <div className="flex gap-[10px] px-[16px]">
-                        <div className="flex w-[95px] items-center border rounded-md overflow-hidden">
-
-                        </div>
-                    </div>
                 </div>
-                <div className="overflow-x-auto">
+                <div className="overflow-x-auto mt-[40px]">
                     <ResponsiveContainer width="100%" height={218}>
                         <BarChart
                             data={dataSet}
@@ -512,12 +507,23 @@ const ReportPage = () => {
                             }}
                         >
                             <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                            <XAxis dataKey="name" />
+                            <XAxis dataKey="name" 
+                                tick={{
+                                    fill: '#175D5F', // Change the tick color
+                                    fontSize: 10,    // Set font size
+                                    fontWeight: 600, // Set font weight
+                                }} 
+                            />
                             <YAxis
                                 tickCount={8} // Divides the Y-axis into increments of 10
                                 interval={0} // Ensures all ticks are displayed
                                 domain={[0, 'dataMax + 10']} // Adjusts the range dynamically
                                 tickFormatter={(value) => `${value}`} // Optional: Customize tick format
+                                tick={{
+                                    fill: '#348017', // Change the tick color
+                                    fontSize: 12,    // Set font size
+                                    fontWeight: 400, // Set font weight
+                                }} 
                             />
                             <Tooltip content={<CustomTooltip1 />} />
                             <Bar
@@ -525,19 +531,25 @@ const ReportPage = () => {
                                 fill="#EF4444"
                                 barSize={12}
                                 radius={[3, 3, 0, 0]}
-                            />
+                            >
+                                <LabelList dataKey="Closed" position="top" />
+                            </Bar>
                             <Bar
                                 dataKey="Resolved"
                                 fill="#348017"
                                 barSize={12}
                                 radius={[3, 3, 0, 0]}
-                            />
+                            >
+                                <LabelList dataKey="Resolved" position="top" />
+                            </Bar>
                             <Bar
                                 dataKey="Unresolved"
                                 fill="#D6E4D1"
                                 barSize={12}
                                 radius={[3, 3, 0, 0]}
-                            />
+                            >
+                                <LabelList dataKey="Unresolved" position="top" />
+                            </Bar>
 
                         </BarChart>
                     </ResponsiveContainer>
@@ -776,10 +788,9 @@ const ReportPage = () => {
                                     <Tooltip formatter={(value, name) => ` ${value}%`} />
                                 </PieChart>
                             </div>
-
-                            <div className="w-full">
-                                <div className="grid grid-cols-4">
-                                    {dataPerCategory.map((category, index) => (
+                            <div className="flex w-full rounded-md flex-wrap gap-[10px]">
+                            {dataPerCategory.map((category, index) => (
+                                <div className=" shrink-0 items-center" key={index}>
                                         <div
                                             className="flex w-full gap-[10px]"
                                             key={index}
@@ -809,8 +820,8 @@ const ReportPage = () => {
                                                 </span>
                                             </div>
                                         </div>
-                                    ))}
-                                </div>
+                                    </div>
+                                 ))}
                             </div>
                         </div>
                     </div>
@@ -908,8 +919,8 @@ const ReportPage = () => {
                 <p className="p-4  text-base montserrat-bold">
                     Inquiries Per Type
                 </p>
-                <div className="border border-t-1"></div>
-                <div className="flex-grow">
+                
+                <div className="flex-grow mt-[40px]">
 
                    {/*  <BarChart
                         width={400}
