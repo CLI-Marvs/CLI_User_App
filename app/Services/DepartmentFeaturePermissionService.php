@@ -39,4 +39,13 @@ class DepartmentFeaturePermissionService
     {
         return $this->repository->updateDepartmentPermissionStatus($departmentId, $status);
     }
+
+    /**
+     * Update the department feature permissions
+     */
+    public function updateDepartmentFeaturePermissions(int $departmentId, array $permissions)
+    {
+        return $this->repository->updateDepartmentFeaturePermissions($departmentId, $permissions);
+    }
+
 }

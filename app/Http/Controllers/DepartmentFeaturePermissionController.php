@@ -67,9 +67,9 @@ class DepartmentFeaturePermissionController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * Update the specified resource 'status' in storage.
      */
-    public function update(UpdateDepartmentFeaturePermissionRequest $request)
+    public function updateStatus(UpdateDepartmentFeaturePermissionRequest $request)
     {
         $validatedData = $request->validated();
         
@@ -91,10 +91,35 @@ class DepartmentFeaturePermissionController extends Controller
     }
 
     /**
+     * Update the specified resource  in storage.
+     */
+    public function updatePermissions(UpdateDepartmentFeaturePermissionRequest $request)
+    {
+        $validatedData = $request->validated();
+         
+        
+        try {
+            $this->service->updateDepartmentFeaturePermissions($validatedData['department_id'], $validatedData['features']);
+            return response()->json([
+                'message' => 'Department feature permissions updated successfully',
+                'statusCode' => 200
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(
+                [
+                    'Error updating department feature permissions' => $e->getMessage()
+                ],
+                500
+            );
+        }
+    }
+
+    /**
      * Remove the specified resource from storage.
      */
     public function destroy(string $id)
     {
         
     }
+
 }

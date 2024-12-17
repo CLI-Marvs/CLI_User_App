@@ -7,26 +7,25 @@ import apiService from "../../../../servicesApi/apiService";
 import { showToast } from "../../../../../util/toastUtil";
 import CircularProgress from "@mui/material/CircularProgress";
 
-const EditDepartmentModal = ({ editDepartmentModalRef, selectedDepartment }) => {
+const EditUserModal = ({ editEmployeeModalRef, selectedEmployee }) => {
     //States
-    const { employeeDepartments, features } = useStateContext();
+    const { features } = useStateContext();
     const [isLoading, setIsLoading] = useState(false);
     const [formData, setFormData] = useState({
-        department_id: 0, // selected department
+        employee_id: 0, // selected department
         features: [],   // array of features with permissions
     });
 
-
-
     //Hooks
     useEffect(() => {
-        if (selectedDepartment) {
+        console.log("selectedEmployee", selectedEmployee)
+        if (selectedEmployee) {
             setFormData({
-                department_id: selectedDepartment.id,
-                features: selectedDepartment.features,
+                employee_id: selectedEmployee.id,
+                features: selectedEmployee.features,
             });
         }
-    }, [selectedDepartment])
+    }, [selectedEmployee])
 
 
     //Event handler
@@ -41,7 +40,7 @@ const EditDepartmentModal = ({ editDepartmentModalRef, selectedDepartment }) => 
                     ...feature,
                     pivot: {
                         ...feature.pivot,
-                        [permission.value]: value,  
+                        [permission.value]: value,
                     },
                 };
             }
@@ -72,24 +71,24 @@ const EditDepartmentModal = ({ editDepartmentModalRef, selectedDepartment }) => 
     const handleSubmit = () => {
         //TODO: disable the button if there is no data in form data
         const payload = {
-            department_id: parseInt(formData.department_id),
+            employee_id: parseInt(formData.employee_id),
             features: formData.features
         };
         console.log("payload", payload)
-        // console.log("payload", JSON.stringify(payload))
+        console.log("payload", JSON.stringify(payload))
         // setIsLoading(true);
         try {
-            const response = apiService.put("update-departments-feature-permissions", payload);
+            const response = apiService.put("update-employees-feature-permissions", payload);
             console.log("reponse", response)
 
             if (response.statusCode === 200) {
                 showToast("Data added successfully!", "Data added successfully!");
                 setFormData({
-                    department_id: 0, // selected department
+                    employee_id: 0, // selected department
                     features: [],
                 });
-                // if (editDepartmentModalRef.current) {
-                //     editDepartmentModalRef.current.close();
+                // if ( editEmployeeModalRef.current) {
+                //      editEmployeeModalRef.current.close();
                 // }
             }
 
@@ -105,14 +104,14 @@ const EditDepartmentModal = ({ editDepartmentModalRef, selectedDepartment }) => 
     //Handle close the modal and cancel the modal
     const handleCloseModal = () => {
         //TODO: remove all state if the
-        if (selectedDepartment) {
+        if (selectedEmployee) {
             setFormData({
-                department_id: selectedDepartment.id,
-                features: selectedDepartment.features,
+                employee_id: selectedEmployee.id,
+                features: selectedEmployee.features,
             });
         }
-        if (editDepartmentModalRef.current) {
-            editDepartmentModalRef.current.close();
+        if (editEmployeeModalRef.current) {
+            editEmployeeModalRef.current.close();
         }
     }
 
@@ -121,7 +120,7 @@ const EditDepartmentModal = ({ editDepartmentModalRef, selectedDepartment }) => 
         <dialog
             id="EditDepartment"
             className="modal w-[683px] rounded-[10px] shadow-custom5 backdrop:bg-black/50  "
-            ref={editDepartmentModalRef}
+            ref={editEmployeeModalRef}
         >
             <div className='relative p-[20px] mb-5 rounded-lg'>
                 <div className=''>
@@ -138,42 +137,45 @@ const EditDepartmentModal = ({ editDepartmentModalRef, selectedDepartment }) => 
                     </div>
                 </div> */}
                 <div className='flex flex-col gap-[36px] mt-[26px]'>
-                    <div className='w-full p-[10px] flex flex-col gap-[10px]'>
-                        <p className='text-sm font-semibold'>Department</p>
+                    <div className='w-full p-[10px] flex flex-col gap-[10px] relative mb-2'>
+                        <p className='text-sm font-semibold'>User</p>
                         <div
-                            className={`flex items-center border rounded-[5px] overflow-hidden border-custom-bluegreen`}
+                            className={`flex items-center border  rounded-[5px] overflow-hidden border-custom-bluegreen`}
                         >
-                            <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex items-center w-[250px] tablet:w-[175px] mobile:w-[270px] mobile:text-xs -mr-3 pl-3 py-1">
+                            <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex w-[240px] pl-3 py-1">
+                                Name
+                            </span>
+                            <input
+                                name="name"
+                                type="text"
+                                value={selectedEmployee?.firstname + " " + selectedEmployee?.lastname}
+                                disabled
+                                className=' w-full px-4 text-sm focus:outline-none mobile:text-xs'
+                            />
+                        </div>
+                        <div
+                            className={`flex items-center border  rounded-[5px] overflow-hidden border-custom-bluegreen`}
+                        >
+                            <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex w-[240px] pl-3 py-1">
                                 Department
                             </span>
-                            <div className="relative w-full">
-                                {/* Display the passed employee department */}
-                                <select
-                                    // onChange={handleSelectDepartmentChange}
-                                    name="department"
-                                    disabled
-                                    value={formData.department_id}
-                                    className="appearance-none text-sm w-full px-4 py-1 bg-white focus:outline-none border-0 mobile:text-xs"
-                                >
-                                    <option value="">(Select)</option>
-                                    {employeeDepartments.map((item) => (
-                                        <option value={item.id} >{item.name}</option>
-                                    ))}
-                                </select>
-                                <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3 text-custom-bluegreen pointer-events-none">
-                                    <IoMdArrowDropdown />
-                                </span>
-                            </div>
+                            <input
+                                name="department"
+                                type="text"
+                                readOnly={true}
+                                value={selectedEmployee?.department}
+                                className="w-full px-4 text-sm focus:outline-none mobile:text-xs"
+                                placeholder=""
+                            />
                         </div>
+
                     </div>
                     <div className='w-full p-[10px] flex flex-col gap-[10px]'>
                         <p className='text-sm font-semibold'>Permissions</p>
                         {/*Display the features */}
                         {features &&
                             features.map((item, index) => {
-                                // Check if the feature is associated with the selected department
-
-                                const featurePermissions = selectedDepartment && selectedDepartment?.features.find(
+                                const featurePermissions = selectedEmployee && selectedEmployee?.features.find(
                                     (feature) => feature.id === item.id
                                 )?.pivot;
 
@@ -192,22 +194,6 @@ const EditDepartmentModal = ({ editDepartmentModalRef, selectedDepartment }) => 
                                                     {PERMISSIONS &&
                                                         PERMISSIONS.map((permission, permIndex) => {
                                                             const isDisabled = ["S", "D", "E"].includes(permission.name);
-
-                                                            // Get the permission value from the pivot object
-                                                            // Get the current permission value (true/false)
-                                                            const isChecked = featurePermissions
-                                                                ? featurePermissions[permission.value]
-                                                                : false;
-
-
-                                                            // Debug logging
-
-                                                            // console.log('DepartmentFeature:', departmentFeature);
-                                                            // Dynamically determine permission value based on departmentFeature
-                                                            // const permissionValue = departmentFeature
-                                                            //     ? departmentFeature.pivot[permission.value] ?? false
-                                                            //     : false; // Default to false for non-associated features
-                                                            // console.log(`Permission Value for ${permission.name}:`, permissionValue);
                                                             return (
                                                                 <div
                                                                     className="flex flex-col gap-[2.75px] items-center"
@@ -225,7 +211,7 @@ const EditDepartmentModal = ({ editDepartmentModalRef, selectedDepartment }) => 
                                                                             permission.value
                                                                             ] || false
                                                                         }
-                                                                        // checked={!!permissionValue}
+                                                                        
                                                                         disabled={isDisabled}
                                                                         className={`h-[16px] w-[16px] ${isDisabled
                                                                             ? "cursor-not-allowed bg-custom-grayF1"
@@ -286,4 +272,4 @@ const EditDepartmentModal = ({ editDepartmentModalRef, selectedDepartment }) => 
     )
 }
 
-export default EditDepartmentModal
+export default EditUserModal

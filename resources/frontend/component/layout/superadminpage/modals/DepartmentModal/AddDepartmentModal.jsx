@@ -6,14 +6,15 @@ import { PERMISSIONS } from '../../../../../constant/data/permissions';
 import apiService from "../../../../servicesApi/apiService";
 import { showToast } from "../../../../../util/toastUtil";
 import CircularProgress from "@mui/material/CircularProgress";
-
+import { validateDepartment } from './utils/validation';
+import { isButtonDisabled } from './utils/isButtonDisabled';
 const AddDepartmentModal = ({ modalRef }) => {
     //States
     const { employeeDepartments, features, getAllEmployeeDepartment, getAllFeatures, getDepartmentsWithPermissions } = useStateContext();
     const [isLoading, setIsLoading] = useState(false);
     const [formData, setFormData] = useState({
-        department_id: 0, // selected department
-        features: [],   // array of features with permissions
+        department_id: 0, // Selected department
+        features: [],   // Array of features with permissions
     });
 
     //TODO:
@@ -26,10 +27,7 @@ const AddDepartmentModal = ({ modalRef }) => {
         getAllFeatures()
     }, [])
 
-
-
     //Event handler
-
     //Handle the change event of select tag for employee department
     const handleSelectDepartmentChange = (e) => {
         setFormData({ ...formData, department_id: parseInt(e.target.value) });
@@ -48,7 +46,7 @@ const AddDepartmentModal = ({ modalRef }) => {
                 return feature;
             }).filter((feature) => {
                 // Keep the feature if it has any of the permissions (R or W), otherwise remove it
-                return feature.can_read || feature.can_write;  // Ensure you are checking for permission keys
+                return feature.can_read || feature.can_write;  
             });
 
             // If the feature doesn't exist and the permission value is true, add it
@@ -63,34 +61,40 @@ const AddDepartmentModal = ({ modalRef }) => {
 
 
     //Handle the submit/save button click
-    const handleSubmit = () => {
+    const handleSubmit = (e) => {
+        e.preventDefault();
         //TODO: disable the button if there is no data in form data
+        const validationError = validateDepartment(formData);
+        if (validationError) {
+            // setError(validationError);
+            console.log("validationError", validationError)
+            return;
+        }
         const payload = {
             department_id: formData.department_id,
             features: formData.features
         };
-        // console.log("payload", JSON.stringify(payload))
-        setIsLoading(true);
-        try {
-            const response = apiService.post("departments-assign-feature-permissions", payload);
-            console.log("reponse", response)
+        // setIsLoading(true);
+        // try {
+        //     const response = apiService.post("departments-assign-feature-permissions", payload);
+        //     console.log("reponse", response)
 
-            if (response.statusCode === 200) {
-                showToast("Data added successfully!", "Data added successfully!");
-                setFormData({
-                    department_id: 0, // selected department
-                    features: [],
-                });
-                if (modalRef.current) {
-                    modalRef.current.close();
-                }
-            }
-            getDepartmentsWithPermissions()
-        } catch (error) {
-            console.log("error", error);
-        } finally {
-            setIsLoading(false);
-        }
+        //     if (response.statusCode === 200) {
+        //         showToast("Data added successfully!", "Data added successfully!");
+        //         setFormData({
+        //             department_id: 0, // selected department
+        //             features: [],
+        //         });
+        //         if (modalRef.current) {
+        //             modalRef.current.close();
+        //         }
+        //     }
+        //     getDepartmentsWithPermissions()
+        // } catch (error) {
+        //     console.log("error", error);
+        // } finally {
+        //     setIsLoading(false);
+        // }
 
     }
 
@@ -107,6 +111,7 @@ const AddDepartmentModal = ({ modalRef }) => {
         }
     }
 
+ 
     return (
         <dialog
             id="Department"
@@ -245,9 +250,7 @@ const AddDepartmentModal = ({ modalRef }) => {
                             onClick={
                                 handleSubmit
                             }
-                            disabled={
-                                isLoading
-                            }
+                            disabled={isButtonDisabled(formData)}
                             className={`gradient-btn5 w-[100px] h-[35px] rounded-[10px] text-sm text-white montserrat-semibold ${isLoading ? "cursor-not-allowed" : ""
                                 }`}
                         >

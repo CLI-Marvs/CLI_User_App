@@ -30,4 +30,20 @@ class EmployeeFeaturePermissionService
     {
         return $this->repository->getEmployeessWithPermissions();
     }
+
+    /**
+     * Update the employee's permission status
+     */
+    public function updateEmployeePermissionStatus(int $employeeId, string $status)
+    {
+        return $this->repository->updateEmployeePermissionStatus($employeeId, $status);
+    }
+
+    /*
+     * Update the employee feature permissions
+     */
+    public function updateEmployeeFeaturePermissions(int $employeeId, array $permissions)
+    {
+        return $this->repository->updateEmployeeFeaturePermissions($employeeId, $permissions);
+    }
 }
