@@ -41,6 +41,14 @@ const Dec_18_24 = () => {
                                 •
                             </div>
                             <div>
+                                Holiday Advisory Pop-up.
+                            </div>
+                        </div>
+                        <div className='flex'>
+                            <div className='flex w-[30px] shrink-0 justify-center'>
+                                •
+                            </div>
+                            <div>
                                 Settings (Version logs and automated banner settings).
                             </div>
                         </div>
