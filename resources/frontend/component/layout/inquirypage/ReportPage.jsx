@@ -360,7 +360,7 @@ const ReportPage = () => {
         fetchDataReport();
         getCommunicationTypePerProperty();
         getInquiriesPerChannel();
-
+        
     }, []);
 
     useEffect(() => {
@@ -431,9 +431,9 @@ const ReportPage = () => {
                                     {user?.department}
                                 </option>
                             )} */}
-                            <option value="Customer Relations - Services">
+                           {/*  <option value="Customer Relations - Services">
                                 38 Park Avenue
-                            </option>
+                            </option> */}
 
                         </select>
                         <span className="absolute inset-y-0 right-0 flex items-center text-white pr-3 pl-3 bg-custom-lightgreen pointer-events-none">
@@ -638,7 +638,7 @@ const ReportPage = () => {
                     <div className="py-[10px]">
                         <ResponsiveContainer width="100%" height={200}>
                             <LineChart
-                                data={inquriesPerChannelDatasample}
+                                data={inquriesPerChannelData}
                                 margin={{
                                     top: 5,
                                     right: 20,
