@@ -1,5 +1,10 @@
 export const SURVEY_LINKS = [
     {
+        //For N/A
+        surveyName: "N/A",
+        surveyLink: "none",
+    },
+    {
         //For sales
         surveyName: "Survey for Reservation (For Sales)",
         surveyLink:
@@ -28,5 +33,13 @@ export const SURVEY_LINKS = [
         surveyName: "Survey for Owners Living in the Unit (For CLIPM)",
         surveyLink:
             "https://docs.google.com/forms/d/1xrzezLCLipw7V7qhghuqAlIwcglK1nZDDfMYtUVRRFg/viewform?edit_requested=true",
+    },
+    {
+        surveyName: "Survey for Title and Related Concerns",
+        surveyLink: "https://forms.gle/4GKzkQ4R6A14zFYd8",
+    },
+    {
+        surveyName: "Survey for Other Concerns",
+        surveyLink: "https://forms.gle/LZpoPc7f95BWVfr1A",
     },
 ];

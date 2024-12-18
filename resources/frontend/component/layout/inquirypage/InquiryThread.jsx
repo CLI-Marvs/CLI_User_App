@@ -59,6 +59,8 @@ const InquiryThread = () => {
         setSearchFilter,
         data,
         setMessages,
+        setIsUserTypeChange,
+        isUserTypeChange
     } = useStateContext();
     const [chatMessage, setChatMessage] = useState("");
     const userLoggedInEmail = user?.employee_email;
@@ -182,6 +184,7 @@ const InquiryThread = () => {
         }
     };
     const handleOpenModal = () => {
+        setIsUserTypeChange(false);
         if (modalRef.current) {
             modalRef.current.showModal();
         }
@@ -494,7 +497,7 @@ const InquiryThread = () => {
         };
     }, [ticketId]);
 
-    const capitalizeWords = (name) => {
+    /* const capitalizeWords = (name) => {
         if (name) {
             return name
                 .split(" ")
@@ -505,7 +508,7 @@ const InquiryThread = () => {
                 )
                 .join(" ");
         }
-    };
+    }; */
 
     return (
         <>
@@ -1176,7 +1179,7 @@ const InquiryThread = () => {
                                                 Note: This message will be sent
                                                 to{" "}
                                                 <span className="font-semibold">
-                                                    {capitalizeWords(
+                                                    {/* capitalizeWords() */
                                                         `${dataConcern?.buyer_firstname ||
                                                         ""
                                                         } ${dataConcern?.buyer_middlename ||
@@ -1184,10 +1187,10 @@ const InquiryThread = () => {
                                                         } ${dataConcern?.buyer_lastname ||
                                                         ""
                                                         }`
-                                                    )}{" "}
-                                                    {capitalizeWords(
+                                                    }{" "}
+                                                    {/* capitalizeWords() */
                                                         dataConcern?.suffix_name
-                                                    )}
+                                                    }
                                                 </span>
                                                 . Please use the comment section
                                                 for CLI internal communication.
@@ -1215,16 +1218,7 @@ const InquiryThread = () => {
 
                             <div className="border my-2 border-t-1 border-custom-lightestgreen"></div>
                             <div className="w-full flex justify-end gap-[13px] items-center">
-                                {/* {dataConcern?.status === "Resolved" ||
-                                    dataConcern?.status === "Closed" && (
-                                        <span
-                                            className="w-auto font-semibold text-[13px] text-[#1A73E8] underline cursor-pointer"
-                                            onClick={handleOpenAddInfoModal}
-                                        >
-                                            Create new ticket
-                                        </span>
-                                    )} */}
-
+                  
                                 {(dataConcern?.status === "Resolved" || dataConcern?.status === "Closed") && (
                                     <span
                                         className="w-auto font-semibold text-[13px] text-[#1A73E8] underline cursor-pointer"

@@ -48,7 +48,7 @@ const Navbar = () => {
     }, [ticketId]);
 
 
-    const capitalizeWords = (name) => {
+    /* const capitalizeWords = (name) => {
         if (name) {
             return name
                 .split(" ")
@@ -59,7 +59,7 @@ const Navbar = () => {
                 )
                 .join(" ");
         }
-    };
+    }; */
 
 
     const breadcrumbs = [
@@ -191,12 +191,12 @@ const Navbar = () => {
                         key={routeTo}
                         className="text-custom-solidgreen cursor-default"
                     >
-                        {capitalizeWords(
+                        {/* capitalizeWords()*/
                             `${concernData?.buyer_firstname || ""} ${
                                 concernData?.buyer_middlename || ""
                             } ${concernData?.buyer_lastname || ""}`
-                        )}{" "}
-                        {capitalizeWords(concernData?.suffix_name || "")} {""}
+                        }{" "}
+                        {/* capitalizeWords()*/concernData?.suffix_name || ""} {""}
                         ({concernData?.details_concern || ""}) {" "} 
                         {concernData?.property || ""} ({concernData?.ticket_id})
                     </span>

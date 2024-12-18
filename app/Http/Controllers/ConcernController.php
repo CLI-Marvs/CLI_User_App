@@ -968,7 +968,8 @@ class ConcernController extends Controller
 
             if (!empty($searchParams['hasAttachments'])) {
                 $query->whereHas('messages', function ($messageQuery) {
-                    $messageQuery->whereNotNull('attachment');
+                    $messageQuery->whereNotNull('attachment')
+                                 ->whereJsonLength('attachment', '>', 0);   
                 });
             }
         }
@@ -1437,7 +1438,7 @@ class ConcernController extends Controller
                         'unit_number' => $request->unit_number,
                         'property' => $request->property,
                         'channels' => $request->channels,
-                        // 'other_user_type' => $request->other_user_type ?? null,
+                        'other_user_type' => $request->other_user_type ?? null,
                         'admin_remarks' => $request->admin_remarks ?? null,
                     ],
                     'buyer_old_data' => [
@@ -1783,7 +1784,8 @@ class ConcernController extends Controller
      * Implement a function to resolve a ticket
      */
     public function markAsResolve(Request $request)
-    {
+    {   
+ 
 
         try {
             $assignees = $request->assignees;
@@ -1822,10 +1824,7 @@ class ConcernController extends Controller
             }
 
             $this->inquiryResolveLogs($request, 'resolve');
-            // ReplyFromAdminJob::dispatch($request->ticket_id, $buyerEmail, $request->remarks, $messageId, $allFiles, $admin_name, $buyer_lastname);
-            // dd($request->ticket_id, $buyerEmail, $buyer_lastname, $message_id, $admin_name, $department);
-
-            //Pass the selectedSurveyType as arguments to MarkResolvedToCustomerJob job 
+            
             MarkResolvedToCustomerJob::dispatch($request->ticket_id, $buyerEmail, $buyer_lastname, $message_id, $admin_name, $department, $modifiedTicketId, $selectedSurveyType);
         } catch (\Exception $e) {
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
@@ -2095,7 +2094,7 @@ class ConcernController extends Controller
             $buyer_name = $request->buyer_name;
             $concerns->communication_type = $request->communication_type;
             $concerns->status = "Closed";
-            $concerns->survey_link = $selectedSurveyType['surveyName'];// Save the survey name to database
+            $concerns->survey_link = $selectedSurveyType['surveyName']; // Save the survey name to database
             $buyer_lastname = $request->buyer_lastname;
             $message_id = $request->message_id;
             $concerns->save();
@@ -2124,7 +2123,6 @@ class ConcernController extends Controller
         } catch (\Exception $e) {
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
         }
-
     }
 
     public function sendMessageConcerns(Request $request)
