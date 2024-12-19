@@ -56,20 +56,6 @@ const ResolveModal = ({ modalRef, ticketId, dataRef, onupdate }) => {
         setIsSurveyRequired(false);
     };
 
-    /* const capitalizeWords = (name) => {
-        if (name) {
-            return name
-                .split(" ")
-                .map(
-                    (word) =>
-                        word.charAt(0).toUpperCase() +
-                        word.slice(1).toLowerCase()
-                )
-                .join(" ");
-        }
-    }; */
-
-
     /**
      * Function to handle marking a ticket as resolved
      */

@@ -40,21 +40,19 @@ class DepartmentFeaturePermissionController extends Controller
     {
         $validatedData = $request->validated();
         try {
-            $this->service->syncPermissions(
+            $message = $this->service->syncPermissions(
                 $validatedData['department_id'],
                 $validatedData['features']
             );
             return response()->json([
-                'message' => 'Department permission successfully added',
+                'message' => $message,
                 'statusCode' => 200
-            ]);
+            ],200);
         } catch (\Exception $e) {
-            return response()->json(
-                [
-                    'Error saving department permission' => $e->getMessage()
-                ],
-                500
-            );
+            return response()->json([
+                'error' => 'Error saving department permission',
+                'details' => $e->getMessage(),
+            ], 500);
         }
     }
 
@@ -72,14 +70,14 @@ class DepartmentFeaturePermissionController extends Controller
     public function updateStatus(UpdateDepartmentFeaturePermissionRequest $request)
     {
         $validatedData = $request->validated();
-        
+
         //$validatedData = $request->validated();
         try {
-            $this->service->updateDepartmentPermissionStatus($validatedData['department_id'], $validatedData['status']);
+            $message = $this->service->updateDepartmentPermissionStatus($validatedData['department_id'], $validatedData['status']);
             return response()->json([
-                'message' => 'Department permission updated successfully',
+                'message' => $message,
                 'statusCode' => 200
-            ]);
+            ], 200);
         } catch (\Exception $e) {
             return response()->json(
                 [
@@ -96,12 +94,12 @@ class DepartmentFeaturePermissionController extends Controller
     public function updatePermissions(UpdateDepartmentFeaturePermissionRequest $request)
     {
         $validatedData = $request->validated();
-         
-        
+
+
         try {
-            $this->service->updateDepartmentFeaturePermissions($validatedData['department_id'], $validatedData['features']);
+            $message = $this->service->updateDepartmentFeaturePermissions($validatedData['department_id'], $validatedData['features']);
             return response()->json([
-                'message' => 'Department feature permissions updated successfully',
+                'message' => $message,
                 'statusCode' => 200
             ]);
         } catch (\Exception $e) {
@@ -117,9 +115,5 @@ class DepartmentFeaturePermissionController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
-    {
-        
-    }
-
+    public function destroy(string $id) {}
 }

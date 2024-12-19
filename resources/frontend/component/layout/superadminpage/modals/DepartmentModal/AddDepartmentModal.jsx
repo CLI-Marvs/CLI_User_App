@@ -6,20 +6,16 @@ import { PERMISSIONS } from '../../../../../constant/data/permissions';
 import apiService from "../../../../servicesApi/apiService";
 import { showToast } from "../../../../../util/toastUtil";
 import CircularProgress from "@mui/material/CircularProgress";
-import { validateDepartment } from './utils/validation';
 import { isButtonDisabled } from './utils/isButtonDisabled';
 const AddDepartmentModal = ({ modalRef }) => {
     //States
     const { employeeDepartments, features, getAllEmployeeDepartment, getAllFeatures, getDepartmentsWithPermissions } = useStateContext();
     const [isLoading, setIsLoading] = useState(false);
+    // const [isError,setIsError]
     const [formData, setFormData] = useState({
         department_id: 0, // Selected department
         features: [],   // Array of features with permissions
     });
-
-    //TODO:
-    //1. Dont show the department in the select tag  if it already exists in the database
-    //2. Only ONCE TO insert a record/deparment, if already in database, show the label "IF not visible department, it means already inserted"
 
     //Hooks
     useEffect(() => {
@@ -46,72 +42,68 @@ const AddDepartmentModal = ({ modalRef }) => {
                 return feature;
             }).filter((feature) => {
                 // Keep the feature if it has any of the permissions (R or W), otherwise remove it
-                return feature.can_read || feature.can_write;  
+                return feature.can_read || feature.can_write;
             });
 
-            // If the feature doesn't exist and the permission value is true, add it
+            // Add to the features array if the feature doesn't exist and the permission value is true
             if (!updatedFeatures.find((feature) => feature.featureId === featureId) && value === true) {
                 updatedFeatures.push({ featureId, [permission.value]: value });
             }
 
-            // Return updated state
+
             return { ...prevState, features: updatedFeatures };
         });
     };
 
 
     //Handle the submit/save button click
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        //TODO: disable the button if there is no data in form data
-        const validationError = validateDepartment(formData);
-        if (validationError) {
-            // setError(validationError);
-            console.log("validationError", validationError)
-            return;
-        }
+        setIsLoading(true);
         const payload = {
             department_id: formData.department_id,
             features: formData.features
         };
-        // setIsLoading(true);
-        // try {
-        //     const response = apiService.post("departments-assign-feature-permissions", payload);
-        //     console.log("reponse", response)
-
-        //     if (response.statusCode === 200) {
-        //         showToast("Data added successfully!", "Data added successfully!");
-        //         setFormData({
-        //             department_id: 0, // selected department
-        //             features: [],
-        //         });
-        //         if (modalRef.current) {
-        //             modalRef.current.close();
-        //         }
-        //     }
-        //     getDepartmentsWithPermissions()
-        // } catch (error) {
-        //     console.log("error", error);
-        // } finally {
-        //     setIsLoading(false);
-        // }
-
+        try {
+            const response = await apiService.post("departments-assign-feature-permissions", payload);
+            if (response.data?.statusCode === 200) {
+                showToast("Data added successfully!", "success");
+                setFormData({
+                    department_id: 0,
+                    features: [],
+                });
+                if (modalRef.current) {
+                    setTimeout(() => {
+                        modalRef.current.close();
+                    }, 1000);
+                }
+            }
+            getDepartmentsWithPermissions();
+            getAllEmployeeDepartment();
+        } catch (error) {
+            // Handle error response 
+            if (error.response) {
+                const errorMessage = error.response.data?.error || "An error occurred.";
+                showToast(errorMessage, "error");
+            }
+        } finally {
+            setIsLoading(false);
+        }
     }
 
 
-    //Handle close the modal and cancel the modal
+    //Handle close the modal and reset all state
     const handleCloseModal = () => {
-        //TODO: remove all state if the
         if (modalRef.current) {
             setFormData({
-                department_id: 0, // selected department
+                department_id: 0,
                 features: [],
             });
             modalRef.current.close();
         }
     }
 
- 
+
     return (
         <dialog
             id="Department"
@@ -126,12 +118,12 @@ const AddDepartmentModal = ({ modalRef }) => {
                         </button>
                     </div>
                 </div>
-                <div className="flex justify-center items-center mt-[14px] flex-col gap-y-2">
+                {/* <div className="flex justify-center items-center mt-[14px] flex-col gap-y-2">
                     <AiFillInfoCircle className="size-[37px] text-[#5B9BD5]" />
                     <div className="w-full flex justify-center items-center h-12 bg-red-100 mb-4 rounded-lg">
                         <p>Validation error here</p>
                     </div>
-                </div>
+                </div> */}
                 <div className='flex flex-col gap-[36px] mt-[26px]'>
                     <div className='w-full p-[10px] flex flex-col gap-[10px]'>
                         <p className='text-sm font-semibold'>Department</p>
@@ -162,28 +154,7 @@ const AddDepartmentModal = ({ modalRef }) => {
                         <div className='py-2 w-[343pxpx]'>
                             <label htmlFor="" className='text-red-500 text-sm'>Note: Department not visible is already in the list.</label>
                         </div>
-                        {/* <div
-                            className={`flex items-center border rounded-[5px] overflow-hidden border-custom-bluegreen`}
-                        >
-                            <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex items-center w-[250px] tablet:w-[175px] mobile:w-[270px] mobile:text-xs -mr-3 pl-3 py-1">
-                                Role
-                            </span>
-                            <div className="relative w-full">
-                                <select
-                                  
-                                    name="department"
-                                    className="appearance-none text-sm w-full px-4 py-1 bg-white focus:outline-none border-0 mobile:text-xs"
-                                >
-                                    <option value="">(Select)</option>
-                                    <option value="CRS">Role I</option>
-                                    <option value="Treasury">Role II</option>
-                                    <option value="Accounting">Role III</option>
-                                </select>
-                                <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3 text-custom-bluegreen pointer-events-none">
-                                    <IoMdArrowDropdown />
-                                </span>
-                            </div>
-                        </div> */}
+
                     </div>
                     <div className='w-full p-[10px] flex flex-col gap-[10px]'>
                         <p className='text-sm font-semibold'>Permissions</p>
@@ -201,17 +172,18 @@ const AddDepartmentModal = ({ modalRef }) => {
                                         <div className='w-full h-[44px] gap-[63px] flex items-center justify-center rounded-[5px]'>
 
                                             {PERMISSIONS && PERMISSIONS.map((permission, index) => {
-                                                const isDisabled = ["S", "D", "E"].includes(permission.name); // Check based on `name`
-
+                                                const isDisabled = ["S", "D", "E"].includes(permission.name);
                                                 return (
                                                     <div className="flex flex-col gap-[2.75px] items-center" key={index}>
-                                                        {/* Display the name of the permission */}
                                                         <p className="montserrat-semibold text-[10px] leading-[12.19px]">
                                                             {permission.name}
                                                         </p>
+
                                                         {/* Checkbox for each permission */}
                                                         <input
-                                                            // value={formData && formData.features.find((feature) => feature.featureId === item.id)?.[permission.value]}
+                                                            checked={
+                                                                formData.features.find((feature) => feature.featureId === item.id)?.[permission.value] || false
+                                                            }
                                                             type="checkbox"
                                                             disabled={isDisabled}
                                                             className={`h-[16px] w-[16px] ${isDisabled ? "cursor-not-allowed bg-custom-grayF1" : ""
@@ -247,11 +219,11 @@ const AddDepartmentModal = ({ modalRef }) => {
                         </button>
                         <button
                             type="submit"
-                            onClick={
-                                handleSubmit
-                            }
-                            disabled={isButtonDisabled(formData)}
-                            className={`gradient-btn5 w-[100px] h-[35px] rounded-[10px] text-sm text-white montserrat-semibold ${isLoading ? "cursor-not-allowed" : ""
+                            onClick={handleSubmit}
+                            disabled={isButtonDisabled(formData) || isLoading}
+                            className={`gradient-btn5 w-[100px] h-[35px] rounded-[10px] text-sm text-white montserrat-semibold ${isLoading || isButtonDisabled(formData)
+                                ? "opacity-50 cursor-not-allowed"
+                                : ""
                                 }`}
                         >
                             {isLoading ? (
@@ -260,6 +232,7 @@ const AddDepartmentModal = ({ modalRef }) => {
                                 <>Save</>
                             )}
                         </button>
+
                     </div>
                 </div>
             </div>

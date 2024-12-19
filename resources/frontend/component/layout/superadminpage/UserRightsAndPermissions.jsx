@@ -8,18 +8,27 @@ import { PERMISSIONS } from '../../../constant/data/permissions';
 import { HiPencil } from "react-icons/hi";
 import { MdDelete } from "react-icons/md";
 import apiService from "../../servicesApi/apiService";
+import { showToast } from "../../../util/toastUtil"
+import Alert from "../mainComponent/Alert";
+import CircularProgress from "@mui/material/CircularProgress";
+
+import { setActive } from '@material-tailwind/react/components/Tabs/TabsContext';
 
 const UserRightsAndPermissions = () => {
 
   //State
   const { departmentsWithPermissions, getDepartmentsWithPermissions, getEmployeesWithPermissions,
-    employeesWithPermissions, features } = useStateContext();
+    employeesWithPermissions, features, getAllEmployeeDepartment } = useStateContext();
   const [selectedDepartment, setSelectedDepartment] = useState(null);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const modalRef = useRef(null);
   const modalref2 = useRef(null);
   const editDepartmentModalRef = useRef(null);
   const editEmployeeModalRef = useRef(null);
+  const [showAlert, setShowAlert] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+
   //Hooks 
   useEffect(() => {
     getDepartmentsWithPermissions();
@@ -55,35 +64,42 @@ const UserRightsAndPermissions = () => {
     }
   };
 
-  /**
+  /*
     * Handle the click event of the edit employee button
     */
   const handleEditEmployeeModal = (employee) => {
-    console.log('item', employee)
     setSelectedEmployee(employee);
     if (editEmployeeModalRef.current) {
       editEmployeeModalRef.current.showModal();
     }
   };
+
   /**
-   * Handle to delete department permission
+   * Handle to Update 'Active or InActive" department permission
    */
-  const handleUpdateDepartmentPermissionStatus = (department) => {
+  const updateDepartmentPermissionStatus = async (department) => {
     const payload = {
       department_id: department?.id,
       status: "InActive",
     };
     try {
-      const response = apiService.patch("update-departments-status", payload);
-      if (response.statusCode === 200) {
-        showToast("Data deleted successfully!", "Data deleted successfully!");
+      setIsLoading(true);
+      const response = await apiService.patch("update-departments-status", payload);
+      if (response.data?.statusCode === 200) {
+        showToast("Data deleted successfully!", "success");
         getDepartmentsWithPermissions();
+        getAllEmployeeDepartment();
       }
     } catch (error) {
       console.log("error", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
+  /*
+  * Handle to Update 'Active or InActive" employee permission
+  */
   const handleUpdateEmployeePermissionStatus = (employee) => {
     const payload = {
       employee_id: employee?.id,
@@ -92,7 +108,7 @@ const UserRightsAndPermissions = () => {
     try {
       const response = apiService.patch("update-employee-status", payload);
       if (response.statusCode === 200) {
-        showToast("Data deleted successfully!", "Data deleted successfully!");
+        showToast("Data deleted successfully!", "success");
         getEmployeesWithPermissions();
       }
     } catch (error) {
@@ -100,6 +116,31 @@ const UserRightsAndPermissions = () => {
     }
   }
 
+  /*
+  Handle  click event to show the alert  
+  */
+  const handleShowUpdateAlert = (department) => {
+    setSelectedDepartment(department);
+    setShowAlert(true);
+  };
+
+  /**
+   * Handle click to cancel the alert
+   */
+  const handleCancel = () => {
+    setShowAlert(false);
+    setSelectedDepartment(null);
+  };
+
+  /**
+   * Handle click to confirm the alert
+   */
+  const handleConfirm = () => {
+    if (selectedDepartment) {
+      updateDepartmentPermissionStatus(selectedDepartment); //Call the function
+    }
+    setShowAlert(false);
+  };
   return (
     <div className='h-screen max-w-full bg-custom-grayFA p-[20px]'>
       {/* Specific Department */}
@@ -208,8 +249,19 @@ const UserRightsAndPermissions = () => {
                               </span>
                             </div>
                           </button>
-                          <button onClick={() => handleUpdateDepartmentPermissionStatus(department)}>
-                            <MdDelete className='w-6 h-6 text-red-500' />
+                          <button onClick={() => handleShowUpdateAlert(department)}
+                            disabled={isLoading}
+                            className={`  ${isLoading
+                              ? "opacity-50 cursor-not-allowed"
+                              : ""
+                              }`}
+                            type='submit'
+                          >
+                            {isLoading ? (
+                              <CircularProgress className="spinnerSize" />
+                            ) : (
+                              <><MdDelete className='w-6 h-6 text-red-500' /></>
+                            )}
                           </button>
                         </td>
                       </tr>
@@ -370,6 +422,17 @@ const UserRightsAndPermissions = () => {
         <EditEmployeeModal
           editEmployeeModalRef={editEmployeeModalRef}
           selectedEmployee={selectedEmployee} />
+      </div>
+      <div className="">
+        <Alert
+          title="Are you sure you want to delete this data?"
+          show={showAlert}
+          onCancel={handleCancel}
+          onConfirm={handleConfirm}
+        //You can pass onConfirm and onCancel props to customize the text of the buttons. Example below;
+        // confirmText="Update"
+        // cancelText="Cancel"
+        />
       </div>
     </div>
   )

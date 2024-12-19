@@ -9,14 +9,12 @@ import CircularProgress from "@mui/material/CircularProgress";
 
 const EditDepartmentModal = ({ editDepartmentModalRef, selectedDepartment }) => {
     //States
-    const { employeeDepartments, features } = useStateContext();
+    const { features } = useStateContext();
     const [isLoading, setIsLoading] = useState(false);
     const [formData, setFormData] = useState({
         department_id: 0, // selected department
         features: [],   // array of features with permissions
     });
-
-
 
     //Hooks
     useEffect(() => {
@@ -41,7 +39,7 @@ const EditDepartmentModal = ({ editDepartmentModalRef, selectedDepartment }) => 
                     ...feature,
                     pivot: {
                         ...feature.pivot,
-                        [permission.value]: value,  
+                        [permission.value]: value,
                     },
                 };
             }
@@ -104,7 +102,6 @@ const EditDepartmentModal = ({ editDepartmentModalRef, selectedDepartment }) => 
 
     //Handle close the modal and cancel the modal
     const handleCloseModal = () => {
-        //TODO: remove all state if the
         if (selectedDepartment) {
             setFormData({
                 department_id: selectedDepartment.id,
@@ -143,26 +140,16 @@ const EditDepartmentModal = ({ editDepartmentModalRef, selectedDepartment }) => 
                         <div
                             className={`flex items-center border rounded-[5px] overflow-hidden border-custom-bluegreen`}
                         >
-                            <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex items-center w-[250px] tablet:w-[175px] mobile:w-[270px] mobile:text-xs -mr-3 pl-3 py-1">
+                            <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex items-center w-[280px] tablet:w-[175px] mobile:w-[270px] mobile:text-xs -mr-3 pl-3 py-1">
                                 Department
                             </span>
                             <div className="relative w-full">
-                                {/* Display the passed employee department */}
-                                <select
-                                    // onChange={handleSelectDepartmentChange}
+                                <input type="input"
                                     name="department"
                                     disabled
-                                    value={formData.department_id}
-                                    className="appearance-none text-sm w-full px-4 py-1 bg-white focus:outline-none border-0 mobile:text-xs"
-                                >
-                                    <option value="">(Select)</option>
-                                    {employeeDepartments.map((item) => (
-                                        <option value={item.id} >{item.name}</option>
-                                    ))}
-                                </select>
-                                <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3 text-custom-bluegreen pointer-events-none">
-                                    <IoMdArrowDropdown />
-                                </span>
+                                    value={selectedDepartment?.name}
+                                    className="appearance-none text-sm w-full px-4 py-1 focus:outline-none border-0 mobile:text-xs" />
+
                             </div>
                         </div>
                     </div>
@@ -171,13 +158,6 @@ const EditDepartmentModal = ({ editDepartmentModalRef, selectedDepartment }) => 
                         {/*Display the features */}
                         {features &&
                             features.map((item, index) => {
-                                // Check if the feature is associated with the selected department
-
-                                const featurePermissions = selectedDepartment && selectedDepartment?.features.find(
-                                    (feature) => feature.id === item.id
-                                )?.pivot;
-
-
                                 return (
                                     <div
                                         className="flex items-center border rounded-[5px] overflow-hidden border-custom-bluegreen h-[56px]"
@@ -192,32 +172,14 @@ const EditDepartmentModal = ({ editDepartmentModalRef, selectedDepartment }) => 
                                                     {PERMISSIONS &&
                                                         PERMISSIONS.map((permission, permIndex) => {
                                                             const isDisabled = ["S", "D", "E"].includes(permission.name);
-
-                                                            // Get the permission value from the pivot object
-                                                            // Get the current permission value (true/false)
-                                                            const isChecked = featurePermissions
-                                                                ? featurePermissions[permission.value]
-                                                                : false;
-
-
-                                                            // Debug logging
-
-                                                            // console.log('DepartmentFeature:', departmentFeature);
-                                                            // Dynamically determine permission value based on departmentFeature
-                                                            // const permissionValue = departmentFeature
-                                                            //     ? departmentFeature.pivot[permission.value] ?? false
-                                                            //     : false; // Default to false for non-associated features
-                                                            // console.log(`Permission Value for ${permission.name}:`, permissionValue);
                                                             return (
                                                                 <div
                                                                     className="flex flex-col gap-[2.75px] items-center"
                                                                     key={permIndex}
                                                                 >
-                                                                    {/* Display the name of the permission */}
                                                                     <p className="montserrat-semibold text-[10px] leading-[12.19px]">
                                                                         {permission.name}
                                                                     </p>
-                                                                    {/* Checkbox for each permission */}
                                                                     <input
                                                                         type="checkbox"
                                                                         checked={formData &&

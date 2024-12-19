@@ -45,8 +45,8 @@ class MarkResolvedToCustomerJob implements ShouldQueue
     public function handle(Mailer $mailer): void
     {
         //Check if the survey name is equal to N/A
-        if ($this->selectedSurveyType['surveyName'] === "N/A") {
-            $this->selectedSurveyType = null;  
+        if ($this->selectedSurveyType['surveyName'] === 'N/A') {
+            $this->selectedSurveyType = null;
         }
         $mailer->to($this->email)
             ->send(new ResolvedTicketToCustomerMail($this->ticket_id, $this->email, $this->buyer_lastname, $this->message_id, $this->admin_name, $this->department, $this->modifiedTicketId, $this->selectedSurveyType));

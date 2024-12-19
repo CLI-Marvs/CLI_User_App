@@ -21,15 +21,25 @@ class DepartmentFeaturePermissionRepository
      */
     public function syncDepartmentPermissions(int $departmentId, array $features)
     {
-        // Find the department, or create it if it doesn't exist
+ 
         $department = $this->model->findOrFail($departmentId);
 
+        // Check if department already has permissions with "Active" status
+        $activePermissions = $department->features()->where('status', 'Active')->count();
+
         // Check if department already has permissions using the relationship
-        if ($department->features()->count() > 0) {
-            throw new \Exception("Permissions already exist for department_id: {$departmentId}");
+        if ($activePermissions > 0) {
+            
+            // If there are active permissions, check if there are any "InActive" permissions
+            $inactivePermissions = $department->features()->where('status', 'InActive')->count();
+
+            if ($inactivePermissions === 0) {
+                // If no "InActive" permission exists, throw an exception
+                throw new \Exception("Permissions already exist for department_id: {$departmentId} and are currently Active.");
+            }
         }
 
-        // Iterate over each feature and insert it one at a time
+        // Iterate over each feature and insert 
         foreach ($features as $feature) {
             $department->features()->attach($feature['featureId'], [
                 'status' => 'Active',
@@ -41,9 +51,7 @@ class DepartmentFeaturePermissionRepository
             ]);
         }
 
-        return response()->json([
-            'message' => 'Department permissions successfully created'
-        ], 201);
+      return 'Department permission successfully added';
     }
 
     /**
@@ -78,9 +86,8 @@ class DepartmentFeaturePermissionRepository
             ->where('department_id', $departmentId)
             ->update(['status' => $status]);
 
-        return response()->json([
-            'message' => 'Department permissions updated successfully'
-        ], 201);
+       
+        return 'Department permissions updated successfully';
     }
 
     /**
@@ -126,9 +133,7 @@ class DepartmentFeaturePermissionRepository
             // Commit the transaction
             DB::commit();
 
-            return response()->json([
-                'message' => 'Department feature permissions updated successfully'
-            ], 200);
+            return 'Department feature permissions updated successfully';
         } catch (\Exception $e) {
             // Rollback the transaction
             DB::rollBack();
