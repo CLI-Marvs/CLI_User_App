@@ -18,7 +18,7 @@ const ImageSlideshow = () => {
     }, [bannerLists.length]);
 
     return (
-        <div className="relative w-[583px] h-[70px] overflow-hidden">
+        <div className="relative w-[787px] h-auto overflow-hidden">
             <div
                 className="flex transition-transform duration-500 ease-in-out"
                 style={{

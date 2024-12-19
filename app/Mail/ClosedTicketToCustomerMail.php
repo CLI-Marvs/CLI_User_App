@@ -21,11 +21,12 @@ class ClosedTicketToCustomerMail extends Mailable
     protected $admin_name;
     protected $department;
     protected $modifiedTicketId;
+    protected $selectedSurveyType;
 
     /**
      * Create a new message instance.
      */
-    public function __construct($ticket_id, $email, $buyer_lastname, $message_id, $admin_name, $department, $modifiedTicketId,)
+    public function __construct($ticket_id, $email, $buyer_lastname, $message_id, $admin_name, $department, $modifiedTicketId, $selectedSurveyType)
     {
         $this->ticket_id = $ticket_id;
         $this->email = $email;
@@ -34,6 +35,7 @@ class ClosedTicketToCustomerMail extends Mailable
         $this->admin_name = $admin_name;
         $this->department = $department;
         $this->modifiedTicketId = $modifiedTicketId;
+        $this->selectedSurveyType = $selectedSurveyType;
     }
 
     /**
@@ -81,8 +83,11 @@ class ClosedTicketToCustomerMail extends Mailable
 
         return $headers;
     }
-    /**
+
+    /*
      * Get the message content definition.
+     * Call the message template
+     * Pass the selectedSurveyType as arguments to the message template
      */
     public function content(): Content
     {
@@ -94,6 +99,7 @@ class ClosedTicketToCustomerMail extends Mailable
                 'admin_name' => $this->admin_name,
                 'department' => $this->department,
                 'modifiedTicketId' => $this->modifiedTicketId,
+                'selectedSurveyType' => $this->selectedSurveyType
             ],
         );
     }

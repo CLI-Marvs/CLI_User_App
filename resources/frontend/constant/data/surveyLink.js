@@ -1,14 +1,45 @@
 export const SURVEY_LINKS = [
     {
-        surveyName: "Reservation",
-        surveyLink: "https://forms.gle/3g3i5x4k1x5y6z7u8/Reservation",
+        //For N/A
+        surveyName: "N/A",
+        surveyLink: "none",
     },
     {
-        surveyName: "After-Sales",
-        surveyLink: "https://forms.gle/3g3i5x4k1x5y6z7u8/after-sales",
+        //For sales
+        surveyName: "Survey for Reservation (For Sales)",
+        surveyLink:
+            "https://docs.google.com/forms/d/1VS8JhYrzPPFzqc8Wac09Da95ZKSToO0m_tIhvy40PlU/viewform?edit_requested=true",
     },
     {
-        surveyName: "Move-In",
-        surveyLink: "https://forms.gle/3g3i5x4k1x5y6z7u8/move-in",
+        //For CRS
+        surveyName: "Survey for Equity Payment (For CRS)",
+        surveyLink:
+            "https://docs.google.com/forms/d/1CSQrWy5YKYQXZa1lPKXUB50fdEx3Wc8Innm_m7jDEnk/viewform?edit_requested=true",
+    },
+    {
+        //For CRT
+        surveyName: "Survey for Turnover (For CRT)",
+        surveyLink:
+            "https://docs.google.com/forms/d/1jGdGVgMGMzZKCcKvfITJ2inSAecCjy9q5ke9BJhtI1I/viewform?edit_requested=true",
+    },
+    {
+        //For AMT
+        surveyName: "Survey for Takeout (For AMT)",
+        surveyLink:
+            "https://docs.google.com/forms/d/17Y39LN6wxwlnUFvwvp6imSARqTG67P1dztAVj1ZvXYY/viewform?edit_requested=true",
+    },
+    {
+        //For CLIPM
+        surveyName: "Survey for Owners Living in the Unit (For CLIPM)",
+        surveyLink:
+            "https://docs.google.com/forms/d/1xrzezLCLipw7V7qhghuqAlIwcglK1nZDDfMYtUVRRFg/viewform?edit_requested=true",
+    },
+    {
+        surveyName: "Survey for Title and Related Concerns",
+        surveyLink: "https://forms.gle/4GKzkQ4R6A14zFYd8",
+    },
+    {
+        surveyName: "Survey for Other Concerns",
+        surveyLink: "https://forms.gle/LZpoPc7f95BWVfr1A",
     },
 ];

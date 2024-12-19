@@ -325,8 +325,7 @@ const InquiryList = () => {
         specificAssigneeCsr,
         currentPage,
     ]);
-
-    console.log("loading", loading);
+ 
 
     return (
         <>
@@ -531,6 +530,9 @@ const InquiryList = () => {
                                                 </option>
                                                 <option value="unresolved">
                                                     Unresolved
+                                                </option>
+                                                <option value="Closed">
+                                                    Closed
                                                 </option>
                                             </select>
                                         </div>

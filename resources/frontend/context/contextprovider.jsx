@@ -85,7 +85,8 @@ export const ContextProvider = ({ children }) => {
     const [filterDueDate, setFilterDueDate] = useState(null);
     const [loading, setLoading] = useState(false);
     const [navBarData, setNavBarData] = useState([]);
- 
+    const [isUserTypeChange, setIsUserTypeChange] = useState(false);
+
     useEffect(() => {
         if (user && user.department && !isDepartmentInitialized) {
             setDepartment(user.department === "Customer Relations - Services" ? "All" : user.department);
@@ -537,20 +538,21 @@ export const ContextProvider = ({ children }) => {
 
 
 
-    useEffect(() => {
-        getPropertyUnits(towerPhaseId, selectedFloor);
-    }, [towerPhaseId, selectedFloor]);
+    // useEffect(() => {
+    //     getPropertyUnits(towerPhaseId, selectedFloor);
+    // }, [towerPhaseId, selectedFloor]);
 
-    useEffect(() => {
-        getPricingMasterLists();
-        getPaymentSchemes();
-    }, []);
+    // useEffect(() => {
+    //     getPricingMasterLists();
+    //     getPaymentSchemes();
+    // }, []);
 
-    useEffect(() => {
-        if (towerPhaseId) {
-            getPropertyFloors(towerPhaseId);
-        }
-    }, [towerPhaseId, token]);
+    // useEffect(() => {
+    //     if (towerPhaseId) {
+    //         getPropertyFloors(towerPhaseId);
+    //     }
+    // }, [towerPhaseId, token]);
+
     // useEffect(() => {
     //     getPaymentSchemes();
     // }, [token]);
@@ -614,7 +616,7 @@ export const ContextProvider = ({ children }) => {
         getCount();
     }, [unreadCount, token]); */
 
-    useEffect(() => { }, [user, token]);
+    // useEffect(() => { }, [user, token]);
 
     useEffect(() => {
         getSpecificInquiry();
@@ -763,6 +765,8 @@ export const ContextProvider = ({ children }) => {
                 inquriesPerChannelData,
                 navBarData,
                 getNavBarData,
+                setIsUserTypeChange,
+                isUserTypeChange
             }}
 
         >

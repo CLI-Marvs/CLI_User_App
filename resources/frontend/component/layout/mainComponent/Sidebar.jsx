@@ -31,11 +31,11 @@ const Sidebar = () => {
   useEffect(() => {
     if (!location.pathname.startsWith("/inquirymanagement/thread")) {
       localStorage.removeItem("dataConcern");
-      localStorage.removeItem("updatedData"); 
-      localStorage.removeItem("closeConcern"); 
+      localStorage.removeItem("updatedData");
+      localStorage.removeItem("closeConcern");
     }
   }, [location]);
-  
+
   useEffect(() => {
     getCount();
   }, [location]);
@@ -60,7 +60,7 @@ const Sidebar = () => {
     setActiveItemTransaction(item);
   };
 
- 
+
   useEffect(() => {
     switch (location.pathname) {
       case "/superadmin/userrightsandpermissions":
@@ -76,7 +76,10 @@ const Sidebar = () => {
         break;
       case "/inquirymanagement/inquirylist":
       case "/inquirymanagement/report":
-      case "/inquirymanagement/autoassign":
+      case "/inquirymanagement/settings":
+      case "/inquirymanagement/settings/bannersettings":
+      case "/inquirymanagement/settings/autoassign":
+        case "/inquirymanagement/settings/versionlogs":
         setIsInvoiceOpen(false);
         setInquiryOpen(true);
         setSuperAdminOpen(false);
@@ -97,7 +100,7 @@ const Sidebar = () => {
             <ListItem
               className={`flex text-sm items-center w-[185px] h-[36px] pl-[12px] pr-[60px] gap-2 rounded-[10px] ${activeItem === "notification" &&
                 location.pathname.startsWith("/notification")
-                ? "bg-custom-lightestgreen text-custom-solidgreen font-semibold"
+                ? "bg-custom-lightestgreen text-custom-solidgreen font-semibold shadow-custom4"
                 : " hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
                 } `}
               onClick={() => handleItemClick("notification")}
@@ -116,10 +119,10 @@ const Sidebar = () => {
           </Link>
           <Link to="inquirymanagement/inquirylist">
             <ListItem
-              className={`h-[35px] w-[185px] text-sm pl-[12px] transition-all duration-300 ease-in-out 
+              className={`h-[35px] w-[185px] text-sm pl-[12px] transition-all duration-300 ease-in-out z-10 
                   ${activeItem === "inquiry" ||
                   location.pathname.startsWith("/inquirymanagement")
-                  ? "bg-custom-lightestgreen text-custom-solidgreen font-semibold"
+                  ? "bg-custom-lightestgreen text-custom-solidgreen font-semibold shadow-custom5"
                   : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
                 }
                     ${isInquiryOpen
@@ -129,7 +132,7 @@ const Sidebar = () => {
                     `}
               onClick={handleInquiryDropdownClick}
             >
-              Inquiry Management
+              Customer Relations
               <ListItemSuffix>
                 <IoIosArrowDown
                   className={`text-custom-solidgreen  transition-transform duration-200 ease-in-out ${isInquiryOpen ? "rotate-180" : ""
@@ -140,7 +143,7 @@ const Sidebar = () => {
           </Link>
           {isInquiryOpen &&
             location.pathname.startsWith("/inquirymanagement") && (
-              <div className="px-[12px] py-[20px] w-[185px] min-h-[122px] flex flex-col gap-[5px] bg-custom-lightestgreen border-t rounded-t-none rounded-b-[10px] border-custom-solidgreen transition-all duration-300 ease-in-out">
+              <div className="px-[12px] py-[20px] w-[185px] min-h-[122px] flex flex-col gap-[5px] z-20 shadow-custom5  bg-custom-lightestgreen border-t rounded-t-none rounded-b-[10px] border-custom-solidgreen transition-all duration-300 ease-in-out">
                 <Link to="/inquirymanagement/inquirylist">
                   <ListItem
                     className={`h-[32px] w-full py-[8px] px-[18px]  text-sm rounded-[50px] ${location.pathname.startsWith(
@@ -158,7 +161,7 @@ const Sidebar = () => {
                       )
                     }
                   >
-                    Inquiries
+                    Feedback
                   </ListItem>
                 </Link>
                 <Link to="/inquirymanagement/report">
@@ -176,19 +179,19 @@ const Sidebar = () => {
                     Reports
                   </ListItem>
                 </Link>
-                <Link to="/inquirymanagement/autoassign">
+                <Link to="/inquirymanagement/settings/bannersettings">
                   <ListItem
-                    className={`h-[32px] w-full py-[8px] px-[18px] text-sm rounded-[50px] hidden ${location.pathname.startsWith(
-                      "/inquirymanagement/autoassign"
+                    className={`h-[32px] w-full py-[8px] px-[18px] text-sm rounded-[50px]  ${location.pathname.startsWith(
+                      "/inquirymanagement/settings"
                     )
                       ? "bg-white text-custom-solidgreen font-semibold"
                       : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
                       }`}
                     onClick={() =>
-                      handleItemClick("/autoassign")
+                      handleItemClick("/settings")
                     }
                   >
-                    Auto Assign
+                    Settings
                   </ListItem>
                 </Link>
               </div>
@@ -224,12 +227,11 @@ const Sidebar = () => {
               <div className="px-[12px] py-[20px] w-[185px] min-h-[122px] flex flex-col gap-[5px] bg-custom-lightestgreen border-t rounded-t-none rounded-b-[10px] border-custom-solidgreen transition-all duration-300 ease-in-out">
                 <Link to="/superadmin/userrightsandpermissions">
                   <ListItem
-                    className={`h-[48px] w-full py-[8px] px-[18px]  text-sm rounded-[10px] ${
-                      location.pathname.startsWith(
-                        "/superadmin/userrightsandpermissions"
-                      )
-                      ? "bg-white text-custom-solidgreen font-semibold "
-                      : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
+                    className={`h-[48px] w-full py-[8px] px-[18px]  text-sm rounded-[10px] ${location.pathname.startsWith(
+                      "/superadmin/userrightsandpermissions"
+                    )
+                        ? "bg-white text-custom-solidgreen font-semibold "
+                        : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
                       }`}
                     onClick={() =>
                       handleItemClick(
@@ -240,10 +242,10 @@ const Sidebar = () => {
                     User Rights & Permissions
                   </ListItem>
                 </Link>
-                
+
               </div>
             )
-          } 
+          }
 
           {/* <Link to="/transactionmanagement/invoices">
             <ListItem

@@ -367,10 +367,10 @@ const AssignDetails = ({ logMessages, ticketId }) => {
             type: "log",
             created_at: logReply.created_at,
         })),
-
+    
     ].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-
-    const capitalizeWords = (name) => {
+     
+    /* const capitalizeWords = (name) => {
         if (name) {
             return name
                 .split(" ")
@@ -381,7 +381,7 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                 )
                 .join(" ");
         }
-    };
+    }; */
 
     const renderDetails = (actionType, details, inquiry_createdAt) => {
 
@@ -449,9 +449,9 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                             <div>
                                 <p className="text-custom-solidgreen">
                                     Added assignee:{" "}
-                                    {capitalizeWords(
+                                    {/* capitalizeWords() */
                                         details.assign_to_name.join(", ")
-                                    )}
+                                    }
                                 </p>
                             </div>
                             <div>
@@ -485,9 +485,9 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                             <div>
                                 <p className="text-custom-solidgreen mb-1">
                                     Removed assignee:{" "}
-                                    {capitalizeWords(
+                                    {/* capitalizeWords() */
                                         details.remove_to_name
-                                    )}
+                                    }
                                 </p>
                             </div>
                             <div>
@@ -570,7 +570,7 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                         </div>
                         <div>
                             <p className="text-[#A5A5A5]">
-                                by {capitalizeWords(details.buyer_name)}
+                                by {/* capitalizeWords() */details.buyer_name}
                             </p>
                         </div>
                     </>
@@ -796,7 +796,14 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                                                 </span>
                                                 <span className="text-custom-grayA5">{"}"}</span>
                                             </>
-                                        ) : null}
+                                            ) : <>
+                                                <span className="text-custom-grayA5">
+                                                    {details.buyer_old_data.user_type ? " " : " Added "}
+                                                </span>
+                                                <span className="text-black">
+                                                        {" "}{details.buyer_updated_data.user_type}{" "}
+                                                </span>
+                                            </>}
                                     </p>
                                 ) : null}
 

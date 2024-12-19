@@ -25,6 +25,8 @@ import { VALID_FILE_EXTENSIONS } from "../../../constant/data/validFile";
 import InquiryFormModal from "./InquiryFormModal";
 import ThreadInquiryFormModal from "./ThreadInquiryFormModal";
 import { ALLOWED_EMPLOYEES_CRS } from "../../../constant/data/allowedEmployeesCRS";
+import { ALLOWED_DEPARTMENT } from "../../../constant/data/allowedDepartment";
+
 import Skeleton from 'react-loading-skeleton'
 import 'react-loading-skeleton/dist/skeleton.css'
 
@@ -40,7 +42,7 @@ const InquiryThread = () => {
     const [ticket, setTicket] = useState("");
     const [status, setStatus] = useState("");
     const [type, setType] = useState("");
-    const [channels,setChannels] = useState("");
+    const [channels, setChannels] = useState("");
     const [selectedProperty, setSelectedProperty] = useState("");
     const [fileName, setFileName] = useState("");
     const [hasAttachments, setHasAttachments] = useState(false);
@@ -57,9 +59,12 @@ const InquiryThread = () => {
         setSearchFilter,
         data,
         setMessages,
+        setIsUserTypeChange,
+        isUserTypeChange
     } = useStateContext();
     const [chatMessage, setChatMessage] = useState("");
     const userLoggedInEmail = user?.employee_email;
+    const userLoggedInDepartment = user?.department; //Holds the user's department
     const [isSearchLoading, setIsSearchLoading] = useState(false);
     const modalRef = useRef(null);
     const modalRef2 = useRef(null);
@@ -131,25 +136,25 @@ const InquiryThread = () => {
                 .map((item) => {
                     let formattedItem = formatFunc(item);
 
-                // Capitalize each word in the string
-                formattedItem = formattedItem
-                    .split(" ")
-                    .map((word) => {
-                        // Check for specific words that need to be fully capitalized
-                        if (/^(Sjmv|Lpu|Cdo|Dgt)$/i.test(word)) {
-                            return word.toUpperCase();
-                        }
-                        // Capitalize the first letter of all other words
-                        return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
-                    })
-                    .join(" ");
+                    // Capitalize each word in the string
+                    formattedItem = formattedItem
+                        .split(" ")
+                        .map((word) => {
+                            // Check for specific words that need to be fully capitalized
+                            if (/^(Sjmv|Lpu|Cdo|Dgt)$/i.test(word)) {
+                                return word.toUpperCase();
+                            }
+                            // Capitalize the first letter of all other words
+                            return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+                        })
+                        .join(" ");
 
-                // Replace specific names if needed
-                if (formattedItem === "Casamira South") {
-                    formattedItem = "Casa Mira South";
-                }
+                    // Replace specific names if needed
+                    if (formattedItem === "Casamira South") {
+                        formattedItem = "Casa Mira South";
+                    }
 
-                return formattedItem;
+                    return formattedItem;
                 })
                 .sort((a, b) => {
                     if (a === "N/A") return -1;
@@ -179,6 +184,7 @@ const InquiryThread = () => {
         }
     };
     const handleOpenModal = () => {
+        setIsUserTypeChange(false);
         if (modalRef.current) {
             modalRef.current.showModal();
         }
@@ -491,7 +497,7 @@ const InquiryThread = () => {
         };
     }, [ticketId]);
 
-    const capitalizeWords = (name) => {
+    /* const capitalizeWords = (name) => {
         if (name) {
             return name
                 .split(" ")
@@ -502,7 +508,7 @@ const InquiryThread = () => {
                 )
                 .join(" ");
         }
-    };
+    }; */
 
     return (
         <>
@@ -685,6 +691,9 @@ const InquiryThread = () => {
                                                 </option>
                                                 <option value="Unresolved">
                                                     Unresolved
+                                                </option>
+                                                <option value="Closed">
+                                                    Closed
                                                 </option>
                                             </select>
                                         </div>
@@ -878,11 +887,11 @@ const InquiryThread = () => {
                         </div>
                         <div className="p-[10px]">
                             {/* Container for chat input and attached files */}
-                            {dataConcern?.status === "unresolved" &&
-                                user?.department ==
-                                "Customer Relations - Services" && (
+                            {/* IF userLoggedInDepartment is in  ALLOWED_DEPARTMENTS then render/show the textarea for reply */}
+                            {dataConcern?.status === "unresolved" && ALLOWED_DEPARTMENT.includes(userLoggedInDepartment)
+                                && (
                                     <div className="relative">
-                                        <div className="gradient-btn2 rounded-[12px] p-[2px] relative">
+                                        <div className="gradient-btn2 rounded-[12px] p-[2px] relative ">
                                             <div className="bg-white p-[10px] rounded-[10px]">
                                                 {/* Display attached files inside the same container */}
                                                 {attachedFiles.length > 0 && (
@@ -1170,7 +1179,7 @@ const InquiryThread = () => {
                                                 Note: This message will be sent
                                                 to{" "}
                                                 <span className="font-semibold">
-                                                    {capitalizeWords(
+                                                    {/* capitalizeWords() */
                                                         `${dataConcern?.buyer_firstname ||
                                                         ""
                                                         } ${dataConcern?.buyer_middlename ||
@@ -1178,10 +1187,10 @@ const InquiryThread = () => {
                                                         } ${dataConcern?.buyer_lastname ||
                                                         ""
                                                         }`
-                                                    )}{" "}
-                                                    {capitalizeWords(
+                                                    }{" "}
+                                                    {/* capitalizeWords() */
                                                         dataConcern?.suffix_name
-                                                    )}
+                                                    }
                                                 </span>
                                                 . Please use the comment section
                                                 for CLI internal communication.
@@ -1190,14 +1199,13 @@ const InquiryThread = () => {
                                     </div>
                                 )}
 
-                            {/*Render if the logged in user department is not CRS */}
-                            {user?.department !==
-                                "Customer Relations - Services" && (
+                            {/*Render if the logged in user department is not CRS or other critical departments*/}
+                            {!ALLOWED_DEPARTMENT.includes(userLoggedInDepartment) && (
                                     <div className="relative py-2">
                                         <div className="text-[11px] text-[#B54D4D]">
                                             <p>
                                                 <span className="font-semibold">
-                                                    Note: Only CRS team can reply
+                                                    Note: Only CRS, Turnovers, Accounts Management, Sales, and Registration & Documentation teams can reply
                                                     directly to inquiries, use the
                                                     comment section for internal
                                                     communication.
@@ -1207,18 +1215,10 @@ const InquiryThread = () => {
                                     </div>
                                 )}
 
+
                             <div className="border my-2 border-t-1 border-custom-lightestgreen"></div>
                             <div className="w-full flex justify-end gap-[13px] items-center">
-                                {/* {dataConcern?.status === "Resolved" ||
-                                    dataConcern?.status === "Closed" && (
-                                        <span
-                                            className="w-auto font-semibold text-[13px] text-[#1A73E8] underline cursor-pointer"
-                                            onClick={handleOpenAddInfoModal}
-                                        >
-                                            Create new ticket
-                                        </span>
-                                    )} */}
-
+                  
                                 {(dataConcern?.status === "Resolved" || dataConcern?.status === "Closed") && (
                                     <span
                                         className="w-auto font-semibold text-[13px] text-[#1A73E8] underline cursor-pointer"
@@ -1292,14 +1292,14 @@ const InquiryThread = () => {
                                                 )
                                         ) : (
                                             <div className="flex flex-col gap-[20px] py-[20px] px-[30px]">
-                                            {[...Array(5)].map((_, idx) => (
-                                                <div className="flex flex-col gap-[10px]" key={idx}>
-                                                    <Skeleton height={20} width="80%" />
-                                                    <Skeleton height={20} width="80%" />
-                                                    <Skeleton height={50} width="100%" />
-                                                </div>
-                                            ))}
-                                        </div>
+                                                {[...Array(5)].map((_, idx) => (
+                                                    <div className="flex flex-col gap-[10px]" key={idx}>
+                                                        <Skeleton height={20} width="80%" />
+                                                        <Skeleton height={20} width="80%" />
+                                                        <Skeleton height={50} width="100%" />
+                                                    </div>
+                                                ))}
+                                            </div>
                                         )}
                                 </div>
                             </div>

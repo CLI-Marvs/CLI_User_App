@@ -12,12 +12,13 @@ if (rootElement) {
     ReactDOM.createRoot(rootElement).render(
         <React.StrictMode>
             <ContextProvider>
-                <ToastContainer/>
-                <PriceBasicDetailsFormDataProvider>
+                <ToastContainer />
+                <App />
+                {/* <PriceBasicDetailsFormDataProvider>
                     <FloorPremiumFormDataProvider>
-                        <App />
+                        
                     </FloorPremiumFormDataProvider>
-                </PriceBasicDetailsFormDataProvider>
+                </PriceBasicDetailsFormDataProvider> */}
             </ContextProvider>
         </React.StrictMode>
     );

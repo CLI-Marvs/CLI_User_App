@@ -5,11 +5,57 @@ import DateLogo from "../../../../../public/Images/Date_range.svg";
 import { FaRegTrashAlt } from 'react-icons/fa';
 import { IoMdAdd } from "react-icons/io";
 import { TbTrashFilled } from 'react-icons/tb';
+import { useStateContext } from '../../../context/contextprovider';
 const AutoAssign = () => {
+
+  const { propertyNamesList } = useStateContext();
+
   const [isFilterVisible, setIsFilterVisible] = useState(false);
   const filterBoxRef = useRef(null);
 
 
+  const formatFunc = (name) => {
+    return name
+      .toLowerCase()
+      .replace(/\b\w/g, (char) => char.toUpperCase());
+  };
+
+
+  const formattedPropertyNames = [
+    "N/A",
+    ...(Array.isArray(propertyNamesList) && propertyNamesList.length > 0
+      ? propertyNamesList
+        .filter((item) => !item.toLowerCase().includes("phase"))
+        .map((item) => {
+          let formattedItem = formatFunc(item);
+
+          // Capitalize each word in the string
+          formattedItem = formattedItem
+            .split(" ")
+            .map((word) => {
+              // Check for specific words that need to be fully capitalized
+              if (/^(Sjmv|Lpu|Cdo|Dgt)$/i.test(word)) {
+                return word.toUpperCase();
+              }
+              // Capitalize the first letter of all other words
+              return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+            })
+            .join(" ");
+
+          // Replace specific names if needed
+          if (formattedItem === "Casamira South") {
+            formattedItem = "Casa Mira South";
+          }
+
+          return formattedItem;
+        })
+        .sort((a, b) => {
+          if (a === "N/A") return -1;
+          if (b === "N/A") return 1;
+          return a.localeCompare(b);
+        })
+      : []),
+  ];
 
   const handleClickOutside = (event) => {
     if (
@@ -360,8 +406,8 @@ const AutoAssign = () => {
           )}
         </div>
         {/*  <div className="flex items-center">
-                        <button onClick={handleOpenModal} className='h-[38px] w-[121px] gradient-btn5 text-white  text-xs rounded-[10px]'> <span className='text-[18px]'>+</span> Add Inquiry</button>
-                    </div> */}
+            <button onClick={handleOpenModal} className='h-[38px] w-[121px] gradient-btn5 text-white  text-xs rounded-[10px]'> <span className='text-[18px]'>+</span> Add Inquiry</button>
+        </div> */}
       </div>
       <div className='w-full mt-[12px]'>
         <div className='flex '>
@@ -380,11 +426,52 @@ const AutoAssign = () => {
                 <td className='pl-[16px] w-[150px]'>
                   <select name="property" id="" className='w-[150px] h-[31px] rounded-[5px] pl-[15px] text-sm'>
                     <option value="">(Select)</option>
+                    {formattedPropertyNames.map(
+                        (item, index) => {
+                            return (
+                                <option
+                                    key={index}
+                                    value={item}
+                                >
+                                    {item}
+                                </option>
+                            );
+                        }
+                    )}
                   </select>
                 </td>
                 <td className='w-[150px]'>
                   <select name="category" id="" className='w-[150px] h-[31px] rounded-[5px] pl-[15px] text-sm'>
                     <option value="">(Select)</option>
+                    <option value="Reservation Documents">
+                        Reservation Documents
+                      </option>
+                      <option value="Payment Issues">
+                        Payment Issues
+                      </option>
+                      <option value="SOA/ Buyer's Ledger">
+                        SOA/
+                        Buyer's Ledger
+                      </option>
+                      <option value="Turn Over Status">
+                        Turn Over Status
+                      </option>
+                      <option value="Unit Status">
+                        Unit Status
+                      </option>
+                      <option value="Loan Application">
+                        Loan Application
+                      </option>
+                      <option value="Title and Other Registration Documents">
+                        Title and Other Registration
+                        Documents
+                      </option>
+                      <option value="Commissions">
+                        Commissions
+                      </option>
+                      <option value="Other Concerns">
+                        Other Concerns
+                      </option>
                   </select>
                 </td>
                 <td className='w-[150px]'>

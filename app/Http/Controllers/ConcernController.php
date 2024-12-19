@@ -537,8 +537,6 @@ class ConcernController extends Controller
     public function addConcernFromPreviousInquiry(Request $request)
     {
         try {
-/* 
-            dd($request->all()); */
             $user = $request->user();
             $lastConcern = Concerns::latest()->first();
             $messageRef = Messages::where('ticket_id', $request->ticket_id)
@@ -563,7 +561,7 @@ class ConcernController extends Controller
                 $concerns->user_type = $request->other_user_type;
             }
             $concerns->buyer_name = $request->buyer_firstname . ' ' . $request->buyer_middlename . ' ' . $request->buyer_lastname;
-            $concerns->suffix_name= $request->suffix_name;
+            $concerns->suffix_name = $request->suffix_name;
             $concerns->buyer_firstname = $request->buyer_firstname;
             $concerns->buyer_middlename =
                 $request->buyer_middlename;
@@ -655,7 +653,7 @@ class ConcernController extends Controller
         $fileLinks = [];
         if ($files) {
             /*   $keyJson = config('services.gcs.key_json');  //Access from services.php */
-            $keyArray = json_decode($this->keyJson, true); 
+            $keyArray = json_decode($this->keyJson, true);
             $storage = new StorageClient([
                 'keyFile' => $keyArray
             ]);
@@ -688,23 +686,23 @@ class ConcernController extends Controller
     //          if (!$fileUrlPath) {
     //              return response()->json(['message' => 'File path is required.'], 400);
     //          }
- 
+
     //          $keyJson = config('services.gcs.key_json');  //Access from services.php
     //          $keyArray = json_decode($keyJson, true); // Decode the JSON string to an array
     //          $storage = new StorageClient([
     //              'keyFile' => $keyArray
     //          ]);
- 
+
     //          $bucket = $storage->bucket('super-app-storage');
     //          $filePath = 'concerns/' . $fileUrlPath;
     //          $object = $bucket->object($filePath);
     //          if (!$object->exists()) {
     //              return response()->json(['message' => 'File not found in cloud storage.'], 404);
     //          }
- 
+
     //          // Get the file content from GCS
     //          $fileContent = $object->downloadAsStream()->getContents();
- 
+
     //          return response($fileContent)
     //              ->header('Content-Type', $object->info()['contentType'] ?? 'application/octet-stream')
     //              ->header('Content-Disposition', 'attachment; filename="' . basename($fileUrlPath) . '"');
@@ -730,13 +728,10 @@ class ConcernController extends Controller
             ]);
 
 
-           /*  dd($this->bucket); */
+
             $bucket = $storage->bucket($this->bucket);
             $filePath = $this->folderName . $fileUrlPath;
-
-          /*   dd($filePath); */
             $object = $bucket->object($filePath);
-           /*  dd($object); */
             if (!$object->exists()) {
                 return response()->json(['message' => 'File not found in cloud storage.'], 404);
             }
@@ -906,12 +901,12 @@ class ConcernController extends Controller
                     $join->on('concerns.ticket_id', '=', 'latest_messages.ticket_id');
                 })
                 ->select(
-                        'concerns.*', 
-                        'latest_logs.message_log', 
-                        DB::raw('CASE WHEN pinned.concern_id IS NOT NULL THEN 1 ELSE 0 END AS isPinned'), 
-                        'created_by_subquery.created_by', 
-                        'latest_messages.latest_message'
-                         )
+                    'concerns.*',
+                    'latest_logs.message_log',
+                    DB::raw('CASE WHEN pinned.concern_id IS NOT NULL THEN 1 ELSE 0 END AS isPinned'),
+                    'created_by_subquery.created_by',
+                    'latest_messages.latest_message'
+                )
                 ->paginate(20);
 
             return response()->json($allConcerns);
@@ -935,8 +930,8 @@ class ConcernController extends Controller
     {
         $days = $request->query("days", null);
         $status = $request->query("status", null);
+
         // $type = $request->query('type', null);
-        // dd($type, $status);
 
         $search = $request->query("search", null);
         $specificAssignCSR = $request->query('specificAssigneeCsr', null);
@@ -973,7 +968,8 @@ class ConcernController extends Controller
 
             if (!empty($searchParams['hasAttachments'])) {
                 $query->whereHas('messages', function ($messageQuery) {
-                    $messageQuery->whereNotNull('attachment');
+                    $messageQuery->whereNotNull('attachment')
+                                 ->whereJsonLength('attachment', '>', 0);   
                 });
             }
         }
@@ -1030,7 +1026,7 @@ class ConcernController extends Controller
             });
     }
 
-  
+
 
     private function getPinnedConcernsSubquery($employee)
     {
@@ -1040,8 +1036,6 @@ class ConcernController extends Controller
 
     public function handleSearchFilter($query, $searchParams)
     {
-
-
         if (!empty($searchParams['name'])) {
             $query->where('buyer_name', 'ILIKE', '%' . $searchParams['name'] . '%');
         }
@@ -1437,7 +1431,7 @@ class ConcernController extends Controller
                         'suffix' => $request->suffix_name ?? null,
                         'buyer_email' => $request->buyer_email,
                         'mobile_number' => $request->mobile_number,
-                        'user_type' => $request->user_type,
+                        'user_type' => $request->user_type === "Others" ? $buyerOldData['user_type'] : $request->user_type,
                         'communication_type' => $request->communication_type,
                         'contract_number' => $request->contract_number,
                         'details_concern' => $request->details_concern,
@@ -1536,7 +1530,7 @@ class ConcernController extends Controller
                         'department' => $request->assign_by_department,
                         'buyer_name' => $concernData->buyer_name,
                         'assignee_name' => $selectedOption['name'],
-                        'adminLink'=> $adminLink,
+                        'adminLink' => $adminLink,
                         'property' => $concernData->property
                     ];
                     $data = [
@@ -1589,6 +1583,7 @@ class ConcernController extends Controller
                 'content' => $request->all()
             ]);
             $testData = new BankTransaction();
+
             $testData->bank_name = $request->input('burks');
             $testData->payment_channel = $request->input('recnnr');
             $testData->transact_by = $request->input('objnr');
@@ -1716,7 +1711,6 @@ class ConcernController extends Controller
     public function getInquiryLogs($ticketId)
     {
         try {
-            /*    dd($ticketId); */
             $message = InquiryLogs::where('ticket_id', $ticketId)
                 /*  ->orderBy('created_at', 'desc') */
                 ->get();
@@ -1786,15 +1780,17 @@ class ConcernController extends Controller
     }
 
 
-
+    /**
+     * Implement a function to resolve a ticket
+     */
     public function markAsResolve(Request $request)
-    {
+    {   
+ 
 
         try {
-            /*dd($request->all()); */
             $assignees = $request->assignees;
             $concerns = Concerns::where('ticket_id', $request->ticket_id)->first();
-            $surveyLink = $request->surveyLink;
+            $selectedSurveyType = $request->selectedSurveyType;
             $allFiles = null;
             $messageId = $request->message_id;
             $modifiedTicketId = str_replace('Ticket#', '', $request->ticket_id);
@@ -1805,7 +1801,7 @@ class ConcernController extends Controller
             $buyer_name = $request->buyer_name;
             $concerns->communication_type = $request->communication_type;
             $concerns->status = "Resolved";
-            $concerns->survey_link = $surveyLink;
+            $concerns->survey_link = $selectedSurveyType['surveyName']; //Save the survey name to database
             $buyer_lastname = $request->buyer_lastname;
             $message_id = $request->message_id;
             $concerns->save();
@@ -1828,11 +1824,8 @@ class ConcernController extends Controller
             }
 
             $this->inquiryResolveLogs($request, 'resolve');
-            // ReplyFromAdminJob::dispatch($request->ticket_id, $buyerEmail, $request->remarks, $messageId, $allFiles, $admin_name, $buyer_lastname);
-            // dd($request->ticket_id, $buyerEmail, $buyer_lastname, $message_id, $admin_name, $department);
-
-
-            MarkResolvedToCustomerJob::dispatch($request->ticket_id, $buyerEmail, $buyer_lastname, $message_id, $admin_name, $department, $modifiedTicketId, $surveyLink);
+            
+            MarkResolvedToCustomerJob::dispatch($request->ticket_id, $buyerEmail, $buyer_lastname, $message_id, $admin_name, $department, $modifiedTicketId, $selectedSurveyType);
         } catch (\Exception $e) {
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
         }
@@ -2085,21 +2078,48 @@ class ConcernController extends Controller
     }
 
     /**
-     * Function to mark as closed
+     * Implement a function to resolve a ticket
      */
     public function markAsClosed(Request $request)
     {
-
         try {
-            $ticket_id = $request->ticket_id;
-            $modifiedTicketId = str_replace('Ticket#', '', $ticket_id);
-            $concerns = Concerns::where('ticket_id', $ticket_id)->first();
+            $assignees = $request->assignees;
+            $concerns = Concerns::where('ticket_id', $request->ticket_id)->first();
+            $selectedSurveyType = $request->selectedSurveyType;
+            $modifiedTicketId = str_replace('Ticket#', '', $request->ticket_id);
+            $buyerEmail = $request->buyer_email;
+            $admin_name = $request->admin_name;
+            $department = $request->department;
+            $details_concern = $request->details_concern;
+            $buyer_name = $request->buyer_name;
+            $concerns->communication_type = $request->communication_type;
             $concerns->status = "Closed";
+            $concerns->survey_link = $selectedSurveyType['surveyName']; // Save the survey name to database
+            $buyer_lastname = $request->buyer_lastname;
+            $message_id = $request->message_id;
             $concerns->save();
-            $this->inquiryResolveLogs($request, 'close');
-            MarkClosedToCustomerJob::dispatch($request->ticket_id, $request->buyer_email, $request->buyer_lastname, $request->message_id, $request->admin_name, $request->department, $modifiedTicketId, $request->surveyLink);
 
-            return response()->json('Successfully marked as closed');
+            if (!empty($assignees)) {
+                foreach ($assignees as $assignee) {
+                    $data = [
+                        'ticket_id' => $request->ticket_id,
+                        'buyer_name' => $buyer_name,
+                        'admin_name' => $admin_name,
+                        'details_concern' => $details_concern,
+                        'modifiedTicketId' => $modifiedTicketId
+                    ];
+                    NotifyAssignedCliOfResolvedInquiryJob::dispatch(
+                        $assignee['employee_email'],
+                        $assignee['name'],
+                        $data
+                    );
+                }
+            }
+
+            $this->inquiryResolveLogs($request, 'close');
+
+            //Pass the selectedSurveyType as arguments to MarkResolvedToCustomerJob job 
+            MarkClosedToCustomerJob::dispatch($request->ticket_id, $buyerEmail, $buyer_lastname, $message_id, $admin_name, $department, $modifiedTicketId, $selectedSurveyType);
         } catch (\Exception $e) {
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
         }
@@ -2163,7 +2183,7 @@ class ConcernController extends Controller
             // $conversation  = Conversations::where('ticket_id', $request->ticketId)
             //     ->orderBy('created_at', 'asc')
             //     ->get();
-            
+
             $dataToComment = [
                 'ticket_id' => $ticketIdEmail,
                 'commenter_message' => $conversation->message,
@@ -2391,14 +2411,14 @@ class ConcernController extends Controller
     {
         $fileLinks = [];
         if ($attachments) {
-         /*    $keyJson = config('services.gcs.key_json'); */
+            /*    $keyJson = config('services.gcs.key_json'); */
             $keyJson = config($data['keyjson']);
             $keyArray = json_decode($keyJson, true);
             $storage = new StorageClient([
                 'keyFile' => $keyArray
             ]);
-          /*   $bucket = $storage->bucket('super-app-storage'); */
-             $bucket = $storage->bucket($data['bucketName']);
+            /*   $bucket = $storage->bucket('super-app-storage'); */
+            $bucket = $storage->bucket($data['bucketName']);
 
             foreach ($attachments as $fileData) {
                 $fileName = uniqid() . '.' . $fileData['extension'];
@@ -2464,14 +2484,13 @@ class ConcernController extends Controller
 
     public function getNavBarData(Request $request)
     {
-       try {
-        $ticketId = $request->ticketId;
-        $concernData = Concerns::where('ticket_id', $ticketId)->
-                                select('buyer_firstname', 'buyer_middlename', 'buyer_lastname', 'suffix_name', 'details_concern', 'property', 'ticket_id')
-                               ->first();
-        return response()->json($concernData);
-       } catch (\Exception $e) {
-           return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
-       }
+        try {
+            $ticketId = $request->ticketId;
+            $concernData = Concerns::where('ticket_id', $ticketId)->select('buyer_firstname', 'buyer_middlename', 'buyer_lastname', 'suffix_name', 'details_concern', 'property', 'ticket_id')
+                ->first();
+            return response()->json($concernData);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
+        }
     }
 }
