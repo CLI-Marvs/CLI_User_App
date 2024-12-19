@@ -25,14 +25,6 @@ const Dec_18_24 = () => {
                                 •
                             </div>
                             <div>
-                                Update on user roles to allow specific departments to reply.
-                            </div>
-                        </div>
-                        <div className='flex'>
-                            <div className='flex w-[30px] shrink-0 justify-center'>
-                                •
-                            </div>
-                            <div>
                                 Update on user roles to allow specific departments to reply directly (Customer Relations- Turnovers, Accounts Management Department, Sales, Registration & Documentation).
                             </div>
                         </div>
