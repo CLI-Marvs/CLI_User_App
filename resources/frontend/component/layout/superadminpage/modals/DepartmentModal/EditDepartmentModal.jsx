@@ -1,21 +1,22 @@
-import React, { useEffect, useState } from 'react'
-import { AiFillInfoCircle } from 'react-icons/ai'
-import { IoMdArrowDropdown } from 'react-icons/io'
+import React, { useEffect, useState, useMemo } from 'react'
 import { useStateContext } from '../../../../../context/contextprovider';
 import { PERMISSIONS } from '../../../../../constant/data/permissions';
 import apiService from "../../../../servicesApi/apiService";
 import { showToast } from "../../../../../util/toastUtil";
 import CircularProgress from "@mui/material/CircularProgress";
+import isEqual from 'lodash/isEqual';
+import { normalizeData } from '../DepartmentModal/utils/normalizeData';
 
 const EditDepartmentModal = ({ editDepartmentModalRef, selectedDepartment }) => {
     //States
-    const { features } = useStateContext();
+    const { features, getDepartmentsWithPermissions } = useStateContext();
     const [isLoading, setIsLoading] = useState(false);
+    const [selectedDepartmentOldData, setSelectedDepartmentOldData] = useState(null); //Holds the old data of the selected department
     const [formData, setFormData] = useState({
-        department_id: 0, // selected department
-        features: [],   // array of features with permissions
+        department_id: 0,  
+        features: [],  
     });
-
+    
     //Hooks
     useEffect(() => {
         if (selectedDepartment) {
@@ -24,6 +25,7 @@ const EditDepartmentModal = ({ editDepartmentModalRef, selectedDepartment }) => 
                 features: selectedDepartment.features,
             });
         }
+        setSelectedDepartmentOldData(selectedDepartment);
     }, [selectedDepartment])
 
 
@@ -67,38 +69,32 @@ const EditDepartmentModal = ({ editDepartmentModalRef, selectedDepartment }) => 
     };
 
     //Handle the submit/save button click
-    const handleSubmit = () => {
-        //TODO: disable the button if there is no data in form data
+    const handleSubmit = async () => {
         const payload = {
             department_id: parseInt(formData.department_id),
             features: formData.features
         };
-        console.log("payload", payload)
-        // console.log("payload", JSON.stringify(payload))
-        // setIsLoading(true);
         try {
-            const response = apiService.put("update-departments-feature-permissions", payload);
-            console.log("reponse", response)
+            setIsLoading(true);
+            const response = await apiService.put("update-departments-feature-permissions", payload);
 
-            if (response.statusCode === 200) {
-                showToast("Data added successfully!", "Data added successfully!");
+            if (response.data?.statusCode === 200) {
+                showToast("Data udpated successfully!", "success");
                 setFormData({
-                    department_id: 0, // selected department
+                    department_id: 0, 
                     features: [],
                 });
-                // if (editDepartmentModalRef.current) {
-                //     editDepartmentModalRef.current.close();
-                // }
+                getDepartmentsWithPermissions();
+                if (editDepartmentModalRef.current) {
+                    editDepartmentModalRef.current.close();
+                }
             }
-
         } catch (error) {
             console.log("error", error);
         } finally {
             setIsLoading(false);
         }
-
     }
-
 
     //Handle close the modal and cancel the modal
     const handleCloseModal = () => {
@@ -113,6 +109,16 @@ const EditDepartmentModal = ({ editDepartmentModalRef, selectedDepartment }) => 
         }
     }
 
+    //Function to check if the old data is the same as the new data, if so, disable the button
+    const isButtonDisabled = useMemo(() => {
+        if (!selectedDepartmentOldData || !formData) {
+            return true;
+        }
+        const oldDataNormalized = normalizeData(selectedDepartmentOldData);
+        const newDataNormalized = normalizeData(formData);
+        // Compare old and new data  
+        return isEqual(oldDataNormalized, newDataNormalized);
+    }, [selectedDepartmentOldData, formData]);
 
     return (
         <dialog
@@ -226,21 +232,13 @@ const EditDepartmentModal = ({ editDepartmentModalRef, selectedDepartment }) => 
                         </button>
                         <button
                             type="submit"
-                            onClick={
-                                handleSubmit
-                            }
-                            disabled={
-                                isLoading
-                            }
-                            className={`gradient-btn5 w-[100px] h-[35px] rounded-[10px] text-sm text-white montserrat-semibold ${isLoading ? "cursor-not-allowed" : ""
-                                }`}
+                            onClick={handleSubmit}
+                            disabled={isButtonDisabled || isLoading}
+                            className={`gradient-btn5 w-[100px] h-[35px] rounded-[10px] text-sm text-white montserrat-semibold ${isButtonDisabled || isLoading ? "cursor-not-allowed opacity-50" : ""}`}
                         >
-                            {isLoading ? (
-                                <CircularProgress className="spinnerSize" />
-                            ) : (
-                                <>Save</>
-                            )}
+                            {isLoading ? <CircularProgress className="spinnerSize" /> : "Save"}
                         </button>
+
                     </div>
                 </div>
             </div>

@@ -23,20 +23,22 @@ class EmployeeFeaturePermissionRepository
     public function syncPermissions($employeeId, $features)
     {
         // Find the employee, or create it if it doesn't exist
-        $employee = Employee::find($employeeId);
-        if (!$employee) {
-            throw new \Exception('Employee not found');
+        $employee = Employee::findOrFail($employeeId);
+        // Check if department already has permissions with "Active" status
+        $activePermissions = $employee->features()->where('status', 'Active')->count();
+        
+        // Check if department already has permissions using the relationship
+        if ($activePermissions > 0) {
+
+            // If there are active permissions, check if there are any "InActive" permissions
+            $inactivePermissions = $employee->features()->where('status', 'InActive')->count();
+
+            if ($inactivePermissions === 0) {
+                // If no "InActive" permission exists, throw an exception
+                throw new \Exception("Permissions already exist for employeeId: {$employeeId} and are currently Active.");
+            }
         }
 
-        // Check if employee already has permissions
-        $existingEmployeePermissions = DB::table('employee_feature_permission')
-            ->where('employee_id', $employeeId)
-            ->exists();
-
-        // Throw an error if permissions already exist for the department
-        if ($existingEmployeePermissions) {
-            throw new \Exception("Permissions already exist for employee Id: {$employeeId}");
-        }
 
         // Iterate over each feature and insert it one at a time
         foreach ($features as $feature) {
@@ -56,18 +58,26 @@ class EmployeeFeaturePermissionRepository
     }
 
     /*
-     * Get all employee with permissions
+     * Get all employee with permissions and get the latest data from the pivot table
+     * 
      */
     public function getEmployeessWithPermissions()
     {
         $employeePermissions = $this->model->query()
             ->whereHas('features', function ($query) {
-                $query->where('employee_feature_permission.status', 'Active'); 
+                $query->where('employee_feature_permission.status', 'Active'); // Filter departments that have active features
             })
             ->with(['features' => function ($query) {
-                $query->wherePivot('status', 'Active');
+                $query->wherePivot('status', 'Active')
+                ->orderByPivot('created_at', 'desc'); // Order by pivot's created_at
             }])
-            ->latest('created_at')
+            ->orderByDesc(function ($query) {
+                $query->select('created_at')
+                ->from('employee_feature_permission')
+                ->whereColumn('employee_feature_permission.employee_id', 'employee.id') // Match department_id
+                ->latest()
+                    ->limit(1); // Get the latest pivot created_at for ordering
+            })
             ->get();
 
         return $employeePermissions;
@@ -139,7 +149,6 @@ class EmployeeFeaturePermissionRepository
             return response()->json([
                 'message' => 'Employee feature permissions updated successfully'
             ], 200);
-
         } catch (\Exception $e) {
             // Rollback the transaction
             DB::rollBack();

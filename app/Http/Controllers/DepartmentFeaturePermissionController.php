@@ -101,7 +101,7 @@ class DepartmentFeaturePermissionController extends Controller
             return response()->json([
                 'message' => $message,
                 'statusCode' => 200
-            ]);
+            ], 200);
         } catch (\Exception $e) {
             return response()->json(
                 [

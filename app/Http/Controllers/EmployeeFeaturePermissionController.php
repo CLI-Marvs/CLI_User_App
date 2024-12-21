@@ -46,7 +46,7 @@ class EmployeeFeaturePermissionController extends Controller
             return response()->json([
                 'message' => 'Employee permission successfully added',
                 'statusCode' => 200
-            ]);
+            ], 200);
         } catch (\Exception $e) {
             return response()->json(
                 [
@@ -69,7 +69,7 @@ class EmployeeFeaturePermissionController extends Controller
             return response()->json([
                 'message' => 'Employee permission updated successfully',
                 'statusCode' => 200
-            ]);
+            ], 200);
         } catch (\Exception $e) {
             return response()->json(
                 [

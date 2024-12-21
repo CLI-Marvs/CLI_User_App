@@ -21,13 +21,14 @@ const UserRightsAndPermissions = () => {
     employeesWithPermissions, features, getAllEmployeeDepartment } = useStateContext();
   const [selectedDepartment, setSelectedDepartment] = useState(null);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
-  const modalRef = useRef(null);
-  const modalref2 = useRef(null);
+  const [alertType, setAlertType] = useState("");
+  const departmentModalRef = useRef(null);
+  const userModalRef = useRef(null);
   const editDepartmentModalRef = useRef(null);
   const editEmployeeModalRef = useRef(null);
   const [showAlert, setShowAlert] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-
+  const [isEmployeeLoadingState, setIsEmployeeLoadingState] = useState({});
+  const [isDepartmentLoadingState, setIsDepartmentLoadingState] = useState({});
 
   //Hooks 
   useEffect(() => {
@@ -36,27 +37,21 @@ const UserRightsAndPermissions = () => {
   }, []);
 
   //Event Handler
-  /* 
-   * Handle the click event of the add department button
-   */
+  //Handle the click event of the add department button
   const handleAddDepartmentModal = () => {
-    if (modalRef.current) {
-      modalRef.current.showModal();
+    if (departmentModalRef.current) {
+      departmentModalRef.current.showModal();
     }
   };
 
-  /**
-   * Handle the click event of the add user button
-   */
+  //Handle the click event of the add user button
   const handleAddUserModal = () => {
-    if (modalref2.current) {
-      modalref2.current.showModal();
+    if (userModalRef.current) {
+      userModalRef.current.showModal();
     }
   };
 
-  /**
-   * Handle the click event of the edit department button
-   */
+  //Handle the click event of the edit department button
   const handleEditDepartmentModal = (department) => {
     setSelectedDepartment(department);
     if (editDepartmentModalRef.current) {
@@ -64,9 +59,7 @@ const UserRightsAndPermissions = () => {
     }
   };
 
-  /*
-    * Handle the click event of the edit employee button
-    */
+  //Handle the click event of the edit employee button
   const handleEditEmployeeModal = (employee) => {
     setSelectedEmployee(employee);
     if (editEmployeeModalRef.current) {
@@ -74,16 +67,14 @@ const UserRightsAndPermissions = () => {
     }
   };
 
-  /**
-   * Handle to Update 'Active or InActive" department permission
-   */
+  //Handle to Update 'Active or InActive" department permission
   const updateDepartmentPermissionStatus = async (department) => {
     const payload = {
       department_id: department?.id,
       status: "InActive",
     };
     try {
-      setIsLoading(true);
+      setIsDepartmentLoadingState((prev) => ({ ...prev, [department.id]: true }));
       const response = await apiService.patch("update-departments-status", payload);
       if (response.data?.statusCode === 200) {
         showToast("Data deleted successfully!", "success");
@@ -93,54 +84,65 @@ const UserRightsAndPermissions = () => {
     } catch (error) {
       console.log("error", error);
     } finally {
-      setIsLoading(false);
+      setIsDepartmentLoadingState((prev) => ({ ...prev, [department.id]: false }));
     }
   };
 
-  /*
-  * Handle to Update 'Active or InActive" employee permission
-  */
-  const handleUpdateEmployeePermissionStatus = (employee) => {
+  //Handle to Update 'Active or InActive" employee permission
+  const updateEmployeePermissionStatus = async (employee) => {
     const payload = {
       employee_id: employee?.id,
       status: "InActive",
     };
     try {
-      const response = apiService.patch("update-employee-status", payload);
-      if (response.statusCode === 200) {
+      setIsEmployeeLoadingState((prev) => ({ ...prev, [employee.id]: true }));
+      const response = await apiService.patch("update-employee-status", payload);
+      if (response.data?.statusCode === 200) {
         showToast("Data deleted successfully!", "success");
         getEmployeesWithPermissions();
       }
     } catch (error) {
       console.log("error", error);
+    } finally {
+      setIsEmployeeLoadingState((prev) => ({ ...prev, [employee.id]: false }));
     }
   }
 
-  /*
-  Handle  click event to show the alert  
-  */
-  const handleShowUpdateAlert = (department) => {
+  //Handle click event to show the department alert 
+  const handleShowUpdateDepartmentAlert = (department, alertType) => {
+    setAlertType(alertType);
     setSelectedDepartment(department);
     setShowAlert(true);
   };
 
-  /**
-   * Handle click to cancel the alert
-   */
+  //Handle click to cancel the department alert
   const handleCancel = () => {
     setShowAlert(false);
     setSelectedDepartment(null);
+    setSelectedEmployee(null);
   };
 
-  /**
-   * Handle click to confirm the alert
-   */
+  //Handle click to confirm the department alert
   const handleConfirm = () => {
-    if (selectedDepartment) {
-      updateDepartmentPermissionStatus(selectedDepartment); //Call the function
+    if (alertType === "department") {
+      if (selectedDepartment) {
+        updateDepartmentPermissionStatus(selectedDepartment); //Call the function
+      }
+    } else if (alertType === "employee") {
+      if (selectedEmployee) {
+        updateEmployeePermissionStatus(selectedEmployee); //Call the function
+      }
     }
     setShowAlert(false);
   };
+
+  //Handle click event to show the employee alert  
+  const handleShowUpdateEmployeeAlert = (employee, alertType) => {
+    setAlertType(alertType);
+    setSelectedEmployee(employee);
+    setShowAlert(true);
+  };
+
   return (
     <div className='h-screen max-w-full bg-custom-grayFA p-[20px]'>
       {/* Specific Department */}
@@ -249,15 +251,15 @@ const UserRightsAndPermissions = () => {
                               </span>
                             </div>
                           </button>
-                          <button onClick={() => handleShowUpdateAlert(department)}
-                            disabled={isLoading}
-                            className={`  ${isLoading
+                          <button onClick={() => handleShowUpdateDepartmentAlert(department, 'department')}
+                            disabled={isDepartmentLoadingState[department.id]}
+                            className={`${isDepartmentLoadingState[department.id]
                               ? "opacity-50 cursor-not-allowed"
                               : ""
                               }`}
                             type='submit'
                           >
-                            {isLoading ? (
+                            {isDepartmentLoadingState[department.id] ? (
                               <CircularProgress className="spinnerSize" />
                             ) : (
                               <><MdDelete className='w-6 h-6 text-red-500' /></>
@@ -274,7 +276,7 @@ const UserRightsAndPermissions = () => {
                     <tr>
                       <td
                         colSpan={features.length + 1 || 1}
-                        className="text-center py-[16px] text-custom-bluegreen text-sm"
+                        className="text-center py-[16px] text-custom-bluegreen "
                       >
                         No data found
                       </td>
@@ -318,99 +320,113 @@ const UserRightsAndPermissions = () => {
               </tr>
             </thead>
             <tbody>
-              {employeesWithPermissions && employeesWithPermissions.map((employee, index) => {
-                return (
-                  <div className='flex items-center gap-x-4' key={index}>
-                    <tr className='flex gap-[57px] mt-[6px] h-[64px] overflow-hidden px-[16px] py-[10px] bg-custom-lightestgreen text-custom-bluegreen text-sm' key={index}>
-                      <td className='w-[200px] flex flex-col items-start justify-center gap-2'>
-                        <div className='w-full h-[31px] flex items-center justify-center bg-white rounded-[5px]'>
-                          <p className='montserrat-regular text-custom-lightgreen text-sm'>
-                            {employee?.firstname} {employee?.lastname}
-                          </p>
-                        </div>
-                      </td>
-                      <td className='w-[200px] flex flex-col items-start justify-center gap-2'>
-                        <div className='w-full h-[31px] flex items-center justify-center bg-white rounded-[5px]'>
-                          <p className='montserrat-regular text-sm'>{employee?.department}</p>
-                        </div>
-                      </td>
+              {employeesWithPermissions && employeesWithPermissions.length > 0 ? (
+                employeesWithPermissions.map((employee, index) => {
+                  return (
+                    <div className='flex items-center gap-x-4' key={index}>
+                      <tr className='flex gap-[57px] mt-[6px] h-[64px] overflow-hidden px-[16px] py-[10px] bg-custom-lightestgreen text-custom-bluegreen text-sm' key={index}>
+                        <td className='w-[200px] flex flex-col items-start justify-center gap-2'>
+                          <div className='w-full h-[31px] flex items-center justify-center bg-white rounded-[5px]'>
+                            <p className='montserrat-regular text-custom-lightgreen text-sm'>
+                              {employee?.firstname} {employee?.lastname}
+                            </p>
+                          </div>
+                        </td>
+                        <td className='w-[200px] flex flex-col items-start justify-center gap-2'>
+                          <div className='w-full h-[35px] flex items-center justify-center bg-white rounded-[5px] py-1'>
+                            <p className='montserrat-regular text-sm text-center'>{employee?.department}</p>
+                          </div>
+                        </td>
 
-                      {/* Iterate over the features (columns) */}
-                      {features.map((feature, featureIndex) => {
-                        // Check if the department has this feature
-                        const departmentFeature = employee.features.find(
-                          (f) => f.id === feature.id
-                        );
+                        {/* Iterate over the features (columns) */}
+                        {features.map((feature, featureIndex) => {
+                          // Check if the department has this feature
+                          const departmentFeature = employee.features.find(
+                            (f) => f.id === feature.id
+                          );
 
-                        return (
-                          <td
-                            className="w-[200px] flex flex-col items-start justify-center gap-2"
-                            key={featureIndex}
-                          >
-                            <div className="w-full h-[44px] gap-[20px] flex items-center justify-center bg-white rounded-[5px]">
-                              {departmentFeature ? (
-                                PERMISSIONS.map((permission) => {
-                                  // Access the permission status from the department's feature pivot
-                                  const permissionValue = departmentFeature.pivot[permission.value];
-                                  return (
-                                    <div
-                                      className="flex flex-col gap-[2.75px] items-center"
-                                      key={permission.value}
-                                    >
-                                      <p className="montserrat-semibold text-[10px] leading-[12.19px]">
-                                        {permission.name}
-                                      </p>
-                                      <input
-                                        type="checkbox"
-                                        className="h-[16px] w-[16px]"
-                                        checked={permissionValue}
-                                        disabled
-                                      />
-                                    </div>
-                                  );
-                                })
-                              ) : (
-                                <p className="text-center text-custom-gray">No Permissions</p>
-                              )}
-                            </div>
-                          </td>
-                        );
-                      })}
-                    </tr>
-                    <div className='flex gap-x-3'>
-                      <button
-                        className="gradient-btn5 p-[1px] w-[80px] h-[31px] rounded-[10px]"
-                        onClick={() => handleEditEmployeeModal(employee)}
-                      >
-                        <div className="w-full h-full rounded-[9px] bg-white flex justify-center items-center montserrat-semibold text-sm gap-x-2">
-                          <p className="text-base font-bold bg-gradient-to-r from-custom-bluegreen via-custom-solidgreen to-custom-solidgreen bg-clip-text text-transparent">
-                            Edit
-                          </p>
-                          <span>
-                            <HiPencil className='w-5 h-5 text-custom-bluegreen' />
-                          </span>
-                        </div>
-                      </button>
-                      <button onClick={() => handleUpdateEmployeePermissionStatus(employee)}>
-                        <MdDelete className='w-6 h-6 text-red-500' />
-                      </button>
+                          return (
+                            <td
+                              className="w-[200px] flex flex-col items-start justify-center gap-2"
+                              key={featureIndex}
+                            >
+                              <div className="w-full h-[44px] gap-[20px] flex items-center justify-center bg-white rounded-[5px]">
+                                {departmentFeature ? (
+                                  PERMISSIONS.map((permission) => {
+                                    // Access the permission status from the department's feature pivot
+                                    const permissionValue = departmentFeature.pivot[permission.value];
+                                    return (
+                                      <div
+                                        className="flex flex-col gap-[2.75px] items-center"
+                                        key={permission.value}
+                                      >
+                                        <p className="montserrat-semibold text-[10px] leading-[12.19px]">
+                                          {permission.name}
+                                        </p>
+                                        <input
+                                          type="checkbox"
+                                          className="h-[16px] w-[16px]"
+                                          checked={permissionValue}
+                                          disabled
+                                        />
+                                      </div>
+                                    );
+                                  })
+                                ) : (
+                                  <p className="text-center text-custom-gray">No Permissions</p>
+                                )}
+                              </div>
+                            </td>
+                          );
+                        })}
+                      </tr>
+                      <div className='flex gap-x-3'>
+                        <button
+                          className="gradient-btn5 p-[1px] w-[80px] h-[31px] rounded-[10px]"
+                          onClick={() => handleEditEmployeeModal(employee)}
+                        >
+                          <div className="w-full h-full rounded-[9px] bg-white flex justify-center items-center montserrat-semibold text-sm gap-x-2">
+                            <p className="text-base font-bold bg-gradient-to-r from-custom-bluegreen via-custom-solidgreen to-custom-solidgreen bg-clip-text text-transparent">
+                              Edit
+                            </p>
+                            <span>
+                              <HiPencil className='w-5 h-5 text-custom-bluegreen' />
+                            </span>
+                          </div>
+                        </button>
+                        <button onClick={() => handleShowUpdateEmployeeAlert(employee, 'employee')}
+                          disabled={isEmployeeLoadingState[employee.id]}
+                          className={`${isEmployeeLoadingState[employee.id]
+                            ? "opacity-50 cursor-not-allowed"
+                            : ""
+                            }`}
+                          type='submit'
+                        >
+                          {isEmployeeLoadingState[employee.id] ? (
+                            <CircularProgress className="spinnerSize" />
+                          ) : (
+                            <><MdDelete className='w-6 h-6 text-red-500' /></>
+                          )}
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                )
-              })}
+                  );
+                })
+              ) : (
+                <div className="text-center text-custom-bluegreen mt-4">
+                  No data found
+                </div>
+              )}
 
             </tbody>
           </table>
-          {/* <div className="w-[1260px] flex justify-end items-center h-[63px] px-6 gap-2  rounded-b-lg">
-
-          </div> */}
         </div>
       </div>
       <div>
-        <AddDepartmentModal modalRef={modalRef} />
+        <AddDepartmentModal departmentModalRef={departmentModalRef} />
       </div>
       <div>
-        <AddUserModals modalRef={modalref2} />
+        <AddUserModals userModalRef={userModalRef} />
       </div>
       <div>
         <EditDepartmentModal

@@ -1,35 +1,35 @@
-import React, { useEffect, useState } from 'react'
-import { AiFillInfoCircle } from 'react-icons/ai'
-import { IoMdArrowDropdown } from 'react-icons/io'
+import React, { useEffect, useState, useMemo } from 'react'
 import { useStateContext } from '../../../../../context/contextprovider';
 import { PERMISSIONS } from '../../../../../constant/data/permissions';
 import apiService from "../../../../servicesApi/apiService";
 import { showToast } from "../../../../../util/toastUtil";
 import CircularProgress from "@mui/material/CircularProgress";
+import { normalizeData } from '../UserModal/utils/normalizeData';
+import isEqual from 'lodash/isEqual';
+
 
 const EditUserModal = ({ editEmployeeModalRef, selectedEmployee }) => {
     //States
-    const { features } = useStateContext();
+    const { features, getEmployeesWithPermissions } = useStateContext();
     const [isLoading, setIsLoading] = useState(false);
     const [formData, setFormData] = useState({
-        employee_id: 0, // selected department
-        features: [],   // array of features with permissions
+        employee_id: 0,  
+        features: [],   
     });
+    const [selectedEmployeeOldData, setSelectedEmployeeOldData] = useState(null); //Holds the old data of the selected department
 
     //Hooks
     useEffect(() => {
-        console.log("selectedEmployee", selectedEmployee)
         if (selectedEmployee) {
             setFormData({
                 employee_id: selectedEmployee.id,
                 features: selectedEmployee.features,
             });
+            setSelectedEmployeeOldData(selectedEmployee);
         }
     }, [selectedEmployee])
 
-
     //Event handler
-
     //Handle the permission change
     const handleFeaturePermissionChange = (item, permission, value) => {
         const featureId = item.id;
@@ -68,36 +68,31 @@ const EditUserModal = ({ editEmployeeModalRef, selectedEmployee }) => {
     };
 
     //Handle the submit/save button click
-    const handleSubmit = () => {
-        //TODO: disable the button if there is no data in form data
+    const handleSubmit = async () => {
         const payload = {
             employee_id: parseInt(formData.employee_id),
             features: formData.features
         };
-        console.log("payload", payload)
-        console.log("payload", JSON.stringify(payload))
-        // setIsLoading(true);
         try {
-            const response = apiService.put("update-employees-feature-permissions", payload);
-            console.log("reponse", response)
+            setIsLoading(true);
+            const response = await apiService.put("update-employees-feature-permissions", payload);
 
-            if (response.statusCode === 200) {
-                showToast("Data added successfully!", "Data added successfully!");
+            if (response.data?.statusCode === 200) {
+                showToast("Data updated successfully!", "success");
                 setFormData({
-                    employee_id: 0, // selected department
+                    employee_id: 0,
                     features: [],
                 });
-                // if ( editEmployeeModalRef.current) {
-                //      editEmployeeModalRef.current.close();
-                // }
+                getEmployeesWithPermissions();
+                if (editEmployeeModalRef.current) {
+                    editEmployeeModalRef.current.close();
+                }
             }
-
         } catch (error) {
             console.log("error", error);
         } finally {
             setIsLoading(false);
         }
-
     }
 
 
@@ -115,6 +110,18 @@ const EditUserModal = ({ editEmployeeModalRef, selectedEmployee }) => {
         }
     }
 
+    //Function to check if the old data is the same as the new data, if so, disable the button
+    const isButtonDisabled = useMemo(() => {
+        if (!selectedEmployeeOldData || !formData) {
+            return true;
+        }
+
+        const oldDataNormalized = normalizeData(selectedEmployeeOldData);
+        const newDataNormalized = normalizeData(formData);
+
+        // Compare old and new data  
+        return isEqual(oldDataNormalized, newDataNormalized);
+    }, [selectedEmployeeOldData, formData]);
 
     return (
         <dialog
@@ -211,7 +218,7 @@ const EditUserModal = ({ editEmployeeModalRef, selectedEmployee }) => {
                                                                             permission.value
                                                                             ] || false
                                                                         }
-                                                                        
+
                                                                         disabled={isDisabled}
                                                                         className={`h-[16px] w-[16px] ${isDisabled
                                                                             ? "cursor-not-allowed bg-custom-grayF1"
@@ -250,20 +257,11 @@ const EditUserModal = ({ editEmployeeModalRef, selectedEmployee }) => {
                         </button>
                         <button
                             type="submit"
-                            onClick={
-                                handleSubmit
-                            }
-                            disabled={
-                                isLoading
-                            }
-                            className={`gradient-btn5 w-[100px] h-[35px] rounded-[10px] text-sm text-white montserrat-semibold ${isLoading ? "cursor-not-allowed" : ""
-                                }`}
+                            onClick={handleSubmit}
+                            disabled={isButtonDisabled || isLoading}
+                            className={`gradient-btn5 w-[100px] h-[35px] rounded-[10px] text-sm text-white montserrat-semibold ${isButtonDisabled || isLoading ? "cursor-not-allowed opacity-50" : ""}`}
                         >
-                            {isLoading ? (
-                                <CircularProgress className="spinnerSize" />
-                            ) : (
-                                <>Save</>
-                            )}
+                            {isLoading ? <CircularProgress className="spinnerSize" /> : "Save"}
                         </button>
                     </div>
                 </div>

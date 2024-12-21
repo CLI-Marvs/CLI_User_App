@@ -30,7 +30,8 @@ class EmployeeDepartmentRepository
                     $subQuery->where('status', 'Active');
                 });
             })
-            ->orWhereDoesntHave('features') // Include departments with no related pivot entries  
+            ->latest('created_at')
+            ->orWhereDoesntHave('features')  
             ->get();
     }
 }

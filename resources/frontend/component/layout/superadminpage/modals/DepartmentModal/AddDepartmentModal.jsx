@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react'
-import { AiFillInfoCircle } from 'react-icons/ai'
 import { IoMdArrowDropdown } from 'react-icons/io'
 import { useStateContext } from '../../../../../context/contextprovider';
 import { PERMISSIONS } from '../../../../../constant/data/permissions';
@@ -7,14 +6,13 @@ import apiService from "../../../../servicesApi/apiService";
 import { showToast } from "../../../../../util/toastUtil";
 import CircularProgress from "@mui/material/CircularProgress";
 import { isButtonDisabled } from './utils/isButtonDisabled';
-const AddDepartmentModal = ({ modalRef }) => {
+const AddDepartmentModal = ({ departmentModalRef }) => {
     //States
     const { employeeDepartments, features, getAllEmployeeDepartment, getAllFeatures, getDepartmentsWithPermissions } = useStateContext();
     const [isLoading, setIsLoading] = useState(false);
-    // const [isError,setIsError]
     const [formData, setFormData] = useState({
-        department_id: 0, // Selected department
-        features: [],   // Array of features with permissions
+        department_id: 0, 
+        features: [],   
     });
 
     //Hooks
@@ -59,12 +57,12 @@ const AddDepartmentModal = ({ modalRef }) => {
     //Handle the submit/save button click
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setIsLoading(true);
         const payload = {
             department_id: formData.department_id,
             features: formData.features
         };
         try {
+            setIsLoading(true);
             const response = await apiService.post("departments-assign-feature-permissions", payload);
             if (response.data?.statusCode === 200) {
                 showToast("Data added successfully!", "success");
@@ -72,16 +70,15 @@ const AddDepartmentModal = ({ modalRef }) => {
                     department_id: 0,
                     features: [],
                 });
-                if (modalRef.current) {
+                if (departmentModalRef.current) {
                     setTimeout(() => {
-                        modalRef.current.close();
+                        departmentModalRef.current.close();
                     }, 1000);
                 }
             }
             getDepartmentsWithPermissions();
             getAllEmployeeDepartment();
         } catch (error) {
-            // Handle error response 
             if (error.response) {
                 const errorMessage = error.response.data?.error || "An error occurred.";
                 showToast(errorMessage, "error");
@@ -94,12 +91,12 @@ const AddDepartmentModal = ({ modalRef }) => {
 
     //Handle close the modal and reset all state
     const handleCloseModal = () => {
-        if (modalRef.current) {
+        if (departmentModalRef.current) {
             setFormData({
                 department_id: 0,
                 features: [],
             });
-            modalRef.current.close();
+            departmentModalRef.current.close();
         }
     }
 
@@ -108,7 +105,7 @@ const AddDepartmentModal = ({ modalRef }) => {
         <dialog
             id="Department"
             className="modal w-[683px] rounded-[10px] shadow-custom5 backdrop:bg-black/50  "
-            ref={modalRef}
+            ref={departmentModalRef}
         >
             <div className='relative p-[20px] mb-5 rounded-lg'>
                 <div className=''>

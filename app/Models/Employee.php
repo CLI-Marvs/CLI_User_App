@@ -19,7 +19,7 @@ class Employee extends Authenticatable
     public function features(): BelongsToMany
     {
         return $this->belongsToMany(Feature::class, 'employee_feature_permission', 'employee_id', 'feature_id')
-        ->withPivot('can_read', 'can_write', 'can_execute', 'can_delete', 'can_save')
+        ->withPivot('can_read', 'can_write', 'can_execute', 'can_delete', 'can_save','created_at')
         ->withTimestamps();
     }
 

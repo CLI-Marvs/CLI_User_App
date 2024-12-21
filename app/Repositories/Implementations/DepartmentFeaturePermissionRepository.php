@@ -5,7 +5,6 @@ namespace App\Repositories\Implementations;
 use App\Models\Feature;
 use App\Models\EmployeeDepartment;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 
 class DepartmentFeaturePermissionRepository
 {
@@ -18,10 +17,11 @@ class DepartmentFeaturePermissionRepository
 
     /**
      *Synchronize feature permissions for a department
+     * This function is to create the permission of each department (e.g can write, can read, etc)
      */
     public function syncDepartmentPermissions(int $departmentId, array $features)
     {
- 
+
         $department = $this->model->findOrFail($departmentId);
 
         // Check if department already has permissions with "Active" status
@@ -29,7 +29,7 @@ class DepartmentFeaturePermissionRepository
 
         // Check if department already has permissions using the relationship
         if ($activePermissions > 0) {
-            
+
             // If there are active permissions, check if there are any "InActive" permissions
             $inactivePermissions = $department->features()->where('status', 'InActive')->count();
 
@@ -51,51 +51,57 @@ class DepartmentFeaturePermissionRepository
             ]);
         }
 
-      return 'Department permission successfully added';
+        return 'Department permission successfully added';
     }
 
     /**
      * Get all departments with permissions 
      * Only departments with active feature permissions are returned
      * The loaded features are filtered to show only active ones
+     * Get the latest data from the pivot table
      */
     public function getDepartmentsWithPermissions()
     {
         $departmentPermissions = $this->model->query()
-            ->whereHas('features', function ($query) {
-                $query->where('department_feature_permissions.status', 'Active'); // Filter departments that have active features
-            })
-            ->with(['features' => function ($query) {
-                $query->wherePivot('status', 'Active');
-            }])
-            ->latest('created_at')
-            ->get();
+        ->whereHas('features', function ($query) {
+            $query->where('department_feature_permissions.status', 'Active'); // Filter departments that have active features
+        })
+        ->with(['features' => function ($query) {
+            $query->wherePivot('status', 'Active')
+            ->orderByPivot('created_at', 'desc'); // Order by pivot's created_at
+        }])
+        ->orderByDesc(function ($query) {
+            $query->select('created_at')
+            ->from('department_feature_permissions')
+            ->whereColumn('department_feature_permissions.department_id', 'employee_departments.id') // Match department_id
+            ->latest()
+            ->limit(1); // Get the latest pivot created_at for ordering
+        })
+        ->get();
 
         return $departmentPermissions;
     }
 
     /**
      * Update the department's permission status
+     * 'Active or InActive'
      */
     public function updateDepartmentPermissionStatus(int $departmentId, string $status)
     {
-
         $department = $this->model->findOrFail($departmentId);
-
         $department->features()->newPivotQuery()
             ->where('department_id', $departmentId)
             ->update(['status' => $status]);
-
-       
         return 'Department permissions updated successfully';
     }
 
     /**
      * Update the department feature permissions
+     * This function is to update the permission of each department (e.g can write, can read, etc)
      */
     public function updateDepartmentFeaturePermissions(int $departmentId, array $permissions)
     {
-        
+
         DB::beginTransaction();
         try {
             // Find the department or throw an exception
@@ -117,7 +123,7 @@ class DepartmentFeaturePermissionRepository
 
                 // Prepare pivot data, using existing pivot data if available
                 $pivotData = [
-                    'status'=>'Active',
+                    'status' => 'Active',
                     'can_read' => $feature['pivot']['can_read'] ?? $feature['can_read'] ?? false,
                     'can_write' => $feature['pivot']['can_write'] ?? $feature['can_write'] ?? false,
                     'can_execute' => $feature['pivot']['can_execute'] ?? $feature['can_execute'] ?? false,
@@ -126,7 +132,7 @@ class DepartmentFeaturePermissionRepository
                 ];
                 $featuresToSync[$featureId] = $pivotData;
             }
-            
+
             // Sync the features with the department
             $department->features()->sync($featuresToSync);
 
