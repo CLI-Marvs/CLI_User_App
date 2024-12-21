@@ -11,8 +11,7 @@ import apiService from "../../servicesApi/apiService";
 import { showToast } from "../../../util/toastUtil"
 import Alert from "../mainComponent/Alert";
 import CircularProgress from "@mui/material/CircularProgress";
-
-import { setActive } from '@material-tailwind/react/components/Tabs/TabsContext';
+ 
 
 const UserRightsAndPermissions = () => {
 
@@ -110,7 +109,7 @@ const UserRightsAndPermissions = () => {
 
   //Handle click event to show the department alert 
   const handleShowUpdateDepartmentAlert = (department, alertType) => {
-    setAlertType(alertType);
+    setAlertType(alertType); //employee or department
     setSelectedDepartment(department);
     setShowAlert(true);
   };
@@ -156,9 +155,7 @@ const UserRightsAndPermissions = () => {
               Add
             </button>
           </div>
-
         </div>
-
         <div>
           <table className="overflow-x-auto bg-custom-grayFA mb-2">
             <thead>
@@ -445,9 +442,6 @@ const UserRightsAndPermissions = () => {
           show={showAlert}
           onCancel={handleCancel}
           onConfirm={handleConfirm}
-        //You can pass onConfirm and onCancel props to customize the text of the buttons. Example below;
-        // confirmText="Update"
-        // cancelText="Cancel"
         />
       </div>
     </div>

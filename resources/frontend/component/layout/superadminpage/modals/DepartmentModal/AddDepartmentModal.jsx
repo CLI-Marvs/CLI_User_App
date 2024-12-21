@@ -47,8 +47,6 @@ const AddDepartmentModal = ({ departmentModalRef }) => {
             if (!updatedFeatures.find((feature) => feature.featureId === featureId) && value === true) {
                 updatedFeatures.push({ featureId, [permission.value]: value });
             }
-
-
             return { ...prevState, features: updatedFeatures };
         });
     };
@@ -89,7 +87,7 @@ const AddDepartmentModal = ({ departmentModalRef }) => {
     }
 
 
-    //Handle close the modal and reset all state
+    //Handle close the modal/cancel and reset all state
     const handleCloseModal = () => {
         if (departmentModalRef.current) {
             setFormData({
@@ -115,12 +113,6 @@ const AddDepartmentModal = ({ departmentModalRef }) => {
                         </button>
                     </div>
                 </div>
-                {/* <div className="flex justify-center items-center mt-[14px] flex-col gap-y-2">
-                    <AiFillInfoCircle className="size-[37px] text-[#5B9BD5]" />
-                    <div className="w-full flex justify-center items-center h-12 bg-red-100 mb-4 rounded-lg">
-                        <p>Validation error here</p>
-                    </div>
-                </div> */}
                 <div className='flex flex-col gap-[36px] mt-[26px]'>
                     <div className='w-full p-[10px] flex flex-col gap-[10px]'>
                         <p className='text-sm font-semibold'>Department</p>
@@ -192,8 +184,6 @@ const AddDepartmentModal = ({ departmentModalRef }) => {
                                                     </div>
                                                 );
                                             })}
-
-
                                         </div>
                                     </div>
                                 </div>
@@ -229,7 +219,6 @@ const AddDepartmentModal = ({ departmentModalRef }) => {
                                 <>Save</>
                             )}
                         </button>
-
                     </div>
                 </div>
             </div>

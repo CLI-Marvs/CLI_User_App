@@ -134,12 +134,6 @@ const EditDepartmentModal = ({ editDepartmentModalRef, selectedDepartment }) => 
                         </button>
                     </div>
                 </div>
-                {/* <div className="flex justify-center items-center mt-[14px] flex-col gap-y-2">
-                    <AiFillInfoCircle className="size-[37px] text-[#5B9BD5]" />
-                    <div className="w-full flex justify-center items-center h-12 bg-red-100 mb-4 rounded-lg">
-                        <p>Validation error here</p>
-                    </div>
-                </div> */}
                 <div className='flex flex-col gap-[36px] mt-[26px]'>
                     <div className='w-full p-[10px] flex flex-col gap-[10px]'>
                         <p className='text-sm font-semibold'>Department</p>
@@ -193,7 +187,6 @@ const EditDepartmentModal = ({ editDepartmentModalRef, selectedDepartment }) => 
                                                                             permission.value
                                                                             ] || false
                                                                         }
-                                                                        // checked={!!permissionValue}
                                                                         disabled={isDisabled}
                                                                         className={`h-[16px] w-[16px] ${isDisabled
                                                                             ? "cursor-not-allowed bg-custom-grayF1"
@@ -238,7 +231,6 @@ const EditDepartmentModal = ({ editDepartmentModalRef, selectedDepartment }) => 
                         >
                             {isLoading ? <CircularProgress className="spinnerSize" /> : "Save"}
                         </button>
-
                     </div>
                 </div>
             </div>

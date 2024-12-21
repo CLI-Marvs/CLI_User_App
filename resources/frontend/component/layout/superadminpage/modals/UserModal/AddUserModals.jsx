@@ -58,6 +58,7 @@ const AddUserModals = ({ userModalRef }) => {
         setSearch(employee.name);
         setIsDropdownOpen(false);
     };
+
     //Handle the permission change
     const handleFeaturePermissionChange = (item, permission, value) => {
         const featureId = item.id;
@@ -226,7 +227,6 @@ const AddUserModals = ({ userModalRef }) => {
                                 </>
                             )}
                         </div>
-                        {/* Conditionally render the list when dropdown is open */}
                     </div>
                     <div className='w-full p-[10px] flex flex-col gap-[10px]'>
                         <p className='text-sm font-semibold'>Permissions</p>
@@ -299,7 +299,6 @@ const AddUserModals = ({ userModalRef }) => {
                                 <>Save</>
                             )}
                         </button>
-
                     </div>
                 </div>
             </div>
