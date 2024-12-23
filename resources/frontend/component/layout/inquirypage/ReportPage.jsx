@@ -27,34 +27,7 @@ import { useLocation } from "react-router-dom";
 
 const barHeight = 20;
 
-const dataSetType= [
-    { name: 'Project 1', Complaint: 17, Request: 18, Inquiry: 12, Suggestion: 5 },
-    { name: 'Project 2', Complaint: 22, Request: 15, Inquiry: 20, Suggestion: 8 },
-    { name: 'Project 3', Complaint: 10, Request: 25, Inquiry: 8, Suggestion: 6 },
-    { name: 'Project 4', Complaint: 14, Request: 18, Inquiry: 10, Suggestion: 12 },
-    { name: 'Project 5', Complaint: 9, Request: 12, Inquiry: 5, Suggestion: 7 },
-];
 
-const dataPerCategory = [
-    { name: 'Category Alpha', value: 40 },
-    { name: 'Category Bravo', value: 30 },
-    { name: 'Category Charlie', value: 20 },
-    { name: 'Category Delta', value: 10 },
-    { name: 'Category Echo', value: 13 },
-
-];
-
-
-
-const inquriesPerChannelDatasample = [
-    { name: 'Email', value: 20 },
-    { name: 'Call', value: 35 },
-    { name: 'Walk-in', value: 50 },
-    { name: 'Website', value: 20 },
-    { name: 'Social Media', value: 18 },
-    { name: 'Branch Tablet', value: 22 },
-    { name: 'Internal Endorsement', value: 12 },
-];
 
 const colors = ["#348017", "#70AD47", "#1A73E8", "#5B9BD5", "#175D5F", "#404B52", "#A5A5A5"];
 
@@ -115,17 +88,38 @@ const getCategoryColor = (categoryName) => {
 };
 const CustomTooltip = ({ active, payload }) => {
     if (active && payload && payload.length) {
+        const { name } = payload[0].payload;
         return (
             <div className="bg-white p-2 shadow-lg rounded">
-                {/*  <p>{`${payload[0].name}`}</p> */}
-                <p>{`Resolved: ${payload[0].value}`}</p>
-                <p>{`Unresolved: ${payload[1].value}`}</p>
+                 <p className="font-bold">{`${name}`}</p>
+                <p className="text-custom-solidgreen">{`Resolved: ${payload[0].value}`}</p>
+                <p className="text-custom-lightgreen">{`Unresolved: ${payload[1].value}`}</p>
             </div>
         );
     }
 
     return null;
 };
+
+const CustomTooltipPieChart = ({ active, payload, label }) => {
+    if (active && payload && payload.length) {
+        return (
+            <div className="custom-tooltip bg-white p-3 rounded shadow-md">
+                {payload.map((entry, index) => (
+                    <div key={index} className="text-gray-700">
+                        <p className="font-bold">{`${entry.name}`}</p>
+                        <p>{`Count: ${entry.value}`}</p>
+                    </div>
+                ))}
+            </div>
+        );
+    }
+
+    return null;
+};
+
+
+
 const CustomTooltip2 = ({ active, payload }) => {
     if (active && payload && payload.length) {
         return (
@@ -291,12 +285,15 @@ const ReportPage = () => {
         inquiriesPerChannelMonth,
         setInquiriesPerChannelMonth,
         getInquiriesPerChannel,
-        inquriesPerChannelData
+        inquriesPerChannelData,
+        propertyNamesList
     } = useStateContext();
+
+    
     const defaultData = [{ name: "No Data" }];
     const dataToDisplay = dataCategory.length > 0 ? dataCategory : defaultData;
     const location = useLocation();
-
+    console.log("inquriesPerChannelData", inquriesPerChannelData);
     const getCurrentMonth = () => {
         const months = [
             'january', 'february', 'march', 'april', 'may', 'june',
@@ -305,6 +302,49 @@ const ReportPage = () => {
         const currentMonthIndex = new Date().getMonth();
         return months[currentMonthIndex];
     };
+
+    const formatFunc = (name) => {
+        return name
+            .toLowerCase()
+            .replace(/\b\w/g, (char) => char.toUpperCase());
+    };
+
+
+    const formattedPropertyNames = [
+        "N/A",
+        ...(Array.isArray(propertyNamesList) && propertyNamesList.length > 0
+            ? propertyNamesList
+                .filter((item) => !item.toLowerCase().includes("phase"))
+                .map((item) => {
+                    let formattedItem = formatFunc(item);
+
+                    // Capitalize each word in the string
+                    formattedItem = formattedItem
+                        .split(" ")
+                        .map((word) => {
+                            // Check for specific words that need to be fully capitalized
+                            if (/^(Sjmv|Lpu|Cdo|Dgt)$/i.test(word)) {
+                                return word.toUpperCase();
+                            }
+                            // Capitalize the first letter of all other words
+                            return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+                        })
+                        .join(" ");
+
+                    // Replace specific names if needed
+                    if (formattedItem === "Casamira South") {
+                        formattedItem = "Casa Mira South";
+                    }
+
+                    return formattedItem;
+                })
+                .sort((a, b) => {
+                    if (a === "N/A") return -1;
+                    if (b === "N/A") return 1;
+                    return a.localeCompare(b);
+                })
+            : []),
+    ];
 
     //Get current year
     const currentYear = new Date().getFullYear();
@@ -328,6 +368,7 @@ const ReportPage = () => {
     const handleDepartmentYearChange = (e) => {
         setDepartmentStatusYear(e.target.value);
     }
+
     const handleInquiriesPerCategoryYearChange = (e) => {
         setInquiriesPerCategoryYear(e.target.value);
     }
@@ -378,6 +419,9 @@ const ReportPage = () => {
 
     // console.log("department", department);
 
+    
+    const totalValue = dataCategory.reduce((total, category) => total + category.value, 0); //total value of category
+
     return (
         <div className="h-screen bg-custom-grayFA p-4 flex flex-col gap-[21px]">
             <div className="flex gap-[10px] bg-[#F2F8FC] rounded-[10px] w-full py-[24px] px-[30px]">
@@ -390,7 +434,7 @@ const ReportPage = () => {
                             name="concern"
                             className="appearance-none w-full px-4 py-1 bg-white focus:outline-none border-0"
                             value={department}
-                            onChange={(e) => setDepartment(e.target.value)}
+                           /* onChange={(e) => setDepartment(e.target.value)} */
                         >
                             {user?.department === "Customer Relations - Services" ? (
                                 allDepartment.map((item, index) => (
@@ -420,20 +464,19 @@ const ReportPage = () => {
                         /* value={department}
                         onChange={(e) => setDepartment(e.target.value)} */
                         >
-                            {/* {user?.department === "Customer Relations - Services" ? (
-                                allDepartment.map((item, index) => (
-                                    <option key={index} value={item}>
-                                        {item}
-                                    </option>
-                                ))
-                            ) : (
-                                <option value={user?.department}>
-                                    {user?.department}
-                                </option>
-                            )} */}
-                           {/*  <option value="Customer Relations - Services">
-                                38 Park Avenue
-                            </option> */}
+                           <option value="">All</option>
+                                    {formattedPropertyNames.map(
+                                        (item, index) => {
+                                            return (
+                                                <option
+                                                    key={index}
+                                                    value={item}
+                                                >
+                                                    {item}
+                                                </option>
+                                            );
+                                        }
+                                    )}
 
                         </select>
                         <span className="absolute inset-y-0 right-0 flex items-center text-white pr-3 pl-3 bg-custom-lightgreen pointer-events-none">
@@ -452,6 +495,7 @@ const ReportPage = () => {
                     /*  value={department} */
                     /* onChange={handleDepartmentYearChange} */
                     >
+                        <option value="january">All</option>
                         <option value="january">January</option>
                         <option value="february">February</option>
                         <option value="march">March</option>
@@ -487,6 +531,11 @@ const ReportPage = () => {
                     <span className="absolute inset-y-0 right-0 flex items-center text-white pr-3 pl-3 bg-custom-lightgreen pointer-events-none">
                         <MdCalendarToday />
                     </span>
+                </div>
+                <div>
+                    <button className="bg-custom-lightgreen text-white rounded-[6px] px-4 h-full font-semibold">
+                        Search
+                    </button>
                 </div>
             </div>
             <div className="bg-[#F2F8FC] p-4 rounded-[10px]">
@@ -746,7 +795,6 @@ const ReportPage = () => {
                                     Internal Endorsement
                                 </span>
                             </div>
-
                         </div>
                     </div>
                 </div>
@@ -762,7 +810,7 @@ const ReportPage = () => {
                             <div>
                                 <PieChart width={548} height={360}>
                                     <Pie
-                                        data={dataPerCategory}
+                                        data={dataCategory}
                                         cx="50%"
                                         cy="50%"
                                         outerRadius={170}
@@ -776,7 +824,7 @@ const ReportPage = () => {
                                         startAngle={90}
                                         endAngle={450}
                                     >
-                                        {dataPerCategory.map((entry, index) => (
+                                        {dataCategory.map((entry, index) => (
                                             <Cell
                                                 key={index}
                                                 // fill={categoryColors[entry.name] || COLORS[index % COLORS.length]}
@@ -785,11 +833,12 @@ const ReportPage = () => {
                                         ))}
 
                                     </Pie>
-                                    <Tooltip formatter={(value, name) => ` ${value}%`} />
+                                    <Tooltip content={<CustomTooltipPieChart/>} />
                                 </PieChart>
                             </div>
-                            <div className="flex w-full rounded-md flex-wrap gap-[10px]">
-                            {dataPerCategory.map((category, index) => (
+                            <div className="flex w-full rounded-md flex-wrap justify-end gap-[10px]">
+                            {dataCategory.map((category, index) => (
+                                
                                 <div className=" shrink-0 items-center" key={index}>
                                         <div
                                             className="flex w-full gap-[10px]"
@@ -813,11 +862,11 @@ const ReportPage = () => {
                                             </div>
                                             <div className="flex items-center gap-1">
                                                 <span className="text-gray-700 font-bold text-sm">
-                                                    {category.value}
+                                                    {totalValue > 0 ? `${((category.value / totalValue) * 100)}%` : ""}
                                                 </span>
-                                                <span className="text-custom-gray81 text-[10px]">
+                                               {/*  <span className="text-custom-gray81 text-[10px]">
                                                     {category.value ? "%" : ""}
-                                                </span>
+                                                </span> */}
                                             </div>
                                         </div>
                                     </div>
@@ -1005,7 +1054,7 @@ const ReportPage = () => {
                     
                     <ResponsiveContainer width="100%" height={218}>
                         <BarChart
-                            data={dataSetType}
+                            data={communicationTypeData}
                             margin={{
                                 top: 5,
                                 right: 30,
@@ -1016,37 +1065,59 @@ const ReportPage = () => {
                             <CartesianGrid strokeDasharray="3 3" vertical={false} />
                             <XAxis dataKey="name" />
                             <YAxis
-                                tickCount={8} // Divides the Y-axis into increments of 10
-                                interval={0} // Ensures all ticks are displayed
-                                // Adjusts the range dynamically
-                                tickFormatter={(value) => `${value}`} // Optional: Customize tick format
+                                tickFormatter={(value) => (Number.isInteger(value) ? value : '')}
                             />
                             <Tooltip content={<CustomTooltip3 />} />
                             <Bar
-                                dataKey="Complaint"
+                                dataKey="complainCount"
                                 fill="#EF4444" // Red color for complaints
                                 barSize={12}
                                 radius={[3, 3, 0, 0]}
+                            >
+                                 <LabelList
+                                dataKey="complainCount"
+                                position="top"
+                                fill="#4a5568"
                             />
+                            </Bar>
                             <Bar
-                                dataKey="Request"
+                                dataKey="requestCount"
                                 fill="#348017" // Green color for requests
                                 barSize={12}
                                 radius={[3, 3, 0, 0]}
+                            >
+                                 <LabelList
+                                dataKey="requestCount"
+                                position="top"
+                                fill="#4a5568"
                             />
+                            </Bar>
+                                
+                                 
                             <Bar
-                                dataKey="Inquiry"
+                                dataKey="inquiryCount"
                                 fill="#1A73E8" // Blue color for inquiries
                                 barSize={12}
                                 radius={[3, 3, 0, 0]}
+                            >
+                                <LabelList
+                                dataKey="inquiryCount"
+                                position="top"
+                                fill="#4a5568"
                             />
+                            </Bar>
                             <Bar
-                                dataKey="Suggestion"
+                                dataKey="suggestionCount"
                                 fill="#E4EA3B" // Yellow color for suggestions
                                 barSize={12}
                                 radius={[3, 3, 0, 0]}
+                            >
+                                <LabelList
+                                dataKey="suggestionCount"
+                                position="top"
+                                fill="#4a5568"
                             />
-
+                            </Bar>
                         </BarChart>
                     </ResponsiveContainer>
 

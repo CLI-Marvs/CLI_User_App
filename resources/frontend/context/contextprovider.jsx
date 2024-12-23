@@ -278,7 +278,6 @@ export const ContextProvider = ({ children }) => {
                 requestCount: item.request,
                 inquiryCount: item.inquiry,
                 suggestionCount: item.suggestion,
-
             }));
 
             setCommunicationTypeData(formattedData);
@@ -299,12 +298,12 @@ export const ContextProvider = ({ children }) => {
                 },
             });
             const result = response.data;
- 
+           
             const formattedData = result.map((item) => ({
                 name: item.channels,
                 value: item.total,
             }));
-
+            
             setInquriesPerChannelData(formattedData);
         } catch (error) {
             console.error("Error fetching data:", error);
@@ -365,7 +364,6 @@ export const ContextProvider = ({ children }) => {
             } /* finally {
                 setLoading(false); 
             } */
-            
         }
     };
 
