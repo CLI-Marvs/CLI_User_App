@@ -75,7 +75,7 @@ const EditUserModal = ({ editEmployeeModalRef, selectedEmployee }) => {
         };
         try {
             setIsLoading(true);
-            const response = await apiService.put("update-employees-feature-permissions", payload);
+            const response = await apiService.patch("update-employees-feature-permissions", payload);
 
             if (response.data?.statusCode === 200) {
                 showToast("Data updated successfully!", "success");

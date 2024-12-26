@@ -221,6 +221,7 @@ const Navbar = () => {
                 /*    localStorage.removeItem("selectedUnit");
         sessionStorage.removeItem("modalAlreadyShown"); */
                 localStorage.removeItem("authToken");
+                sessionStorage.removeItem("userAccessData");
                 window.location.href = "/";
             } else {
                 console.log("Logout failed");

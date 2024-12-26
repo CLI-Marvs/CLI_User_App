@@ -6,7 +6,7 @@ import moment from "moment";
 import apiService from "../../servicesApi/apiService";
 
 const TicketTable = ({ concernData }) => {
-    
+    const [hasPermission, setHasPermission] = useState(false);
     const [checkedRows, setCheckedRows] = useState([]);
     const {
         getMessages,
@@ -15,8 +15,19 @@ const TicketTable = ({ concernData }) => {
         setData,
         getInquiryLogs,
         getConcernMessages,
-        getNavBarData
+        getNavBarData,
+        userAccessData
     } = useStateContext();
+    //Permission check
+    useEffect(() => {
+        if (userAccessData) {
+           
+            const notificationPermissions = userAccessData?.employeePermissions?.find(
+                (perm) => perm.name === 'Inquiry Management'
+            );
+            setHasPermission(notificationPermissions?.pivot?.can_read);
+        }
+    }, [userAccessData]);
     const handleCheckboxChange = (index) => {
         setCheckedRows((prevCheckedRows) =>
             prevCheckedRows.includes(index)
@@ -47,14 +58,14 @@ const TicketTable = ({ concernData }) => {
         getNavBarData();
         const encodedTicketId = encodeURIComponent(items.ticket_id);
         navigate(
-            `/inquirymanagement/thread/${encodedTicketId}` , {
+            `/inquirymanagement/thread/${encodedTicketId}`, {
             state: { itemsData: items },
-         }
+        }
         );
     };
 
-  
-    
+
+
     const formatTime = (createdAt) => {
         const date = new Date(createdAt);
         const now = new Date();
@@ -69,19 +80,20 @@ const TicketTable = ({ concernData }) => {
             hours = hours % 12;
             hours = hours ? hours : 12;
 
-            const formattedTime = `${hours}:${
-                minutes < 10 ? "0" + minutes : minutes
-            } ${ampm}`;
+            const formattedTime = `${hours}:${minutes < 10 ? "0" + minutes : minutes
+                } ${ampm}`;
             return formattedTime;
         } else {
             const options = { month: "long", day: "numeric" };
             return date.toLocaleDateString(undefined, options);
         }
     };
-
-   /*  useEffect(() => {
-        getAllConcerns();
-    }, []); */
+    if (!hasPermission) {
+        return <div className="w-full h-full flex justify-center items-center text-custom-bluegreen text-lg">You do not have permission to view this page.</div>;
+    }
+    /*  useEffect(() => {
+         getAllConcerns();
+     }, []); */
     return (
         <table className="flex flex-col gap-1 w-full">
             <tbody>
@@ -92,15 +104,14 @@ const TicketTable = ({ concernData }) => {
                             onClick={() => navigateToThread(row)}
                             className={`flex items-center h-7 cursor-pointer mb-1 text-sm 
                             hover:shadow-custom
-                            ${
-                                row.status === "Resolved" || row.status === "Closed"
+                            ${row.status === "Resolved" || row.status === "Closed"
                                     ? row.ispinned === 1
                                         ? "bg-custom-lightestgreen"
                                         : "bg-custom-grayF1"
                                     : row.ispinned === 1
-                                    ? "bg-custom-lightestgreen"
-                                    : "bg-white"
-                            }`}
+                                        ? "bg-custom-lightestgreen"
+                                        : "bg-white"
+                                }`}
                         >
                             {/*  <td className='w-10 flex justify-center'>
                             <input
@@ -111,11 +122,10 @@ const TicketTable = ({ concernData }) => {
                             />
                         </td> */}
                             <td
-                                className={`w-[60px] shrink-0 flex justify-center text-xl  ${
-                                    row.status === "Resolved" || row.status === "Closed"
+                                className={`w-[60px] shrink-0 flex justify-center text-xl  ${row.status === "Resolved" || row.status === "Closed"
                                         ? "text-gray-500"
                                         : "text-custom-bluegreen"
-                                }`}
+                                    }`}
                             >
                                 <button
                                     className="hover:shadow-custom5 hover:rounded-full text-custom-solidgreen"
@@ -133,11 +143,10 @@ const TicketTable = ({ concernData }) => {
                             </td>
                             <td
                                 className={`shrink-0 
-                                ${
-                                    row.status === "Resolved" || row.status === "Closed"
+                                ${row.status === "Resolved" || row.status === "Closed"
                                         ? "text-black font-normal"
                                         : "text-custom-bluegreen font-semibold"
-                                }
+                                    }
                                 `}
                             >
                                 <p className={`w-[130px] pr-2  truncate `}>
@@ -169,8 +178,8 @@ const TicketTable = ({ concernData }) => {
                                         const middleInitial =
                                             row.buyer_middlename
                                                 ? `${row.buyer_middlename
-                                                      .charAt(0)
-                                                      .toUpperCase()}.`
+                                                    .charAt(0)
+                                                    .toUpperCase()}.`
                                                 : "";
                                         // Define the suffix if it exists
                                         const suffix = row.suffix_name
@@ -191,11 +200,10 @@ const TicketTable = ({ concernData }) => {
 
                                         return `${capitalize(
                                             lastName
-                                        )}, ${capitalize(firstName)}${
-                                            middleInitial
+                                        )}, ${capitalize(firstName)}${middleInitial
                                                 ? `, ${middleInitial}`
                                                 : ""
-                                        }`;
+                                            }`;
 
                                         // return `${capitalize(
                                         //     lastName
@@ -208,11 +216,10 @@ const TicketTable = ({ concernData }) => {
                             <td className="flex flex-1 gap-1 truncate">
                                 <p
                                     className={`truncate
-                                    ${
-                                        row.status === "Resolved" || row.status === "Closed"
+                                    ${row.status === "Resolved" || row.status === "Closed"
                                             ? "text-black font-normal"
                                             : "text-custom-bluegreen font-semibold"
-                                    }
+                                        }
                                     `}
                                 >
                                     <span className="flex-1 truncate">
@@ -234,20 +241,18 @@ const TicketTable = ({ concernData }) => {
                                 </p>
                             </td>
                             <td
-                                className={`w-[210px] flex items-center  ${
-                                    row.status === "Resolved" || row.status === "Closed"
+                                className={`w-[210px] flex items-center  ${row.status === "Resolved" || row.status === "Closed"
                                         ? "text-gray-500"
                                         : "text-custom-lightgreen"
-                                }`}
+                                    }`}
                             >
                                 <p className="truncate">{row.message_log}</p>
                             </td>
                             <td
-                                className={`w-[110px] flex justify-end pr-3 ${
-                                    row.status === "Resolved" || row.status === "Closed"
+                                className={`w-[110px] flex justify-end pr-3 ${row.status === "Resolved" || row.status === "Closed"
                                         ? "text-black"
                                         : "text-custom-bluegreen"
-                                } font-semibold`}
+                                    } font-semibold`}
                             >
                                 {formatTime(row.created_at)}
                             </td>

@@ -163,5 +163,5 @@ Route::middleware('auth:sanctum')->group(function () {
   Route::get('/get-employees-with-permissions', [EmployeeFeaturePermissionController::class, 'index']);
   Route::post('/employee-assign-feature-permissions', [EmployeeFeaturePermissionController::class, 'store']);
   Route::patch('/update-employee-status', [EmployeeFeaturePermissionController::class, 'updateStatus']);
-  Route::put('/update-employees-feature-permissions', [EmployeeFeaturePermissionController::class, 'updatePermissions']);
+  Route::patch('/update-employees-feature-permissions', [EmployeeFeaturePermissionController::class, 'updatePermissions']);
 });

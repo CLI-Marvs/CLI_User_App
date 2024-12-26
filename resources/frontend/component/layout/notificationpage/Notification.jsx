@@ -17,9 +17,24 @@ const Notification = () => {
         getNotifications,
         setNotifStatus,
         notifStatus,
+        userAccessData
     } = useStateContext();
     const [activeButton, setActiveButton] = useState("All");
+    const [hasPermission, setHasPermission] = useState(false);
+    
+    //Permission check
+    useEffect(() => {
+      if(userAccessData) {
+        const notificationPermissions = userAccessData?.employeePermissions?.find(
+          (perm) => perm.name === 'Notification'
+        );
+        setHasPermission(notificationPermissions?.pivot?.can_read);
+      }
+    }, [userAccessData]);
+ 
 
+    
+ 
     const handleClick = (button) => {
         setNotifStatus((prev) => (prev === button ? "All" : button));
         setNotifCurrentPage(0);
@@ -38,6 +53,7 @@ const Notification = () => {
         setNotifStatus("");
         getNotifications();
     }; */
+
     const buttonLabels = ["All", "Unread", "Read"];
 
     const navigateToThread = (items) => {
@@ -87,7 +103,10 @@ const Notification = () => {
     useEffect(() => {
         setNotifStatus("All");
     }, [location.pathname]);
-
+    // console.log("notificationPermissions", userAccessData);
+    if (!hasPermission) {
+        return <div className="w-full h-full flex justify-center items-center text-custom-bluegreen text-lg">You do not have permission to view this page.</div>;
+    }
     return (
         <div className=" bg-custom-grayFA ">
             <div className="bg-custom-grayFA px-5">
@@ -102,11 +121,10 @@ const Notification = () => {
                             <button
                                 key={label}
                                 onClick={() => handleClick(label)}
-                                className={`flex items-center border montserrat-semibold border-custom-lightgreen h-[24px] px-3 rounded-[50px] text-[13px] ${
-                                    activeButton === label
+                                className={`flex items-center border montserrat-semibold border-custom-lightgreen h-[24px] px-3 rounded-[50px] text-[13px] ${activeButton === label
                                         ? "bg-custom-lightgreen text-white"
                                         : "text-custom-lightgreen"
-                                }`}
+                                    }`}
                             >
                                 {label}
                             </button>
@@ -122,11 +140,10 @@ const Notification = () => {
                                 notifications.map((item, index) => (
                                     <tr
                                         onClick={() => navigateToThread(item)}
-                                        className={`flex items-center min-h-[47px] cursor-pointer my-1 ${
-                                            item.is_read === 1
+                                        className={`flex items-center min-h-[47px] cursor-pointer my-1 ${item.is_read === 1
                                                 ? "bg-custom-grayF1"
                                                 : "bg-white"
-                                        } hover:shadow-custom4`}
+                                            } hover:shadow-custom4`}
                                         key={index}
                                     >
                                         <td className="w-[228px] shrink-0 h-full px-4">

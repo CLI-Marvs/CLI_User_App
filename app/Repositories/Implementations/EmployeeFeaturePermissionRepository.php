@@ -26,7 +26,7 @@ class EmployeeFeaturePermissionRepository
         $employee = Employee::findOrFail($employeeId);
         // Check if department already has permissions with "Active" status
         $activePermissions = $employee->features()->where('status', 'Active')->count();
-        
+
         // Check if department already has permissions using the relationship
         if ($activePermissions > 0) {
 
@@ -69,13 +69,13 @@ class EmployeeFeaturePermissionRepository
             })
             ->with(['features' => function ($query) {
                 $query->wherePivot('status', 'Active')
-                ->orderByPivot('created_at', 'desc'); // Order by pivot's created_at
+                    ->orderByPivot('created_at', 'desc'); // Order by pivot's created_at
             }])
             ->orderByDesc(function ($query) {
                 $query->select('created_at')
-                ->from('employee_feature_permission')
-                ->whereColumn('employee_feature_permission.employee_id', 'employee.id') // Match department_id
-                ->latest()
+                    ->from('employee_feature_permission')
+                    ->whereColumn('employee_feature_permission.employee_id', 'employee.id') // Match department_id
+                    ->latest()
                     ->limit(1); // Get the latest pivot created_at for ordering
             })
             ->get();
@@ -108,10 +108,9 @@ class EmployeeFeaturePermissionRepository
      */
     public function updateEmployeeFeaturePermissions(int $employeeId, array $permissions)
     {
-
         DB::beginTransaction();
         try {
-            // Find the department or throw an exception
+            // Find the employee or throw an exception
             $employee = $this->model->findOrFail($employeeId);
 
             // Validate input
@@ -119,17 +118,16 @@ class EmployeeFeaturePermissionRepository
                 throw new \InvalidArgumentException("No permissions provided");
             }
 
-            // Prepare the features to sync
+
+            // Filter and prepare only Active features to sync
             $featuresToSync = [];
             foreach ($permissions as $feature) {
-                // Ensure feature ID exists
                 $featureId = $feature['id'] ?? $feature['feature_id'] ?? null;
                 if (!$featureId) {
                     continue;
                 }
 
-                // Prepare pivot data, using existing pivot data if available
-                $pivotData = [
+                $featuresToSync[$featureId] = [
                     'status' => 'Active',
                     'can_read' => $feature['pivot']['can_read'] ?? $feature['can_read'] ?? false,
                     'can_write' => $feature['pivot']['can_write'] ?? $feature['can_write'] ?? false,
@@ -137,20 +135,14 @@ class EmployeeFeaturePermissionRepository
                     'can_delete' => $feature['pivot']['can_delete'] ?? $feature['can_delete'] ?? false,
                     'can_save' => $feature['pivot']['can_save'] ?? $feature['can_save'] ?? false,
                 ];
-                $featuresToSync[$featureId] = $pivotData;
             }
 
-            // Sync the features with the department
+            // Only sync the Active features
             $employee->features()->sync($featuresToSync);
 
-            // Commit the transaction
             DB::commit();
-
-            return response()->json([
-                'message' => 'Employee feature permissions updated successfully'
-            ], 200);
+            return response()->json(['message' => 'Employee feature permissions updated successfully'], 200);
         } catch (\Exception $e) {
-            // Rollback the transaction
             DB::rollBack();
             return response()->json([
                 'message' => 'Error updating employee feature permissions',

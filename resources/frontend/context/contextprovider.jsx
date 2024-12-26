@@ -8,6 +8,7 @@ import React, {
 import apiService from "../component/servicesApi/apiService";
 import debounce from "lodash/debounce";
 import { set } from "lodash";
+import { json } from "react-router-dom";
 
 
 const StateContext = createContext({
@@ -90,7 +91,7 @@ export const ContextProvider = ({ children }) => {
     const [features, setFeatures] = useState([]);
     const [departmentsWithPermissions, setDepartmentsWithPermissions] = useState([]);
     const [employeesWithPermissions, setEmployeesWithPermissions] = useState([]);
-
+    const [userAccessData, setUserAccessData] = useState([]); //Holds the user and department access data
     useEffect(() => {
         if (user && user.department && !isDepartmentInitialized) {
             setDepartment(user.department === "Customer Relations - Services" ? "All" : user.department);
@@ -107,6 +108,13 @@ export const ContextProvider = ({ children }) => {
             localStorage.removeItem("authToken");
         }
     };
+    // Load from sessionStorage on initial load
+    useEffect(() => {
+        const storedData = sessionStorage.getItem("userAccessData");
+        if (storedData) {
+            setUserAccessData(JSON.parse(storedData));
+        }
+    }, []);
 
     const getAllConcerns = async () => {
         if (token) {
@@ -580,7 +588,35 @@ export const ContextProvider = ({ children }) => {
     const getEmployeesWithPermissions = async () => {
         try {
             const response = await apiService.get("get-employees-with-permissions");
+            // console.log("response", response.data.data);
             setEmployeesWithPermissions(response.data.data);
+            
+
+            // Get stored user access data from sessionStorage
+            const storedUserAccessData = JSON.parse(sessionStorage.getItem("userAccessData"));
+
+            // Check if stored data exists and has employeePermissions
+            if (storedUserAccessData) {
+                // Merge or update departmentPermissions and employeePermissions from the API response
+                const transformedData = {
+                    ...storedUserAccessData,  // Retain the existing data
+                    departmentPermissions: response.data.data[0]?.departmentPermissions || [],  // Update departmentPermissions if available
+                    employeePermissions: response.data.data[0]?.features.map((feature) => ({
+                        id: feature.id,
+                        name: feature.name,
+                        created_at: feature.created_at,
+                        updated_at: feature.updated_at,
+                        pivot: feature.pivot, // Preserve the pivot structure
+                    })) || [],
+                };
+                setUserAccessData(transformedData);
+                // Save the updated user access data back to sessionStorage
+                // sessionStorage.setItem("userAccessData", JSON.stringify(transformedData));
+                // // console.log("transformedData", JSON.stringify(transformedData));
+                // console.log("transformedData", transformedData);
+            } else {
+                console.error("Stored user access data not found.");
+            }
         }
         catch (error) {
             console.log("error", error);
@@ -822,7 +858,9 @@ export const ContextProvider = ({ children }) => {
                 getDepartmentsWithPermissions,
                 departmentsWithPermissions,
                 getEmployeesWithPermissions,
-                employeesWithPermissions
+                employeesWithPermissions,
+                userAccessData,
+                setUserAccessData
             }}
 
         >

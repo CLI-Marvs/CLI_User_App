@@ -3,17 +3,24 @@
 namespace App\Services;
 
 
+use table;
+use App\Models\Employee;
+use App\Models\EmployeeDepartment;
+use Illuminate\Support\Facades\DB;
 use App\Repositories\Implementations\EmployeeFeaturePermissionRepository;
 
 
 class EmployeeFeaturePermissionService
 {
     protected $repository;
-    public function __construct(EmployeeFeaturePermissionRepository $repository)
+    protected $model;
+
+    public function __construct(EmployeeFeaturePermissionRepository $repository, Employee $model)
     {
         $this->repository = $repository;
+        $this->model = $model;
     }
-
+ 
     /**
      * Synchronize feature permissions for a department
      */
@@ -45,5 +52,41 @@ class EmployeeFeaturePermissionService
     public function updateEmployeeFeaturePermissions(int $employeeId, array $permissions)
     {
         return $this->repository->updateEmployeeFeaturePermissions($employeeId, $permissions);
+    }
+
+    /**
+     * Get permissions for an employee.
+     *
+     * @param Employee $employees
+     * @return array
+     */
+    public function getEmployeePermissions($user)
+    {
+        // Fetch the department name from the employee record
+        $employeeDepartmentName = $user->department;
+
+        // Fetch the department's ID using the department name
+        $employeeDepartment = EmployeeDepartment::where('name', $employeeDepartmentName)->first();
+
+        // Check if the department exists
+        if (!$employeeDepartment) {
+            // Handle the case where the department doesn't exist (optional)
+            return [
+                'departmentPermissions' => [],
+                'employeePermissions' => [],
+            ];
+        }
+
+        // Fetch department-specific permissions
+        $departmentPermissions = DB::table('department_feature_permissions')
+        ->where('department_id', $employeeDepartment->id)
+            ->get();
+
+        // Fetch employee-specific permissions using the features relationship
+        $employeePermissions = $user->features()->get();
+        return [
+            'departmentPermissions' => $departmentPermissions,
+            'employeePermissions' => $employeePermissions,
+        ];
     }
 }
