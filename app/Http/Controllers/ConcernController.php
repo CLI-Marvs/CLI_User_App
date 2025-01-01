@@ -875,7 +875,7 @@ class ConcernController extends Controller
 
 
 
-    public function getAllConcerns(Request $request)
+    public function  getAllConcerns(Request $request)
     {
         try {
             $employee = $request->user();
@@ -1915,13 +1915,26 @@ class ConcernController extends Controller
     }
 
 
+    public function getCreatedDates(Request $request)
+    {
+        $years = Concerns::select(DB::raw('DISTINCT EXTRACT(YEAR FROM created_at) as year'))
+        ->orderBy('year', 'desc')
+        ->get();
+
+        return response()->json($years);
+    }
+
+
 
     public function getMonthlyReports(Request $request)
     {
 
-        $year = $request->input('year', Carbon::now()->year);
+        $year = $request->year ?? Carbon::now()->year;
         $department = $request->department;
-
+        $project = $request->property;
+        $month = $request->month;
+        /* $monthNumber = Carbon::parse($request->propertyMonth)->month; */
+        
         $query = Concerns::select(
             DB::raw('EXTRACT(MONTH FROM created_at) as month'),
             DB::raw('SUM(case when status = \'Resolved\' then 1 else 0 end) as Resolved'),
@@ -1929,12 +1942,20 @@ class ConcernController extends Controller
             DB::raw('SUM(case when status = \'Closed\' then 1 else 0 end) as Closed')
 
         )
+            /* ->whereMonth('created_at', $monthNumber) */
             ->whereYear('created_at', $year);
 
         if ($department && $department !== 'All') {
             $query->whereRaw("resolve_from::jsonb @> ?", json_encode([['department' => $department]]));
         }
 
+        if ($month && $month !== 'All') {
+            $query->whereMonth('created_at', $month);
+        }
+
+        if ($project && $project !== 'All') {
+            $query->where('property', $project);
+        }
 
         $reports = $query->groupBy('month')
             ->orderBy('month')
@@ -1957,8 +1978,9 @@ class ConcernController extends Controller
     public function getInquiriesPerProperty(Request $request)
     {
         $department = $request->department;
-        $monthNumber = Carbon::parse($request->propertyMonth)->month;
-        $year = $request->input('year', Carbon::now()->year);
+        $month = $request->month;
+        $project = $request->property;
+        $year = $request->year ?? Carbon::now()->year;
         $query = Concerns::select(
             DB::raw('property'),
             /*   DB::raw('EXTRACT(MONTH FROM created_at) as month'), */
@@ -1966,11 +1988,16 @@ class ConcernController extends Controller
             DB::raw('SUM(case when status = \'unresolved\' then 1 else 0 end) as Unresolved')
 
         )
-            ->whereMonth('created_at', $monthNumber)
             ->whereYear('created_at', $year)
             ->whereNotNull('status');
 
+        if ($project && $project !== 'All') {
+            $query->where('property', $project);
+        }
 
+        if ($month && $month !== 'All') {
+            $query->whereMonth('created_at', $month);
+        }
 
         if ($department && $department !== "All") {
             $query->whereRaw("resolve_from::jsonb @> ?", json_encode([['department' => $department]]));
@@ -1986,10 +2013,12 @@ class ConcernController extends Controller
     public function getInquiriesPerChannel(Request $request)
     {
         $department = $request->department;
-        $monthNumber = Carbon::parse($request->propertyMonth)->month;
-        $year = $request->input('year', Carbon::now()->year);
+        $month = $request->month;
+        $project = $request->property;
+        $year = $request->year ?? Carbon::now()->year;
+
         $query = Concerns::select('channels', DB::raw('COUNT(*) as total'))
-            ->whereMonth('created_at', $monthNumber)
+            
             ->whereYear('created_at', $year)
             ->whereNotNull('channels');
 
@@ -1997,16 +2026,26 @@ class ConcernController extends Controller
             $query->whereRaw("resolve_from::jsonb @> ?", json_encode([['department' => $department]]));
         }
 
+        if ($month && $month !== 'All') {
+            $query->whereMonth('created_at', $month);
+        }
+
+        if ($project && $project !== 'All') {
+            $query->where('property', $project);
+        }
+
+
         $inquiryChannels = $query->groupBy('channels')->get();
         return response()->json($inquiryChannels);
     }
 
     public function getCommunicationType(Request $request)
     {
-        $year = $request->input('year', Carbon::now()->year);
+        $year = $request->year ?? Carbon::now()->year;
         $department = $request->department;
-        $monthNumber = Carbon::parse($request->propertyMonth)->month;
-
+        $month = $request->month;
+        $project = $request->property;
+        
 
         // Query to count each <communication_t></communication_t>ype grouped by property
         $query = Concerns::select(
@@ -2017,12 +2056,20 @@ class ConcernController extends Controller
             DB::raw("SUM(case when communication_type = 'Suggestion or recommendation' then 1 else 0 end) as Suggestion"),
 
         )
-            ->whereMonth('created_at', $monthNumber)
             ->whereYear('created_at', $year);
 
         if ($department && $department !== "All") {
             $query->whereRaw("resolve_from::jsonb @> ?", json_encode([['department' => $department]]));
         }
+
+        if ($month && $month !== 'All') {
+            $query->whereMonth('created_at', $month);
+        }
+
+        if ($project && $project !== 'All') {
+            $query->where('property', $project);
+        }
+        
 
         // Group by property and get the result
         $communicationTypes = $query->groupBy('property')->get();
@@ -2034,20 +2081,30 @@ class ConcernController extends Controller
     public function getInquiriesByCategory(Request $request)
     {
         try {
-            $monthNumber = Carbon::parse($request->month)->month;
-            $year = $request->input('year', Carbon::now()->year);
+            $project = $request->property;
+            $department = $request->department;
+            $month = $request->month;
+            $year = $request->year ?? Carbon::now()->year;
         } catch (\Exception $e) {
             return response()->json(['error' => 'Invalid month format'], 400);
         }
 
         $department = $request->department;
         $query = Concerns::select('details_concern', DB::raw('COUNT(*) as total'))
-            ->whereMonth('created_at', $monthNumber)
+
             ->whereYear('created_at', $year)
             ->whereNotNull('details_concern');
 
         if ($department && $department !== "All") {
             $query->whereRaw("resolve_from::jsonb @> ?", json_encode([['department' => $department]]));
+        }
+
+        if ($project && $project !== 'All') {
+            $query->where('property', $project);
+        }
+
+        if ($month && $month !== 'All') {
+            $query->whereMonth('created_at', $month);
         }
 
         $concerns = $query->groupBy('details_concern')->get();

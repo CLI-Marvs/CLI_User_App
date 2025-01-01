@@ -24,6 +24,7 @@ import { useStateContext } from "../../../context/contextprovider";
 import { IoMdArrowDropdown } from "react-icons/io";
 import { MdCalendarToday } from "react-icons/md";
 import { useLocation } from "react-router-dom";
+import { get, set } from "lodash";
 
 const barHeight = 20;
 
@@ -146,9 +147,9 @@ const monthNames = {
     "07": "July",
     "08": "August",
     "09": "September",
-    10: "October",
-    11: "November",
-    12: "December",
+    "10": "October",
+    "11": "November",
+    "12": "December",
 };
 
 const CustomTooltip1 = ({ active, payload, label }) => {
@@ -255,6 +256,12 @@ const ReportPage = () => {
     const {
         setMonth,
         month,
+        setYear,
+        year,
+        setProject,
+        project,
+        fullYear,
+        getFullYear,
         dataCategory,
         fetchCategory,
         dataProperty,
@@ -289,11 +296,15 @@ const ReportPage = () => {
         propertyNamesList
     } = useStateContext();
 
-    
+    const [departmentValue, setDepartmentValue] = useState("All");
+    const [projectValue, setProjectValue] = useState("All");
+    const [yearValue, setYearValue] = useState("");
+    const [monthValue, setMonthValue] = useState("All");
+
     const defaultData = [{ name: "No Data" }];
     const dataToDisplay = dataCategory.length > 0 ? dataCategory : defaultData;
     const location = useLocation();
-    console.log("inquriesPerChannelData", inquriesPerChannelData);
+   /*  console.log("inquriesPerChannelData", inquriesPerChannelData); */
     const getCurrentMonth = () => {
         const months = [
             'january', 'february', 'march', 'april', 'may', 'june',
@@ -395,16 +406,27 @@ const ReportPage = () => {
         }
     };
 
+    const handleSearchFilter = () => {
+        setDepartment(departmentValue);
+        setProject(projectValue);
+        setYear(yearValue);
+        setMonth(monthValue);
+    };
+
     useEffect(() => {
+
         fetchCategory();
         getInquiriesPerProperty();
         fetchDataReport();
         getCommunicationTypePerProperty();
         getInquiriesPerChannel();
-        
+        getFullYear();
+
     }, []);
 
-    useEffect(() => {
+   
+
+   /*  useEffect(() => {
         setMonth(getCurrentMonth());
         setPropertyMonth(getCurrentMonth());
         setCommunicationTypeMonth(getCurrentMonth())
@@ -415,7 +437,7 @@ const ReportPage = () => {
         setInquiriesPerPropertyYear(currentYear);
         setCommunicationTypeYear(currentYear);
         setInquiriesPerChanelYear(currentYear);
-    }, []);
+    }, []); */
 
     // console.log("department", department);
 
@@ -433,8 +455,8 @@ const ReportPage = () => {
                         <select
                             name="concern"
                             className="appearance-none w-full px-4 py-1 bg-white focus:outline-none border-0"
-                            value={department}
-                           /* onChange={(e) => setDepartment(e.target.value)} */
+                            value={departmentValue}
+                            onChange={(e) => setDepartmentValue(e.target.value)}
                         >
                             {user?.department === "Customer Relations - Services" ? (
                                 allDepartment.map((item, index) => (
@@ -461,10 +483,10 @@ const ReportPage = () => {
                         <select
                             name="concern"
                             className="appearance-none w-full px-4 py-1 bg-white focus:outline-none border-0"
-                        /* value={department}
-                        onChange={(e) => setDepartment(e.target.value)} */
+                            value={projectValue}
+                            onChange={(e) => setProjectValue(e.target.value)}
                         >
-                           <option value="">All</option>
+                           <option value="All">All</option>
                                     {formattedPropertyNames.map(
                                         (item, index) => {
                                             return (
@@ -490,24 +512,18 @@ const ReportPage = () => {
                     </span>
                     <select
                         name="month"
-                        /* value={departmentStatusYear} */
+                        value={monthValue}
                         className="appearance-none w-full px-4 py-1 bg-white focus:outline-none border-0"
-                    /*  value={department} */
-                    /* onChange={handleDepartmentYearChange} */
+                        onChange={(e) => setMonthValue(e.target.value)}
                     >
-                        <option value="january">All</option>
-                        <option value="january">January</option>
-                        <option value="february">February</option>
-                        <option value="march">March</option>
-                        <option value="april">April</option>
-                        <option value="may">May</option>
-                        <option value="june">June</option>
-                        <option value="july">July</option>
-                        <option value="august">August</option>
-                        <option value="september">September</option>
-                        <option value="october">October</option>
-                        <option value="november">November</option>
-                        <option value="december">December</option>
+                        <option value="All">All</option>
+                        {Object.entries(monthNames)
+                            .sort(([keyA], [keyB]) => keyA - keyB) // Ensure keys are sorted numerically
+                            .map(([key, name]) => (
+                                <option key={key} value={key}>
+                                    {name}
+                                </option>
+                            ))}
                     </select>
                     <span className="absolute inset-y-0 right-0 flex items-center text-white pr-3 pl-3 bg-custom-lightgreen pointer-events-none">
                         <MdCalendarToday />
@@ -519,21 +535,20 @@ const ReportPage = () => {
                     </span>
                     <select
                         name="year"
-                        value={departmentStatusYear}
+                        value={yearValue}
                         className="appearance-none w-[100px] px-4 py-1 bg-white focus:outline-none border-0"
-                        /*  value={department} */
-                        onChange={handleDepartmentYearChange}
+                        onChange={(e) => setYearValue(e.target.value)}
                     >
-                        <option value="2024">
-                            2024
-                        </option>
+                       {fullYear.map((item, index) => (
+                            <option key={index} value={item.year}>  {item.year}</option>
+                        ))}
                     </select>
                     <span className="absolute inset-y-0 right-0 flex items-center text-white pr-3 pl-3 bg-custom-lightgreen pointer-events-none">
                         <MdCalendarToday />
                     </span>
                 </div>
                 <div>
-                    <button className="bg-custom-lightgreen text-white rounded-[6px] px-4 h-full font-semibold">
+                    <button onClick={handleSearchFilter} className="hover:shadow-custom4 bg-custom-lightgreen text-white rounded-[6px] px-4 h-full font-semibold">
                         Search
                     </button>
                 </div>
@@ -724,6 +739,7 @@ const ReportPage = () => {
                                         const colors = ['#348017', '#70ad47', '#1A73E8', '#5B9BD5', '#175d5f', '#404B52', '#a5a5a5'];
                                         return (
                                             <circle
+                                                key={index}
                                                 cx={cx}
                                                 cy={cy}
                                                 r={4} // Adjust the radius size if needed
@@ -862,7 +878,7 @@ const ReportPage = () => {
                                             </div>
                                             <div className="flex items-center gap-1">
                                                 <span className="text-gray-700 font-bold text-sm">
-                                                    {totalValue > 0 ? `${((category.value / totalValue) * 100)}%` : ""}
+                                                    {`${((category.value / totalValue) * 100).toFixed(0)}%`}
                                                 </span>
                                                {/*  <span className="text-custom-gray81 text-[10px]">
                                                     {category.value ? "%" : ""}
@@ -1159,7 +1175,7 @@ const ReportPage = () => {
                 </div>
             </div>
             <div className="hidden fixed bottom-[50px] right-[41px]">
-                <button className="flex justify-center items-center size-[60px] shadow-custom8 rounded-full bg-[#1A73E8] text-white text-lg">
+                <button className="flex justify-center items-center size-[60px] shadow-custom8 rounded-full bg-[#1A73E8]  text-white text-lg">
                     <TiDownload className="text-white text-[30px]" />
                 </button>
             </div>
