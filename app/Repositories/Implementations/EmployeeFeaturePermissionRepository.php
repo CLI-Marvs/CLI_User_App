@@ -18,16 +18,16 @@ class EmployeeFeaturePermissionRepository
     }
 
     /**
-     *Synchronize feature permissions for a department
+     *Synchronize feature permissions for a employee
      */
     public function syncPermissions($employeeId, $features)
     {
         // Find the employee, or create it if it doesn't exist
         $employee = $this->model->findOrFail($employeeId);
-        // Check if department already has permissions with "Active" status
+        // Check if employee already has permissions with "Active" status
         $activePermissions = $employee->features()->where('status', 'Active')->count();
 
-        // Check if department already has permissions using the relationship
+        // Check if employee already has permissions using the relationship
         if ($activePermissions > 0) {
 
             // If there are active permissions, check if there are any "InActive" permissions
@@ -101,8 +101,8 @@ class EmployeeFeaturePermissionRepository
      */
     public function updateEmployeePermissionStatus(int $employeeId, string $status)
     {
-        $department = $this->model->findOrFail($employeeId);
-        $updatedStatus = $department->features()->newPivotQuery()
+        $employee = $this->model->findOrFail($employeeId);
+        $updatedStatus = $employee->features()->newPivotQuery()
             ->where('employee_id', $employeeId)
             ->update(['status' => $status]);
 
