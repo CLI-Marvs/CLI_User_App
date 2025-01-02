@@ -61,7 +61,7 @@ class EmployeeFeaturePermissionRepository
     {
         $employeePermissions = $this->model->query()
             ->whereHas('features', function ($query) {
-                $query->where('employee_feature_permission.status', 'Active') // Filter departments that have active features
+                $query->where('employee_feature_permission.status', 'Active') // Filter employees that have active features
                     ->where(function ($permissionQuery) {
                         $permissionQuery
                             ->where('employee_feature_permission.can_read', true)
@@ -86,7 +86,7 @@ class EmployeeFeaturePermissionRepository
             ->orderByDesc(function ($query) {
                 $query->select('created_at')
                     ->from('employee_feature_permission')
-                    ->whereColumn('employee_feature_permission.employee_id', 'employee.id') // Match department_id
+                    ->whereColumn('employee_feature_permission.employee_id', 'employee.id') // Match employee_id
                     ->latest()
                     ->limit(1); // Get the latest pivot created_at for ordering
             })

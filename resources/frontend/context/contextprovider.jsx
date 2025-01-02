@@ -129,7 +129,7 @@ export const ContextProvider = ({ children }) => {
             userAccessData.departmentPermissions?.forEach((perm) => {
                 allPermissions[perm.name] = perm.pivot;
             });
-          
+
             setPermissions(allPermissions);
         }
     }, [userAccessData]);
@@ -627,16 +627,16 @@ export const ContextProvider = ({ children }) => {
         }
     }
 
-        //Get all permissions together for both departments and employees
-        const getUserAccessData = async () => {
-            try {
-                const response = await apiService.get("get-user-access-data", { token });
-                sessionStorage.setItem("userAccessData", JSON.stringify(response.data));
-                setUserAccessData(response.data);
-            } catch (error) {
-                console.log("error", error);
-            }
+    //Get all permissions together for both departments and employees
+    const getUserAccessData = async () => {
+        try {
+            const response = await apiService.get("get-user-access-data", { token });
+            sessionStorage.setItem("userAccessData", JSON.stringify(response.data));
+            setUserAccessData(response.data);
+        } catch (error) {
+            console.log("error", error);
         }
+    }
 
     // const getUserAccessData = async () => {
     //     try {

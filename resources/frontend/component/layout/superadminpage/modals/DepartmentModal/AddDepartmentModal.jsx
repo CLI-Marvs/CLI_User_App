@@ -130,9 +130,13 @@ const AddDepartmentModal = ({ departmentModalRef }) => {
                                     value={formData.department_id}
                                     className="appearance-none text-sm w-full px-4 py-1 bg-white focus:outline-none border-0 mobile:text-xs"
                                 >
-                                    <option value="">(Select)</option>
-                                    {employeeDepartments.map((item,index) => (
-                                        <option value={item.id} key={index}>{item.name}</option>
+                                    <option value="">
+                                        (Select)
+                                    </option>
+                                    {employeeDepartments.map((item, index) => (
+                                        <option value={item.id} key={index}>
+                                            {item.name}
+                                        </option>
                                     ))}
                                 </select>
                                 <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3 text-custom-bluegreen pointer-events-none">
