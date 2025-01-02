@@ -411,6 +411,7 @@ const ReportPage = () => {
         setProject(projectValue);
         setYear(yearValue);
         setMonth(monthValue);
+
     };
 
     useEffect(() => {
@@ -421,6 +422,7 @@ const ReportPage = () => {
         getCommunicationTypePerProperty();
         getInquiriesPerChannel();
         getFullYear();
+        setYear(currentYear);
 
     }, []);
 
@@ -518,7 +520,7 @@ const ReportPage = () => {
                     >
                         <option value="All">All</option>
                         {Object.entries(monthNames)
-                            .sort(([keyA], [keyB]) => keyA - keyB) // Ensure keys are sorted numerically
+                            .sort(([keyA], [keyB]) => keyA - keyB) 
                             .map(([key, name]) => (
                                 <option key={key} value={key}>
                                     {name}
