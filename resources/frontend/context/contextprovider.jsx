@@ -92,6 +92,8 @@ export const ContextProvider = ({ children }) => {
     const [departmentsWithPermissions, setDepartmentsWithPermissions] = useState([]);
     const [employeesWithPermissions, setEmployeesWithPermissions] = useState([]);
     const [userAccessData, setUserAccessData] = useState([]); //Holds the user and department access data
+    const [permissions, setPermissions] = useState({});
+    const [isUserAccessDataFetching, setIsUserAccessDataFetching] = useState(true);
     useEffect(() => {
         if (user && user.department && !isDepartmentInitialized) {
             setDepartment(user.department === "Customer Relations - Services" ? "All" : user.department);
@@ -116,6 +118,26 @@ export const ContextProvider = ({ children }) => {
         }
     }, []);
 
+    useEffect(() => {
+        if (userAccessData) {
+            const allPermissions = {};
+
+            userAccessData.employeePermissions?.forEach((perm) => {
+                allPermissions[perm.name] = perm.pivot;
+            });
+
+            userAccessData.departmentPermissions?.forEach((perm) => {
+                allPermissions[perm.name] = perm.pivot;
+            });
+          
+            setPermissions(allPermissions);
+        }
+    }, [userAccessData]);
+
+    // Check if the user has permission
+    const hasPermission = (permissionName) => {
+        return permissions[permissionName]?.can_read || false;
+    };
     const getAllConcerns = async () => {
         if (token) {
             setLoading(true);
@@ -576,52 +598,90 @@ export const ContextProvider = ({ children }) => {
     //Get all departments with permissions
     const getDepartmentsWithPermissions = async () => {
         try {
+            setIsUserAccessDataFetching(true);
             const response = await apiService.get("get-departments-with-permissions");
             setDepartmentsWithPermissions(response.data.data);
+            getUserAccessData();
         }
         catch (error) {
             console.log("error", error);
+        }
+        finally {
+            setIsUserAccessDataFetching(false);
         }
     }
 
     //Get all employees with permissions
     const getEmployeesWithPermissions = async () => {
         try {
+            setIsUserAccessDataFetching(true);
             const response = await apiService.get("get-employees-with-permissions");
-            // console.log("response", response.data.data);
             setEmployeesWithPermissions(response.data.data);
-            
-
-            // Get stored user access data from sessionStorage
-            const storedUserAccessData = JSON.parse(sessionStorage.getItem("userAccessData"));
-
-            // Check if stored data exists and has employeePermissions
-            if (storedUserAccessData) {
-                // Merge or update departmentPermissions and employeePermissions from the API response
-                const transformedData = {
-                    ...storedUserAccessData,  // Retain the existing data
-                    departmentPermissions: response.data.data[0]?.departmentPermissions || [],  // Update departmentPermissions if available
-                    employeePermissions: response.data.data[0]?.features.map((feature) => ({
-                        id: feature.id,
-                        name: feature.name,
-                        created_at: feature.created_at,
-                        updated_at: feature.updated_at,
-                        pivot: feature.pivot, // Preserve the pivot structure
-                    })) || [],
-                };
-                setUserAccessData(transformedData);
-                // Save the updated user access data back to sessionStorage
-                // sessionStorage.setItem("userAccessData", JSON.stringify(transformedData));
-                // // console.log("transformedData", JSON.stringify(transformedData));
-                // console.log("transformedData", transformedData);
-            } else {
-                console.error("Stored user access data not found.");
-            }
+            getUserAccessData();
         }
         catch (error) {
             console.log("error", error);
         }
+        finally {
+            setIsUserAccessDataFetching(false);
+        }
     }
+
+        //Get all permissions together for both departments and employees
+        const getUserAccessData = async () => {
+            try {
+                const response = await apiService.get("get-user-access-data", { token });
+                sessionStorage.setItem("userAccessData", JSON.stringify(response.data));
+                setUserAccessData(response.data);
+            } catch (error) {
+                console.log("error", error);
+            }
+        }
+
+    // const getUserAccessData = async () => {
+    //     try {
+    //         const response = await apiService.get("get-user-access-data", { token });
+
+
+    //         // Get existing data from sessionStorage
+    //         const storedData = sessionStorage.getItem("userAccessData");
+    //         const existingData = storedData ? JSON.parse(storedData) : {};
+
+    //         // Merge the new data with the existing data
+    //         const updatedData = {
+    //             ...existingData, // Include existing data
+    //             employeePermissions: [
+    //                 ...(existingData.employeePermissions || []),
+    //                 ...(response.data.employeePermissions || []),
+    //             ],
+    //             departmentPermissions: [
+    //                 ...(existingData.departmentPermissions || []),
+    //                 ...(response.data.departmentPermissions || []),
+    //             ],
+    //         };
+
+    //         // Remove duplicates based on IDs (optional, for clean data)
+    //         const uniqueById = (arr, key) =>
+    //             [...new Map(arr.map((item) => [item[key], item])).values()];
+    //         updatedData.employeePermissions = uniqueById(
+    //             updatedData.employeePermissions,
+    //             "id"
+    //         );
+    //         updatedData.departmentPermissions = uniqueById(
+    //             updatedData.departmentPermissions,
+    //             "id"
+    //         );
+
+    //         // Save the updated data to sessionStorage
+    //         sessionStorage.setItem("userAccessData", JSON.stringify(updatedData));
+
+    //         // Update the state
+    //         setUserAccessData(updatedData);
+    //     } catch (error) {
+    //         console.log("error", error);
+    //     }
+    // };
+
     // useEffect(() => {
     //     getPropertyUnits(towerPhaseId, selectedFloor);
     // }, [towerPhaseId, selectedFloor]);
@@ -676,6 +736,7 @@ export const ContextProvider = ({ children }) => {
     useEffect(() => {
         getBankName();
         getTransactions();
+        getUserAccessData();
     }, [currentPageTransaction, bankNames]);
 
     useEffect(() => {
@@ -860,7 +921,10 @@ export const ContextProvider = ({ children }) => {
                 getEmployeesWithPermissions,
                 employeesWithPermissions,
                 userAccessData,
-                setUserAccessData
+                setUserAccessData,
+                getUserAccessData,
+                hasPermission,
+                isUserAccessDataFetching,
             }}
 
         >

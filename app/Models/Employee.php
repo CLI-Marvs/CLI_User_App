@@ -22,6 +22,4 @@ class Employee extends Authenticatable
         ->withPivot('can_read', 'can_write', 'can_execute', 'can_delete', 'can_save','created_at','status')
         ->withTimestamps();
     }
-
-    //Custom function
 }

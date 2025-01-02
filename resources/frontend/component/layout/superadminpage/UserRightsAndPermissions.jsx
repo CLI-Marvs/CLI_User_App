@@ -11,13 +11,14 @@ import apiService from "../../servicesApi/apiService";
 import { showToast } from "../../../util/toastUtil"
 import Alert from "../mainComponent/Alert";
 import CircularProgress from "@mui/material/CircularProgress";
- 
+import Skeleton from 'react-loading-skeleton'
+import 'react-loading-skeleton/dist/skeleton.css'
 
 const UserRightsAndPermissions = () => {
 
-  //State
+  //States
   const { departmentsWithPermissions, getDepartmentsWithPermissions, getEmployeesWithPermissions,
-    employeesWithPermissions, features, getAllEmployeeDepartment } = useStateContext();
+    employeesWithPermissions, features, getAllEmployeeDepartment, isUserAccessDataFetching } = useStateContext();
   const [selectedDepartment, setSelectedDepartment] = useState(null);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [alertType, setAlertType] = useState("");
@@ -28,6 +29,7 @@ const UserRightsAndPermissions = () => {
   const [showAlert, setShowAlert] = useState(false);
   const [isEmployeeLoadingState, setIsEmployeeLoadingState] = useState({});
   const [isDepartmentLoadingState, setIsDepartmentLoadingState] = useState({});
+
 
   //Hooks 
   useEffect(() => {
@@ -66,7 +68,7 @@ const UserRightsAndPermissions = () => {
     }
   };
 
-  //Handle to Update 'Active or InActive" department permission
+  //To Update 'Active or InActive" department permission
   const updateDepartmentPermissionStatus = async (department) => {
     const payload = {
       department_id: department?.id,
@@ -87,7 +89,7 @@ const UserRightsAndPermissions = () => {
     }
   };
 
-  //Handle to Update 'Active or InActive" employee permission
+  //To Update 'Active or InActive" employee permission
   const updateEmployeePermissionStatus = async (employee) => {
     const payload = {
       employee_id: employee?.id,
@@ -109,7 +111,7 @@ const UserRightsAndPermissions = () => {
 
   //Handle click event to show the department alert 
   const handleShowUpdateDepartmentAlert = (department, alertType) => {
-    setAlertType(alertType); //employee or department
+    setAlertType(alertType); //department type
     setSelectedDepartment(department);
     setShowAlert(true);
   };
@@ -121,7 +123,7 @@ const UserRightsAndPermissions = () => {
     setSelectedEmployee(null);
   };
 
-  //Handle click to confirm the department alert
+  //Handle click to confirm the department/employee alert
   const handleConfirm = () => {
     if (alertType === "department") {
       if (selectedDepartment) {
@@ -135,9 +137,9 @@ const UserRightsAndPermissions = () => {
     setShowAlert(false);
   };
 
-  //Handle click event to show the employee alert  
+  //Handle click event to show the department/employee alert  
   const handleShowUpdateEmployeeAlert = (employee, alertType) => {
-    setAlertType(alertType);
+    setAlertType(alertType); //employee type
     setSelectedEmployee(employee);
     setShowAlert(true);
   };
@@ -164,122 +166,136 @@ const UserRightsAndPermissions = () => {
                   Department
                 </th>
                 {/* Display all features */}
-                {features && features.map((feature, index) => (
+                {isUserAccessDataFetching ? (
+                  <>
+                    <th className="flex  justify-start w-[200px] shrink-0 bg-gray-100 rounded-md">
+                      <Skeleton height={40} width="80%" />
+                    </th>
+                    <th className="flex justify-center w-[200px] shrink-0 bg-gray-100 rounded-md">
+                      <Skeleton height={40} width="80%" />
+                    </th>
+                    <th className="flex justify-center w-[200px] shrink-0 bg-gray-100 rounded-md">
+                      <Skeleton height={40} width="80%" />
+                    </th>
+                  </>
+                ) : features && features.length > 0 ? features.map((feature, index) => (
                   <th
                     className="flex justify-center w-[200px] shrink-0 "
                     key={index}
                   >
                     {feature.name}
                   </th>
-                ))}
+                )) : null}
               </tr>
             </thead>
             <tbody>
-              {departmentsWithPermissions && departmentsWithPermissions.length > 0 ? (
-                <table className="w-full">
-                  <tbody>
-                    {departmentsWithPermissions.map((department, index) => (
-                      <tr
-                        key={index}
-                        className="flex items-center gap-x-4 mb-2"
-                      >
-                        <td
-                          className="flex gap-[57px] mt-[6px] h-[64px] overflow-hidden px-[16px] py-[10px] bg-custom-lightestgreen text-custom-bluegreen text-sm"
-                        >
-                          <div className="w-[200px] flex flex-col items-start justify-center gap-2">
-                            <div className="w-full h-[40px] flex items-center justify-center bg-white rounded-[5px]">
-                              <p className="montserrat-regular text-sm text-center">{department.name}</p>
+              {isUserAccessDataFetching ? (
+                <tr className="w-full flex gap-x-2">
+                  <th className="flex justify-start w-[200px] shrink-0 bg-gray-100 rounded-md">
+                    <Skeleton height={40} width="80%" />
+                  </th>
+                  <th className="flex justify-center w-[200px] shrink-0 bg-gray-100 rounded-md">
+                    <Skeleton height={40} width="80%" />
+                  </th>
+                  <th className="flex justify-center w-[200px] shrink-0 bg-gray-100 rounded-md">
+                    <Skeleton height={40} width="80%" />
+                  </th>
+                </tr>
+              ) : departmentsWithPermissions && departmentsWithPermissions.length > 0 ? (
+                departmentsWithPermissions.map((department, index) => (
+                  <tr
+                    key={index}
+                    className="flex items-center gap-x-4 mb-2"
+                  >
+                    <td className="flex gap-[57px] mt-[6px] h-[64px] overflow-hidden px-[16px] py-[10px] bg-custom-lightestgreen text-custom-bluegreen text-sm">
+                      <div className="w-[200px] flex flex-col items-start justify-center gap-2">
+                        <div className="w-full h-[40px] flex items-center justify-center bg-white rounded-[5px]">
+                          <p className="montserrat-regular text-sm text-center">
+                            {department.name}
+                          </p>
+                        </div>
+                      </div>
+                      {features.map((feature, featureIndex) => {
+                        const departmentFeature = department.features.find(
+                          (f) => f.id === feature.id
+                        );
+
+                        return (
+                          <div
+                            key={featureIndex}
+                            className="w-[200px] flex flex-col items-start justify-center gap-2"
+                          >
+                            <div className="w-full h-[44px] gap-[20px] flex items-center justify-center bg-white rounded-[5px]">
+                              {departmentFeature ? (
+                                PERMISSIONS.map((permission) => {
+                                  const permissionValue = departmentFeature.pivot[permission.value];
+                                  return (
+                                    <div
+                                      className="flex flex-col gap-[2.75px] items-center"
+                                      key={permission.value}
+                                    >
+                                      <p className="montserrat-semibold text-[10px] leading-[12.19px]">
+                                        {permission.name}
+                                      </p>
+                                      <input
+                                        type="checkbox"
+                                        className="h-[16px] w-[16px]"
+                                        checked={permissionValue}
+                                        disabled
+                                      />
+                                    </div>
+                                  );
+                                })
+                              ) : (
+                                <p className="text-center text-custom-gray">No Permissions</p>
+                              )}
                             </div>
                           </div>
+                        );
+                      })}
+                    </td>
 
-                          {features.map((feature, featureIndex) => {
-                            // Check if the department has this feature
-                            const departmentFeature = department.features.find(
-                              (f) => f.id === feature.id
-                            );
-
-                            return (
-                              <div
-                                key={featureIndex}
-                                className="w-[200px] flex flex-col items-start justify-center gap-2"
-                              >
-                                <div className="w-full h-[44px] gap-[20px] flex items-center justify-center bg-white rounded-[5px]">
-                                  {departmentFeature ? (
-                                    PERMISSIONS.map((permission) => {
-                                      // Access the permission status from the department's feature pivot
-                                      const permissionValue = departmentFeature.pivot[permission.value];
-                                      return (
-                                        <div
-                                          className="flex flex-col gap-[2.75px] items-center"
-                                          key={permission.value}
-                                        >
-                                          <p className="montserrat-semibold text-[10px] leading-[12.19px]">
-                                            {permission.name}
-                                          </p>
-                                          <input
-                                            type="checkbox"
-                                            className="h-[16px] w-[16px]"
-                                            checked={permissionValue}
-                                            disabled
-                                          />
-                                        </div>
-                                      );
-                                    })
-                                  ) : (
-                                    <p className="text-center text-custom-gray">No Permissions</p>
-                                  )}
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </td>
-
-                        <td className="flex gap-x-3">
-                          <button
-                            className="gradient-btn5 p-[1px] w-[80px] h-[31px] rounded-[10px]"
-                            onClick={() => handleEditDepartmentModal(department)}
-                          >
-                            <div className="w-full h-full rounded-[9px] bg-white flex justify-center items-center montserrat-semibold text-sm gap-x-2">
-                              <p className="text-base font-bold bg-gradient-to-r from-custom-bluegreen via-custom-solidgreen to-custom-solidgreen bg-clip-text text-transparent">
-                                Edit
-                              </p>
-                              <span>
-                                <HiPencil className='w-5 h-5 text-custom-bluegreen' />
-                              </span>
-                            </div>
-                          </button>
-                          <button onClick={() => handleShowUpdateDepartmentAlert(department, 'department')}
-                            disabled={isDepartmentLoadingState[department.id]}
-                            className={`${isDepartmentLoadingState[department.id]
-                              ? "opacity-50 cursor-not-allowed"
-                              : ""
-                              }`}
-                            type='submit'
-                          >
-                            {isDepartmentLoadingState[department.id] ? (
-                              <CircularProgress className="spinnerSize" />
-                            ) : (
-                              <><MdDelete className='w-6 h-6 text-red-500' /></>
-                            )}
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              ) : (
-                <table className="w-full">
-                  <tbody>
-                    <tr>
-                      <td
-                        colSpan={features.length + 1 || 1}
-                        className="text-center py-[16px] text-custom-bluegreen "
+                    <td className="flex gap-x-3">
+                      <button
+                        className="gradient-btn5 p-[1px] w-[80px] h-[31px] rounded-[10px]"
+                        onClick={() => handleEditDepartmentModal(department)}
                       >
-                        No data found
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
+                        <div className="w-full h-full rounded-[9px] bg-white flex justify-center items-center montserrat-semibold text-sm gap-x-2">
+                          <p className="text-base font-bold bg-gradient-to-r from-custom-bluegreen via-custom-solidgreen to-custom-solidgreen bg-clip-text text-transparent">
+                            Edit
+                          </p>
+                          <span>
+                            <HiPencil className='w-5 h-5 text-custom-bluegreen' />
+                          </span>
+                        </div>
+                      </button>
+                      <button
+                        onClick={() => handleShowUpdateDepartmentAlert(department, 'department')}
+                        disabled={isDepartmentLoadingState[department.id]}
+                        className={`${isDepartmentLoadingState[department.id]
+                          ? "opacity-50 cursor-not-allowed"
+                          : ""
+                          }`}
+                        type='submit'
+                      >
+                        {isDepartmentLoadingState[department.id] ? (
+                          <CircularProgress className="spinnerSize" />
+                        ) : (
+                          <MdDelete className='w-6 h-6 text-red-500' />
+                        )}
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td
+                    colSpan={features.length + 1 || 1}
+                    className="text-center py-[16px] text-custom-bluegreen"
+                  >
+                    No data found
+                  </td>
+                </tr>
               )}
             </tbody>
           </table>
@@ -306,115 +322,145 @@ const UserRightsAndPermissions = () => {
                 </th>
 
                 {/* Feature */}
-                {features && features.map((feature, index) => (
-                  <th
-                    className="flex justify-center w-[200px] shrink-0 "
-                    key={index}
-                  >
-                    {feature.name}
-                  </th>
-                ))}
+                {isUserAccessDataFetching ? (
+                  <>
+                    <th className="flex  justify-start w-[200px] shrink-0 bg-gray-100 rounded-md">
+                      <Skeleton height={40} width="80%" />
+                    </th>
+                    <th className="flex justify-center w-[200px] shrink-0 bg-gray-100 rounded-md">
+                      <Skeleton height={40} width="80%" />
+                    </th>
+                    <th className="flex justify-center w-[200px] shrink-0 bg-gray-100 rounded-md">
+                      <Skeleton height={40} width="80%" />
+                    </th>
+                  </>
+                ) :
+                  features && features.map((feature, index) => (
+                    <th
+                      className="flex justify-center w-[200px] shrink-0 "
+                      key={index}
+                    >
+                      {feature.name}
+                    </th>
+                  ))}
               </tr>
             </thead>
             <tbody>
-              {employeesWithPermissions && employeesWithPermissions.length > 0 ? (
-                employeesWithPermissions.map((employee, index) => {
-                  return (
-                    <div className='flex items-center gap-x-4' key={index}>
-                      <tr className='flex gap-[57px] mt-[6px] h-[64px] overflow-hidden px-[16px] py-[10px] bg-custom-lightestgreen text-custom-bluegreen text-sm' key={index}>
-                        <td className='w-[200px] flex flex-col items-start justify-center gap-2'>
-                          <div className='w-full h-[31px] flex items-center justify-center bg-white rounded-[5px]'>
-                            <p className='montserrat-regular text-custom-lightgreen text-sm'>
-                              {employee?.firstname} {employee?.lastname}
-                            </p>
-                          </div>
-                        </td>
-                        <td className='w-[200px] flex flex-col items-start justify-center gap-2'>
-                          <div className='w-full h-[35px] flex items-center justify-center bg-white rounded-[5px] py-1'>
-                            <p className='montserrat-regular text-sm text-center'>{employee?.department}</p>
-                          </div>
-                        </td>
-
-                        {/* Iterate over the features (columns) */}
-                        {features.map((feature, featureIndex) => {
-                          // Check if the department has this feature
-                          const departmentFeature = employee.features.find(
-                            (f) => f.id === feature.id
-                          );
-
-                          return (
-                            <td
-                              className="w-[200px] flex flex-col items-start justify-center gap-2"
-                              key={featureIndex}
-                            >
-                              <div className="w-full h-[44px] gap-[20px] flex items-center justify-center bg-white rounded-[5px]">
-                                {departmentFeature ? (
-                                  PERMISSIONS.map((permission) => {
-                                    // Access the permission status from the department's feature pivot
-                                    const permissionValue = departmentFeature.pivot[permission.value];
-                                    return (
-                                      <div
-                                        className="flex flex-col gap-[2.75px] items-center"
-                                        key={permission.value}
-                                      >
-                                        <p className="montserrat-semibold text-[10px] leading-[12.19px]">
-                                          {permission.name}
-                                        </p>
-                                        <input
-                                          type="checkbox"
-                                          className="h-[16px] w-[16px]"
-                                          checked={permissionValue}
-                                          disabled
-                                        />
-                                      </div>
-                                    );
-                                  })
-                                ) : (
-                                  <p className="text-center text-custom-gray">No Permissions</p>
-                                )}
-                              </div>
-                            </td>
-                          );
-                        })}
-                      </tr>
-                      <div className='flex gap-x-3'>
-                        <button
-                          className="gradient-btn5 p-[1px] w-[80px] h-[31px] rounded-[10px]"
-                          onClick={() => handleEditEmployeeModal(employee)}
-                        >
-                          <div className="w-full h-full rounded-[9px] bg-white flex justify-center items-center montserrat-semibold text-sm gap-x-2">
-                            <p className="text-base font-bold bg-gradient-to-r from-custom-bluegreen via-custom-solidgreen to-custom-solidgreen bg-clip-text text-transparent">
-                              Edit
-                            </p>
-                            <span>
-                              <HiPencil className='w-5 h-5 text-custom-bluegreen' />
-                            </span>
-                          </div>
-                        </button>
-                        <button onClick={() => handleShowUpdateEmployeeAlert(employee, 'employee')}
-                          disabled={isEmployeeLoadingState[employee.id]}
-                          className={`${isEmployeeLoadingState[employee.id]
-                            ? "opacity-50 cursor-not-allowed"
-                            : ""
-                            }`}
-                          type='submit'
-                        >
-                          {isEmployeeLoadingState[employee.id] ? (
-                            <CircularProgress className="spinnerSize" />
-                          ) : (
-                            <><MdDelete className='w-6 h-6 text-red-500' /></>
-                          )}
-                        </button>
-                      </div>
+              {isUserAccessDataFetching ? (
+                <tr>
+                  <td className='w-full mt-1'>
+                    <div className="flex shrink-0 bg-gray-100 rounded-md mt-1">
+                      <Skeleton height={40} width="80%" />
                     </div>
-                  );
-                })
-              ) : (
-                <div className="text-center text-custom-bluegreen mt-4">
-                  No data found
-                </div>
-              )}
+                    <div className="flex shrink-0 bg-gray-100 rounded-md mt-2">
+                      <Skeleton height={40} width="80%" />
+                    </div>
+                    <div className="flex shrink-0 bg-gray-100 rounded-md mt-2">
+                      <Skeleton height={40} width="80%" />
+                    </div>
+                  </td>
+                </tr>
+              ) : employeesWithPermissions && employeesWithPermissions.length > 0 ? (
+                employeesWithPermissions.map((employee, index) => (
+                  <tr key={index} className='flex items-center gap-x-4'>
+                    <td className='flex gap-[57px] mt-[6px] h-[64px] overflow-hidden px-[16px] py-[10px] bg-custom-lightestgreen text-custom-bluegreen text-sm'>
+                      {/* Employee Name */}
+                      <div className='w-[200px] flex flex-col items-start justify-center gap-2'>
+                        <div className='w-full h-[31px] flex items-center justify-center bg-white rounded-[5px]'>
+                          <p className='montserrat-regular text-custom-lightgreen text-sm'>
+                            {employee?.firstname} {employee?.lastname}
+                          </p>
+                        </div>
+                      </div>
 
+                      {/* Department */}
+                      <div className='w-[200px] flex flex-col items-start justify-center gap-2'>
+                        <div className='w-full h-[35px] flex items-center justify-center bg-white rounded-[5px] py-1'>
+                          <p className='montserrat-regular text-sm text-center'>{employee?.department}</p>
+                        </div>
+                      </div>
+
+                      {/* Features */}
+                      {features.map((feature, featureIndex) => {
+                        const departmentFeature = employee.features.find(
+                          (f) => f.id === feature.id
+                        );
+
+                        return (
+                          <div
+                            className="w-[200px] flex flex-col items-start justify-center gap-2"
+                            key={featureIndex}
+                          >
+                            <div className="w-full h-[44px] gap-[20px] flex items-center justify-center bg-white rounded-[5px]">
+                              {departmentFeature ? (
+                                PERMISSIONS.map((permission) => {
+                                  const permissionValue = departmentFeature.pivot[permission.value];
+                                  return (
+                                    <div
+                                      className="flex flex-col gap-[2.75px] items-center"
+                                      key={permission.value}
+                                    >
+                                      <p className="montserrat-semibold text-[10px] leading-[12.19px]">
+                                        {permission.name}
+                                      </p>
+                                      <input
+                                        type="checkbox"
+                                        className="h-[16px] w-[16px]"
+                                        checked={permissionValue}
+                                        disabled
+                                      />
+                                    </div>
+                                  );
+                                })
+                              ) : (
+                                <p className="text-center text-custom-gray">No Permissions</p>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </td>
+
+                    {/* Actions */}
+                    <td className='flex gap-x-3'>
+                      <button
+                        className="gradient-btn5 p-[1px] w-[80px] h-[31px] rounded-[10px]"
+                        onClick={() => handleEditEmployeeModal(employee)}
+                      >
+                        <div className="w-full h-full rounded-[9px] bg-white flex justify-center items-center montserrat-semibold text-sm gap-x-2">
+                          <p className="text-base font-bold bg-gradient-to-r from-custom-bluegreen via-custom-solidgreen to-custom-solidgreen bg-clip-text text-transparent">
+                            Edit
+                          </p>
+                          <span>
+                            <HiPencil className='w-5 h-5 text-custom-bluegreen' />
+                          </span>
+                        </div>
+                      </button>
+                      <button
+                        onClick={() => handleShowUpdateEmployeeAlert(employee, 'employee')}
+                        disabled={isEmployeeLoadingState[employee.id]}
+                        className={`${isEmployeeLoadingState[employee.id]
+                          ? "opacity-50 cursor-not-allowed"
+                          : ""
+                          }`}
+                        type='submit'
+                      >
+                        {isEmployeeLoadingState[employee.id] ? (
+                          <CircularProgress className="spinnerSize" />
+                        ) : (
+                          <MdDelete className='w-6 h-6 text-red-500' />
+                        )}
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={features.length + 2} className="text-center py-4 text-custom-bluegreen">
+                    No data found
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>

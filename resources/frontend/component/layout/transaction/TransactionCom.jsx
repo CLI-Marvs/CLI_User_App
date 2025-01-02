@@ -22,17 +22,30 @@ const TransactionCom = () => {
         getInvoices,
         setFilterDueDate,
         filterDueDate,
+        userAccessData
     } = useStateContext();
 
     const [startDate, setStartDate] = useState(null);
     const [sapDate, setSapDate] = useState(null);
     const [sapLoader, setSapLoader] = useState(false);
     const [isDate, setIsDate] = useState(null);
+    const [hasPermission, setHasPermission] = useState(false);
+    const [canWrite, setCanWrite] = useState(false);
     const handlePageChange = (data) => {
         const selectedPage = data.selected + 1;
         setCurrentPageInvoices(selectedPage);
     };
 
+   useEffect(() => {
+        if (userAccessData) {
+            const transactionPermissions = userAccessData?.employeePermissions?.find(
+                (perm) => perm.name === 'Transaction Management'
+            ) || userAccessData?.departmentPermissions?.find(
+                (perm) => perm.name === 'Transaction Management'
+            );
+            setCanWrite(transactionPermissions?.pivot?.can_write);
+        }
+    }, [userAccessData]);
     const handleDateChange = (date) => {
         if (date) {
             const year = date.getFullYear(); // Get the full year (e.g., 2024)
@@ -93,6 +106,8 @@ const TransactionCom = () => {
     useEffect(() => {
         getInvoices();
     }, []);
+
+
     return (
         <>
             {sapLoader && (
@@ -123,15 +138,16 @@ const TransactionCom = () => {
                                 className="absolute top-[45%] right-0 transform -translate-y-1/2 text-custom-bluegreen size-6  pointer-events-none"
                             />
                         </div>
-
-                        <button
-                            /* onClick={sendSoapRequest} */
-                            className="h-[38px] w-[121px] gradient-btn5 text-white  text-xs rounded-[10px]"
-                            onClick={sendSoapRequest}
-                        >
-                            {" "}
-                            SAP Sync
-                        </button>
+                        {canWrite && (
+                            <button
+                                /* onClick={sendSoapRequest} */
+                                className="h-[38px] w-[121px] gradient-btn5 text-white  text-xs rounded-[10px]"
+                                onClick={sendSoapRequest}
+                            >
+                                {" "}
+                                SAP Sync
+                            </button>
+                        )}
                     </div>
 
                     {/* <div className="relative border border-gray-500 z-40 mr-10">
@@ -183,61 +199,61 @@ const TransactionCom = () => {
                         {invoices.length > 0 ? (
                             invoices.map((item, index) => (
                                 <tr key={index}>
-                                <td className=" px-4 border border-gray-500">
-                                    {item.contract_number}
-                                </td>
-                                <td className=" px-4 border border-gray-500">
-                                    {item.document_number}
-                                </td>
-                                <td className=" px-4 border border-gray-500">
-                                    {capitalizeFirstLetter(
-                                        item.customer_name
-                                    )}
-                                </td>
-                                <td className=" px-4 border border-gray-500">
-                                    {item.invoice_status}
-                                </td>
-                                <td className=" px-4 border border-gray-500">
-                                {item.invoice_amount ? (
-                                    new Intl.NumberFormat('en-US', { style: 'decimal', minimumFractionDigits: 2 }).format(item.invoice_amount)
-                                ): null}
-                                </td>
-                                <td className=" px-4 border border-gray-500">
-                                    {item.description}
-                                </td>
-                                <td className=" px-4 border border-gray-500">
-                                    {item.due_date}
-                                </td>
-                                <td className="px-4 border border-gray-500">
-                                    {item.invoice_link ? (
-                                        <a
-                                            href={
-                                                item.invoice_link
-                                            }
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="cursor-pointer underline"
-                                        >
-                                            View Document
-                                        </a>
-                                    ) : null}
-                                </td>
-                            </tr>
+                                    <td className=" px-4 border border-gray-500">
+                                        {item.contract_number}
+                                    </td>
+                                    <td className=" px-4 border border-gray-500">
+                                        {item.document_number}
+                                    </td>
+                                    <td className=" px-4 border border-gray-500">
+                                        {capitalizeFirstLetter(
+                                            item.customer_name
+                                        )}
+                                    </td>
+                                    <td className=" px-4 border border-gray-500">
+                                        {item.invoice_status}
+                                    </td>
+                                    <td className=" px-4 border border-gray-500">
+                                        {item.invoice_amount ? (
+                                            new Intl.NumberFormat('en-US', { style: 'decimal', minimumFractionDigits: 2 }).format(item.invoice_amount)
+                                        ) : null}
+                                    </td>
+                                    <td className=" px-4 border border-gray-500">
+                                        {item.description}
+                                    </td>
+                                    <td className=" px-4 border border-gray-500">
+                                        {item.due_date}
+                                    </td>
+                                    <td className="px-4 border border-gray-500">
+                                        {item.invoice_link ? (
+                                            <a
+                                                href={
+                                                    item.invoice_link
+                                                }
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="cursor-pointer underline"
+                                            >
+                                                View Document
+                                            </a>
+                                        ) : null}
+                                    </td>
+                                </tr>
                             ))
                         ) : (
                             <>
-                            <tr>
-                                <td
-                                    className="text-md px-4 py-2 text-center"
-                                    colSpan={8}
-                                >
-                                    No data to show
-                                </td>
-                            </tr>
-                        </>
+                                <tr>
+                                    <td
+                                        className="text-md px-4 py-2 text-center"
+                                        colSpan={8}
+                                    >
+                                        No data to show
+                                    </td>
+                                </tr>
+                            </>
                         )}
-                         
-                         
+
+
                     </tbody>
                 </table>
 
@@ -266,7 +282,7 @@ const TransactionCom = () => {
                             disabledLinkClassName={
                                 "text-gray-300 cursor-not-allowed"
                             }
-                            /*       forcePage={currentPageInvoices} */
+                        /*       forcePage={currentPageInvoices} */
                         />
                     </div>
                 </div>

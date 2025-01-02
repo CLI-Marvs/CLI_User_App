@@ -89,7 +89,7 @@ const EditUserModal = ({ editEmployeeModalRef, selectedEmployee }) => {
                 }
             }
         } catch (error) {
-            console.log("error", error);
+            console.log("Error updating user permission:", error);
         } finally {
             setIsLoading(false);
         }
@@ -98,7 +98,6 @@ const EditUserModal = ({ editEmployeeModalRef, selectedEmployee }) => {
 
     //Handle close the modal and cancel the modal
     const handleCloseModal = () => {
-        //TODO: remove all state if the
         if (selectedEmployee) {
             setFormData({
                 employee_id: selectedEmployee.id,
@@ -110,7 +109,7 @@ const EditUserModal = ({ editEmployeeModalRef, selectedEmployee }) => {
         }
     }
 
-    //Function to check if the old data is the same as the new data, if so, disable the button
+    //Function to check if the old data is the same as the new data, if YES, disable the button
     const isButtonDisabled = useMemo(() => {
         if (!selectedEmployeeOldData || !formData) {
             return true;
@@ -137,12 +136,6 @@ const EditUserModal = ({ editEmployeeModalRef, selectedEmployee }) => {
                         </button>
                     </div>
                 </div>
-                {/* <div className="flex justify-center items-center mt-[14px] flex-col gap-y-2">
-                    <AiFillInfoCircle className="size-[37px] text-[#5B9BD5]" />
-                    <div className="w-full flex justify-center items-center h-12 bg-red-100 mb-4 rounded-lg">
-                        <p>Validation error here</p>
-                    </div>
-                </div> */}
                 <div className='flex flex-col gap-[36px] mt-[26px]'>
                     <div className='w-full p-[10px] flex flex-col gap-[10px] relative mb-2'>
                         <p className='text-sm font-semibold'>User</p>
@@ -155,7 +148,7 @@ const EditUserModal = ({ editEmployeeModalRef, selectedEmployee }) => {
                             <input
                                 name="name"
                                 type="text"
-                                value={selectedEmployee?.firstname + " " + selectedEmployee?.lastname}
+                                value={selectedEmployee?.firstname + " " + selectedEmployee?.lastname || ''}
                                 disabled
                                 className=' w-full px-4 text-sm focus:outline-none mobile:text-xs'
                             />
@@ -169,10 +162,9 @@ const EditUserModal = ({ editEmployeeModalRef, selectedEmployee }) => {
                             <input
                                 name="department"
                                 type="text"
-                                readOnly={true}
-                                value={selectedEmployee?.department}
+                                disabled
+                                value={selectedEmployee?.department || ''}
                                 className="w-full px-4 text-sm focus:outline-none mobile:text-xs"
-                                placeholder=""
                             />
                         </div>
 
@@ -182,11 +174,6 @@ const EditUserModal = ({ editEmployeeModalRef, selectedEmployee }) => {
                         {/*Display the features */}
                         {features &&
                             features.map((item, index) => {
-                                const featurePermissions = selectedEmployee && selectedEmployee?.features.find(
-                                    (feature) => feature.id === item.id
-                                )?.pivot;
-
-
                                 return (
                                     <div
                                         className="flex items-center border rounded-[5px] overflow-hidden border-custom-bluegreen h-[56px]"

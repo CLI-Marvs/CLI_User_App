@@ -144,13 +144,6 @@ Route::middleware('auth:sanctum')->group(function () {
   //Features
   Route::get('/get-features', [FeatureController::class, 'index']);
 
-  //Department Feature Permission
-  // Route::prefix('departments')->controller(DepartmentFeaturePermissionController::class)->group(function () {
-  //     Route::get('/permissions', 'index');
-  //     Route::post('/assign-feature-permissions', 'store');
-  //     Route::patch('/status', 'updateStatus');
-  //     Route::put('/feature-permissions', 'updatePermissions'); update-departments-status
-  // });
 
   //Department Feature Permission
   Route::get('/get-departments-with-permissions', [DepartmentFeaturePermissionController::class, 'index']);
@@ -164,4 +157,5 @@ Route::middleware('auth:sanctum')->group(function () {
   Route::post('/employee-assign-feature-permissions', [EmployeeFeaturePermissionController::class, 'store']);
   Route::patch('/update-employee-status', [EmployeeFeaturePermissionController::class, 'updateStatus']);
   Route::patch('/update-employees-feature-permissions', [EmployeeFeaturePermissionController::class, 'updatePermissions']);
+  Route::get('/get-user-access-data', [EmployeeFeaturePermissionController::class, 'getUserAccessData']);
 });

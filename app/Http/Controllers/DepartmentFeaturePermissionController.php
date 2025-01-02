@@ -24,6 +24,7 @@ class DepartmentFeaturePermissionController extends Controller
     public function index()
     {
         $departmentsWithPermissions = $this->service->getDepartmentsWithPermissions();
+
         return response()->json(
             [
                 'message' => 'Departments with permissions retrieved successfully',
@@ -44,6 +45,7 @@ class DepartmentFeaturePermissionController extends Controller
                 $validatedData['department_id'],
                 $validatedData['features']
             );
+
             return response()->json([
                 'message' => $message,
                 'statusCode' => 200
@@ -61,19 +63,18 @@ class DepartmentFeaturePermissionController extends Controller
      */
     public function show(string $id)
     {
-        //
+        
     }
 
-    /**
+    /*
      * Update the specified resource 'status' in storage.
      */
     public function updateStatus(UpdateDepartmentFeaturePermissionRequest $request)
     {
         $validatedData = $request->validated();
-
-        //$validatedData = $request->validated();
         try {
             $message = $this->service->updateDepartmentPermissionStatus($validatedData['department_id'], $validatedData['status']);
+
             return response()->json([
                 'message' => $message,
                 'statusCode' => 200
@@ -88,16 +89,15 @@ class DepartmentFeaturePermissionController extends Controller
         }
     }
 
-    /**
+    /*
      * Update the specified resource  in storage.
      */
     public function updatePermissions(UpdateDepartmentFeaturePermissionRequest $request)
     {
         $validatedData = $request->validated();
-
-
         try {
             $message = $this->service->updateDepartmentFeaturePermissions($validatedData['department_id'], $validatedData['features']);
+
             return response()->json([
                 'message' => $message,
                 'statusCode' => 200
@@ -112,7 +112,7 @@ class DepartmentFeaturePermissionController extends Controller
         }
     }
 
-    /**
+    /*
      * Remove the specified resource from storage.
      */
     public function destroy(string $id) {}

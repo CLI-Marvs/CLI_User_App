@@ -6,7 +6,7 @@ import moment from "moment";
 import apiService from "../../servicesApi/apiService";
 
 const TicketTable = ({ concernData }) => {
-    const [hasPermission, setHasPermission] = useState(false);
+ 
     const [checkedRows, setCheckedRows] = useState([]);
     const {
         getMessages,
@@ -16,18 +16,10 @@ const TicketTable = ({ concernData }) => {
         getInquiryLogs,
         getConcernMessages,
         getNavBarData,
-        userAccessData
+ 
     } = useStateContext();
     //Permission check
-    useEffect(() => {
-        if (userAccessData) {
-           
-            const notificationPermissions = userAccessData?.employeePermissions?.find(
-                (perm) => perm.name === 'Inquiry Management'
-            );
-            setHasPermission(notificationPermissions?.pivot?.can_read);
-        }
-    }, [userAccessData]);
+    
     const handleCheckboxChange = (index) => {
         setCheckedRows((prevCheckedRows) =>
             prevCheckedRows.includes(index)
@@ -88,9 +80,7 @@ const TicketTable = ({ concernData }) => {
             return date.toLocaleDateString(undefined, options);
         }
     };
-    if (!hasPermission) {
-        return <div className="w-full h-full flex justify-center items-center text-custom-bluegreen text-lg">You do not have permission to view this page.</div>;
-    }
+   
     /*  useEffect(() => {
          getAllConcerns();
      }, []); */
@@ -123,8 +113,8 @@ const TicketTable = ({ concernData }) => {
                         </td> */}
                             <td
                                 className={`w-[60px] shrink-0 flex justify-center text-xl  ${row.status === "Resolved" || row.status === "Closed"
-                                        ? "text-gray-500"
-                                        : "text-custom-bluegreen"
+                                    ? "text-gray-500"
+                                    : "text-custom-bluegreen"
                                     }`}
                             >
                                 <button
@@ -201,8 +191,8 @@ const TicketTable = ({ concernData }) => {
                                         return `${capitalize(
                                             lastName
                                         )}, ${capitalize(firstName)}${middleInitial
-                                                ? `, ${middleInitial}`
-                                                : ""
+                                            ? `, ${middleInitial}`
+                                            : ""
                                             }`;
 
                                         // return `${capitalize(
@@ -242,16 +232,16 @@ const TicketTable = ({ concernData }) => {
                             </td>
                             <td
                                 className={`w-[210px] flex items-center  ${row.status === "Resolved" || row.status === "Closed"
-                                        ? "text-gray-500"
-                                        : "text-custom-lightgreen"
+                                    ? "text-gray-500"
+                                    : "text-custom-lightgreen"
                                     }`}
                             >
                                 <p className="truncate">{row.message_log}</p>
                             </td>
                             <td
                                 className={`w-[110px] flex justify-end pr-3 ${row.status === "Resolved" || row.status === "Closed"
-                                        ? "text-black"
-                                        : "text-custom-bluegreen"
+                                    ? "text-black"
+                                    : "text-custom-bluegreen"
                                     } font-semibold`}
                             >
                                 {formatTime(row.created_at)}

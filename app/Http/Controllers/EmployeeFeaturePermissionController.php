@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\PermissionUpdate;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use App\Services\EmployeeFeaturePermissionService;
 use App\Http\Requests\StoreEmployeeFeaturePermissionRequest;
 use App\Http\Requests\UpdateEmployeeFeaturePermissionRequest;
@@ -16,13 +18,13 @@ class EmployeeFeaturePermissionController extends Controller
     {
         $this->service = $service;
     }
-    
+
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        $employeesWithPermissions = $this->service->getDepartmentsWithPermissions();
+        $employeesWithPermissions = $this->service->getEmployeessWithPermissions();
         return response()->json(
             [
                 'message' => 'Employees with permissions retrieved successfully',
@@ -43,6 +45,7 @@ class EmployeeFeaturePermissionController extends Controller
                 $validatedData['employee_id'],
                 $validatedData['features']
             );
+            // PermissionUpdate::dispatch($validatedData['employee_id']);
             return response()->json([
                 'message' => 'Employee permission successfully added',
                 'statusCode' => 200
@@ -57,7 +60,7 @@ class EmployeeFeaturePermissionController extends Controller
         }
     }
 
-    /**
+    /*
      * Update the specified resource 'status' in storage.
      */
     public function updateStatus(UpdateEmployeeFeaturePermissionRequest $request)
@@ -65,11 +68,14 @@ class EmployeeFeaturePermissionController extends Controller
         $validatedData = $request->validated();
 
         try {
-            $this->service->updateEmployeePermissionStatus($validatedData['employee_id'], $validatedData['status']);
-            return response()->json([
-                'message' => 'Employee permission updated successfully',
-                'statusCode' => 200
-            ], 200);
+            $updatedStatus = $this->service->updateEmployeePermissionStatus($validatedData['employee_id'], $validatedData['status']);
+
+            if ($updatedStatus) {
+                return response()->json([
+                    'message' => 'Employee permission updated successfully',
+                    'statusCode' => 200
+                ], 200);
+            }
         } catch (\Exception $e) {
             return response()->json(
                 [
@@ -87,11 +93,17 @@ class EmployeeFeaturePermissionController extends Controller
     {
         $validatedData = $request->validated();
         try {
-            $this->service->updateEmployeeFeaturePermissions($validatedData['employee_id'], $validatedData['features']);
-            return response()->json([
-                'message' => 'Employee feature permissions updated successfully',
-                'statusCode' => 200
-            ]);
+            $result = $this->service->updateEmployeeFeaturePermissions(
+                $validatedData['employee_id'],
+                $validatedData['features']
+            );
+
+            if ($result) {
+                return response()->json([
+                    'statusCode' => 200,
+                    'data' => $result
+                ], 200);
+            }
         } catch (\Exception $e) {
             return response()->json(
                 [
@@ -100,5 +112,15 @@ class EmployeeFeaturePermissionController extends Controller
                 500
             );
         }
+    }
+
+    /** 
+     * Get all user and department access data
+     */
+    public function getUserAccessData()
+    {
+        $user = Auth::user();
+        $userAccessData = $this->service->getUserAccessData($user);
+        return response()->json($userAccessData, 200);
     }
 }

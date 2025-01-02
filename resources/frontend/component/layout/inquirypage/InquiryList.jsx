@@ -32,6 +32,7 @@ const InquiryList = () => {
         loading,
         /*  setHasAttachments,
         hasAttachments */
+        userAccessData
     } = useStateContext();
 
     const [name, setName] = useState("");
@@ -55,6 +56,18 @@ const InquiryList = () => {
     const [lastActivity, setLastActivity] = useState(null);
     const filterBoxRef = useRef(null);
     const [isOpenSelect, setIsOpenSelect] = useState(false);
+    const [canWrite, setCanWrite] = useState(false);
+
+    useEffect(() => {
+        if (userAccessData) {
+            const inquiryPermissions = userAccessData?.employeePermissions?.find(
+                (perm) => perm.name === 'Inquiry Management'
+            ) || userAccessData?.departmentPermissions?.find(
+                (perm) => perm.name === 'Inquiry Management'
+            );
+            setCanWrite(inquiryPermissions?.pivot?.can_write);
+        }
+    }, [userAccessData]);
 
     const handleSelect = (option) => {
         onChange(option);
@@ -224,25 +237,25 @@ const InquiryList = () => {
                 .map((item) => {
                     let formattedItem = formatFunc(item);
 
-                // Capitalize each word in the string
-                formattedItem = formattedItem
-                    .split(" ")
-                    .map((word) => {
-                        // Check for specific words that need to be fully capitalized
-                        if (/^(Sjmv|Lpu|Cdo|Dgt)$/i.test(word)) {
-                            return word.toUpperCase();
-                        }
-                        // Capitalize the first letter of all other words
-                        return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
-                    })
-                    .join(" ");
+                    // Capitalize each word in the string
+                    formattedItem = formattedItem
+                        .split(" ")
+                        .map((word) => {
+                            // Check for specific words that need to be fully capitalized
+                            if (/^(Sjmv|Lpu|Cdo|Dgt)$/i.test(word)) {
+                                return word.toUpperCase();
+                            }
+                            // Capitalize the first letter of all other words
+                            return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+                        })
+                        .join(" ");
 
-                // Replace specific names if needed
-                if (formattedItem === "Casamira South") {
-                    formattedItem = "Casa Mira South";
-                }
+                    // Replace specific names if needed
+                    if (formattedItem === "Casamira South") {
+                        formattedItem = "Casa Mira South";
+                    }
 
-                return formattedItem;
+                    return formattedItem;
                 })
                 .sort((a, b) => {
                     if (a === "N/A") return -1;
@@ -325,65 +338,63 @@ const InquiryList = () => {
         specificAssigneeCsr,
         currentPage,
     ]);
- 
+
 
     return (
         <>
             <div className="h-screen max-w-full bg-custom-grayFA px-[20px]">
                 <div className="bg-custom-grayFA">
                     <div className="relative flex justify-start gap-3 pt-1">
-                        <div className="relative w-[604px]">
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                strokeWidth="1.5"
-                                stroke="currentColor"
-                                className="size-4 absolute left-3 top-4 text-gray-500"
-                            >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
+                        {canWrite && (
+                            <div className="relative w-[604px]">
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    strokeWidth="1.5"
+                                    stroke="currentColor"
+                                    className="size-4 absolute left-3 top-4 text-gray-500"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
+                                    />
+                                </svg>
+                                <input
+                                    type="text"
+                                    readOnly={true}
+                                    onClick={toggleFilterBox}
+                                    className="h-[47px] w-[606px] bg-custom-grayF1 rounded-[10px] pl-9 pr-6 text-sm"
+                                    placeholder="Search"
                                 />
-                            </svg>
-                            <input
-                                type="text"
-                                readOnly={true}
-                                onClick={toggleFilterBox}
-                                className="h-[47px] w-[606px] bg-custom-grayF1 rounded-[10px] pl-9 pr-6 text-sm"
-                                placeholder="Search"
-                            />
-                            <svg
-                                onClick={toggleFilterBox}
-                                xmlns="http://www.w3.org/2000/svg"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                strokeWidth={1.5}
-                                stroke="currentColor"
-                                className="size-[24px] absolute right-3 top-3 text-custom-bluegreen hover:bg-gray-200 cursor-pointer"
-                            >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    d="M6 13.5V3.75m0 9.75a1.5 1.5 0 0 1 0 3m0-3a1.5 1.5 0 0 0 0 3m0 3.75V16.5m12-3V3.75m0 9.75a1.5 1.5 0 0 1 0 3m0-3a1.5 1.5 0 0 0 0 3m0 3.75V16.5m-6-9V3.75m0 3.75a1.5 1.5 0 0 1 0 3m0-3a1.5 1.5 0 0 0 0 3m0 9.75V10.5"
-                                />
-                            </svg>
-                        </div>
+                                <svg
+                                    onClick={toggleFilterBox}
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    strokeWidth={1.5}
+                                    stroke="currentColor"
+                                    className="size-[24px] absolute right-3 top-3 text-custom-bluegreen hover:bg-gray-200 cursor-pointer"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        d="M6 13.5V3.75m0 9.75a1.5 1.5 0 0 1 0 3m0-3a1.5 1.5 0 0 0 0 3m0 3.75V16.5m12-3V3.75m0 9.75a1.5 1.5 0 0 1 0 3m0-3a1.5 1.5 0 0 0 0 3m0 3.75V16.5m-6-9V3.75m0 3.75a1.5 1.5 0 0 1 0 3m0-3a1.5 1.5 0 0 0 0 3m0 9.75V10.5"
+                                    />
+                                </svg>
+                            </div>
+                        )}
                         <div className="flex items-center">
-                            {user?.department ===
-                                "Customer Relations - Services" && (
+                            {!canWrite || user?.department === "Customer Relations - Services" && (
                                 <button
                                     onClick={handleOpenModal}
-                                    className="h-[38px] w-[121px] gradient-btn5 text-white  text-xs rounded-[10px]"
+                                    className="h-[38px] w-[121px] gradient-btn5 text-white text-xs rounded-[10px]"
                                 >
-                                    {" "}
-                                    <span className="text-[18px]">+</span> Add
-                                    Inquiry
+                                    <span className="text-[18px]">+</span> Add Inquiry
                                 </button>
                             )}
                         </div>
-
                         {isFilterVisible && (
                             <div
                                 ref={filterBoxRef}
@@ -699,7 +710,7 @@ const InquiryList = () => {
                         <button onClick={handleOpenModal} className='h-[38px] w-[121px] gradient-btn5 text-white  text-xs rounded-[10px]'> <span className='text-[18px]'>+</span> Add Inquiry</button>
                     </div> */}
                 </div>
-                <div className="max-w-[1260px] ">
+                <div className="max-w-[1260px]">
                     <div className="flex justify-between items-center h-12 mt-[15px] px-6 bg-white rounded-t-lg mb-1 ">
                         <div className="relative mr-4 ">
                             <button
@@ -747,51 +758,46 @@ const InquiryList = () => {
                                 <div className="flex items-center space-x-2">
                                     {user?.department ===
                                         "Customer Relations - Services" && (
-                                        <button
-                                            onClick={handleAssignedToMeClick}
-                                            className={`flex items-center text-custom-lightgreen h-[25px] w-[125px] rounded-[55px] p-[2px] ${
-                                                assignedToMeActive
+                                            <button
+                                                onClick={handleAssignedToMeClick}
+                                                className={`flex items-center text-custom-lightgreen h-[25px] w-[125px] rounded-[55px] p-[2px] ${assignedToMeActive
                                                     ? "bglightgreen-btn"
                                                     : "gradient-btn2hover "
-                                            }`}
-                                        >
-                                            <p
-                                                className={`h-full w-full flex justify-center items-center text-xs montserrat-semibold rounded-[50px]   ${
-                                                    assignedToMeActive
+                                                    }`}
+                                            >
+                                                <p
+                                                    className={`h-full w-full flex justify-center items-center text-xs montserrat-semibold rounded-[50px]   ${assignedToMeActive
                                                         ? "bglightgreen-btn"
                                                         : "bg-white hover:bg-custom-lightestgreen"
-                                                }
+                                                        }
                                         `}
-                                            >
-                                                Assigned to me
-                                            </p>
-                                        </button>
-                                    )}
+                                                >
+                                                    Assigned to me
+                                                </p>
+                                            </button>
+                                        )}
                                     {dayButtonLabels.map((label) => (
                                         <button
                                             key={label}
                                             onClick={() =>
                                                 handleDayClick(label)
                                             }
-                                            className={`flex justify-center items-center  text-custom-lightgreen h-[25px] rounded-[55px] p-[2px] ${
-                                                activeDayButton === label
-                                                    ? "bglightgreen-btn hover:bg-custom-lightgreen"
-                                                    : "gradient-btn2hover border-custom-lightgreen"
-                                            } hover:bg-custom-lightestgreen ${
-                                                label === "3+ Days"
+                                            className={`flex justify-center items-center  text-custom-lightgreen h-[25px] rounded-[55px] p-[2px] ${activeDayButton === label
+                                                ? "bglightgreen-btn hover:bg-custom-lightgreen"
+                                                : "gradient-btn2hover border-custom-lightgreen"
+                                                } hover:bg-custom-lightestgreen ${label === "3+ Days"
                                                     ? "w-[76px]"
                                                     : label === "2 Days"
-                                                    ? "w-[69px]"
-                                                    : "w-[60px]"
-                                            }`}
+                                                        ? "w-[69px]"
+                                                        : "w-[60px]"
+                                                }`}
                                         >
                                             <p
                                                 className={`h-full w-full flex justify-center items-center text-xs montserrat-semibold rounded-[50px]
-                                            ${
-                                                activeDayButton === label
-                                                    ? "bglightgreen-btn"
-                                                    : "bg-white hover:bg-custom-lightestgreen"
-                                            }
+                                            ${activeDayButton === label
+                                                        ? "bglightgreen-btn"
+                                                        : "bg-white hover:bg-custom-lightestgreen"
+                                                    }
                                             `}
                                             >
                                                 {label}
@@ -811,7 +817,7 @@ const InquiryList = () => {
                         </div>
                     </div>
                     <div className="w-[1260px]">
-                       {/*  {loading ? (
+                        {/*  {loading ? (
                             <>
                              <p className="text-center">
                                <Spinner/>
@@ -829,12 +835,12 @@ const InquiryList = () => {
                            </>
                         )} */}
                         {data && data.length === 0 ? (
-                                <p className="text-center text-gray-500 py-4">
-                                    No records found.
-                                </p>
-                            ) : (
-                                <TicketTable concernData={data || []} />
-                            )}
+                            <p className="text-center text-gray-500 py-4">
+                                No records found.
+                            </p>
+                        ) : (
+                            <TicketTable concernData={data || []} />
+                        )}
                     </div>
                     <div className="flex justify-end items-center h-12 px-6 gap-2 bg-white rounded-b-lg">
                         <p className="text-sm text-gray-400 hidden">

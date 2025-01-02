@@ -11,8 +11,8 @@ const AddDepartmentModal = ({ departmentModalRef }) => {
     const { employeeDepartments, features, getAllEmployeeDepartment, getAllFeatures, getDepartmentsWithPermissions } = useStateContext();
     const [isLoading, setIsLoading] = useState(false);
     const [formData, setFormData] = useState({
-        department_id: 0, 
-        features: [],   
+        department_id: 0,
+        features: [],
     });
 
     //Hooks
@@ -131,8 +131,8 @@ const AddDepartmentModal = ({ departmentModalRef }) => {
                                     className="appearance-none text-sm w-full px-4 py-1 bg-white focus:outline-none border-0 mobile:text-xs"
                                 >
                                     <option value="">(Select)</option>
-                                    {employeeDepartments.map((item) => (
-                                        <option value={item.id}>{item.name}</option>
+                                    {employeeDepartments.map((item,index) => (
+                                        <option value={item.id} key={index}>{item.name}</option>
                                     ))}
                                 </select>
                                 <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3 text-custom-bluegreen pointer-events-none">
@@ -141,7 +141,9 @@ const AddDepartmentModal = ({ departmentModalRef }) => {
                             </div>
                         </div>
                         <div className='py-2 w-[343pxpx]'>
-                            <label htmlFor="" className='text-red-500 text-sm'>Note: Department not visible is already in the list.</label>
+                            <label htmlFor="" className='text-red-500 text-sm'>
+                                Note: Department not visible is already in the list.
+                            </label>
                         </div>
 
                     </div>
@@ -159,7 +161,6 @@ const AddDepartmentModal = ({ departmentModalRef }) => {
                                 <div className="relative h-full w-full flex justify-center items-center">
                                     <div className='w-[342px] h-[44px]'>
                                         <div className='w-full h-[44px] gap-[63px] flex items-center justify-center rounded-[5px]'>
-
                                             {PERMISSIONS && PERMISSIONS.map((permission, index) => {
                                                 const isDisabled = ["S", "D", "E"].includes(permission.name);
                                                 return (

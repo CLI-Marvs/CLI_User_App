@@ -23,7 +23,7 @@ class DepartmentFeaturePermissionService
     }
 
 
-    /**
+    /*
      * Get all departments with permissions
      */ 
     public function getDepartmentsWithPermissions()
@@ -32,7 +32,7 @@ class DepartmentFeaturePermissionService
     }
 
 
-    /**
+    /*
      * Update the department's permission status
      */
     public function updateDepartmentPermissionStatus(int $departmentId,string $status)
@@ -41,7 +41,7 @@ class DepartmentFeaturePermissionService
     }
 
     /**
-     * Update the department feature permissions
+     * Update the department's feature permissions
      */
     public function updateDepartmentFeaturePermissions(int $departmentId, array $permissions)
     {

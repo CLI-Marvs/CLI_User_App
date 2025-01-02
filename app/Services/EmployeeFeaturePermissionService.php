@@ -21,7 +21,7 @@ class EmployeeFeaturePermissionService
         $this->model = $model;
     }
  
-    /**
+    /*
      * Synchronize feature permissions for a department
      */
     public function syncPermissions($employeeId, $features)
@@ -33,7 +33,7 @@ class EmployeeFeaturePermissionService
     /**
      * Get all departments with permissions
      */
-    public function getDepartmentsWithPermissions()
+    public function getEmployeessWithPermissions()
     {
         return $this->repository->getEmployeessWithPermissions();
     }
@@ -55,19 +55,18 @@ class EmployeeFeaturePermissionService
     }
 
     /**
-     * Get permissions for an employee.
-     *
+     * Get permissions for an employee or department.
      * @param Employee $employees
      * @return array
      */
-    public function getEmployeePermissions($user)
+    public function getUserAccessData($user)
     {
         // Fetch the department name from the employee record
         $employeeDepartmentName = $user->department;
 
         // Fetch the department's ID using the department name
         $employeeDepartment = EmployeeDepartment::where('name', $employeeDepartmentName)->first();
-
+       
         // Check if the department exists
         if (!$employeeDepartment) {
             // Handle the case where the department doesn't exist (optional)
@@ -77,13 +76,16 @@ class EmployeeFeaturePermissionService
             ];
         }
 
-        // Fetch department-specific permissions
-        $departmentPermissions = DB::table('department_feature_permissions')
-        ->where('department_id', $employeeDepartment->id)
-            ->get();
+        // Fetch department-specific permissions via the relationship
+        $departmentPermissions = $employeeDepartment->features()
+        ->wherePivot('status', 'Active')
+        ->get();
 
         // Fetch employee-specific permissions using the features relationship
-        $employeePermissions = $user->features()->get();
+        $employeePermissions = $user->features()
+        ->wherePivot('status', 'Active')
+        ->get();
+
         return [
             'departmentPermissions' => $departmentPermissions,
             'employeePermissions' => $employeePermissions,

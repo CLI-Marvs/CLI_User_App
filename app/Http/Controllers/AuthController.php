@@ -111,8 +111,8 @@ class AuthController extends Controller
                     'created_at' => now()
                 ]);
             }
-            $userAccessData = $this->permissionService->getEmployeePermissions($user);
-           
+            $userAccessData = $this->permissionService->getUserAccessData($user);
+        
             Auth::login($user);
 
             $token = $user->createToken('authToken')->plainTextToken;

@@ -31,6 +31,7 @@ class EmployeeDepartmentRepository
                 });
             })
             ->latest('created_at')
+            ->orderBy('name', 'asc')
             ->orWhereDoesntHave('features')  
             ->get();
     }

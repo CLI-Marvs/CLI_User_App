@@ -25,13 +25,51 @@ const AddUserModals = ({ userModalRef }) => {
         employeesWithPermissions,
         search
     ); // Use the utility function
-     
+  
 
     //Hooks
     //Get all feature
     useEffect(() => {
         getAllFeatures();
     }, []);
+
+    // useEffect(() => {
+    //     let permissionUpdateChannel;
+
+    //     // Function to ensure window.Echo is loaded before subscribing
+    //     const initChannels = () => {
+    //         if (employeeId && window.Echo) {
+    //             // Channel for permission updates
+    //             permissionUpdateChannel = window.Echo.channel(
+    //                 `permission-update.${employeeId}`
+    //             );
+    //             permissionUpdateChannel.listen(".PermissionUpdate", (data) => {
+    //                 console.log("Permission updated:", data);
+    //                 // Handle real-time permission updates here
+    //                 getUserAccessData(); // Refresh user access data after updates
+    //             });
+
+    //         }
+    //     };
+
+    //     // Wait until the browser (Echo) is ready
+    //     const checkBrowserReady = setInterval(() => {
+    //         if (window.Echo) {
+    //             initChannels();
+    //             clearInterval(checkBrowserReady); // Stop checking once Echo is ready
+    //         }
+    //     }, 100); // Check every 100ms if Echo is initialized
+
+    //     return () => {
+    //         // Clear interval if component unmounts
+    //         clearInterval(checkBrowserReady); 
+    //         // Cleanup permission update channel
+    //         if (permissionUpdateChannel) {
+    //             permissionUpdateChannel.stopListening(".PermissionUpdate");
+    //             window.Echo.leaveChannel(`permission-update.${employeeId}`);
+    //         }
+    //     };
+    // }, [employeeId]);
 
     // Close dropdown on outside click
     useEffect(() => {
@@ -46,7 +84,7 @@ const AddUserModals = ({ userModalRef }) => {
             document.removeEventListener("mousedown", handleOutsideClick);
         };
     }, []);
- 
+
     //Event Handler
     //Handle select employee
     const handleSelectEmployee = (employee) => {
@@ -88,13 +126,14 @@ const AddUserModals = ({ userModalRef }) => {
             employee_id: formData?.employee_id,
             features: formData.features
         };
+        
         try {
             setIsLoading(true);
             const response = await apiService.post("employee-assign-feature-permissions", payload);
             if (response.data?.statusCode === 200) {
                 showToast("Data added successfully!", "success");
                 setFormData({
-                    employee_id: 0,  
+                    employee_id: 0,
                     features: [],
                 });
                 setSearch("");
@@ -105,7 +144,7 @@ const AddUserModals = ({ userModalRef }) => {
                 }
             }
         } catch (error) {
-            console.log("error", error);
+            console.log("Error saving add user modal:", error);
         } finally {
             setIsLoading(false);
         }
@@ -116,7 +155,7 @@ const AddUserModals = ({ userModalRef }) => {
         if (userModalRef.current) {
             setSelectedEmployee(null);
             setFormData({
-                employee_id: 0, 
+                employee_id: 0,
                 features: [],
             });
             setSearch("");
@@ -249,7 +288,7 @@ const AddUserModals = ({ userModalRef }) => {
                                                         <p className="montserrat-semibold text-[10px] leading-[12.19px]">
                                                             {permission.name}
                                                         </p>
-                                         
+
                                                         <input
                                                             checked={
                                                                 formData.features.find((feature) => feature.featureId === item.id)?.[permission.value] || false

@@ -44,11 +44,34 @@ import PreloadWrapper from "./PreloadWrapper";
 import BannerSettingsView from './views/pages/bannersettingsViews/BannerSettingsView';
 import CrsSettingsSidebar from './layout/mainComponent/sidebars/CrsSettingsSidebar';
 import VersionLogsView from './views/pages/raiseaconcernViews/VersionLogsView';
-// PrivateRoute component to check authentication
-const PrivateRoute = () => {
+import { useStateContext } from '../context/contextprovider';
+
+
+// PrivateRoute component to check authentication and permissions( department and employee )
+const PrivateRoute = ({ requiredPermission }) => {
+    const { hasPermission } = useStateContext();
+
+    // Check for authentication token
     const authToken = localStorage.getItem("authToken");
-    return authToken ? <Outlet /> : <Navigate to="/" replace />;
+
+    // Redirect to login page if not authenticated
+    if (!authToken) {
+        return <Navigate to="/" replace />;
+    }
+
+    // Check for required permissions
+    if (requiredPermission && !hasPermission(requiredPermission)) {
+        return (
+            <div className="w-full h-full flex justify-center   text-custom-bluegreen text-lg">
+                You do not have permission to view this page.
+            </div>
+        );
+    }
+
+    // Render the child routes if authentication and permission checks pass
+    return <Outlet />;
 };
+
 const App = () => {
     /**
      * Implement storage event listener to handle authToken changes across tabs
@@ -294,47 +317,90 @@ const App = () => {
                         },
                         {
                             path: "notification",
-                            element: <NotificationView />,
+                            element: <PrivateRoute requiredPermission="Notification" />,
+                            children: [{ path: "", element: <NotificationView /> }],
                         },
                         {
                             path: "transactionmanagement/invoices",
-                            element: <TransactionView />,
+                            element: <PrivateRoute requiredPermission="Transaction Management" />,
+                            children: [{ path: "", element: <TransactionView /> }],
                         },
                         {
                             path: "transactionmanagement/transactionrecords",
-                            element: <BankStatementView />,
+                            element: <PrivateRoute requiredPermission="Transaction Records" />,
+                            children: [{ path: "", element: <BankStatementView /> }],
                         },
+                        // {
+                        //     path: "inquirymanagement/inquirylist",
+                        //     element: <InquiryListView />,
+                        // },
+                        // {
+                        //     path: "inquirymanagement/thread/:id",
+                        //     element: <InquiryThreadView />,
+                        // },
+                        // {
+                        //     path: "inquirymanagement/report",
+                        //     element: <ReportViews />,
+                        // },
+                        // {
+                        //     path: "inquirymanagement/autoassign",
+                        //     element: <AutoAssignView />,
+                        // },
+                        // {
+                        //     path: "inquirymanagement/settings",
+                        //     element: <SecondLayout />,
+                        //     children: [
+                        //         {
+                        //             path: "autoassign",
+                        //             element: <AutoAssignView />,
+                        //         },
+                        //         {
+                        //             path: "bannersettings",
+                        //             element: <BannerSettingsView />,
+                        //         },
+                        //         {
+                        //             path: "versionlogs",
+                        //             element: <VersionLogsView />,
+                        //         },
+                        //     ],
+                        // },
                         {
-                            path: "inquirymanagement/inquirylist",
-                            element: <InquiryListView />,
-                        },
-                        {
-                            path: "inquirymanagement/thread/:id",
-                            element: <InquiryThreadView />,
-                        },
-                        {
-                            path: "inquirymanagement/report",
-                            element: <ReportViews />,
-                        },
-                        {
-                            path: "inquirymanagement/autoassign",
-                            element: <AutoAssignView />,
-                        },
-                        {
-                            path: "inquirymanagement/settings",
-                            element: <SecondLayout />,
+                            path: "inquirymanagement",
+                            element: <PrivateRoute requiredPermission="Inquiry Management" />,
                             children: [
                                 {
+                                    path: "inquirylist",
+                                    element: <InquiryListView />
+                                },
+                                {
+                                    path: "thread/:id",
+                                    element: <InquiryThreadView />
+                                },
+                                {
+                                    path: "report",
+                                    element: <ReportViews />
+                                },
+                                {
                                     path: "autoassign",
-                                    element: <AutoAssignView />,
+                                    element: <AutoAssignView />
                                 },
                                 {
-                                    path: "bannersettings",
-                                    element: <BannerSettingsView />,
-                                },
-                                {
-                                    path: "versionlogs",
-                                    element: <VersionLogsView/>,
+                                    path: "settings",
+                                    element: <SecondLayout />,
+                                    children: [
+                                        {
+                                            path: "autoassign",
+                                            element: <AutoAssignView />
+                                        },
+                                        {
+                                            path: "bannersettings",
+                                            element: <BannerSettingsView />
+                                        },
+                                        {
+                                            path: "versionlogs",
+                                            element: <VersionLogsView />
+                                        },
+                                    ],
                                 },
                             ],
                         },

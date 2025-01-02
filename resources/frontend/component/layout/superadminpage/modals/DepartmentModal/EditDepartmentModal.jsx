@@ -79,7 +79,7 @@ const EditDepartmentModal = ({ editDepartmentModalRef, selectedDepartment }) => 
             const response = await apiService.put("update-departments-feature-permissions", payload);
 
             if (response.data?.statusCode === 200) {
-                showToast("Data udpated successfully!", "success");
+                showToast("Data updated successfully!", "success");
                 setFormData({
                     department_id: 0, 
                     features: [],
@@ -147,7 +147,7 @@ const EditDepartmentModal = ({ editDepartmentModalRef, selectedDepartment }) => 
                                 <input type="input"
                                     name="department"
                                     disabled
-                                    value={selectedDepartment?.name}
+                                    value={selectedDepartment?.name || ''}
                                     className="appearance-none text-sm w-full px-4 py-1 focus:outline-none border-0 mobile:text-xs" />
 
                             </div>
