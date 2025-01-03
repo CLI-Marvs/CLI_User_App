@@ -190,14 +190,14 @@ const UserRightsAndPermissions = () => {
             </thead>
             <tbody>
               {isUserAccessDataFetching ? (
-                <tr className="w-full flex gap-x-2">
-                  <th className="flex justify-start w-[200px] shrink-0 bg-gray-100 rounded-md">
+                <tr className="w-full flex flex-col gap-x-2">
+                  <th className="flex justify-start  shrink-0 bg-gray-100 rounded-md mt-1">
                     <Skeleton height={40} width="80%" />
                   </th>
-                  <th className="flex justify-center w-[200px] shrink-0 bg-gray-100 rounded-md">
+                  <th className="flex justify-center shrink-0 bg-gray-100 rounded-md mt-2">
                     <Skeleton height={40} width="80%" />
                   </th>
-                  <th className="flex justify-center w-[200px] shrink-0 bg-gray-100 rounded-md">
+                  <th className="flex justify-center  shrink-0 bg-gray-100 rounded-md mt-2">
                     <Skeleton height={40} width="80%" />
                   </th>
                 </tr>
