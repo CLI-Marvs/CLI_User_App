@@ -95,6 +95,7 @@ const CustomTooltip = ({ active, payload }) => {
                  <p className="font-bold">{`${name}`}</p>
                 <p className="text-custom-solidgreen">{`Resolved: ${payload[0].value}`}</p>
                 <p className="text-custom-lightgreen">{`Unresolved: ${payload[1].value}`}</p>
+                <p className="text-red-500">{`Closed: ${payload[2].value}`}</p>
             </div>
         );
     }
@@ -360,7 +361,7 @@ const ReportPage = () => {
     //Get current year
     const currentYear = new Date().getFullYear();
 
-    const chartHeight = dataProperty.length * (barHeight + 60);
+    const chartHeight = dataProperty.length * (barHeight + 80);
     const chartHeight2 = communicationTypeData.length * (barHeight + 100);
 
     const allDepartment = allEmployees
@@ -907,6 +908,7 @@ const ReportPage = () => {
                                 data={dataProperty}
                                 layout="vertical"
                                 margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                                
                             >
                                 <XAxis type="number" hide />
                                 <YAxis
@@ -953,6 +955,19 @@ const ReportPage = () => {
                                 >
                                     <LabelList
                                         dataKey="unresolved" // Update this to unresolved
+                                        position="right"
+                                        fill="#4a5568"
+                                    />
+                                </Bar>
+                                
+                                <Bar
+                                    dataKey="closed"
+                                    fill="#EF4444"
+                                    barSize={15}
+                                    radius={[0, 4, 4, 0]}
+                                >
+                                    <LabelList
+                                        dataKey="closed" 
                                         position="right"
                                         fill="#4a5568"
                                     />

@@ -261,7 +261,9 @@ export const ContextProvider = ({ children }) => {
                 name: item.property,
                 resolved: item.resolved,
                 unresolved: item.unresolved,
+                closed: item.closed,
             }));
+            console.log("formattedData", formattedData);
             setDataPropery(formattedData);
         } catch (error) {
             console.log("error retrieving", error);

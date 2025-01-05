@@ -1985,7 +1985,8 @@ class ConcernController extends Controller
             DB::raw('property'),
             /*   DB::raw('EXTRACT(MONTH FROM created_at) as month'), */
             DB::raw('SUM(case when status = \'Resolved\' then 1 else 0 end) as Resolved'),
-            DB::raw('SUM(case when status = \'unresolved\' then 1 else 0 end) as Unresolved')
+            DB::raw('SUM(case when status = \'unresolved\' then 1 else 0 end) as Unresolved'),
+            DB::raw('SUM(case when status = \'Closed\' then 1 else 0 end) as Closed')
 
         )
             ->whereYear('created_at', $year)
@@ -2053,7 +2054,7 @@ class ConcernController extends Controller
             DB::raw("SUM(case when communication_type = 'Complaint' then 1 else 0 end) as Complaint"),
             DB::raw("SUM(case when communication_type = 'Request' then 1 else 0 end) as Request"),
             DB::raw("SUM(case when communication_type = 'Inquiry' then 1 else 0 end) as Inquiry"),
-            DB::raw("SUM(case when communication_type = 'Suggestion or recommendation' then 1 else 0 end) as Suggestion"),
+            DB::raw("SUM(case when communication_type = 'Suggestion or Recommendation' then 1 else 0 end) as Suggestion"),
 
         )
             ->whereYear('created_at', $year);
