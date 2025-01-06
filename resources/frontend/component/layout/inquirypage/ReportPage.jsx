@@ -623,6 +623,7 @@ const ReportPage = () => {
 
                 </div>
                 <div className="flex justify-end gap-6 text-sm">
+                   
                     <div className="flex items-center px-3 py-2 gap-3">
                         <span className="flex items-center text-custom-solidgreen text-2xl">
                             ●
@@ -635,7 +636,7 @@ const ReportPage = () => {
                         </span>
                         <span className="text-custom-gray12">Unresolved</span>
                     </div>
-                    <div className="flex items-center px-3 py-2 gap-3">
+                     <div className="flex items-center px-3 py-2 gap-3">
                         <span className="flex items-center text-red-500 text-2xl">
                             ●
                         </span>
@@ -739,8 +740,8 @@ const ReportPage = () => {
                                     activeDot={false}
                                     dot={(props) => {
                                         const { cx, cy, index } = props;
-                                        /* const colors = ['#348017', '#70ad47', '#1A73E8', '#5B9BD5', '#175d5f', '#404B52', '#a5a5a5']; */
-                                        const colors = ['#404B52', '#70ad47', '#348017', '#a5a5a5', '#175d5f', '#1A73E8', '#5B9BD5'];
+                                        const colors = ['#348017', '#70ad47', '#1A73E8', '#5B9BD5', '#175d5f', '#404B52', '#a5a5a5'];
+                                        
                                         return (
                                             <circle
                                                 key={index}
