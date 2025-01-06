@@ -449,7 +449,7 @@ const ReportPage = () => {
 
     return (
         <div className="h-screen bg-custom-grayFA p-4 flex flex-col gap-[21px]">
-            <div className="flex gap-[10px] bg-[#F2F8FC] rounded-[10px] w-full py-[24px] px-[30px]">
+            <div className="flex flex-wrap gap-[10px] bg-[#F2F8FC] rounded-[10px] w-full py-[24px] px-[30px]">
                 <div className="flex w-[550px] items-center border border-custom-lightgreen rounded-[5px] overflow-hidden shrink-0">
                     <span className="text-white text-sm h-full bg-custom-lightgreen flex items-center w-[110px] -mr-3 pl-3 py-1 shrink-0">
                         Department
@@ -992,10 +992,17 @@ const ReportPage = () => {
                                         Resolved
                                     </span>
                                 </div>
+                                <div className="flex items-center px-3 py-2 gap-2">
+                                    <span className="flex h-[20px] items-center pb-1 text-red-500 text-2xl">
+                                        ●
+                                    </span>
+                                    <span className="text-custom-gray12 text-sm">
+                                        Closed
+                                    </span>
+                                </div>
                             </div>
                         </div>
                     </div>
-
                 </div>
             </div>
             <div className=" w-full pb-7 min-h-[335px] flex-grow-1 bg-[#F2F8FC] rounded-lg">
