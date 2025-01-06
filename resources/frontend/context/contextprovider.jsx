@@ -718,8 +718,6 @@ export const ContextProvider = ({ children }) => {
                 setDepartment,
                 project,
                 setProject,
-                month,
-                setMonth,
                 year,
                 setYear,
                 fetchDataReport,
