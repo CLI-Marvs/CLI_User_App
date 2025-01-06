@@ -593,14 +593,7 @@ const ReportPage = () => {
                                 }} 
                             />
                             <Tooltip content={<CustomTooltip1 />} />
-                            <Bar
-                                dataKey="Closed"
-                                fill="#EF4444"
-                                barSize={12}
-                                radius={[3, 3, 0, 0]}
-                            >
-                                <LabelList dataKey="Closed" position="top" />
-                            </Bar>
+                           
                             <Bar
                                 dataKey="Resolved"
                                 fill="#348017"
@@ -617,18 +610,19 @@ const ReportPage = () => {
                             >
                                 <LabelList dataKey="Unresolved" position="top" />
                             </Bar>
-
+                            <Bar
+                                dataKey="Closed"
+                                fill="#EF4444"
+                                barSize={12}
+                                radius={[3, 3, 0, 0]}
+                            >
+                                <LabelList dataKey="Closed" position="top" />
+                            </Bar>
                         </BarChart>
                     </ResponsiveContainer>
 
                 </div>
                 <div className="flex justify-end gap-6 text-sm">
-                    <div className="flex items-center px-3 py-2 gap-3">
-                        <span className="flex items-center text-red-500 text-2xl">
-                            ●
-                        </span>
-                        <span className="text-custom-gray12">Closed</span>
-                    </div>
                     <div className="flex items-center px-3 py-2 gap-3">
                         <span className="flex items-center text-custom-solidgreen text-2xl">
                             ●
@@ -640,6 +634,12 @@ const ReportPage = () => {
                             ●
                         </span>
                         <span className="text-custom-gray12">Unresolved</span>
+                    </div>
+                    <div className="flex items-center px-3 py-2 gap-3">
+                        <span className="flex items-center text-red-500 text-2xl">
+                            ●
+                        </span>
+                        <span className="text-custom-gray12">Closed</span>
                     </div>
                 </div>
             </div>
