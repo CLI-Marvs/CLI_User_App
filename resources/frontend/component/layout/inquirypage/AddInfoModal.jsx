@@ -57,7 +57,6 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
     useEffect(() => {
         const storedData = JSON.parse(localStorage.getItem("updatedData") || "{}");
         if (dataConcern) {
-            console.log("dataConcern", JSON.stringify(dataConcern));
             setDataToUpdate({
                 ...dataConcern,
                 user_type: dataConcern.user_type === null || dataConcern.user_type === ""

@@ -968,7 +968,8 @@ class ConcernController extends Controller
 
             if (!empty($searchParams['hasAttachments'])) {
                 $query->whereHas('messages', function ($messageQuery) {
-                    $messageQuery->whereNotNull('attachment');
+                    $messageQuery->whereNotNull('attachment')
+                                 ->whereJsonLength('attachment', '>', 0);   
                 });
             }
         }
@@ -1783,7 +1784,8 @@ class ConcernController extends Controller
      * Implement a function to resolve a ticket
      */
     public function markAsResolve(Request $request)
-    {
+    {   
+ 
 
         try {
             $assignees = $request->assignees;
@@ -1822,10 +1824,7 @@ class ConcernController extends Controller
             }
 
             $this->inquiryResolveLogs($request, 'resolve');
-            // ReplyFromAdminJob::dispatch($request->ticket_id, $buyerEmail, $request->remarks, $messageId, $allFiles, $admin_name, $buyer_lastname);
-            // dd($request->ticket_id, $buyerEmail, $buyer_lastname, $message_id, $admin_name, $department);
-
-            //Pass the selectedSurveyType as arguments to MarkResolvedToCustomerJob job 
+            
             MarkResolvedToCustomerJob::dispatch($request->ticket_id, $buyerEmail, $buyer_lastname, $message_id, $admin_name, $department, $modifiedTicketId, $selectedSurveyType);
         } catch (\Exception $e) {
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);

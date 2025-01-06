@@ -184,7 +184,6 @@ const InquiryThread = () => {
         }
     };
     const handleOpenModal = () => {
-        console.log("123", isUserTypeChange);
         setIsUserTypeChange(false);
         if (modalRef.current) {
             modalRef.current.showModal();
@@ -498,7 +497,7 @@ const InquiryThread = () => {
         };
     }, [ticketId]);
 
-    const capitalizeWords = (name) => {
+    /* const capitalizeWords = (name) => {
         if (name) {
             return name
                 .split(" ")
@@ -509,7 +508,7 @@ const InquiryThread = () => {
                 )
                 .join(" ");
         }
-    };
+    }; */
 
     return (
         <>
@@ -1180,7 +1179,7 @@ const InquiryThread = () => {
                                                 Note: This message will be sent
                                                 to{" "}
                                                 <span className="font-semibold">
-                                                    {capitalizeWords(
+                                                    {/* capitalizeWords() */
                                                         `${dataConcern?.buyer_firstname ||
                                                         ""
                                                         } ${dataConcern?.buyer_middlename ||
@@ -1188,10 +1187,10 @@ const InquiryThread = () => {
                                                         } ${dataConcern?.buyer_lastname ||
                                                         ""
                                                         }`
-                                                    )}{" "}
-                                                    {capitalizeWords(
+                                                    }{" "}
+                                                    {/* capitalizeWords() */
                                                         dataConcern?.suffix_name
-                                                    )}
+                                                    }
                                                 </span>
                                                 . Please use the comment section
                                                 for CLI internal communication.
