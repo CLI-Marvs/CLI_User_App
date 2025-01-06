@@ -992,10 +992,17 @@ const ReportPage = () => {
                                         Resolved
                                     </span>
                                 </div>
+                                <div className="flex items-center px-3 py-2 gap-2">
+                                    <span className="flex h-[20px] items-center pb-1 text-red-500 text-2xl">
+                                        ●
+                                    </span>
+                                    <span className="text-custom-gray12 text-sm">
+                                        Closed
+                                    </span>
+                                </div>
                             </div>
                         </div>
                     </div>
-
                 </div>
             </div>
             <div className=" w-full pb-7 min-h-[335px] flex-grow-1 bg-[#F2F8FC] rounded-lg">
