@@ -214,7 +214,7 @@ const CustomTooltipLines = ({ active, payload, label }) => {
         const colorMapping = {
             'Email': '#348017', // Green
             'Call': '#70ad47', // Light green
-            'Walk-in': '#1A73E8', // Blue
+            'Walk in': '#1A73E8', // Blue
             'Website': '#5B9BD5', // Light blue
             'Social Media': '#175d5f', // Dark green
             'Branch Tablet': '#404B52', // Dark gray
@@ -739,7 +739,8 @@ const ReportPage = () => {
                                     activeDot={false}
                                     dot={(props) => {
                                         const { cx, cy, index } = props;
-                                        const colors = ['#348017', '#70ad47', '#1A73E8', '#5B9BD5', '#175d5f', '#404B52', '#a5a5a5'];
+                                        /* const colors = ['#348017', '#70ad47', '#1A73E8', '#5B9BD5', '#175d5f', '#404B52', '#a5a5a5']; */
+                                        const colors = ['#404B52', '#70ad47', '#348017', '#a5a5a5', '#175d5f', '#1A73E8', '#5B9BD5'];
                                         return (
                                             <circle
                                                 key={index}
