@@ -214,7 +214,7 @@ const CustomTooltipLines = ({ active, payload, label }) => {
         const colorMapping = {
             'Email': '#348017', // Green
             'Call': '#70ad47', // Light green
-            'Walk in': '#1A73E8', // Blue
+            'Walk-in': '#1A73E8', // Blue
             'Website': '#5B9BD5', // Light blue
             'Social Media': '#175d5f', // Dark green
             'Branch Tablet': '#404B52', // Dark gray

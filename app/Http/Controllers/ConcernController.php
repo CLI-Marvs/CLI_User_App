@@ -2017,16 +2017,6 @@ class ConcernController extends Controller
         $project = $request->property;
         $year = $request->year ?? Carbon::now()->year;
 
-        $customOrder = [
-            'Email', 
-            'Call', 
-            'Walk-in', 
-            'Website', 
-            'Social media', 
-            'Branch Tablet', 
-            'Internal Endorsement'
-        ];
-
 
         $query = Concerns::select('channels', DB::raw('COUNT(*) as total'))
             
@@ -2060,6 +2050,18 @@ class ConcernController extends Controller
 
 
         $inquiryChannels = $query->groupBy('channels')->get();
+
+        $inquiryChannels->transform(function ($item) {
+            if ($item->channels === 'Social media') {
+                $item->channels = 'Social Media';
+            }
+            if ($item->channels === 'Walk in') {
+                $item->channels = 'Walk-in';
+            }
+            return $item;
+        });
+
+
         return response()->json($inquiryChannels);
     }
 
