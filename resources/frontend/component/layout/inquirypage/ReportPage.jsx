@@ -31,6 +31,7 @@ const barHeight = 20;
 
 
 const colors = ["#348017", "#70AD47", "#1A73E8", "#5B9BD5", "#175D5F", "#404B52", "#A5A5A5"];
+const communicationColors = ["#EB4444","#348017","#1A73E8","#E4EA3B"];
 
 const COLORS = [
     "#1F77B4", // Blue
@@ -1132,14 +1133,15 @@ const ReportPage = () => {
                             />
                             <Tooltip />
                             <Bar
-                                dataKey="value"
-                                fill="#348017"
-                                barSize={40}
-                            >
-                                <LabelList dataKey="value" fill="#000000" position="right" />
-                            </Bar>
+                                    dataKey="value" // Green color for values    
+                                    barSize={25}
+                                >
+                                    {communicationTypeData.map((entry, index) => (
+                                        <Cell key={`cell-${index}`} fill={communicationColors[index % 20]} />
+                                    ))}
+                                    <LabelList dataKey="value" fill="#4a5568" position="right" />
+                                </Bar>
                         </BarChart>
-
                     </ResponsiveContainer>
 
 
