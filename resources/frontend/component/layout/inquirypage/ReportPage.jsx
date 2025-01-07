@@ -451,7 +451,7 @@ const ReportPage = () => {
         <div className="h-screen bg-custom-grayFA p-4 flex flex-col gap-[21px]">
             <div className="flex flex-col gap-[10px] bg-[#F2F8FC] rounded-[10px] w-full py-[24px] px-[30px]">
                 <div className="flex gap-[10px]">
-                <div className="relative flex border border-custom-lightgreen rounded-[5px] overflow-hidden">
+                    <div className="relative flex border border-custom-lightgreen rounded-[5px] overflow-hidden">
                         <span className="text-white bg-custom-lightgreen text-sm flex items-center w-[60px] px-[15px] -mr-3 pl-3 py-1 shrink-0">
                             Year
                         </span>
@@ -600,7 +600,7 @@ const ReportPage = () => {
                                 }}
                             />
                             <Tooltip content={<CustomTooltip1 />} />
-                           
+
                             <Bar
                                 dataKey="Resolved"
                                 fill="#348017"
@@ -630,7 +630,7 @@ const ReportPage = () => {
 
                 </div>
                 <div className="flex justify-end gap-6 text-sm">
-                   
+
                     <div className="flex items-center px-3 py-2 gap-3">
                         <span className="flex items-center text-custom-solidgreen text-2xl">
                             ●
@@ -643,7 +643,7 @@ const ReportPage = () => {
                         </span>
                         <span className="text-custom-gray12">Unresolved</span>
                     </div>
-                     <div className="flex items-center px-3 py-2 gap-3">
+                    <div className="flex items-center px-3 py-2 gap-3">
                         <span className="flex items-center text-red-500 text-2xl">
                             ●
                         </span>
@@ -651,7 +651,7 @@ const ReportPage = () => {
                     </div>
                 </div>
             </div>
-            <div className="w-full pb-7 min-h-[335px] flex-grow-1 bg-[#F2F8FC] rounded-lg">
+            <div className="w-[571px] pb-7  flex-grow-1 bg-[#F2F8FC] rounded-lg">
                 <p className="p-4 text-base montserrat-bold">
                     Per Channel
                 </p>
@@ -711,58 +711,49 @@ const ReportPage = () => {
                 </div>
                 <div className="flex flex-col">
                     <div className="py-[10px]">
-                        <ResponsiveContainer width="100%" height={200}>
-                            <LineChart
+                        <ResponsiveContainer width="100%" height={300}>
+                            <BarChart
+                                layout="vertical"
                                 data={inquriesPerChannelData}
                                 margin={{
                                     top: 5,
                                     right: 20,
-                                    left: -25,
+                                    left: 20,
                                     bottom: 15,
                                 }}
                             >
-                                <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                                <CartesianGrid strokeDasharray="3 3" horizontal={false} />
                                 <XAxis
+                                    type="number"
+                                    tick={{
+                                        fontSize: 12,
+                                        fill: '#000',
+                                    }}
+                                    domain={[0, 'dataMax + 10']}
+                                />
+                                <YAxis
+                                    type="category"
                                     dataKey="name"
                                     tick={{
                                         fontSize: 12,
                                         fill: '#000',
-                                        width: 10,
                                     }}
-                                    padding={{ left: 40, right: 40 }}
-                                    dy={5}
-                                />
-                                <YAxis
-                                    tickCount={8} // Divides the Y-axis into increments of 10
-                                    interval={0} // Ensures all ticks are displayed
-                                    domain={[0, 'dataMax + 10']} // Adjusts the range dynamically
-                                    tickFormatter={(value) => `${value}`} // Optional: Customize tick format
+                                    width={100}
                                 />
                                 <Tooltip content={<CustomTooltipLines />} />
-                                <Line
-                                    type="monotone"
-                                    dataKey="value"
-                                    stroke="#F3D48F"
-                                    strokeWidth={1}
-                                    activeDot={false}
-                                    dot={(props) => {
-                                        const { cx, cy, index } = props;
-                                        const colors = ['#348017', '#70ad47', '#1A73E8', '#5B9BD5', '#175d5f', '#404B52', '#a5a5a5'];
+                                <Bar
+                                    dataKey="value" // Green color for values    
+                                    barSize={25}
+                                >
+                                     {inquriesPerChannelData.map((entry, index) => (
+                                        <Cell key={`cell-${index}`} fill={colors[index % 20]} />
                                         
-                                        return (
-                                            <circle
-                                                key={index}
-                                                cx={cx}
-                                                cy={cy}
-                                                r={4} // Adjust the radius size if needed
-                                                fill={colors[index % colors.length]} // Assign color based on index
-                                                stroke={colors[index % colors.length]} // Match the stroke color to the fill
-                                                strokeWidth={0} // Remove any visible stroke
-                                            />
-                                        );
-                                    }}
-                                />
-                            </LineChart>
+                                    ))}
+                                    <LabelList dataKey="value" fill="#4a5568" position="right" />
+                                </Bar>
+
+                            </BarChart>
+
                         </ResponsiveContainer>
                     </div>
                     <div className="w-full px-[10px]">
