@@ -451,7 +451,7 @@ const ReportPage = () => {
         <div className="h-screen bg-custom-grayFA p-4 flex flex-col gap-[21px]">
             <div className="flex flex-col gap-[10px] bg-[#F2F8FC] rounded-[10px] w-full py-[24px] px-[30px]">
                 <div className="flex gap-[10px]">
-                <div className="relative flex border border-custom-lightgreen rounded-[5px] overflow-hidden">
+                    <div className="relative flex border border-custom-lightgreen rounded-[5px] overflow-hidden">
                         <span className="text-white bg-custom-lightgreen text-sm flex items-center w-[60px] px-[15px] -mr-3 pl-3 py-1 shrink-0">
                             Year
                         </span>
@@ -600,7 +600,7 @@ const ReportPage = () => {
                                 }}
                             />
                             <Tooltip content={<CustomTooltip1 />} />
-                           
+
                             <Bar
                                 dataKey="Resolved"
                                 fill="#348017"
@@ -630,7 +630,7 @@ const ReportPage = () => {
 
                 </div>
                 <div className="flex justify-end gap-6 text-sm">
-                   
+
                     <div className="flex items-center px-3 py-2 gap-3">
                         <span className="flex items-center text-custom-solidgreen text-2xl">
                             ●
@@ -643,7 +643,7 @@ const ReportPage = () => {
                         </span>
                         <span className="text-custom-gray12">Unresolved</span>
                     </div>
-                     <div className="flex items-center px-3 py-2 gap-3">
+                    <div className="flex items-center px-3 py-2 gap-3">
                         <span className="flex items-center text-red-500 text-2xl">
                             ●
                         </span>
@@ -748,7 +748,7 @@ const ReportPage = () => {
                                     dot={(props) => {
                                         const { cx, cy, index } = props;
                                         const colors = ['#348017', '#70ad47', '#1A73E8', '#5B9BD5', '#175d5f', '#404B52', '#a5a5a5'];
-                                        
+
                                         return (
                                             <circle
                                                 key={index}
@@ -1013,7 +1013,7 @@ const ReportPage = () => {
                     </div>
                 </div>
             </div>
-            <div className=" w-full pb-7 min-h-[335px] flex-grow-1 bg-[#F2F8FC] rounded-lg">
+            <div className=" w-[579px] pb-7 min-h-[335px] flex-grow-1 bg-[#F2F8FC] rounded-lg">
                 <p className="p-4  text-base montserrat-bold">
                     Inquiries Per Type
                 </p>
@@ -1101,73 +1101,45 @@ const ReportPage = () => {
                         </Bar>
                     </BarChart> */}
 
-                    <ResponsiveContainer width="100%" height={218}>
+                    <ResponsiveContainer width="100%" height={300}>
                         <BarChart
+                            layout="vertical"
                             data={communicationTypeData}
                             margin={{
                                 top: 5,
-                                right: 30,
-                                left: -25,
-                                bottom: 5,
+                                right: 20,
+                                left: 20,
+                                bottom: 15,
                             }}
                         >
-                            <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                            <XAxis dataKey="name" />
-                            <YAxis
-                                tickFormatter={(value) => (Number.isInteger(value) ? value : '')}
+                            <CartesianGrid strokeDasharray="3 3" horizontal={false} />
+                            <XAxis
+                                type="number"
+                                tick={{
+                                    fontSize: 12,
+                                    fill: '#000',
+                                }}
+                                domain={[0, 'dataMax + 10']}
                             />
-                            <Tooltip content={<CustomTooltip3 />} />
+                            <YAxis
+                                type="category"
+                                dataKey="name"
+                                tick={{
+                                    fontSize: 12,
+                                    fill: '#000',
+                                }}
+                                width={100}
+                            />
+                            <Tooltip />
                             <Bar
-                                dataKey="complainCount"
-                                fill="#EF4444" // Red color for complaints
-                                barSize={12}
-                                radius={[3, 3, 0, 0]}
+                                dataKey="value"
+                                fill="#348017"
+                                barSize={40}
                             >
-                                <LabelList
-                                    dataKey="complainCount"
-                                    position="top"
-                                    fill="#4a5568"
-                                />
-                            </Bar>
-                            <Bar
-                                dataKey="requestCount"
-                                fill="#348017" // Green color for requests
-                                barSize={12}
-                                radius={[3, 3, 0, 0]}
-                            >
-                                <LabelList
-                                    dataKey="requestCount"
-                                    position="top"
-                                    fill="#4a5568"
-                                />
-                            </Bar>
-
-
-                            <Bar
-                                dataKey="inquiryCount"
-                                fill="#1A73E8" // Blue color for inquiries
-                                barSize={12}
-                                radius={[3, 3, 0, 0]}
-                            >
-                                <LabelList
-                                    dataKey="inquiryCount"
-                                    position="top"
-                                    fill="#4a5568"
-                                />
-                            </Bar>
-                            <Bar
-                                dataKey="suggestionCount"
-                                fill="#E4EA3B" // Yellow color for suggestions
-                                barSize={12}
-                                radius={[3, 3, 0, 0]}
-                            >
-                                <LabelList
-                                    dataKey="suggestionCount"
-                                    position="top"
-                                    fill="#4a5568"
-                                />
+                                <LabelList dataKey="value" fill="#000000" position="right" />
                             </Bar>
                         </BarChart>
+
                     </ResponsiveContainer>
 
 
