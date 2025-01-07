@@ -2017,6 +2017,7 @@ class ConcernController extends Controller
         $project = $request->property;
         $year = $request->year ?? Carbon::now()->year;
 
+
         $query = Concerns::select('channels', DB::raw('COUNT(*) as total'))
             
             ->whereYear('created_at', $year)
@@ -2034,8 +2035,33 @@ class ConcernController extends Controller
             $query->where('property', $project);
         }
 
+        $query->orderByRaw("
+            CASE 
+                WHEN channels = 'Email' THEN 1
+                WHEN channels = 'Call' THEN 2
+                WHEN channels = 'Walk in' THEN 3
+                WHEN channels = 'Website' THEN 4
+                WHEN channels = 'Social media' THEN 5
+                WHEN channels = 'Branch Tablet' THEN 6
+                WHEN channels = 'Internal Endorsement' THEN 7
+                ELSE 8
+            END
+        ");
+
 
         $inquiryChannels = $query->groupBy('channels')->get();
+
+        $inquiryChannels->transform(function ($item) {
+            if ($item->channels === 'Social media') {
+                $item->channels = 'Social Media';
+            }
+            if ($item->channels === 'Walk in') {
+                $item->channels = 'Walk-in';
+            }
+            return $item;
+        });
+
+
         return response()->json($inquiryChannels);
     }
 
