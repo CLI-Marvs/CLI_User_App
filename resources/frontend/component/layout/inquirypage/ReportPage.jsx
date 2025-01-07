@@ -559,7 +559,7 @@ const ReportPage = () => {
             <div className="bg-[#F2F8FC] p-4 rounded-[10px]">
                 <div className=" mb-2">
                     <p className="text-lg montserrat-bold">
-                        Resolved vs. Unresolved Chart vs. Closed Chart
+                        Resolved vs. Unresolved vs. Closed Chart
                     </p>
                 </div>
                 <div className="overflow-x-auto mt-[40px]">
