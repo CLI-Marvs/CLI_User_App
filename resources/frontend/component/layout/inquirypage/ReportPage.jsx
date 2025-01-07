@@ -92,7 +92,7 @@ const CustomTooltip = ({ active, payload }) => {
         const { name } = payload[0].payload;
         return (
             <div className="bg-white p-2 shadow-lg rounded">
-                 <p className="font-bold">{`${name}`}</p>
+                <p className="font-bold">{`${name}`}</p>
                 <p className="text-custom-solidgreen">{`Resolved: ${payload[0].value}`}</p>
                 <p className="text-custom-lightgreen">{`Unresolved: ${payload[1].value}`}</p>
                 <p className="text-red-500">{`Closed: ${payload[2].value}`}</p>
@@ -305,7 +305,7 @@ const ReportPage = () => {
     const defaultData = [{ name: "No Data" }];
     const dataToDisplay = dataCategory.length > 0 ? dataCategory : defaultData;
     const location = useLocation();
-   /*  console.log("inquriesPerChannelData", inquriesPerChannelData); */
+    /*  console.log("inquriesPerChannelData", inquriesPerChannelData); */
     const getCurrentMonth = () => {
         const months = [
             'january', 'february', 'march', 'april', 'may', 'june',
@@ -427,134 +427,141 @@ const ReportPage = () => {
 
     }, []);
 
-   
 
-   /*  useEffect(() => {
-        setMonth(getCurrentMonth());
-        setPropertyMonth(getCurrentMonth());
-        setCommunicationTypeMonth(getCurrentMonth())
-        setInquiriesPerChannelMonth(getCurrentMonth());
 
-        setDepartmentStatusYear(currentYear);
-        setInquiriesPerCategoryYear(currentYear);
-        setInquiriesPerPropertyYear(currentYear);
-        setCommunicationTypeYear(currentYear);
-        setInquiriesPerChanelYear(currentYear);
-    }, []); */
+    /*  useEffect(() => {
+         setMonth(getCurrentMonth());
+         setPropertyMonth(getCurrentMonth());
+         setCommunicationTypeMonth(getCurrentMonth())
+         setInquiriesPerChannelMonth(getCurrentMonth());
+ 
+         setDepartmentStatusYear(currentYear);
+         setInquiriesPerCategoryYear(currentYear);
+         setInquiriesPerPropertyYear(currentYear);
+         setCommunicationTypeYear(currentYear);
+         setInquiriesPerChanelYear(currentYear);
+     }, []); */
 
     // console.log("department", department);
 
-    
+
     const totalValue = dataCategory.reduce((total, category) => total + category.value, 0); //total value of category
 
     return (
         <div className="h-screen bg-custom-grayFA p-4 flex flex-col gap-[21px]">
-            <div className="flex gap-[10px] bg-[#F2F8FC] rounded-[10px] w-full py-[24px] px-[30px]">
-                <div className="flex w-[550px] items-center border border-custom-lightgreen rounded-[5px] overflow-hidden shrink-0">
-                    <span className="text-white text-sm h-full bg-custom-lightgreen flex items-center w-[110px] -mr-3 pl-3 py-1 shrink-0">
-                        Department
-                    </span>
-                    <div className="relative w-full">
-                        <select
-                            name="concern"
-                            className="appearance-none w-full px-4 py-1 bg-white focus:outline-none border-0"
-                            value={departmentValue}
-                            onChange={(e) => setDepartmentValue(e.target.value)}
-                        >
-                            {user?.department === "Customer Relations - Services" ? (
-                                allDepartment.map((item, index) => (
-                                    <option key={index} value={item}>
-                                        {item}
-                                    </option>
-                                ))
-                            ) : (
-                                <option value={user?.department}>
-                                    {user?.department}
-                                </option>
-                            )}
-                        </select>
-                        <span className="absolute inset-y-0 right-0 flex items-center text-white pr-3 pl-3 bg-custom-lightgreen pointer-events-none">
-                            <IoMdArrowDropdown />
+            <div className="flex flex-col gap-[10px] bg-[#F2F8FC] rounded-[10px] w-full py-[24px] px-[30px]">
+                <div className="flex gap-[10px]">
+                <div className="relative flex border border-custom-lightgreen rounded-[5px] overflow-hidden">
+                        <span className="text-white bg-custom-lightgreen text-sm flex items-center w-[60px] px-[15px] -mr-3 pl-3 py-1 shrink-0">
+                            Year
                         </span>
-                    </div>
-                </div>
-                <div className="flex w-[388px] items-center border border-custom-lightgreen rounded-[5px] overflow-hidden shrink-0">
-                    <span className="text-white text-sm h-full bg-custom-lightgreen flex items-center w-[76px] px-[15px] -mr-3 pl-3 py-1 shrink-0">
-                        Project
-                    </span>
-                    <div className="relative w-full">
                         <select
-                            name="concern"
-                            className="appearance-none w-full px-4 py-1 bg-white focus:outline-none border-0"
-                            value={projectValue}
-                            onChange={(e) => setProjectValue(e.target.value)}
+                            name="year"
+                            value={yearValue}
+                            className="appearance-none w-[100px] px-4 py-1 bg-white focus:outline-none border-0"
+                            onChange={(e) => setYearValue(e.target.value)}
                         >
-                           <option value="All">All</option>
-                                    {formattedPropertyNames.map(
-                                        (item, index) => {
-                                            return (
-                                                <option
-                                                    key={index}
-                                                    value={item}
-                                                >
-                                                    {item}
-                                                </option>
-                                            );
-                                        }
-                                    )}
-
-                        </select>
-                        <span className="absolute inset-y-0 right-0 flex items-center text-white pr-3 pl-3 bg-custom-lightgreen pointer-events-none">
-                            <IoMdArrowDropdown />
-                        </span>
-                    </div>
-                </div>
-                <div className="relative flex border w-[203px] border-custom-lightgreen rounded-[5px] overflow-hidden shrink-0">
-                    <span className="text-white bg-custom-lightgreen text-sm flex items-center w-[75px] px-[15px] -mr-3 pl-3 py-1 shrink-0">
-                        Month
-                    </span>
-                    <select
-                        name="month"
-                        value={monthValue}
-                        className="appearance-none w-full px-4 py-1 bg-white focus:outline-none border-0"
-                        onChange={(e) => setMonthValue(e.target.value)}
-                    >
-                        <option value="All">All</option>
-                        {Object.entries(monthNames)
-                            .sort(([keyA], [keyB]) => keyA - keyB) 
-                            .map(([key, name]) => (
-                                <option key={key} value={key}>
-                                    {name}
-                                </option>
+                            {fullYear.map((item, index) => (
+                                <option key={index} value={item.year}>  {item.year}</option>
                             ))}
-                    </select>
-                    <span className="absolute inset-y-0 right-0 flex items-center text-white pr-3 pl-3 bg-custom-lightgreen pointer-events-none">
-                        <MdCalendarToday />
-                    </span>
+                        </select>
+                        <span className="absolute inset-y-0 right-0 flex items-center text-white pr-3 pl-3 bg-custom-lightgreen pointer-events-none">
+                            <MdCalendarToday />
+                        </span>
+                    </div>
+                    <div className="relative flex border w-[203px] border-custom-lightgreen rounded-[5px] overflow-hidden shrink-0">
+                        <span className="text-white bg-custom-lightgreen text-sm flex items-center w-[75px] px-[15px] -mr-3 pl-3 py-1 shrink-0">
+                            Month
+                        </span>
+                        <select
+                            name="month"
+                            value={monthValue}
+                            className="appearance-none w-full px-4 py-1 bg-white focus:outline-none border-0"
+                            onChange={(e) => setMonthValue(e.target.value)}
+                        >
+                            <option value="All">All</option>
+                            {Object.entries(monthNames)
+                                .sort(([keyA], [keyB]) => keyA - keyB)
+                                .map(([key, name]) => (
+                                    <option key={key} value={key}>
+                                        {name}
+                                    </option>
+                                ))}
+                        </select>
+                        <span className="absolute inset-y-0 right-0 flex items-center text-white pr-3 pl-3 bg-custom-lightgreen pointer-events-none">
+                            <MdCalendarToday />
+                        </span>
+                    </div>
                 </div>
-                <div className="relative flex border border-custom-lightgreen rounded-[5px] overflow-hidden shrink-0">
-                    <span className="text-white bg-custom-lightgreen text-sm flex items-center w-[60px] px-[15px] -mr-3 pl-3 py-1 shrink-0">
-                        Year
-                    </span>
-                    <select
-                        name="year"
-                        value={yearValue}
-                        className="appearance-none w-[100px] px-4 py-1 bg-white focus:outline-none border-0"
-                        onChange={(e) => setYearValue(e.target.value)}
-                    >
-                       {fullYear.map((item, index) => (
-                            <option key={index} value={item.year}>  {item.year}</option>
-                        ))}
-                    </select>
-                    <span className="absolute inset-y-0 right-0 flex items-center text-white pr-3 pl-3 bg-custom-lightgreen pointer-events-none">
-                        <MdCalendarToday />
-                    </span>
+                <div className="flex gap-[10px]">
+                    <div className="flex w-[550px] items-center border border-custom-lightgreen rounded-[5px] overflow-hidden shrink-0">
+                        <span className="text-white text-sm h-full bg-custom-lightgreen flex items-center w-[110px] -mr-3 pl-3 py-1 shrink-0">
+                            Department
+                        </span>
+                        <div className="relative w-full">
+                            <select
+                                name="concern"
+                                className="appearance-none w-full px-4 py-1 bg-white focus:outline-none border-0"
+                                value={departmentValue}
+                                onChange={(e) => setDepartmentValue(e.target.value)}
+                            >
+                                {user?.department === "Customer Relations - Services" ? (
+                                    allDepartment.map((item, index) => (
+                                        <option key={index} value={item}>
+                                            {item}
+                                        </option>
+                                    ))
+                                ) : (
+                                    <option value={user?.department}>
+                                        {user?.department}
+                                    </option>
+                                )}
+                            </select>
+                            <span className="absolute inset-y-0 right-0 flex items-center text-white pr-3 pl-3 bg-custom-lightgreen pointer-events-none">
+                                <IoMdArrowDropdown />
+                            </span>
+                        </div>
+                    </div>
+                    <div className="flex w-[388px] items-center border border-custom-lightgreen rounded-[5px] overflow-hidden shrink-0">
+                        <span className="text-white text-sm h-full bg-custom-lightgreen flex items-center w-[76px] px-[15px] -mr-3 pl-3 py-1 shrink-0">
+                            Project
+                        </span>
+                        <div className="relative w-full">
+                            <select
+                                name="concern"
+                                className="appearance-none w-full px-4 py-1 bg-white focus:outline-none border-0"
+                                value={projectValue}
+                                onChange={(e) => setProjectValue(e.target.value)}
+                            >
+                                <option value="All">All</option>
+                                {formattedPropertyNames.map(
+                                    (item, index) => {
+                                        return (
+                                            <option
+                                                key={index}
+                                                value={item}
+                                            >
+                                                {item}
+                                            </option>
+                                        );
+                                    }
+                                )}
+
+                            </select>
+                            <span className="absolute inset-y-0 right-0 flex items-center text-white pr-3 pl-3 bg-custom-lightgreen pointer-events-none">
+                                <IoMdArrowDropdown />
+                            </span>
+                        </div>
+                    </div>
                 </div>
                 <div>
-                    <button onClick={handleSearchFilter} className="hover:shadow-custom4 bg-custom-lightgreen text-white rounded-[6px] px-4 h-full font-semibold">
+                    <button onClick={handleSearchFilter} className="hover:shadow-custom4 bg-custom-lightgreen text-white rounded-[6px] px-4 py-1 font-semibold">
                         Search
                     </button>
                 </div>
+
+
+
             </div>
             <div className="bg-[#F2F8FC] p-4 rounded-[10px]">
                 <div className=" mb-2">
@@ -574,12 +581,12 @@ const ReportPage = () => {
                             }}
                         >
                             <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                            <XAxis dataKey="name" 
+                            <XAxis dataKey="name"
                                 tick={{
                                     fill: '#175D5F', // Change the tick color
                                     fontSize: 10,    // Set font size
                                     fontWeight: 600, // Set font weight
-                                }} 
+                                }}
                             />
                             <YAxis
                                 tickCount={8} // Divides the Y-axis into increments of 10
@@ -590,7 +597,7 @@ const ReportPage = () => {
                                     fill: '#348017', // Change the tick color
                                     fontSize: 12,    // Set font size
                                     fontWeight: 400, // Set font weight
-                                }} 
+                                }}
                             />
                             <Tooltip content={<CustomTooltip1 />} />
                            
@@ -854,13 +861,13 @@ const ReportPage = () => {
                                         ))}
 
                                     </Pie>
-                                    <Tooltip content={<CustomTooltipPieChart/>} />
+                                    <Tooltip content={<CustomTooltipPieChart />} />
                                 </PieChart>
                             </div>
                             <div className="flex w-full rounded-md flex-wrap justify-end gap-[10px]">
-                            {dataCategory.map((category, index) => (
-                                
-                                <div className=" shrink-0 items-center" key={index}>
+                                {dataCategory.map((category, index) => (
+
+                                    <div className=" shrink-0 items-center" key={index}>
                                         <div
                                             className="flex w-full gap-[10px]"
                                             key={index}
@@ -885,13 +892,13 @@ const ReportPage = () => {
                                                 <span className="text-gray-700 font-bold text-sm">
                                                     {`${((category.value / totalValue) * 100).toFixed(0)}%`}
                                                 </span>
-                                               {/*  <span className="text-custom-gray81 text-[10px]">
+                                                {/*  <span className="text-custom-gray81 text-[10px]">
                                                     {category.value ? "%" : ""}
                                                 </span> */}
                                             </div>
                                         </div>
                                     </div>
-                                 ))}
+                                ))}
                             </div>
                         </div>
                     </div>
@@ -910,7 +917,7 @@ const ReportPage = () => {
                                 data={dataProperty}
                                 layout="vertical"
                                 margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-                                
+
                             >
                                 <XAxis type="number" hide />
                                 <YAxis
@@ -961,7 +968,7 @@ const ReportPage = () => {
                                         fill="#4a5568"
                                     />
                                 </Bar>
-                                
+
                                 <Bar
                                     dataKey="closed"
                                     fill="#EF4444"
@@ -969,7 +976,7 @@ const ReportPage = () => {
                                     radius={[0, 4, 4, 0]}
                                 >
                                     <LabelList
-                                        dataKey="closed" 
+                                        dataKey="closed"
                                         position="right"
                                         fill="#4a5568"
                                     />
@@ -993,20 +1000,27 @@ const ReportPage = () => {
                                         Resolved
                                     </span>
                                 </div>
+                                <div className="flex items-center px-3 py-2 gap-2">
+                                    <span className="flex h-[20px] items-center pb-1 text-red-500 text-2xl">
+                                        ●
+                                    </span>
+                                    <span className="text-custom-gray12 text-sm">
+                                        Closed
+                                    </span>
+                                </div>
                             </div>
                         </div>
                     </div>
-
                 </div>
             </div>
             <div className=" w-full pb-7 min-h-[335px] flex-grow-1 bg-[#F2F8FC] rounded-lg">
                 <p className="p-4  text-base montserrat-bold">
                     Inquiries Per Type
                 </p>
-                
+
                 <div className="flex-grow mt-[40px]">
 
-                   {/*  <BarChart
+                    {/*  <BarChart
                         width={400}
                         height={chartHeight2}
                         data={communicationTypeData}
@@ -1086,7 +1100,7 @@ const ReportPage = () => {
                             />
                         </Bar>
                     </BarChart> */}
-                    
+
                     <ResponsiveContainer width="100%" height={218}>
                         <BarChart
                             data={communicationTypeData}
@@ -1109,11 +1123,11 @@ const ReportPage = () => {
                                 barSize={12}
                                 radius={[3, 3, 0, 0]}
                             >
-                                 <LabelList
-                                dataKey="complainCount"
-                                position="top"
-                                fill="#4a5568"
-                            />
+                                <LabelList
+                                    dataKey="complainCount"
+                                    position="top"
+                                    fill="#4a5568"
+                                />
                             </Bar>
                             <Bar
                                 dataKey="requestCount"
@@ -1121,14 +1135,14 @@ const ReportPage = () => {
                                 barSize={12}
                                 radius={[3, 3, 0, 0]}
                             >
-                                 <LabelList
-                                dataKey="requestCount"
-                                position="top"
-                                fill="#4a5568"
-                            />
+                                <LabelList
+                                    dataKey="requestCount"
+                                    position="top"
+                                    fill="#4a5568"
+                                />
                             </Bar>
-                                
-                                 
+
+
                             <Bar
                                 dataKey="inquiryCount"
                                 fill="#1A73E8" // Blue color for inquiries
@@ -1136,10 +1150,10 @@ const ReportPage = () => {
                                 radius={[3, 3, 0, 0]}
                             >
                                 <LabelList
-                                dataKey="inquiryCount"
-                                position="top"
-                                fill="#4a5568"
-                            />
+                                    dataKey="inquiryCount"
+                                    position="top"
+                                    fill="#4a5568"
+                                />
                             </Bar>
                             <Bar
                                 dataKey="suggestionCount"
@@ -1148,10 +1162,10 @@ const ReportPage = () => {
                                 radius={[3, 3, 0, 0]}
                             >
                                 <LabelList
-                                dataKey="suggestionCount"
-                                position="top"
-                                fill="#4a5568"
-                            />
+                                    dataKey="suggestionCount"
+                                    position="top"
+                                    fill="#4a5568"
+                                />
                             </Bar>
                         </BarChart>
                     </ResponsiveContainer>
