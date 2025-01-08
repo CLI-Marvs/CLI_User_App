@@ -909,9 +909,28 @@ const ReportPage = () => {
                             Per Property
                         </p>
                         <div className="border border-t-1"></div>
-                        <div className="flex-grow">
-
-                            <BarChart
+                        <div className="flex-grow overflow-x-auto px-[10px] mt-[5px] pb-[10px]">
+                            <table class="table-auto border-collapse border border-gray-300 w-full text-sm text-left">
+                                <thead class="bg-gray-100">
+                                    <tr>
+                                        <th class="border border-gray-300 px-4 py-2 w-[300px]">Property</th>
+                                        <th class="border border-gray-300 px-4 py-2">Resolved</th>
+                                        <th class="border border-gray-300 px-4 py-2">Unresolved</th>
+                                        <th class="border border-gray-300 px-4 py-2">Closed</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                {dataProperty.map((item, index) => (
+                                    <tr class="hover:bg-gray-50" key={index}>
+                                        <td class="border border-gray-300 px-4 py-2">{item.name}</td>
+                                        <td class="border border-gray-300 px-4 py-2">{item.resolved}</td>
+                                        <td class="border border-gray-300 px-4 py-2">{item.unresolved}</td>
+                                        <td class="border border-gray-300 px-4 py-2">{item.closed}</td>
+                                    </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                           {/*  <BarChart
                                 width={400}
                                 height={chartHeight}
                                 data={dataProperty}
@@ -981,9 +1000,9 @@ const ReportPage = () => {
                                         fill="#4a5568"
                                     />
                                 </Bar>
-                            </BarChart>
+                            </BarChart> */}
 
-                            <div className="flex justify-end">
+                           {/*  <div className="flex justify-end">
                                 <div className="flex items-center px-3 py-2 gap-2">
                                     <span className="flex h-[20px] items-center pb-1 text-custom-lightestgreen text-2xl">
                                         ●
@@ -1008,7 +1027,7 @@ const ReportPage = () => {
                                         Closed
                                     </span>
                                 </div>
-                            </div>
+                            </div> */}
                         </div>
                     </div>
                 </div>
