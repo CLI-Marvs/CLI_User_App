@@ -6,6 +6,7 @@ import apiService from "../../../../servicesApi/apiService";
 import { showToast } from "../../../../../util/toastUtil";
 import CircularProgress from "@mui/material/CircularProgress";
 import { isButtonDisabled } from './utils/isButtonDisabled';
+import Feature from '../../component/Feature';
 const AddDepartmentModal = ({ departmentModalRef }) => {
     //States
     const { employeeDepartments, features, getAllEmployeeDepartment, getAllFeatures, getDepartmentsWithPermissions } = useStateContext();
@@ -97,66 +98,7 @@ const AddDepartmentModal = ({ departmentModalRef }) => {
             departmentModalRef.current.close();
         }
     }
-
-    //Render function
-    //Display the features
-    const renderFeatures = (item, index) => {
-        return (
-            <div
-                className={`flex items-center border rounded-[5px] overflow-hidden border-custom-bluegreen h-[56px]`}
-                key={index}
-            >
-                <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex items-center w-[275px] h-full px-[15px]">
-                    {item.name}
-                </span>
-                <div className="relative h-full w-full flex justify-center items-center">
-                    <div className='w-[342px] h-[44px]'>
-                        <div className='w-full h-[44px] gap-[63px] flex items-center justify-center rounded-[5px]'>
-                            {PERMISSIONS &&
-                                PERMISSIONS.map((permission) =>
-                                    renderPermissionCheckbox(
-                                        permission,
-                                        item,
-                                        formData,
-                                        handleFeaturePermissionChange)
-                            )}
-                        </div>
-                    </div>
-                </div>
-            </div>
-        );
-
-    };
-
-    //Display the permission checkbox
-    const renderPermissionCheckbox = (permission, item, formData, handleFeaturePermissionChange) => {
-        const isDisabled = ["S", "D", "E"].includes(permission.name);
-        return (
-            <div className="flex flex-col gap-[2.75px] items-center" key={permission.name}>
-                <p className="montserrat-semibold text-[10px] leading-[12.19px]">
-                    {permission.name}
-                </p>
-                <input
-                    checked={
-                        formData.features.find((feature) => feature.featureId === item.id)?.[permission.value] || false
-                    }
-                    type="checkbox"
-                    disabled={isDisabled}
-                    className={`h-[16px] w-[16px] ${isDisabled ? "cursor-not-allowed bg-custom-grayF1" : ""
-                        }`}
-                    onChange={(e) =>
-                        handleFeaturePermissionChange(
-                            item,
-                            permission,
-                            e.target.checked
-                        )
-                    }
-                />
-            </div>
-        );
-    };
-
-
+ 
 
     return (
         <dialog
@@ -214,7 +156,13 @@ const AddDepartmentModal = ({ departmentModalRef }) => {
                         <p className='text-sm font-semibold'>Permissions</p>
                         {/*Display the features */}
                         {features && features.map((item, index) => (
-                            renderFeatures(item, index)
+                            <Feature
+                                key={item.id}
+                                index={index}
+                                item={item}
+                                formData={formData}
+                                handleFeaturePermissionChange={handleFeaturePermissionChange}
+                            />
                         ))}
 
                     </div>
