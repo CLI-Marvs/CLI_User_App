@@ -451,7 +451,7 @@ const ReportPage = () => {
         <div className="h-screen bg-custom-grayFA p-4 flex flex-col gap-[21px]">
             <div className="flex flex-col gap-[10px] bg-[#F2F8FC] rounded-[10px] w-full py-[24px] px-[30px]">
                 <div className="flex gap-[10px]">
-                <div className="relative flex border border-custom-lightgreen rounded-[5px] overflow-hidden">
+                    <div className="relative flex border border-custom-lightgreen rounded-[5px] overflow-hidden">
                         <span className="text-white bg-custom-lightgreen text-sm flex items-center w-[60px] px-[15px] -mr-3 pl-3 py-1 shrink-0">
                             Year
                         </span>
@@ -600,7 +600,7 @@ const ReportPage = () => {
                                 }}
                             />
                             <Tooltip content={<CustomTooltip1 />} />
-                           
+
                             <Bar
                                 dataKey="Resolved"
                                 fill="#348017"
@@ -630,7 +630,7 @@ const ReportPage = () => {
 
                 </div>
                 <div className="flex justify-end gap-6 text-sm">
-                   
+
                     <div className="flex items-center px-3 py-2 gap-3">
                         <span className="flex items-center text-custom-solidgreen text-2xl">
                             ●
@@ -643,7 +643,7 @@ const ReportPage = () => {
                         </span>
                         <span className="text-custom-gray12">Unresolved</span>
                     </div>
-                     <div className="flex items-center px-3 py-2 gap-3">
+                    <div className="flex items-center px-3 py-2 gap-3">
                         <span className="flex items-center text-red-500 text-2xl">
                             ●
                         </span>
@@ -748,7 +748,7 @@ const ReportPage = () => {
                                     dot={(props) => {
                                         const { cx, cy, index } = props;
                                         const colors = ['#348017', '#70ad47', '#1A73E8', '#5B9BD5', '#175d5f', '#404B52', '#a5a5a5'];
-                                        
+
                                         return (
                                             <circle
                                                 key={index}
@@ -1212,6 +1212,91 @@ const ReportPage = () => {
                     <TiDownload className="text-white text-[30px]" />
                 </button>
             </div>
+            <div className="flex-grow mt-[20px]">
+                    <div className="flex flex-col gap-[15px] w-full">
+                        <div className="w-full pb-7 min-h-[335px] flex-grow-1 bg-[#F2F8FC] rounded-lg">
+                            <p className="p-4 text-base montserrat-bold">
+                                Per Category
+                            </p>
+                            <div className="border border-t-1"></div>
+                            <div className="flex flex-col">
+                                <div className="flex justify-center">
+                                    <PieChart width={648} height={630}>
+                                        <Pie
+                                            data={dataCategory}
+                                            cx="50%"
+                                            cy="50%"
+                                            outerRadius={300}
+                                            innerRadius={0}
+                                            paddingAngle={1}
+                                            strokeWidth={1}
+                                            stroke="white"
+                                            cornerRadius={0}
+                                            fill="#8884d8"
+                                            dataKey="value"
+                                            startAngle={90}
+                                            endAngle={450}
+                                        >
+                                            {dataCategory.map((entry, index) => (
+                                                <Cell
+                                                    key={index}
+                                                    // fill={categoryColors[entry.name] || COLORS[index % COLORS.length]}
+                                                    fill={getColor(entry.name, index)}
+                                                />
+                                            ))}
+                                            <LabelList 
+                                                dataKey="value" 
+                                                position="inside" 
+                                                fill="white" 
+                                                fontSize={20} 
+                                                />
+                                        </Pie>
+                                        <Tooltip content={<CustomTooltipPieChart />} />
+                                    </PieChart>
+                                </div>
+                                <div className="flex justify-center w-full">
+                                    <div className="grid grid-cols-2 gap-2">
+                                        {dataCategory.map((category, index) => (
+
+                                            <div className=" shrink-0 items-center" key={index}>
+                                                <div
+                                                    className="flex w-[280px] gap-[10px]"
+                                                    key={index}
+                                                >
+                                                    <span
+                                                        className="text-[20px] mb-1"
+                                                        style={{
+                                                            color: getCategoryColor(
+                                                                category.name
+                                                            ),
+                                                        }}
+                                                    >
+                                                        ●
+                                                    </span>
+                                                    <div className="flex gap-1 shrink-0 items-center">
+
+                                                        <span className="text-[18px] text-[#121212] leading-[15px] py-[4px]">
+                                                            {category.name}
+                                                        </span>
+                                                    </div>
+                                                    <div className="flex items-center gap-1">
+                                                        <span className="text-gray-700 font-bold text-sm">
+                                                            {`${((category.value / totalValue) * 100).toFixed(0)}%`}
+                                                        </span>
+                                                        {/*  <span className="text-custom-gray81 text-[10px]">
+                                                        {category.value ? "%" : ""}
+                                                    </span> */}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                                
+                            </div>
+                        </div>
+                    </div>
+                </div>
         </div>
     );
 };
