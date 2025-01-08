@@ -419,8 +419,9 @@ const ReportPage = () => {
     };
 
     useEffect(() => {
-
+        
         fetchCategory();
+        getInquiriesPerDepartment();
         getInquiriesPerProperty();
         fetchDataReport();
         getCommunicationTypePerProperty();
@@ -1210,6 +1211,36 @@ const ReportPage = () => {
                     </div>
                 </div>
             </div>
+            <div className="flex flex-col gap-3">
+                    <div className=" bg-whiterounded-[10px] bg-[#F2F8FC] w-[579px] flex flex-col overflow-y-auto">
+                        <p className="p-4  text-base montserrat-bold">
+                            Per Department
+                        </p>
+                        <div className="border border-t-1"></div>
+                        <div className="flex-grow overflow-x-auto px-[10px] mt-[5px] pb-[10px]">
+                            <table class="table-auto border-collapse border border-gray-300 w-full text-sm text-left">
+                                <thead class="bg-gray-100">
+                                    <tr>
+                                        <th class="border border-gray-300 px-4 py-2 w-[300px]">Department</th>
+                                        <th class="border border-gray-300 px-4 py-2">Resolved</th>
+                                        <th class="border border-gray-300 px-4 py-2">Unresolved</th>
+                                        <th class="border border-gray-300 px-4 py-2">Closed</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                {dataDepartment.map((item, index) => (
+                                    <tr class="hover:bg-gray-50" key={index}>
+                                        <td class="border border-gray-300 px-4 py-2">{item.name}</td>
+                                        <td class="border border-gray-300 px-4 py-2">{item.resolved}</td>
+                                        <td class="border border-gray-300 px-4 py-2">{item.unresolved}</td>
+                                        <td class="border border-gray-300 px-4 py-2">{item.closed}</td>
+                                    </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
             <div className="hidden fixed bottom-[50px] right-[41px]">
                 <button className="flex justify-center items-center size-[60px] shadow-custom8 rounded-full bg-[#1A73E8]  text-white text-lg">
                     <TiDownload className="text-white text-[30px]" />

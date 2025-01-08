@@ -2015,7 +2015,7 @@ class ConcernController extends Controller
         $year = $request->year ?? Carbon::now()->year;
         $query = Concerns::select(
             DB::raw("
-                (SELECT string_agg(elem->>'department', ', ')
+                (SELECT COALESCE(string_agg(elem->>'department', ', '), 'CRS')
                 FROM jsonb_array_elements(assign_to::jsonb) AS elem
                 ) AS department
             "),
@@ -2039,7 +2039,7 @@ class ConcernController extends Controller
             $query->whereRaw("resolve_from::jsonb @> ?", json_encode([['department' => $department]]));
         }
 
-        $concerns = $query->groupBy('property')->get();
+        $concerns = $query->groupBy('department')->get();
         return response()->json($concerns);
     }
 

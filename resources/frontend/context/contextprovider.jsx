@@ -669,6 +669,7 @@ export const ContextProvider = ({ children }) => {
     useEffect(() => {
         const fetchData = async () => {
             try {
+                await getInquiriesPerDepartment();
                 await fetchDataReport();
                 await getInquiriesPerProperty();
                 await fetchCategory();
