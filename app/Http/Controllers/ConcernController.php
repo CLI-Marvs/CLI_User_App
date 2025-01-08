@@ -2007,6 +2007,42 @@ class ConcernController extends Controller
         return response()->json($concerns);
     }
 
+    public function getInquiriesPerDepartment(Request $request)
+    {
+        $department = $request->department;
+        $month = $request->month;
+        $project = $request->property;
+        $year = $request->year ?? Carbon::now()->year;
+        $query = Concerns::select(
+            DB::raw("
+                (SELECT string_agg(elem->>'department', ', ')
+                FROM jsonb_array_elements(assign_to::jsonb) AS elem
+                ) AS department
+            "),
+            DB::raw('SUM(case when status = \'Resolved\' then 1 else 0 end) as Resolved'),
+            DB::raw('SUM(case when status = \'unresolved\' then 1 else 0 end) as Unresolved'),
+            DB::raw('SUM(case when status = \'Closed\' then 1 else 0 end) as Closed')
+
+        )
+            ->whereYear('created_at', $year)
+            ->whereNotNull('status');
+
+        if ($project && $project !== 'All') {
+            $query->where('property', $project);
+        }
+
+        if ($month && $month !== 'All') {
+            $query->whereMonth('created_at', $month);
+        }
+
+        if ($department && $department !== "All") {
+            $query->whereRaw("resolve_from::jsonb @> ?", json_encode([['department' => $department]]));
+        }
+
+        $concerns = $query->groupBy('property')->get();
+        return response()->json($concerns);
+    }
+
     /**
      * Get Inquiries per channel data
      */
