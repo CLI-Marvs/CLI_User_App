@@ -13,8 +13,8 @@ const EditUserModal = ({ editEmployeeModalRef, selectedEmployee }) => {
     const { features, getEmployeesWithPermissions } = useStateContext();
     const [isLoading, setIsLoading] = useState(false);
     const [formData, setFormData] = useState({
-        employee_id: 0,  
-        features: [],   
+        employee_id: 0,
+        features: [],
     });
     const [selectedEmployeeOldData, setSelectedEmployeeOldData] = useState(null); //Holds the old data of the selected department
 
@@ -122,6 +122,68 @@ const EditUserModal = ({ editEmployeeModalRef, selectedEmployee }) => {
         return isEqual(oldDataNormalized, newDataNormalized);
     }, [selectedEmployeeOldData, formData]);
 
+
+    //Render function
+    //Display the features
+    const renderFeatures = (item, index) => {
+        return (
+            <div
+                className="flex items-center border rounded-[5px] overflow-hidden border-custom-bluegreen h-[56px]"
+                key={index}
+            >
+                <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex items-center w-[275px] h-full px-[15px]">
+                    {item.name}
+                </span>
+                <div className="relative h-full w-full flex justify-center items-center">
+                    <div className="w-[342px] h-[44px]">
+                        <div className="w-full h-[44px] gap-[63px] flex items-center justify-center rounded-[5px]">
+                            {PERMISSIONS &&
+                                PERMISSIONS.map((permission) =>
+                                    renderPermissionCheckbox(
+                                        permission,
+                                        item,
+                                        formData,
+                                        handleFeaturePermissionChange)
+                                )}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    //Display the permission checkbox
+    const renderPermissionCheckbox = (permission, item, formData, handleFeaturePermissionChange) => {
+        const isDisabled = ["S", "D", "E"].includes(permission.name);
+        return (
+            <div className="flex flex-col gap-[2.75px] items-center" key={permission.name}>
+                <p className="montserrat-semibold text-[10px] leading-[12.19px]">
+                    {permission.name}
+                </p>
+                <input
+                    type="checkbox"
+                    checked={formData &&
+                        formData?.features?.find((feature) => feature.id === item.id)?.pivot[
+                        permission.value
+                        ] || false
+                    }
+                    disabled={isDisabled}
+                    className={`h-[16px] w-[16px] ${isDisabled
+                        ? "cursor-not-allowed bg-custom-grayF1"
+                        : ""
+                        }`}
+                    onChange={(e) =>
+                        handleFeaturePermissionChange(
+                            item,
+                            permission,
+                            e.target.checked
+                        )
+                    }
+                />
+            </div>
+        );
+    };
+
     return (
         <dialog
             id="EditDepartment"
@@ -173,61 +235,9 @@ const EditUserModal = ({ editEmployeeModalRef, selectedEmployee }) => {
                         <p className='text-sm font-semibold'>Permissions</p>
                         {/*Display the features */}
                         {features &&
-                            features.map((item, index) => {
-                                return (
-                                    <div
-                                        className="flex items-center border rounded-[5px] overflow-hidden border-custom-bluegreen h-[56px]"
-                                        key={index}
-                                    >
-                                        <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex items-center w-[275px] h-full px-[15px]">
-                                            {item.name}
-                                        </span>
-                                        <div className="relative h-full w-full flex justify-center items-center">
-                                            <div className="w-[342px] h-[44px]">
-                                                <div className="w-full h-[44px] gap-[63px] flex items-center justify-center rounded-[5px]">
-                                                    {PERMISSIONS &&
-                                                        PERMISSIONS.map((permission, permIndex) => {
-                                                            const isDisabled = ["S", "D", "E"].includes(permission.name);
-                                                            return (
-                                                                <div
-                                                                    className="flex flex-col gap-[2.75px] items-center"
-                                                                    key={permIndex}
-                                                                >
-                                                                    {/* Display the name of the permission */}
-                                                                    <p className="montserrat-semibold text-[10px] leading-[12.19px]">
-                                                                        {permission.name}
-                                                                    </p>
-                                                                    {/* Checkbox for each permission */}
-                                                                    <input
-                                                                        type="checkbox"
-                                                                        checked={formData &&
-                                                                            formData?.features?.find((feature) => feature.id === item.id)?.pivot[
-                                                                            permission.value
-                                                                            ] || false
-                                                                        }
-
-                                                                        disabled={isDisabled}
-                                                                        className={`h-[16px] w-[16px] ${isDisabled
-                                                                            ? "cursor-not-allowed bg-custom-grayF1"
-                                                                            : ""
-                                                                            }`}
-                                                                        onChange={(e) =>
-                                                                            handleFeaturePermissionChange(
-                                                                                item,
-                                                                                permission,
-                                                                                e.target.checked
-                                                                            )
-                                                                        }
-                                                                    />
-                                                                </div>
-                                                            );
-                                                        })}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                );
-                            })}
+                            features.map((item, index) => (
+                                renderFeatures(item, index)
+                            ))}
                     </div>
                 </div>
                 <div className="">

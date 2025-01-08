@@ -25,7 +25,7 @@ const AddUserModals = ({ userModalRef }) => {
         employeesWithPermissions,
         search
     ); // Use the utility function
-   
+
 
     //Hooks
     //Get all feature
@@ -180,7 +180,12 @@ const AddUserModals = ({ userModalRef }) => {
                         <div className='w-full h-[44px] gap-[63px] flex items-center justify-center rounded-[5px]'>
                             {PERMISSIONS &&
                                 PERMISSIONS.map((permission) =>
-                                    renderPermissionCheckbox(permission, item, formData, handleFeaturePermissionChange)
+                                    renderPermissionCheckbox(
+                                        permission,
+                                        item,
+                                        formData,
+                                        handleFeaturePermissionChange
+                                    )
                                 )}
                         </div>
                     </div>
@@ -189,7 +194,7 @@ const AddUserModals = ({ userModalRef }) => {
         );
 
     };
-    
+
     //Display the permission checkbox
     const renderPermissionCheckbox = (permission, item, formData, handleFeaturePermissionChange) => {
         const isDisabled = ["S", "D", "E"].includes(permission.name);
@@ -207,7 +212,11 @@ const AddUserModals = ({ userModalRef }) => {
                     className={`h-[16px] w-[16px] ${isDisabled ? "cursor-not-allowed bg-custom-grayF1" : ""
                         }`}
                     onChange={(e) =>
-                        handleFeaturePermissionChange(item, permission, e.target.checked)
+                        handleFeaturePermissionChange(
+                            item,
+                            permission,
+                            e.target.checked
+                        )
                     }
                 />
             </div>

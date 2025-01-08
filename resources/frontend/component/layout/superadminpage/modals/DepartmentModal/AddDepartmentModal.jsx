@@ -114,8 +114,12 @@ const AddDepartmentModal = ({ departmentModalRef }) => {
                         <div className='w-full h-[44px] gap-[63px] flex items-center justify-center rounded-[5px]'>
                             {PERMISSIONS &&
                                 PERMISSIONS.map((permission) =>
-                                    renderPermissionCheckbox(permission, item, formData, handleFeaturePermissionChange)
-                                )}
+                                    renderPermissionCheckbox(
+                                        permission,
+                                        item,
+                                        formData,
+                                        handleFeaturePermissionChange)
+                            )}
                         </div>
                     </div>
                 </div>
@@ -141,7 +145,11 @@ const AddDepartmentModal = ({ departmentModalRef }) => {
                     className={`h-[16px] w-[16px] ${isDisabled ? "cursor-not-allowed bg-custom-grayF1" : ""
                         }`}
                     onChange={(e) =>
-                        handleFeaturePermissionChange(item, permission, e.target.checked)
+                        handleFeaturePermissionChange(
+                            item,
+                            permission,
+                            e.target.checked
+                        )
                     }
                 />
             </div>
@@ -207,7 +215,6 @@ const AddDepartmentModal = ({ departmentModalRef }) => {
                         {/*Display the features */}
                         {features && features.map((item, index) => (
                             renderFeatures(item, index)
-
                         ))}
 
                     </div>
