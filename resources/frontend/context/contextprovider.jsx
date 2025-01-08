@@ -43,13 +43,18 @@ export const ContextProvider = ({ children }) => {
     const [dataProperty, setDataPropery] = useState([]);
     const [communicationTypeData, setCommunicationTypeData] = useState([]);
     const [inquriesPerChannelData, setInquriesPerChannelData] = useState([]);
-    const [month, setMonth] = useState("");
     const [propertyMonth, setPropertyMonth] = useState("");
     const [communicationTypeMonth, setCommunicationTypeMonth] = useState("");
     const [specificInquiry, setSpecificInquiry] = useState(null);
     const [dataSet, setDataSet] = useState([]);
-    const [department, setDepartment] = useState("");
+
+
+    const [department, setDepartment] = useState("All");
+    const [project, setProject] = useState("All");
+    const [month, setMonth] = useState("All");
     const [year, setYear] = useState("");
+    const [fullYear, setFullYear] = useState([]);
+
     const [departmentStatusYear, setDepartmentStatusYear] = useState("");
     const [inquiriesPerCategoryYear, setInquiriesPerCategoryYear] = useState("");
     const [inquiriesPerPropertyYear, setInquiriesPerPropertyYear] = useState("");
@@ -228,7 +233,7 @@ export const ContextProvider = ({ children }) => {
         if (!isDepartmentInitialized) return;
         try {
             const response = await apiService.get("category-monthly", {
-                params: { month: month, department: department, year: inquiriesPerCategoryYear },
+                params: { department: department, property:project, month: month, year: year },
             });
             const result = response.data;
             const formattedData = result.map((item) => ({
@@ -257,7 +262,7 @@ export const ContextProvider = ({ children }) => {
         try {
 
             const response = await apiService.get("report-monthly", {
-                params: { department: department, year: departmentStatusYear },
+                params: { department: department, property: project, month: month, year: year },
             });
             const result = response.data;
 
@@ -279,9 +284,10 @@ export const ContextProvider = ({ children }) => {
         try {
             const response = await apiService.get("inquiries-property", {
                 params: {
-                    propertyMonth: propertyMonth,
+                    month: month,
+                    property: project,
                     department: department,
-                    year: inquiriesPerPropertyYear
+                    year: year
                 },
             });
             const result = response.data;
@@ -289,20 +295,23 @@ export const ContextProvider = ({ children }) => {
                 name: item.property,
                 resolved: item.resolved,
                 unresolved: item.unresolved,
+                closed: item.closed,
             }));
             setDataPropery(formattedData);
         } catch (error) {
             console.log("error retrieving", error);
         }
     };
+
     const getCommunicationTypePerProperty = async () => {
         if (!isDepartmentInitialized) return;
         try {
             const response = await apiService.get("communication-type-property", {
                 params: {
-                    propertyMonth: communicationTypeMonth,
+                    month: month,
+                    property: project,
                     department: department,
-                    year: communicationTypeYear
+                    year: year
                 },
             });
             const result = response.data;
@@ -312,7 +321,6 @@ export const ContextProvider = ({ children }) => {
                 requestCount: item.request,
                 inquiryCount: item.inquiry,
                 suggestionCount: item.suggestion,
-
             }));
 
             setCommunicationTypeData(formattedData);
@@ -327,18 +335,20 @@ export const ContextProvider = ({ children }) => {
         try {
             const response = await apiService.get("inquiries-channel", {
                 params: {
-                    propertyMonth: inquiriesPerChannelMonth,
+                    month: month,
+                    property: project,
                     department: department,
-                    year: communicationTypeYear
+                    year: year
                 },
             });
             const result = response.data;
 
+           
             const formattedData = result.map((item) => ({
                 name: item.channels,
                 value: item.total,
             }));
-
+            
             setInquriesPerChannelData(formattedData);
         } catch (error) {
             console.error("Error fetching data:", error);
@@ -440,6 +450,16 @@ export const ContextProvider = ({ children }) => {
                 console.log("error retrieving", error);
             }
         }
+    };
+
+    const getFullYear = async () => {
+
+            try {
+                const response = await apiService.get("concern-year");
+                setFullYear(response.data);
+            } catch (error) {
+                console.log("error retrieving", error);
+            }
     };
 
 
@@ -782,7 +802,7 @@ export const ContextProvider = ({ children }) => {
         };
 
         fetchData();
-    }, [department, propertyMonth, month, departmentStatusYear, inquiriesPerCategoryYear, inquiriesPerPropertyYear, communicationTypeYear, communicationTypeMonth, inquiriesPerChannelMonth, inquiriesPerChanelYear]);
+    }, [department, propertyMonth, month, project, year, departmentStatusYear, inquiriesPerCategoryYear, inquiriesPerPropertyYear, communicationTypeYear, communicationTypeMonth, inquiriesPerChannelMonth, inquiriesPerChanelYear]);
 
     return (
         <StateContext.Provider
@@ -821,6 +841,8 @@ export const ContextProvider = ({ children }) => {
                 hasAttachments,
                 setMonth,
                 month,
+                fullYear,
+                getFullYear,
                 dataCategory,
                 fetchCategory,
                 propertyMonth,
@@ -841,6 +863,10 @@ export const ContextProvider = ({ children }) => {
                 getCount,
                 department,
                 setDepartment,
+                project,
+                setProject,
+                year,
+                setYear,
                 fetchDataReport,
                 dataSet,
                 pricingMasterLists,
