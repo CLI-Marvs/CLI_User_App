@@ -210,7 +210,7 @@ const CustomTooltip3 = ({ active, payload, label }) => {
 };
 
 
-const CustomTooltipLines = ({ active, payload, label }) => {
+const CustomTooltipBar1 = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
 
         const colorMapping = {
@@ -240,11 +240,11 @@ const CustomTooltipLines = ({ active, payload, label }) => {
                     >
                         ●
                     </span>
-                    <span className="text-custom-gray12 text-xs">{dataType}</span>
+                    <span className="text-custom-gray12 text-sm">{dataType}</span>
                 </div>
                 <p>
                     Count:{" "}
-                    <span className="font-bold" style={{ color }}>
+                    <span className="font-bold">
                         {payload[0].value}
                     </span>
                 </p>
@@ -254,6 +254,51 @@ const CustomTooltipLines = ({ active, payload, label }) => {
 
     return null;
 };
+
+const CustomTooltipBar2 = ({ active, payload, label }) => {
+    if (active && payload && payload.length) {
+                                                            /*  const communicationColors = ["#EB4444", "#348017", "#1A73E8", "#E4EA3B"]; */
+        const colorMapping = {
+            'Complaint': '#EB4444',
+            'Request': '#348017', 
+            'Inquiry': '#1A73E8', 
+            'Suggestion or Recommendation': '#E4EA3B', 
+            
+        };
+
+        const dataType = label; // Or use payload[0].name if `label` is not directly available
+
+        // Get the color corresponding to the data type
+        const color = colorMapping[dataType] || '#000000'; // Default to black if no color found
+
+        return (
+            <div
+                className="custom-tooltip bg-white p-2 shadow-md rounded"
+                style={{ borderLeft: `4px solid ${color}` }} // Color border
+            >
+                <div className="flex items-center pr-3 gap-[11px]">
+                    <span
+                        className="flex h-[20px] items-center pb-1 text-2xl"
+                        style={{ color }} // Set the color of the dot
+                    >
+                        ●
+                    </span>
+                    <span className="text-custom-gray12 text-sm">{dataType}</span>
+                </div>
+                <p>
+                    Count:{" "}
+                    <span className="font-bold">
+                        {payload[0].value}
+                    </span>
+                </p>
+            </div>
+        );
+    }
+
+    return null;
+};
+
+
 
 const ReportPage = () => {
     const {
@@ -607,7 +652,7 @@ const ReportPage = () => {
                             <Bar
                                 dataKey="Resolved"
                                 fill="#348017"
-                                barSize={12}
+                                barSize={15}
                                 radius={[3, 3, 0, 0]}
                             >
                                 <LabelList dataKey="Resolved" position="top" />
@@ -615,7 +660,7 @@ const ReportPage = () => {
                             <Bar
                                 dataKey="Unresolved"
                                 fill="#D6E4D1"
-                                barSize={12}
+                                barSize={15}
                                 radius={[3, 3, 0, 0]}
                             >
                                 <LabelList dataKey="Unresolved" position="top" />
@@ -623,7 +668,7 @@ const ReportPage = () => {
                             <Bar
                                 dataKey="Closed"
                                 fill="#EF4444"
-                                barSize={12}
+                                barSize={15}
                                 radius={[3, 3, 0, 0]}
                             >
                                 <LabelList dataKey="Closed" position="top" />
@@ -689,10 +734,10 @@ const ReportPage = () => {
                                     }}
                                     width={100}
                                 />
-                                <Tooltip />
+                                <Tooltip content={<CustomTooltipBar2 />} />
                                 <Bar
                                     dataKey="value" // Green color for values    
-                                    barSize={25}
+                                    barSize={45}
                                 >
                                     {communicationTypeData.map((entry, index) => (
                                         <Cell key={`cell-${index}`} fill={communicationColors[index % 20]} />
@@ -747,7 +792,7 @@ const ReportPage = () => {
                     <div className="mt-4"></div>
                     <div className="flex flex-col">
                         <div className="py-[10px]">
-                            <ResponsiveContainer width="100%" height={300}>
+                            <ResponsiveContainer width="100%" height={312}>
                                 <BarChart
                                     layout="vertical"
                                     data={inquriesPerChannelData}
@@ -776,7 +821,7 @@ const ReportPage = () => {
                                         }}
                                         width={100}
                                     />
-                                    <Tooltip content={<CustomTooltipLines />} />
+                                    <Tooltip content={<CustomTooltipBar1 />} />
                                     <Bar
                                         dataKey="value" // Green color for values    
                                         barSize={25}
