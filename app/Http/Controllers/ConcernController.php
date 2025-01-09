@@ -2110,14 +2110,9 @@ class ConcernController extends Controller
         
 
         // Query to count each <communication_t></communication_t>ype grouped by property
-        $query = Concerns::select(
-            'property',
-            DB::raw("SUM(case when communication_type = 'Complaint' then 1 else 0 end) as Complaint"),
-            DB::raw("SUM(case when communication_type = 'Request' then 1 else 0 end) as Request"),
-            DB::raw("SUM(case when communication_type = 'Inquiry' then 1 else 0 end) as Inquiry"),
-            DB::raw("SUM(case when communication_type = 'Suggestion or Recommendation' then 1 else 0 end) as Suggestion"),
+        $query = Concerns::select('communication_type', DB::raw('COUNT(*) as total'))
 
-        )
+
             ->whereYear('created_at', $year);
 
         if ($department && $department !== "All") {
@@ -2132,9 +2127,17 @@ class ConcernController extends Controller
             $query->where('property', $project);
         }
         
-
-        // Group by property and get the result
-        $communicationTypes = $query->groupBy('property')->get();
+        $query->orderByRaw("
+            CASE 
+                WHEN communication_type = 'Complaint' THEN 1
+                WHEN communication_type = 'Request' THEN 2
+                WHEN communication_type = 'Inquiry' THEN 3
+                WHEN communication_type = 'Suggestion or Recommendation' THEN 4
+                ELSE 5
+            END
+        ");
+        
+        $communicationTypes = $query->groupBy('communication_type')->get();
         return response()->json($communicationTypes);
     }
 

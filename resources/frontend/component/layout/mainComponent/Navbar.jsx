@@ -291,7 +291,7 @@ const Navbar = () => {
                             ref={dropdownRef}
                         >
                             <img
-                                src={user.profile_picture}
+                                src={user?.profile_picture}
                                 alt="image"
                                 className="h-[63px] w-[63px] rounded-full border-8"
                                 onClick={() => setIsOpen(!isOpen)}
