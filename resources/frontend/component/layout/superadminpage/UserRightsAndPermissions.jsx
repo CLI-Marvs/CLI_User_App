@@ -13,12 +13,17 @@ import Alert from "../mainComponent/Alert";
 import CircularProgress from "@mui/material/CircularProgress";
 import Skeleton from 'react-loading-skeleton'
 import 'react-loading-skeleton/dist/skeleton.css'
+import useFeatures from './hooks/useFeatures';
+import { departmentPermissionService, employeePermissionService, employeeDepartmentService } from './../../servicesApi/apiCalls/roleManagement';
+import useEmployeeDepartments from './hooks/useEmployeeDepartments';
 
 const UserRightsAndPermissions = () => {
 
   //States
-  const { departmentsWithPermissions, getDepartmentsWithPermissions, getEmployeesWithPermissions,
-    employeesWithPermissions, features, getAllEmployeeDepartment, isUserAccessDataFetching } = useStateContext();
+  const { features, isFeatureFetching, fetchFeatures } = useFeatures();
+  const [departmentsWithPermissions, setDepartmentsWithPermissions] = useState([]);
+  const [employeesWithPermissions, setEmployeesWithPermissions] = useState([]);
+  const [employeeDepartments, setEmployeeDepartments] = useState([]);
   const [selectedDepartment, setSelectedDepartment] = useState(null);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [alertType, setAlertType] = useState("");
@@ -29,15 +34,57 @@ const UserRightsAndPermissions = () => {
   const [showAlert, setShowAlert] = useState(false);
   const [isEmployeeLoadingState, setIsEmployeeLoadingState] = useState({});
   const [isDepartmentLoadingState, setIsDepartmentLoadingState] = useState({});
+  const [isDepartmentPermissionsLoading, setIsDepartmentPermissionsLoading] = useState(false);
+  const [isEmployeePermissionLoading, setIsEmployeePermissionLoading] = useState(false);
 
 
   //Hooks 
   useEffect(() => {
-    getDepartmentsWithPermissions();
-    getEmployeesWithPermissions();
+    fetchDepartmentWithPermissions();
+    fetchEmployeeWithPermissions();
+    fetchFeatures();
+    fetchEmployeeDepartments();
   }, []);
 
   //Event Handler
+  //Function to get department with permissions
+  const fetchDepartmentWithPermissions = async () => {
+    try {
+      setIsDepartmentPermissionsLoading(true);
+      const employeeDepartmentsPermissionsData = await departmentPermissionService.getDepartmentsWithPermissions();
+      setDepartmentsWithPermissions(employeeDepartmentsPermissionsData);
+    } catch (error) {
+      console.error('Error fetching employee departments:', error);
+    } finally {
+      setIsDepartmentPermissionsLoading(false);
+    }
+  }
+
+  //Function to get employee with permisisons
+  const fetchEmployeeWithPermissions = async () => {
+    try {
+      setIsEmployeePermissionLoading(true);
+      const employeePermissionsData = await employeePermissionService.getEmployeesWithPermissions();
+      setEmployeesWithPermissions(employeePermissionsData);
+    } catch (error) {
+      console.error('Error fetching employee permissions:', error);
+    }
+    finally {
+      setIsEmployeePermissionLoading(false);
+    }
+  }
+
+  //Function to fetch employee departments
+  const fetchEmployeeDepartments = async () => {
+    try {
+      const employeeDepartmentsData = await employeeDepartmentService.getAllEmployeeDepartment();
+      setEmployeeDepartments(employeeDepartmentsData);
+    } catch (error) {
+      console.error('Error fetching employee departments:', error);
+    }
+  }
+
+
   //Handle the click event of the add department button
   const handleAddDepartmentModal = () => {
     if (departmentModalRef.current) {
@@ -76,11 +123,11 @@ const UserRightsAndPermissions = () => {
     };
     try {
       setIsDepartmentLoadingState((prev) => ({ ...prev, [department.id]: true }));
-      const response = await apiService.patch("update-departments-status", payload);
+      const response = await departmentPermissionService.editDepartmentPermissionsStatus(payload);
       if (response.data?.statusCode === 200) {
         showToast("Data deleted successfully!", "success");
-        getDepartmentsWithPermissions();
-        getAllEmployeeDepartment();
+        await fetchDepartmentWithPermissions();
+        await fetchEmployeeDepartments();
       }
     } catch (error) {
       console.log("error", error);
@@ -97,10 +144,10 @@ const UserRightsAndPermissions = () => {
     };
     try {
       setIsEmployeeLoadingState((prev) => ({ ...prev, [employee.id]: true }));
-      const response = await apiService.patch("update-employee-status", payload);
+      const response = await employeePermissionService.editEmployeesPermissionsStatus(payload);
       if (response.data?.statusCode === 200) {
         showToast("Data deleted successfully!", "success");
-        getEmployeesWithPermissions();
+        fetchEmployeeWithPermissions();
       }
     } catch (error) {
       console.log("error", error);
@@ -166,7 +213,7 @@ const UserRightsAndPermissions = () => {
                   Department
                 </th>
                 {/* Display all features */}
-                {isUserAccessDataFetching ? (
+                {isFeatureFetching ? (
                   <>
                     <th className="flex  justify-start w-[200px] shrink-0 bg-gray-100 rounded-md">
                       <Skeleton height={40} width="80%" />
@@ -186,10 +233,11 @@ const UserRightsAndPermissions = () => {
                     {feature.name}
                   </th>
                 )) : null}
+
               </tr>
             </thead>
             <tbody>
-              {isUserAccessDataFetching ? (
+              {isDepartmentPermissionsLoading ? (
                 <tr className="w-full flex flex-col gap-x-2">
                   <th className="flex justify-start  shrink-0 bg-gray-100 rounded-md mt-1">
                     <Skeleton height={40} width="80%" />
@@ -322,7 +370,7 @@ const UserRightsAndPermissions = () => {
                 </th>
 
                 {/* Feature */}
-                {isUserAccessDataFetching ? (
+                {isFeatureFetching ? (
                   <>
                     <th className="flex  justify-start w-[200px] shrink-0 bg-gray-100 rounded-md">
                       <Skeleton height={40} width="80%" />
@@ -346,7 +394,7 @@ const UserRightsAndPermissions = () => {
               </tr>
             </thead>
             <tbody>
-              {isUserAccessDataFetching ? (
+              {isEmployeePermissionLoading ? (
                 <tr>
                   <td className='w-full mt-1'>
                     <div className="flex shrink-0 bg-gray-100 rounded-md mt-1">
@@ -364,7 +412,7 @@ const UserRightsAndPermissions = () => {
                 employeesWithPermissions.map((employee, index) => (
                   <tr key={index} className='flex items-center gap-x-4'>
                     <td className='flex gap-[57px] mt-[6px] h-[64px] overflow-hidden px-[16px] py-[10px] bg-custom-lightestgreen text-custom-bluegreen text-sm'>
-                      {/* Employee Name */}
+
                       <div className='w-[200px] flex flex-col items-start justify-center gap-2'>
                         <div className='w-full h-[31px] flex items-center justify-center bg-white rounded-[5px]'>
                           <p className='montserrat-regular text-custom-lightgreen text-sm'>
@@ -373,14 +421,14 @@ const UserRightsAndPermissions = () => {
                         </div>
                       </div>
 
-                      {/* Department */}
+
                       <div className='w-[200px] flex flex-col items-start justify-center gap-2'>
                         <div className='w-full h-[35px] flex items-center justify-center bg-white rounded-[5px] py-1'>
                           <p className='montserrat-regular text-sm text-center'>{employee?.department}</p>
                         </div>
                       </div>
 
-                      {/* Features */}
+
                       {features.map((feature, featureIndex) => {
                         const departmentFeature = employee.features.find(
                           (f) => f.id === feature.id
@@ -421,7 +469,7 @@ const UserRightsAndPermissions = () => {
                       })}
                     </td>
 
-                    {/* Actions */}
+
                     <td className='flex gap-x-3'>
                       <button
                         className="gradient-btn5 p-[1px] w-[80px] h-[31px] rounded-[10px]"
@@ -466,21 +514,33 @@ const UserRightsAndPermissions = () => {
         </div>
       </div>
       <div>
-        <AddDepartmentModal departmentModalRef={departmentModalRef} />
+        <AddDepartmentModal
+          departmentModalRef={departmentModalRef}
+          onSubmitSuccess={fetchDepartmentWithPermissions}
+          onDeleteSuccess={fetchEmployeeDepartments}
+          employeeDepartments={employeeDepartments}
+        />
       </div>
       <div>
-        <AddUserModals userModalRef={userModalRef} />
+        <AddUserModals
+          employeesWithPermissions={employeesWithPermissions}
+          userModalRef={userModalRef}
+          onSubmitSuccess={fetchEmployeeWithPermissions}
+        />
       </div>
       <div>
         <EditDepartmentModal
           editDepartmentModalRef={editDepartmentModalRef}
+          onSubmitSuccess={fetchDepartmentWithPermissions}
           selectedDepartment={selectedDepartment}
         />
       </div>
       <div>
         <EditEmployeeModal
           editEmployeeModalRef={editEmployeeModalRef}
-          selectedEmployee={selectedEmployee} />
+          selectedEmployee={selectedEmployee}
+          onSubmitSuccess={fetchEmployeeWithPermissions}
+        />
       </div>
       <div className="">
         <Alert

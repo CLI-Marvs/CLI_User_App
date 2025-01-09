@@ -1,17 +1,19 @@
 import React, { useRef, useState, useEffect } from 'react'
 import { AiFillInfoCircle } from 'react-icons/ai'
-import apiService from "../../../../servicesApi/apiService";
 import { useStateContext } from '../../../../../context/contextprovider';
-import { PERMISSIONS } from '../../../../../constant/data/permissions';
 import highlightText from '../../../../../util/hightlightText.jsx';
 import { isButtonDisabled } from '../UserModal/utils/isButtonDisabled.js'
 import CircularProgress from "@mui/material/CircularProgress";
 import { showToast } from "../../../../../util/toastUtil.js";
 import { getFilteredEmployeeOptions } from '../UserModal/utils/employeeUtils';
 import Feature from '../../component/Feature.jsx'
-const AddUserModals = ({ userModalRef }) => {
+import useFeatures from '../../hooks/useFeatures';
+import { employeePermissionService } from '../../../../servicesApi/apiCalls/roleManagement';
+const AddUserModals = ({ userModalRef, onSubmitSuccess, employeesWithPermissions }) => {
+
     //States
-    const { features, getAllFeatures, allEmployees, getEmployeesWithPermissions, employeesWithPermissions } = useStateContext();
+    const { allEmployees } = useStateContext();
+    const { features, fetchFeatures } = useFeatures();
     const [isLoading, setIsLoading] = useState(false);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [search, setSearch] = useState("");
@@ -20,6 +22,7 @@ const AddUserModals = ({ userModalRef }) => {
         employee_id: 0,
         features: [],
     });
+ 
     const dropdownRef = useRef(null);
     const filteredOptions = getFilteredEmployeeOptions(
         allEmployees,
@@ -31,7 +34,7 @@ const AddUserModals = ({ userModalRef }) => {
     //Hooks
     //Get all feature
     useEffect(() => {
-        getAllFeatures();
+        fetchFeatures();
     }, []);
 
     // useEffect(() => {
@@ -130,7 +133,7 @@ const AddUserModals = ({ userModalRef }) => {
 
         try {
             setIsLoading(true);
-            const response = await apiService.post("employee-assign-feature-permissions", payload);
+            const response = await employeePermissionService.storeEmployeesWithPermissions(payload);
             if (response.data?.statusCode === 200) {
                 showToast("Data added successfully!", "success");
                 setFormData({
@@ -139,7 +142,7 @@ const AddUserModals = ({ userModalRef }) => {
                 });
                 setSearch("");
                 setSelectedEmployee(null);
-                getEmployeesWithPermissions();
+                onSubmitSuccess();
                 if (userModalRef.current) {
                     userModalRef.current.close();
                 }

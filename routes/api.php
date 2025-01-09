@@ -53,6 +53,7 @@ Route::get('/concern-year', [ConcernController::class, 'getCreatedDates']);
 Route::get('/report-monthly', [ConcernController::class, 'getMonthlyReports']);
 Route::get('/category-monthly', [ConcernController::class, 'getInquiriesByCategory']);
 Route::get('/inquiries-property', [ConcernController::class, 'getInquiriesPerProperty']);
+Route::get('/inquiries-department', [ConcernController::class, 'getInquiriesPerDepartment']);
 Route::get('/inquiries-channel', [ConcernController::class, 'getInquiriesPerChannel']);
 Route::get('/communication-type-property', [ConcernController::class, 'getCommunicationType']);
 

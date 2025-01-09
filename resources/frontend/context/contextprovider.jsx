@@ -41,6 +41,7 @@ export const ContextProvider = ({ children }) => {
     const [ticketId, setTicketId] = useState(null);
     const [dataCategory, setDataCategory] = useState([]);
     const [dataProperty, setDataPropery] = useState([]);
+    const [dataDepartment, setDataDepartment] = useState([]);
     const [communicationTypeData, setCommunicationTypeData] = useState([]);
     const [inquriesPerChannelData, setInquriesPerChannelData] = useState([]);
     const [propertyMonth, setPropertyMonth] = useState("");
@@ -92,13 +93,9 @@ export const ContextProvider = ({ children }) => {
     const [loading, setLoading] = useState(false);
     const [navBarData, setNavBarData] = useState([]);
     const [isUserTypeChange, setIsUserTypeChange] = useState(false);
-    const [employeeDepartments, setEmployeeDepartments] = useState([]);
-    const [features, setFeatures] = useState([]);
-    const [departmentsWithPermissions, setDepartmentsWithPermissions] = useState([]);
-    const [employeesWithPermissions, setEmployeesWithPermissions] = useState([]);
     const [userAccessData, setUserAccessData] = useState([]); //Holds the user and department access data
     const [permissions, setPermissions] = useState({});
-    const [isUserAccessDataFetching, setIsUserAccessDataFetching] = useState(true);
+
     useEffect(() => {
         if (user && user.department && !isDepartmentInitialized) {
             setDepartment(user.department === "Customer Relations - Services" ? "All" : user.department);
@@ -233,7 +230,7 @@ export const ContextProvider = ({ children }) => {
         if (!isDepartmentInitialized) return;
         try {
             const response = await apiService.get("category-monthly", {
-                params: { department: department, property:project, month: month, year: year },
+                params: { department: department, property: project, month: month, year: year },
             });
             const result = response.data;
             const formattedData = result.map((item) => ({
@@ -303,6 +300,30 @@ export const ContextProvider = ({ children }) => {
         }
     };
 
+    const getInquiriesPerDepartment = async () => {
+        if (!isDepartmentInitialized) return;
+        try {
+            const response = await apiService.get("inquiries-department", {
+                params: {
+                    month: month,
+                    property: project,
+                    department: department,
+                    year: year
+                },
+            });
+            const result = response.data;
+            const formattedData = result.map((item) => ({
+                name: item.department,
+                resolved: item.resolved,
+                unresolved: item.unresolved,
+                closed: item.closed,
+            }));
+            setDataDepartment(formattedData);
+        } catch (error) {
+            console.log("error retrieving", error);
+        }
+    };
+
     const getCommunicationTypePerProperty = async () => {
         if (!isDepartmentInitialized) return;
         try {
@@ -316,11 +337,8 @@ export const ContextProvider = ({ children }) => {
             });
             const result = response.data;
             const formattedData = result.map((item) => ({
-                name: item.property,
-                complainCount: item.complaint,
-                requestCount: item.request,
-                inquiryCount: item.inquiry,
-                suggestionCount: item.suggestion,
+                name: item.communication_type,
+                value: item.total,
             }));
 
             setCommunicationTypeData(formattedData);
@@ -343,12 +361,12 @@ export const ContextProvider = ({ children }) => {
             });
             const result = response.data;
 
-           
+
             const formattedData = result.map((item) => ({
                 name: item.channels,
                 value: item.total,
             }));
-            
+
             setInquriesPerChannelData(formattedData);
         } catch (error) {
             console.error("Error fetching data:", error);
@@ -454,12 +472,12 @@ export const ContextProvider = ({ children }) => {
 
     const getFullYear = async () => {
 
-            try {
-                const response = await apiService.get("concern-year");
-                setFullYear(response.data);
-            } catch (error) {
-                console.log("error retrieving", error);
-            }
+        try {
+            const response = await apiService.get("concern-year");
+            setFullYear(response.data);
+        } catch (error) {
+            console.log("error retrieving", error);
+        }
     };
 
 
@@ -591,73 +609,6 @@ export const ContextProvider = ({ children }) => {
     }
 
 
-    //Get all employee departments
-    const getAllEmployeeDepartment = async () => {
-        try {
-            const response = await apiService.get(
-                "get-employees-departments"
-            );
-            setEmployeeDepartments(response.data.data);
-        }
-        catch (error) {
-            console.log("error", error);
-        }
-    }
-
-    //Get all features
-    const getAllFeatures = async () => {
-        try {
-            const response = await apiService.get("get-features");
-            setFeatures(response.data.data);
-        }
-        catch (error) {
-            console.log("error", error);
-        }
-    }
-
-    //Get all departments with permissions
-    const getDepartmentsWithPermissions = async () => {
-        try {
-            setIsUserAccessDataFetching(true);
-            const response = await apiService.get("get-departments-with-permissions");
-            setDepartmentsWithPermissions(response.data.data);
-            getUserAccessData();
-        }
-        catch (error) {
-            console.log("error", error);
-        }
-        finally {
-            setIsUserAccessDataFetching(false);
-        }
-    }
-
-    //Get all employees with permissions
-    const getEmployeesWithPermissions = async () => {
-        try {
-            setIsUserAccessDataFetching(true);
-            const response = await apiService.get("get-employees-with-permissions");
-            setEmployeesWithPermissions(response.data.data);
-            getUserAccessData();
-        }
-        catch (error) {
-            console.log("error", error);
-        }
-        finally {
-            setIsUserAccessDataFetching(false);
-        }
-    }
-
-    //Get all permissions together for both departments and employees
-    const getUserAccessData = async () => {
-        try {
-            const response = await apiService.get("get-user-access-data", { token });
-            sessionStorage.setItem("userAccessData", JSON.stringify(response.data));
-            setUserAccessData(response.data);
-        } catch (error) {
-            console.log("error", error);
-        }
-    }
-
     // const getUserAccessData = async () => {
     //     try {
     //         const response = await apiService.get("get-user-access-data", { token });
@@ -756,7 +707,7 @@ export const ContextProvider = ({ children }) => {
     useEffect(() => {
         getBankName();
         getTransactions();
-        getUserAccessData();
+        // getUserAccessData();
     }, [currentPageTransaction, bankNames]);
 
     useEffect(() => {
@@ -791,6 +742,7 @@ export const ContextProvider = ({ children }) => {
     useEffect(() => {
         const fetchData = async () => {
             try {
+                await getInquiriesPerDepartment();
                 await fetchDataReport();
                 await getInquiriesPerProperty();
                 await fetchCategory();
@@ -848,6 +800,9 @@ export const ContextProvider = ({ children }) => {
                 propertyMonth,
                 dataProperty,
                 getInquiriesPerProperty,
+                getInquiriesPerDepartment,
+                dataDepartment,
+                setDataDepartment,
                 getCommunicationTypePerProperty,
                 communicationTypeData,
                 setCommunicationTypeData,
@@ -938,19 +893,10 @@ export const ContextProvider = ({ children }) => {
                 getNavBarData,
                 setIsUserTypeChange,
                 isUserTypeChange,
-                getAllEmployeeDepartment,
-                employeeDepartments,
-                getAllFeatures,
-                features,
-                getDepartmentsWithPermissions,
-                departmentsWithPermissions,
-                getEmployeesWithPermissions,
-                employeesWithPermissions,
                 userAccessData,
                 setUserAccessData,
-                getUserAccessData,
                 hasPermission,
-                isUserAccessDataFetching,
+
             }}
 
         >

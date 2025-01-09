@@ -1,15 +1,15 @@
 import React, { useEffect, useState } from 'react'
 import { IoMdArrowDropdown } from 'react-icons/io'
-import { useStateContext } from '../../../../../context/contextprovider';
-import { PERMISSIONS } from '../../../../../constant/data/permissions';
-import apiService from "../../../../servicesApi/apiService";
 import { showToast } from "../../../../../util/toastUtil";
 import CircularProgress from "@mui/material/CircularProgress";
 import { isButtonDisabled } from './utils/isButtonDisabled';
 import Feature from '../../component/Feature';
-const AddDepartmentModal = ({ departmentModalRef }) => {
+import { departmentPermissionService } from '../../../../servicesApi/apiCalls/roleManagement';
+import useFeatures from '../../hooks/useFeatures';
+const AddDepartmentModal = ({ departmentModalRef, onSubmitSuccess, employeeDepartments, onDeleteSuccess }) => {
+
     //States
-    const { employeeDepartments, features, getAllEmployeeDepartment, getAllFeatures, getDepartmentsWithPermissions } = useStateContext();
+    const { features, fetchFeatures } = useFeatures();
     const [isLoading, setIsLoading] = useState(false);
     const [formData, setFormData] = useState({
         department_id: 0,
@@ -18,11 +18,11 @@ const AddDepartmentModal = ({ departmentModalRef }) => {
 
     //Hooks
     useEffect(() => {
-        getAllEmployeeDepartment();
-        getAllFeatures()
+        fetchFeatures();
     }, [])
 
     //Event handler
+
     //Handle the change event of select tag for employee department
     const handleSelectDepartmentChange = (e) => {
         setFormData({ ...formData, department_id: parseInt(e.target.value) });
@@ -62,7 +62,7 @@ const AddDepartmentModal = ({ departmentModalRef }) => {
         };
         try {
             setIsLoading(true);
-            const response = await apiService.post("departments-assign-feature-permissions", payload);
+            const response = await departmentPermissionService.storeDepartmentsWithPermissions(payload);
             if (response.data?.statusCode === 200) {
                 showToast("Data added successfully!", "success");
                 setFormData({
@@ -75,8 +75,8 @@ const AddDepartmentModal = ({ departmentModalRef }) => {
                     }, 1000);
                 }
             }
-            getDepartmentsWithPermissions();
-            getAllEmployeeDepartment();
+            onSubmitSuccess(); // Call this callback from the parent component to refresh or fetch the updated department permissions data.
+            onDeleteSuccess(); // Call this callback to refresh or fetch the updated list of employee departments.
         } catch (error) {
             if (error.response) {
                 const errorMessage = error.response.data?.error || "An error occurred.";
@@ -98,7 +98,7 @@ const AddDepartmentModal = ({ departmentModalRef }) => {
             departmentModalRef.current.close();
         }
     }
- 
+
 
     return (
         <dialog
@@ -134,8 +134,8 @@ const AddDepartmentModal = ({ departmentModalRef }) => {
                                     <option value="">
                                         (Select)
                                     </option>
-                                    {employeeDepartments.map((item, index) => (
-                                        <option value={item.id} key={index}>
+                                    {employeeDepartments.map((item) => (
+                                        <option value={item.id} key={item.id}>
                                             {item.name}
                                         </option>
                                     ))}

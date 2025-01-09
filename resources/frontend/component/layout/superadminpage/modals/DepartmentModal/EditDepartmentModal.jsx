@@ -1,15 +1,14 @@
 import React, { useEffect, useState, useMemo } from 'react'
-import { useStateContext } from '../../../../../context/contextprovider';
-import { PERMISSIONS } from '../../../../../constant/data/permissions';
-import apiService from "../../../../servicesApi/apiService";
 import { showToast } from "../../../../../util/toastUtil";
 import CircularProgress from "@mui/material/CircularProgress";
 import isEqual from 'lodash/isEqual';
 import { normalizeData } from '../DepartmentModal/utils/normalizeData';
 import Feature from '../../component/Feature';
-const EditDepartmentModal = ({ editDepartmentModalRef, selectedDepartment }) => {
+import useFeatures from '../../hooks/useFeatures';
+import { departmentPermissionService } from '../../../../servicesApi/apiCalls/roleManagement';
+const EditDepartmentModal = ({ editDepartmentModalRef, selectedDepartment, onSubmitSuccess }) => {
     //States
-    const { features, getDepartmentsWithPermissions } = useStateContext();
+    const { features, fetchFeatures } = useFeatures();
     const [isLoading, setIsLoading] = useState(false);
     const [selectedDepartmentOldData, setSelectedDepartmentOldData] = useState(null); //Holds the old data of the selected department
     const [formData, setFormData] = useState({
@@ -26,11 +25,11 @@ const EditDepartmentModal = ({ editDepartmentModalRef, selectedDepartment }) => 
             });
         }
         setSelectedDepartmentOldData(selectedDepartment);
+        fetchFeatures();
     }, [selectedDepartment])
 
 
     //Event handler
-
     //Handle the permission change
     const handleFeaturePermissionChange = (item, permission, value) => {
         const featureId = item.id;
@@ -76,7 +75,7 @@ const EditDepartmentModal = ({ editDepartmentModalRef, selectedDepartment }) => 
         };
         try {
             setIsLoading(true);
-            const response = await apiService.put("update-departments-feature-permissions", payload);
+            const response = await departmentPermissionService.editDepartmentsWithPermissions(payload);
 
             if (response.data?.statusCode === 200) {
                 showToast("Data updated successfully!", "success");
@@ -84,7 +83,7 @@ const EditDepartmentModal = ({ editDepartmentModalRef, selectedDepartment }) => 
                     department_id: 0,
                     features: [],
                 });
-                getDepartmentsWithPermissions();
+                onSubmitSuccess(); // Call this callback from the parent component to refresh or fetch the updated department permissions data.
                 if (editDepartmentModalRef.current) {
                     editDepartmentModalRef.current.close();
                 }
@@ -119,7 +118,7 @@ const EditDepartmentModal = ({ editDepartmentModalRef, selectedDepartment }) => 
         // Compare old and new data  
         return isEqual(oldDataNormalized, newDataNormalized);
     }, [selectedDepartmentOldData, formData]);
- 
+
     return (
         <dialog
             id="EditDepartment"
@@ -189,7 +188,9 @@ const EditDepartmentModal = ({ editDepartmentModalRef, selectedDepartment }) => 
                             disabled={isButtonDisabled || isLoading}
                             className={`gradient-btn5 w-[100px] h-[35px] rounded-[10px] text-sm text-white montserrat-semibold ${isButtonDisabled || isLoading ? "cursor-not-allowed opacity-50" : ""}`}
                         >
-                            {isLoading ? <CircularProgress className="spinnerSize" /> : "Save"}
+                            {isLoading ?
+                                <CircularProgress className="spinnerSize" /> : "Save"
+                            }
                         </button>
                     </div>
                 </div>

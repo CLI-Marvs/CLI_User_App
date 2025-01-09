@@ -1,16 +1,15 @@
-import React, { useEffect, useState, useMemo } from 'react'
-import { useStateContext } from '../../../../../context/contextprovider';
-import { PERMISSIONS } from '../../../../../constant/data/permissions';
-import apiService from "../../../../servicesApi/apiService";
+import React, { useEffect, useState, useMemo } from 'react';
 import { showToast } from "../../../../../util/toastUtil";
 import CircularProgress from "@mui/material/CircularProgress";
 import { normalizeData } from '../UserModal/utils/normalizeData';
 import isEqual from 'lodash/isEqual';
 import Feature from '../../component/Feature';
+import useFeatures from '../../hooks/useFeatures';
+import { employeePermissionService } from '../../../../servicesApi/apiCalls/roleManagement';
 
-const EditUserModal = ({ editEmployeeModalRef, selectedEmployee }) => {
+const EditUserModal = ({ editEmployeeModalRef, selectedEmployee, onSubmitSuccess }) => {
     //States
-    const { features, getEmployeesWithPermissions } = useStateContext();
+    const { features, fetchFeatures } = useFeatures();
     const [isLoading, setIsLoading] = useState(false);
     const [formData, setFormData] = useState({
         employee_id: 0,
@@ -26,6 +25,7 @@ const EditUserModal = ({ editEmployeeModalRef, selectedEmployee }) => {
                 features: selectedEmployee.features,
             });
             setSelectedEmployeeOldData(selectedEmployee);
+            fetchFeatures();
         }
     }, [selectedEmployee])
 
@@ -75,7 +75,7 @@ const EditUserModal = ({ editEmployeeModalRef, selectedEmployee }) => {
         };
         try {
             setIsLoading(true);
-            const response = await apiService.patch("update-employees-feature-permissions", payload);
+            const response = await employeePermissionService.editEmployeesWithPermissions(payload);
 
             if (response.data?.statusCode === 200) {
                 showToast("Data updated successfully!", "success");
@@ -83,7 +83,7 @@ const EditUserModal = ({ editEmployeeModalRef, selectedEmployee }) => {
                     employee_id: 0,
                     features: [],
                 });
-                getEmployeesWithPermissions();
+                onSubmitSuccess();
                 if (editEmployeeModalRef.current) {
                     editEmployeeModalRef.current.close();
                 }
@@ -174,7 +174,7 @@ const EditUserModal = ({ editEmployeeModalRef, selectedEmployee }) => {
                         {/*Display the features */}
                         {features &&
                             features.map((item, index) => (
-                                <Feature 
+                                <Feature
                                     key={item.id}
                                     index={index}
                                     item={item}
