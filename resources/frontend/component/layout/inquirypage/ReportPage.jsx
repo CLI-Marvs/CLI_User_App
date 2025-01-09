@@ -1058,12 +1058,13 @@ const ReportPage = () => {
                                 </PieChart>
                             </div>
                             <div className="flex justify-center w-full">
-                                <div className="grid grid-cols-2 gap-[2px]">
+                                <div className="flex w-[150px]"></div> {/* dummy div to align the chart */}
+                                <div className="grid grid-cols-2 gap-[3px]">
                                     {dataCategory.map((category, index) => (
 
                                         <div className=" shrink-0 items-center" key={index}>
                                             <div
-                                                className="flex w-[380px] gap-[10px]"
+                                                className="flex w-[420px] gap-[10px]"
                                                 key={index}
                                             >
                                                 <span
