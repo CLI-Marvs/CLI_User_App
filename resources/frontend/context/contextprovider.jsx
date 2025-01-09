@@ -40,6 +40,7 @@ export const ContextProvider = ({ children }) => {
     const [ticketId, setTicketId] = useState(null);
     const [dataCategory, setDataCategory] = useState([]);
     const [dataProperty, setDataPropery] = useState([]);
+    const [dataDepartment, setDataDepartment] = useState([]);
     const [communicationTypeData, setCommunicationTypeData] = useState([]);
     const [inquriesPerChannelData, setInquriesPerChannelData] = useState([]);
     const [propertyMonth, setPropertyMonth] = useState("");
@@ -269,6 +270,30 @@ export const ContextProvider = ({ children }) => {
         }
     };
 
+    const getInquiriesPerDepartment = async () => {
+        if (!isDepartmentInitialized) return;
+        try {
+            const response = await apiService.get("inquiries-department", {
+                params: {
+                    month: month,
+                    property: project,
+                    department: department,
+                    year: year
+                },
+            });
+            const result = response.data;
+            const formattedData = result.map((item) => ({
+                name: item.department,
+                resolved: item.resolved,
+                unresolved: item.unresolved,
+                closed: item.closed,
+            }));
+            setDataDepartment(formattedData);
+        } catch (error) {
+            console.log("error retrieving", error);
+        }
+    };
+
     const getCommunicationTypePerProperty = async () => {
         if (!isDepartmentInitialized) return;
         try {
@@ -282,11 +307,8 @@ export const ContextProvider = ({ children }) => {
             });
             const result = response.data;
             const formattedData = result.map((item) => ({
-                name: item.property,
-                complainCount: item.complaint,
-                requestCount: item.request,
-                inquiryCount: item.inquiry,
-                suggestionCount: item.suggestion,
+                name: item.communication_type,
+                value: item.total,
             }));
 
             setCommunicationTypeData(formattedData);
@@ -644,6 +666,7 @@ export const ContextProvider = ({ children }) => {
     useEffect(() => {
         const fetchData = async () => {
             try {
+                await getInquiriesPerDepartment();
                 await fetchDataReport();
                 await getInquiriesPerProperty();
                 await fetchCategory();
@@ -701,6 +724,9 @@ export const ContextProvider = ({ children }) => {
                 propertyMonth,
                 dataProperty,
                 getInquiriesPerProperty,
+                getInquiriesPerDepartment,
+                dataDepartment,
+                setDataDepartment,
                 getCommunicationTypePerProperty,
                 communicationTypeData,
                 setCommunicationTypeData,

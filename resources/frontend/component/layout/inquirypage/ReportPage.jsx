@@ -31,6 +31,7 @@ const barHeight = 20;
 
 
 const colors = ["#348017", "#70AD47", "#1A73E8", "#5B9BD5", "#175D5F", "#404B52", "#A5A5A5"];
+const communicationColors = ["#EB4444","#348017","#1A73E8","#E4EA3B"];
 
 const COLORS = [
     "#1F77B4", // Blue
@@ -102,6 +103,7 @@ const CustomTooltip = ({ active, payload }) => {
 
     return null;
 };
+
 
 const CustomTooltipPieChart = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
@@ -269,6 +271,9 @@ const ReportPage = () => {
         communicationTypeData,
         getCommunicationTypePerProperty,
         getInquiriesPerProperty,
+        getInquiriesPerDepartment,
+        dataDepartment,
+        setDataDepartment,
         propertyMonth,
         setPropertyMonth,
         setCommunicationTypeMonth,
@@ -416,8 +421,9 @@ const ReportPage = () => {
     };
 
     useEffect(() => {
-
+        
         fetchCategory();
+        getInquiriesPerDepartment();
         getInquiriesPerProperty();
         fetchDataReport();
         getCommunicationTypePerProperty();
@@ -909,9 +915,28 @@ const ReportPage = () => {
                             Per Property
                         </p>
                         <div className="border border-t-1"></div>
-                        <div className="flex-grow">
-
-                            <BarChart
+                        <div className="flex-grow overflow-x-auto px-[10px] mt-[5px] pb-[10px]">
+                            <table class="table-auto border-collapse border border-gray-300 w-full text-sm text-left">
+                                <thead class="bg-gray-100">
+                                    <tr>
+                                        <th class="border border-gray-300 px-4 py-2 w-[300px]">Property</th>
+                                        <th class="border border-gray-300 px-4 py-2">Resolved</th>
+                                        <th class="border border-gray-300 px-4 py-2">Unresolved</th>
+                                        <th class="border border-gray-300 px-4 py-2">Closed</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                {dataProperty.map((item, index) => (
+                                    <tr class="hover:bg-gray-50" key={index}>
+                                        <td class="border border-gray-300 px-4 py-2">{item.name}</td>
+                                        <td class="border border-gray-300 px-4 py-2">{item.resolved}</td>
+                                        <td class="border border-gray-300 px-4 py-2">{item.unresolved}</td>
+                                        <td class="border border-gray-300 px-4 py-2">{item.closed}</td>
+                                    </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                           {/*  <BarChart
                                 width={400}
                                 height={chartHeight}
                                 data={dataProperty}
@@ -981,9 +1006,9 @@ const ReportPage = () => {
                                         fill="#4a5568"
                                     />
                                 </Bar>
-                            </BarChart>
+                            </BarChart> */}
 
-                            <div className="flex justify-end">
+                           {/*  <div className="flex justify-end">
                                 <div className="flex items-center px-3 py-2 gap-2">
                                     <span className="flex h-[20px] items-center pb-1 text-custom-lightestgreen text-2xl">
                                         ●
@@ -1008,12 +1033,12 @@ const ReportPage = () => {
                                         Closed
                                     </span>
                                 </div>
-                            </div>
+                            </div> */}
                         </div>
                     </div>
                 </div>
             </div>
-            <div className=" w-full pb-7 min-h-[335px] flex-grow-1 bg-[#F2F8FC] rounded-lg">
+            <div className=" w-[579px] pb-7 min-h-[335px] flex-grow-1 bg-[#F2F8FC] rounded-lg">
                 <p className="p-4  text-base montserrat-bold">
                     Inquiries Per Type
                 </p>
@@ -1101,72 +1126,45 @@ const ReportPage = () => {
                         </Bar>
                     </BarChart> */}
 
-                    <ResponsiveContainer width="100%" height={218}>
+                    <ResponsiveContainer width="100%" height={300}>
                         <BarChart
+                            layout="vertical"
                             data={communicationTypeData}
                             margin={{
                                 top: 5,
-                                right: 30,
-                                left: -25,
-                                bottom: 5,
+                                right: 20,
+                                left: 20,
+                                bottom: 15,
                             }}
                         >
-                            <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                            <XAxis dataKey="name" />
-                            <YAxis
-                                tickFormatter={(value) => (Number.isInteger(value) ? value : '')}
+                            <CartesianGrid strokeDasharray="3 3" horizontal={false} />
+                            <XAxis
+                                type="number"
+                                tick={{
+                                    fontSize: 12,
+                                    fill: '#000',
+                                }}
+                                domain={[0, 'dataMax + 10']}
                             />
-                            <Tooltip content={<CustomTooltip3 />} />
+                            <YAxis
+                                type="category"
+                                dataKey="name"
+                                tick={{
+                                    fontSize: 12,
+                                    fill: '#000',
+                                }}
+                                width={100}
+                            />
+                            <Tooltip />
                             <Bar
-                                dataKey="complainCount"
-                                fill="#EF4444" // Red color for complaints
-                                barSize={12}
-                                radius={[3, 3, 0, 0]}
-                            >
-                                <LabelList
-                                    dataKey="complainCount"
-                                    position="top"
-                                    fill="#4a5568"
-                                />
-                            </Bar>
-                            <Bar
-                                dataKey="requestCount"
-                                fill="#348017" // Green color for requests
-                                barSize={12}
-                                radius={[3, 3, 0, 0]}
-                            >
-                                <LabelList
-                                    dataKey="requestCount"
-                                    position="top"
-                                    fill="#4a5568"
-                                />
-                            </Bar>
-
-
-                            <Bar
-                                dataKey="inquiryCount"
-                                fill="#1A73E8" // Blue color for inquiries
-                                barSize={12}
-                                radius={[3, 3, 0, 0]}
-                            >
-                                <LabelList
-                                    dataKey="inquiryCount"
-                                    position="top"
-                                    fill="#4a5568"
-                                />
-                            </Bar>
-                            <Bar
-                                dataKey="suggestionCount"
-                                fill="#E4EA3B" // Yellow color for suggestions
-                                barSize={12}
-                                radius={[3, 3, 0, 0]}
-                            >
-                                <LabelList
-                                    dataKey="suggestionCount"
-                                    position="top"
-                                    fill="#4a5568"
-                                />
-                            </Bar>
+                                    dataKey="value" // Green color for values    
+                                    barSize={25}
+                                >
+                                    {communicationTypeData.map((entry, index) => (
+                                        <Cell key={`cell-${index}`} fill={communicationColors[index % 20]} />
+                                    ))}
+                                    <LabelList dataKey="value" fill="#4a5568" position="right" />
+                                </Bar>
                         </BarChart>
                     </ResponsiveContainer>
 
@@ -1207,6 +1205,36 @@ const ReportPage = () => {
                     </div>
                 </div>
             </div>
+            <div className="flex flex-col gap-3">
+                    <div className=" bg-whiterounded-[10px] bg-[#F2F8FC] w-[579px] flex flex-col overflow-y-auto">
+                        <p className="p-4  text-base montserrat-bold">
+                            Per Department
+                        </p>
+                        <div className="border border-t-1"></div>
+                        <div className="flex-grow overflow-x-auto px-[10px] mt-[5px] pb-[10px]">
+                            <table class="table-auto border-collapse border border-gray-300 w-full text-sm text-left">
+                                <thead class="bg-gray-100">
+                                    <tr>
+                                        <th class="border border-gray-300 px-4 py-2 w-[300px]">Department</th>
+                                        <th class="border border-gray-300 px-4 py-2">Resolved</th>
+                                        <th class="border border-gray-300 px-4 py-2">Unresolved</th>
+                                        <th class="border border-gray-300 px-4 py-2">Closed</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                {dataDepartment.map((item, index) => (
+                                    <tr class="hover:bg-gray-50" key={index}>
+                                        <td class="border border-gray-300 px-4 py-2">{item.name}</td>
+                                        <td class="border border-gray-300 px-4 py-2">{item.resolved}</td>
+                                        <td class="border border-gray-300 px-4 py-2">{item.unresolved}</td>
+                                        <td class="border border-gray-300 px-4 py-2">{item.closed}</td>
+                                    </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
             <div className="hidden fixed bottom-[50px] right-[41px]">
                 <button className="flex justify-center items-center size-[60px] shadow-custom8 rounded-full bg-[#1A73E8]  text-white text-lg">
                     <TiDownload className="text-white text-[30px]" />
