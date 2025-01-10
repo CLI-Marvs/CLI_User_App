@@ -226,7 +226,6 @@ export const ContextProvider = ({ children }) => {
     };
 
     const fetchDataReport = async () => {
-        if (!isDepartmentInitialized) return;
         try {
 
             const response = await apiService.get("report-monthly", {
@@ -248,7 +247,6 @@ export const ContextProvider = ({ children }) => {
     };
 
     const getInquiriesPerProperty = async () => {
-        if (!isDepartmentInitialized) return;
         try {
             const response = await apiService.get("inquiries-property", {
                 params: {
@@ -274,8 +272,6 @@ export const ContextProvider = ({ children }) => {
     const getInquiriesPerDepartment = async () => {
 
 
-        if (!isDepartmentInitialized) return;
-
         try {
             const response = await apiService.get("inquiries-department", {
                 params: {
@@ -300,7 +296,7 @@ export const ContextProvider = ({ children }) => {
     };
 
     const getCommunicationTypePerProperty = async () => {
-        if (!isDepartmentInitialized) return;
+
         try {
             const response = await apiService.get("communication-type-property", {
                 params: {
@@ -323,7 +319,6 @@ export const ContextProvider = ({ children }) => {
     };
 
     const getInquiriesPerChannel = async () => {
-        if (!isDepartmentInitialized) return;
 
         try {
             const response = await apiService.get("inquiries-channel", {
