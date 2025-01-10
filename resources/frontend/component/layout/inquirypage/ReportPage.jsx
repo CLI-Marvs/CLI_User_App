@@ -163,14 +163,15 @@ const CustomTooltip1 = ({ active, payload, label }) => {
             <div className="custom-tooltip bg-white p-3 shadow-lg rounded-lg border border-gray-200">
                 <p className="font-bold text-lg text-gray-800">{monthName}</p>
                 <div className="mt-2">
-                    <p className="text-sm text-gray-600">
-                        <span className="text-red-500">Closed:</span> {payload[0].value}
-                    </p>
+                   
                     <p className="text-sm text-gray-600">
                         <span className="text-custom-solidgreen">Resolved:</span> {payload[1].value}
                     </p>
                     <p className="text-sm text-gray-600">
-                        <span className="text-custom-lightgreen">Unresolved:</span> {payload[2].value}
+                        <span className="text-custom-lightgreen">Closed:</span> {payload[0].value}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                        <span className="text-red-500 ">Unresolved:</span> {payload[2].value}
                     </p>
                 </div>
             </div>
@@ -658,20 +659,20 @@ const ReportPage = () => {
                                 <LabelList dataKey="Resolved" position="top" />
                             </Bar>
                             <Bar
-                                dataKey="Unresolved"
+                                dataKey="Closed"
                                 fill="#D6E4D1"
                                 barSize={15}
                                 radius={[3, 3, 0, 0]}
                             >
-                                <LabelList dataKey="Unresolved" position="top" />
+                                <LabelList dataKey="Closed" position="top" />
                             </Bar>
                             <Bar
-                                dataKey="Closed"
+                                dataKey="Unresolved"
                                 fill="#EF4444"
                                 barSize={15}
                                 radius={[3, 3, 0, 0]}
                             >
-                                <LabelList dataKey="Closed" position="top" />
+                                <LabelList dataKey="Unresolved" position="top" />
                             </Bar>
                         </BarChart>
                     </ResponsiveContainer>
@@ -689,14 +690,15 @@ const ReportPage = () => {
                         <span className="flex items-center text-custom-lightestgreen text-2xl">
                             ●
                         </span>
-                        <span className="text-custom-gray12">Unresolved</span>
+                        <span className="text-custom-gray12">Closed</span>
                     </div>
                     <div className="flex items-center px-3 py-2 gap-3">
                         <span className="flex items-center text-red-500 text-2xl">
                             ●
                         </span>
-                        <span className="text-custom-gray12">Closed</span>
+                        <span className="text-custom-gray12">Unresolved</span>
                     </div>
+                   
                 </div>
             </div>
             <div className="flex gap-[10px]">
@@ -913,8 +915,8 @@ const ReportPage = () => {
                                     <tr>
                                         <th class="border border-gray-300 px-4 py-2 w-[300px]">Property</th>
                                         <th class="border border-gray-300 px-4 py-2">Resolved</th>
-                                        <th class="border border-gray-300 px-4 py-2">Unresolved</th>
                                         <th class="border border-gray-300 px-4 py-2">Closed</th>
+                                        <th class="border border-gray-300 text-red-500 px-4 py-2">Unresolved</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -922,8 +924,8 @@ const ReportPage = () => {
                                         <tr class="hover:bg-gray-50" key={index}>
                                             <td class="border border-gray-300 px-4 py-2">{item.name}</td>
                                             <td class="border border-gray-300 px-4 py-2">{item.resolved}</td>
-                                            <td class="border border-gray-300 px-4 py-2">{item.unresolved}</td>
                                             <td class="border border-gray-300 px-4 py-2">{item.closed}</td>
+                                            <td class="border border-gray-300 px-4 py-2">{item.unresolved}</td>
                                         </tr>
                                     ))}
                                 </tbody>
@@ -1041,8 +1043,8 @@ const ReportPage = () => {
                                     <tr>
                                         <th class="border border-gray-300 px-4 py-2 w-[300px]">Department</th>
                                         <th class="border border-gray-300 px-4 py-2">Resolved</th>
-                                        <th class="border border-gray-300 px-4 py-2">Unresolved</th>
                                         <th class="border border-gray-300 px-4 py-2">Closed</th>
+                                        <th class="border border-gray-300 text-red-500 px-4 py-2">Unresolved</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -1050,8 +1052,8 @@ const ReportPage = () => {
                                         <tr class="hover:bg-gray-50" key={index}>
                                             <td class="border border-gray-300 px-4 py-2">{item.name}</td>
                                             <td class="border border-gray-300 px-4 py-2">{item.resolved}</td>
-                                            <td class="border border-gray-300 px-4 py-2">{item.unresolved}</td>
                                             <td class="border border-gray-300 px-4 py-2">{item.closed}</td>
+                                            <td class="border border-gray-300 px-4 py-2">{item.unresolved}</td>
                                         </tr>
                                     ))}
                                 </tbody>
