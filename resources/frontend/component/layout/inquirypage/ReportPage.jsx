@@ -28,10 +28,7 @@ import { get, set } from "lodash";
 
 const barHeight = 20;
 
-
-
 const colors = ["#348017", "#70AD47", "#1A73E8", "#5B9BD5", "#175D5F", "#404B52", "#A5A5A5"];
-const communicationColors = ["#EB4444", "#348017", "#1A73E8", "#E4EA3B"];
 
 const COLORS = [
     "#1F77B4", // Blue
@@ -45,6 +42,29 @@ const COLORS = [
     "#BCBD22", // Olive
     "#17BECF"  // Teal
 ];
+
+const getBarColorPerType = (name) => {
+    const colors = {
+        'Complaints': '#EB4444',         
+        'Requests': '#348017',           
+        'Inquiries': '#1A73E8',      
+        'Suggestion or Recommendations': '#E4EA3B',        
+    };
+    return colors[name] || '#CCCCCC'; 
+};
+
+const getBarColorPerChannel = (name) => {
+    const colors = {
+        'Email': '#348017',         
+        'Call': '#70AD47',           
+        'Walk-in': '#1A73E8',      
+        'Website': '#5B9BD5',        
+        'Social Media': '#175D5F',        
+        'Branch Tablet': '#404B52',        
+        'Internal Endorsement': '#A5A5A5',           
+    };
+    return colors[name] || '#CCCCCC'; // Default to gray if no match
+};
 
 const CustomTick = ({ x, y, payload }) => {
     const words = payload.value.split(' '); // Split by spaces to handle word wrapping
@@ -257,7 +277,7 @@ const CustomTooltipBar1 = ({ active, payload, label }) => {
 
 const CustomTooltipBar2 = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
-                                                            /*  const communicationColors = ["#EB4444", "#348017", "#1A73E8", "#E4EA3B"]; */
+                                                            
         const colorMapping = {
             'Complaint': '#EB4444',
             'Request': '#348017', 
@@ -740,7 +760,7 @@ const ReportPage = () => {
                                     barSize={45}
                                 >
                                     {communicationTypeData.map((entry, index) => (
-                                        <Cell key={`cell-${index}`} fill={communicationColors[index % 20]} />
+                                        <Cell key={`cell-${index}`} fill={getBarColorPerType(entry.name)} />
                                     ))}
                                     <LabelList dataKey="value" fill="#4a5568" position="right" />
                                 </Bar>
@@ -827,7 +847,7 @@ const ReportPage = () => {
                                         barSize={25}
                                     >
                                         {inquriesPerChannelData.map((entry, index) => (
-                                            <Cell key={`cell-${index}`} fill={colors[index % 20]} />
+                                            <Cell key={`cell-${index}`} fill={getBarColorPerChannel(entry.name)} />
 
                                         ))}
                                         <LabelList dataKey="value" fill="#4a5568" position="right" />
