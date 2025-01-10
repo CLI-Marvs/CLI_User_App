@@ -1989,7 +1989,8 @@ class ConcernController extends Controller
 
         )
             ->whereYear('created_at', $year)
-            ->whereNotNull('status');
+            ->whereNotNull('property');
+
 
         if ($project && $project !== 'All') {
             $query->where('property', $project);

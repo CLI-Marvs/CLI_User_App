@@ -926,6 +926,18 @@ const ReportPage = () => {
                                             <td class="border border-gray-300 px-4 py-2">{item.closed}</td>
                                         </tr>
                                     ))}
+                                    <tr class="bg-gray-100 font-semibold">
+                                        <td class="border border-gray-300 px-4 py-2">Total</td>
+                                        <td class="border border-gray-300 px-4 py-2">
+                                            {dataProperty.reduce((sum, item) => sum + item.resolved, 0)}
+                                        </td>
+                                        <td class="border border-gray-300 px-4 py-2">
+                                            {dataProperty.reduce((sum, item) => sum + item.unresolved, 0)}
+                                        </td>
+                                        <td class="border border-gray-300 px-4 py-2">
+                                            {dataProperty.reduce((sum, item) => sum + item.closed, 0)}
+                                        </td>
+                                    </tr>
                                 </tbody>
                             </table>
                             {/*  <BarChart
@@ -1054,6 +1066,18 @@ const ReportPage = () => {
                                             <td class="border border-gray-300 px-4 py-2">{item.closed}</td>
                                         </tr>
                                     ))}
+                                    <tr class="bg-gray-100 font-semibold">
+                                        <td class="border border-gray-300 px-4 py-2">Total</td>
+                                        <td class="border border-gray-300 px-4 py-2">
+                                            {dataDepartment.reduce((sum, item) => sum + item.resolved, 0)}
+                                        </td>
+                                        <td class="border border-gray-300 px-4 py-2">
+                                            {dataDepartment.reduce((sum, item) => sum + item.unresolved, 0)}
+                                        </td>
+                                        <td class="border border-gray-300 px-4 py-2">
+                                            {dataDepartment.reduce((sum, item) => sum + item.closed, 0)}
+                                        </td>
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>
