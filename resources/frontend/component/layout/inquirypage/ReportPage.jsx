@@ -371,6 +371,8 @@ const ReportPage = () => {
             .replace(/\b\w/g, (char) => char.toUpperCase());
     };
 
+    const totalValuePieChart = dataCategory.reduce((acc, curr) => acc + curr.value, 0);
+    const formatPercentage = (value) => ((value / totalValuePieChart) * 100).toFixed(2) + '%';
 
     const formattedPropertyNames = [
         "N/A",
@@ -1097,6 +1099,7 @@ const ReportPage = () => {
                                             position="inside"
                                             fill="white"
                                             fontSize={20}
+                                            formatter={(value) => formatPercentage(value)}
                                         />
                                     </Pie>
                                     <Tooltip content={<CustomTooltipPieChart />} />
@@ -1130,7 +1133,7 @@ const ReportPage = () => {
                                                 </div>
                                                 <div className="flex items-center gap-1">
                                                     <span className="text-gray-700 font-bold text-sm">
-                                                        {`${((category.value / totalValue) * 100).toFixed(0)}%`}
+                                                        {`${((category.value / totalValue) * 100).toFixed(2)}%`}
                                                     </span>
                                                     {/*  <span className="text-custom-gray81 text-[10px]">
                                                         {category.value ? "%" : ""}
