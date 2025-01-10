@@ -371,9 +371,6 @@ const ReportPage = () => {
             .replace(/\b\w/g, (char) => char.toUpperCase());
     };
 
-    const totalValuePieChart = dataCategory.reduce((acc, curr) => acc + curr.value, 0);
-    const formatPercentage = (value) => ((value / totalValuePieChart) * 100).toFixed(2) + '%';
-
     const formattedPropertyNames = [
         "N/A",
         ...(Array.isArray(propertyNamesList) && propertyNamesList.length > 0
@@ -1099,7 +1096,7 @@ const ReportPage = () => {
                                             position="inside"
                                             fill="white"
                                             fontSize={20}
-                                            formatter={(value) => formatPercentage(value)}
+                                           
                                         />
                                     </Pie>
                                     <Tooltip content={<CustomTooltipPieChart />} />
