@@ -45,11 +45,12 @@ import BannerSettingsView from './views/pages/bannersettingsViews/BannerSettings
 import CrsSettingsSidebar from './layout/mainComponent/sidebars/CrsSettingsSidebar';
 import VersionLogsView from './views/pages/raiseaconcernViews/VersionLogsView';
 import { useStateContext } from '../context/contextprovider';
-
+import { ALLOWED_EMPLOYEES_CRS } from '../constant/data/allowedEmployeesCRS';
 
 // PrivateRoute component to check authentication and permissions( department and employee )
 const PrivateRoute = ({ requiredPermission }) => {
-    const { hasPermission } = useStateContext();
+    const { hasPermission, user } = useStateContext();
+    const userLoggedInEmail = user?.employee_email;
 
     // Check for authentication token
     const authToken = localStorage.getItem("authToken");
@@ -57,6 +58,15 @@ const PrivateRoute = ({ requiredPermission }) => {
     // Redirect to login page if not authenticated
     if (!authToken) {
         return <Navigate to="/" replace />;
+    }
+
+    //Check if logged in user is allowed to view the superadmin page
+    if (!ALLOWED_EMPLOYEES_CRS.includes(userLoggedInEmail)) {
+        return (
+            <div className="w-full h-full flex justify-center   text-custom-bluegreen text-lg mt-4">
+                You do not have permission to view this page.
+            </div>
+        );
     }
 
     // Check for required permissions
@@ -330,40 +340,6 @@ const App = () => {
                             element: <PrivateRoute requiredPermission="Transaction Records" />,
                             children: [{ path: "", element: <BankStatementView /> }],
                         },
-                        // {
-                        //     path: "inquirymanagement/inquirylist",
-                        //     element: <InquiryListView />,
-                        // },
-                        // {
-                        //     path: "inquirymanagement/thread/:id",
-                        //     element: <InquiryThreadView />,
-                        // },
-                        // {
-                        //     path: "inquirymanagement/report",
-                        //     element: <ReportViews />,
-                        // },
-                        // {
-                        //     path: "inquirymanagement/autoassign",
-                        //     element: <AutoAssignView />,
-                        // },
-                        // {
-                        //     path: "inquirymanagement/settings",
-                        //     element: <SecondLayout />,
-                        //     children: [
-                        //         {
-                        //             path: "autoassign",
-                        //             element: <AutoAssignView />,
-                        //         },
-                        //         {
-                        //             path: "bannersettings",
-                        //             element: <BannerSettingsView />,
-                        //         },
-                        //         {
-                        //             path: "versionlogs",
-                        //             element: <VersionLogsView />,
-                        //         },
-                        //     ],
-                        // },
                         {
                             path: "inquirymanagement",
                             element: <PrivateRoute requiredPermission="Inquiry Management" />,

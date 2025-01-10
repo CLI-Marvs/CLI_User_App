@@ -31,7 +31,7 @@ const barHeight = 20;
 
 
 const colors = ["#348017", "#70AD47", "#1A73E8", "#5B9BD5", "#175D5F", "#404B52", "#A5A5A5"];
-const communicationColors = ["#EB4444","#348017","#1A73E8","#E4EA3B"];
+const communicationColors = ["#EB4444", "#348017", "#1A73E8", "#E4EA3B"];
 
 const COLORS = [
     "#1F77B4", // Blue
@@ -210,7 +210,7 @@ const CustomTooltip3 = ({ active, payload, label }) => {
 };
 
 
-const CustomTooltipLines = ({ active, payload, label }) => {
+const CustomTooltipBar1 = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
 
         const colorMapping = {
@@ -240,11 +240,11 @@ const CustomTooltipLines = ({ active, payload, label }) => {
                     >
                         ●
                     </span>
-                    <span className="text-custom-gray12 text-xs">{dataType}</span>
+                    <span className="text-custom-gray12 text-sm">{dataType}</span>
                 </div>
                 <p>
                     Count:{" "}
-                    <span className="font-bold" style={{ color }}>
+                    <span className="font-bold">
                         {payload[0].value}
                     </span>
                 </p>
@@ -254,6 +254,51 @@ const CustomTooltipLines = ({ active, payload, label }) => {
 
     return null;
 };
+
+const CustomTooltipBar2 = ({ active, payload, label }) => {
+    if (active && payload && payload.length) {
+                                                            /*  const communicationColors = ["#EB4444", "#348017", "#1A73E8", "#E4EA3B"]; */
+        const colorMapping = {
+            'Complaint': '#EB4444',
+            'Request': '#348017', 
+            'Inquiry': '#1A73E8', 
+            'Suggestion or Recommendation': '#E4EA3B', 
+            
+        };
+
+        const dataType = label; // Or use payload[0].name if `label` is not directly available
+
+        // Get the color corresponding to the data type
+        const color = colorMapping[dataType] || '#000000'; // Default to black if no color found
+
+        return (
+            <div
+                className="custom-tooltip bg-white p-2 shadow-md rounded"
+                style={{ borderLeft: `4px solid ${color}` }} // Color border
+            >
+                <div className="flex items-center pr-3 gap-[11px]">
+                    <span
+                        className="flex h-[20px] items-center pb-1 text-2xl"
+                        style={{ color }} // Set the color of the dot
+                    >
+                        ●
+                    </span>
+                    <span className="text-custom-gray12 text-sm">{dataType}</span>
+                </div>
+                <p>
+                    Count:{" "}
+                    <span className="font-bold">
+                        {payload[0].value}
+                    </span>
+                </p>
+            </div>
+        );
+    }
+
+    return null;
+};
+
+
 
 const ReportPage = () => {
     const {
@@ -421,7 +466,7 @@ const ReportPage = () => {
     };
 
     useEffect(() => {
-        
+
         fetchCategory();
         getInquiriesPerDepartment();
         getInquiriesPerProperty();
@@ -565,9 +610,6 @@ const ReportPage = () => {
                         Search
                     </button>
                 </div>
-
-
-
             </div>
             <div className="bg-[#F2F8FC] p-4 rounded-[10px]">
                 <div className=" mb-2">
@@ -610,7 +652,7 @@ const ReportPage = () => {
                             <Bar
                                 dataKey="Resolved"
                                 fill="#348017"
-                                barSize={12}
+                                barSize={15}
                                 radius={[3, 3, 0, 0]}
                             >
                                 <LabelList dataKey="Resolved" position="top" />
@@ -618,7 +660,7 @@ const ReportPage = () => {
                             <Bar
                                 dataKey="Unresolved"
                                 fill="#D6E4D1"
-                                barSize={12}
+                                barSize={15}
                                 radius={[3, 3, 0, 0]}
                             >
                                 <LabelList dataKey="Unresolved" position="top" />
@@ -626,7 +668,7 @@ const ReportPage = () => {
                             <Bar
                                 dataKey="Closed"
                                 fill="#EF4444"
-                                barSize={12}
+                                barSize={15}
                                 radius={[3, 3, 0, 0]}
                             >
                                 <LabelList dataKey="Closed" position="top" />
@@ -657,70 +699,16 @@ const ReportPage = () => {
                     </div>
                 </div>
             </div>
-            <div className="w-[571px] pb-7  flex-grow-1 bg-[#F2F8FC] rounded-lg">
-                <p className="p-4 text-base montserrat-bold">
-                    Per Channel
-                </p>
-                <div className="border border-t-1"></div>
-                <div className="mt-4">
-                    {/* <div className="flex gap-[10px] px-[16px]">
-                        <div className="flex  w-[300px] items-center border rounded-md overflow-hidden">
-                            <span className="text-custom-gray81 bg-custom-grayFA flex items-center text-sm w-[150px] -mr-3 pl-3 py-1">
-                                For the month of
-                            </span>
-                            <div className="relative w-[159px]">
-                                <select
-                                    name="concern"
-                                    className="appearance-none w-full px-4 py-1 bg-white focus:outline-none border-0"
-                                    value={inquiriesPerChannelMonth}
-                                    onChange={(e) => setInquiriesPerChannelMonth(e.target.value)}
-                                >
-                                    <option value="january">January</option>
-                                    <option value="february">February</option>
-                                    <option value="march">March</option>
-                                    <option value="april">April</option>
-                                    <option value="may">May</option>
-                                    <option value="june">June</option>
-                                    <option value="july">July</option>
-                                    <option value="august">August</option>
-                                    <option value="september">September</option>
-                                    <option value="october">October</option>
-                                    <option value="november">November</option>
-                                    <option value="december">December</option>
-                                </select>
-                                <span className="absolute inset-y-0 right-0 flex items-center text-custom-gray81 pr-3 pl-3 bg-custom-grayFA pointer-events-none">
-                                    <IoMdArrowDropdown />
-                                </span>
-                            </div>
-                        </div>
-                        <div className="flex w-[95px] items-center border rounded-md overflow-hidden">
-                            <div className="relative w-full">
-                                <select
-                                    name="year"
-                                    className="appearance-none w-[100px] px-4 py-1 bg-white focus:outline-none border-0"
-                                    value={inquiriesPerChanelYear}
-                                    onChange={handleInquiriesPerChannelYearChange}
-                                >
-
-                                    <option value="2024">
-                                        2024
-                                    </option>
-
-                                </select>
-                                <span className="absolute inset-y-0 right-0 flex items-center text-custom-gray81 pr-3 pl-3 bg-custom-grayFA pointer-events-none">
-                                    <IoMdArrowDropdown />
-                                </span>
-                            </div>
-                        </div>
-
-                    </div> */}
-                </div>
-                <div className="flex flex-col">
-                    <div className="py-[10px]">
+            <div className="flex gap-[10px]">
+                <div className=" w-[579px] pb-7 min-h-[335px] flex-grow-1 bg-[#F2F8FC] rounded-lg">
+                    <p className="p-4  text-base montserrat-bold">
+                        Inquiries Per Type
+                    </p>
+                    <div className="flex-grow mt-[40px]">
                         <ResponsiveContainer width="100%" height={300}>
                             <BarChart
                                 layout="vertical"
-                                data={inquriesPerChannelData}
+                                data={communicationTypeData}
                                 margin={{
                                     top: 5,
                                     right: 20,
@@ -746,167 +734,180 @@ const ReportPage = () => {
                                     }}
                                     width={100}
                                 />
-                                <Tooltip content={<CustomTooltipLines />} />
+                                <Tooltip content={<CustomTooltipBar2 />} />
                                 <Bar
                                     dataKey="value" // Green color for values    
-                                    barSize={25}
+                                    barSize={45}
                                 >
-                                     {inquriesPerChannelData.map((entry, index) => (
-                                        <Cell key={`cell-${index}`} fill={colors[index % 20]} />
-                                        
+                                    {communicationTypeData.map((entry, index) => (
+                                        <Cell key={`cell-${index}`} fill={communicationColors[index % 20]} />
                                     ))}
                                     <LabelList dataKey="value" fill="#4a5568" position="right" />
                                 </Bar>
-
                             </BarChart>
-
                         </ResponsiveContainer>
-                    </div>
-                    <div className="w-full px-[10px]">
-                        <div className="flex flex-wrap text-[#121212]">
-                            <div className="flex items-center pr-3 gap-[11px] ">
-                                <span className="flex h-[20px] items-center pb-1 text-custom-solidgreen text-2xl">
-                                    ●
-                                </span>
-                                <span className="text-custom-gray12 text-xs">
-                                    Email
-                                </span>
-                            </div>
-                            <div className="flex items-center pr-3 gap-[11px]">
-                                <span className="flex h-[20px] items-center pb-1 text-custom-lightgreen text-2xl">
-                                    ●
-                                </span>
-                                <span className="text-custom-gray12 text-xs">
-                                    Call
-                                </span>
-                            </div>
-                            <div className="flex items-center pr-3 gap-[11px]">
-                                <span className="flex h-[20px] items-center pb-1 text-[#1A73E8] text-2xl">
-                                    ●
-                                </span>
-                                <span className="text-custom-gray12 text-xs">
-                                    Walk-in
-                                </span>
-                            </div>
-                            <div className="flex items-center pr-3 gap-[11px]">
-                                <span className="flex h-[20px] items-center pb-1 text-[#5B9BD5] text-2xl">
+
+
+                        <div className="flex justify-end">
+                            <div className="flex items-center pr-3 py-2 gap-2">
+                                <span className="flex h-[20px] items-center pb-1 text-[#EB4444] text-2xl">
                                     ●
                                 </span>
                                 <span className="text-custom-gray12 text-sm">
-                                    Website
+                                    Complaints
                                 </span>
                             </div>
-                            <div className="flex items-center pr-3 gap-[11px]">
-                                <span className="flex h-[20px] items-center pb-1 text-custom-bluegreen text-2xl">
+                            <div className="flex items-center pr-3 py-2 gap-2">
+                                <span className="flex h-[20px] items-center pb-1 text-[#348017] text-2xl">
                                     ●
                                 </span>
-                                <span className="text-custom-gray12 text-xs">
-                                    Social Media
+                                <span className="text-custom-gray12 text-sm">
+                                    Requests
                                 </span>
                             </div>
-                            <div className="flex items-center pr-3 gap-[11px] ">
-                                <span className="flex h-[20px] items-center pb-1 text-[#404B52] text-2xl">
+                            <div className="flex items-center pr-3 py-2 gap-2">
+                                <span className="flex h-[20px] items-center pb-1 text-[#1A73E8] text-2xl">
                                     ●
                                 </span>
-                                <span className="text-custom-gray12 text-xs">
-                                    Branch Tablet
+                                <span className="text-custom-gray12 text-sm">
+                                    Inquiries
                                 </span>
                             </div>
-                            <div className="flex items-center pr-3 gap-[11px] ">
-                                <span className="flex h-[20px] items-center pb-1 text-custom-grayA5 text-2xl">
+                            <div className="flex items-center pr-3 py-2 gap-2">
+                                <span className="flex h-[20px] items-center pb-1 text-[#E4EA3B] text-2xl">
                                     ●
                                 </span>
-                                <span className="text-custom-gray12 text-xs">
-                                    Internal Endorsement
+                                <span className="text-custom-gray12 text-sm">
+                                    Suggestion or Recommendations
                                 </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div className="w-[571px] pb-7  flex-grow-1 bg-[#F2F8FC] rounded-lg">
+                    <p className="p-4 text-base montserrat-bold">
+                        Per Channel
+                    </p>
+                    <div className="border border-t-1"></div>
+                    <div className="mt-4"></div>
+                    <div className="flex flex-col">
+                        <div className="py-[10px]">
+                            <ResponsiveContainer width="100%" height={312}>
+                                <BarChart
+                                    layout="vertical"
+                                    data={inquriesPerChannelData}
+                                    margin={{
+                                        top: 5,
+                                        right: 20,
+                                        left: 20,
+                                        bottom: 15,
+                                    }}
+                                >
+                                    <CartesianGrid strokeDasharray="3 3" horizontal={false} />
+                                    <XAxis
+                                        type="number"
+                                        tick={{
+                                            fontSize: 12,
+                                            fill: '#000',
+                                        }}
+                                        domain={[0, 'dataMax + 10']}
+                                    />
+                                    <YAxis
+                                        type="category"
+                                        dataKey="name"
+                                        tick={{
+                                            fontSize: 12,
+                                            fill: '#000',
+                                        }}
+                                        width={100}
+                                    />
+                                    <Tooltip content={<CustomTooltipBar1 />} />
+                                    <Bar
+                                        dataKey="value" // Green color for values    
+                                        barSize={25}
+                                    >
+                                        {inquriesPerChannelData.map((entry, index) => (
+                                            <Cell key={`cell-${index}`} fill={colors[index % 20]} />
+
+                                        ))}
+                                        <LabelList dataKey="value" fill="#4a5568" position="right" />
+                                    </Bar>
+
+                                </BarChart>
+
+                            </ResponsiveContainer>
+                        </div>
+                        <div className="w-full px-[10px]">
+                            <div className="flex flex-wrap justify-end text-[#121212]">
+                                <div className="flex items-center pr-3 gap-[11px] ">
+                                    <span className="flex h-[20px] items-center pb-1 text-custom-solidgreen text-2xl">
+                                        ●
+                                    </span>
+                                    <span className="text-custom-gray12 text-xs">
+                                        Email
+                                    </span>
+                                </div>
+                                <div className="flex items-center pr-3 gap-[11px]">
+                                    <span className="flex h-[20px] items-center pb-1 text-custom-lightgreen text-2xl">
+                                        ●
+                                    </span>
+                                    <span className="text-custom-gray12 text-xs">
+                                        Call
+                                    </span>
+                                </div>
+                                <div className="flex items-center pr-3 gap-[11px]">
+                                    <span className="flex h-[20px] items-center pb-1 text-[#1A73E8] text-2xl">
+                                        ●
+                                    </span>
+                                    <span className="text-custom-gray12 text-xs">
+                                        Walk-in
+                                    </span>
+                                </div>
+                                <div className="flex items-center pr-3 gap-[11px]">
+                                    <span className="flex h-[20px] items-center pb-1 text-[#5B9BD5] text-2xl">
+                                        ●
+                                    </span>
+                                    <span className="text-custom-gray12 text-sm">
+                                        Website
+                                    </span>
+                                </div>
+                                <div className="flex items-center pr-3 gap-[11px]">
+                                    <span className="flex h-[20px] items-center pb-1 text-custom-bluegreen text-2xl">
+                                        ●
+                                    </span>
+                                    <span className="text-custom-gray12 text-xs">
+                                        Social Media
+                                    </span>
+                                </div>
+                                <div className="flex items-center pr-3 gap-[11px] ">
+                                    <span className="flex h-[20px] items-center pb-1 text-[#404B52] text-2xl">
+                                        ●
+                                    </span>
+                                    <span className="text-custom-gray12 text-xs">
+                                        Branch Tablet
+                                    </span>
+                                </div>
+                                <div className="flex items-center pr-3 gap-[11px] ">
+                                    <span className="flex h-[20px] items-center pb-1 text-custom-grayA5 text-2xl">
+                                        ●
+                                    </span>
+                                    <span className="text-custom-gray12 text-xs">
+                                        Internal Endorsement
+                                    </span>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-            <div className="relative flex gap-3 mt-4  items-start">
-                <div className="flex flex-col gap-[15px] w-[571px]">
-                    <div className="w-full pb-7 min-h-[335px] flex-grow-1 bg-[#F2F8FC] rounded-lg">
-                        <p className="p-4 text-base montserrat-bold">
-                            Per Category
-                        </p>
-                        <div className="border border-t-1"></div>
-                        <div className="flex flex-col">
-                            <div>
-                                <PieChart width={548} height={360}>
-                                    <Pie
-                                        data={dataCategory}
-                                        cx="50%"
-                                        cy="50%"
-                                        outerRadius={170}
-                                        innerRadius={0}
-                                        paddingAngle={1}
-                                        strokeWidth={1}
-                                        stroke="white"
-                                        cornerRadius={0}
-                                        fill="#8884d8"
-                                        dataKey="value"
-                                        startAngle={90}
-                                        endAngle={450}
-                                    >
-                                        {dataCategory.map((entry, index) => (
-                                            <Cell
-                                                key={index}
-                                                // fill={categoryColors[entry.name] || COLORS[index % COLORS.length]}
-                                                fill={getColor(entry.name, index)}
-                                            />
-                                        ))}
-
-                                    </Pie>
-                                    <Tooltip content={<CustomTooltipPieChart />} />
-                                </PieChart>
-                            </div>
-                            <div className="flex w-full rounded-md flex-wrap justify-end gap-[10px]">
-                                {dataCategory.map((category, index) => (
-
-                                    <div className=" shrink-0 items-center" key={index}>
-                                        <div
-                                            className="flex w-full gap-[10px]"
-                                            key={index}
-                                        >
-                                            <span
-                                                className="text-xl mb-1"
-                                                style={{
-                                                    color: getCategoryColor(
-                                                        category.name
-                                                    ),
-                                                }}
-                                            >
-                                                ●
-                                            </span>
-                                            <div className="flex gap-1 shrink-0 items-center">
-
-                                                <span className="text-sm text-[#121212] leading-[15px] py-[4px]">
-                                                    {category.name}
-                                                </span>
-                                            </div>
-                                            <div className="flex items-center gap-1">
-                                                <span className="text-gray-700 font-bold text-sm">
-                                                    {`${((category.value / totalValue) * 100).toFixed(0)}%`}
-                                                </span>
-                                                {/*  <span className="text-custom-gray81 text-[10px]">
-                                                    {category.value ? "%" : ""}
-                                                </span> */}
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            <div className="relative flex gap-3 mt-[10px]  items-start">
                 <div className="flex flex-col gap-3">
                     <div className=" bg-whiterounded-[10px] bg-[#F2F8FC] w-[579px] flex flex-col overflow-y-auto">
                         <p className="p-4  text-base montserrat-bold">
                             Per Property
                         </p>
                         <div className="border border-t-1"></div>
-                        <div className="flex-grow overflow-x-auto px-[10px] mt-[5px] pb-[10px]">
+                        <div className="flex-grow overflow-x-auto px-[10px] mt-[5px] pb-[50px]">
                             <table class="table-auto border-collapse border border-gray-300 w-full text-sm text-left">
                                 <thead class="bg-gray-100">
                                     <tr>
@@ -917,17 +918,17 @@ const ReportPage = () => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                {dataProperty.map((item, index) => (
-                                    <tr class="hover:bg-gray-50" key={index}>
-                                        <td class="border border-gray-300 px-4 py-2">{item.name}</td>
-                                        <td class="border border-gray-300 px-4 py-2">{item.resolved}</td>
-                                        <td class="border border-gray-300 px-4 py-2">{item.unresolved}</td>
-                                        <td class="border border-gray-300 px-4 py-2">{item.closed}</td>
-                                    </tr>
+                                    {dataProperty.map((item, index) => (
+                                        <tr class="hover:bg-gray-50" key={index}>
+                                            <td class="border border-gray-300 px-4 py-2">{item.name}</td>
+                                            <td class="border border-gray-300 px-4 py-2">{item.resolved}</td>
+                                            <td class="border border-gray-300 px-4 py-2">{item.unresolved}</td>
+                                            <td class="border border-gray-300 px-4 py-2">{item.closed}</td>
+                                        </tr>
                                     ))}
                                 </tbody>
                             </table>
-                           {/*  <BarChart
+                            {/*  <BarChart
                                 width={400}
                                 height={chartHeight}
                                 data={dataProperty}
@@ -999,7 +1000,7 @@ const ReportPage = () => {
                                 </Bar>
                             </BarChart> */}
 
-                           {/*  <div className="flex justify-end">
+                            {/*  <div className="flex justify-end">
                                 <div className="flex items-center px-3 py-2 gap-2">
                                     <span className="flex h-[20px] items-center pb-1 text-custom-lightestgreen text-2xl">
                                         ●
@@ -1028,181 +1029,13 @@ const ReportPage = () => {
                         </div>
                     </div>
                 </div>
-            </div>
-            <div className=" w-[579px] pb-7 min-h-[335px] flex-grow-1 bg-[#F2F8FC] rounded-lg">
-                <p className="p-4  text-base montserrat-bold">
-                    Inquiries Per Type
-                </p>
-
-                <div className="flex-grow mt-[40px]">
-
-                    {/*  <BarChart
-                        width={400}
-                        height={chartHeight2}
-                        data={communicationTypeData}
-                        layout="vertical"
-                        margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-                    >
-                        <XAxis type="number" hide />
-                        <YAxis
-                            type="category"
-                            dataKey="name"
-                            hide
-                            tick={false}
-                        />
-                        <Tooltip content={<CustomTooltip2 />} />
-
-                        <Bar
-                            dataKey="complainCount"
-                            fill="#EB4444"
-                            barSize={15}
-                            radius={[0, 4, 4, 0]}
-                        >
-                            <LabelList
-                                dataKey="complainCount"
-                                position="right"
-                                fill="#4a5568"
-                            />
-                            <LabelList
-                                dataKey="name"
-                                position="top"
-                                content={({ x, y, value }) => (
-                                    <text
-                                        x={x}
-                                        y={y - 13}
-                                        fill="#00000"
-                                        textAnchor="start"
-                                        dominantBaseline="central"
-                                    >
-                                        {value}
-                                    </text>
-                                )}
-                            />
-                        </Bar>
-                        <Bar
-                            dataKey="requestCount"
-                            fill="#348017"
-                            barSize={15}
-                            radius={[0, 4, 4, 0]}
-                        >
-                            <LabelList
-                                dataKey="requestCount"
-                                position="right"
-                                fill="#4a5568"
-                            />
-                        </Bar>
-                        <Bar
-                            dataKey="inquiryCount"
-                            fill="#1A73E8"
-                            barSize={15}
-                            radius={[0, 4, 4, 0]}
-                        >
-                            <LabelList
-                                dataKey="inquiryCount"
-                                position="right"
-                                fill="#4a5568"
-                            />
-                        </Bar>
-                        <Bar
-                            dataKey="suggestionCount"
-                            fill="#E4EA3B"
-                            barSize={15}
-                            radius={[0, 4, 4, 0]}
-                        >
-                            <LabelList
-                                dataKey="suggestionCount"
-                                position="right"
-                                fill="#4a5568"
-                            />
-                        </Bar>
-                    </BarChart> */}
-
-                    <ResponsiveContainer width="100%" height={300}>
-                        <BarChart
-                            layout="vertical"
-                            data={communicationTypeData}
-                            margin={{
-                                top: 5,
-                                right: 20,
-                                left: 20,
-                                bottom: 15,
-                            }}
-                        >
-                            <CartesianGrid strokeDasharray="3 3" horizontal={false} />
-                            <XAxis
-                                type="number"
-                                tick={{
-                                    fontSize: 12,
-                                    fill: '#000',
-                                }}
-                                domain={[0, 'dataMax + 10']}
-                            />
-                            <YAxis
-                                type="category"
-                                dataKey="name"
-                                tick={{
-                                    fontSize: 12,
-                                    fill: '#000',
-                                }}
-                                width={100}
-                            />
-                            <Tooltip />
-                            <Bar
-                                    dataKey="value" // Green color for values    
-                                    barSize={25}
-                                >
-                                    {communicationTypeData.map((entry, index) => (
-                                        <Cell key={`cell-${index}`} fill={communicationColors[index % 20]} />
-                                    ))}
-                                    <LabelList dataKey="value" fill="#4a5568" position="right" />
-                                </Bar>
-                        </BarChart>
-                    </ResponsiveContainer>
-
-
-                    <div className="flex justify-end">
-                        <div className="flex items-center pr-3 py-2 gap-2">
-                            <span className="flex h-[20px] items-center pb-1 text-[#EB4444] text-2xl">
-                                ●
-                            </span>
-                            <span className="text-custom-gray12 text-sm">
-                                Complaints
-                            </span>
-                        </div>
-                        <div className="flex items-center pr-3 py-2 gap-2">
-                            <span className="flex h-[20px] items-center pb-1 text-[#348017] text-2xl">
-                                ●
-                            </span>
-                            <span className="text-custom-gray12 text-sm">
-                                Requests
-                            </span>
-                        </div>
-                        <div className="flex items-center pr-3 py-2 gap-2">
-                            <span className="flex h-[20px] items-center pb-1 text-[#1A73E8] text-2xl">
-                                ●
-                            </span>
-                            <span className="text-custom-gray12 text-sm">
-                                Inquiries
-                            </span>
-                        </div>
-                        <div className="flex items-center pr-3 py-2 gap-2">
-                            <span className="flex h-[20px] items-center pb-1 text-[#E4EA3B] text-2xl">
-                                ●
-                            </span>
-                            <span className="text-custom-gray12 text-sm">
-                                Suggestion or Recommendations
-                            </span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div className="flex flex-col gap-3">
+                <div className="flex flex-col gap-3">
                     <div className=" bg-whiterounded-[10px] bg-[#F2F8FC] w-[579px] flex flex-col overflow-y-auto">
                         <p className="p-4  text-base montserrat-bold">
                             Per Department
                         </p>
                         <div className="border border-t-1"></div>
-                        <div className="flex-grow overflow-x-auto px-[10px] mt-[5px] pb-[10px]">
+                        <div className="flex-grow overflow-x-auto px-[10px] mt-[5px] pb-[50px]">
                             <table class="table-auto border-collapse border border-gray-300 w-full text-sm text-left">
                                 <thead class="bg-gray-100">
                                     <tr>
@@ -1213,109 +1046,111 @@ const ReportPage = () => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                {dataDepartment.map((item, index) => (
-                                    <tr class="hover:bg-gray-50" key={index}>
-                                        <td class="border border-gray-300 px-4 py-2">{item.name}</td>
-                                        <td class="border border-gray-300 px-4 py-2">{item.resolved}</td>
-                                        <td class="border border-gray-300 px-4 py-2">{item.unresolved}</td>
-                                        <td class="border border-gray-300 px-4 py-2">{item.closed}</td>
-                                    </tr>
+                                    {dataDepartment.map((item, index) => (
+                                        <tr class="hover:bg-gray-50" key={index}>
+                                            <td class="border border-gray-300 px-4 py-2">{item.name}</td>
+                                            <td class="border border-gray-300 px-4 py-2">{item.resolved}</td>
+                                            <td class="border border-gray-300 px-4 py-2">{item.unresolved}</td>
+                                            <td class="border border-gray-300 px-4 py-2">{item.closed}</td>
+                                        </tr>
                                     ))}
                                 </tbody>
                             </table>
                         </div>
                     </div>
                 </div>
+            </div>
+            <div className="flex-grow mt-[10px]">
+                <div className="flex flex-col gap-[15px] w-full">
+                    <div className="w-full pb-7 min-h-[335px] flex-grow-1 bg-[#F2F8FC] rounded-lg">
+                        <p className="p-4 text-base montserrat-bold">
+                            Per Category
+                        </p>
+                        <div className="border border-t-1"></div>
+                        <div className="flex flex-col">
+                            <div className="flex justify-center">
+                                <PieChart width={648} height={630}>
+                                    <Pie
+                                        data={dataCategory}
+                                        cx="50%"
+                                        cy="50%"
+                                        outerRadius={300}
+                                        innerRadius={0}
+                                        paddingAngle={1}
+                                        strokeWidth={1}
+                                        stroke="white"
+                                        cornerRadius={0}
+                                        fill="#8884d8"
+                                        dataKey="value"
+                                        startAngle={90}
+                                        endAngle={450}
+                                    >
+                                        {dataCategory.map((entry, index) => (
+                                            <Cell
+                                                key={index}
+                                                // fill={categoryColors[entry.name] || COLORS[index % COLORS.length]}
+                                                fill={getColor(entry.name, index)}
+                                            />
+                                        ))}
+                                        <LabelList
+                                            dataKey="value"
+                                            position="inside"
+                                            fill="white"
+                                            fontSize={20}
+                                        />
+                                    </Pie>
+                                    <Tooltip content={<CustomTooltipPieChart />} />
+                                </PieChart>
+                            </div>
+                            <div className="flex justify-center w-full">
+                                <div className="flex w-[150px]"></div> {/* dummy div to align the chart */}
+                                <div className="grid grid-cols-2 gap-[3px]">
+                                    {dataCategory.map((category, index) => (
+
+                                        <div className=" shrink-0 items-center" key={index}>
+                                            <div
+                                                className="flex w-[420px] gap-[10px]"
+                                                key={index}
+                                            >
+                                                <span
+                                                    className="text-[20px] mb-1"
+                                                    style={{
+                                                        color: getCategoryColor(
+                                                            category.name
+                                                        ),
+                                                    }}
+                                                >
+                                                    ●
+                                                </span>
+                                                <div className="flex gap-1 shrink-0 items-center">
+
+                                                    <span className="text-[18px] text-[#121212] leading-[15px] py-[4px]">
+                                                        {category.name}
+                                                    </span>
+                                                </div>
+                                                <div className="flex items-center gap-1">
+                                                    <span className="text-gray-700 font-bold text-sm">
+                                                        {`${((category.value / totalValue) * 100).toFixed(0)}%`}
+                                                    </span>
+                                                    {/*  <span className="text-custom-gray81 text-[10px]">
+                                                        {category.value ? "%" : ""}
+                                                    </span> */}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
             <div className="hidden fixed bottom-[50px] right-[41px]">
                 <button className="flex justify-center items-center size-[60px] shadow-custom8 rounded-full bg-[#1A73E8]  text-white text-lg">
                     <TiDownload className="text-white text-[30px]" />
                 </button>
             </div>
-            <div className="flex-grow mt-[20px]">
-                    <div className="flex flex-col gap-[15px] w-full">
-                        <div className="w-full pb-7 min-h-[335px] flex-grow-1 bg-[#F2F8FC] rounded-lg">
-                            <p className="p-4 text-base montserrat-bold">
-                                Per Category
-                            </p>
-                            <div className="border border-t-1"></div>
-                            <div className="flex flex-col">
-                                <div className="flex justify-center">
-                                    <PieChart width={648} height={630}>
-                                        <Pie
-                                            data={dataCategory}
-                                            cx="50%"
-                                            cy="50%"
-                                            outerRadius={300}
-                                            innerRadius={0}
-                                            paddingAngle={1}
-                                            strokeWidth={1}
-                                            stroke="white"
-                                            cornerRadius={0}
-                                            fill="#8884d8"
-                                            dataKey="value"
-                                            startAngle={90}
-                                            endAngle={450}
-                                        >
-                                            {dataCategory.map((entry, index) => (
-                                                <Cell
-                                                    key={index}
-                                                    // fill={categoryColors[entry.name] || COLORS[index % COLORS.length]}
-                                                    fill={getColor(entry.name, index)}
-                                                />
-                                            ))}
-                                            <LabelList 
-                                                dataKey="value" 
-                                                position="inside" 
-                                                fill="white" 
-                                                fontSize={20} 
-                                                />
-                                        </Pie>
-                                        <Tooltip content={<CustomTooltipPieChart />} />
-                                    </PieChart>
-                                </div>
-                                <div className="flex justify-center w-full">
-                                    <div className="grid grid-cols-2 gap-2">
-                                        {dataCategory.map((category, index) => (
-
-                                            <div className=" shrink-0 items-center" key={index}>
-                                                <div
-                                                    className="flex w-[280px] gap-[10px]"
-                                                    key={index}
-                                                >
-                                                    <span
-                                                        className="text-[20px] mb-1"
-                                                        style={{
-                                                            color: getCategoryColor(
-                                                                category.name
-                                                            ),
-                                                        }}
-                                                    >
-                                                        ●
-                                                    </span>
-                                                    <div className="flex gap-1 shrink-0 items-center">
-
-                                                        <span className="text-[18px] text-[#121212] leading-[15px] py-[4px]">
-                                                            {category.name}
-                                                        </span>
-                                                    </div>
-                                                    <div className="flex items-center gap-1">
-                                                        <span className="text-gray-700 font-bold text-sm">
-                                                            {`${((category.value / totalValue) * 100).toFixed(0)}%`}
-                                                        </span>
-                                                        {/*  <span className="text-custom-gray81 text-[10px]">
-                                                        {category.value ? "%" : ""}
-                                                    </span> */}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                                
-                            </div>
-                        </div>
-                    </div>
-                </div>
         </div>
     );
 };

@@ -18,14 +18,17 @@ import apiService from "../../servicesApi/apiService";
 import { useStateContext } from "../../../context/contextprovider";
 import InquiryFormModal from "../inquirypage/InquiryFormModal";
 import { set } from "lodash";
+import { ALLOWED_EMPLOYEES_CRS } from "../../../constant/data/allowedEmployeesCRS";
+
+
 const Sidebar = () => {
-  const { unreadCount, getCount } = useStateContext();
+  const { unreadCount, getCount, user } = useStateContext();
   const [activeItem, setActiveItem] = useState(null);
   const location = useLocation();
   const [isInquiryOpen, setInquiryOpen] = useState(false);
   const [isSuperAdminOpen, setSuperAdminOpen] = useState(false);
   const [isInvoiceOpen, setIsInvoiceOpen] = useState(false);
-
+  const userLoggedInEmail = user?.employee_email;
   const [activeItemTransaction, setActiveItemTransaction] = useState(null);
 
   useEffect(() => {
@@ -197,10 +200,10 @@ const Sidebar = () => {
               </div>
             )
           }
-
+          {ALLOWED_EMPLOYEES_CRS.includes(userLoggedInEmail) && (
           <Link to="superadmin/userrightsandpermissions">
             <ListItem
-              className={`h-[35px] w-[185px] text-sm pl-[12px] transition-all duration-300 ease-in-out hidden
+              className={`h-[35px] w-[185px] text-sm pl-[12px] transition-all duration-300 ease-in-out 
                   ${activeItem === "superadmin" ||
                   location.pathname.startsWith("/superadmin")
                   ? "bg-custom-lightestgreen text-custom-solidgreen font-semibold"
@@ -213,7 +216,7 @@ const Sidebar = () => {
                     `}
               onClick={handleSuperAdminDropdownClick}
             >
-              Super Admin
+                Admin Setting
               <ListItemSuffix>
                 <IoIosArrowDown
                   className={`text-custom-solidgreen  transition-transform duration-200 ease-in-out ${isSuperAdminOpen ? "rotate-180" : ""
@@ -222,12 +225,14 @@ const Sidebar = () => {
               </ListItemSuffix>
             </ListItem>
           </Link>
-          {isSuperAdminOpen &&
+          )}
+
+          {ALLOWED_EMPLOYEES_CRS.includes(userLoggedInEmail) && isSuperAdminOpen &&
             location.pathname.startsWith("/superadmin") && (
               <div className="px-[12px] py-[20px] w-[185px] min-h-[122px] flex flex-col gap-[5px] bg-custom-lightestgreen border-t rounded-t-none rounded-b-[10px] border-custom-solidgreen transition-all duration-300 ease-in-out">
                 <Link to="/superadmin/userrightsandpermissions">
                   <ListItem
-                    className={`h-[48px] w-full py-[8px] px-[18px]  text-sm rounded-[10px] ${location.pathname.startsWith(
+                    className={`h-[48px] w-full py-[8px] px-[18px]  text-sm rounded-[25px] ${location.pathname.startsWith(
                       "/superadmin/userrightsandpermissions"
                     )
                         ? "bg-white text-custom-solidgreen font-semibold "
