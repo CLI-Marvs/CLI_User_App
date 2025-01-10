@@ -704,6 +704,7 @@ const ReportPage = () => {
                     <p className="p-4  text-base montserrat-bold">
                         Inquiries Per Type
                     </p>
+                    <div className="border border-t-1"></div>
                     <div className="flex-grow mt-[40px]">
                         <ResponsiveContainer width="100%" height={300}>
                             <BarChart
