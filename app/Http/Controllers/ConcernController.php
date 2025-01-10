@@ -2113,7 +2113,8 @@ class ConcernController extends Controller
         $query = Concerns::select('communication_type', DB::raw('COUNT(*) as total'))
 
 
-            ->whereYear('created_at', $year);
+            ->whereYear('created_at', $year)
+            ->whereNotNull('communication_type');
 
         if ($department && $department !== "All") {
             $query->whereRaw("resolve_from::jsonb @> ?", json_encode([['department' => $department]]));
