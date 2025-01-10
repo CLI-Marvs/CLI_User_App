@@ -224,6 +224,7 @@ export const ContextProvider = ({ children }) => {
             }
         }
     };
+
     const fetchDataReport = async () => {
         if (!isDepartmentInitialized) return;
         try {
@@ -271,7 +272,10 @@ export const ContextProvider = ({ children }) => {
     };
 
     const getInquiriesPerDepartment = async () => {
+
+
         if (!isDepartmentInitialized) return;
+
         try {
             const response = await apiService.get("inquiries-department", {
                 params: {
@@ -288,6 +292,7 @@ export const ContextProvider = ({ children }) => {
                 unresolved: item.unresolved,
                 closed: item.closed,
             }));
+            console.log("formattedData", formattedData);
             setDataDepartment(formattedData);
         } catch (error) {
             console.log("error retrieving", error);
@@ -664,6 +669,7 @@ export const ContextProvider = ({ children }) => {
 
     //* For Report Page
     useEffect(() => {
+
         const fetchData = async () => {
             try {
                 await getInquiriesPerDepartment();
@@ -672,6 +678,7 @@ export const ContextProvider = ({ children }) => {
                 await fetchCategory();
                 await getCommunicationTypePerProperty();
                 await getInquiriesPerChannel();
+                
             } catch (error) {
                 console.error("Error fetching data:", error);
             }
