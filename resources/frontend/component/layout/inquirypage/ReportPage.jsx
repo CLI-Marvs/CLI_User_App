@@ -28,6 +28,53 @@ import { get, set } from "lodash";
 
 const barHeight = 20;
 
+const ReportPage = () => {
+    const {
+        setMonth,
+        month,
+        setYear,
+        year,
+        setProject,
+        project,
+        fullYear,
+        getFullYear,
+        dataCategory,
+        fetchCategory,
+        dataProperty,
+        communicationTypeData,
+        getCommunicationTypePerProperty,
+        getInquiriesPerProperty,
+        getInquiriesPerDepartment,
+        dataDepartment,
+        setDataDepartment,
+        propertyMonth,
+        setPropertyMonth,
+        setCommunicationTypeMonth,
+        communicationTypeMonth,
+        user,
+        setDepartment,
+        department,
+        dataSet,
+        fetchDataReport,
+        allEmployees,
+        data,
+        setDepartmentStatusYear,
+        departmentStatusYear,
+        setInquiriesPerCategoryYear,
+        inquiriesPerCategoryYear,
+        setInquiriesPerPropertyYear,
+        inquiriesPerPropertyYear,
+        setCommunicationTypeYear,
+        communicationTypeYear,
+        inquiriesPerChanelYear,
+        setInquiriesPerChanelYear,
+        inquiriesPerChannelMonth,
+        setInquiriesPerChannelMonth,
+        getInquiriesPerChannel,
+        inquriesPerChannelData,
+        propertyNamesList
+    } = useStateContext();
+
 const colors = ["#348017", "#70AD47", "#1A73E8", "#5B9BD5", "#175D5F", "#404B52", "#A5A5A5"];
 
 const COLORS = [
@@ -86,6 +133,9 @@ const CustomTick = ({ x, y, payload }) => {
     );
 };
 
+
+
+
 const categoryColors = {
     "Commissions": COLORS[0],
     "Leasing": COLORS[1],
@@ -132,7 +182,7 @@ const CustomTooltipPieChart = ({ active, payload, label }) => {
                 {payload.map((entry, index) => (
                     <div key={index} className="text-gray-700">
                         <p className="font-bold">{`${entry.name}`}</p>
-                        <p>{`Count: ${entry.value}`}</p>
+                        <p>{`${formatPercentage(entry.value)}`}</p>
                     </div>
                 ))}
             </div>
@@ -183,14 +233,15 @@ const CustomTooltip1 = ({ active, payload, label }) => {
             <div className="custom-tooltip bg-white p-3 shadow-lg rounded-lg border border-gray-200">
                 <p className="font-bold text-lg text-gray-800">{monthName}</p>
                 <div className="mt-2">
-                    <p className="text-sm text-gray-600">
-                        <span className="text-red-500">Closed:</span> {payload[0].value}
-                    </p>
+                   
                     <p className="text-sm text-gray-600">
                         <span className="text-custom-solidgreen">Resolved:</span> {payload[1].value}
                     </p>
                     <p className="text-sm text-gray-600">
-                        <span className="text-custom-lightgreen">Unresolved:</span> {payload[2].value}
+                        <span className="text-custom-lightgreen">Closed:</span> {payload[0].value}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                        <span className="text-red-500 ">Unresolved:</span> {payload[2].value}
                     </p>
                 </div>
             </div>
@@ -320,52 +371,7 @@ const CustomTooltipBar2 = ({ active, payload, label }) => {
 
 
 
-const ReportPage = () => {
-    const {
-        setMonth,
-        month,
-        setYear,
-        year,
-        setProject,
-        project,
-        fullYear,
-        getFullYear,
-        dataCategory,
-        fetchCategory,
-        dataProperty,
-        communicationTypeData,
-        getCommunicationTypePerProperty,
-        getInquiriesPerProperty,
-        getInquiriesPerDepartment,
-        dataDepartment,
-        setDataDepartment,
-        propertyMonth,
-        setPropertyMonth,
-        setCommunicationTypeMonth,
-        communicationTypeMonth,
-        user,
-        setDepartment,
-        department,
-        dataSet,
-        fetchDataReport,
-        allEmployees,
-        data,
-        setDepartmentStatusYear,
-        departmentStatusYear,
-        setInquiriesPerCategoryYear,
-        inquiriesPerCategoryYear,
-        setInquiriesPerPropertyYear,
-        inquiriesPerPropertyYear,
-        setCommunicationTypeYear,
-        communicationTypeYear,
-        inquiriesPerChanelYear,
-        setInquiriesPerChanelYear,
-        inquiriesPerChannelMonth,
-        setInquiriesPerChannelMonth,
-        getInquiriesPerChannel,
-        inquriesPerChannelData,
-        propertyNamesList
-    } = useStateContext();
+
 
     const [departmentValue, setDepartmentValue] = useState("All");
     const [projectValue, setProjectValue] = useState("All");
@@ -391,6 +397,32 @@ const ReportPage = () => {
             .replace(/\b\w/g, (char) => char.toUpperCase());
     };
 
+
+    const totalValuePieChart = dataCategory.reduce((acc, curr) => acc + curr.value, 0);
+
+    const formatPercentage = (value) => ((value / totalValuePieChart) * 100).toFixed(2) + '%';
+  
+
+    const renderCustomLabel = ({ x, y, value, index, payload, cx }) => {
+        const percentage = formatPercentage(value);
+        const name = payload.name;
+        
+        // Adjust text alignment based on label's position relative to pie center
+        const textAnchor = x > cx ? 'start' : 'end';
+    
+        return (
+            <text 
+                x={x} 
+                y={y} 
+                fill="black" 
+                fontSize={20} 
+                textAnchor={textAnchor} 
+                dominantBaseline="middle"
+            >
+                {`${percentage} ${name}`}
+            </text>
+        );
+    };
 
     const formattedPropertyNames = [
         "N/A",
@@ -482,7 +514,6 @@ const ReportPage = () => {
         setProject(projectValue);
         setYear(yearValue);
         setMonth(monthValue);
-
     };
 
     useEffect(() => {
@@ -498,7 +529,7 @@ const ReportPage = () => {
 
     }, []);
 
-
+   
 
     /*  useEffect(() => {
          setMonth(getCurrentMonth());
@@ -678,20 +709,20 @@ const ReportPage = () => {
                                 <LabelList dataKey="Resolved" position="top" />
                             </Bar>
                             <Bar
-                                dataKey="Unresolved"
+                                dataKey="Closed"
                                 fill="#D6E4D1"
                                 barSize={15}
                                 radius={[3, 3, 0, 0]}
                             >
-                                <LabelList dataKey="Unresolved" position="top" />
+                                <LabelList dataKey="Closed" position="top" />
                             </Bar>
                             <Bar
-                                dataKey="Closed"
+                                dataKey="Unresolved"
                                 fill="#EF4444"
                                 barSize={15}
                                 radius={[3, 3, 0, 0]}
                             >
-                                <LabelList dataKey="Closed" position="top" />
+                                <LabelList dataKey="Unresolved" position="top" />
                             </Bar>
                         </BarChart>
                     </ResponsiveContainer>
@@ -709,14 +740,15 @@ const ReportPage = () => {
                         <span className="flex items-center text-custom-lightestgreen text-2xl">
                             ●
                         </span>
-                        <span className="text-custom-gray12">Unresolved</span>
+                        <span className="text-custom-gray12">Closed</span>
                     </div>
                     <div className="flex items-center px-3 py-2 gap-3">
                         <span className="flex items-center text-red-500 text-2xl">
                             ●
                         </span>
-                        <span className="text-custom-gray12">Closed</span>
+                        <span className="text-custom-gray12">Unresolved</span>
                     </div>
+                   
                 </div>
             </div>
             <div className="flex gap-[10px]">
@@ -724,6 +756,7 @@ const ReportPage = () => {
                     <p className="p-4  text-base montserrat-bold">
                         Inquiries Per Type
                     </p>
+                    <div className="border border-t-1"></div>
                     <div className="flex-grow mt-[40px]">
                         <ResponsiveContainer width="100%" height={300}>
                             <BarChart
@@ -928,24 +961,36 @@ const ReportPage = () => {
                         </p>
                         <div className="border border-t-1"></div>
                         <div className="flex-grow overflow-x-auto px-[10px] mt-[5px] pb-[50px]">
-                            <table class="table-auto border-collapse border border-gray-300 w-full text-sm text-left">
-                                <thead class="bg-gray-100">
+                            <table className="table-auto border-collapse border border-gray-300 w-full text-sm text-left">
+                                <thead className="bg-gray-100">
                                     <tr>
-                                        <th class="border border-gray-300 px-4 py-2 w-[300px]">Property</th>
-                                        <th class="border border-gray-300 px-4 py-2">Resolved</th>
-                                        <th class="border border-gray-300 px-4 py-2">Unresolved</th>
-                                        <th class="border border-gray-300 px-4 py-2">Closed</th>
+                                        <th className="border border-gray-300 px-4 py-2 w-[300px]">Property</th>
+                                        <th className="border border-gray-300 px-4 py-2">Resolved</th>
+                                        <th className="border border-gray-300 px-4 py-2">Closed</th>
+                                        <th className="border border-gray-300 text-red-500 px-4 py-2">Unresolved</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {dataProperty.map((item, index) => (
-                                        <tr class="hover:bg-gray-50" key={index}>
-                                            <td class="border border-gray-300 px-4 py-2">{item.name}</td>
-                                            <td class="border border-gray-300 px-4 py-2">{item.resolved}</td>
-                                            <td class="border border-gray-300 px-4 py-2">{item.unresolved}</td>
-                                            <td class="border border-gray-300 px-4 py-2">{item.closed}</td>
+                                        <tr className="hover:bg-gray-50" key={index}>
+                                            <td className="border border-gray-300 px-4 py-2">{item.name}</td>
+                                            <td className="border border-gray-300 px-4 py-2">{item.resolved}</td>
+                                            <td className="border border-gray-300 px-4 py-2">{item.closed}</td>
+                                            <td className="border border-gray-300 px-4 py-2">{item.unresolved}</td>
                                         </tr>
                                     ))}
+                                    <tr className="bg-gray-100 font-semibold">
+                                        <td className="border border-gray-300 px-4 py-2">Total</td>
+                                        <td className="border border-gray-300 px-4 py-2">
+                                            {dataProperty.reduce((sum, item) => sum + item.resolved, 0)}
+                                        </td>
+                                        <td className="border border-gray-300 px-4 py-2">
+                                            {dataProperty.reduce((sum, item) => sum + item.unresolved, 0)}
+                                        </td>
+                                        <td className="border border-gray-300 px-4 py-2">
+                                            {dataProperty.reduce((sum, item) => sum + item.closed, 0)}
+                                        </td>
+                                    </tr>
                                 </tbody>
                             </table>
                             {/*  <BarChart
@@ -1056,24 +1101,36 @@ const ReportPage = () => {
                         </p>
                         <div className="border border-t-1"></div>
                         <div className="flex-grow overflow-x-auto px-[10px] mt-[5px] pb-[50px]">
-                            <table class="table-auto border-collapse border border-gray-300 w-full text-sm text-left">
-                                <thead class="bg-gray-100">
+                            <table className="table-auto border-collapse border border-gray-300 w-full text-sm text-left">
+                                <thead className="bg-gray-100">
                                     <tr>
-                                        <th class="border border-gray-300 px-4 py-2 w-[300px]">Department</th>
-                                        <th class="border border-gray-300 px-4 py-2">Resolved</th>
-                                        <th class="border border-gray-300 px-4 py-2">Unresolved</th>
-                                        <th class="border border-gray-300 px-4 py-2">Closed</th>
+                                        <th className="border border-gray-300 px-4 py-2 w-[300px]">Department</th>
+                                        <th className="border border-gray-300 px-4 py-2">Resolved</th>
+                                        <th className="border border-gray-300 px-4 py-2">Closed</th>
+                                        <th className="border border-gray-300 text-red-500 px-4 py-2">Unresolved</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {dataDepartment.map((item, index) => (
-                                        <tr class="hover:bg-gray-50" key={index}>
-                                            <td class="border border-gray-300 px-4 py-2">{item.name}</td>
-                                            <td class="border border-gray-300 px-4 py-2">{item.resolved}</td>
-                                            <td class="border border-gray-300 px-4 py-2">{item.unresolved}</td>
-                                            <td class="border border-gray-300 px-4 py-2">{item.closed}</td>
+                                        <tr className="hover:bg-gray-50" key={index}>
+                                            <td className="border border-gray-300 px-4 py-2">{item.name}</td>
+                                            <td className="border border-gray-300 px-4 py-2">{item.resolved}</td>
+                                            <td className="border border-gray-300 px-4 py-2">{item.closed}</td>
+                                            <td className="border border-gray-300 px-4 py-2">{item.unresolved}</td>
                                         </tr>
                                     ))}
+                                    <tr className="bg-gray-100 font-semibold">
+                                        <td className="border border-gray-300 px-4 py-2">Total</td>
+                                        <td className="border border-gray-300 px-4 py-2">
+                                            {dataDepartment.reduce((sum, item) => sum + item.resolved, 0)}
+                                        </td>
+                                        <td className="border border-gray-300 px-4 py-2">
+                                            {dataDepartment.reduce((sum, item) => sum + item.unresolved, 0)}
+                                        </td>
+                                        <td className="border border-gray-300 px-4 py-2">
+                                            {dataDepartment.reduce((sum, item) => sum + item.closed, 0)}
+                                        </td>
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>
@@ -1117,10 +1174,11 @@ const ReportPage = () => {
                                             position="inside"
                                             fill="white"
                                             fontSize={20}
+                                           
                                         />
-                                    </Pie>
-                                    <Tooltip content={<CustomTooltipPieChart />} />
-                                </PieChart>
+                                </Pie>
+                                <Tooltip content={<CustomTooltipPieChart />} />
+                            </PieChart>
                             </div>
                             <div className="flex justify-center w-full">
                                 <div className="flex w-[150px]"></div> {/* dummy div to align the chart */}
@@ -1150,7 +1208,7 @@ const ReportPage = () => {
                                                 </div>
                                                 <div className="flex items-center gap-1">
                                                     <span className="text-gray-700 font-bold text-sm">
-                                                        {`${((category.value / totalValue) * 100).toFixed(0)}%`}
+                                                        {`${((category.value / totalValue) * 100).toFixed(2)}%`}
                                                     </span>
                                                     {/*  <span className="text-custom-gray81 text-[10px]">
                                                         {category.value ? "%" : ""}
