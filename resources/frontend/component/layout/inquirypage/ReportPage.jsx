@@ -75,299 +75,299 @@ const ReportPage = () => {
         propertyNamesList
     } = useStateContext();
 
-const colors = ["#348017", "#70AD47", "#1A73E8", "#5B9BD5", "#175D5F", "#404B52", "#A5A5A5"];
+    const colors = ["#348017", "#70AD47", "#1A73E8", "#5B9BD5", "#175D5F", "#404B52", "#A5A5A5"];
 
-const COLORS = [
-    "#1F77B4", // Blue
-    "#FF7F0E", // Orange
-    "#2CA02C", // Green
-    "#D62728", // Red
-    "#9467BD", // Purple
-    "#8C564B", // Brown
-    "#E377C2", // Pink
-    "#7F7F7F", // Gray
-    "#BCBD22", // Olive
-    "#17BECF"  // Teal
-];
+    const COLORS = [
+        "#1F77B4", // Blue
+        "#FF7F0E", // Orange
+        "#2CA02C", // Green
+        "#D62728", // Red
+        "#9467BD", // Purple
+        "#8C564B", // Brown
+        "#E377C2", // Pink
+        "#7F7F7F", // Gray
+        "#BCBD22", // Olive
+        "#17BECF"  // Teal
+    ];
 
-const getBarColorPerType = (name) => {
-    const colors = {
-        'Complaints': '#EB4444',         
-        'Requests': '#348017',           
-        'Inquiries': '#1A73E8',      
-        'Suggestion or Recommendations': '#E4EA3B',        
+    const getBarColorPerType = (name) => {
+        const colors = {
+            'Complaints': '#EB4444',
+            'Requests': '#348017',
+            'Inquiries': '#1A73E8',
+            'Suggestion or Recommendations': '#E4EA3B',
+        };
+        return colors[name] || '#CCCCCC';
     };
-    return colors[name] || '#CCCCCC'; 
-};
 
-const getBarColorPerChannel = (name) => {
-    const colors = {
-        'Email': '#348017',         
-        'Call': '#70AD47',           
-        'Walk-in': '#1A73E8',      
-        'Website': '#5B9BD5',        
-        'Social Media': '#175D5F',        
-        'Branch Tablet': '#404B52',        
-        'Internal Endorsement': '#A5A5A5',           
+    const getBarColorPerChannel = (name) => {
+        const colors = {
+            'Email': '#348017',
+            'Call': '#70AD47',
+            'Walk-in': '#1A73E8',
+            'Website': '#5B9BD5',
+            'Social Media': '#175D5F',
+            'Branch Tablet': '#404B52',
+            'Internal Endorsement': '#A5A5A5',
+        };
+        return colors[name] || '#CCCCCC'; // Default to gray if no match
     };
-    return colors[name] || '#CCCCCC'; // Default to gray if no match
-};
 
-const CustomTick = ({ x, y, payload }) => {
-    const words = payload.value.split(' '); // Split by spaces to handle word wrapping
-    return (
-        <g transform={`translate(${x},${y})`}>
-            {words.map((word, index) => (
-                <text
-                    key={index}
-                    x={0}
-                    y={index * 12} // Adjust the y position for each line of text
-                    textAnchor="middle"
-                    fontSize={10}
-                    fill="#000"
-                >
-                    {word}
-                </text>
-            ))}
-        </g>
-    );
-};
-
-
-
-
-const categoryColors = {
-    "Commissions": COLORS[0],
-    "Leasing": COLORS[1],
-    "Loan Application": COLORS[2],
-    "Other Concerns": COLORS[3],
-    "Payment Issues": COLORS[4],
-    "Reservation Documents": COLORS[5],
-    "SOA/ Buyer's Ledger": COLORS[6],
-    "Title and Other Registration Documents": COLORS[7],
-    "Turn Over Status": COLORS[8],
-    "Unit Status": COLORS[9],
-};
-// Function to get a unique color from COLORS if a category is missing from categoryColors 
-const getColor = (category, index) => {
-    if (categoryColors[category]) return categoryColors[category];
-    return COLORS[index % COLORS.length];
-};
-const SINGLE_COLOR = "#5B9BD5";
-
-const getCategoryColor = (categoryName) => {
-    return categoryColors[categoryName] || "#8884d8";
-};
-const CustomTooltip = ({ active, payload }) => {
-    if (active && payload && payload.length) {
-        const { name } = payload[0].payload;
+    const CustomTick = ({ x, y, payload }) => {
+        const words = payload.value.split(' '); // Split by spaces to handle word wrapping
         return (
-            <div className="bg-white p-2 shadow-lg rounded">
-                <p className="font-bold">{`${name}`}</p>
-                <p className="text-custom-solidgreen">{`Resolved: ${payload[0].value}`}</p>
-                <p className="text-custom-lightgreen">{`Unresolved: ${payload[1].value}`}</p>
-                <p className="text-red-500">{`Closed: ${payload[2].value}`}</p>
-            </div>
-        );
-    }
-
-    return null;
-};
-
-
-const CustomTooltipPieChart = ({ active, payload, label }) => {
-    if (active && payload && payload.length) {
-        return (
-            <div className="custom-tooltip bg-white p-3 rounded shadow-md">
-                {payload.map((entry, index) => (
-                    <div key={index} className="text-gray-700">
-                        <p className="font-bold">{`${entry.name}`}</p>
-                        <p>{`${formatPercentage(entry.value)}`}</p>
-                    </div>
+            <g transform={`translate(${x},${y})`}>
+                {words.map((word, index) => (
+                    <text
+                        key={index}
+                        x={0}
+                        y={index * 12} // Adjust the y position for each line of text
+                        textAnchor="middle"
+                        fontSize={10}
+                        fill="#000"
+                    >
+                        {word}
+                    </text>
                 ))}
-            </div>
+            </g>
         );
-    }
-
-    return null;
-};
+    };
 
 
 
-const CustomTooltip2 = ({ active, payload }) => {
-    if (active && payload && payload.length) {
-        return (
-            <div className="bg-white p-2 shadow-lg rounded">
-                {/*  <p>{`${payload[0].name}`}</p> */}
-                <p>{`Complaints: ${payload[0].value}`}</p>
-                <p>{`Requests: ${payload[1].value}`}</p>
-                <p>{`Inquiries: ${payload[2].value}`}</p>
-                <p>{`Suggestions or Recommendations: ${payload[3].value}`}</p>
-            </div>
-        );
-    }
 
-    return null;
-};
+    const categoryColors = {
+        "Commissions": COLORS[0],
+        "Leasing": COLORS[1],
+        "Loan Application": COLORS[2],
+        "Other Concerns": COLORS[3],
+        "Payment Issues": COLORS[4],
+        "Reservation Documents": COLORS[5],
+        "SOA/ Buyer's Ledger": COLORS[6],
+        "Title and Other Registration Documents": COLORS[7],
+        "Turn Over Status": COLORS[8],
+        "Unit Status": COLORS[9],
+    };
+    // Function to get a unique color from COLORS if a category is missing from categoryColors 
+    const getColor = (category, index) => {
+        if (categoryColors[category]) return categoryColors[category];
+        return COLORS[index % COLORS.length];
+    };
+    const SINGLE_COLOR = "#5B9BD5";
 
-const monthNames = {
-    "01": "January",
-    "02": "February",
-    "03": "March",
-    "04": "April",
-    "05": "May",
-    "06": "June",
-    "07": "July",
-    "08": "August",
-    "09": "September",
-    "10": "October",
-    "11": "November",
-    "12": "December",
-};
+    const getCategoryColor = (categoryName) => {
+        return categoryColors[categoryName] || "#8884d8";
+    };
+    const CustomTooltip = ({ active, payload }) => {
+        if (active && payload && payload.length) {
+            const { name } = payload[0].payload;
+            return (
+                <div className="bg-white p-2 shadow-lg rounded">
+                    <p className="font-bold">{`${name}`}</p>
+                    <p className="text-custom-solidgreen">{`Resolved: ${payload[0].value}`}</p>
+                    <p className="text-custom-lightgreen">{`Unresolved: ${payload[1].value}`}</p>
+                    <p className="text-red-500">{`Closed: ${payload[2].value}`}</p>
+                </div>
+            );
+        }
 
-const CustomTooltip1 = ({ active, payload, label }) => {
-    if (active && payload && payload.length) {
-        const monthName = monthNames[label] || label;
+        return null;
+    };
 
-        return (
-            <div className="custom-tooltip bg-white p-3 shadow-lg rounded-lg border border-gray-200">
-                <p className="font-bold text-lg text-gray-800">{monthName}</p>
-                <div className="mt-2">
-                   
-                    <p className="text-sm text-gray-600">
-                        <span className="text-custom-solidgreen">Resolved:</span> {payload[1].value}
-                    </p>
-                    <p className="text-sm text-gray-600">
-                        <span className="text-custom-lightgreen">Closed:</span> {payload[0].value}
-                    </p>
-                    <p className="text-sm text-gray-600">
-                        <span className="text-red-500 ">Unresolved:</span> {payload[2].value}
+
+    const CustomTooltipPieChart = ({ active, payload, label }) => {
+        if (active && payload && payload.length) {
+            return (
+                <div className="custom-tooltip bg-white p-3 rounded shadow-md">
+                    {payload.map((entry, index) => (
+                        <div key={index} className="text-gray-700">
+                            <p className="font-bold">{`${entry.name}`}</p>
+                            <p>{`${formatPercentage(entry.value)}`}</p>
+                        </div>
+                    ))}
+                </div>
+            );
+        }
+
+        return null;
+    };
+
+
+
+    const CustomTooltip2 = ({ active, payload }) => {
+        if (active && payload && payload.length) {
+            return (
+                <div className="bg-white p-2 shadow-lg rounded">
+                    {/*  <p>{`${payload[0].name}`}</p> */}
+                    <p>{`Complaints: ${payload[0].value}`}</p>
+                    <p>{`Requests: ${payload[1].value}`}</p>
+                    <p>{`Inquiries: ${payload[2].value}`}</p>
+                    <p>{`Suggestions or Recommendations: ${payload[3].value}`}</p>
+                </div>
+            );
+        }
+
+        return null;
+    };
+
+    const monthNames = {
+        "01": "January",
+        "02": "February",
+        "03": "March",
+        "04": "April",
+        "05": "May",
+        "06": "June",
+        "07": "July",
+        "08": "August",
+        "09": "September",
+        "10": "October",
+        "11": "November",
+        "12": "December",
+    };
+
+    const CustomTooltip1 = ({ active, payload, label }) => {
+        if (active && payload && payload.length) {
+            const monthName = monthNames[label] || label;
+
+            return (
+                <div className="custom-tooltip bg-white p-3 shadow-lg rounded-lg border border-gray-200">
+                    <p className="font-bold text-lg text-gray-800">{monthName}</p>
+                    <div className="mt-2">
+
+                        <p className="text-sm text-gray-600">
+                            <span className="text-custom-solidgreen">Resolved:</span> {payload[1].value}
+                        </p>
+                        <p className="text-sm text-gray-600">
+                            <span className="text-custom-lightgreen">Closed:</span> {payload[0].value}
+                        </p>
+                        <p className="text-sm text-gray-600">
+                            <span className="text-red-500 ">Unresolved:</span> {payload[2].value}
+                        </p>
+                    </div>
+                </div>
+            );
+        }
+
+        return null;
+    };
+
+
+    const CustomTooltip3 = ({ active, payload, label }) => {
+        if (active && payload && payload.length) {
+            const monthName = monthNames[label] || label;
+
+            return (
+                <div className="custom-tooltip bg-white p-3 shadow-lg rounded-lg border border-gray-200">
+                    <p className="font-bold text-lg text-gray-800">{monthName}</p>
+                    <div className="mt-2">
+                        <p className="text-sm text-gray-600">
+                            <span className="text-red-500">Complaint:</span> {payload[0].value}
+                        </p>
+                        <p className="text-sm text-gray-600">
+                            <span className="text-green-500">Request:</span> {payload[1].value}
+                        </p>
+                        <p className="text-sm text-gray-600">
+                            <span className="text-blue-500">Inquiry:</span> {payload[2].value}
+                        </p>
+                        <p className="text-sm text-gray-600">
+                            <span className="text-yellow-500">Suggestion:</span> {payload[3].value}
+                        </p>
+                    </div>
+                </div>
+            );
+        }
+
+        return null;
+    };
+
+
+    const CustomTooltipBar1 = ({ active, payload, label }) => {
+        if (active && payload && payload.length) {
+
+            const colorMapping = {
+                'Email': '#348017', // Green
+                'Call': '#70ad47', // Light green
+                'Walk-in': '#1A73E8', // Blue
+                'Website': '#5B9BD5', // Light blue
+                'Social Media': '#175d5f', // Dark green
+                'Branch Tablet': '#404B52', // Dark gray
+                'Internal Endorsement': '#a5a5a5' // Gray
+            };
+
+            const dataType = label; // Or use payload[0].name if `label` is not directly available
+
+            // Get the color corresponding to the data type
+            const color = colorMapping[dataType] || '#000000'; // Default to black if no color found
+
+            return (
+                <div
+                    className="custom-tooltip bg-white p-2 shadow-md rounded"
+                    style={{ borderLeft: `4px solid ${color}` }} // Color border
+                >
+                    <div className="flex items-center pr-3 gap-[11px]">
+                        <span
+                            className="flex h-[20px] items-center pb-1 text-2xl"
+                            style={{ color }} // Set the color of the dot
+                        >
+                            ●
+                        </span>
+                        <span className="text-custom-gray12 text-sm">{dataType}</span>
+                    </div>
+                    <p>
+                        Count:{" "}
+                        <span className="font-bold">
+                            {payload[0].value}
+                        </span>
                     </p>
                 </div>
-            </div>
-        );
-    }
+            );
+        }
 
-    return null;
-};
+        return null;
+    };
 
+    const CustomTooltipBar2 = ({ active, payload, label }) => {
+        if (active && payload && payload.length) {
 
-const CustomTooltip3 = ({ active, payload, label }) => {
-    if (active && payload && payload.length) {
-        const monthName = monthNames[label] || label;
+            const colorMapping = {
+                'Complaint': '#EB4444',
+                'Request': '#348017',
+                'Inquiry': '#1A73E8',
+                'Suggestion or Recommendation': '#E4EA3B',
 
-        return (
-            <div className="custom-tooltip bg-white p-3 shadow-lg rounded-lg border border-gray-200">
-                <p className="font-bold text-lg text-gray-800">{monthName}</p>
-                <div className="mt-2">
-                    <p className="text-sm text-gray-600">
-                        <span className="text-red-500">Complaint:</span> {payload[0].value}
-                    </p>
-                    <p className="text-sm text-gray-600">
-                        <span className="text-green-500">Request:</span> {payload[1].value}
-                    </p>
-                    <p className="text-sm text-gray-600">
-                        <span className="text-blue-500">Inquiry:</span> {payload[2].value}
-                    </p>
-                    <p className="text-sm text-gray-600">
-                        <span className="text-yellow-500">Suggestion:</span> {payload[3].value}
+            };
+
+            const dataType = label; // Or use payload[0].name if `label` is not directly available
+
+            // Get the color corresponding to the data type
+            const color = colorMapping[dataType] || '#000000'; // Default to black if no color found
+
+            return (
+                <div
+                    className="custom-tooltip bg-white p-2 shadow-md rounded"
+                    style={{ borderLeft: `4px solid ${color}` }} // Color border
+                >
+                    <div className="flex items-center pr-3 gap-[11px]">
+                        <span
+                            className="flex h-[20px] items-center pb-1 text-2xl"
+                            style={{ color }} // Set the color of the dot
+                        >
+                            ●
+                        </span>
+                        <span className="text-custom-gray12 text-sm">{dataType}</span>
+                    </div>
+                    <p>
+                        Count:{" "}
+                        <span className="font-bold">
+                            {payload[0].value}
+                        </span>
                     </p>
                 </div>
-            </div>
-        );
-    }
+            );
+        }
 
-    return null;
-};
-
-
-const CustomTooltipBar1 = ({ active, payload, label }) => {
-    if (active && payload && payload.length) {
-
-        const colorMapping = {
-            'Email': '#348017', // Green
-            'Call': '#70ad47', // Light green
-            'Walk-in': '#1A73E8', // Blue
-            'Website': '#5B9BD5', // Light blue
-            'Social Media': '#175d5f', // Dark green
-            'Branch Tablet': '#404B52', // Dark gray
-            'Internal Endorsement': '#a5a5a5' // Gray
-        };
-
-        const dataType = label; // Or use payload[0].name if `label` is not directly available
-
-        // Get the color corresponding to the data type
-        const color = colorMapping[dataType] || '#000000'; // Default to black if no color found
-
-        return (
-            <div
-                className="custom-tooltip bg-white p-2 shadow-md rounded"
-                style={{ borderLeft: `4px solid ${color}` }} // Color border
-            >
-                <div className="flex items-center pr-3 gap-[11px]">
-                    <span
-                        className="flex h-[20px] items-center pb-1 text-2xl"
-                        style={{ color }} // Set the color of the dot
-                    >
-                        ●
-                    </span>
-                    <span className="text-custom-gray12 text-sm">{dataType}</span>
-                </div>
-                <p>
-                    Count:{" "}
-                    <span className="font-bold">
-                        {payload[0].value}
-                    </span>
-                </p>
-            </div>
-        );
-    }
-
-    return null;
-};
-
-const CustomTooltipBar2 = ({ active, payload, label }) => {
-    if (active && payload && payload.length) {
-                                                            
-        const colorMapping = {
-            'Complaint': '#EB4444',
-            'Request': '#348017', 
-            'Inquiry': '#1A73E8', 
-            'Suggestion or Recommendation': '#E4EA3B', 
-            
-        };
-
-        const dataType = label; // Or use payload[0].name if `label` is not directly available
-
-        // Get the color corresponding to the data type
-        const color = colorMapping[dataType] || '#000000'; // Default to black if no color found
-
-        return (
-            <div
-                className="custom-tooltip bg-white p-2 shadow-md rounded"
-                style={{ borderLeft: `4px solid ${color}` }} // Color border
-            >
-                <div className="flex items-center pr-3 gap-[11px]">
-                    <span
-                        className="flex h-[20px] items-center pb-1 text-2xl"
-                        style={{ color }} // Set the color of the dot
-                    >
-                        ●
-                    </span>
-                    <span className="text-custom-gray12 text-sm">{dataType}</span>
-                </div>
-                <p>
-                    Count:{" "}
-                    <span className="font-bold">
-                        {payload[0].value}
-                    </span>
-                </p>
-            </div>
-        );
-    }
-
-    return null;
-};
+        return null;
+    };
 
 
 
@@ -401,22 +401,22 @@ const CustomTooltipBar2 = ({ active, payload, label }) => {
     const totalValuePieChart = dataCategory.reduce((acc, curr) => acc + curr.value, 0);
 
     const formatPercentage = (value) => ((value / totalValuePieChart) * 100).toFixed(2) + '%';
-  
+
 
     const renderCustomLabel = ({ x, y, value, index, payload, cx }) => {
         const percentage = formatPercentage(value);
         const name = payload.name;
-        
+
         // Adjust text alignment based on label's position relative to pie center
         const textAnchor = x > cx ? 'start' : 'end';
-    
+
         return (
-            <text 
-                x={x} 
-                y={y} 
-                fill="black" 
-                fontSize={20} 
-                textAnchor={textAnchor} 
+            <text
+                x={x}
+                y={y}
+                fill="black"
+                fontSize={20}
+                textAnchor={textAnchor}
                 dominantBaseline="middle"
             >
                 {`${percentage} ${name}`}
@@ -529,7 +529,7 @@ const CustomTooltipBar2 = ({ active, payload, label }) => {
 
     }, []);
 
-   
+
 
     /*  useEffect(() => {
          setMonth(getCurrentMonth());
@@ -748,7 +748,7 @@ const CustomTooltipBar2 = ({ active, payload, label }) => {
                         </span>
                         <span className="text-custom-gray12">Unresolved</span>
                     </div>
-                   
+
                 </div>
             </div>
             <div className="flex gap-[10px]">
@@ -1146,7 +1146,7 @@ const CustomTooltipBar2 = ({ active, payload, label }) => {
                         <div className="border border-t-1"></div>
                         <div className="flex flex-col">
                             <div className="flex justify-center">
-                                <PieChart width={648} height={630}>
+                                <PieChart width={1648} height={800}>
                                     <Pie
                                         data={dataCategory}
                                         cx="50%"
@@ -1161,24 +1161,20 @@ const CustomTooltipBar2 = ({ active, payload, label }) => {
                                         dataKey="value"
                                         startAngle={90}
                                         endAngle={450}
+                                        label={renderCustomLabel}
+                                        labelLine={true}
                                     >
                                         {dataCategory.map((entry, index) => (
                                             <Cell
                                                 key={index}
-                                                // fill={categoryColors[entry.name] || COLORS[index % COLORS.length]}
                                                 fill={getColor(entry.name, index)}
                                             />
                                         ))}
-                                        <LabelList
-                                            dataKey="value"
-                                            position="inside"
-                                            fill="white"
-                                            fontSize={20}
-                                           
-                                        />
-                                </Pie>
-                                <Tooltip content={<CustomTooltipPieChart />} />
-                            </PieChart>
+                                    </Pie>
+                                    <Tooltip content={<CustomTooltipPieChart />} />
+                                </PieChart>
+
+
                             </div>
                             <div className="flex justify-center w-full">
                                 <div className="flex w-[150px]"></div> {/* dummy div to align the chart */}
