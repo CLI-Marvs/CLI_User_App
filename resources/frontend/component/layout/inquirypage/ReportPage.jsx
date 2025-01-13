@@ -491,7 +491,6 @@ const CustomTooltipBar2 = ({ active, payload, label }) => {
         setProject(projectValue);
         setYear(yearValue);
         setMonth(monthValue);
-
     };
 
     useEffect(() => {
@@ -507,7 +506,7 @@ const CustomTooltipBar2 = ({ active, payload, label }) => {
 
     }, []);
 
-
+   
 
     /*  useEffect(() => {
          setMonth(getCurrentMonth());
@@ -937,24 +936,36 @@ const CustomTooltipBar2 = ({ active, payload, label }) => {
                         </p>
                         <div className="border border-t-1"></div>
                         <div className="flex-grow overflow-x-auto px-[10px] mt-[5px] pb-[50px]">
-                            <table class="table-auto border-collapse border border-gray-300 w-full text-sm text-left">
-                                <thead class="bg-gray-100">
+                            <table className="table-auto border-collapse border border-gray-300 w-full text-sm text-left">
+                                <thead className="bg-gray-100">
                                     <tr>
-                                        <th class="border border-gray-300 px-4 py-2 w-[300px]">Property</th>
-                                        <th class="border border-gray-300 px-4 py-2">Resolved</th>
-                                        <th class="border border-gray-300 px-4 py-2">Unresolved</th>
-                                        <th class="border border-gray-300 px-4 py-2">Closed</th>
+                                        <th className="border border-gray-300 px-4 py-2 w-[300px]">Property</th>
+                                        <th className="border border-gray-300 px-4 py-2">Resolved</th>
+                                        <th className="border border-gray-300 px-4 py-2">Unresolved</th>
+                                        <th className="border border-gray-300 px-4 py-2">Closed</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {dataProperty.map((item, index) => (
-                                        <tr class="hover:bg-gray-50" key={index}>
-                                            <td class="border border-gray-300 px-4 py-2">{item.name}</td>
-                                            <td class="border border-gray-300 px-4 py-2">{item.resolved}</td>
-                                            <td class="border border-gray-300 px-4 py-2">{item.unresolved}</td>
-                                            <td class="border border-gray-300 px-4 py-2">{item.closed}</td>
+                                        <tr className="hover:bg-gray-50" key={index}>
+                                            <td className="border border-gray-300 px-4 py-2">{item.name}</td>
+                                            <td className="border border-gray-300 px-4 py-2">{item.resolved}</td>
+                                            <td className="border border-gray-300 px-4 py-2">{item.unresolved}</td>
+                                            <td className="border border-gray-300 px-4 py-2">{item.closed}</td>
                                         </tr>
                                     ))}
+                                    <tr class="bg-gray-100 font-semibold">
+                                        <td class="border border-gray-300 px-4 py-2">Total</td>
+                                        <td class="border border-gray-300 px-4 py-2">
+                                            {dataProperty.reduce((sum, item) => sum + item.resolved, 0)}
+                                        </td>
+                                        <td class="border border-gray-300 px-4 py-2">
+                                            {dataProperty.reduce((sum, item) => sum + item.unresolved, 0)}
+                                        </td>
+                                        <td class="border border-gray-300 px-4 py-2">
+                                            {dataProperty.reduce((sum, item) => sum + item.closed, 0)}
+                                        </td>
+                                    </tr>
                                 </tbody>
                             </table>
                             {/*  <BarChart
@@ -1065,24 +1076,36 @@ const CustomTooltipBar2 = ({ active, payload, label }) => {
                         </p>
                         <div className="border border-t-1"></div>
                         <div className="flex-grow overflow-x-auto px-[10px] mt-[5px] pb-[50px]">
-                            <table class="table-auto border-collapse border border-gray-300 w-full text-sm text-left">
-                                <thead class="bg-gray-100">
+                            <table className="table-auto border-collapse border border-gray-300 w-full text-sm text-left">
+                                <thead className="bg-gray-100">
                                     <tr>
-                                        <th class="border border-gray-300 px-4 py-2 w-[300px]">Department</th>
-                                        <th class="border border-gray-300 px-4 py-2">Resolved</th>
-                                        <th class="border border-gray-300 px-4 py-2">Unresolved</th>
-                                        <th class="border border-gray-300 px-4 py-2">Closed</th>
+                                        <th className="border border-gray-300 px-4 py-2 w-[300px]">Department</th>
+                                        <th className="border border-gray-300 px-4 py-2">Resolved</th>
+                                        <th className="border border-gray-300 px-4 py-2">Unresolved</th>
+                                        <th className="border border-gray-300 px-4 py-2">Closed</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {dataDepartment.map((item, index) => (
-                                        <tr class="hover:bg-gray-50" key={index}>
-                                            <td class="border border-gray-300 px-4 py-2">{item.name}</td>
-                                            <td class="border border-gray-300 px-4 py-2">{item.resolved}</td>
-                                            <td class="border border-gray-300 px-4 py-2">{item.unresolved}</td>
-                                            <td class="border border-gray-300 px-4 py-2">{item.closed}</td>
+                                        <tr className="hover:bg-gray-50" key={index}>
+                                            <td className="border border-gray-300 px-4 py-2">{item.name}</td>
+                                            <td className="border border-gray-300 px-4 py-2">{item.resolved}</td>
+                                            <td className="border border-gray-300 px-4 py-2">{item.unresolved}</td>
+                                            <td className="border border-gray-300 px-4 py-2">{item.closed}</td>
                                         </tr>
                                     ))}
+                                    <tr class="bg-gray-100 font-semibold">
+                                        <td class="border border-gray-300 px-4 py-2">Total</td>
+                                        <td class="border border-gray-300 px-4 py-2">
+                                            {dataDepartment.reduce((sum, item) => sum + item.resolved, 0)}
+                                        </td>
+                                        <td class="border border-gray-300 px-4 py-2">
+                                            {dataDepartment.reduce((sum, item) => sum + item.unresolved, 0)}
+                                        </td>
+                                        <td class="border border-gray-300 px-4 py-2">
+                                            {dataDepartment.reduce((sum, item) => sum + item.closed, 0)}
+                                        </td>
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>
