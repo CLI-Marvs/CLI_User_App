@@ -1154,7 +1154,7 @@ const ReportPage = () => {
                                         outerRadius={300}
                                         innerRadius={0}
                                         paddingAngle={1}
-                                        strokeWidth={1}
+                                        strokeWidth={2}
                                         stroke="white"
                                         cornerRadius={0}
                                         fill="#8884d8"
