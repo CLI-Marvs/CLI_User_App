@@ -2014,7 +2014,7 @@ class ConcernController extends Controller
         $project = $request->property;
         $year = $request->year ?? Carbon::now()->year;
         $query = Concerns::select(
-            DB::raw("elem->>'department' AS department"),
+            DB::raw("jsonb_array_elements(assign_to::jsonb)->>'department' as department"),
             DB::raw('SUM(case when status = \'Resolved\' then 1 else 0 end) as Resolved'),
             DB::raw('SUM(case when status = \'unresolved\' then 1 else 0 end) as Unresolved'),
             DB::raw('SUM(case when status = \'Closed\' then 1 else 0 end) as Closed')
