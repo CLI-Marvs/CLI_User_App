@@ -28,7 +28,52 @@ import { get, set } from "lodash";
 
 const barHeight = 20;
 
-
+const ReportPage = () => {
+    const {
+        setMonth,
+        month,
+        setYear,
+        year,
+        setProject,
+        project,
+        fullYear,
+        getFullYear,
+        dataCategory,
+        fetchCategory,
+        dataProperty,
+        communicationTypeData,
+        getCommunicationTypePerProperty,
+        getInquiriesPerProperty,
+        getInquiriesPerDepartment,
+        dataDepartment,
+        setDataDepartment,
+        propertyMonth,
+        setPropertyMonth,
+        setCommunicationTypeMonth,
+        communicationTypeMonth,
+        user,
+        setDepartment,
+        department,
+        dataSet,
+        fetchDataReport,
+        allEmployees,
+        data,
+        setDepartmentStatusYear,
+        departmentStatusYear,
+        setInquiriesPerCategoryYear,
+        inquiriesPerCategoryYear,
+        setInquiriesPerPropertyYear,
+        inquiriesPerPropertyYear,
+        setCommunicationTypeYear,
+        communicationTypeYear,
+        inquiriesPerChanelYear,
+        setInquiriesPerChanelYear,
+        inquiriesPerChannelMonth,
+        setInquiriesPerChannelMonth,
+        getInquiriesPerChannel,
+        inquriesPerChannelData,
+        propertyNamesList
+    } = useStateContext();
 
 const colors = ["#348017", "#70AD47", "#1A73E8", "#5B9BD5", "#175D5F", "#404B52", "#A5A5A5"];
 const communicationColors = ["#EB4444", "#348017", "#1A73E8", "#E4EA3B"];
@@ -65,6 +110,9 @@ const CustomTick = ({ x, y, payload }) => {
         </g>
     );
 };
+
+
+
 
 const categoryColors = {
     "Commissions": COLORS[0],
@@ -112,7 +160,7 @@ const CustomTooltipPieChart = ({ active, payload, label }) => {
                 {payload.map((entry, index) => (
                     <div key={index} className="text-gray-700">
                         <p className="font-bold">{`${entry.name}`}</p>
-                        <p>{`Count: ${entry.value}`}</p>
+                        <p>{`${formatPercentage(entry.value)}`}</p>
                     </div>
                 ))}
             </div>
@@ -301,52 +349,7 @@ const CustomTooltipBar2 = ({ active, payload, label }) => {
 
 
 
-const ReportPage = () => {
-    const {
-        setMonth,
-        month,
-        setYear,
-        year,
-        setProject,
-        project,
-        fullYear,
-        getFullYear,
-        dataCategory,
-        fetchCategory,
-        dataProperty,
-        communicationTypeData,
-        getCommunicationTypePerProperty,
-        getInquiriesPerProperty,
-        getInquiriesPerDepartment,
-        dataDepartment,
-        setDataDepartment,
-        propertyMonth,
-        setPropertyMonth,
-        setCommunicationTypeMonth,
-        communicationTypeMonth,
-        user,
-        setDepartment,
-        department,
-        dataSet,
-        fetchDataReport,
-        allEmployees,
-        data,
-        setDepartmentStatusYear,
-        departmentStatusYear,
-        setInquiriesPerCategoryYear,
-        inquiriesPerCategoryYear,
-        setInquiriesPerPropertyYear,
-        inquiriesPerPropertyYear,
-        setCommunicationTypeYear,
-        communicationTypeYear,
-        inquiriesPerChanelYear,
-        setInquiriesPerChanelYear,
-        inquiriesPerChannelMonth,
-        setInquiriesPerChannelMonth,
-        getInquiriesPerChannel,
-        inquriesPerChannelData,
-        propertyNamesList
-    } = useStateContext();
+
 
     const [departmentValue, setDepartmentValue] = useState("All");
     const [projectValue, setProjectValue] = useState("All");
@@ -372,6 +375,32 @@ const ReportPage = () => {
             .replace(/\b\w/g, (char) => char.toUpperCase());
     };
 
+
+    const totalValuePieChart = dataCategory.reduce((acc, curr) => acc + curr.value, 0);
+
+    const formatPercentage = (value) => ((value / totalValuePieChart) * 100).toFixed(2) + '%';
+  
+
+    const renderCustomLabel = ({ x, y, value, index, payload, cx }) => {
+        const percentage = formatPercentage(value);
+        const name = payload.name;
+        
+        // Adjust text alignment based on label's position relative to pie center
+        const textAnchor = x > cx ? 'start' : 'end';
+    
+        return (
+            <text 
+                x={x} 
+                y={y} 
+                fill="black" 
+                fontSize={20} 
+                textAnchor={textAnchor} 
+                dominantBaseline="middle"
+            >
+                {`${percentage} ${name}`}
+            </text>
+        );
+    };
 
     const formattedPropertyNames = [
         "N/A",
@@ -463,7 +492,6 @@ const ReportPage = () => {
         setProject(projectValue);
         setYear(yearValue);
         setMonth(monthValue);
-
     };
 
     useEffect(() => {
@@ -479,7 +507,7 @@ const ReportPage = () => {
 
     }, []);
 
-
+   
 
     /*  useEffect(() => {
          setMonth(getCurrentMonth());
@@ -910,8 +938,8 @@ const ReportPage = () => {
                         </p>
                         <div className="border border-t-1"></div>
                         <div className="flex-grow overflow-x-auto px-[10px] mt-[5px] pb-[50px]">
-                            <table class="table-auto border-collapse border border-gray-300 w-full text-sm text-left">
-                                <thead class="bg-gray-100">
+                            <table className="table-auto border-collapse border border-gray-300 w-full text-sm text-left">
+                                <thead className="bg-gray-100">
                                     <tr>
                                         <th class="border border-gray-300 px-4 py-2 w-[300px]">Property</th>
                                         <th class="border border-gray-300 px-4 py-2">Resolved</th>
@@ -928,6 +956,18 @@ const ReportPage = () => {
                                             <td class="border border-gray-300 px-4 py-2">{item.unresolved}</td>
                                         </tr>
                                     ))}
+                                    <tr class="bg-gray-100 font-semibold">
+                                        <td class="border border-gray-300 px-4 py-2">Total</td>
+                                        <td class="border border-gray-300 px-4 py-2">
+                                            {dataProperty.reduce((sum, item) => sum + item.resolved, 0)}
+                                        </td>
+                                        <td class="border border-gray-300 px-4 py-2">
+                                            {dataProperty.reduce((sum, item) => sum + item.unresolved, 0)}
+                                        </td>
+                                        <td class="border border-gray-300 px-4 py-2">
+                                            {dataProperty.reduce((sum, item) => sum + item.closed, 0)}
+                                        </td>
+                                    </tr>
                                 </tbody>
                             </table>
                             {/*  <BarChart
@@ -1038,8 +1078,8 @@ const ReportPage = () => {
                         </p>
                         <div className="border border-t-1"></div>
                         <div className="flex-grow overflow-x-auto px-[10px] mt-[5px] pb-[50px]">
-                            <table class="table-auto border-collapse border border-gray-300 w-full text-sm text-left">
-                                <thead class="bg-gray-100">
+                            <table className="table-auto border-collapse border border-gray-300 w-full text-sm text-left">
+                                <thead className="bg-gray-100">
                                     <tr>
                                         <th class="border border-gray-300 px-4 py-2 w-[300px]">Department</th>
                                         <th class="border border-gray-300 px-4 py-2">Resolved</th>
@@ -1056,6 +1096,18 @@ const ReportPage = () => {
                                             <td class="border border-gray-300 px-4 py-2">{item.unresolved}</td>
                                         </tr>
                                     ))}
+                                    <tr class="bg-gray-100 font-semibold">
+                                        <td class="border border-gray-300 px-4 py-2">Total</td>
+                                        <td class="border border-gray-300 px-4 py-2">
+                                            {dataDepartment.reduce((sum, item) => sum + item.resolved, 0)}
+                                        </td>
+                                        <td class="border border-gray-300 px-4 py-2">
+                                            {dataDepartment.reduce((sum, item) => sum + item.unresolved, 0)}
+                                        </td>
+                                        <td class="border border-gray-300 px-4 py-2">
+                                            {dataDepartment.reduce((sum, item) => sum + item.closed, 0)}
+                                        </td>
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>
@@ -1071,38 +1123,33 @@ const ReportPage = () => {
                         <div className="border border-t-1"></div>
                         <div className="flex flex-col">
                             <div className="flex justify-center">
-                                <PieChart width={648} height={630}>
-                                    <Pie
-                                        data={dataCategory}
-                                        cx="50%"
-                                        cy="50%"
-                                        outerRadius={300}
-                                        innerRadius={0}
-                                        paddingAngle={1}
-                                        strokeWidth={1}
-                                        stroke="white"
-                                        cornerRadius={0}
-                                        fill="#8884d8"
-                                        dataKey="value"
-                                        startAngle={90}
-                                        endAngle={450}
-                                    >
-                                        {dataCategory.map((entry, index) => (
-                                            <Cell
-                                                key={index}
-                                                // fill={categoryColors[entry.name] || COLORS[index % COLORS.length]}
-                                                fill={getColor(entry.name, index)}
-                                            />
-                                        ))}
-                                        <LabelList
-                                            dataKey="value"
-                                            position="inside"
-                                            fill="white"
-                                            fontSize={20}
+                            <PieChart width={1650} height={700}>
+                                <Pie
+                                    data={dataCategory}
+                                    cx="50%"
+                                    cy="50%"
+                                    outerRadius={300}
+                                    innerRadius={0}
+                                    paddingAngle={1}
+                                    strokeWidth={2}
+                                    stroke="white"
+                                    cornerRadius={0}
+                                    fill="#8884d8"
+                                    dataKey="value"
+                                    startAngle={90}
+                                    endAngle={450}
+                                    label={renderCustomLabel}
+                                    labelLine={true}
+                                >
+                                    {dataCategory.map((entry, index) => (
+                                        <Cell
+                                            key={index}
+                                            fill={getColor(entry.name, index)}
                                         />
-                                    </Pie>
-                                    <Tooltip content={<CustomTooltipPieChart />} />
-                                </PieChart>
+                                    ))}
+                                </Pie>
+                                <Tooltip content={<CustomTooltipPieChart />} />
+                            </PieChart>
                             </div>
                             <div className="flex justify-center w-full">
                                 <div className="flex w-[150px]"></div> {/* dummy div to align the chart */}
