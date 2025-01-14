@@ -1203,12 +1203,12 @@ const ReportPage = () => {
                                                     </span>
                                                 </div>
                                                 <div className="flex items-center gap-1">
-                                                    <span className="text-gray-700 font-bold text-sm">
+                                                    <span className="text-gray-500 font-bold text-sm">
                                                         {`${((category.value / totalValue) * 100).toFixed(2)}%`}
                                                     </span>
-                                                    {/*  <span className="text-custom-gray81 text-[10px]">
-                                                        {category.value ? "%" : ""}
-                                                    </span> */}
+                                                     <span className="text-gray-500 font-bold text-sm">
+                                                        {"("}{category.value}{")"}
+                                                    </span>
                                                 </div>
                                             </div>
                                         </div>
