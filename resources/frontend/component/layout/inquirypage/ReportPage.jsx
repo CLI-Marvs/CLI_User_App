@@ -918,7 +918,9 @@ const ReportPage = () => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {dataProperty.map((item, index) => (
+                                    {dataProperty
+                                    .filter((item) => item.name !== null && item.name !== undefined) 
+                                    .map((item, index) => (
                                         <tr class="hover:bg-gray-50" key={index}>
                                             <td class="border border-gray-300 px-4 py-2">{item.name}</td>
                                             <td class="border border-gray-300 px-4 py-2">{item.resolved}</td>
@@ -1046,7 +1048,9 @@ const ReportPage = () => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {dataDepartment.map((item, index) => (
+                                    {dataDepartment
+                                    .filter((item) => item.name !== null && item.name !== undefined) 
+                                    .map((item, index) => (
                                         <tr class="hover:bg-gray-50" key={index}>
                                             <td class="border border-gray-300 px-4 py-2">{item.name}</td>
                                             <td class="border border-gray-300 px-4 py-2">{item.resolved}</td>

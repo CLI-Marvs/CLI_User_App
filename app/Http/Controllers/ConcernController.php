@@ -2013,13 +2013,12 @@ class ConcernController extends Controller
         $month = $request->month;
         $project = $request->property;
         $year = $request->year ?? Carbon::now()->year;
-        $query = DB::table(
-            DB::raw("(SELECT jsonb_array_elements(assign_to::jsonb)->>'department' AS department, status FROM concerns) AS sub"))
-        ->select(
-            'department',
-            DB::raw('SUM(CASE WHEN status = \'Resolved\' THEN 1 ELSE 0 END) as Resolved'),
-            DB::raw('SUM(CASE WHEN status = \'Unresolved\' THEN 1 ELSE 0 END) as Unresolved'),
-            DB::raw('SUM(CASE WHEN status = \'Closed\' THEN 1 ELSE 0 END) as Closed')
+        $query = Concerns::select(
+            DB::raw("jsonb_array_elements(assign_to::jsonb)->>'department' as department"),
+            DB::raw('SUM(case when status = \'Resolved\' then 1 else 0 end) as Resolved'),
+            DB::raw('SUM(case when status = \'unresolved\' then 1 else 0 end) as Unresolved'),
+            DB::raw('SUM(case when status = \'Closed\' then 1 else 0 end) as Closed')
+
         )
             ->whereYear('created_at', $year)
             ->whereNotNull('status');
