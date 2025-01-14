@@ -235,10 +235,10 @@ const ReportPage = () => {
                     <div className="mt-2">
 
                         <p className="text-sm text-gray-600">
-                            <span className="text-custom-solidgreen">Resolved:</span> {payload[1].value}
+                            <span className="text-custom-solidgreen">Resolved:</span> {payload[0].value}
                         </p>
                         <p className="text-sm text-gray-600">
-                            <span className="text-custom-lightgreen">Closed:</span> {payload[0].value}
+                            <span className="text-custom-lightgreen">Closed:</span> {payload[1].value}
                         </p>
                         <p className="text-sm text-gray-600">
                             <span className="text-red-500 ">Unresolved:</span> {payload[2].value}
