@@ -1111,14 +1111,17 @@ const ReportPage = () => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {dataDepartment.map((item, index) => (
-                                        <tr className="hover:bg-gray-50" key={index}>
-                                            <td className="border border-gray-300 px-4 py-2">{item.name}</td>
-                                            <td className="border border-gray-300 px-4 py-2">{item.resolved}</td>
-                                            <td className="border border-gray-300 px-4 py-2">{item.closed}</td>
-                                            <td className="border border-gray-300 px-4 py-2">{item.unresolved}</td>
-                                        </tr>
-                                    ))}
+                                    {dataDepartment
+                                        .slice() // Create a copy to avoid mutating the original array
+                                        .sort((a, b) => a.name.localeCompare(b.name)) // Sort alphabetically by name
+                                        .map((item, index) => (
+                                            <tr className="hover:bg-gray-50" key={index}>
+                                                <td className="border border-gray-300 px-4 py-2">{item.name}</td>
+                                                <td className="border border-gray-300 px-4 py-2">{item.resolved}</td>
+                                                <td className="border border-gray-300 px-4 py-2">{item.closed}</td>
+                                                <td className="border border-gray-300 px-4 py-2">{item.unresolved}</td>
+                                            </tr>
+                                        ))}
                                     <tr className="bg-gray-100 font-semibold">
                                         <td className="border border-gray-300 px-4 py-2">Total</td>
                                         <td className="border border-gray-300 px-4 py-2">
