@@ -56,6 +56,21 @@ const InquiryList = () => {
     const filterBoxRef = useRef(null);
     const [isOpenSelect, setIsOpenSelect] = useState(false);
 
+    const [resultSearchActive, setResultSearchActive] = useState(false);
+    const [resultName, setResultName] = useState("");
+    const [resultCategory, setResultCategory] = useState("");
+    const [resultType, setResultType] = useState("");
+    const [resultStatus, setResultStatus] = useState("");
+    const [resultEmail, setResultEmail] = useState("");
+    const [resultTicket, setResultTicket] = useState("");
+    const [resultChannels, setResultChannels] = useState("");
+    const [resultStartDate, setResultStartDate] = useState("");
+    const [resultSelectedProperty, setResultSelectedProperty] = useState("");
+    const [resultHasAttachments, setResultHasAttachments] = useState("");
+    const [resultYear, setResultYear] = useState("");
+    const [resultMonth, setResultMonth] = useState("");
+
+
     const handleSelect = (option) => {
         onChange(option);
         setIsOpenSelect(false);
@@ -272,6 +287,17 @@ const InquiryList = () => {
     };
 
     const handleSearch = () => {
+        setResultSearchActive(true);
+        setResultName(name);
+        setResultCategory(category);
+        setResultType(type);
+        setResultStatus(status);
+        setResultEmail(email);
+        setResultChannels(channels);
+        setResultTicket(ticket);
+        setResultStartDate(startDate);
+        setResultSelectedProperty(selectedProperty);
+        setResultHasAttachments(hasAttachments);
         setSearchFilter({
             name,
             category,
@@ -698,6 +724,14 @@ const InquiryList = () => {
                     {/*  <div className="flex items-center">
                         <button onClick={handleOpenModal} className='h-[38px] w-[121px] gradient-btn5 text-white  text-xs rounded-[10px]'> <span className='text-[18px]'>+</span> Add Inquiry</button>
                     </div> */}
+                    <div className="flex flex-col gap-1 p-2">
+                        <div className="flex text-sm">
+                            <p>Search Result for :</p>
+                        </div>
+                        <div className="flex text-sm">
+                            <p>Results Found</p>
+                        </div>
+                    </div>
                 </div>
                 <div className="max-w-[1260px] ">
                     <div className="flex justify-between items-center h-12 mt-[15px] px-6 bg-white rounded-t-lg mb-1 ">
