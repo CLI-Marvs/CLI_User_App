@@ -7,7 +7,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import DateLogo from "../../../../../../public/Images/Date_range.svg";
 import { useStateContext } from "../../../../context/contextprovider";
 import AddPricingModal from "./AddPricingModal";
-import AddPropertyModal from "../basicpricing/modals/AddPropertyModal";
+import AddPropertyModal from "../basicpricing/modals/Property/AddPropertyModal";
 import { json } from "react-router-dom";
 import moment from "moment";
 import { useNavigate } from "react-router-dom";

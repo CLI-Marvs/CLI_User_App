@@ -30,10 +30,10 @@ class PriceBasicDetailController extends Controller
             // // Create or update basic pricing
             // $basicPricing = $this->createOrUpdateBasicPricing($request, $priceListSetting->id,  $floorPremiumId, $propertyId);
 
-            // // Create price master list
+            // Create price master list
             $this->createPriceMasterList($priceBasic->id, $request);
 
-            // // Return success response
+            // Return success response
             return response()->json(['message' => 'Basic pricing created successfully'], 201);
         } catch (\Exception $e) {
             // Handle any exceptions and return error response
@@ -71,7 +71,6 @@ class PriceBasicDetailController extends Controller
     private function createOrUpdatePriceBasicDetails($request)
     {
         $priceListData = $request->input('priceList');
-        //dd($priceListSettings);
         // Validate and handle the price list data
         $priceListSetting = new PriceBasicDetails();
         $priceListSetting->base_price = $priceListData['basePrice'];
@@ -117,6 +116,9 @@ class PriceBasicDetailController extends Controller
         $priceMasterList->property_masters_id = $priceListData['propertyId'];
         $priceMasterList->emp_id = $empId;
         $priceMasterList->status = $priceListData['status'];
+       
         $priceMasterList->save();
+        // Now set 'date_last_update' to the updated 'updated_at'
+      
     }
 }

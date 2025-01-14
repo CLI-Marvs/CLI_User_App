@@ -1,15 +1,35 @@
 import React, { useEffect, useState } from "react";
 import { IoIosArrowDown } from "react-icons/io";
 import { useStateContext } from "../../../../../context/contextprovider";
-
+import { usePaymentSchemeStateContext } from '../../../../../context/PaymentScheme/PaymentSchemeContext'
 const PaymentSchemes = () => {
     //State
     const [accordionOpen, setAccordionOpen] = useState(false);
-    const { paymentSchemes, setPaymentSchemes, getPaymentSchemes } =
-        useStateContext();
+    const {
+        paymentSchemes,
+        setPaymentSchemes,
+        getPaymentSchemes,
+        formDataState,
+    } = useStateContext();
+    const { setPaymentSchemeFormData } = usePaymentSchemeStateContext();
+    const [selectedPaymentScheme, setSelectedPaymentScheme] = useState([]);
+    // console.log("selectedPaymentScheme", selectedPaymentScheme);
+    // console.log("paymentSchemes", paymentSchemes);
+
     //Hooks
 
-    // useEffect(() => {}, []);
+    //Event Handler
+    const handlePaymentSchemeSelect = (id) => {
+        setSelectedPaymentScheme((prevSelectedPaymentScheme) => {
+            if (prevSelectedPaymentScheme.includes(id)) {
+                // Deselect unit if it's already selected
+                return prevSelectedPaymentScheme.filter((paymentSchemeId) => paymentSchemeId !== id);
+            } else {
+                // Select the new unit by adding its ID
+                return [...prevSelectedPaymentScheme, id];
+            }
+        });
+    }
     return (
         <>
             <div
@@ -62,11 +82,17 @@ const PaymentSchemes = () => {
                     <div className="p-[20px] flex flex-wrap items-center gap-[20px]">
                         {paymentSchemes &&
                             paymentSchemes.map((item, index) => (
-                                <div className="w-[240px] p-[20px]   rounded-[10px]">
+                                <div
+                                    className="w-[240px] p-[20px]   rounded-[10px]"
+                                    key={index}
+                                >
                                     <div className="flex items-center gap-[15px] h-[36px] w-full mb-[10px]">
                                         <input
                                             type="checkbox"
                                             className="h-[16px] w-[16px] ml-[16px] rounded-[2px] appearance-none border border-gray-400 checked:bg-transparent flex items-center justify-center checked:before:bg-black checked:before:w-[12px] checked:before:h-[12px] checked:before:block checked:before:content-['']"
+                                            onChange={() =>
+                                                handlePaymentSchemeSelect(item.id)
+                                            }
                                         />
                                         <p className="montserrat-semibold text-[21px]">
                                             {item?.payment_scheme_name}

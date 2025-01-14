@@ -381,27 +381,28 @@ const App = () => {
                             ],
                         },
                         {
-                            path: "propertyandpricing",
+                            //TODO: add permission here
+                            path: "property-and-pricing",
                             element: <PropertyAndPricingLayout />,
                             children: [
                                 {
-                                    path: "pricingmasterlist",
+                                    path: "pricing-master-list",
                                     element: <PricingMasterListView />,
                                 },
                                 {
-                                    path: "basicpricing/:id",
+                                    path: "basic-pricing/:id",
                                     element: <BasicPricingView />,
                                 },
                                 {
-                                    path: "paymentscheme",
+                                    path: "payment-scheme",
                                     element: <PaymentSchemeView />,
                                 },
                                 {
-                                    path: "priceversioning",
+                                    path: "price-versioning",
                                     element: <PriceVersioningView />,
                                 },
                                 {
-                                    path: "promotionalPricing",
+                                    path: "promotional-pricing",
                                     element: <PromotionalPricingView />,
                                 },
                             ],

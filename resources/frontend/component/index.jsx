@@ -6,6 +6,7 @@ import PriceBasicDetailsFormDataProvider from "../context/PriceBasicDetail/Price
 import FloorPremiumFormDataProvider from "../context/FloorPremium/FloorPremiumContext";
 import { ToastContainer } from "react-toastify";
 
+import PaymentSchemeFormDataProvider from "../context/PaymentScheme/PaymentSchemeContext";
 const rootElement = document.getElementById("root");
 
 if (rootElement) {
@@ -16,7 +17,9 @@ if (rootElement) {
                 <App />
                 {/* <PriceBasicDetailsFormDataProvider>
                     <FloorPremiumFormDataProvider>
-                        
+                        <PaymentSchemeFormDataProvider>
+                            <App />
+                        </PaymentSchemeFormDataProvider>
                     </FloorPremiumFormDataProvider>
                 </PriceBasicDetailsFormDataProvider> */}
             </ContextProvider>

@@ -115,19 +115,47 @@ Route::middleware('auth:sanctum')->group(function () {
   Route::post('/isread/{concernId}', [ConcernController::class, 'readNotifByUser']);
   Route::get('/specific-assignee', [ConcernController::class, 'getSpecificInquiry']);
   Route::post('/remove-assignee', [ConcernController::class, 'removeAssignee']);
-  Route::get('/property-name', [PropertyMasterController::class, 'getPropertyName']);
   /* Download the file attachment */
   Route::post('/download-file', [ConcernController::class, 'downloadFileFromGCS']);
   /* Pricing Master List */
   Route::get('/get-pricing-master-lists', [PriceListMasterController::class, 'getAllPricingMasterLists']);
   /*Basic Pricing */
   Route::post('/basic-pricing', [PriceBasicDetailController::class, 'storeBasicPricing']);
-  /*Payment Scheme */
-  Route::post('/payment-schemes', [PaymentSchemeController::class, 'storePaymentScheme']);
-  Route::get('/get-payment-schemes', [PaymentSchemeController::class, 'getAllPaymentSchemes']);
+
+
   /* Property Master */
-  Route::post('/property-details', [PropertyMasterController::class, 'storePropertyDetail']);
-  Route::get('/get-property-master/{id}', [PropertyMasterController::class, 'getPropertyMaster']);
+  // Route::post('/property-details', [PropertyMasterController::class, 'storePropertyDetail']);
+   Route::get('/get-property-master/{id}', [PropertyMasterController::class, 'getPropertyMaster']);
+
+
+
+  /*Property Data*/
+  Route::prefix('properties')->group(function () {
+    // Get property names  
+    Route::get('names', [PropertyMasterController::class, 'names']);
+
+    // Store property details
+    Route::post('/', [PropertyMasterController::class, 'store']);
+      
+    // Get single property
+    Route::get('{property}', [PropertyMasterController::class, 'show']);
+     
+  });
+
+
+
+  /*Payment Scheme */
+  Route::prefix('payment-schemes')->group(function () {
+    // Get list of all payment schemes
+    Route::get('/', [PaymentSchemeController::class, 'index']);
+
+    // Store payment scheme
+    Route::post('/', [PaymentSchemeController::class, 'store']);
+  });
+
+  // Route::post('/payment-schemes', [PaymentSchemeController::class, 'storePaymentScheme']);
+  // Route::get('/get-payment-schemes', [PaymentSchemeController::class, 'getAllPaymentSchemes']);
+  
 
   /* Unit */
   // Route::post('/units-import', [UnitController::class, 'importUnitsFromExcel']);

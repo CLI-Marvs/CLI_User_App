@@ -1,23 +1,42 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import ReactPaginate from "react-paginate";
 import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md";
 import AddPaymentSchemeModal from "./AddPaymentSchemeModal";
-import { useStateContext } from "../../../../context/contextprovider";
+
 import moment from "moment";
+import { paymentSchemeService } from '@/component/servicesApi/apiCalls/propertyPricing/paymentScheme/paymentSchemeService';
 
 const PaymentScheme = () => {
     //State
-    const { paymentSchemes, setPaymentSchemes, getPaymentSchemes } =
-        useStateContext();
     const modalRef = useRef(null);
+    const [paymentSchemes, setPaymentSchemes] = useState([]);
+
+
+    //Hooks
+    useEffect(() => {
+        fetchPaymentSchemes();
+    }, []);
+
+
+    //Event handler
+    //Get all payment schemes
+    const fetchPaymentSchemes = async () => {
+        try {
+            const response = await paymentSchemeService.getPaymentSchemes();
+            setPaymentSchemes(response.data);
+        } catch (error) {
+            console.error("Error fetching payment schemes:", error);
+        }
+    };
+
+    //Handle open the Add Payment modal
     const handleOpenModal = () => {
         if (modalRef.current) {
             modalRef.current.showModal();
         }
     };
-    useEffect(() => {
-        getPaymentSchemes();
-    }, []);
+
+
     return (
         <div className="h-screen max-w-[1800px] bg-custom-grayFA px-4">
             <div className="">
@@ -56,14 +75,15 @@ const PaymentScheme = () => {
                             </th>
                         </tr>
                     </thead>
-                    <tbody className="mt-{10px} rounded-[10px]">
+                    <tbody className="mt-{10px} rounded-[10px] shadow-md">
+                        {/* TODO: add skeleton here */}
                         {paymentSchemes &&
                             paymentSchemes.map((item, index) => (
                                 <tr
-                                    className="flex min-h-[68px]  shadow-custom4 text-sm justify-start gap-[30px] px-[12px]  rounded-t-[10px]"
+                                    className="flex min-h-[68px]  text-sm justify-start gap-[30px] px-[12px] even:bg-custombg3"
                                     key={index}
                                 >
-                                    <td className="flex flex-col justify-center w-[100px] pr-3 py-3">
+                                    <td className="flex flex-col justify-center w-[100px] pr-3 py-3 " colSpan="100%">
                                         <p className="font-bold text-custom-solidgreen ">
                                             {item?.status}
                                         </p>
@@ -86,12 +106,12 @@ const PaymentScheme = () => {
                                         <p>{item?.downpayment_installment}%</p>
                                         {item?.number_months_downpayment >
                                             0 && (
-                                            <p>
-                                                (
-                                                {item.number_months_downpayment}{" "}
-                                                mos)
-                                            </p>
-                                        )}
+                                                <p>
+                                                    (
+                                                    {item.number_months_downpayment}
+                                                    mos)
+                                                </p>
+                                            )}
                                     </td>
 
                                     <td className="flex items-center w-[120px]">
@@ -222,11 +242,14 @@ const PaymentScheme = () => {
                     pageLinkClassName="w-full h-full flex justify-center items-center"
                     activeLinkClassName="w-full h-full flex justify-center items-center"
                     disabledLinkClassName={"text-gray-300 cursor-not-allowed"}
-                    /* forcePage={currentPage} */
+                /* forcePage={currentPage} */
                 />
             </div>
             <div>
-                <AddPaymentSchemeModal modalRef={modalRef} />
+                <AddPaymentSchemeModal
+                    onSubmitSuccess={fetchPaymentSchemes}
+                    modalRef={modalRef}
+                />
             </div>
         </div>
     );

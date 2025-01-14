@@ -6,7 +6,7 @@ import PriceVersions from "./accordion/PriceVersions";
 import PaymentSchemes from "./accordion/PaymentSchemes";
 import ReviewsandApprovalRouting from "./accordion/ReviewsandApprovalRouting";
 import FloorPremiums from "./accordion/FloorPremiums";
-import AddPropertyModal from "./modals/AddPropertyModal";
+import AddPropertyModal from "./modals/Property/AddPropertyModal";
 import { Form, useLocation } from "react-router-dom";
 import UploadUnitDetailsModal from "./modals/UploadUnitDetailsModal";
 import { usePriceBasicDetailStateContext } from "../../../../context/PriceBasicDetail/PriceBasicContext";
@@ -16,8 +16,8 @@ import apiService from "../../../servicesApi/apiService";
 import expectedHeaders from "../../../../constant/data/excelHeader";
 import * as XLSX from "xlsx";
 import { useNavigate } from "react-router-dom";
-import { useParams } from "react-router-dom";
-const BasicPricing = ({ props }) => {
+
+const BasicPricing = () => {
     //State
     const {
         priceBasicDetailsFormData,
@@ -96,6 +96,7 @@ const BasicPricing = ({ props }) => {
 
             // Notify user if missing headers are found
             if (missingHeaders.length > 0) {
+                //TODO: Convert this into Toast
                 alert(
                     `Please check your Excel header row.\nMissing Headers: ${missingHeaders.join(
                         ", "
@@ -107,6 +108,7 @@ const BasicPricing = ({ props }) => {
 
             // Notify user if extra headers are found, but continue with expected headers
             if (extraHeaders.length > 0) {
+                //TODO: Convert this into Toast
                 alert(
                     `Please check your Excel header row.\nExtra Headers: ${extraHeaders.join(
                         ", "
@@ -187,7 +189,7 @@ const BasicPricing = ({ props }) => {
                         },
                     }
                 );
-
+                //TODO: Convert this into Toast
                 alert(response.data.message);
                 // Reset form data
                 // setTimeout(() => {
@@ -219,7 +221,7 @@ const BasicPricing = ({ props }) => {
             reservationFee: priceListData.reservationFee,
             status: passedStatus,
         };
-    }; 
+    };
     const buildFloorPremiumPayload = (validFloorPremiums) => {
         return validFloorPremiums.map((floor) => ({
             floor: floor.floor,
@@ -227,7 +229,7 @@ const BasicPricing = ({ props }) => {
             luckyNumber: floor.luckyNumber,
             excludedUnits: floor.excludedUnits,
         }));
-    }; 
+    };
 
     return (
         <div className="h-screen max-w-[957px] min-w-[897px] bg-custom-grayFA px-[30px] ">
