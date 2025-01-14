@@ -985,10 +985,10 @@ const ReportPage = () => {
                                             {dataProperty.reduce((sum, item) => sum + item.resolved, 0)}
                                         </td>
                                         <td className="border border-gray-300 px-4 py-2">
-                                            {dataProperty.reduce((sum, item) => sum + item.unresolved, 0)}
+                                            {dataProperty.reduce((sum, item) => sum + item.closed, 0)}
                                         </td>
                                         <td className="border border-gray-300 px-4 py-2">
-                                            {dataProperty.reduce((sum, item) => sum + item.closed, 0)}
+                                            {dataProperty.reduce((sum, item) => sum + item.unresolved, 0)}
                                         </td>
                                     </tr>
                                 </tbody>
@@ -1125,10 +1125,10 @@ const ReportPage = () => {
                                             {dataDepartment.reduce((sum, item) => sum + item.resolved, 0)}
                                         </td>
                                         <td className="border border-gray-300 px-4 py-2">
-                                            {dataDepartment.reduce((sum, item) => sum + item.unresolved, 0)}
+                                            {dataDepartment.reduce((sum, item) => sum + item.closed, 0)}
                                         </td>
                                         <td className="border border-gray-300 px-4 py-2">
-                                            {dataDepartment.reduce((sum, item) => sum + item.closed, 0)}
+                                            {dataDepartment.reduce((sum, item) => sum + item.unresolved, 0)}
                                         </td>
                                     </tr>
                                 </tbody>
