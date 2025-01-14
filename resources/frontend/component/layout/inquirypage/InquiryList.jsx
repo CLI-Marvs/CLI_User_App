@@ -318,6 +318,8 @@ const InquiryList = () => {
         setSelectedProperty("");
         setHasAttachments(false);
         setSpecificAssigneeCsr("");
+        setSelectedYear("");
+        setSelectedMonth("");
     };
 
     useEffect(() => {
