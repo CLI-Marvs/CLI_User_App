@@ -657,7 +657,7 @@ const ReportPage = () => {
                     </div>
                 </div>
                 <div>
-                    <button onClick={handleSearchFilter} className="hover:shadow-custom4 bg-custom-lightgreen text-white rounded-[6px] px-4 py-1 font-semibold">
+                    <button onClick={handleSearchFilter} className="hover:shadow-custom4 h-[35px] w-[88px] gradient-btn rounded-[10px] text-white text-sm">
                         Search
                     </button>
                 </div>
