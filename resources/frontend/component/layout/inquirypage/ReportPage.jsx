@@ -595,35 +595,7 @@ const ReportPage = () => {
                         </span>
                     </div>
                 </div>
-                <div className="flex gap-[10px]">
-                    <div className="flex w-[550px] items-center border border-custom-lightgreen rounded-[5px] overflow-hidden shrink-0">
-                        <span className="text-white text-sm h-full bg-custom-lightgreen flex items-center w-[110px] -mr-3 pl-3 py-1 shrink-0">
-                            Department
-                        </span>
-                        <div className="relative w-full">
-                            <select
-                                name="concern"
-                                className="appearance-none w-full px-4 py-1 bg-white focus:outline-none border-0"
-                                value={departmentValue}
-                                onChange={(e) => setDepartmentValue(e.target.value)}
-                            >
-                                {user?.department === "Customer Relations - Services" ? (
-                                    allDepartment.map((item, index) => (
-                                        <option key={index} value={item}>
-                                            {item}
-                                        </option>
-                                    ))
-                                ) : (
-                                    <option value={user?.department}>
-                                        {user?.department}
-                                    </option>
-                                )}
-                            </select>
-                            <span className="absolute inset-y-0 right-0 flex items-center text-white pr-3 pl-3 bg-custom-lightgreen pointer-events-none">
-                                <IoMdArrowDropdown />
-                            </span>
-                        </div>
-                    </div>
+                <div className="flex gap-[10px] flex-wrap">
                     <div className="flex w-[388px] items-center border border-custom-lightgreen rounded-[5px] overflow-hidden shrink-0">
                         <span className="text-white text-sm h-full bg-custom-lightgreen flex items-center w-[76px] px-[15px] -mr-3 pl-3 py-1 shrink-0">
                             Project
@@ -655,6 +627,35 @@ const ReportPage = () => {
                             </span>
                         </div>
                     </div>
+                    <div className="flex w-[550px] items-center border border-custom-lightgreen rounded-[5px] overflow-hidden shrink-0">
+                        <span className="text-white text-sm h-full bg-custom-lightgreen flex items-center w-[110px] -mr-3 pl-3 py-1 shrink-0">
+                            Department
+                        </span>
+                        <div className="relative w-full">
+                            <select
+                                name="concern"
+                                className="appearance-none w-full px-4 py-1 bg-white focus:outline-none border-0"
+                                value={departmentValue}
+                                onChange={(e) => setDepartmentValue(e.target.value)}
+                            >
+                                {user?.department === "Customer Relations - Services" ? (
+                                    allDepartment.map((item, index) => (
+                                        <option key={index} value={item}>
+                                            {item}
+                                        </option>
+                                    ))
+                                ) : (
+                                    <option value={user?.department}>
+                                        {user?.department}
+                                    </option>
+                                )}
+                            </select>
+                            <span className="absolute inset-y-0 right-0 flex items-center text-white pr-3 pl-3 bg-custom-lightgreen pointer-events-none">
+                                <IoMdArrowDropdown />
+                            </span>
+                        </div>
+                    </div>
+
                 </div>
                 <div>
                     <button onClick={handleSearchFilter} className="hover:shadow-custom4 bg-custom-lightgreen text-white rounded-[6px] px-4 py-1 font-semibold">
@@ -665,7 +666,7 @@ const ReportPage = () => {
             <div className="bg-[#F2F8FC] p-4 rounded-[10px]">
                 <div className=" mb-2">
                     <p className="text-lg montserrat-bold">
-                        Resolved vs. Unresolved vs. Closed Chart
+                        Resolved vs. Unresolved vs. Closed
                     </p>
                 </div>
                 <div className="overflow-x-auto mt-[40px]">
@@ -754,7 +755,7 @@ const ReportPage = () => {
             <div className="flex gap-[10px]">
                 <div className=" w-[579px] pb-7 min-h-[335px] flex-grow-1 bg-[#F2F8FC] rounded-lg">
                     <p className="p-4  text-base montserrat-bold">
-                        Inquiries Per Type
+                        By Type
                     </p>
                     <div className="border border-t-1"></div>
                     <div className="flex-grow mt-[40px]">
@@ -839,7 +840,7 @@ const ReportPage = () => {
                 </div>
                 <div className="w-[571px] pb-7  flex-grow-1 bg-[#F2F8FC] rounded-lg">
                     <p className="p-4 text-base montserrat-bold">
-                        Per Channel
+                        By Channel
                     </p>
                     <div className="border border-t-1"></div>
                     <div className="mt-4"></div>
@@ -953,11 +954,11 @@ const ReportPage = () => {
                     </div>
                 </div>
             </div>
-            <div className="relative flex gap-3 mt-[10px]  items-start">
+            <div className="relative flex gap-3 mt-[6px]  items-start">
                 <div className="flex flex-col gap-3">
                     <div className=" bg-whiterounded-[10px] bg-[#F2F8FC] w-[579px] flex flex-col overflow-y-auto">
                         <p className="p-4  text-base montserrat-bold">
-                            Per Property
+                            By Property
                         </p>
                         <div className="border border-t-1"></div>
                         <div className="flex-grow overflow-x-auto px-[10px] mt-[5px] pb-[50px]">
@@ -971,14 +972,21 @@ const ReportPage = () => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {dataProperty.map((item, index) => (
-                                        <tr className="hover:bg-gray-50" key={index}>
-                                            <td className="border border-gray-300 px-4 py-2">{item.name}</td>
-                                            <td className="border border-gray-300 px-4 py-2">{item.resolved}</td>
-                                            <td className="border border-gray-300 px-4 py-2">{item.closed}</td>
-                                            <td className="border border-gray-300 px-4 py-2">{item.unresolved}</td>
-                                        </tr>
-                                    ))}
+                                    {dataProperty
+                                        .slice() // Create a shallow copy to avoid mutating the original array
+                                        .sort((a, b) => {
+                                            if (a.name === "N/A") return -1; // Move "N/A" to the top
+                                            if (b.name === "N/A") return 1;
+                                            return a.name.localeCompare(b.name); // Sort alphabetically
+                                        })
+                                        .map((item, index) => (
+                                            <tr className="hover:bg-gray-50" key={index}>
+                                                <td className="border border-gray-300 px-4 py-2">{item.name}</td>
+                                                <td className="border border-gray-300 px-4 py-2">{item.resolved}</td>
+                                                <td className="border border-gray-300 px-4 py-2">{item.closed}</td>
+                                                <td className="border border-gray-300 px-4 py-2">{item.unresolved}</td>
+                                            </tr>
+                                        ))}
                                     <tr className="bg-gray-100 font-semibold">
                                         <td className="border border-gray-300 px-4 py-2">Total</td>
                                         <td className="border border-gray-300 px-4 py-2">
@@ -1097,7 +1105,7 @@ const ReportPage = () => {
                 <div className="flex flex-col gap-3">
                     <div className=" bg-whiterounded-[10px] bg-[#F2F8FC] w-[579px] flex flex-col overflow-y-auto">
                         <p className="p-4  text-base montserrat-bold">
-                            Per Department
+                            By Department
                         </p>
                         <div className="border border-t-1"></div>
                         <div className="flex-grow overflow-x-auto px-[10px] mt-[5px] pb-[50px]">
@@ -1140,11 +1148,11 @@ const ReportPage = () => {
                     </div>
                 </div>
             </div>
-            <div className="flex-grow mt-[10px]">
+            <div className="flex-grow mt-[6px]">
                 <div className="flex flex-col gap-[15px] w-full">
                     <div className="w-full pb-7 min-h-[335px] flex-grow-1 bg-[#F2F8FC] rounded-lg">
                         <p className="p-4 text-base montserrat-bold">
-                            Per Category
+                            By Category
                         </p>
                         <div className="border border-t-1"></div>
                         <div className="flex flex-col">
