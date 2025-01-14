@@ -1183,7 +1183,7 @@ const ReportPage = () => {
 
                                         <div className=" shrink-0 items-center" key={index}>
                                             <div
-                                                className="flex w-[420px] gap-[10px]"
+                                                className="flex w-[450px] gap-[10px]"
                                                 key={index}
                                             >
                                                 <span
