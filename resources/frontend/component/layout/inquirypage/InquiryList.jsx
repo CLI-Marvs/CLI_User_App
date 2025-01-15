@@ -850,7 +850,7 @@ const InquiryList = () => {
                     {resultSearchActive && (
                         <div className="flex flex-col gap-1 p-2 mt-[15px] bg-white w-max rounded-[8px] shadow-custom7 text-sm">
                             <div className="flex">
-                                <strong>Search Result For :</strong><p>{searchSummary}</p>
+                                <strong>Search Result For :{" "}</strong><p>{searchSummary}</p>
                             </div>
                         </div>
                     )}
