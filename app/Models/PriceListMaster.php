@@ -9,6 +9,7 @@ use App\Models\PropertyMaster;
 use App\Models\PriceBasicDetails;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class PriceListMaster extends Model
@@ -23,18 +24,14 @@ class PriceListMaster extends Model
     {
         return $this->belongsTo(PriceBasicDetails::class, 'pricebasic_details_id', 'id');
     }
-    
-    public function propertyMaster():HasMany
+
+
+    public function towerPhase(): BelongsTo
     {
-        return $this->hasMany(PropertyMaster::class, 'property_masters_id', 'id');
+        return $this->belongsTo(TowerPhase::class, 'tower_phase_id', 'id');
     }
 
-    public function towerPhases():HasMany
-    {
-        return $this->hasMany(TowerPhase::class);
-    }
-
-    public function paymentSchemes():HasMany
+    public function paymentSchemes(): HasMany
     {
         return $this->hasMany(PaymentScheme::class);
     }
@@ -49,5 +46,4 @@ class PriceListMaster extends Model
             $priceMasterList->date_last_update = $priceMasterList->updated_at;
         });
     }
-
 }

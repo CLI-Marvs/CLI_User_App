@@ -12,7 +12,7 @@ class PropertyMaster extends Model
 {
 
     use HasFactory;
-    protected $fillable = ['property_name'];
+ 
     protected $table = 'property_masters';
 
     //Relationships
@@ -23,7 +23,7 @@ class PropertyMaster extends Model
 
     public function towerPhases():HasMany
     {
-        return  $this->hasMany(TowerPhase::class, 'property_masters_id');
+        return  $this->hasMany(TowerPhase::class, 'property_masters_id','id');
     }
 
     public function units()
@@ -36,9 +36,6 @@ class PropertyMaster extends Model
         return $this->belongsTo(BasicPricing::class);
     }
 
-    public function priceListMaster()
-    {
-        return $this->belongsTo(PriceListMaster::class, 'property_masters_id', 'id');
-    }
+   
 }
  

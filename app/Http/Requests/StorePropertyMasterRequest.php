@@ -22,8 +22,8 @@ class StorePropertyMasterRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'property_name' =>
-            'required|string|max:255',
+            'property_masters_id' =>
+            'required|integer ',
             'type' =>
             'required|string|max:255',
             'tower_phase' =>

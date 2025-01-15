@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use Log;
+use Illuminate\Http\Request;
 use App\Models\PropertyMaster;
 use App\Http\Controllers\Controller;
 use App\Services\PropertyMasterService;
@@ -21,9 +23,9 @@ class PropertyMasterController extends Controller
 
 
 
-    /**
+    /*
      * Display a listing of the resource.
-     */
+    */
     public function index()
     {
         //
@@ -38,10 +40,8 @@ class PropertyMasterController extends Controller
         try {
             //TODO: validate the request to make sure it's valid and match in the request
             $property = $this->service->store($request->validated());
-            return response()->json([
-                'message' => 'Property created successfully',
-                'data' => $property,
-            ], 201);
+
+            return response()->json($property, 201);
         } catch (ValidationException $e) {
             return response()->json([
                 'error' => 'Validation failed',
@@ -60,7 +60,16 @@ class PropertyMasterController extends Controller
      */
     public function show(PropertyMaster $propertyMaster)
     {
-        //
+        $propertyMasterData = $this->service->getPropertyMaster($propertyMaster->id);
+        if (!$propertyMasterData) {
+            return response()->json(['message' => 'Property not found.'], 404);
+        }
+
+        try {
+            return response()->json($propertyMasterData);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Error retrieving property data.'], 500);
+        }
     }
 
     /**
@@ -80,10 +89,21 @@ class PropertyMasterController extends Controller
     }
 
 
-    /*Get all property names*/
-    public function names()
+    /**
+     * Get all property names
+     */
+    public function getPropertyNames()
     {
-        $propertyNames = PropertyMaster::pluck('property_name')->toArray();
+        $propertyNames = $this->service->getPropertyNames();
+        return response()->json($propertyNames);
+    }
+
+    /**
+     * Get all property names with ID
+     */
+    public function getPropertyNamesWithIds()
+    {
+        $propertyNames = $this->service->getPropertyNamesWithIds();
         return response()->json($propertyNames);
     }
 }

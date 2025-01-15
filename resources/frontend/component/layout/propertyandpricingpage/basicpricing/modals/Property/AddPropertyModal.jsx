@@ -19,14 +19,14 @@ const formDataState = {
     google_map_link: "",
 };
 
-const AddPropertyModal = ({ modalRef }) => {
+const AddPropertyModal = ({ modalRef, onSubmitSuccess }) => {
     //State
     const { setFloorPremiumsAccordionOpen, user } = useStateContext();
     const [formData, setFormData] = useState(formDataState);
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
     const [propertyNamesList, setPropertyNamesList] = useState([]);
-
+    // console.log("propertyNamesList", propertyNamesList);
     //Hooks
     useEffect(() => {
         fetchPropertyNames();
@@ -36,16 +36,21 @@ const AddPropertyModal = ({ modalRef }) => {
     //Get all property names
     const fetchPropertyNames = async () => {
         try {
-            const response = await propertyMasterService.getPropertyNames();
-            setPropertyNamesList(response.data);
+            const response = await propertyMasterService.getPropertyNamesWithIds();
+       
+            // Convert object to array of objects and sort
+            const sortedProperties = Object.entries(response.data)
+                .map(([id, name]) => ({ id, name }))
+                .sort((a, b) => a.name.localeCompare(b.name));
+
+            setPropertyNamesList(sortedProperties);
         } catch (error) {
             console.error("Error fetching property names:", error);
         }
     };
 
-    const handleChange = (e) => {
+    const handleInputChange = (e) => {
         const { name, value } = e.target;
-
         setFormData((prevData) => ({
             ...prevData,
             [name]: value,
@@ -56,7 +61,7 @@ const AddPropertyModal = ({ modalRef }) => {
     const handleSubmit = async (e, status) => {
         e.preventDefault();
         const payload = {
-            property_name: formData?.propertyName,
+            property_masters_id: formData?.propertyName,
             type: formData.type,
             tower_phase: formData.towerPhase,
             tower_description: formData.tower_description,
@@ -68,17 +73,28 @@ const AddPropertyModal = ({ modalRef }) => {
             status: status,
             emp_id: user?.id,
         };
-
+ 
         try {
             setIsLoading(true);
             const response = await propertyMasterService.storePropertyMaster(payload);
-            console.log("response 75", response);
+            console.log("response", response);
+
+            const propertyId = response?.data?.propertyMaster?.id;
+            const passData = response?.data;
+            console.log("propertyId", propertyId);
+            console.log("passData", passData);
+
             if (response.status === 201) {
                 showToast("Data added successfully!", "success");
                 setFormData(formDataState);
                 if (modalRef.current) {
                     modalRef.current.close();
                 }
+                onSubmitSuccess(); //Call this function to fetch property master lists from PricingMasterList
+                // navigate(`/property-pricing/basic-pricing/${propertyId}`, {
+                //     state: { passPropertyDetails: passData },
+                // });
+
             }
         } catch (error) {
             console.log("Error saving property master data:", error);
@@ -163,7 +179,6 @@ const AddPropertyModal = ({ modalRef }) => {
                 </div>
                 <form>
                     <div className="flex flex-col gap-2">
-                        {/*Property Name */}
                         {/* <div className="flex items-center border border-custom-gray81 rounded-md overflow-hidden">
                             <span className="text-custom-gray81 bg-custombg3 flex w-3/4 pl-3 py-1 montserrat-semibold text-sm">
                                 Property Name
@@ -171,12 +186,16 @@ const AddPropertyModal = ({ modalRef }) => {
                             <input
                                 name="propertyName"
                                 type="text"
-                                onChange={handleChange}
+                                onChange={handleInputChange}
                                 value={formData.propertyName}
                                 className="w-full px-4 focus:outline-none"
                                 placeholder=""
                             />
                         </div> */}
+
+                        {/*Property Name 
+                        TODO: fix the placing of the select box
+                        */}
                         <div className="flex items-center border border-custom-gray81 rounded-md overflow-hidden">
                             <span className="text-custom-gray81 bg-custombg3 flex items-center w-3/4 -mr-3 pl-3 py-1 montserrat-semibold text-sm">
                                 Property Name
@@ -185,22 +204,15 @@ const AddPropertyModal = ({ modalRef }) => {
                                 <select
                                     name="propertyName"
                                     className="appearance-none w-full px-4 py-1 bg-white focus:outline-none border-0"
-                                    onChange={handleChange}
+                                    onChange={handleInputChange}
                                     value={formData.propertyName}
                                 >
                                     <option value="">Select Property</option>
-                                    {propertyNamesList && propertyNamesList.map(
-                                        (item, index) => {
-                                            return (
-                                                <option
-                                                    key={index}
-                                                    value={item}
-                                                >
-                                                    {item}
-                                                </option>
-                                            );
-                                        }
-                                    )}
+                                    {propertyNamesList.map((property) => (
+                                        <option key={property.id} value={property.id}>
+                                            {property.name}
+                                        </option>
+                                    ))}
                                 </select>
                                 <span className="absolute inset-y-0 right-0 text-custom-gray81 flex items-center pr-3 pl-3 bg-custom-grayFA pointer-events-none">
                                     <IoMdArrowDropdown />
@@ -216,7 +228,7 @@ const AddPropertyModal = ({ modalRef }) => {
                                 <select
                                     name="type"
                                     className="appearance-none w-full px-4 py-1 bg-white focus:outline-none border-0"
-                                    onChange={handleChange}
+                                    onChange={handleInputChange}
                                     value={formData.type}
                                 >
                                     <option value="">Select Type</option>
@@ -239,7 +251,7 @@ const AddPropertyModal = ({ modalRef }) => {
                                 type="string"
                                 className="w-full px-4 focus:outline-none"
                                 placeholder=""
-                                onChange={handleChange}
+                                onChange={handleInputChange}
                                 value={formData.towerPhase}
                             />
                         </div>
@@ -262,7 +274,7 @@ const AddPropertyModal = ({ modalRef }) => {
                                     placeholder=""
                                     value={formData.tower_description}
                                     rows="4"
-                                    onChange={handleChange}
+                                    onChange={handleInputChange}
                                     maxLength={350}
                                     className={`rounded-b-[5px] border-t w-full pl-2 outline-none`}
                                 />
@@ -281,7 +293,7 @@ const AddPropertyModal = ({ modalRef }) => {
                             <input
                                 name="barangay"
                                 type="text"
-                                onChange={handleChange}
+                                onChange={handleInputChange}
                                 value={formData.barangay}
                                 className="w-full px-4 focus:outline-none"
                                 placeholder=""
@@ -296,7 +308,7 @@ const AddPropertyModal = ({ modalRef }) => {
                             <input
                                 name="city"
                                 type="text"
-                                onChange={handleChange}
+                                onChange={handleInputChange}
                                 value={formData.city}
                                 className="w-full px-4 focus:outline-none"
                                 placeholder=""
@@ -311,7 +323,7 @@ const AddPropertyModal = ({ modalRef }) => {
                             <input
                                 name="province"
                                 type="text"
-                                onChange={handleChange}
+                                onChange={handleInputChange}
                                 value={formData.province}
                                 className="w-full px-4 focus:outline-none"
                                 placeholder=""
@@ -327,7 +339,7 @@ const AddPropertyModal = ({ modalRef }) => {
                             <input
                                 name="country"
                                 type="text"
-                                onChange={handleChange}
+                                onChange={handleInputChange}
                                 value={formData.country}
                                 className="w-full px-4 focus:outline-none"
                                 placeholder=""
@@ -351,7 +363,7 @@ const AddPropertyModal = ({ modalRef }) => {
                                     value={formData.google_map_link}
                                     name="google_map_link"
                                     placeholder=""
-                                    onChange={handleChange}
+                                    onChange={handleInputChange}
                                     maxLength={350}
                                     rows="4"
                                     className={` rounded-b-[5px] border-t w-full pl-2 outline-none`}

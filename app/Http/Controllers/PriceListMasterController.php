@@ -9,25 +9,28 @@ use App\Models\PriceListMaster;
 use App\Models\PricingMasterList;
 use App\Models\PropertyDetail;
 use App\Models\PropertyMaster;
+use App\Services\PriceListMasterService;
 use Illuminate\Http\Request;
 use PhpParser\Node\Stmt\TryCatch;
 
 class PriceListMasterController extends Controller
 {
-    //get all pricing master list
-    public function getAllPricingMasterLists(Request $request)
+    protected $service;
+
+    public function __construct(PriceListMasterService $service)
     {
-        try {
-            $propertyMasters = PropertyMaster::with([
-                'towerPhases',
-                'propertyCommercialDetail',
-                'priceListMaster.priceBasicDetail'
-            ])->orderBy('created_at', 'desc')->get();
-            return response()->json($propertyMasters);
-        } catch (\Exception $e) {
-            return response()->json(['message' => 'Error occurred.', 'error' => $e->getMessage()], 500);
-        }
+        $this->service = $service;
     }
 
-   //store pricing 
+    /**
+     * Display a listing of the resource.
+     */
+    public function index()
+    {
+        $priceListMasters = $this->service->index();
+
+        return response()->json(
+            $priceListMasters
+        );
+    }
 }

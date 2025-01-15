@@ -64,7 +64,7 @@ Route::post('conversation', [ConcernController::class, 'sendMessageConcerns']);
 Route::get('/get-concern-messages', [ConcernController::class, 'retrieveConcernsMessages']);
 Route::get('/personnel-assignee', [ConcernController::class, 'retrieveAssignees']);
 Route::post('/update-info', [ConcernController::class, 'updateInfo']);
-Route::post('/add-property-sap', [PropertyMasterController::class, 'storePropertyFromSap']);
+// Route::post('/add-property-sap', [PropertyMasterController::class, 'storePropertyFromSap']);
 Route::post('/buyer-reply', [ConcernController::class, 'fromAppSript']);
 
 //* For Sap 
@@ -117,8 +117,7 @@ Route::middleware('auth:sanctum')->group(function () {
   Route::post('/remove-assignee', [ConcernController::class, 'removeAssignee']);
   /* Download the file attachment */
   Route::post('/download-file', [ConcernController::class, 'downloadFileFromGCS']);
-  /* Pricing Master List */
-  Route::get('/get-pricing-master-lists', [PriceListMasterController::class, 'getAllPricingMasterLists']);
+ 
   /*Basic Pricing */
   Route::post('/basic-pricing', [PriceBasicDetailController::class, 'storeBasicPricing']);
 
@@ -132,7 +131,8 @@ Route::middleware('auth:sanctum')->group(function () {
   /*Property Data*/
   Route::prefix('properties')->group(function () {
     // Get property names  
-    Route::get('names', [PropertyMasterController::class, 'names']);
+    Route::get('names', [PropertyMasterController::class, 'getPropertyNames']);
+    Route::get('names/with-ids', [PropertyMasterController::class, 'getPropertyNamesWithIds']);
 
     // Store property details
     Route::post('/', [PropertyMasterController::class, 'store']);
@@ -151,6 +151,13 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Store payment scheme
     Route::post('/', [PaymentSchemeController::class, 'store']);
+  });
+
+  /*Property Price Master List */
+  Route::prefix('price-list-masters')->group(function () {
+    // Get price list masters
+    Route::post('/', [PriceListMasterController::class, 'index']);
+ 
   });
 
   // Route::post('/payment-schemes', [PaymentSchemeController::class, 'storePaymentScheme']);
