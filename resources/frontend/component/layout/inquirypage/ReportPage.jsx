@@ -664,17 +664,15 @@ const ReportPage = () => {
                 </div>
             </div>
             <div className="bg-[#F2F8FC] p-4 rounded-[10px]">
-                <div className=" mb-2 flex">
-                    <p className="text-lg montserrat-bold">
+                <div className=" mb-2 flex text-lg montserrat-bold">
+                    <p className="">
                         Resolved vs. Unresolved vs. Closed
                     </p>
-                    
-                    {dataSet.length < 0 && (
+                    {dataSet.length > 0 && (
                         <p>
                             No results found
                         </p>
-                    )}
-                        
+                      )}
                 </div>
                 <div className="overflow-x-auto mt-[40px]">
                     <ResponsiveContainer width="100%" height={218}>
