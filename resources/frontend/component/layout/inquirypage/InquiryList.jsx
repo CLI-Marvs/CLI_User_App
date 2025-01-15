@@ -19,6 +19,7 @@ const InquiryList = () => {
         setCurrentPage,
         data,
         pageCount,
+        fullYear,
         getAllConcerns,
         daysFilter,
         setDaysFilter,
@@ -44,6 +45,8 @@ const InquiryList = () => {
     const [channels, setChannels] = useState("");
 
     const [selectedProperty, setSelectedProperty] = useState("");
+    const [selectedYear, setSelectedYear] = useState("");
+    const [selectedMonth, setSelectedMonth] = useState("");
     const [hasAttachments, setHasAttachments] = useState(false);
     const { propertyNamesList } = useStateContext();
     const [activeDayButton, setActiveDayButton] = useState(null);
@@ -252,6 +255,21 @@ const InquiryList = () => {
             : []),
     ];
 
+    const monthNames = {
+        "01": "January",
+        "02": "February",
+        "03": "March",
+        "04": "April",
+        "05": "May",
+        "06": "June",
+        "07": "July",
+        "08": "August",
+        "09": "September",
+        "10": "October",
+        "11": "November",
+        "12": "December",
+    };
+
     const updateLastActivity = () => {
         const currentTime = new Date();
         setLastActivity(currentTime);
@@ -283,6 +301,8 @@ const InquiryList = () => {
             startDate,
             selectedProperty,
             hasAttachments,
+            selectedMonth,
+            selectedYear,
         });
         setDaysFilter(null);
         setStatusFilter(null);
@@ -298,6 +318,8 @@ const InquiryList = () => {
         setSelectedProperty("");
         setHasAttachments(false);
         setSpecificAssigneeCsr("");
+        setSelectedYear("");
+        setSelectedMonth("");
     };
 
     useEffect(() => {
@@ -666,6 +688,61 @@ const InquiryList = () => {
                                                         );
                                                     }
                                                 )}
+                                            </select>
+                                            <span className="absolute inset-y-0 right-0 flex items-center  pl-3 pointer-events-none">
+                                                <IoIosArrowDown />
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div className="flex gap-3">
+                                        <div className="flex">
+                                            <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[94px]">
+                                                Year
+                                            </label>
+                                            <div className="relative w-[146px]">
+                                                <select
+                                                className="w-full border-b-1 outline-none appearance-none text-sm absolute px-[8px]"
+                                                value={selectedYear}
+                                                onChange={(e) =>
+                                                    setSelectedYear(e.target.value)
+                                                }
+                                            >
+                                                <option value="">
+                                                    {" "}
+                                                    Select Year
+                                                </option>
+                                                {fullYear && fullYear.map((item, index) => (
+                                                    <option key={index} value={item.year}>  {item.year}</option>
+                                                ))}
+                                            </select>
+                                            <span className="absolute inset-y-0 right-0 flex items-center  pl-3 pointer-events-none">
+                                                <IoIosArrowDown />
+                                            </span>
+                                            </div>
+                                        </div>
+                                        <div className="flex relative">
+                                            <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[65px]">
+                                                {" "}
+                                                Month
+                                            </label>
+                                            <select
+                                                className="w-[220px] border-b-1 outline-none appearance-none text-sm px-[8px]"
+                                                onChange={(e) =>
+                                                    setSelectedMonth(e.target.value)
+                                                }
+                                                value={selectedMonth}
+                                            >
+                                                <option value="">
+                                                    {" "}
+                                                    Select Month
+                                                </option>
+                                                {Object.entries(monthNames)
+                                                    .sort(([keyA], [keyB]) => keyA - keyB)
+                                                    .map(([key, name]) => (
+                                                        <option key={key} value={key}>
+                                                            {name}
+                                                        </option>
+                                                ))}
                                             </select>
                                             <span className="absolute inset-y-0 right-0 flex items-center  pl-3 pointer-events-none">
                                                 <IoIosArrowDown />

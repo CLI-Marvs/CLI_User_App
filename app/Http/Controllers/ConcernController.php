@@ -1067,6 +1067,14 @@ class ConcernController extends Controller
             $query->whereDate('concerns.created_at', '=', $startDate);
         }
 
+        if (!empty($searchParams['selectedYear'])) {
+            $query->whereYear('created_at', $searchParams['selectedYear']);
+        }
+
+        if (!empty($searchParams['selectedMonth'])) {
+            $query->whereMonth('created_at', $searchParams['selectedMonth']);
+        }
+
         return $query;
     }
 
