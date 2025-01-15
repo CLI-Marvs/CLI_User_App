@@ -1067,6 +1067,14 @@ class ConcernController extends Controller
             $query->whereDate('concerns.created_at', '=', $startDate);
         }
 
+        if (!empty($searchParams['selectedYear'])) {
+            $query->whereYear('created_at', $searchParams['selectedYear']);
+        }
+
+        if (!empty($searchParams['selectedMonth'])) {
+            $query->whereMonth('created_at', $searchParams['selectedMonth']);
+        }
+
         return $query;
     }
 
@@ -1989,7 +1997,8 @@ class ConcernController extends Controller
 
         )
             ->whereYear('created_at', $year)
-            ->whereNotNull('status');
+            ->whereNotNull('property');
+
 
         if ($project && $project !== 'All') {
             $query->where('property', $project);
@@ -2135,7 +2144,28 @@ class ConcernController extends Controller
         ");
         
         $communicationTypes = $query->groupBy('communication_type')->get();
-        return response()->json($communicationTypes);
+
+
+        $mappedCommunicationTypes = $communicationTypes->map(function ($item) {
+            switch ($item->communication_type) {
+                case 'Complaint':
+                    $item->communication_type = 'Complaints';
+                    break;
+                case 'Suggestion or Recommendation':
+                    $item->communication_type = 'Suggestion or Recommendations';
+                    break;
+                case 'Request':
+                    $item->communication_type = 'Requests';
+                    break;
+                case 'Inquiry':
+                    $item->communication_type = 'Inquiries';
+                    break;
+            }
+            return $item;
+        });
+    
+        return response()->json($mappedCommunicationTypes);
+
     }
 
 
