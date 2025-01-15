@@ -664,10 +664,17 @@ const ReportPage = () => {
                 </div>
             </div>
             <div className="bg-[#F2F8FC] p-4 rounded-[10px]">
-                <div className=" mb-2">
+                <div className=" mb-2 flex">
                     <p className="text-lg montserrat-bold">
                         Resolved vs. Unresolved vs. Closed
                     </p>
+                    
+                    {dataSet.length < 0 && (
+                        <p>
+                            No results found
+                        </p>
+                    )}
+                        
                 </div>
                 <div className="overflow-x-auto mt-[40px]">
                     <ResponsiveContainer width="100%" height={218}>
@@ -1120,17 +1127,6 @@ const ReportPage = () => {
                                 </thead>
                                 <tbody>
                                     {dataDepartment
-<<<<<<< HEAD
-                                    .filter((item) => item.name !== null && item.name !== undefined) 
-                                    .map((item, index) => (
-                                        <tr class="hover:bg-gray-50" key={index}>
-                                            <td class="border border-gray-300 px-4 py-2">{item.name}</td>
-                                            <td class="border border-gray-300 px-4 py-2">{item.resolved}</td>
-                                            <td class="border border-gray-300 px-4 py-2">{item.unresolved}</td>
-                                            <td class="border border-gray-300 px-4 py-2">{item.closed}</td>
-                                        </tr>
-                                    ))}
-=======
                                         .slice() // Create a copy to avoid mutating the original array
                                         .sort((a, b) => a.name.localeCompare(b.name)) // Sort alphabetically by name
                                         .map((item, index) => (
@@ -1153,7 +1149,6 @@ const ReportPage = () => {
                                             {dataDepartment.reduce((sum, item) => sum + item.unresolved, 0)}
                                         </td>
                                     </tr>
->>>>>>> 16a871e3a4b0ca95a6a5d74065276486f2da6ffb
                                 </tbody>
                             </table>
                         </div>
