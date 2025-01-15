@@ -17,7 +17,6 @@ const PricingMasterList = () => {
     const [toggled, setToggled] = useState(false);
     const [isFilterVisible, setIsFilterVisible] = useState(false);
     const {
-        getPricingMasterLists,
         pricingMasterLists,
         isLoading,
         getPropertyMaster,
@@ -36,7 +35,6 @@ const PricingMasterList = () => {
 
     //Hooks
     useEffect(() => {
-        getPricingMasterLists();
     }, []);
 
     //Event handler
@@ -279,26 +277,24 @@ const PricingMasterList = () => {
                             pricingMasterLists.map((item, index) => {
                                 return (
                                     <tr
-                                        className={`flex gap-4 mt-2 h-[144px] shadow-custom5 rounded-[10px] overflow-hidden px-4 ${
-                                            item?.status === "Draft"
-                                                ? "bg-white"
-                                                : item?.status === "Approved"
+                                        className={`flex gap-4 mt-2 h-[144px] shadow-custom5 rounded-[10px] overflow-hidden px-4 ${item?.status === "Draft"
+                                            ? "bg-white"
+                                            : item?.status === "Approved"
                                                 ? "bg-[#F0F3EE]"
                                                 : "bg-[#EBF0F6]"
-                                        } text-custom-bluegreen text-sm`}
+                                            } text-custom-bluegreen text-sm`}
                                         key={index}
                                     >
                                         <td className="w-[100px] flex flex-col items-start justify-center gap-2">
                                             <div>
                                                 <p
-                                                    className={`font-bold text-[#5B9BD5]  ${
-                                                        item?.status === "Draft"
-                                                            ? "text-custom-gray81"
-                                                            : item?.status ===
-                                                              "Approved"
+                                                    className={`font-bold text-[#5B9BD5]  ${item?.status === "Draft"
+                                                        ? "text-custom-gray81"
+                                                        : item?.status ===
+                                                            "Approved"
                                                             ? "text-custom-solidgreen"
                                                             : "text-[#5B9BD5]"
-                                                    }`}
+                                                        }`}
                                                 >
                                                     {item?.status}
                                                 </p>
@@ -321,7 +317,7 @@ const PricingMasterList = () => {
                                                     }
                                                 >
                                                     {item?.status ===
-                                                    "On-going Approval"
+                                                        "On-going Approval"
                                                         ? "Cancel"
                                                         : "Edit"}
                                                 </p>
@@ -646,7 +642,7 @@ const PricingMasterList = () => {
                     pageLinkClassName="w-full h-full flex justify-center items-center"
                     activeLinkClassName="w-full h-full flex justify-center items-center"
                     disabledLinkClassName={"text-gray-300 cursor-not-allowed"}
-                    /* forcePage={currentPage} */
+                /* forcePage={currentPage} */
                 />
             </div>
             <div>

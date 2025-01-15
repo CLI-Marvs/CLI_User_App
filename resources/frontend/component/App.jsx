@@ -382,11 +382,11 @@ const App = () => {
                         },
                         {
                             //TODO: add permission here
-                            path: "property-and-pricing",
+                            path: "property-pricing",
                             element: <PropertyAndPricingLayout />,
                             children: [
                                 {
-                                    path: "pricing-master-list",
+                                    path: "master-lists",
                                     element: <PricingMasterListView />,
                                 },
                                 {

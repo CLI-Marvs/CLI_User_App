@@ -515,87 +515,87 @@ export const ContextProvider = ({ children }) => {
         }
     };
 
-    const getPricingMasterLists = useCallback(async () => {
-        if (token) {
-            try {
-                setIsLoading(true);
-                const response = await apiService.get(
-                    "get-pricing-master-lists"
-                );
-                setPricingMasterLists(response.data);
-            } catch (error) {
-                console.error("Error fetching pricing master lists:", error);
-            } finally {
-                setIsLoading(false);
-            }
-        }
-    }, []); //get all pricing master lists data
+    // const    = useCallback(async () => {
+    //     if (token) {
+    //         try {
+    //             setIsLoading(true);
+    //             const response = await apiService.get(
+    //                 "get-pricing-master-lists"
+    //             );
+    //             setPricingMasterLists(response.data);
+    //         } catch (error) {
+    //             console.error("Error fetching pricing master lists:", error);
+    //         } finally {
+    //             setIsLoading(false);
+    //         }
+    //     }
+    // }, []);  
 
-    const getPaymentSchemes = useCallback(async () => {
-        if (token) {
-            try {
-                const response = await apiService.get("get-payment-schemes");
+    // const getPaymentSchemes = useCallback(async () => {
+    //     if (token) {
+    //         try {
+    //             const response = await apiService.get("get-payment-schemes");
 
-                setPaymentSchemes(response.data);
-            } catch (error) {
-                console.error("Error fetching data:", error);
-            }
-        }
-    }, []); //get all payment schemes
-    const getPropertyFloors = useCallback(async (towerPhaseId) => {
-        // Check if property floors have already been fetched
-        if (!propertyFloors[towerPhaseId] && towerPhaseId && token) {
-            try {
-                setIsLoading(true);
-                const response = await apiService.get(
-                    `property-floors/${towerPhaseId}`
-                );
-                return response.data; // Return the data
-                // Merge the new floors data with existing propertyFloors
-                // setPropertyFloors((prev) => ({
-                //     ...prev,
-                //     [towerPhaseId]: response.data, // Store floors based on towerPhaseId
-                // }));
-            } catch (error) {
-                console.error("Error fetching property floors:", error);
-                return null;
-            } finally {
-                setIsLoading(false);
-            }
-        }
-    }, []); //get property floors
+    //             setPaymentSchemes(response.data);
+    //         } catch (error) {
+    //             console.error("Error fetching data:", error);
+    //         }
+    //     }
+    // }, []); 
+    // const getPropertyFloors = useCallback(async (towerPhaseId) => {
 
-    const getPropertyUnits = async (towerPhaseId, selectedFloor) => {
-        if (token || selectedFloor || towerPhaseId) {
-            try {
-                setIsLoading(true);
-                const response = await apiService.post("property-units", {
-                    towerPhaseId,
-                    selectedFloor,
-                });
-                setPropertyUnits(response.data);
-            } catch (error) {
-                console.error("Error fetching property units:", error);
-            } finally {
-                setIsLoading(false);
-            }
-        }
-    }; //get property units
+    //     if (!propertyFloors[towerPhaseId] && towerPhaseId && token) {
+    //         try {
+    //             setIsLoading(true);
+    //             const response = await apiService.get(
+    //                 `property-floors/${towerPhaseId}`
+    //             );
+    //             return response.data; // Return the data
+    //             // Merge the new floors data with existing propertyFloors
+    //             // setPropertyFloors((prev) => ({
+    //             //     ...prev,
+    //             //     [towerPhaseId]: response.data, // Store floors based on towerPhaseId
+    //             // }));
+    //         } catch (error) {
+    //             console.error("Error fetching property floors:", error);
+    //             return null;
+    //         } finally {
+    //             setIsLoading(false);
+    //         }
+    //     }
+    // }, []); //get property floors
 
-    const getPropertyMaster = async (id) => {
-        // if (token) {
-        //     try {
-        //         setIsLoading(true);
-        //         const response = await apiService.get(
-        //             `get-property-master/${id}`
-        //         );
+    // const getPropertyUnits = async (towerPhaseId, selectedFloor) => {
+    //     if (token || selectedFloor || towerPhaseId) {
+    //         try {
+    //             setIsLoading(true);
+    //             const response = await apiService.post("property-units", {
+    //                 towerPhaseId,
+    //                 selectedFloor,
+    //             });
+    //             setPropertyUnits(response.data);
+    //         } catch (error) {
+    //             console.error("Error fetching property units:", error);
+    //         } finally {
+    //             setIsLoading(false);
+    //         }
+    //     }
+    // }; //get property units
 
-        //         return response.data;
-        //     } catch (e) {
-        //         console.error("Error fetching propertymaster data:", error);
-        //     }
-        // }
-    };
+    // const getPropertyMaster = async (id) => {
+    //     // if (token) {
+    //     //     try {
+    //     //         setIsLoading(true);
+    //     //         const response = await apiService.get(
+    //     //             `get-property-master/${id}`
+    //     //         );
+
+    //     //         return response.data;
+    //     //     } catch (e) {
+    //     //         console.error("Error fetching propertymaster data:", error);
+    //     //     }
+    //     // }
+    // };
 
     const getBannerData = async () => {
         try {
@@ -658,7 +658,7 @@ export const ContextProvider = ({ children }) => {
     // }, [towerPhaseId, selectedFloor]);
 
     // useEffect(() => {
-    //     getPricingMasterLists();
+    //       ();
     //     getPaymentSchemes();
     // }, []);
 
@@ -749,7 +749,7 @@ export const ContextProvider = ({ children }) => {
                 await fetchCategory();
                 await getCommunicationTypePerProperty();
                 await getInquiriesPerChannel();
-                
+
             } catch (error) {
                 console.error("Error fetching data:", error);
             }
@@ -827,10 +827,9 @@ export const ContextProvider = ({ children }) => {
                 fetchDataReport,
                 dataSet,
                 pricingMasterLists,
-                getPricingMasterLists,
+
                 paymentSchemes,
-                getPaymentSchemes,
-                getPropertyFloors,
+
                 setPropertyId,
                 propertyFloors,
                 propertyId,
@@ -840,7 +839,6 @@ export const ContextProvider = ({ children }) => {
                 setSelectedFloor,
                 propertyUnit,
                 setPropertyUnits,
-                getPropertyUnits,
                 towerPhaseId,
                 setTowerPhaseId,
                 isLoading,
@@ -849,7 +847,6 @@ export const ContextProvider = ({ children }) => {
                 setConcernMessages,
                 concernId,
                 setConcernId,
-                getPropertyMaster,
                 getConcernMessages,
                 setAssigneesPersonnel,
                 assigneesPersonnel,
