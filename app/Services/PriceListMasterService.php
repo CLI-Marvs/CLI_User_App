@@ -21,4 +21,12 @@ class PriceListMasterService
     {
         return $this->repository->index();
     }
+
+    /*
+    Store price list master data
+    */
+    public function store(array $data)
+    {
+        return $this->repository->store($data);
+    }
 }

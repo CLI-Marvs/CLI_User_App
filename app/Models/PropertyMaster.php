@@ -18,7 +18,7 @@ class PropertyMaster extends Model
     //Relationships
     public function propertyCommercialDetail():HasOne
     {
-        return $this->hasOne(PropertyCommercialDetail::class);
+        return $this->hasOne(PropertyCommercialDetail::class, 'property_master_id', 'id');
     }
 
     public function towerPhases():HasMany

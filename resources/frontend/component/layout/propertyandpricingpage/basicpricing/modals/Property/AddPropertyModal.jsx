@@ -19,7 +19,7 @@ const formDataState = {
     google_map_link: "",
 };
 
-const AddPropertyModal = ({ modalRef, onSubmitSuccess }) => {
+const AddPropertyModal = ({ propertyModalRef, onSubmitSuccess }) => {
     //State
     const { setFloorPremiumsAccordionOpen, user } = useStateContext();
     const [formData, setFormData] = useState(formDataState);
@@ -77,23 +77,20 @@ const AddPropertyModal = ({ modalRef, onSubmitSuccess }) => {
         try {
             setIsLoading(true);
             const response = await propertyMasterService.storePropertyMaster(payload);
-            console.log("response", response);
-
-            const propertyId = response?.data?.propertyMaster?.id;
-            const passData = response?.data;
-            console.log("propertyId", propertyId);
-            console.log("passData", passData);
+            const towerPhaseId = response?.data?.data?.tower_phases[0]?.id;
+            const propertyData = response?.data;
+ 
 
             if (response.status === 201) {
                 showToast("Data added successfully!", "success");
                 setFormData(formDataState);
-                if (modalRef.current) {
-                    modalRef.current.close();
+                if (propertyModalRef.current) {
+                    propertyModalRef.current.close();
                 }
                 onSubmitSuccess(); //Call this function to fetch property master lists from PricingMasterList
-                // navigate(`/property-pricing/basic-pricing/${propertyId}`, {
-                //     state: { passPropertyDetails: passData },
-                // });
+                navigate(`/property-pricing/basic-pricing/${towerPhaseId}`, {
+                    state: { passPropertyData: propertyData },
+                });
 
             }
         } catch (error) {
@@ -129,8 +126,8 @@ const AddPropertyModal = ({ modalRef, onSubmitSuccess }) => {
         //     const passData = response?.data;
         //     alert(response.data.message);
 
-        //     if (modalRef.current) {
-        //         modalRef.current.close();
+        //     if (propertyModalRef.current) {
+        //         propertyModalRef.current.close();
         //     }
         //     setFormData(formDataState);
         //     setFloorPremiumsAccordionOpen(false);
@@ -146,20 +143,20 @@ const AddPropertyModal = ({ modalRef, onSubmitSuccess }) => {
 
     //Handle close the modal and reset all state
     const handleClose = () => {
-        if (modalRef.current) {
+        if (propertyModalRef.current) {
             // setFormData(formDataState);
             // setFloorPremiumsAccordionOpen(false);
             // navigate("/propertyandpricing/basicpricing", {
             //     state: { passPropertyDetails: null },
             // }); //navigate to Basic pricing components   with the property detail data as props
             setFormData(formDataState);
-            modalRef.current.close();
+            propertyModalRef.current.close();
         }
     };
     return (
         <dialog
             className="modal w-[475px] h-auto rounded-lg backdrop:bg-black/50"
-            ref={modalRef}
+            ref={propertyModalRef}
         >
             <div className=" px-14 mb-5 rounded-lg">
                 <div className="">
@@ -173,6 +170,12 @@ const AddPropertyModal = ({ modalRef, onSubmitSuccess }) => {
                             ✕
                         </button>
                     </div>
+                </div>
+                <div className="w-full flex justify-center items-center h-12 bg-red-100 mb-4 rounded-lg">
+                    <p className="flex text-[#C42E2E] ">
+                        {/* TODO: make this dynamic */}
+                        Error message here
+                    </p>
                 </div>
                 <div className="pt-5 flex justify-start items-center mb-5">
                     <p className="montserrat-bold">Add Property Details</p>

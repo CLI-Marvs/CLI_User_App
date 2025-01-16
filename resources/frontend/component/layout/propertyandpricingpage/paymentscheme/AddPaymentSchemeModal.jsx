@@ -98,6 +98,12 @@ const AddPaymentSchemeModal = ({ modalRef, onSubmitSuccess }) => {
                         </button>
                     </div>
                 </div>
+                <div className="w-full flex justify-center items-center h-12 bg-red-100 mb-4 rounded-lg">
+                    <p className="flex text-[#C42E2E] ">
+                        {/* TODO: make this dynamic */}
+                        Error message here
+                    </p>
+                </div>
                 <div className="pt-5 flex justify-start items-center mb-5">
                     <p className="montserrat-bold">Add Payment Scheme</p>
                 </div>

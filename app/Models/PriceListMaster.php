@@ -4,13 +4,15 @@ namespace App\Models;
 
 use App\Models\TowerPhase;
 use App\Models\BasicPricing;
+use App\Models\FloorPremium;
 use App\Models\PaymentScheme;
 use App\Models\PropertyMaster;
-use App\Models\PriceBasicDetails;
+use App\Models\PriceBasicDetail;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class PriceListMaster extends Model
 {
@@ -20,11 +22,10 @@ class PriceListMaster extends Model
 
 
     //Relationship
-    public function priceBasicDetail()
+    public function priceBasicDetail():HasOne
     {
-        return $this->belongsTo(PriceBasicDetails::class, 'pricebasic_details_id', 'id');
+        return $this->hasOne(PriceBasicDetail::class,'pricelist_master_id','id');
     }
-
 
     public function towerPhase(): BelongsTo
     {
@@ -34,6 +35,11 @@ class PriceListMaster extends Model
     public function paymentSchemes(): HasMany
     {
         return $this->hasMany(PaymentScheme::class);
+    }
+
+    public function floorPremiums(): HasMany
+    {
+        return $this->hasMany(FloorPremium::class);
     }
 
 

@@ -156,7 +156,9 @@ Route::middleware('auth:sanctum')->group(function () {
   /*Property Price Master List */
   Route::prefix('price-list-masters')->group(function () {
     // Get price list masters
-    Route::post('/', [PriceListMasterController::class, 'index']);
+    Route::get('/', [PriceListMasterController::class, 'index']);
+    //Store a price list masters
+    Route::post('/', [PriceListMasterController::class, 'store']);
  
   });
 

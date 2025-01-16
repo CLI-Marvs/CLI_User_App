@@ -16,6 +16,7 @@ const PricingMasterList = () => {
 
     //States
     const [propertyMasterList, setPropertyMasterList] = useState([]);
+    console.log("propertyMasterList", propertyMasterList);
     const [startDate, setStartDate] = useState(new Date());
     const [toggled, setToggled] = useState(false);
     const [isFilterVisible, setIsFilterVisible] = useState(false);
@@ -25,7 +26,7 @@ const PricingMasterList = () => {
         getPropertyMaster,
     } = useStateContext();
     const navigate = useNavigate();
-    const modalRef = useRef(null);
+    const propertyModalRef = useRef(null);
     const toggleFilterBox = () => {
         setIsFilterVisible(!isFilterVisible);
     };
@@ -39,38 +40,48 @@ const PricingMasterList = () => {
     }, []);
 
     //Event handler
+    /**
+     * Handle to navigate to basic pricing component, only if the Status !== On-going Approval
+     * @param {*} id 
+     * @param {*} status 
+     */
     const handleNavigateToBasicPricing = async (id, status) => {
-        if (status !== "On-going Approval") {
-            try {
-                // Fetch the property details based on the id
-                const response = await getPropertyMaster(id);
-                const passData = response;
-                navigate(`/propertyandpricing/basicpricing/${id}`, {
-                    state: { passPropertyDetails: passData },
-                });
-            } catch (error) {
-                console.log("Property not found");
-            }
-        } else {
-            console.log("On-going Approval, action cancelled");
-        }
+        console.log("status", status);
+        console.log("id", id);
+        // if (status !== "On-going Approval") {
+        //     try {
+        //         // Fetch the property details based on the id
+        //         const response = await getPropertyMaster(id);
+        //         const passData = response;
+        //         navigate(`/propertyandpricing/basicpricing/${id}`, {
+        //             state: { passPropertyDetails: passData },
+        //         });
+        //     } catch (error) {
+        //         console.log("Property not found");
+        //     }
+        // } else {
+        //     console.log("On-going Approval, action cancelled");
+        // }
     };
 
-    //Function to get property pricing list masters
+    /**
+     * Function to get property pricing list masters
+     */
     const fetchPropertyListMasters = async () => {
         try {
             const response = await priceListMasterService.getPriceListMasters();
-
             setPropertyMasterList(response.data);
         } catch (error) {
             console.log("Error fetching property master list:", error);
         }
     };
 
-    //Handle click to open modal
+    /*
+    Handle click to open modal
+     */
     const handleOpenModal = () => {
-        if (modalRef.current) {
-            modalRef.current.showModal();
+        if (propertyModalRef.current) {
+            propertyModalRef.current.showModal();
         }
     };
     return (
@@ -337,12 +348,12 @@ const PricingMasterList = () => {
                                         <div>
                                             <p
                                                 className="underline text-blue-500 cursor-pointer"
-                                            // onClick={() =>
-                                            //     handleNavigateToBasicPricing(
-                                            //         item.id,
-                                            //         item?.status
-                                            //     )
-                                            // }
+                                                onClick={() =>
+                                                    handleNavigateToBasicPricing(
+                                                        item.id,
+                                                        item?.status
+                                                    )
+                                                }
                                             >
                                                 {item?.status ===
                                                     "On-going Approval"
@@ -354,8 +365,10 @@ const PricingMasterList = () => {
                                     <td className="w-[150px] flex items-center justify-start">
                                         <div className="">
                                             <p className="pr-1  ">
-                                                {item?.property_name} 
-                                                {/* TODO: DOnt capitalize all property names*/}
+                                                {item?.property_name}
+                                                {/* TODO: DOnt capitalize all property names
+                                                    Item color base on status.
+                                                */}
                                             </p>
                                             <p>
                                                 Tower {""}
@@ -710,10 +723,10 @@ const PricingMasterList = () => {
                 />
             </div>
             <div>
-                {/* <AddPricingModal modalRef={modalRef} /> */}
+                {/* <AddPricingModal propertyModalRef={propertyModalRef} /> */}
                 <AddPropertyModal
                     onSubmitSuccess={fetchPropertyListMasters}
-                    modalRef={modalRef} />
+                    propertyModalRef={propertyModalRef} />
             </div>
         </div>
     );

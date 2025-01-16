@@ -55,9 +55,25 @@ class PropertyMasterRepository
             ]);
 
             DB::commit();
+            // Fetch the property master with specific relationships and fields
+            $result = $this->model
+                ->with([
+                    'towerPhases' => function ($query) {
+                        $query->select('id', 'property_masters_id', 'tower_phase_name', 'tower_description')
+                            ->latest('id')
+                            ->limit(1);
+                    },
+                    'propertyCommercialDetail' => function ($query) {
+                        $query->select('id', 'property_master_id', 'type', 'barangay', 'city', 'province')
+                            ->latest('id')
+                            ->limit(1);
+                    }
+                ])
+                ->select('id', 'property_name') // Add any other property master fields you need
+                ->find($propertyMaster->id);
             // Return success status and optional message
             return [
-                'data' => $towerPhase,
+                'data' => $result,
                 'message' => 'Property and related details added successfully!',
                 'success' => true
             ];

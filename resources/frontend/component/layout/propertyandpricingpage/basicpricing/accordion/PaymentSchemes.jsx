@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { IoIosArrowDown } from "react-icons/io";
 import { useStateContext } from "../../../../../context/contextprovider";
-import { usePaymentSchemeStateContext } from '../../../../../context/PaymentScheme/PaymentSchemeContext'
+ 
 const PaymentSchemes = () => {
     //State
     const [accordionOpen, setAccordionOpen] = useState(false);
@@ -11,7 +11,7 @@ const PaymentSchemes = () => {
         getPaymentSchemes,
         formDataState,
     } = useStateContext();
-    const { setPaymentSchemeFormData } = usePaymentSchemeStateContext();
+ 
     const [selectedPaymentScheme, setSelectedPaymentScheme] = useState([]);
     // console.log("selectedPaymentScheme", selectedPaymentScheme);
     // console.log("paymentSchemes", paymentSchemes);

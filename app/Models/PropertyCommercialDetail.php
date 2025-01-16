@@ -26,6 +26,6 @@ class PropertyCommercialDetail extends Model
     //Relationships
     public function propertyMaster():BelongsTo
     {
-        return $this->belongsTo(PropertyMaster::class);
+        return $this->belongsTo(PropertyMaster::class, 'property_master_id', 'id');
     }
 }
