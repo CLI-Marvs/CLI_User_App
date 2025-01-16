@@ -87,6 +87,7 @@ const InquiryList = () => {
     };
 
     const handleRefresh = () => {
+        setResultSearchActive(false);
         if (daysFilter) {
             setDaysFilter(null);
             setActiveDayButton(null);
@@ -105,6 +106,7 @@ const InquiryList = () => {
             setAssignedToMeActive(false);
             setDaysFilter(null);
         }
+        
         getAllConcerns();
     };
 
