@@ -638,11 +638,15 @@ const ReportPage = () => {
                                 value={departmentValue}
                                 onChange={(e) => setDepartmentValue(e.target.value)}
                             >
+                                <option value="All">All</option>
                                 {user?.department === "Customer Relations - Services" ? (
-                                    allDepartment.map((item, index) => (
-                                        <option key={index} value={item}>
-                                            {item}
-                                        </option>
+                                    allDepartment
+                                        .filter((item) => item !== "All")
+                                        .sort()
+                                        .map((item, index) => (
+                                            <option key={index} value={item}>
+                                                {item}
+                                            </option>
                                     ))
                                 ) : (
                                     <option value={user?.department}>
@@ -666,7 +670,7 @@ const ReportPage = () => {
             <div className="bg-[#F2F8FC] p-4 rounded-[10px]">
                 <div className=" mb-2 flex gap-[8px] text-lg montserrat-bold">
                     <p className="">
-                        Resolved vs. Unresolved vs. Closed
+                        Resolved vs. Closed vs. Unresolved 
                     </p>
                     {dataSet && dataSet.every(item => item.Resolved === 0 && item.Unresolved === 0 && item.Closed === 0) && (
                         <p>
