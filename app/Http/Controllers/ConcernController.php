@@ -909,6 +909,10 @@ class ConcernController extends Controller
                 )
                 ->paginate(20);
 
+                \Log::info($allConcerns);
+
+                /* dd($allConcerns); */
+
             return response()->json($allConcerns);
         } catch (\Exception $e) {
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
@@ -1073,6 +1077,10 @@ class ConcernController extends Controller
 
         if (!empty($searchParams['selectedMonth'])) {
             $query->whereMonth('created_at', $searchParams['selectedMonth']);
+        }
+
+        if (!empty($searchParams['departments'])) {
+            $query->whereIn('resolve_from.department', $searchParams['departments']);
         }
 
         return $query;
