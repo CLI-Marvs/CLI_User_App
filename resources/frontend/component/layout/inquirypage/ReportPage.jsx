@@ -664,15 +664,15 @@ const ReportPage = () => {
                 </div>
             </div>
             <div className="bg-[#F2F8FC] p-4 rounded-[10px]">
-                <div className=" mb-2 flex text-lg montserrat-bold">
+                <div className=" mb-2 flex gap-[8px] text-lg montserrat-bold">
                     <p className="">
                         Resolved vs. Unresolved vs. Closed
                     </p>
-                    {dataSet.length > 0 && (
+                    {dataSet && dataSet.every(item => item.Resolved === 0 && item.Unresolved === 0 && item.Closed === 0) && (
                         <p>
-                            No results found
+                          - (No results found)
                         </p>
-                      )}
+                        )}
                 </div>
                 <div className="overflow-x-auto mt-[40px]">
                     <ResponsiveContainer width="100%" height={218}>
@@ -759,9 +759,17 @@ const ReportPage = () => {
             </div>
             <div className="flex gap-[10px]">
                 <div className=" w-[579px] pb-7 min-h-[335px] flex-grow-1 bg-[#F2F8FC] rounded-lg">
-                    <p className="p-4  text-base montserrat-bold">
-                        By Type
-                    </p>
+                    <div className="flex p-4 gap-[8px] text-base montserrat-bold">
+                        <p className="">
+                            By Type
+                        </p>
+                        {communicationTypeData && communicationTypeData.every(item => item.value === 0) && (
+                            <p>
+                              - (No results found)
+                            </p>
+                            )}
+                    </div>
+                    
                     <div className="border border-t-1"></div>
                     <div className="flex-grow mt-[40px]">
                         <ResponsiveContainer width="100%" height={300}>
@@ -844,9 +852,14 @@ const ReportPage = () => {
                     </div>
                 </div>
                 <div className="w-[571px] pb-7  flex-grow-1 bg-[#F2F8FC] rounded-lg">
-                    <p className="p-4 text-base montserrat-bold">
-                        By Channel
-                    </p>
+                    <div className="flex p-4 gap-[8px] text-base montserrat-bold">
+                        <p className="">
+                            By Channel
+                        </p>
+                        {inquriesPerChannelData && inquriesPerChannelData.every(item => item.value === 0) && (
+                            <p> - (No results found)</p>    
+                            )}
+                    </div>
                     <div className="border border-t-1"></div>
                     <div className="mt-4"></div>
                     <div className="flex flex-col">
@@ -962,9 +975,17 @@ const ReportPage = () => {
             <div className="relative flex gap-3 mt-[6px]  items-start">
                 <div className="flex flex-col gap-3">
                     <div className=" bg-whiterounded-[10px] bg-[#F2F8FC] w-[579px] flex flex-col overflow-y-auto">
-                        <p className="p-4  text-base montserrat-bold">
-                            By Property
-                        </p>
+                        <div className="p-4 flex gap-[8px] text-base montserrat-bold">
+                            <p className="">
+                                By Property
+                            </p>
+                            {dataProperty && dataProperty.every(item => item.resolved === 0 && item.unresolved === 0 && item.closed === 0) && (
+                                <p>
+                                  - (No results found)
+                                </p>    
+                                )}
+                        </div>
+                        
                         <div className="border border-t-1"></div>
                         <div className="flex-grow overflow-x-auto px-[10px] mt-[5px] pb-[50px]">
                             <table className="table-auto border-collapse border border-gray-300 w-full text-sm text-left">
@@ -1109,9 +1130,16 @@ const ReportPage = () => {
                 </div>
                 <div className="flex flex-col gap-3">
                     <div className=" bg-whiterounded-[10px] bg-[#F2F8FC] w-[579px] flex flex-col overflow-y-auto">
-                        <p className="p-4  text-base montserrat-bold">
-                            By Department
-                        </p>
+                        <div className="flex p-4 gap-[8px] text-base montserrat-bold">
+                            <p className="">
+                                By Department
+                            </p>
+                            {dataDepartment && dataDepartment.every(item => item.resolved === 0 && item.unresolved === 0 && item.closed === 0) && (
+                                <p>
+                                  - (No results found)
+                                </p>    
+                                )}
+                        </div>
                         <div className="border border-t-1"></div>
                         <div className="flex-grow overflow-x-auto px-[10px] mt-[5px] pb-[50px]">
                             <table className="table-auto border-collapse border border-gray-300 w-full text-sm text-left">
@@ -1156,9 +1184,17 @@ const ReportPage = () => {
             <div className="flex-grow mt-[6px]">
                 <div className="flex flex-col gap-[15px] w-full">
                     <div className="w-full pb-7 min-h-[335px] flex-grow-1 bg-[#F2F8FC] rounded-lg">
-                        <p className="p-4 text-base montserrat-bold">
-                            By Category
-                        </p>
+                        <div className="flex p-4 gap-[8px] text-base montserrat-bold">
+                            <p className="">
+                                By Category
+                            </p>
+                            {dataCategory && dataCategory.every(item => item.value === 0) && (
+                                <p>
+                                  - (No results found)
+                                </p>    
+                                )}
+                        </div>
+                        
                         <div className="border border-t-1"></div>
                         <div className="flex flex-col">
                             <div className="flex justify-center">
