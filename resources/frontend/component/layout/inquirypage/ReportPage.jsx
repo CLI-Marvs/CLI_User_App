@@ -235,10 +235,10 @@ const ReportPage = () => {
                     <div className="mt-2">
 
                         <p className="text-sm text-gray-600">
-                            <span className="text-custom-solidgreen">Resolved:</span> {payload[1].value}
+                            <span className="text-custom-solidgreen">Resolved:</span> {payload[0].value}
                         </p>
                         <p className="text-sm text-gray-600">
-                            <span className="text-custom-lightgreen">Closed:</span> {payload[0].value}
+                            <span className="text-custom-lightgreen">Closed:</span> {payload[1].value}
                         </p>
                         <p className="text-sm text-gray-600">
                             <span className="text-red-500 ">Unresolved:</span> {payload[2].value}
@@ -658,7 +658,7 @@ const ReportPage = () => {
 
                 </div>
                 <div>
-                    <button onClick={handleSearchFilter} className="hover:shadow-custom4 bg-custom-lightgreen text-white rounded-[6px] px-4 py-1 font-semibold">
+                    <button onClick={handleSearchFilter} className="hover:shadow-custom4 h-[35px] w-[88px] gradient-btn rounded-[10px] text-white text-sm">
                         Search
                     </button>
                 </div>
@@ -993,10 +993,10 @@ const ReportPage = () => {
                                             {dataProperty.reduce((sum, item) => sum + item.resolved, 0)}
                                         </td>
                                         <td className="border border-gray-300 px-4 py-2">
-                                            {dataProperty.reduce((sum, item) => sum + item.unresolved, 0)}
+                                            {dataProperty.reduce((sum, item) => sum + item.closed, 0)}
                                         </td>
                                         <td className="border border-gray-300 px-4 py-2">
-                                            {dataProperty.reduce((sum, item) => sum + item.closed, 0)}
+                                            {dataProperty.reduce((sum, item) => sum + item.unresolved, 0)}
                                         </td>
                                     </tr>
                                 </tbody>
@@ -1136,10 +1136,10 @@ const ReportPage = () => {
                                             {dataDepartment.reduce((sum, item) => sum + item.resolved, 0)}
                                         </td>
                                         <td className="border border-gray-300 px-4 py-2">
-                                            {dataDepartment.reduce((sum, item) => sum + item.unresolved, 0)}
+                                            {dataDepartment.reduce((sum, item) => sum + item.closed, 0)}
                                         </td>
                                         <td className="border border-gray-300 px-4 py-2">
-                                            {dataDepartment.reduce((sum, item) => sum + item.closed, 0)}
+                                            {dataDepartment.reduce((sum, item) => sum + item.unresolved, 0)}
                                         </td>
                                     </tr>
                                 </tbody>
@@ -1194,7 +1194,7 @@ const ReportPage = () => {
 
                                         <div className=" shrink-0 items-center" key={index}>
                                             <div
-                                                className="flex w-[420px] gap-[10px]"
+                                                className="flex w-[450px] gap-[10px]"
                                                 key={index}
                                             >
                                                 <span
@@ -1214,12 +1214,12 @@ const ReportPage = () => {
                                                     </span>
                                                 </div>
                                                 <div className="flex items-center gap-1">
-                                                    <span className="text-gray-700 font-bold text-sm">
+                                                    <span className="text-gray-500 font-bold text-sm">
                                                         {`${((category.value / totalValue) * 100).toFixed(2)}%`}
                                                     </span>
-                                                    {/*  <span className="text-custom-gray81 text-[10px]">
-                                                        {category.value ? "%" : ""}
-                                                    </span> */}
+                                                     <span className="text-gray-500 font-bold text-sm">
+                                                        {"("}{category.value}{")"}
+                                                    </span>
                                                 </div>
                                             </div>
                                         </div>

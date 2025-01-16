@@ -1067,6 +1067,14 @@ class ConcernController extends Controller
             $query->whereDate('concerns.created_at', '=', $startDate);
         }
 
+        if (!empty($searchParams['selectedYear'])) {
+            $query->whereYear('created_at', $searchParams['selectedYear']);
+        }
+
+        if (!empty($searchParams['selectedMonth'])) {
+            $query->whereMonth('created_at', $searchParams['selectedMonth']);
+        }
+
         return $query;
     }
 
@@ -2015,11 +2023,7 @@ class ConcernController extends Controller
         $project = $request->property;
         $year = $request->year ?? Carbon::now()->year;
         $query = Concerns::select(
-            DB::raw("
-                (SELECT COALESCE(string_agg(elem->>'department', ', '), 'CRS')
-                FROM jsonb_array_elements(assign_to::jsonb) AS elem
-                ) AS department
-            "),
+            DB::raw("jsonb_array_elements(assign_to::jsonb)->>'department' as department"),
             DB::raw('SUM(case when status = \'Resolved\' then 1 else 0 end) as Resolved'),
             DB::raw('SUM(case when status = \'unresolved\' then 1 else 0 end) as Unresolved'),
             DB::raw('SUM(case when status = \'Closed\' then 1 else 0 end) as Closed')
