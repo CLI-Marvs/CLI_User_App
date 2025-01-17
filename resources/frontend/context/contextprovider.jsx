@@ -200,7 +200,7 @@ export const ContextProvider = ({ children }) => {
     };
 
     const fetchCategory = async () => {
-        if (!isDepartmentInitialized) return;
+       
         try {
             const response = await apiService.get("category-monthly", {
                 params: { department: department, property:project, month: month, year: year },
@@ -291,7 +291,7 @@ export const ContextProvider = ({ children }) => {
                 unresolved: item.unresolved,
                 closed: item.closed,
             }));
-            console.log("formattedData", formattedData);
+            
             setDataDepartment(formattedData);
         } catch (error) {
             console.log("error retrieving", error);
