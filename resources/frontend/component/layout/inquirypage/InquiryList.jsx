@@ -28,9 +28,12 @@ const InquiryList = () => {
         statusFilter,
         searchFilter,
         user,
+        dataCount,
         setSpecificAssigneeCsr,
         specificAssigneeCsr,
+        department,
         loading,
+        allEmployees,
         /*  setHasAttachments,
         hasAttachments */
     } = useStateContext();
@@ -43,7 +46,7 @@ const InquiryList = () => {
     const [status, setStatus] = useState("");
     const [type, setType] = useState("");
     const [channels, setChannels] = useState("");
-
+    const [departments, setDepartments] = useState("");
     const [selectedProperty, setSelectedProperty] = useState("");
     const [selectedYear, setSelectedYear] = useState("");
     const [selectedMonth, setSelectedMonth] = useState("");
@@ -60,18 +63,7 @@ const InquiryList = () => {
     const [isOpenSelect, setIsOpenSelect] = useState(false);
 
     const [resultSearchActive, setResultSearchActive] = useState(false);
-    const [resultName, setResultName] = useState("");
-    const [resultCategory, setResultCategory] = useState("");
-    const [resultType, setResultType] = useState("");
-    const [resultStatus, setResultStatus] = useState("");
-    const [resultEmail, setResultEmail] = useState("");
-    const [resultTicket, setResultTicket] = useState("");
-    const [resultChannels, setResultChannels] = useState("");
-    const [resultStartDate, setResultStartDate] = useState("");
-    const [resultSelectedProperty, setResultSelectedProperty] = useState("");
-    const [resultHasAttachments, setResultHasAttachments] = useState("");
-    const [resultYear, setResultYear] = useState("");
-    const [resultMonth, setResultMonth] = useState("");
+   
 
 
     const handleSelect = (option) => {
@@ -334,16 +326,6 @@ const InquiryList = () => {
 
     const handleSearch = () => {
         setResultSearchActive(true);
-        setResultName(name);
-        setResultCategory(category);
-        setResultType(type);
-        setResultStatus(status);
-        setResultEmail(email);
-        setResultChannels(channels);
-        setResultTicket(ticket);
-        setResultStartDate(startDate);
-        setResultSelectedProperty(selectedProperty);
-        setResultHasAttachments(hasAttachments);
 
         let summaryParts = []; // Array to hold each part of the summary
 
@@ -353,6 +335,7 @@ const InquiryList = () => {
         if (type) summaryParts.push(`Type -> ${type}`);
         if (email) summaryParts.push(`Email -> ${email}`);
         if (channels) summaryParts.push(`Channels -> ${channels}`);
+        if (departments) summaryParts.push(`Department -> ${departments}`);
         if (ticket) summaryParts.push(`Ticket -> ${ticket}`);
         if (startDate) summaryParts.push(`Start Date -> ${formatDate(startDate)}`);
         if (selectedProperty) summaryParts.push(`Property -> ${selectedProperty}`);
@@ -377,6 +360,7 @@ const InquiryList = () => {
             hasAttachments,
             selectedMonth,
             selectedYear,
+            departments,
         });
         setDaysFilter(null);
         setStatusFilter(null);
@@ -394,6 +378,7 @@ const InquiryList = () => {
         setSpecificAssigneeCsr("");
         setSelectedYear("");
         setSelectedMonth("");
+        setDepartments("");
     };
 
     useEffect(() => {
@@ -689,6 +674,45 @@ const InquiryList = () => {
                                             <IoIosArrowDown />
                                         </span>
                                     </div>
+                                    <div className="flex relative">
+                                        <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
+                                            {" "}
+                                            Department
+                                        </label>
+                                        <div className="flex bg-red-900 justify-start w-full relative">
+                                            <label
+                                                htmlFor=""
+                                                className="w-full border-b-2"
+                                            >
+                                                {""}
+                                            </label>
+                                            <select
+                                                className="w-full border-b-1 outline-none appearance-none text-sm absolute px-[8px]"
+                                                value={departments}
+                                                onChange={(e) =>
+                                                    setDepartments(e.target.value)
+                                                }
+                                            >
+                                                <option value="">
+                                                    {" "}
+                                                    Select Department
+                                                </option>
+                                                {[...new Set(allEmployees
+                                                    .map(item => item.department)
+                                                    .filter(department => department !== null && department !== undefined && department !== "NULL")
+                                                    )]
+                                                    .sort((a, b) => a.localeCompare(b))
+                                                    .map((department, index) => (
+                                                    <option key={index} value={department}>
+                                                        {department}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                        <span className="absolute inset-y-0 right-0 flex items-center  pl-3 pointer-events-none">
+                                            <IoIosArrowDown />
+                                        </span>
+                                    </div>
                                     <div className="flex">
                                         <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
                                             {" "}
@@ -867,10 +891,10 @@ const InquiryList = () => {
                             >
                                 {isOpen ? <IoIosArrowUp /> : <IoIosArrowDown />}{" "}
                                 {resultSearchActive ? (
-                                    data && data.length === 0 ? (
+                                    dataCount && dataCount === 0 ? (
                                         <p>No Records Found</p>
                                     ) : (
-                                        <p>{data.length} Results Found</p>
+                                        <p>{dataCount} Results Found</p>
                                     )
                                 ) : (
                                     <p>{selectedOption}</p>
