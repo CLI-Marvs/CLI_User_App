@@ -51,9 +51,11 @@ class ConcernController extends Controller
     private $keyJson;
     private $bucket;
     private $folderName;
+    private $dynamicTicketYear;
 
     public function __construct()
     {
+        $this->dynamicTicketYear = date('y');
         if (config('services.app_url') === 'http://localhost:8001' || config('services.app_url') === 'https://admin-dev.cebulandmasters.com') {
             $this->keyJson = config('services.gcs.key_json');
             $this->bucket = 'super-app-storage';
@@ -466,7 +468,7 @@ class ConcernController extends Controller
             $nextId = $lastConcern ? $lastConcern->id + 1 : 1;
             $formattedId = str_pad($nextId, 8, '0', STR_PAD_LEFT);
 
-            $ticketId = 'Ticket#24' . $formattedId;
+            $ticketId = 'Ticket#' . $this->dynamicTicketYear . $formattedId;
 
 
             $concerns = new Concerns();
@@ -546,7 +548,7 @@ class ConcernController extends Controller
             $nextId = $lastConcern ? $lastConcern->id + 1 : 1;
             $formattedId = str_pad($nextId, 8, '0', STR_PAD_LEFT);
 
-            $ticketId = 'Ticket#24' . $formattedId;
+            $ticketId = 'Ticket#'.$this->dynamicTicketYear . $formattedId;
 
 
 
@@ -2492,7 +2494,7 @@ class ConcernController extends Controller
                     $nextId = $lastConcern ? $lastConcern->id + 1 : 1;
 
                     $formattedId = str_pad($nextId, 8, '0', STR_PAD_LEFT);
-                    $ticketId = 'Ticket#24' . $formattedId;
+                    $ticketId = 'Ticket#' . $this->dynamicTicketYear . $formattedId;
 
                     $concerns = new Concerns();
                     $concerns->email_subject = $buyer['email_subject'];
