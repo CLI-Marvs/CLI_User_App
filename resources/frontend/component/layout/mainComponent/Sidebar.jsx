@@ -71,8 +71,10 @@ const Sidebar = () => {
         setIsInvoiceOpen(false);
         setSuperAdminOpen(true);
         break;
-      case "/transactionmanagement/invoices":
-      case "/transactionmanagement/transactionrecords":
+      case "/transaction/invoices":
+      case "/transaction/records":
+      case "/transaction/customer":
+
         setInquiryOpen(false);
         setIsInvoiceOpen(true);
         setSuperAdminOpen(false);
@@ -97,7 +99,7 @@ const Sidebar = () => {
 
   return (
     <>
-      <Card className="shadow-none w-[230px] max-w-[230px] p-[25px] pr-[20px] pt-0 rounded-none bg-custom-grayFA relative z-30">
+      <Card className="shadow-none w-[230px] max-w-[230px] p-[25px] pr-[20px] pt-0 rounded-none bg-custom-grayFA relative z-30 overflow-hidden">
         <List className="p-0 gap-0">
           <Link to="/notification">
             <ListItem
@@ -252,11 +254,11 @@ const Sidebar = () => {
             )
           }
 
-          {/* <Link to="/transactionmanagement/invoices">
+          <Link to="/transaction/invoices">
             <ListItem
               className={`h-[35px] w-[210px] text-sm pl-[12px] transition-all duration-300 ease-in-out 
             ${activeItemTransaction === "invoices" ||
-                        location.pathname.startsWith("/transactionmanagement")
+                        location.pathname.startsWith("/transaction")
                         ? "bg-custom-lightestgreen text-custom-solidgreen font-semibold"
                         : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
                       }
@@ -272,17 +274,17 @@ const Sidebar = () => {
                 />
               </ListItemSuffix>
             </ListItem>
-          </Link> */}
-          {/* 
+          </Link>
+          
           {isInvoiceOpen &&
             location.pathname.startsWith(
-              "/transactionmanagement"
+              "/transaction"
             ) && (
               <div className="px-[12px] py-[20px] w-[210px] min-h-[122px] flex flex-col gap-[5px] bg-custom-lightestgreen border-t rounded-t-none rounded-b-[10px] border-custom-solidgreen transition-all duration-300 ease-in-out">
-                <Link to="/transactionmanagement/invoices">
+                <Link to="/transaction/invoices">
                   <ListItem
                     className={`h-[32px] w-full py-[8px] px-[18px] text-sm rounded-[50px] ${location.pathname.startsWith(
-                      "/transactionmanagement/invoices"
+                      "/transaction/invoices"
                     )
                         ? "bg-white text-custom-solidgreen font-semibold"
                         : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
@@ -297,25 +299,42 @@ const Sidebar = () => {
                   </ListItem>
                 </Link>
 
-                <Link to="/transactionmanagement/transactionrecords">
+                <Link to="/transaction/records">
                   <ListItem
                     className={`h-[32px] w-full py-[8px] px-[18px] text-sm rounded-[50px] ${location.pathname.startsWith(
-                      "/transactionmanagement/transactionrecords"
+                      "/transaction/records"
                     )
                         ? "bg-white text-custom-solidgreen font-semibold"
                         : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
                       }`}
                     onClick={() =>
                       handleItemTransactionClick(
-                        "/transactionmanagement/transactionrecords"
+                        "/transaction/records"
                       )
                     }
                   >
                     Transaction Records
                   </ListItem>
                 </Link>
+                <Link to="/transaction/customer">
+                  <ListItem
+                    className={`h-[32px] w-full py-[8px] px-[18px] text-sm rounded-[50px] ${location.pathname.startsWith(
+                      "/transaction/customer"
+                    )
+                        ? "bg-white text-custom-solidgreen font-semibold"
+                        : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
+                      }`}
+                    onClick={() =>
+                      handleItemTransactionClick(
+                        "/transaction/customer"
+                      )
+                    }
+                  >
+                    Customer Masterlist
+                  </ListItem>
+                </Link>
               </div>
-            )} */}
+            )}
 
           <div className="mt-3 mb-1 px-4">
             <p className="text-[14px] font-bold bg-gradient-to-r from-custom-bluegreen via-custom-lightgreen to-custom-solidgreen bg-clip-text text-transparent">

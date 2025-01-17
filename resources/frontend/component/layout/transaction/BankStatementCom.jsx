@@ -108,7 +108,6 @@ const BankStatementCom = () => {
                     </soap:Body>
                     </soap:Envelope>`;
 
-                // Make the API call for the current item
                 const response = await apiServiceSap.post(
                     "post-data-sap",
                     soapBody
@@ -116,7 +115,7 @@ const BankStatementCom = () => {
             }
 
             getMatches();
-            getTransactions(); // Call to update transactions after all items are processed
+            getTransactions(); 
 
             if (modalRef.current) {
                 modalRef.current.close();
@@ -134,8 +133,6 @@ const BankStatementCom = () => {
             }
             setLoading(false);
             toast.error("Sometine went wrong. Please refresh the page");
-            
-
         }
     };
 

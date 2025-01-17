@@ -96,6 +96,10 @@ export const ContextProvider = ({ children }) => {
     const [userAccessData, setUserAccessData] = useState([]); //Holds the user and department access data
     const [permissions, setPermissions] = useState({});
 
+    const [customerData, setCustomerData] = useState([]);
+    const [customerDetails, setCustomerDetails] = useState([]);
+    const [messageData, setMessageData] = useState([]);
+
     useEffect(() => {
         if (user && user.department && !isDepartmentInitialized) {
             setDepartment(user.department === "Customer Relations - Services" ? "All" : user.department);
@@ -896,6 +900,12 @@ export const ContextProvider = ({ children }) => {
                 userAccessData,
                 setUserAccessData,
                 hasPermission,
+                setCustomerData,
+                customerData,
+                setCustomerDetails,
+                customerDetails,
+                setMessageData,
+                messageData
 
             }}
 

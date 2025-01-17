@@ -248,3 +248,59 @@ textarea {
 .shrink {
   transform: scale(0.87); /* Adjust the scale factor as needed */
 }
+
+
+.transaction-scrollbar {
+  overflow-y: auto; /* Hide the scrollbar initially */
+}
+
+.transaction-scrollbar:hover {
+  overflow-y: auto; /* Show the scrollbar on hover */
+}
+
+.transaction-scrollbar::-webkit-scrollbar {
+  width: 6px; /* Adjust the width for thinness */
+}
+
+.transaction-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #888; /* Color of the scrollbar thumb */
+  border-radius: 10px; /* Rounded corners for the scrollbar thumb */
+}
+
+.transaction-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: #555; /* Darker color on hover */
+}
+
+.transaction-scrollbar::-webkit-scrollbar-track {
+  background-color: #f1f1f1; /* Background of the scrollbar track */
+  border-radius: 10px;
+}
+
+
+.customer-scrollbar {
+  overflow-x: hidden; /* Hide the scrollbar initially */
+}
+
+.customer-scrollbar:hover {
+  overflow-x: auto; /* Show the scrollbar on hover */
+}
+
+.customer-scrollbar::-webkit-scrollbar {
+  height: 3px;
+  cursor: pointer;
+  width: 6px; /* Adjust the width for thinness */
+}
+
+.customer-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #348017; /* Color of the scrollbar thumb */
+  border-radius: 10px; /* Rounded corners for the scrollbar thumb */
+}
+
+.customer-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: #348017; /* Darker color on hover */
+}
+
+.customer-scrollbar::-webkit-scrollbar-track {
+  background-color: #f1f1f1; /* Background of the scrollbar track */
+  border-radius: 5px;
+}
