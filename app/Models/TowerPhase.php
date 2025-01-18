@@ -22,7 +22,7 @@ class TowerPhase extends Model
         return $this->belongsTo(PropertyMaster::class, 'property_masters_id', 'id');
     }
 
-    public function units()
+    public function units():HasMany
     {
         return $this->hasMany(Unit::class);
     }

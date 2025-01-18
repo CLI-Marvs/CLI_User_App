@@ -1,24 +1,25 @@
 import { createContext, useContext, useState } from 'react';
 
 const BasicPricingContext = createContext();
-
+const initialState = () => ({
+    priceListSettings: {
+        base_price: "",
+        transfer_charge: 8 || "",
+        effective_balcony_base: 50 || "",
+        vat: 12 || "",
+        vatable_less_price: 3600000 || "",
+        reservation_fee: "",
+    },
+    floorPremiums: {},
+    additionalPremiums: {},
+    priceVersions: {},
+    paymentSchemes:  [],
+    reviewsAndApproval: {}
+});
 export default function BasicPricingProvider({ children }) {
-    const [pricingData, setPricingData] = useState({
-        priceListSettings: {
-            basePrice: "",
-            transferCharge: 8 || "",
-            effectiveBalconyBase: 50 || "",
-            vat: 12 || "",
-            vatableLessPrice: 3600000 || "",
-            reservationFee: "",
-        },
-        floorPremiums: {},
-        additionalPremiums: {},
-        priceVersions: {},
-        paymentSchemes: {},
-        reviewsAndApproval: {}
-    });
- 
+    const [pricingData, setPricingData] = useState(initialState());
+
+
     const updatePricingSection = (section, newData) => {
         setPricingData(prev => ({
             ...prev,
@@ -26,8 +27,13 @@ export default function BasicPricingProvider({ children }) {
         }));
     };
 
+    //Reset the all state
+    const resetPricingData = () => {
+        setPricingData(initialState());
+    }
+
     return (
-        <BasicPricingContext.Provider value={{ pricingData, updatePricingSection }}>
+        <BasicPricingContext.Provider value={{ pricingData, updatePricingSection, resetPricingData, setPricingData }}>
             {children}
         </BasicPricingContext.Provider>
     );

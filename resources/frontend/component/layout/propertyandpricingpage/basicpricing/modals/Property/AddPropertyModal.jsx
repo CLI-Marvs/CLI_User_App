@@ -89,7 +89,7 @@ const AddPropertyModal = ({ propertyModalRef, onSubmitSuccess }) => {
                 }
                 onSubmitSuccess(); //Call this function to fetch property master lists from PricingMasterList
                 navigate(`/property-pricing/basic-pricing/${towerPhaseId}`, {
-                    state: { passPropertyData: propertyData },
+                    state: { data: propertyData },
                 });
 
             }

@@ -37,8 +37,11 @@ class PriceListMasterController extends Controller
         try {
             //TODO: validate the request to make sure it's valid and match in the request
             $priceListMaster = $this->service->store($request->validated());
-             
-            return response()->json($priceListMaster, 201);
+
+            return response()->json([
+                'message' => 'Price list master created successfully',
+                'data' => $priceListMaster,
+            ], 201);
         } catch (ValidationException $e) {
             return response()->json([
                 'error' => 'Validation failed',

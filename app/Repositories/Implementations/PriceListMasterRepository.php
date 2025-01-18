@@ -23,6 +23,8 @@ class PriceListMasterRepository
         $priceListMasters = $this->model->with([
             'towerPhase.propertyMaster',  // Nested relationship to get property details
             'towerPhase',
+            'priceBasicDetail',
+            'towerPhase.propertyMaster.propertyCommercialDetail',
         ])->select('price_list_masters.*')  // Select all fields from price list masters
             ->orderBy('created_at', 'desc')
             ->get();
@@ -31,9 +33,13 @@ class PriceListMasterRepository
         // Transform the data to get specific fields
         $transformedData = $priceListMasters->map(function ($priceList) {
             return [
+                'price_list_master_id' => $priceList->id,
+                'tower_phase_id' => $priceList->towerPhase->id,
                 'tower_phase_name' => $priceList->towerPhase->tower_phase_name,
                 'status' => $priceList->status,
                 'property_name' => $priceList->towerPhase->propertyMaster->property_name ?? null,
+                'pricebasic_details' => $priceList->priceBasicDetail ? $priceList->priceBasicDetail->toArray() : null,
+                'property_commercial_detail' => $priceList->towerPhase->propertyMaster->propertyCommercialDetail->toArray(),
                 // Add other fields you need
             ];
         });
@@ -46,15 +52,16 @@ class PriceListMasterRepository
      */
     public function store(array $data)
     {
-        
+
         DB::beginTransaction();
         try {
-            $priceListMaster = $this->model->where('tower_phase_id', $data['tower_phase_id'])->firstOrFail();
+            $priceListMaster = $this->model->where('tower_phase_id', $data['tower_phase_id'])->first();
 
 
             if (!$priceListMaster) {
                 throw new \Exception("PriceListMaster not found for tower_phase_id: {$data['tower_phase_id']}");
             }
+
             // Create a PriceBasicDetail for the PriceListMaster
             $priceBasicDetail = $priceListMaster->priceBasicDetail()->create([
                 'base_price' => $data['priceListPayload']['base_price'],
@@ -72,7 +79,7 @@ class PriceListMasterRepository
                 'pricebasic_details_id' => $priceBasicDetail->id,
             ]);
 
-
+            DB::commit();
             return $priceListMaster->fresh();
         } catch (\Exception $e) {
             DB::rollBack();

@@ -2,14 +2,14 @@ import React, { useEffect, useState, useRef } from "react";
 import ReactPaginate from "react-paginate";
 import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md";
 import AddPaymentSchemeModal from "./AddPaymentSchemeModal";
-
+import { usePaymentSchemes } from "@/component/layout/propertyandpricingpage/hooks/usePaymentSchemes";
 import moment from "moment";
-import { paymentSchemeService } from '@/component/servicesApi/apiCalls/propertyPricing/paymentScheme/paymentSchemeService';
+
 
 const PaymentScheme = () => {
     //State
     const modalRef = useRef(null);
-    const [paymentSchemes, setPaymentSchemes] = useState([]);
+    const { paymentSchemes, fetchPaymentSchemes } = usePaymentSchemes();
 
 
     //Hooks
@@ -20,14 +20,14 @@ const PaymentScheme = () => {
 
     //Event handler
     //Get all payment schemes
-    const fetchPaymentSchemes = async () => {
-        try {
-            const response = await paymentSchemeService.getPaymentSchemes();
-            setPaymentSchemes(response.data);
-        } catch (error) {
-            console.error("Error fetching payment schemes:", error);
-        }
-    };
+    // const fetchPaymentSchemes = async () => {
+    //     try {
+    //         const response = await paymentSchemeService.getPaymentSchemes();
+    //         setPaymentSchemes(response.data);
+    //     } catch (error) {
+    //         console.error("Error fetching payment schemes:", error);
+    //     }
+    // };
 
     //Handle open the Add Payment modal
     const handleOpenModal = () => {

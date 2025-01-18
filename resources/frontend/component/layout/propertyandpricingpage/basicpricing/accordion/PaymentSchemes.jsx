@@ -1,69 +1,71 @@
 import React, { useEffect, useState } from "react";
 import { IoIosArrowDown } from "react-icons/io";
-import { useStateContext } from "../../../../../context/contextprovider";
- 
+import { usePaymentSchemes } from "@/component/layout/propertyandpricingpage/hooks/usePaymentSchemes";
+import { usePricing } from "@/component/layout/propertyandpricingpage/basicpricing/context/BasicPricingContext";
+
 const PaymentSchemes = () => {
     //State
     const [accordionOpen, setAccordionOpen] = useState(false);
-    const {
-        paymentSchemes,
-        setPaymentSchemes,
-        getPaymentSchemes,
-        formDataState,
-    } = useStateContext();
+    const { paymentSchemes, fetchPaymentSchemes } = usePaymentSchemes();
+    const { pricingData, updatePricingSection } = usePricing();
  
-    const [selectedPaymentScheme, setSelectedPaymentScheme] = useState([]);
-    // console.log("selectedPaymentScheme", selectedPaymentScheme);
-    // console.log("paymentSchemes", paymentSchemes);
-
+    const [selectedSchemes, setSelectedSchemes] = useState([]);
     //Hooks
+    useEffect(() => {
+        fetchPaymentSchemes();
+    }, []);
 
     //Event Handler
-    const handlePaymentSchemeSelect = (id) => {
-        setSelectedPaymentScheme((prevSelectedPaymentScheme) => {
-            if (prevSelectedPaymentScheme.includes(id)) {
-                // Deselect unit if it's already selected
-                return prevSelectedPaymentScheme.filter((paymentSchemeId) => paymentSchemeId !== id);
-            } else {
-                // Select the new unit by adding its ID
-                return [...prevSelectedPaymentScheme, id];
-            }
+
+    /**
+     * Handle select payment scheme, add or remove the selected scheme id into the array
+     * @param {*} e 
+     * @param {*} id 
+     */
+    const handleSelectedPaymentScheme = (e, schemeId) => {
+        const isChecked = e.target.checked;
+        setSelectedSchemes(prevSchemes => {
+            const newSchemes = isChecked
+                ? [...prevSchemes, schemeId]
+                : prevSchemes.filter(id => id !== schemeId);
+
+            // Update the parent form state
+            updatePricingSection('paymentSchemes', { selectedSchemes: newSchemes });
+
+            return newSchemes; 
         });
     }
+
     return (
         <>
             <div
                 className={`transition-all duration-2000 ease-in-out
-      ${
-          accordionOpen
-              ? "h-[74px] mx-5 bg-white shadow-custom5 rounded-[10px]"
-              : "h-[72px] gradient-btn3 rounded-[10px] p-[1px]"
-      } `}
+      ${accordionOpen
+                        ? "h-[74px] mx-5 bg-white shadow-custom5 rounded-[10px]"
+                        : "h-[72px] gradient-btn3 rounded-[10px] p-[1px]"
+                    } `}
             >
                 <button
                     onClick={() => setAccordionOpen(!accordionOpen)}
                     className={`
-            ${
-                accordionOpen
-                    ? "flex justify-between items-center h-full w-full bg-white rounded-[9px] px-[15px]"
-                    : "flex justify-between items-center h-full w-full bg-custom-grayFA rounded-[9px] px-[15px]"
-            } `}
+            ${accordionOpen
+                            ? "flex justify-between items-center h-full w-full bg-white rounded-[9px] px-[15px]"
+                            : "flex justify-between items-center h-full w-full bg-custom-grayFA rounded-[9px] px-[15px]"
+                        } `}
                 >
                     <span
-                        className={` text-custom-solidgreen ${
-                            accordionOpen
-                                ? "text-[20px] montserrat-semibold"
-                                : "text-[18px] montserrat-regular"
-                        }`}
+                        className={` text-custom-solidgreen ${accordionOpen
+                            ? "text-[20px] montserrat-semibold"
+                            : "text-[18px] montserrat-regular"
+                            }`}
                     >
                         Payment Schemes
                     </span>
                     <span
-                        className={`flex justify-center items-center h-[40px] w-[40px] rounded-full  transform transition-transform duration-300 ease-in-out ${
-                            accordionOpen
-                                ? "rotate-180 bg-[#F3F7F2] text-custom-solidgreen"
-                                : "rotate-0 gradient-btn2 text-white"
-                        }`}
+                        className={`flex justify-center items-center h-[40px] w-[40px] rounded-full  transform transition-transform duration-300 ease-in-out ${accordionOpen
+                            ? "rotate-180 bg-[#F3F7F2] text-custom-solidgreen"
+                            : "rotate-0 gradient-btn2 text-white"
+                            }`}
                     >
                         <IoIosArrowDown className=" text-[18px]" />
                     </span>
@@ -71,11 +73,10 @@ const PaymentSchemes = () => {
             </div>
             <div
                 className={`mx-5 rounded-[10px] shadow-custom5 grid overflow-hidden transition-all duration-300 ease-in-out
-            ${
-                accordionOpen
-                    ? "mt-2 mb-4 grid-rows-[1fr] opacity-100"
-                    : "grid-rows-[0fr] opacity-0"
-            }
+            ${accordionOpen
+                        ? "mt-2 mb-4 grid-rows-[1fr] opacity-100"
+                        : "grid-rows-[0fr] opacity-0"
+                    }
             `}
             >
                 <div className=" overflow-hidden bg-white">
@@ -89,18 +90,23 @@ const PaymentSchemes = () => {
                                     <div className="flex items-center gap-[15px] h-[36px] w-full mb-[10px]">
                                         <input
                                             type="checkbox"
-                                            className="h-[16px] w-[16px] ml-[16px] rounded-[2px] appearance-none border border-gray-400 checked:bg-transparent flex items-center justify-center checked:before:bg-black checked:before:w-[12px] checked:before:h-[12px] checked:before:block checked:before:content-['']"
-                                            onChange={() =>
-                                                handlePaymentSchemeSelect(item.id)
+                                            checked={selectedSchemes.includes(item.id)}
+                                            className="h-[16px] w-[16px]  rounded-[2px] appearance-none border border-gray-400 checked:bg-transparent flex items-center justify-center checked:before:bg-black checked:before:w-[12px] checked:before:h-[12px] checked:before:block checked:before:content-['']"
+                                            onChange={(e) =>
+                                                handleSelectedPaymentScheme(e, item.id)
                                             }
                                         />
-                                        <p className="montserrat-semibold text-[21px]">
-                                            {item?.payment_scheme_name}
+                                        <p className="montserrat-semibold text-[21px] bg-red-900">
+                                            {item?.payment_scheme_name} ID: {item?.id}
                                         </p>
                                     </div>
                                     <div className="flex flex-col gap-1 text-sm pr-4">
-                                        <p>{item?.description}</p>
-                                        <p>Spot {item?.spot}%</p>
+                                        <p>
+                                            {item?.description}
+                                        </p>
+                                        <p>
+                                            Spot {item?.spot}%
+                                        </p>
                                         <p>
                                             Installment{" "}
                                             {item?.downpayment_installment}%

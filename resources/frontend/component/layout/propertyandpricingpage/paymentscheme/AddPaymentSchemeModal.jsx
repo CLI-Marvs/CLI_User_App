@@ -16,7 +16,6 @@ const formDataState = {
 
 const AddPaymentSchemeModal = ({ modalRef, onSubmitSuccess }) => {
     //State
-
     const [formData, setFormData] = useState(formDataState);
     const [isLoading, setIsLoading] = useState({});
 
@@ -54,13 +53,11 @@ const AddPaymentSchemeModal = ({ modalRef, onSubmitSuccess }) => {
                 if (modalRef.current) {
                     modalRef.current.close();
                 }
-
             }
         } catch (error) {
             console.log("Error saving payment scheme data:", error);
         } finally {
             setIsLoading((prev) => ({ ...prev, [status]: false }));
-
         }
     };
 
@@ -68,11 +65,6 @@ const AddPaymentSchemeModal = ({ modalRef, onSubmitSuccess }) => {
     //Handle close the modal and reset all state
     const handleClose = () => {
         if (modalRef.current) {
-            // setFormData(formDataState);
-            // setFloorPremiumsAccordionOpen(false);
-            // navigate("/propertyandpricing/basicpricing", {
-            //     state: { passPropertyDetails: null },
-            // }); //navigate to Basic pricing components   with the property detail data as props
             setIsLoading({});
             setFormData(formDataState);
             modalRef.current.close();

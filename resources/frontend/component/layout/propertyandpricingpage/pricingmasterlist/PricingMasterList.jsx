@@ -16,7 +16,7 @@ const PricingMasterList = () => {
 
     //States
     const [propertyMasterList, setPropertyMasterList] = useState([]);
-    console.log("propertyMasterList", propertyMasterList);
+    // console.log("propertyMasterList", propertyMasterList);
     const [startDate, setStartDate] = useState(new Date());
     const [toggled, setToggled] = useState(false);
     const [isFilterVisible, setIsFilterVisible] = useState(false);
@@ -27,6 +27,7 @@ const PricingMasterList = () => {
     } = useStateContext();
     const navigate = useNavigate();
     const propertyModalRef = useRef(null);
+    const dataFetchedRef = useRef(false);
     const toggleFilterBox = () => {
         setIsFilterVisible(!isFilterVisible);
     };
@@ -45,40 +46,37 @@ const PricingMasterList = () => {
      * @param {*} id 
      * @param {*} status 
      */
-    const handleNavigateToBasicPricing = async (id, status) => {
-        console.log("status", status);
-        console.log("id", id);
-        // if (status !== "On-going Approval") {
-        //     try {
-        //         // Fetch the property details based on the id
-        //         const response = await getPropertyMaster(id);
-        //         const passData = response;
-        //         navigate(`/propertyandpricing/basicpricing/${id}`, {
-        //             state: { passPropertyDetails: passData },
-        //         });
-        //     } catch (error) {
-        //         console.log("Property not found");
-        //     }
-        // } else {
-        //     console.log("On-going Approval, action cancelled");
-        // }
+    const handleNavigateToBasicPricing = async (item) => {
+        const status=item.status;
+        const id = item.tower_phase_id;
+        if (status !== "On-going Approval") {
+            try {
+                //Pass the price list master data to the basic pricing component for editing data
+                navigate(`/property-pricing/basic-pricing/${id}`, {
+                    state: { data: item },
+                });
+            } catch (error) {
+                console.log("Property not found");
+            }
+        } else {
+            console.log("On-going Approval, action cancelled");
+        }
     };
 
-    /**
-     * Function to get property pricing list masters
-     */
+    // Function to get property pricing list masters
     const fetchPropertyListMasters = async () => {
+        //TODO: if I navigate to other item or page "Payment scheme" the property master list will still the same, no need to fetch again
+        if (dataFetchedRef.current) return; // Prevent refetch if data already fetched
         try {
             const response = await priceListMasterService.getPriceListMasters();
             setPropertyMasterList(response.data);
+            dataFetchedRef.current = true;
         } catch (error) {
             console.log("Error fetching property master list:", error);
         }
     };
 
-    /*
-    Handle click to open modal
-     */
+    //Handle click to open modal
     const handleOpenModal = () => {
         if (propertyModalRef.current) {
             propertyModalRef.current.showModal();
@@ -350,8 +348,7 @@ const PricingMasterList = () => {
                                                 className="underline text-blue-500 cursor-pointer"
                                                 onClick={() =>
                                                     handleNavigateToBasicPricing(
-                                                        item.id,
-                                                        item?.status
+                                                        item,
                                                     )
                                                 }
                                             >
@@ -507,34 +504,55 @@ const PricingMasterList = () => {
                                                 <span>
                                                     Base Price (Sq.M.)
                                                 </span>
-                                                <span></span>
+                                                <span>
+                                                    {item?.pricebasic_details?.base_price}
+                                                </span>
                                             </p>
                                             <p className="space-x-1">
                                                 <span>Reservation</span>
-                                                <span></span>
+                                                <span>
+                                                    {item?.pricebasic_details?.reservation_fee}
+                                                </span>
                                             </p>
                                             <p className="space-x-1">
                                                 <span>
                                                     Transfer Charge
                                                 </span>
-                                                <span></span>
+                                                <span>
+                                                    {item?.pricebasic_details?.transfer_charge}
+                                                </span>
+                                                <span>
+                                                    {item?.pricebasic_details?.transfer_charge ? "%" : ""}
+                                                </span>
                                             </p>
                                             <p className="space-x-1">
                                                 <span>VAT</span>
-                                                <span></span>
+                                                <span>
+                                                    {item?.pricebasic_details?.vat} 
+                                                </span>
+                                                <span>
+                                                  {item?.pricebasic_details?.vat ? "%" : ""}
+                                                </span>
                                             </p>
                                             <p className="space-x-1">
                                                 <span>
                                                     VATable Threshold
                                                 </span>
-                                                <span></span>
+                                                <span>
+                                                    {item?.pricebasic_details?.vatable_less_price}
+                                                </span>
                                             </p>
                                             <p className="space-x-1">
                                                 <span>
                                                     Effective Balcony
                                                     Base
                                                 </span>
-                                                <span></span>
+                                                <span>
+                                                    {item?.pricebasic_details?.effective_balcony_base}
+                                                </span>
+                                                <span>
+                                                    {item?.pricebasic_details?.effective_balcony_base ? "%" : ""}
+                                                </span>
                                             </p>
                                         </div>
                                     </td>

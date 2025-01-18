@@ -1,19 +1,25 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { IoIosArrowDown } from "react-icons/io";
 import { IoMdArrowDropdown } from "react-icons/io";
 import { LiaPercentSolid } from "react-icons/lia";
-// import { usePriceBasicDetailStateContext } from "../../../../../context/PriceBasicDetail/PriceBasicContext";
 import { usePricing } from "@/component/layout/propertyandpricingpage/basicpricing/context/BasicPricingContext";
 
-const formDataState = {
 
-};
-
-const PriceListSettings = () => {
+const PriceListSettings = ({ }) => {
     //State
     const [accordionOpen, setAccordionOpen] = useState(false);
-    const [formData, setFormData] = useState(formDataState);
     const { pricingData, updatePricingSection } = usePricing();
+ 
+    // const [formData, setFormData] = useState(pricingData.priceListSettings);
+    // console.log("formData", formData);
+ 
+
+    //Hooks
+    // useEffect(() => {
+    //     if(priceListData) {
+    //         setFormData(priceListData);
+    //     }
+    // }, [priceListData]);
 
     //Event Handler
     const handleInputChange = (e) => {
@@ -72,14 +78,14 @@ const PriceListSettings = () => {
                                     Base Price Per Sq. M.
                                 </span>
                                 <input
-                                    name="basePrice"
+                                    name="base_price"
                                     type="number"
                                     onChange={handleInputChange}
-                                    value={pricingData.priceListSettings.basePrice}
+                                    value={pricingData.priceListSettings.base_price}
                                     className="w-full px-4 focus:outline-none "
 
                                 />
-                                {/* TODO: add percent suffix here */}
+                                {/* TODO: add percent % suffix here */}
                             </div>
                             <div className="flex items-center border border-custom-grayF1 rounded-[5px] overflow-hidden w-[375px] text-sm">
                                 <span className="text-custom-gray81 bg-custom-grayFA font-semibold flex w-[180%] pl-3 py-1 ">
@@ -88,9 +94,9 @@ const PriceListSettings = () => {
                                 <input
                                     onChange={handleInputChange}
                                     value={
-                                        pricingData.priceListSettings.transferCharge
+                                        pricingData.priceListSettings.transfer_charge
                                     }
-                                    name="transferCharge"
+                                    name="transfer_charge"
                                     type="number"
                                     className="w-full px-4 focus:outline-none"
 
@@ -103,11 +109,11 @@ const PriceListSettings = () => {
                                     Effective Balcony Base
                                 </span>
                                 <input
-                                    name="effectiveBalconyBase"
+                                    name="effective_balcony_base"
                                     type="number"
                                     onChange={handleInputChange}
                                     value={
-                                        pricingData.priceListSettings.effectiveBalconyBase
+                                        pricingData.priceListSettings.effective_balcony_base
                                     }
                                     className="w-full px-4 focus:outline-none"
                                 />
@@ -134,14 +140,13 @@ const PriceListSettings = () => {
                                     </span>
                                 </span>
                                 <input
-                                    name="vatableLessPrice"
+                                    name="vatable_less_price"
                                     type="number"
                                     onChange={handleInputChange}
                                     value={
-                                        pricingData.priceListSettings.vatableLessPrice
+                                        pricingData.priceListSettings.vatable_less_price
                                     }
                                     className="w-full px-4 focus:outline-none"
-                                    defaultValue="3600000"
                                 />
                             </div>
                             <div className="flex items-center border border-custom-grayF1 rounded-[5px] overflow-hidden w-[375px] text-sm">
@@ -149,11 +154,11 @@ const PriceListSettings = () => {
                                     Reservation Fee
                                 </span>
                                 <input
-                                    name="reservationFee"
+                                    name="reservation_fee"
                                     type="number"
                                     onChange={handleInputChange}
                                     value={
-                                        pricingData.priceListSettings.reservationFee
+                                        pricingData.priceListSettings.reservation_fee
                                     }
                                     className="w-full px-4 focus:outline-none"
                                     placeholder=""

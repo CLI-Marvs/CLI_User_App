@@ -1,9 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
-import UploadUnitDetailsModal from "./modals/UploadUnitDetailsModal";
-import { useStateContext } from "../../../../context/contextprovider";
+ 
 const ProjectDetails = ({ propertyData }) => {
  
-    //State
+    //State 
     // Destructure the necessary data from propertyData
     // const { towerPhase, propertyCommercialDetail } =
     //     propertyData.propertyData || {};
@@ -32,7 +31,7 @@ const ProjectDetails = ({ propertyData }) => {
                         <div className="h-[26px] w-auto px-[15px] py-[5px] bg-white rounded-[5px]">
                             <p className="text-custom-gray81 text-xs">
                                 {/*TODO: MAke this not all capitalized */}
-                                {propertyData?.data?.property_name}
+                                {propertyData?.data?.property_name || propertyData?.property_name}
                             </p>
                         </div>
                         {/* ID {id} */}
@@ -47,7 +46,7 @@ const ProjectDetails = ({ propertyData }) => {
                             <p className="text-custom-gray81 text-xs">
                                 {
                                     propertyData?.data?.property_commercial_detail
-                                    ?.type
+                                    ?.type || propertyData?.property_commercial_detail?.type
                                 }
                             </p>
                         </div>
@@ -62,7 +61,7 @@ const ProjectDetails = ({ propertyData }) => {
                             <p className=" text-custom-gray81 text-xs">
                                 {
                                     propertyData?.data?.tower_phases[0]
-                                    ?.tower_phase_name
+                                    ?.tower_phase_name || propertyData?.tower_phase_name
                                 }
                             </p>
                         </div>
