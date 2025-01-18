@@ -33,6 +33,7 @@ export const ContextProvider = ({ children }) => {
     const [notifCurrentPage, setNotifCurrentPage] = useState(0);
     const [searchFilter, setSearchFilter] = useState({});
     const [data, setData] = useState([]);
+    const [dataCount, setDataCount] = useState([]);
     const itemsPerPage = 20;
     const [pageCount, setPageCount] = useState(0);
     const [notifPageCount, setNotifPageCount] = useState(0);
@@ -156,7 +157,9 @@ export const ContextProvider = ({ children }) => {
                 const response = await apiService.get(
                     `/get-concern?${searchParams}`
                 );
+
                 setData(response.data.data);
+                setDataCount(response.data.total);
                 setPageCount(response.data.last_page);
             } catch (error) {
                 console.error("Error fetching data: ", error);
@@ -227,7 +230,7 @@ export const ContextProvider = ({ children }) => {
     };
 
     const fetchCategory = async () => {
-        if (!isDepartmentInitialized) return;
+       
         try {
             const response = await apiService.get("category-monthly", {
                 params: { department: department, property: project, month: month, year: year },
@@ -318,7 +321,7 @@ export const ContextProvider = ({ children }) => {
                 unresolved: item.unresolved,
                 closed: item.closed,
             }));
-            console.log("formattedData", formattedData);
+            
             setDataDepartment(formattedData);
         } catch (error) {
             console.log("error retrieving", error);
@@ -812,6 +815,8 @@ export const ContextProvider = ({ children }) => {
                 setCommunicationTypeMonth,
                 communicationTypeMonth,
                 setData,
+                dataCount,
+                setDataCount,
                 searchFilter,
                 statusFilter,
                 specificInquiry,
