@@ -159,6 +159,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/', [PriceListMasterController::class, 'index']);
     //Store a price list masters
     Route::post('/', [PriceListMasterController::class, 'store']);
+    //Update a price list masters
+    Route::put('/update', [PriceListMasterController::class, 'update']);
  
   });
 

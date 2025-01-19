@@ -3,6 +3,7 @@ import { paymentSchemeService } from '@/component/servicesApi/apiCalls/propertyP
 import { showToast } from "@/util/toastUtil";
 import CircularProgress from "@mui/material/CircularProgress";
 import { isButtonDisabled } from '@/component/layout/propertyandpricingpage/paymentscheme/utils/isButtonDisabled';
+import { usePaymentScheme } from "@/context/PropertyPricing/PaymentSchemeContext";
 
 const formDataState = {
     spot: "",
@@ -14,11 +15,12 @@ const formDataState = {
     bankFinancing: "",
 };
 
-const AddPaymentSchemeModal = ({ modalRef, onSubmitSuccess }) => {
+const AddPaymentSchemeModal = ({ modalRef }) => {
     //State
     const [formData, setFormData] = useState(formDataState);
     const [isLoading, setIsLoading] = useState({});
-
+    const { fetchPaymentSchemes } = usePaymentScheme();
+    
     //Event Handler
     //Handle change in the input field
     const handleChange = (e) => {
@@ -48,8 +50,7 @@ const AddPaymentSchemeModal = ({ modalRef, onSubmitSuccess }) => {
             if (response.status === 201) {
                 showToast("Data added successfully!", "success");
                 setFormData(formDataState);
-                onSubmitSuccess();
-
+                await fetchPaymentSchemes(true);
                 if (modalRef.current) {
                     modalRef.current.close();
                 }

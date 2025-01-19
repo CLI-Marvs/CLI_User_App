@@ -18,6 +18,6 @@ class PaymentScheme extends Model
     //Relationship
     public function priceListMaster(): BelongsTo
     {
-        return $this->belongsTo(PriceListMaster::class);
+        return $this->belongsTo(PriceListMaster::class, 'price_list_masters_id', 'id');
     }
 }

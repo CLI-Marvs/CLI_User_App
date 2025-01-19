@@ -6,6 +6,8 @@ import CircularProgress from "@mui/material/CircularProgress";
 import { useStateContext } from "@/context/contextprovider";
 import { showToast } from "@/util/toastUtil";
 import { propertyMasterService } from '@/component/servicesApi/apiCalls/propertyPricing/property/propertyMasterService';
+import { usePriceListMaster } from '@/context/PropertyPricing/PriceListMasterContext';
+
 
 const formDataState = {
     propertyName: "",
@@ -19,14 +21,15 @@ const formDataState = {
     google_map_link: "",
 };
 
-const AddPropertyModal = ({ propertyModalRef, onSubmitSuccess }) => {
+const AddPropertyModal = ({ propertyModalRef }) => {
     //State
     const { setFloorPremiumsAccordionOpen, user } = useStateContext();
     const [formData, setFormData] = useState(formDataState);
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
     const [propertyNamesList, setPropertyNamesList] = useState([]);
-    // console.log("propertyNamesList", propertyNamesList);
+    const { fetchPropertyListMasters } = usePriceListMaster();
+
     //Hooks
     useEffect(() => {
         fetchPropertyNames();
@@ -37,7 +40,7 @@ const AddPropertyModal = ({ propertyModalRef, onSubmitSuccess }) => {
     const fetchPropertyNames = async () => {
         try {
             const response = await propertyMasterService.getPropertyNamesWithIds();
-       
+
             // Convert object to array of objects and sort
             const sortedProperties = Object.entries(response.data)
                 .map(([id, name]) => ({ id, name }))
@@ -73,21 +76,23 @@ const AddPropertyModal = ({ propertyModalRef, onSubmitSuccess }) => {
             status: status,
             emp_id: user?.id,
         };
- 
+
         try {
             setIsLoading(true);
             const response = await propertyMasterService.storePropertyMaster(payload);
             const towerPhaseId = response?.data?.data?.tower_phases[0]?.id;
             const propertyData = response?.data;
- 
+
 
             if (response.status === 201) {
                 showToast("Data added successfully!", "success");
                 setFormData(formDataState);
+                await fetchPropertyListMasters(true); 
+                
                 if (propertyModalRef.current) {
                     propertyModalRef.current.close();
                 }
-                onSubmitSuccess(); //Call this function to fetch property master lists from PricingMasterList
+
                 navigate(`/property-pricing/basic-pricing/${towerPhaseId}`, {
                     state: { data: propertyData },
                 });
@@ -144,15 +149,11 @@ const AddPropertyModal = ({ propertyModalRef, onSubmitSuccess }) => {
     //Handle close the modal and reset all state
     const handleClose = () => {
         if (propertyModalRef.current) {
-            // setFormData(formDataState);
-            // setFloorPremiumsAccordionOpen(false);
-            // navigate("/propertyandpricing/basicpricing", {
-            //     state: { passPropertyDetails: null },
-            // }); //navigate to Basic pricing components   with the property detail data as props
             setFormData(formDataState);
             propertyModalRef.current.close();
         }
     };
+
     return (
         <dialog
             className="modal w-[475px] h-auto rounded-lg backdrop:bg-black/50"

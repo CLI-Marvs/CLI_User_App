@@ -16,7 +16,8 @@ import { useNavigate } from "react-router-dom";
 import { usePricing } from "@/component/layout/propertyandpricingpage/basicpricing/context/BasicPricingContext";
 import { formatPayload } from '@/component/layout/propertyandpricingpage/basicpricing/utils/payloadFormatter';
 import { showToast } from '@/util/toastUtil';
-
+import { usePriceListMaster } from '@/context/PropertyPricing/PriceListMasterContext';
+import paymentScheme from "./accordion/PaymentSchemes";
 
 const BasicPricing = () => {
     //State
@@ -25,7 +26,7 @@ const BasicPricing = () => {
     const uploadUnitModalRef = useRef(null);
     const fileInputRef = useRef(null);
     const location = useLocation();
-    const { data = {} } = location.state || {};
+    const { data = {}, action = null } = location.state || {};
     const [propertyData, setPropertyData] =
         useState(data);
     const navigate = useNavigate();
@@ -33,7 +34,8 @@ const BasicPricing = () => {
     const [fileSelected, setFileSelected] = useState({});
     const [selectedExcelHeader, setSelectedExcelHeader] = useState([]);
     const { pricingData, resetPricingData, setPricingData } = usePricing();
-  
+    const { fetchPropertyListMasters } = usePriceListMaster();
+
 
     //Hooks 
     useEffect(() => {
@@ -160,27 +162,27 @@ const BasicPricing = () => {
         emp_id: user?.id,
         tower_phase_id: data.data?.tower_phases[0]?.id || data?.tower_phase_id,
         priceListPayload: formatPayload.formatPriceListSettingsPayload(pricingData.priceListSettings),
+        paymentSchemePayload: pricingData.paymentScheme,
         status: status
     });
 
     //Handles in submitting all data in creating price master list
     const handleSubmit = async (e, status) => {
         e.preventDefault();
-
         if (pricingData.priceListSettings.base_price === "" ||
             pricingData.priceListSettings.reservation_fee === "") {
             showToast("Please fill all the fields in the price list settings section", "error");
             return;
         }
-        try {
+        if (action === "Edit") {
             const payload = buildSubmissionPayload(status);
-            const response = await priceListMasterService.storePriceListMasters(payload);
+            const response = await priceListMasterService.updatePriceListMasters(payload);
 
             if (response?.status === 201 || response?.status === 200) {
-                showToast(response?.data?.message || "Data added successfully", "success");
+                showToast(response?.data?.message || "Data updated successfully", "success");
 
                 // Reset data and navigate to master list page
-                resetPricingData();
+                await fetchPropertyListMasters(true);
                 setTimeout(() => {
                     navigate("/property-pricing/master-lists");
                 }, 1000);
@@ -189,13 +191,36 @@ const BasicPricing = () => {
                 console.log("Unexpected response status:", response?.status, response);
                 showToast("Unexpected response received. Please verify the changes.", "warning");
             }
-        } catch (error) {
-            if (error.response?.data?.message) {
-                showToast(error.response.data.message, "error");
-            } else {
-                showToast("An error occurred during submission. Please try again.", "error");
+            console.log("response in edit", response);
+            console.log("payload in edit", payload);
+        } else {
+
+            try {
+                const payload = buildSubmissionPayload(status);
+                const response = await priceListMasterService.storePriceListMasters(payload);
+                if (response?.status === 201 || response?.status === 200) {
+                    showToast(response?.data?.message || "Data added successfully", "success");
+
+                    // Reset data and navigate to master list page
+                    resetPricingData();
+                    await fetchPropertyListMasters(true);
+                    setTimeout(() => {
+                        navigate("/property-pricing/master-lists");
+                    }, 1000);
+                } else {
+
+                    console.log("Unexpected response status:", response?.status, response);
+                    showToast("Unexpected response received. Please verify the changes.", "warning");
+                }
+            } catch (error) {
+                if (error.response?.data?.message) {
+                    showToast(error.response.data.message, "error");
+                } else {
+                    showToast("An error occurred during submission. Please try again.", "error");
+                }
             }
         }
+
 
     };
 
@@ -241,7 +266,8 @@ const BasicPricing = () => {
                     <div className="flex justify-center items-center h-full w-full rounded-[8px] bg-white">
                         Save as Draft
                         <span>
-                            {data?.price_list_master_id
+                            {
+                                data?.price_list_master_id
                             }
                         </span>
                     </div>
@@ -266,9 +292,7 @@ const BasicPricing = () => {
 
             <div className="flex flex-col gap-1 w-full border-t-1 border-custom-lightestgreen py-4  ">
                 <PriceListSettings />
-                <FloorPremiums
-                // propertyId={passPropertyData?.propertyData?.id}
-                />
+                <FloorPremiums />
                 <AdditionalPremiums />
                 <PriceVersions />
                 <PaymentSchemes />
@@ -278,6 +302,8 @@ const BasicPricing = () => {
                 <AddPropertyModal modalRef={modalRef} />
             </div> */}
         </div>
+
+
     );
 };
 

@@ -22,4 +22,15 @@ export const priceListMasterService = {
             throw error;
         }
     },
+
+    //Function to update price list masters
+    updatePriceListMasters: async (payload) => {
+        try {
+            const response = await apiService.put("price-list-masters/update", payload);
+            return response;
+        } catch (error) {
+            console.error("Error updating price list masters:", error);
+            throw error;
+        }
+    },
 };

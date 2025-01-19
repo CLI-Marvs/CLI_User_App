@@ -1,22 +1,21 @@
 import React, { useEffect, useState } from "react";
 import { IoIosArrowDown } from "react-icons/io";
-import { usePaymentSchemes } from "@/component/layout/propertyandpricingpage/hooks/usePaymentSchemes";
 import { usePricing } from "@/component/layout/propertyandpricingpage/basicpricing/context/BasicPricingContext";
+import { usePaymentScheme } from "@/context/PropertyPricing/PaymentSchemeContext";
 
-const PaymentSchemes = () => {
+const paymentScheme = () => {
     //State
     const [accordionOpen, setAccordionOpen] = useState(false);
-    const { paymentSchemes, fetchPaymentSchemes } = usePaymentSchemes();
-    const { pricingData, updatePricingSection } = usePricing();
- 
+    const { updatePricingSection } = usePricing();
     const [selectedSchemes, setSelectedSchemes] = useState([]);
+    const { paymentScheme , fetchPaymentSchemes } = usePaymentScheme();
+ 
     //Hooks
     useEffect(() => {
         fetchPaymentSchemes();
     }, []);
 
     //Event Handler
-
     /**
      * Handle select payment scheme, add or remove the selected scheme id into the array
      * @param {*} e 
@@ -30,9 +29,9 @@ const PaymentSchemes = () => {
                 : prevSchemes.filter(id => id !== schemeId);
 
             // Update the parent form state
-            updatePricingSection('paymentSchemes', { selectedSchemes: newSchemes });
+            updatePricingSection('paymentScheme', { selectedSchemes: newSchemes });
 
-            return newSchemes; 
+            return newSchemes;
         });
     }
 
@@ -81,8 +80,8 @@ const PaymentSchemes = () => {
             >
                 <div className=" overflow-hidden bg-white">
                     <div className="p-[20px] flex flex-wrap items-center gap-[20px]">
-                        {paymentSchemes &&
-                            paymentSchemes.map((item, index) => (
+                        {paymentScheme &&
+                            paymentScheme.map((item, index) => (
                                 <div
                                     className="w-[240px] p-[20px]   rounded-[10px]"
                                     key={index}
@@ -182,4 +181,4 @@ const PaymentSchemes = () => {
     );
 };
 
-export default PaymentSchemes;
+export default paymentScheme;

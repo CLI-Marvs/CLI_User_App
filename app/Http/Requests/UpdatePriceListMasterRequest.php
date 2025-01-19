@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class StorePriceListMasterRequest extends FormRequest
+class UpdatePriceListMasterRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -38,7 +38,6 @@ class StorePriceListMasterRequest extends FormRequest
             'paymentSchemePayload.selectedSchemes' => 'required|array|min:1',
             'paymentSchemePayload.selectedSchemes.*' => 'integer',
 
-            
             'status' =>
             'required|string|max:255',
             'emp_id' =>

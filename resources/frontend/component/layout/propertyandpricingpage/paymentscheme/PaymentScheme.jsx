@@ -2,33 +2,21 @@ import React, { useEffect, useState, useRef } from "react";
 import ReactPaginate from "react-paginate";
 import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md";
 import AddPaymentSchemeModal from "./AddPaymentSchemeModal";
-import { usePaymentSchemes } from "@/component/layout/propertyandpricingpage/hooks/usePaymentSchemes";
+import { usePaymentScheme } from "@/context/PropertyPricing/PaymentSchemeContext";
 import moment from "moment";
 
 
 const PaymentScheme = () => {
     //State
     const modalRef = useRef(null);
-    const { paymentSchemes, fetchPaymentSchemes } = usePaymentSchemes();
-
+    const { paymentScheme, fetchPaymentSchemes } = usePaymentScheme();
 
     //Hooks
     useEffect(() => {
         fetchPaymentSchemes();
     }, []);
 
-
     //Event handler
-    //Get all payment schemes
-    // const fetchPaymentSchemes = async () => {
-    //     try {
-    //         const response = await paymentSchemeService.getPaymentSchemes();
-    //         setPaymentSchemes(response.data);
-    //     } catch (error) {
-    //         console.error("Error fetching payment schemes:", error);
-    //     }
-    // };
-
     //Handle open the Add Payment modal
     const handleOpenModal = () => {
         if (modalRef.current) {
@@ -77,8 +65,8 @@ const PaymentScheme = () => {
                     </thead>
                     <tbody className="mt-{10px} rounded-[10px] shadow-md">
                         {/* TODO: add skeleton here */}
-                        {paymentSchemes &&
-                            paymentSchemes.map((item, index) => (
+                        {paymentScheme &&
+                            paymentScheme.map((item, index) => (
                                 <tr
                                     className="flex min-h-[68px]  text-sm justify-start gap-[30px] px-[12px] even:bg-custombg3"
                                     key={index}
@@ -247,7 +235,6 @@ const PaymentScheme = () => {
             </div>
             <div>
                 <AddPaymentSchemeModal
-                    onSubmitSuccess={fetchPaymentSchemes}
                     modalRef={modalRef}
                 />
             </div>

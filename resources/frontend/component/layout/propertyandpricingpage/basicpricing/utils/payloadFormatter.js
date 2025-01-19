@@ -10,8 +10,22 @@ export const formatPayload = {
                 parseInt(priceListSettings.vatable_less_price) || 0,
             reservation_fee: parseInt(priceListSettings.reservation_fee) || 0,
         };
-        console.log("formattedPriceListSettings", formattedPriceListSettings);
+ 
         return formattedPriceListSettings;
     },
-    formatPaymentSchemePayload: (paymentScheme) => {},
+
+    // formatPaymentSchemePayload: (paymentScheme) => {
+    //     const formattedPaymentScheme = {
+    //         payment_scheme_name: paymentScheme.paymentSchemeName,
+    //         description: paymentScheme.description,
+    //         spot: paymentScheme.spot,
+    //         downpayment_installment: paymentScheme.downpaymentInstallment,
+    //         number_months_downpayment: paymentScheme.numberMonthsDownpayment,
+    //         discount: paymentScheme.discount,
+    //         bank_financing: paymentScheme.bankFinancing,
+    //         status: paymentScheme.status,
+    //     };
+
+    //     return formattedPaymentScheme;
+    // },
 };

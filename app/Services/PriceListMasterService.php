@@ -29,4 +29,12 @@ class PriceListMasterService
     {
         return $this->repository->store($data);
     }
+
+    /**
+     * Update price list master data
+     */
+    public function update(array $data,int $tower_phase_id)
+    {   
+        return $this->repository->update($data, $tower_phase_id);
+    }
 }

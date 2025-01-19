@@ -34,7 +34,7 @@ class PriceListMaster extends Model
 
     public function paymentSchemes(): HasMany
     {
-        return $this->hasMany(PaymentScheme::class);
+        return $this->hasMany(PaymentScheme::class, 'price_list_masters_id', 'id');
     }
 
     public function floorPremiums(): HasMany
