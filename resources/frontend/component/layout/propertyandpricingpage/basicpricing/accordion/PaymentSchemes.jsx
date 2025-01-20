@@ -48,35 +48,27 @@ const paymentScheme = ({ action, priceListMasterData }) => {
         //TODO: to clarify here, if already selected, naa ba freedom si user nga iya e uncheck
         const isChecked = e.target.checked;
         if (action === 'Edit') {
-            // Handle checkbox selection in Edit mode
-            setSelectedSchemes(prevSchemes => {
-                // Access paymentScheme array from prevSchemes
-                const paymentSchemes = prevSchemes?.paymentSchemes || [];
+            setSelectedSchemes((prevSchemes) => {
+                // Ensure paymentSchemes is an array
+                const paymentSchemes = Array.isArray(prevSchemes?.paymentSchemes)
+                    ? prevSchemes.paymentSchemes
+                    : [];
 
-                // Check if the schemeId already exists in the array
                 const isSelected = paymentSchemes.includes(schemeId);
 
-                let newSchemes;
+                // Update the paymentSchemes array
+                const updatedPaymentSchemes = isSelected
+                    ? paymentSchemes.filter((id) => id !== schemeId)
+                    : [...paymentSchemes, schemeId];
 
-                if (isSelected) {
-                    // Remove the schemeId if it's already selected
-                    newSchemes = {
-                        ...prevSchemes,
-                        paymentSchemes: paymentSchemes.filter(id => id !== schemeId),
-                    };
+                // Update pricingData directly as an array of IDs
+                updatePricingSection('paymentSchemes', updatedPaymentSchemes);
 
-                } else {
-                    // Add the schemeId if it's not already selected
-                    newSchemes = {
-                        ...prevSchemes,
-                        paymentSchemes: [...paymentSchemes, schemeId],
-                    };
-                }
-          
-                updatePricingSection('paymentSchemes', { selectedSchemes: newSchemes });
-                return newSchemes;
+                return {
+                    ...prevSchemes,
+                    paymentSchemes: updatedPaymentSchemes, // Ensure array structure
+                };
             });
-            
         }
         else {
             setSelectedSchemes(prevSchemes => {

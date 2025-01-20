@@ -23,7 +23,7 @@ const PricingMasterList = () => {
     const toggleFilterBox = () => {
         setIsFilterVisible(!isFilterVisible);
     };
-
+ 
     //Hooks
     useEffect(() => {
         if (!priceListMaster) {
@@ -322,9 +322,13 @@ const PricingMasterList = () => {
                                                         : "text-[#5B9BD5]"
                                                     }`}
                                             >
+                                                {/* TODO: Dont show Edit if the status is Approved */}
                                                 {item?.status}
                                             </p>
-                                            <span>{moment(item.created_at).format("M / D / YYYY")}</span>
+                                            <span>
+                                                {/* Fix the formatting */}
+                                                {moment(item.updated_at).format("M / D / YYYY")}
+                                            </span>
                                         </div>
                                         <div>
                                             <p
@@ -342,8 +346,12 @@ const PricingMasterList = () => {
                                     </td>
                                     <td className="w-[150px] flex items-center justify-start">
                                         <div>
-                                            <p>{item?.property_name}</p>
-                                            <p>Tower {item?.tower_phase_name}</p>
+                                            <p>
+                                                {item?.property_name}
+                                            </p>
+                                            <p>
+                                                Tower {item?.tower_phase_name}
+                                            </p>
                                         </div>
                                     </td>
                                     <td className="w-[200px] flex items-center justify-start">
@@ -412,11 +420,17 @@ const PricingMasterList = () => {
                                     <td className="w-[100px] flex items-center justify-start"></td>
                                     <td className="w-[150px] flex items-center justify-start rounded-r-lg text-sm">
                                         <div>
-                                            <p>Spot Cash</p>
-                                            <p>Spot 12%</p>
-                                            <p>Spot 2% + 10%</p>
-                                            <p>Installment</p>
-                                            <p>12% Installment</p>
+                                            <p> 
+                                                {item?.payment_scheme?.map((scheme, index) => {
+                                                    return (
+                                                        <span key={index}>
+                                                            {scheme?.payment_scheme_name}
+                                                            {index < item?.payment_scheme?.length - 1 ? <br /> : ""}
+                                                        </span>
+                                                    )
+                                                })}
+                                            </p>
+                                            
                                         </div>
                                     </td>
                                 </tr>

@@ -35,8 +35,8 @@ class UpdatePriceListMasterRequest extends FormRequest
 
             // Payment scheme payload
             'paymentSchemePayload' => 'array',
-            'paymentSchemePayload.selectedSchemes.paymentSchemes' => 'array|min:1',
-            'paymentSchemePayload.selectedSchemes.paymentSchemes.*' => 'integer',
+            'paymentSchemePayload' => 'array|min:1',
+            'paymentSchemePayload.*' => 'integer',
 
             'status' =>
             'required|string|max:255',
@@ -44,6 +44,8 @@ class UpdatePriceListMasterRequest extends FormRequest
             'required|integer',
             'tower_phase_id' =>
             'required|integer',
+            'price_list_master_id' =>
+                'required|integer',
         ];
     }
 }

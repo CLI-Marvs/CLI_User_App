@@ -4,6 +4,7 @@ namespace App\Repositories\Implementations;
 
 use App\Models\PaymentScheme;
 use App\Models\PriceListMaster;
+use App\Models\PriceBasicDetail;
 use Illuminate\Support\Facades\DB;
 
 class PriceListMasterRepository
@@ -45,6 +46,7 @@ class PriceListMasterRepository
 
             return [
                 'price_list_master_id' => $priceList->id,
+                'updated_at' => $priceList->updated_at,
                 'tower_phase_id' => $priceList->towerPhase->id,
                 'tower_phase_name' => $priceList->towerPhase->tower_phase_name,
                 'status' => $priceList->status,
@@ -113,21 +115,19 @@ class PriceListMasterRepository
     /**
      * Update price list master data
      */
-    public function update(array $data, int $tower_phase_id)
+    public function update(array $data)
     {
-
         DB::beginTransaction();
         try {
-            $updatedPriceListMaster = $this->model->where('tower_phase_id', $tower_phase_id)->first();
+            $updatedPriceListMaster = $this->model->where('id', $data['price_list_master_id'])->first();
 
             if (!$updatedPriceListMaster) {
                 throw new \Exception("PriceListMaster not found for tower_phase_id: 
                     {$data['tower_phase_id']}");
             }
 
-
             //Update or Create a PriceBasicDetail for the PriceListMaster
-            $priceBasicDetail = $updatedPriceListMaster->priceBasicDetail->update(
+            $priceBasicDetailUpdated = $updatedPriceListMaster->priceBasicDetail()->update(
                 [
                     'base_price' => $data['priceListPayload']['base_price'],
                     'transfer_charge' => $data['priceListPayload']['transfer_charge'],
@@ -137,14 +137,17 @@ class PriceListMasterRepository
                     'reservation_fee' => $data['priceListPayload']['reservation_fee'],
                 ]
             );
-            
 
+            $priceBasicDetail = $updatedPriceListMaster->priceBasicDetail()->first();
+            if (!$priceBasicDetailUpdated || !$priceBasicDetail) {
+                throw new \Exception('Failed to update or retrieve PriceBasicDetail.');
+            }
 
             $updatedPriceListMaster->update([
                 'status' => $data['status'],
                 'date_last_update' => now(),
                 'pricebasic_details_id' => $priceBasicDetail->id,
-                'payment_scheme_id' => json_encode($data['paymentSchemePayload']['selectedSchemes']['paymentSchemes']),
+                'payment_scheme_id' => json_encode($data['paymentSchemePayload']),
             ]);
 
             DB::commit();

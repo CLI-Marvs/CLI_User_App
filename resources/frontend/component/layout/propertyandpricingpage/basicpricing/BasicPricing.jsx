@@ -57,16 +57,15 @@ const BasicPricing = () => {
             if(data?.payment_scheme){
                 setPricingData(prev => ({
                     ...prev,
-                    paymentSchemes: {
-                        ...prev.paymentSchemes,
-                        ...data.payment_scheme
-                    },
+                    paymentSchemes: Array.isArray(data.payment_scheme)
+                        ? data.payment_scheme.map(scheme => scheme.id)
+                        : [data.payment_scheme.id],
                 }));
             }
         }
     }, [data]);
 
-
+ 
     //Event handler
     // Open the add property modal
     const handleOpenAddPropertyModal = () => {
@@ -176,6 +175,7 @@ const BasicPricing = () => {
      */
     const buildSubmissionPayload = (status) => ({
         emp_id: user?.id,
+        price_list_master_id: data?.price_list_master_id ?? null,
         tower_phase_id: data.data?.tower_phases[0]?.id || data?.tower_phase_id,
         priceListPayload: formatPayload.formatPriceListSettingsPayload(pricingData.priceListSettings),
         paymentSchemePayload: pricingData.paymentSchemes,
@@ -190,6 +190,11 @@ const BasicPricing = () => {
             showToast("Please fill all the fields in the price list settings section", "error");
             return;
         }
+        if(pricingData.paymentSchemes.length === 0){
+            showToast("Please select at least one payment scheme", "error");
+            return;
+        }
+        
         if (action === "Edit") {
             try {
                 setIsLoading((prev) => ({ ...prev, [status]: true }));

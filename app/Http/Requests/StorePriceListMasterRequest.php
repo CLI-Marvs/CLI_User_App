@@ -34,7 +34,7 @@ class StorePriceListMasterRequest extends FormRequest
             //Additional premium
 
             // Payment scheme payload
-            'paymentSchemePayload' => 'required|array',
+            'paymentSchemePayload' => 'array',
             'paymentSchemePayload.selectedSchemes' => 'required|array|min:1',
             'paymentSchemePayload.selectedSchemes.*' => 'integer',
 
