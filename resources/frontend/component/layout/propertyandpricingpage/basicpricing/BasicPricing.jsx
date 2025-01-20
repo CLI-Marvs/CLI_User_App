@@ -18,6 +18,7 @@ import { formatPayload } from '@/component/layout/propertyandpricingpage/basicpr
 import { showToast } from '@/util/toastUtil';
 import { usePriceListMaster } from '@/context/PropertyPricing/PriceListMasterContext';
 import paymentScheme from "./accordion/PaymentSchemes";
+import CircularProgress from "@mui/material/CircularProgress";
 
 const BasicPricing = () => {
     //State
@@ -35,6 +36,7 @@ const BasicPricing = () => {
     const [selectedExcelHeader, setSelectedExcelHeader] = useState([]);
     const { pricingData, resetPricingData, setPricingData } = usePricing();
     const { fetchPropertyListMasters } = usePriceListMaster();
+    const [isLoading, setIsLoading] = useState({});
 
 
     //Hooks 
@@ -43,7 +45,6 @@ const BasicPricing = () => {
             setPropertyData(data);
             // Update the priceListSettings
             if (data?.pricebasic_details) {
-
                 setPricingData(prev => ({
                     ...prev,
                     priceListSettings: {
@@ -52,6 +53,15 @@ const BasicPricing = () => {
                     },
                 }));
 
+            }
+            if(data?.payment_scheme){
+                setPricingData(prev => ({
+                    ...prev,
+                    paymentSchemes: {
+                        ...prev.paymentSchemes,
+                        ...data.payment_scheme
+                    },
+                }));
             }
         }
     }, [data]);
@@ -157,12 +167,18 @@ const BasicPricing = () => {
         reader.readAsArrayBuffer(file);
     };
 
-
+   
+    /**
+     * Payload object for submission with the provided status.
+     * The payload includes employee ID, tower phase ID, price list settings, payment scheme, and the specified status.
+     * @param {*} status 
+     * @returns 
+     */
     const buildSubmissionPayload = (status) => ({
         emp_id: user?.id,
         tower_phase_id: data.data?.tower_phases[0]?.id || data?.tower_phase_id,
         priceListPayload: formatPayload.formatPriceListSettingsPayload(pricingData.priceListSettings),
-        paymentSchemePayload: pricingData.paymentScheme,
+        paymentSchemePayload: pricingData.paymentSchemes,
         status: status
     });
 
@@ -175,28 +191,39 @@ const BasicPricing = () => {
             return;
         }
         if (action === "Edit") {
-            const payload = buildSubmissionPayload(status);
-            const response = await priceListMasterService.updatePriceListMasters(payload);
-
-            if (response?.status === 201 || response?.status === 200) {
-                showToast(response?.data?.message || "Data updated successfully", "success");
-
-                // Reset data and navigate to master list page
-                await fetchPropertyListMasters(true);
-                setTimeout(() => {
-                    navigate("/property-pricing/master-lists");
-                }, 1000);
-            } else {
-
-                console.log("Unexpected response status:", response?.status, response);
-                showToast("Unexpected response received. Please verify the changes.", "warning");
-            }
-            console.log("response in edit", response);
-            console.log("payload in edit", payload);
-        } else {
-
             try {
+                setIsLoading((prev) => ({ ...prev, [status]: true }));
                 const payload = buildSubmissionPayload(status);
+                console.log("Edit Payload", payload);
+                const response = await priceListMasterService.updatePriceListMasters(payload);
+                if (response?.status === 201 || response?.status === 200) {
+                    showToast(response?.data?.message || "Data updated successfully", "success");
+
+                    // Reset data and navigate to master list page
+                    await fetchPropertyListMasters(true);
+                    setTimeout(() => {
+                        navigate("/property-pricing/master-lists");
+                    }, 1000);
+                } else {
+                    console.log("Unexpected response status:", response?.status, response);
+                    showToast("Unexpected response received. Please verify the changes.", "warning");
+                }
+            } catch (error) {
+                if (error.response?.data?.message) {
+                    showToast(error.response.data.message, "error");
+                } else {
+                    showToast("An error occurred during submission. Please try again.", "error");
+                }
+            }
+            finally {
+                setIsLoading((prev) => ({ ...prev, [status]: false }));
+            }
+        } else {
+            try {
+                setIsLoading((prev) => ({ ...prev, [status]: true }));
+                const payload = buildSubmissionPayload(status);
+                console.log("ADd Payload", payload);
+
                 const response = await priceListMasterService.storePriceListMasters(payload);
                 if (response?.status === 201 || response?.status === 200) {
                     showToast(response?.data?.message || "Data added successfully", "success");
@@ -208,7 +235,6 @@ const BasicPricing = () => {
                         navigate("/property-pricing/master-lists");
                     }, 1000);
                 } else {
-
                     console.log("Unexpected response status:", response?.status, response);
                     showToast("Unexpected response received. Please verify the changes.", "warning");
                 }
@@ -219,9 +245,10 @@ const BasicPricing = () => {
                     showToast("An error occurred during submission. Please try again.", "error");
                 }
             }
+            finally {
+                setIsLoading((prev) => ({ ...prev, [status]: false }));
+            }
         }
-
-
     };
 
 
@@ -252,19 +279,30 @@ const BasicPricing = () => {
                     Upload Unit Details
                 </button>
                 <button
-                    className="h-[37px] w-[176px] rounded-[10px] text-white montserrat-semibold text-sm gradient-btn2 hover:shadow-custom4"
+                    className={`h-[37px] w-[176px] rounded-[10px] text-white montserrat-semibold text-sm gradient-btn2 hover:shadow-custom4 ${isLoading['On-going Approval'] ? "cursor-not-allowed opacity-50" : ""
+                        }`}
                     type="submit"
                     onClick={(e) => handleSubmit(e, "On-going Approval")}
                 >
-                    Submit for Approval
+
+                    {isLoading['On-going Approval'] ? (
+                        <CircularProgress className="spinnerSize" />
+                    ) : (
+                        <> Submit for Approval </>
+                    )}
                 </button>
                 <button
-                    className="h-[37px] w-[117px] rounded-[10px] text-custom-solidgreen montserrat-semibold text-sm gradient-btn2 hover:shadow-custom4 p-[3px]"
+                    className={`h-[37px] w-[117px] rounded-[10px] text-custom-solidgreen montserrat-semibold text-sm gradient-btn2 hover:shadow-custom4 p-[3px] ${isLoading['On-going Approval'] ? "cursor-not-allowed opacity-50" : ""
+                        }`}
                     type="submit"
                     onClick={(e) => handleSubmit(e, "Draft")}
                 >
                     <div className="flex justify-center items-center h-full w-full rounded-[8px] bg-white">
-                        Save as Draft
+                        {isLoading['Draft'] ? (
+                            <CircularProgress className="spinnerSize" />
+                        ) : (
+                            <>Save as Draft</>
+                        )}
                         <span>
                             {
                                 data?.price_list_master_id
@@ -295,7 +333,7 @@ const BasicPricing = () => {
                 <FloorPremiums />
                 <AdditionalPremiums />
                 <PriceVersions />
-                <PaymentSchemes />
+                <PaymentSchemes action={action} priceListMasterData={data} />
                 <ReviewsandApprovalRouting />
             </div>
             {/* <div>

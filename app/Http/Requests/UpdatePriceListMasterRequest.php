@@ -23,20 +23,20 @@ class UpdatePriceListMasterRequest extends FormRequest
     {
         return [
             //Price list settings
-            'priceListPayload.base_price' => 'required|integer',
-            'priceListPayload.transfer_charge' => 'required|integer',
-            'priceListPayload.effective_balcony_base' => 'required|integer',
-            'priceListPayload.vat' => 'required|integer',
-            'priceListPayload.vatable_less_price' => 'required|integer',
-            'priceListPayload.reservation_fee' => 'required|integer',
+            'priceListPayload.base_price' => 'integer',
+            'priceListPayload.transfer_charge' => 'integer',
+            'priceListPayload.effective_balcony_base' => 'integer',
+            'priceListPayload.vat' => 'integer',
+            'priceListPayload.vatable_less_price' => 'integer',
+            'priceListPayload.reservation_fee' => 'integer',
 
             //Floor premium
             //Additional premium
 
             // Payment scheme payload
-            'paymentSchemePayload' => 'required|array',
-            'paymentSchemePayload.selectedSchemes' => 'required|array|min:1',
-            'paymentSchemePayload.selectedSchemes.*' => 'integer',
+            'paymentSchemePayload' => 'array',
+            'paymentSchemePayload.selectedSchemes.paymentSchemes' => 'array|min:1',
+            'paymentSchemePayload.selectedSchemes.paymentSchemes.*' => 'integer',
 
             'status' =>
             'required|string|max:255',

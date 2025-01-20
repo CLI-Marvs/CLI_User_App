@@ -27,6 +27,7 @@ const PricingMasterList = () => {
     //Hooks
     useEffect(() => {
         if (!priceListMaster) {
+            console.log("priceListMaster", priceListMaster);
             fetchPropertyListMasters();
         }
     }, [fetchPropertyListMasters, priceListMaster]);

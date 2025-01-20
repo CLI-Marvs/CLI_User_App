@@ -51,13 +51,13 @@ class PriceListMasterRepository
                 'property_name' => $priceList->towerPhase->propertyMaster->property_name ?? null,
                 'pricebasic_details' => $priceList->priceBasicDetail ? $priceList->priceBasicDetail->toArray() : null,
                 'property_commercial_detail' => $priceList->towerPhase->propertyMaster->propertyCommercialDetail->toArray(),
-                'payment_schemes' => $paymentSchemeData->map(function ($scheme) {
+                'payment_scheme' => $paymentSchemeData->map(function ($scheme) {
                     return [
                         'payment_scheme_name' => $scheme->payment_scheme_name,
                         'id' => $scheme->id,
                     ];
                 }),
-                
+
             ];
         });
 
@@ -69,7 +69,7 @@ class PriceListMasterRepository
      */
     public function store(array $data)
     {
-   
+
         DB::beginTransaction();
         try {
             $priceListMaster = $this->model->where('tower_phase_id', $data['tower_phase_id'])->first();
@@ -90,7 +90,7 @@ class PriceListMasterRepository
             ]);
 
 
-            
+
             $priceListMaster->update([
                 'status' => $data['status'],
                 'date_last_update' => now(),
@@ -127,21 +127,24 @@ class PriceListMasterRepository
 
 
             //Update or Create a PriceBasicDetail for the PriceListMaster
-            $priceBasicDetail = $updatedPriceListMaster->priceBasicDetail()->updateOrCreate([
-                'base_price' => $data['priceListPayload']['base_price'],
-                'transfer_charge' => $data['priceListPayload']['transfer_charge'],
-                'effective_balcony_base' => $data['priceListPayload']['effective_balcony_base'],
-                'vat' => $data['priceListPayload']['vat'],
-                'vatable_less_price' => $data['priceListPayload']['vatable_less_price'],
-                'reservation_fee' => $data['priceListPayload']['reservation_fee'],
-            ]);
-
+            $priceBasicDetail = $updatedPriceListMaster->priceBasicDetail->update(
+                [
+                    'base_price' => $data['priceListPayload']['base_price'],
+                    'transfer_charge' => $data['priceListPayload']['transfer_charge'],
+                    'effective_balcony_base' => $data['priceListPayload']['effective_balcony_base'],
+                    'vat' => $data['priceListPayload']['vat'],
+                    'vatable_less_price' => $data['priceListPayload']['vatable_less_price'],
+                    'reservation_fee' => $data['priceListPayload']['reservation_fee'],
+                ]
+            );
             
+
+
             $updatedPriceListMaster->update([
                 'status' => $data['status'],
                 'date_last_update' => now(),
                 'pricebasic_details_id' => $priceBasicDetail->id,
-                'payment_scheme_id' => json_encode($data['paymentSchemePayload']['selectedSchemes']),
+                'payment_scheme_id' => json_encode($data['paymentSchemePayload']['selectedSchemes']['paymentSchemes']),
             ]);
 
             DB::commit();
