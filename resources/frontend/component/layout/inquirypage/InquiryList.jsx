@@ -11,9 +11,23 @@ import { MdRefresh } from "react-icons/md";
 import InquiryFormModal from "./InquiryFormModal";
 import axios from "axios";
 import { toast } from "react-toastify";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useLocation} from "react-router-dom";
 import Spinner from "../../../util/Spinner";
 const InquiryList = () => {
+
+    const location = useLocation();
+    
+
+    const searchParams = new URLSearchParams(location.search);
+    const propertyParam = searchParams.get("property");
+    const statusParam = searchParams.get("status");
+    const departmentParam = searchParams.get("department");
+    const monthParam = searchParams.get("month");
+    const yearParam = searchParams.get("year");
+
+
+   
+
     const {
         currentPage,
         setCurrentPage,
@@ -60,18 +74,7 @@ const InquiryList = () => {
     const [isOpenSelect, setIsOpenSelect] = useState(false);
 
     const [resultSearchActive, setResultSearchActive] = useState(false);
-    const [resultName, setResultName] = useState("");
-    const [resultCategory, setResultCategory] = useState("");
-    const [resultType, setResultType] = useState("");
-    const [resultStatus, setResultStatus] = useState("");
-    const [resultEmail, setResultEmail] = useState("");
-    const [resultTicket, setResultTicket] = useState("");
-    const [resultChannels, setResultChannels] = useState("");
-    const [resultStartDate, setResultStartDate] = useState("");
-    const [resultSelectedProperty, setResultSelectedProperty] = useState("");
-    const [resultHasAttachments, setResultHasAttachments] = useState("");
-    const [resultYear, setResultYear] = useState("");
-    const [resultMonth, setResultMonth] = useState("");
+    
 
 
     const handleSelect = (option) => {
@@ -332,17 +335,7 @@ const InquiryList = () => {
 
     const handleSearch = () => {
         setResultSearchActive(true);
-        setResultName(name);
-        setResultCategory(category);
-        setResultType(type);
-        setResultStatus(status);
-        setResultEmail(email);
-        setResultChannels(channels);
-        setResultTicket(ticket);
-        setResultStartDate(startDate);
-        setResultSelectedProperty(selectedProperty);
-        setResultHasAttachments(hasAttachments);
-
+        
         let summaryParts = []; // Array to hold each part of the summary
 
         if (category) summaryParts.push(`Category -> ${category}`);
@@ -352,6 +345,7 @@ const InquiryList = () => {
         if (email) summaryParts.push(`Email -> ${email}`);
         if (channels) summaryParts.push(`Channels -> ${channels}`);
         if (ticket) summaryParts.push(`Ticket -> ${ticket}`);
+        if (department) summaryParts.push(`Department -> ${department}`);
         if (startDate) summaryParts.push(`Start Date -> ${formatDate(startDate)}`);
         if (selectedProperty) summaryParts.push(`Property -> ${selectedProperty}`);
         if (selectedYear) summaryParts.push(`Year -> ${selectedYear}`);
@@ -369,6 +363,7 @@ const InquiryList = () => {
             status,
             email,
             channels,
+            department,
             ticket,
             startDate,
             selectedProperty,
@@ -393,6 +388,50 @@ const InquiryList = () => {
         setSelectedYear("");
         setSelectedMonth("");
     };
+
+    useEffect(() => {
+        if (propertyParam || statusParam || monthParam || yearParam) {
+
+        setResultSearchActive(true);
+        
+        let summaryParts = []; // Array to hold each part of the summary
+
+        if (category) summaryParts.push(`Category -> ${category}`);
+        if (statusParam) summaryParts.push(`Status -> ${statusParam}`);
+        if (name) summaryParts.push(`Name -> ${name}`);
+        if (type) summaryParts.push(`Type -> ${type}`);
+        if (email) summaryParts.push(`Email -> ${email}`);
+        if (channels) summaryParts.push(`Channels -> ${channels}`);
+        if (departmentParam) summaryParts.push(`Department -> ${departmentParam}`);
+        if (ticket) summaryParts.push(`Ticket -> ${ticket}`);
+        if (startDate) summaryParts.push(`Start Date -> ${formatDate(startDate)}`);
+        if (propertyParam) summaryParts.push(`Property -> ${propertyParam}`);
+        if (yearParam) summaryParts.push(`Year -> ${yearParam}`);
+        if (monthParam) summaryParts.push(`Month -> ${ formatMonth(monthParam)}`);
+        if (hasAttachments) summaryParts.push(`Attachments -> Yes`);
+
+        let summary = `${summaryParts.join(" + ")}`;
+
+        setSearchSummary(summary.trim());
+
+        setSearchFilter({
+            name,
+            category,
+            type,
+            status: statusParam,
+            email,
+            channels,
+            department: departmentParam,
+            ticket,
+            startDate,
+            selectedProperty: propertyParam,
+            hasAttachments,
+            selectedMonth: monthParam,
+            selectedYear: yearParam,
+        });
+
+        }
+    }, [propertyParam, statusParam]);
 
     useEffect(() => {
         if (isFilterVisible) {

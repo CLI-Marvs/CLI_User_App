@@ -23,7 +23,7 @@ import { TiDownload } from "react-icons/ti";
 import { useStateContext } from "../../../context/contextprovider";
 import { IoMdArrowDropdown } from "react-icons/io";
 import { MdCalendarToday } from "react-icons/md";
-import { useLocation } from "react-router-dom";
+import { useLocation, Link } from "react-router-dom";
 import { get, set } from "lodash";
 
 const barHeight = 20;
@@ -369,13 +369,11 @@ const ReportPage = () => {
         return null;
     };
 
-
-
-
+    const currentYear = new Date().getFullYear();
 
     const [departmentValue, setDepartmentValue] = useState("All");
     const [projectValue, setProjectValue] = useState("All");
-    const [yearValue, setYearValue] = useState("");
+    const [yearValue, setYearValue] = useState(currentYear);
     const [monthValue, setMonthValue] = useState("All");
 
     const defaultData = [{ name: "No Data" }];
@@ -461,7 +459,7 @@ const ReportPage = () => {
     ];
 
     //Get current year
-    const currentYear = new Date().getFullYear();
+
 
     const chartHeight = dataProperty.length * (barHeight + 80);
     const chartHeight2 = communicationTypeData.length * (barHeight + 100);
@@ -981,10 +979,44 @@ const ReportPage = () => {
                                         })
                                         .map((item, index) => (
                                             <tr className="hover:bg-gray-50" key={index}>
-                                                <td className="border border-gray-300 px-4 py-2">{item.name}</td>
-                                                <td className="border border-gray-300 px-4 py-2">{item.resolved}</td>
-                                                <td className="border border-gray-300 px-4 py-2">{item.closed}</td>
-                                                <td className="border border-gray-300 px-4 py-2">{item.unresolved}</td>
+                                                <td className="border border-gray-300 px-4 py-2 hover:text-blue-500 hover:underline cursor-pointer">
+                                                    <Link
+                                                        to={`/inquirymanagement/inquirylist?property=${encodeURIComponent(item.name)}&year=${encodeURIComponent(yearValue)}${monthValue !== "All" ? `&month=${encodeURIComponent(monthValue)}` : ""
+                                                            }`}
+                                                    >
+                                                        {item.name}
+                                                    </Link>
+                                                </td>
+                                                <td className="border border-gray-300 px-4 py-2 hover:text-blue-500 hover:underline cursor-pointer">
+                                                    <Link
+                                                        to={`/inquirymanagement/inquirylist?property=${encodeURIComponent(
+                                                            item.name
+                                                        )}&status=Resolved&year=${encodeURIComponent(yearValue)}${monthValue !== "All" ? `&month=${encodeURIComponent(monthValue)}` : ""
+                                                            }`}
+                                                    >
+                                                        {item.resolved}
+                                                    </Link>
+                                                </td>
+                                                <td className="border border-gray-300 px-4 py-2 hover:text-blue-500 hover:underline cursor-pointer">
+                                                    <Link
+                                                        to={`/inquirymanagement/inquirylist?property=${encodeURIComponent(
+                                                            item.name
+                                                        )}&status=Closed&year=${encodeURIComponent(yearValue)}${monthValue !== "All" ? `&month=${encodeURIComponent(monthValue)}` : ""
+                                                            }`}
+                                                    >
+                                                        {item.closed}
+                                                    </Link>
+                                                </td>
+                                                <td className="border border-gray-300 px-4 py-2 hover:text-blue-500 hover:underline cursor-pointer">
+                                                    <Link
+                                                        to={`/inquirymanagement/inquirylist?property=${encodeURIComponent(
+                                                            item.name
+                                                        )}&status=unresolved&year=${encodeURIComponent(yearValue)}${monthValue !== "All" ? `&month=${encodeURIComponent(monthValue)}` : ""
+                                                            }`}
+                                                    >
+                                                        {item.unresolved}
+                                                    </Link>
+                                                </td>
                                             </tr>
                                         ))}
                                     <tr className="bg-gray-100 font-semibold">
@@ -1124,10 +1156,44 @@ const ReportPage = () => {
                                         .sort((a, b) => a.name.localeCompare(b.name)) // Sort alphabetically by name
                                         .map((item, index) => (
                                             <tr className="hover:bg-gray-50" key={index}>
-                                                <td className="border border-gray-300 px-4 py-2">{item.name}</td>
-                                                <td className="border border-gray-300 px-4 py-2">{item.resolved}</td>
-                                                <td className="border border-gray-300 px-4 py-2">{item.closed}</td>
-                                                <td className="border border-gray-300 px-4 py-2">{item.unresolved}</td>
+                                                <td className="border border-gray-300 px-4 py-2 hover:text-blue-500 hover:underline cursor-pointer">
+                                                    <Link
+                                                        to={`/inquirymanagement/inquirylist?department=${encodeURIComponent(item.name)}&year=${encodeURIComponent(yearValue)}${monthValue !== "All" ? `&month=${encodeURIComponent(monthValue)}` : ""
+                                                            }`}
+                                                    >
+                                                        {item.name}
+                                                    </Link>
+                                                </td>
+                                                <td className="border border-gray-300 px-4 py-2 hover:text-blue-500 hover:underline cursor-pointer">
+                                                    <Link
+                                                        to={`/inquirymanagement/inquirylist?department=${encodeURIComponent(
+                                                            item.name
+                                                        )}&status=Resolved&year=${encodeURIComponent(yearValue)}${monthValue !== "All" ? `&month=${encodeURIComponent(monthValue)}` : ""
+                                                            }`}
+                                                    >
+                                                        {item.resolved}
+                                                    </Link>
+                                                </td>
+                                                <td className="border border-gray-300 px-4 py-2 hover:text-blue-500 hover:underline cursor-pointer">
+                                                    <Link
+                                                        to={`/inquirymanagement/inquirylist?department=${encodeURIComponent(
+                                                            item.name
+                                                        )}&status=Closed&year=${encodeURIComponent(yearValue)}${monthValue !== "All" ? `&month=${encodeURIComponent(monthValue)}` : ""
+                                                            }`}
+                                                    >
+                                                        {item.closed}
+                                                    </Link>
+                                                </td>
+                                                <td className="border border-gray-300 px-4 py-2 hover:text-blue-500 hover:underline cursor-pointer">
+                                                    <Link
+                                                        to={`/inquirymanagement/inquirylist?department=${encodeURIComponent(
+                                                            item.name
+                                                        )}&status=unresolved&year=${encodeURIComponent(yearValue)}${monthValue !== "All" ? `&month=${encodeURIComponent(monthValue)}` : ""
+                                                            }`}
+                                                    >
+                                                        {item.unresolved}
+                                                    </Link>
+                                                </td>
                                             </tr>
                                         ))}
                                     <tr className="bg-gray-100 font-semibold">
@@ -1217,7 +1283,7 @@ const ReportPage = () => {
                                                     <span className="text-gray-500 font-bold text-sm">
                                                         {`${((category.value / totalValue) * 100).toFixed(2)}%`}
                                                     </span>
-                                                     <span className="text-gray-500 font-bold text-sm">
+                                                    <span className="text-gray-500 font-bold text-sm">
                                                         {"("}{category.value}{")"}
                                                     </span>
                                                 </div>

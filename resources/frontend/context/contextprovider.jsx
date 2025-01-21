@@ -288,7 +288,7 @@ export const ContextProvider = ({ children }) => {
                 unresolved: item.unresolved,
                 closed: item.closed,
             }));
-            console.log("formattedData", formattedData);
+            
             setDataDepartment(formattedData);
         } catch (error) {
             console.log("error retrieving", error);
