@@ -2,169 +2,108 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
-use App\Models\BasicPricing;
-use App\Models\PropertyCommercialDetail;
-use App\Models\PropertyMaster;
-use App\Models\TowerPhase;
+use Log;
 use Illuminate\Http\Request;
+use App\Models\PropertyMaster;
+use App\Http\Controllers\Controller;
+use App\Services\PropertyMasterService;
+use Dotenv\Exception\ValidationException;
+use App\Http\Requests\StorePropertyMasterRequest;
+use App\Http\Requests\UpdatePropertyMasterRequest;
 
 class PropertyMasterController extends Controller
 {
-    protected $propertyData = [];
-    //Insert property details 
-    public function storePropertyDetail(Request $request)
+
+    protected $service;
+
+    public function __construct(PropertyMasterService $service)
     {
-        try {
-            //payload from frontend
-            $propertyName = $request->input('propertyName');
-            $type = $request->input('type');
-            $tower = $request->input('towerPhase');
-            $status = $request->input('status');
-            $sap_code = $request->input('sap_code');
-            // Create and save property master
-            $propertyMaster = $this->createPropertyMaster($propertyName, $status, $sap_code);
-
-            // Create and save tower phase
-            $towerPhase = $this->createTowerPhase($tower, $propertyMaster->id, $status);
-
-            // Create and save commercial detail
-            $propertyCommercialDetail = $this->createPropertyCommercialDetail($type, $propertyMaster->id, $status);
-
-            // Create a single object combining all details
-            $propertyData = [
-                'propertyMaster' => $propertyMaster,
-                'towerPhase' => $towerPhase,
-                'propertyCommercialDetail' => $propertyCommercialDetail
-            ];
-
-            // Return successful response
-            return response()->json([
-                'message' => 'Property details created successfully',
-                'propertyData' => $propertyData,
-
-            ], 201);
-        } catch (\Exception $e) {
-            return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
-        }
+        $this->service = $service;
     }
 
 
-    public function storePropertyFromSap(Request $request)
+
+    /*
+     * Display a listing of the resource.
+    */
+    public function index()
     {
+        //
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(StorePropertyMasterRequest $request)
+    {
+
         try {
-            \Log::info('From Kyla:', $request->all());
+            //TODO: validate the request to make sure it's valid and match in the request
+            $property = $this->service->store($request->validated());
             
-            $propertyName = $request->input('POSTU');
-            $status = "Draft";
-            $sap_code = $request->input('PSPID');
-
-            $propertyMaster = $this->createPropertyMaster($propertyName, $status, $sap_code);
-
+            return response()->json($property, 201);
+        } catch (ValidationException $e) {
             return response()->json([
-                'message' => 'Property details created successfully',
-                'propertyMaster' => $propertyMaster,
-
-            ], 201);
+                'error' => 'Validation failed',
+                'messages' => $e->errors(),
+            ], 422);
         } catch (\Exception $e) {
-            return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
+            return response()->json([
+                'error' => $e->getMessage(),
+                'message' => 'Failed to create property',
+            ], 500);
         }
     }
 
-
-    //Get a specific property master
-    public function getPropertyMaster($id)
+    /**
+     * Display the specified resource.
+     */
+    public function show(PropertyMaster $propertyMaster)
     {
+        $propertyMasterData = $this->service->getPropertyMaster($propertyMaster->id);
+        if (!$propertyMasterData) {
+            return response()->json(['message' => 'Property not found.'], 404);
+        }
+
         try {
-            // Fetch the property master
-            $propertyMaster = PropertyMaster::find($id);
-
-            if (!$propertyMaster) {
-                return response()->json(['message' => 'Property not found.'], 404);
-            }
-
-            // Fetch related tower phases and commercial detail
-            $towerPhase = TowerPhase::where('property_masters_id', $propertyMaster->id)->first();
-            $propertyCommercialDetail = PropertyCommercialDetail::where('property_master_id', $propertyMaster->id)->first();
-
-            // Combine details in the same way as in storePropertyDetail
-            $propertyData = [
-                'propertyMaster' => $propertyMaster,
-                'towerPhase' => $towerPhase,
-                'propertyCommercialDetail' => $propertyCommercialDetail
-            ];
-
-            // Return the combined property data
-            return response()->json([
-                'message' => 'Property details fetched successfully',
-                'propertyData' => $propertyData,
-            ], 200);
+            return response()->json($propertyMasterData);
         } catch (\Exception $e) {
-            return response()->json(['message' => 'Error fetching property details', 'error' => $e->getMessage()], 500);
+            return response()->json(['message' => 'Error retrieving property data.'], 500);
         }
     }
 
-
-    //Function to get all property masters
-    // public function getAllPropertyMasters(Request $request)
-    // {
-    //     try {
-    //         $propertyMasters = PropertyMaster::with('towerPhases')->get();
-    //         return response()->json($propertyMasters);
-    //     } catch (\Exception $e) {
-    //         return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
-    //     }
-    // }
-    // Function to create property master
-    private function createPropertyMaster($propertyName, $status, $sap_code)
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(UpdatePropertyMasterRequest $request, PropertyMaster $propertyMaster)
     {
-        $propertyMaster = new PropertyMaster();
-        $propertyMaster->property_name = $propertyName;
-        $propertyMaster->sap_code = $sap_code;
-
-        $propertyMaster->status = $status;
-        $propertyMaster->save();
-        return $propertyMaster;
+        //
     }
 
-    // Function to create tower phase
-    private function createTowerPhase($tower, $propertyMasterId, $status)
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(PropertyMaster $propertyMaster)
     {
-        // Create a new TowerPhase instance
-        $towerPhase = new TowerPhase();
-        $towerPhase->property_masters_id = $propertyMasterId;
-        $towerPhase->tower_phase_name = $tower;
-        $towerPhase->status = $status;
-
-        // Save the TowerPhase to generate its ID
-        $towerPhase->save();
-
-        // Now that the ID exists, set the self-referencing foreign key
-        if (!$towerPhase->main_towerphase_id) {
-            $towerPhase->main_towerphase_id = $towerPhase->id;  // Self-referencing
-        }
-
-        // Save again to update the main_towerphase_id
-        $towerPhase->save();
-
-        return $towerPhase;
-    }
-
-    // Function to create property commercial detail
-    private function createPropertyCommercialDetail($type, $propertyMasterId, $status)
-    {
-        $propertyCommercialDetail = new PropertyCommercialDetail();
-        $propertyCommercialDetail->type = $type;
-        $propertyCommercialDetail->property_master_id = $propertyMasterId;
-        $propertyCommercialDetail->status = $status;
-        $propertyCommercialDetail->save();
-        return $propertyCommercialDetail;
+        //
     }
 
 
-    public function getPropertyName()
+    /**
+     * Get all property names
+     */
+    public function getPropertyNames()
     {
-        $property = PropertyMaster::pluck('property_name')->toArray();
-        return response()->json($property);
+        $propertyNames = $this->service->getPropertyNames();
+        return response()->json($propertyNames);
+    }
+
+    /**
+     * Get all property names with ID
+     */
+    public function getPropertyNamesWithIds()
+    {
+        $propertyNames = $this->service->getPropertyNamesWithIds();
+        return response()->json($propertyNames);
     }
 }

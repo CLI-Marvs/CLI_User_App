@@ -5,7 +5,7 @@ namespace App\Models;
 use App\Models\AdditionalPremium;
 use App\Models\FloorPremium;
 use App\Models\PaymentScheme;
-use App\Models\PriceBasicDetails;
+use App\Models\PriceBasicDetail;
 use App\Models\PriceListMaster;
 use App\Models\PriceVersion;
 use App\Models\PricingMasterList;
@@ -27,7 +27,7 @@ class BasicPricing extends Model
 
     public function priceListSetting()
     {
-        return $this->hasOne(PriceBasicDetails::class);
+        return $this->hasOne(PriceBasicDetail::class);
     }
     public function paymentSchemes()
     {

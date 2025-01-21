@@ -99,7 +99,7 @@ const App = () => {
             window.removeEventListener("storage", handleStorageChange);
         };
     }, []);
-
+    
     const Layout = () => {
         return (
             <div className="bg-white relative max-h-screen flex flex-col h-screen">
@@ -381,27 +381,28 @@ const App = () => {
                             ],
                         },
                         {
-                            path: "propertyandpricing",
+                            //TODO: add permission here
+                            path: "property-pricing",
                             element: <PropertyAndPricingLayout />,
                             children: [
                                 {
-                                    path: "pricingmasterlist",
+                                    path: "master-lists",
                                     element: <PricingMasterListView />,
                                 },
                                 {
-                                    path: "basicpricing/:id",
+                                    path: "basic-pricing/:id",
                                     element: <BasicPricingView />,
                                 },
                                 {
-                                    path: "paymentscheme",
+                                    path: "payment-scheme",
                                     element: <PaymentSchemeView />,
                                 },
                                 {
-                                    path: "priceversioning",
+                                    path: "price-versioning",
                                     element: <PriceVersioningView />,
                                 },
                                 {
-                                    path: "promotionalPricing",
+                                    path: "promotional-pricing",
                                     element: <PromotionalPricingView />,
                                 },
                             ],
