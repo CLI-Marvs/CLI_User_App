@@ -135,13 +135,14 @@
 
     <p>
         We value your feedback and would appreciate it if you could take a few moments to complete a short survey (5 minutes)
-        about your experience. Your insights help us improve our service and better serve you in the future.
+        about your experience.<br>
+        Your insights help us improve our service and better serve you in the future.
     </p>
 
     
     <p>
         Please click the link below to access the survey: <br>
-        <a href="{{ $selectedSurveyType['surveyLink']}}">
+        <a href="{{ $selectedSurveyType['surveyLink']}}" style="font-weight: bold">
             {{$selectedSurveyType['surveyName']}}
         </a>
     </p>
