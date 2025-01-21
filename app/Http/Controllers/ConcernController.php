@@ -1079,9 +1079,18 @@ class ConcernController extends Controller
             $query->whereMonth('created_at', $searchParams['selectedMonth']);
         }
 
-        /* if (!empty($searchParams['departments'])) {
-            $query->whereIn('resolve_from.department', $searchParams['departments']);
-        } */
+        if (!empty($searchParams['departments'])) {
+            $departments = $searchParams['departments'];
+        
+            // Ensure $departments is an array
+            if (!is_array($departments)) {
+                $departments = explode(',', $departments); // Convert string to array
+            }
+        
+            foreach ($departments as $department) {
+                $query->whereJsonContains('assign_to', [['department' => $department]]);
+            }
+        }
 
         return $query;
     }
