@@ -79,6 +79,9 @@ const FloorPremiums = ({ propertyId }) => {
     // ]);
 
     //Event handler
+    //Fetch the unit floor
+    
+
     /**
      * Handle to open modal to assign floor premiums
      */

@@ -9,14 +9,44 @@ use App\Exports\ExcelExport;
 use App\Imports\ExcelImport;
 use App\Jobs\ImportUnitsJob;
 use Illuminate\Http\Request;
+use App\Services\UnitService;
 use PhpParser\Node\Stmt\TryCatch;
 use App\Http\Controllers\Controller;
 use Maatwebsite\Excel\Facades\Excel;
+use App\Http\Requests\StoreUnitRequest;
 use Google\Cloud\Storage\StorageClient;
 
 class UnitController extends Controller
 {
     protected $uploadedFile;
+    protected $service;
+
+    public function __construct(UnitService $service)
+    {
+        $this->service = $service;
+    }
+
+
+    /**
+     * Store a newly created resource in storage.
+     */
+
+    public function store(StoreUnitRequest $request) {
+       
+        $validatedData = $request->validated();
+        try {
+            $unit = $this->service->store($validatedData);
+            return response()->json([
+                'message' => 'Unit created successfully',
+                'data' => $unit,
+            ], 201);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Validation failed',
+                'messages' => $e->errors(),
+            ], 422);
+        }
+    }
 
 
     /**
@@ -98,17 +128,20 @@ class UnitController extends Controller
      */
     public function countFloors(int $towerPhaseId)
     {
-        // Retrieve distinct floors for the given tower phase
-        $distinctFloors = Unit::where('tower_phase_id', $towerPhaseId)
-            ->distinct('floor')
-            ->pluck('floor');
 
-        //Count the number of distinct floors
-        $count = $distinctFloors->count();
-        return response()->json([
-            'count' => $count,
-            'floors' => $distinctFloors,
-        ], 200);
+        $distinctFloors=$this->service->countFloor($towerPhaseId);
+        return response()->json($distinctFloors);
+        // Retrieve distinct floors for the given tower phase
+        // $distinctFloors = Unit::where('tower_phase_id', $towerPhaseId)
+        //     ->distinct('floor')
+        //     ->pluck('floor');
+
+        // //Count the number of distinct floors
+        // $count = $distinctFloors->count();
+        // return response()->json([
+        //     'count' => $count,
+        //     'floors' => $distinctFloors,
+        // ], 200);
     }
 
     /**

@@ -37,7 +37,7 @@ const BasicPricing = () => {
     const { pricingData, resetPricingData, setPricingData } = usePricing();
     const { fetchPropertyListMasters } = usePriceListMaster();
     const [isLoading, setIsLoading] = useState({});
-
+    
 
     //Hooks 
     useEffect(() => {
@@ -168,7 +168,7 @@ const BasicPricing = () => {
     };
 
    
-    /**
+    /*
      * Payload object for submission with the provided status.
      * The payload includes employee ID, tower phase ID, price list settings, payment scheme, and the specified status.
      * @param {*} status 
@@ -325,6 +325,7 @@ const BasicPricing = () => {
             />
             <div>
                 <UploadUnitDetailsModal
+                    propertyData={propertyData}
                     handleFileChange={handleFileChange}
                     uploadUnitModalRef={uploadUnitModalRef}
                     fileName={fileName}

@@ -157,13 +157,13 @@ Route::middleware('auth:sanctum')->group(function () {
   });
 
   /* Units */
-  Route::prefix('/units')->group(function () {
+  Route::prefix('units')->group(function () {
     // Store unit details
-    Route::post('/upload-units', [UnitController::class, 'store']);
+    Route::post('/', [UnitController::class, 'store']);
     //Get all units
     Route::get('/', [UnitController::class, 'index']);
     //Update a price list masters
-    Route::put('/unit-floors/{towerPhaseId}', [UnitController::class, 'countFloors']);
+    Route::put('/floors/{towerPhaseId}', [UnitController::class, 'countFloors']);
   });
 
   /* Price Versioning */
