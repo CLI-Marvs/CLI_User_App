@@ -33,6 +33,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use App\Events\InquiryAssignedLogs;
 use Illuminate\Support\Facades\Log;
+use App\Jobs\SendSurveyLinkEmailJob;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 use App\Jobs\MarkClosedToCustomerJob;
@@ -1841,7 +1842,10 @@ class ConcernController extends Controller
 
             $this->inquiryResolveLogs($request, 'resolve');
             
+            
             MarkResolvedToCustomerJob::dispatch($request->ticket_id, $buyerEmail, $buyer_lastname, $message_id, $admin_name, $department, $modifiedTicketId, $selectedSurveyType);
+
+            SendSurveyLinkEmailJob::dispatch($buyerEmail,  $request->buyer_name, $selectedSurveyType, 'resolve');
         } catch (\Exception $e) {
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
         }
@@ -2282,6 +2286,8 @@ class ConcernController extends Controller
 
             //Pass the selectedSurveyType as arguments to MarkResolvedToCustomerJob job 
             MarkClosedToCustomerJob::dispatch($request->ticket_id, $buyerEmail, $buyer_lastname, $message_id, $admin_name, $department, $modifiedTicketId, $selectedSurveyType);
+
+            SendSurveyLinkEmailJob::dispatch($buyerEmail,  $request->buyer_name, $selectedSurveyType, 'close');
         } catch (\Exception $e) {
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
         }
