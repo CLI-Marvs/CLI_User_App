@@ -909,6 +909,10 @@ class ConcernController extends Controller
                 )
                 ->paginate(20);
 
+                \Log::info($allConcerns);
+
+                /* dd($allConcerns); */
+
             return response()->json($allConcerns);
         } catch (\Exception $e) {
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
@@ -1075,8 +1079,8 @@ class ConcernController extends Controller
             $query->whereMonth('created_at', $searchParams['selectedMonth']);
         }
 
-        if (!empty($searchParams[`department`])) {
-            $query->where('department', 'ILIKE', '%' . $searchParams['department'] . '%');
+        if (!empty($searchParams['departments'])) {
+            $query->whereIn('resolve_from.department', $searchParams['departments']);
         }
 
         return $query;
@@ -2027,7 +2031,11 @@ class ConcernController extends Controller
         $project = $request->property;
         $year = $request->year ?? Carbon::now()->year;
         $query = Concerns::select(
-            DB::raw("jsonb_array_elements(assign_to::jsonb)->>'department' as department"),
+            DB::raw("
+                (SELECT COALESCE(string_agg(elem->>'department', ', '), 'CRS')
+                FROM jsonb_array_elements(assign_to::jsonb) AS elem
+                ) AS department
+            "),
             DB::raw('SUM(case when status = \'Resolved\' then 1 else 0 end) as Resolved'),
             DB::raw('SUM(case when status = \'unresolved\' then 1 else 0 end) as Unresolved'),
             DB::raw('SUM(case when status = \'Closed\' then 1 else 0 end) as Closed')
