@@ -10,7 +10,7 @@ import { Form, useLocation } from "react-router-dom";
 import UploadUnitDetailsModal from "./modals/UploadUnitDetailsModal";
 import { useStateContext } from "../../../../context/contextprovider";
 import { priceListMasterService } from '@/component/servicesApi/apiCalls/propertyPricing/priceListMaster/priceListMasterService';
-import expectedHeaders from "../../../../constant/data/excelHeader";
+import expectedHeaders from "@/constant/data/excelHeader";
 import * as XLSX from "xlsx";
 import { useNavigate } from "react-router-dom";
 import { usePricing } from "@/component/layout/propertyandpricingpage/basicpricing/context/BasicPricingContext";
@@ -54,6 +54,7 @@ const BasicPricing = () => {
                 }));
 
             }
+            // Update the payment schemes
             if(data?.payment_scheme){
                 setPricingData(prev => ({
                     ...prev,

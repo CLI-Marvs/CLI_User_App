@@ -10,17 +10,6 @@ const PriceListSettings = ({ }) => {
     const [accordionOpen, setAccordionOpen] = useState(false);
     const { pricingData, updatePricingSection } = usePricing();
  
-    // const [formData, setFormData] = useState(pricingData.priceListSettings);
-    // console.log("formData", formData);
- 
-
-    //Hooks
-    // useEffect(() => {
-    //     if(priceListData) {
-    //         setFormData(priceListData);
-    //     }
-    // }, [priceListData]);
-
     //Event Handler
     const handleInputChange = (e) => {
         const { name, value } = e.target;

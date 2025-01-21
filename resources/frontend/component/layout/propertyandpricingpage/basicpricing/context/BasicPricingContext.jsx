@@ -13,7 +13,7 @@ const initialState = () => ({
     floorPremiums: {},
     additionalPremiums: {},
     priceVersions: {},
-    paymentSchemes:  [],
+    paymentSchemes: [],
     reviewsAndApproval: {}
 });
 export default function BasicPricingProvider({ children }) {

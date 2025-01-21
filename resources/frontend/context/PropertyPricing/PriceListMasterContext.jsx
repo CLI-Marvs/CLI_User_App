@@ -18,7 +18,6 @@ export const PriceListMasterProvider = ({ children }) => {
         setIsLoading(true);
         try {
             const response = await priceListMasterService.getPriceListMasters();
-            console.log("response", response)
             setPriceListMaster(response.data);
             setError(null);
             return response.data;

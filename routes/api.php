@@ -11,6 +11,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UnitController;
 use App\Http\Controllers\ConcernController;
 use App\Http\Controllers\FeatureController;
+use App\Http\Controllers\PriceVersionController;
 use App\Http\Controllers\DynamicBannerController;
 use App\Http\Controllers\PaymentSchemeController;
 use App\Http\Controllers\PropertyMasterController;
@@ -122,33 +123,24 @@ Route::middleware('auth:sanctum')->group(function () {
   Route::post('/basic-pricing', [PriceBasicDetailController::class, 'storeBasicPricing']);
 
 
-  /* Property Master */
-  // Route::post('/property-details', [PropertyMasterController::class, 'storePropertyDetail']);
-   Route::get('/get-property-master/{id}', [PropertyMasterController::class, 'getPropertyMaster']);
-
-
+ 
 
   /*Property Data*/
   Route::prefix('properties')->group(function () {
     // Get property names  
     Route::get('names', [PropertyMasterController::class, 'getPropertyNames']);
     Route::get('names/with-ids', [PropertyMasterController::class, 'getPropertyNamesWithIds']);
-
     // Store property details
     Route::post('/', [PropertyMasterController::class, 'store']);
-      
     // Get single property
     Route::get('{property}', [PropertyMasterController::class, 'show']);
      
   });
 
-
-
   /*Payment Scheme */
   Route::prefix('payment-schemes')->group(function () {
     // Get list of all payment schemes
     Route::get('/', [PaymentSchemeController::class, 'index']);
-
     // Store payment scheme
     Route::post('/', [PaymentSchemeController::class, 'store']);
   });
@@ -164,15 +156,23 @@ Route::middleware('auth:sanctum')->group(function () {
  
   });
 
-  // Route::post('/payment-schemes', [PaymentSchemeController::class, 'storePaymentScheme']);
-  // Route::get('/get-payment-schemes', [PaymentSchemeController::class, 'getAllPaymentSchemes']);
-  
+  /* Units */
+  Route::prefix('/units')->group(function () {
+    // Store unit details
+    Route::post('/upload-units', [UnitController::class, 'store']);
+    //Get all units
+    Route::get('/', [UnitController::class, 'index']);
+    //Update a price list masters
+    Route::put('/unit-floors/{towerPhaseId}', [UnitController::class, 'countFloors']);
+  });
 
-  /* Unit */
-  // Route::post('/units-import', [UnitController::class, 'importUnitsFromExcel']);
-  Route::post('/upload-units', [UnitController::class, 'uploadUnits']);
-  Route::get('/property-floors/{towerPhaseId}', [UnitController::class, 'countFloors']);
-  Route::post('/property-units', [UnitController::class, 'getUnits']);
+  /* Price Versioning */
+ Route::prefix('/price-version')->group(function () {
+    // Store unit details
+    Route::post('/', [PriceVersionController::class, 'store']);
+    //Get all units
+    Route::get('/', [PriceVersionController::class, 'index']);
+ });  
 
   //for banner
   Route::post('/store-banner', [DynamicBannerController::class, 'storeBanner']);

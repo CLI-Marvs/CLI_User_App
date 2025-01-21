@@ -22,9 +22,9 @@ class PriceListMaster extends Model
 
 
     //Relationship
-    public function priceBasicDetail():HasOne
+    public function priceBasicDetail(): HasOne
     {
-        return $this->hasOne(PriceBasicDetail::class,'pricelist_master_id','id');
+        return $this->hasOne(PriceBasicDetail::class, 'pricelist_master_id', 'id');
     }
 
     public function towerPhase(): BelongsTo
@@ -35,6 +35,11 @@ class PriceListMaster extends Model
     public function paymentSchemes(): HasMany
     {
         return $this->hasMany(PaymentScheme::class, 'price_list_masters_id', 'id');
+    }
+
+    public function priceVersions(): HasMany
+    {
+        return $this->hasMany(PriceVersion::class);
     }
 
     public function floorPremiums(): HasMany

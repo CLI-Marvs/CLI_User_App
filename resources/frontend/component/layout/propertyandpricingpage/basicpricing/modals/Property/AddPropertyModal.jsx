@@ -7,7 +7,7 @@ import { useStateContext } from "@/context/contextprovider";
 import { showToast } from "@/util/toastUtil";
 import { propertyMasterService } from '@/component/servicesApi/apiCalls/propertyPricing/property/propertyMasterService';
 import { usePriceListMaster } from '@/context/PropertyPricing/PriceListMasterContext';
-
+import { usePropertyNamesWithIds } from "@/component/layout/propertyandpricingpage/hooks/usePropertyNamesWithIds";
 
 const formDataState = {
     propertyName: "",
@@ -27,30 +27,16 @@ const AddPropertyModal = ({ propertyModalRef }) => {
     const [formData, setFormData] = useState(formDataState);
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
-    const [propertyNamesList, setPropertyNamesList] = useState([]);
+    const { propertyNamesList, fetchPropertyNamesWithIds } = usePropertyNamesWithIds();
     const { fetchPropertyListMasters } = usePriceListMaster();
 
     //Hooks
     useEffect(() => {
-        fetchPropertyNames();
+        fetchPropertyNamesWithIds();
     }, []);
 
     //Event Handler
-    //Get all property names
-    const fetchPropertyNames = async () => {
-        try {
-            const response = await propertyMasterService.getPropertyNamesWithIds();
-
-            // Convert object to array of objects and sort
-            const sortedProperties = Object.entries(response.data)
-                .map(([id, name]) => ({ id, name }))
-                .sort((a, b) => a.name.localeCompare(b.name));
-
-            setPropertyNamesList(sortedProperties);
-        } catch (error) {
-            console.error("Error fetching property names:", error);
-        }
-    };
+ 
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;

@@ -24,7 +24,7 @@ const UploadUnitDetailsModal = ({
         setFloorPremiumsAccordionOpen,
         getPropertyFloors,
     } = useStateContext();
-
+    console.log("selectedExcelHeader",  selectedExcelHeader);
     //Hooks
     useEffect(() => {
         if (selectedExcelHeader) {
@@ -109,6 +109,7 @@ const UploadUnitDetailsModal = ({
         await handleFileChange(event);
     }; //Handle in replacing the file
 
+
     return (
         <dialog
             className="modal w-[474px] rounded-lg backdrop:bg-black/50"
@@ -116,14 +117,14 @@ const UploadUnitDetailsModal = ({
         >
             <div className=" px-14 mb-5 rounded-[10px]">
                 <div className="">
-                    <form
+                    <div
                         method="dialog"
                         className="pt-2 flex justify-end -mr-[50px]"
                     >
                         <button className="flex justify-center w-10 h-10 items-center rounded-full bg-custom-grayFA3 text-custom-bluegreen hover:bg-custom-grayFA">
                             ✕
                         </button>
-                    </form>
+                    </div>
                 </div>
                 <div className="flex justify-between items-center bg-custom-grayFA h-[54px] px-[15px] mb-3">
                     <div>

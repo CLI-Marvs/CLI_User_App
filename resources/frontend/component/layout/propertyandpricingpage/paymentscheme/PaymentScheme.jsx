@@ -50,7 +50,7 @@ const PaymentScheme = () => {
                                 Description
                             </th>
                             <th className="flex justify-start w-[100px] shrink-0 pl-1">
-                                spot
+                                Spot
                             </th>
                             <th className="flex justify-start w-[100px] shrink-0 pl-1">
                                 Installment/No. Months
