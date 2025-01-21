@@ -1190,6 +1190,7 @@ const ReportPage = () => {
                                 <tbody>
                                     {dataDepartment
                                         .slice() // Create a copy to avoid mutating the original array
+                                        .filter(item => item.name !== null)
                                         .sort((a, b) => a.name.localeCompare(b.name)) // Sort alphabetically by name
                                         .map((item, index) => (
                                             <tr className="hover:bg-gray-50" key={index}>
