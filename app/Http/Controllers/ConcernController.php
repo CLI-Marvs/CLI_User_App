@@ -1079,9 +1079,9 @@ class ConcernController extends Controller
             $query->whereMonth('created_at', $searchParams['selectedMonth']);
         }
 
-        if (!empty($searchParams['departments'])) {
+        /* if (!empty($searchParams['departments'])) {
             $query->whereIn('resolve_from.department', $searchParams['departments']);
-        }
+        } */
 
         return $query;
     }

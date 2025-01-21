@@ -350,7 +350,6 @@ const InquiryList = () => {
         if (channels) summaryParts.push(`Channels -> ${channels}`);
         if (departments) summaryParts.push(`Department -> ${departments}`);
         if (ticket) summaryParts.push(`Ticket -> ${ticket}`);
-        if (department) summaryParts.push(`Department -> ${department}`);
         if (startDate) summaryParts.push(`Start Date -> ${formatDate(startDate)}`);
         if (selectedProperty) summaryParts.push(`Property -> ${selectedProperty}`);
         if (selectedYear) summaryParts.push(`Year -> ${selectedYear}`);
@@ -368,14 +367,14 @@ const InquiryList = () => {
             status,
             email,
             channels,
-            department,
+            departments,
             ticket,
             startDate,
             selectedProperty,
             hasAttachments,
             selectedMonth,
             selectedYear,
-            departments,
+            
         });
         setDaysFilter(null);
         setStatusFilter(null);
@@ -397,7 +396,7 @@ const InquiryList = () => {
     };
 
     useEffect(() => {
-        if (propertyParam || statusParam || monthParam || yearParam) {
+        if (propertyParam || statusParam || monthParam || yearParam || departmentParam) {
 
         setResultSearchActive(true);
         

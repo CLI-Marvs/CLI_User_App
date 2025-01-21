@@ -1195,7 +1195,7 @@ const ReportPage = () => {
                                             <tr className="hover:bg-gray-50" key={index}>
                                                 <td className="border border-gray-300 px-4 py-2 hover:text-blue-500 hover:underline cursor-pointer">
                                                     <Link
-                                                        to={`/inquirymanagement/inquirylist?department=${encodeURIComponent(item.name)}&year=${encodeURIComponent(yearValue)}${monthValue !== "All" ? `&month=${encodeURIComponent(monthValue)}` : ""
+                                                        to={`/inquirymanagement/inquirylist?${item.name !== "All" ? `department=${encodeURIComponent(item.name)}&` : ""}year=${encodeURIComponent(yearValue)}${monthValue !== "All" ? `&month=${encodeURIComponent(monthValue)}` : ""
                                                             }`}
                                                     >
                                                         {item.name}
@@ -1203,9 +1203,7 @@ const ReportPage = () => {
                                                 </td>
                                                 <td className="border border-gray-300 px-4 py-2 hover:text-blue-500 hover:underline cursor-pointer">
                                                     <Link
-                                                        to={`/inquirymanagement/inquirylist?department=${encodeURIComponent(
-                                                            item.name
-                                                        )}&status=Resolved&year=${encodeURIComponent(yearValue)}${monthValue !== "All" ? `&month=${encodeURIComponent(monthValue)}` : ""
+                                                        to={`/inquirymanagement/inquirylist?${item.name !== "All" ? `department=${encodeURIComponent(item.name)}&` : ""}status=Resolved&year=${encodeURIComponent(yearValue)}${monthValue !== "All" ? `&month=${encodeURIComponent(monthValue)}` : ""
                                                             }`}
                                                     >
                                                         {item.resolved}
@@ -1213,9 +1211,7 @@ const ReportPage = () => {
                                                 </td>
                                                 <td className="border border-gray-300 px-4 py-2 hover:text-blue-500 hover:underline cursor-pointer">
                                                     <Link
-                                                        to={`/inquirymanagement/inquirylist?department=${encodeURIComponent(
-                                                            item.name
-                                                        )}&status=Closed&year=${encodeURIComponent(yearValue)}${monthValue !== "All" ? `&month=${encodeURIComponent(monthValue)}` : ""
+                                                        to={`/inquirymanagement/inquirylist?${item.name !== "All" ? `department=${encodeURIComponent(item.name)}&` : ""}status=Closed&year=${encodeURIComponent(yearValue)}${monthValue !== "All" ? `&month=${encodeURIComponent(monthValue)}` : ""
                                                             }`}
                                                     >
                                                         {item.closed}
@@ -1223,9 +1219,7 @@ const ReportPage = () => {
                                                 </td>
                                                 <td className="border border-gray-300 px-4 py-2 hover:text-blue-500 hover:underline cursor-pointer">
                                                     <Link
-                                                        to={`/inquirymanagement/inquirylist?department=${encodeURIComponent(
-                                                            item.name
-                                                        )}&status=unresolved&year=${encodeURIComponent(yearValue)}${monthValue !== "All" ? `&month=${encodeURIComponent(monthValue)}` : ""
+                                                        to={`/inquirymanagement/inquirylist?${item.name !== "All" ? `department=${encodeURIComponent(item.name)}&` : ""}status=unresolved&year=${encodeURIComponent(yearValue)}${monthValue !== "All" ? `&month=${encodeURIComponent(monthValue)}` : ""
                                                             }`}
                                                     >
                                                         {item.unresolved}
