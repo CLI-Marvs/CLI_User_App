@@ -33,6 +33,7 @@ export const ContextProvider = ({ children }) => {
     const [notifCurrentPage, setNotifCurrentPage] = useState(0);
     const [searchFilter, setSearchFilter] = useState({});
     const [data, setData] = useState([]);
+    const [dataCount, setDataCount] = useState([]);
     const itemsPerPage = 20;
     const [pageCount, setPageCount] = useState(0);
     const [notifPageCount, setNotifPageCount] = useState(0);
@@ -156,7 +157,9 @@ export const ContextProvider = ({ children }) => {
                 const response = await apiService.get(
                     `/get-concern?${searchParams}`
                 );
+
                 setData(response.data.data);
+                setDataCount(response.data.total);
                 setPageCount(response.data.last_page);
             } catch (error) {
                 console.error("Error fetching data: ", error);
@@ -227,7 +230,7 @@ export const ContextProvider = ({ children }) => {
     };
 
     const fetchCategory = async () => {
-        if (!isDepartmentInitialized) return;
+       
         try {
             const response = await apiService.get("category-monthly", {
                 params: { department: department, property: project, month: month, year: year },
@@ -254,8 +257,8 @@ export const ContextProvider = ({ children }) => {
             }
         }
     };
+
     const fetchDataReport = async () => {
-        if (!isDepartmentInitialized) return;
         try {
 
             const response = await apiService.get("report-monthly", {
@@ -277,7 +280,6 @@ export const ContextProvider = ({ children }) => {
     };
 
     const getInquiriesPerProperty = async () => {
-        if (!isDepartmentInitialized) return;
         try {
             const response = await apiService.get("inquiries-property", {
                 params: {
@@ -301,7 +303,8 @@ export const ContextProvider = ({ children }) => {
     };
 
     const getInquiriesPerDepartment = async () => {
-        if (!isDepartmentInitialized) return;
+
+
         try {
             const response = await apiService.get("inquiries-department", {
                 params: {
@@ -318,6 +321,7 @@ export const ContextProvider = ({ children }) => {
                 unresolved: item.unresolved,
                 closed: item.closed,
             }));
+            
             setDataDepartment(formattedData);
         } catch (error) {
             console.log("error retrieving", error);
@@ -325,7 +329,7 @@ export const ContextProvider = ({ children }) => {
     };
 
     const getCommunicationTypePerProperty = async () => {
-        if (!isDepartmentInitialized) return;
+
         try {
             const response = await apiService.get("communication-type-property", {
                 params: {
@@ -348,7 +352,6 @@ export const ContextProvider = ({ children }) => {
     };
 
     const getInquiriesPerChannel = async () => {
-        if (!isDepartmentInitialized) return;
 
         try {
             const response = await apiService.get("inquiries-channel", {
@@ -740,6 +743,7 @@ export const ContextProvider = ({ children }) => {
 
     //* For Report Page
     useEffect(() => {
+
         const fetchData = async () => {
             try {
                 await getInquiriesPerDepartment();
@@ -748,6 +752,7 @@ export const ContextProvider = ({ children }) => {
                 await fetchCategory();
                 await getCommunicationTypePerProperty();
                 await getInquiriesPerChannel();
+                
             } catch (error) {
                 console.error("Error fetching data:", error);
             }
@@ -810,6 +815,8 @@ export const ContextProvider = ({ children }) => {
                 setCommunicationTypeMonth,
                 communicationTypeMonth,
                 setData,
+                dataCount,
+                setDataCount,
                 searchFilter,
                 statusFilter,
                 specificInquiry,

@@ -19,6 +19,7 @@ const InquiryList = () => {
         setCurrentPage,
         data,
         pageCount,
+        fullYear,
         getAllConcerns,
         daysFilter,
         setDaysFilter,
@@ -27,9 +28,12 @@ const InquiryList = () => {
         statusFilter,
         searchFilter,
         user,
+        dataCount,
         setSpecificAssigneeCsr,
         specificAssigneeCsr,
+        department,
         loading,
+        allEmployees,
         /*  setHasAttachments,
         hasAttachments */
         userAccessData
@@ -43,8 +47,10 @@ const InquiryList = () => {
     const [status, setStatus] = useState("");
     const [type, setType] = useState("");
     const [channels, setChannels] = useState("");
-
+    const [departments, setDepartments] = useState("");
     const [selectedProperty, setSelectedProperty] = useState("");
+    const [selectedYear, setSelectedYear] = useState("");
+    const [selectedMonth, setSelectedMonth] = useState("");
     const [hasAttachments, setHasAttachments] = useState(false);
     const { propertyNamesList } = useStateContext();
     const [activeDayButton, setActiveDayButton] = useState(null);
@@ -69,6 +75,10 @@ const InquiryList = () => {
         }
     }, [userAccessData]);
 
+    const [resultSearchActive, setResultSearchActive] = useState(false);
+   
+
+
     const handleSelect = (option) => {
         onChange(option);
         setIsOpenSelect(false);
@@ -82,6 +92,7 @@ const InquiryList = () => {
     };
 
     const handleRefresh = () => {
+        setResultSearchActive(false);
         if (daysFilter) {
             setDaysFilter(null);
             setActiveDayButton(null);
@@ -100,6 +111,7 @@ const InquiryList = () => {
             setAssignedToMeActive(false);
             setDaysFilter(null);
         }
+        
         getAllConcerns();
     };
 
@@ -135,6 +147,7 @@ const InquiryList = () => {
     };
 
     const handleOptionClick = (option) => {
+        setResultSearchActive(false);
         setSelectedOption(option);
         setIsOpen(false);
 
@@ -148,6 +161,12 @@ const InquiryList = () => {
             setAssignedToMeActive(false);
         } else if (option === "Resolved") {
             setStatusFilter("Resolved");
+            setCurrentPage(0);
+            setSearchFilter("");
+            setSpecificAssigneeCsr("");
+            setAssignedToMeActive(false);
+        } else if (option === "Closed") {
+            setStatusFilter("Closed");
             setCurrentPage(0);
             setSearchFilter("");
             setSpecificAssigneeCsr("");
@@ -265,6 +284,21 @@ const InquiryList = () => {
             : []),
     ];
 
+    const monthNames = {
+        "01": "January",
+        "02": "February",
+        "03": "March",
+        "04": "April",
+        "05": "May",
+        "06": "June",
+        "07": "July",
+        "08": "August",
+        "09": "September",
+        "10": "October",
+        "11": "November",
+        "12": "December",
+    };
+
     const updateLastActivity = () => {
         const currentTime = new Date();
         setLastActivity(currentTime);
@@ -284,7 +318,48 @@ const InquiryList = () => {
         return diff === 0 ? "0 minutes" : `${diff} minutes ago`;
     };
 
+    const formatDate = (dateString) => {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('en-US', {
+          month: 'short', // Jan
+          day: '2-digit', // 16
+          year: 'numeric' // 2025
+        });
+      };
+
+    const formatMonth = (monthNumber) => {
+    const monthNames = [
+        "January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December"
+    ];
+    return monthNames[parseInt(monthNumber, 10) - 1]; // Adjust for zero-based index
+    };
+
+    const [searchSummary, setSearchSummary] = useState("");
+
     const handleSearch = () => {
+        setResultSearchActive(true);
+
+        let summaryParts = []; // Array to hold each part of the summary
+
+        if (category) summaryParts.push(`Category -> ${category}`);
+        if (status) summaryParts.push(`Status -> ${status}`);
+        if (name) summaryParts.push(`Name -> ${name}`);
+        if (type) summaryParts.push(`Type -> ${type}`);
+        if (email) summaryParts.push(`Email -> ${email}`);
+        if (channels) summaryParts.push(`Channels -> ${channels}`);
+        if (departments) summaryParts.push(`Department -> ${departments}`);
+        if (ticket) summaryParts.push(`Ticket -> ${ticket}`);
+        if (startDate) summaryParts.push(`Start Date -> ${formatDate(startDate)}`);
+        if (selectedProperty) summaryParts.push(`Property -> ${selectedProperty}`);
+        if (selectedYear) summaryParts.push(`Year -> ${selectedYear}`);
+        if (selectedMonth) summaryParts.push(`Month -> ${ formatMonth(selectedMonth)}`);
+        if (hasAttachments) summaryParts.push(`Attachments -> Yes`);
+
+        let summary = `${summaryParts.join(" + ")}`;
+
+        setSearchSummary(summary.trim());
+
         setSearchFilter({
             name,
             category,
@@ -296,6 +371,9 @@ const InquiryList = () => {
             startDate,
             selectedProperty,
             hasAttachments,
+            selectedMonth,
+            selectedYear,
+            departments,
         });
         setDaysFilter(null);
         setStatusFilter(null);
@@ -311,6 +389,9 @@ const InquiryList = () => {
         setSelectedProperty("");
         setHasAttachments(false);
         setSpecificAssigneeCsr("");
+        setSelectedYear("");
+        setSelectedMonth("");
+        setDepartments("");
     };
 
     useEffect(() => {
@@ -604,6 +685,45 @@ const InquiryList = () => {
                                             <IoIosArrowDown />
                                         </span>
                                     </div>
+                                    <div className="flex relative">
+                                        <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
+                                            {" "}
+                                            Department
+                                        </label>
+                                        <div className="flex bg-red-900 justify-start w-full relative">
+                                            <label
+                                                htmlFor=""
+                                                className="w-full border-b-2"
+                                            >
+                                                {""}
+                                            </label>
+                                            <select
+                                                className="w-full border-b-1 outline-none appearance-none text-sm absolute px-[8px]"
+                                                value={departments}
+                                                onChange={(e) =>
+                                                    setDepartments(e.target.value)
+                                                }
+                                            >
+                                                <option value="">
+                                                    {" "}
+                                                    Select Department
+                                                </option>
+                                                {[...new Set(allEmployees
+                                                    .map(item => item.department)
+                                                    .filter(department => department !== null && department !== undefined && department !== "NULL")
+                                                    )]
+                                                    .sort((a, b) => a.localeCompare(b))
+                                                    .map((department, index) => (
+                                                    <option key={index} value={department}>
+                                                        {department}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                        <span className="absolute inset-y-0 right-0 flex items-center  pl-3 pointer-events-none">
+                                            <IoIosArrowDown />
+                                        </span>
+                                    </div>
                                     <div className="flex">
                                         <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
                                             {" "}
@@ -683,6 +803,61 @@ const InquiryList = () => {
                                             </span>
                                         </div>
                                     </div>
+                                    <div className="flex gap-3">
+                                        <div className="flex">
+                                            <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[94px]">
+                                                Year
+                                            </label>
+                                            <div className="relative w-[146px]">
+                                                <select
+                                                className="w-full border-b-1 outline-none appearance-none text-sm absolute px-[8px]"
+                                                value={selectedYear}
+                                                onChange={(e) =>
+                                                    setSelectedYear(e.target.value)
+                                                }
+                                            >
+                                                <option value="">
+                                                    {" "}
+                                                    Select Year
+                                                </option>
+                                                {fullYear && fullYear.map((item, index) => (
+                                                    <option key={index} value={item.year}>  {item.year}</option>
+                                                ))}
+                                            </select>
+                                            <span className="absolute inset-y-0 right-0 flex items-center  pl-3 pointer-events-none">
+                                                <IoIosArrowDown />
+                                            </span>
+                                            </div>
+                                        </div>
+                                        <div className="flex relative">
+                                            <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[65px]">
+                                                {" "}
+                                                Month
+                                            </label>
+                                            <select
+                                                className="w-[220px] border-b-1 outline-none appearance-none text-sm px-[8px]"
+                                                onChange={(e) =>
+                                                    setSelectedMonth(e.target.value)
+                                                }
+                                                value={selectedMonth}
+                                            >
+                                                <option value="">
+                                                    {" "}
+                                                    Select Month
+                                                </option>
+                                                {Object.entries(monthNames)
+                                                    .sort(([keyA], [keyB]) => keyA - keyB)
+                                                    .map(([key, name]) => (
+                                                        <option key={key} value={key}>
+                                                            {name}
+                                                        </option>
+                                                ))}
+                                            </select>
+                                            <span className="absolute inset-y-0 right-0 flex items-center  pl-3 pointer-events-none">
+                                                <IoIosArrowDown />
+                                            </span>
+                                        </div>
+                                    </div>
                                     <div className="mt-5 flex gap-5">
                                         <input
                                             type="checkbox"
@@ -709,18 +884,34 @@ const InquiryList = () => {
                     {/*  <div className="flex items-center">
                         <button onClick={handleOpenModal} className='h-[38px] w-[121px] gradient-btn5 text-white  text-xs rounded-[10px]'> <span className='text-[18px]'>+</span> Add Inquiry</button>
                     </div> */}
+                    {resultSearchActive && (
+                        <div className="flex flex-col gap-1 p-2 mt-[15px] bg-white w-max rounded-[8px] shadow-custom7 text-sm">
+                            <div className="flex">
+                                <strong>Search Result For : &nbsp;</strong><p>{searchSummary}</p>
+                            </div>
+                        </div>
+                    )}
+                    
                 </div>
                 <div className="max-w-[1260px]">
                     <div className="flex justify-between items-center h-12 mt-[15px] px-6 bg-white rounded-t-lg mb-1 ">
                         <div className="relative mr-4 ">
                             <button
-                                className="flex text-[20px] w-[130px] items-center gap-3 text-custom-bluegreen font-semibold"
+                                className="flex text-[20px] w-max items-center gap-3 text-custom-bluegreen font-semibold"
                                 onClick={toggleDropdown}
                             >
                                 {isOpen ? <IoIosArrowUp /> : <IoIosArrowDown />}{" "}
-                                {selectedOption}
+                                {resultSearchActive ? (
+                                    dataCount && dataCount === 0 ? (
+                                        <p>No Records Found</p>
+                                    ) : (
+                                        <p>{dataCount} Results Found</p>
+                                    )
+                                ) : (
+                                    <p>{selectedOption}</p>
+                                )}
                             </button>
-
+                        
                             {/* Dropdown Menu */}
                             {isOpen && (
                                 <div className="absolute top-full mt-2 w-48 bg-white border border-gray-200 shadow-lg rounded-md">
@@ -740,6 +931,14 @@ const InquiryList = () => {
                                             }
                                         >
                                             Resolved
+                                        </li>
+                                        <li
+                                            className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                                            onClick={() =>
+                                                handleOptionClick("Closed")
+                                            }
+                                        >
+                                            Closed
                                         </li>
                                         <li
                                             className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
