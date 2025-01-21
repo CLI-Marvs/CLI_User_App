@@ -19,7 +19,12 @@ class PriceVersionController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index() {}
+    public function index() {
+        $priceVersions = $this->service->index();
+        return response()->json([
+            'price_versions' => $priceVersions,
+        ]);
+    }
 
     /**
      * Store a newly created resource in storage.

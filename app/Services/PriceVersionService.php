@@ -24,8 +24,8 @@ class PriceVersionService
     /**
      * Get all price version data
      */
-    // public function index()
-    // {
-    //     return $this->repository->index();
-    // }
+    public function index()
+    {
+        return $this->repository->index();
+    }
 }

@@ -1,15 +1,16 @@
-import React,{useState, useRef} from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import ReactPaginate from "react-paginate";
 import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md";
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import DateLogo from '../../../../../../public/Images/Date_range.svg'
 import AddPriceVersionModal from './AddPriceVersionModal';
+import {priceVersionService} from '@/component/servicesApi/apiCalls/propertyPricing/priceVersion/priceVersionService';
 const PriceVersioning = () => {
 
   const [startDate, setStartDate] = useState(new Date());
   const [toggled, setToggled] = useState(false);
-
+  const [priceVersions, setPriceVersions] = useState([]);
   const [isFilterVisible, setIsFilterVisible] = useState(false);
 
   const toggleFilterBox = () => {
@@ -18,6 +19,25 @@ const PriceVersioning = () => {
 
   const modalRef = useRef(null);
 
+  //Hooks
+  useEffect(() => {
+    fetchPricerVersions();
+  }, []);
+
+  //Event Handler
+  const fetchPricerVersions = async () => {
+    try {
+      const response = await priceVersionService.getPriceVersions();
+      console.log("response 31", response);
+      if (response.status === 200) {
+        setPriceVersions(response.data.price_versions);
+        
+      }
+    } catch (error) {
+      console.log("Error", error);
+    }
+  };
+  //Handle open the Add Price Version modal
   const handleOpenModal = () => {
       if (modalRef.current) {
           modalRef.current.showModal();

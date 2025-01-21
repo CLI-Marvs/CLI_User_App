@@ -7,6 +7,8 @@ import moment from "moment";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { priceVersionService } from '@/component/servicesApi/apiCalls/propertyPricing/priceVersion/priceVersionService';
+import { showToast } from "@/util/toastUtil";
+
 
 const formDataState = {
     name: "",
@@ -23,8 +25,8 @@ const AddPriceVersionModal = ({ modalRef }) => {
     const dateRef = useRef(null);
     const [isDatePickerVisible, setIsDatePickerVisible] = useState(false);
     const [selectedProperty, setSelectedProperty] = useState("");
-    const [selectedTowerPhase,setSelectedTowerPhase] = useState("");
- 
+    const [selectedTowerPhase, setSelectedTowerPhase] = useState("");
+
     //Hooks
     useEffect(() => {
         fetchPropertyNamesWithIds();
@@ -71,28 +73,30 @@ const AddPriceVersionModal = ({ modalRef }) => {
                 tower_phase: selectedTowerPhase,
                 price_version: formData
             };
-            console.log("payload", payload);
             const response = await priceVersionService.storePriceVersion(payload);
-            console.log("response", response);
-
             if (response.status === 201) {
-            //     showToast("Data added successfully!", "success");
-            //     setFormData(formDataState);
-            //    // await fetchPropertyListMasters(true);
+                showToast(response?.data?.message || "Data added successfully!", "success");
+                setFormData(formDataState);
+                setSelectedProperty("");
+                setSelectedTowerPhase("");
+                // await fetchPropertyListMasters(true);
 
-            //     if (modalRef.current) {
-            //         modalRef.current.close();
-            //     }
+                if (modalRef.current) {
+                    modalRef.current.close();
+                }
             }
-       }catch(error){
-           console.log("Error", error);
-       }
-       
+        } catch (error) {
+            console.log("Error", error);
+        }
+
     }
 
     //Handle close the modal  
     const handleCloseModal = () => {
         if (modalRef.current) {
+            setFormData([formDataState]); //TODO: remove all state here
+            setSelectedProperty("");
+            setSelectedTowerPhase("");
             modalRef.current.close();
         }
     };
@@ -121,6 +125,7 @@ const AddPriceVersionModal = ({ modalRef }) => {
                                 onChange={(event) => setSelectedProperty(event.target.value)}
                                 className="appearance-none w-[144px] px-4 py-1 bg-white focus:outline-none border-0"
                             >
+                                {/*TODO: Add Loading state "Retrieving properties..." */}
                                 <option value="">Select Property</option>
                                 {propertyNamesList.map((property) => (
                                     <option key={property.id} value={property.id}>
@@ -156,7 +161,7 @@ const AddPriceVersionModal = ({ modalRef }) => {
                             </tr>
                         </thead>
                         <div className='shadow-custom5 rounded-[10px] overflow-hidden w-[600px]'>
-                            {formData && formData.map((form, index) => (
+                            {formData.length > 0 && formData.map((form, index) => (
                                 <tbody className='' key={index}>
                                     <tr className='h-[66px] text-sm border-separate bg-white'>
                                         <td className='px-[10px]'>
@@ -193,7 +198,7 @@ const AddPriceVersionModal = ({ modalRef }) => {
                                                     />
                                                     {formData.length > 1 && (
                                                         <button className='text-lg'
-                                                        onClick={() => handleRemoveFields(index)}
+                                                            onClick={() => handleRemoveFields(index)}
                                                         >
                                                             ✕
                                                         </button>
