@@ -118,12 +118,12 @@ Route::middleware('auth:sanctum')->group(function () {
   Route::post('/remove-assignee', [ConcernController::class, 'removeAssignee']);
   /* Download the file attachment */
   Route::post('/download-file', [ConcernController::class, 'downloadFileFromGCS']);
- 
+
   /*Basic Pricing */
   Route::post('/basic-pricing', [PriceBasicDetailController::class, 'storeBasicPricing']);
 
 
- 
+
 
   /*Property Data*/
   Route::prefix('properties')->group(function () {
@@ -134,7 +134,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/', [PropertyMasterController::class, 'store']);
     // Get single property
     Route::get('{property}', [PropertyMasterController::class, 'show']);
-     
   });
 
   /*Payment Scheme */
@@ -153,7 +152,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/', [PriceListMasterController::class, 'store']);
     //Update a price list masters
     Route::put('/update', [PriceListMasterController::class, 'update']);
- 
   });
 
   /* Units */
@@ -167,12 +165,12 @@ Route::middleware('auth:sanctum')->group(function () {
   });
 
   /* Price Versioning */
- Route::prefix('/price-version')->group(function () {
+  Route::prefix('/price-version')->group(function () {
     // Store unit details
     Route::post('/', [PriceVersionController::class, 'store']);
     //Get all units
     Route::get('/', [PriceVersionController::class, 'index']);
- });  
+  });
 
   //for banner
   Route::post('/store-banner', [DynamicBannerController::class, 'storeBanner']);

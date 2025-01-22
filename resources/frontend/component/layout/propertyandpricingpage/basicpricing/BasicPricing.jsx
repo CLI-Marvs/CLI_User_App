@@ -34,10 +34,6 @@ const BasicPricing = () => {
     const [fileName, setFileName] = useState("");
     const [fileSelected, setFileSelected] = useState({});
     const [selectedExcelHeader, setSelectedExcelHeader] = useState([]);
-    const { pricingData, resetPricingData, setPricingData } = usePricing();
-    const { fetchPropertyListMasters } = usePriceListMaster();
-    const [isLoading, setIsLoading] = useState({});
-    
 
     //Hooks 
     useEffect(() => {
@@ -167,23 +163,9 @@ const BasicPricing = () => {
         reader.readAsArrayBuffer(file);
     };
 
-   
-    /*
-     * Payload object for submission with the provided status.
-     * The payload includes employee ID, tower phase ID, price list settings, payment scheme, and the specified status.
-     * @param {*} status 
-     * @returns 
+    /**
+     * Handles in submitting all data in creating price master list
      */
-    const buildSubmissionPayload = (status) => ({
-        emp_id: user?.id,
-        price_list_master_id: data?.price_list_master_id ?? null,
-        tower_phase_id: data.data?.tower_phases[0]?.id || data?.tower_phase_id,
-        priceListPayload: formatPayload.formatPriceListSettingsPayload(pricingData.priceListSettings),
-        paymentSchemePayload: pricingData.paymentSchemes,
-        status: status
-    });
-
-    //Handles in submitting all data in creating price master list
     const handleSubmit = async (e, status) => {
         e.preventDefault();
         if (pricingData.priceListSettings.base_price === "" ||
