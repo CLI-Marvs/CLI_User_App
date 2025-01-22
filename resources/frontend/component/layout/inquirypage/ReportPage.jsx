@@ -330,10 +330,10 @@ const ReportPage = () => {
         if (active && payload && payload.length) {
 
             const colorMapping = {
-                'Complaint': '#EB4444',
-                'Request': '#348017',
-                'Inquiry': '#1A73E8',
-                'Suggestion or Recommendation': '#E4EA3B',
+                'Complaints': '#EB4444',
+                'Requests': '#348017',
+                'Inquiries': '#1A73E8',
+                'Suggestion or Recommendations': '#E4EA3B',
 
             };
 
@@ -884,10 +884,10 @@ const ReportPage = () => {
                                 </span>
                                 <span className="text-custom-gray12 text-sm hover:underline hover:text-blue-500 cursor-pointer">
                                     <Link
-                                        to={`/inquirymanagement/inquirylist?type=Suggestion and recommendation&year=${encodeURIComponent(yearValue)}${monthValue !== "All" ? `&month=${encodeURIComponent(monthValue)}` : ""}${departmentValue !== "All" ? `&department=${encodeURIComponent(departmentValue)}` : ""}
+                                        to={`/inquirymanagement/inquirylist?type=Suggestion or Recommendation&year=${encodeURIComponent(yearValue)}${monthValue !== "All" ? `&month=${encodeURIComponent(monthValue)}` : ""}${departmentValue !== "All" ? `&department=${encodeURIComponent(departmentValue)}` : ""}
                                         ${projectValue !== "All" ? `&property=${encodeURIComponent(projectValue)}` : ""}`}
                                     >
-                                        Suggestion and recommendations
+                                        Suggestion or recommendations
                                     </Link>
                                 </span>
                             </div>

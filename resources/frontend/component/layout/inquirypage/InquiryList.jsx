@@ -406,6 +406,7 @@ const InquiryList = () => {
 
     useEffect(() => {
 
+
         if (propertyParam || statusParam || monthParam || yearParam || departmentParam || channelsParam || categoryParam) {
 
         setResultSearchActive(true);
