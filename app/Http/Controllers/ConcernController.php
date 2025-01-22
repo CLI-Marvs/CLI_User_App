@@ -1082,7 +1082,16 @@ class ConcernController extends Controller
         }
 
         if (!empty($searchParams['departments'])) {
-            $query->whereIn('resolve_from.department', $searchParams['departments']);
+            $departments = $searchParams['departments'];
+        
+            // Ensure $departments is an array
+            if (!is_array($departments)) {
+                $departments = explode(',', $departments); // Convert string to array
+            }
+        
+            foreach ($departments as $department) {
+                $query->whereJsonContains('assign_to', [['department' => $department]]);
+            }
         }
 
         return $query;
@@ -2033,11 +2042,7 @@ class ConcernController extends Controller
         $project = $request->property;
         $year = $request->year ?? Carbon::now()->year;
         $query = Concerns::select(
-            DB::raw("
-                (SELECT COALESCE(string_agg(elem->>'department', ', '), 'CRS')
-                FROM jsonb_array_elements(assign_to::jsonb) AS elem
-                ) AS department
-            "),
+            DB::raw("jsonb_array_elements(assign_to::jsonb)->>'department' as department"),
             DB::raw('SUM(case when status = \'Resolved\' then 1 else 0 end) as Resolved'),
             DB::raw('SUM(case when status = \'unresolved\' then 1 else 0 end) as Unresolved'),
             DB::raw('SUM(case when status = \'Closed\' then 1 else 0 end) as Closed')
