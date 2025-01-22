@@ -548,12 +548,18 @@ const ReportPage = () => {
     communicationTypeData
 
     const totalValue = dataCategory.reduce((total, category) => total + category.value, 0);
+
+    const totalResolved = dataSet.reduce((total, item) => total + item.Resolved, 0);
+    const totalUnresolved = dataSet.reduce((total, item) => total + item.Unresolved, 0);
+    const totalClosed = dataSet.reduce((total, item) => total + item.Closed, 0);
     const totalAll = dataSet.reduce(
         (total, item) => total + item.Resolved + item.Unresolved + item.Closed,
         0
     );
+
     const totalValueChannel = inquriesPerChannelData.reduce((total, channel) => total + channel.value, 0);
     const totalValuetype = communicationTypeData.reduce((total, type) => total + type.value, 0);
+
 
     return (
         <div className="h-screen bg-custom-grayFA p-4 flex flex-col gap-[21px]">
@@ -744,7 +750,10 @@ const ReportPage = () => {
                     </ResponsiveContainer>
 
                 </div>
-                <div className="w-full h-[40px] flex items-start justify-start">
+                <div className="w-full flex-col flex items-start justify-start h-max pl-[15px]">
+                    <p className="text-[18px] montserrat-bold">Resolved: {totalResolved}</p>
+                    <p className="text-[18px] montserrat-bold">Closed: {totalClosed}</p>
+                    <p className="text-[18px] montserrat-bold">Unresolved: {totalUnresolved}</p>
                     <p className="text-[18px] montserrat-bold">Total: {totalAll}</p>
                 </div>
                 <div className="flex justify-end gap-6 text-sm">
