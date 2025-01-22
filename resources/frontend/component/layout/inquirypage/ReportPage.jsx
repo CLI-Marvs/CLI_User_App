@@ -853,6 +853,10 @@ const ReportPage = () => {
                                 </span>
                             </div>
                         </div>
+                       
+                    </div>
+                    <div className="w-full h-[44px] flex items-center justify-end px-[12px]">
+                        <p className="text-[18px] montserrat-bold">Total: {totalValue}</p>
                     </div>
                 </div>
                 <div className="w-[571px] pb-7  flex-grow-1 bg-[#F2F8FC] rounded-lg">
@@ -973,6 +977,9 @@ const ReportPage = () => {
                                 </div>
                             </div>
                         </div>
+                    </div>
+                    <div className="w-full h-[44px] flex items-center justify-end px-[12px]">
+                        <p className="text-[18px] montserrat-bold">Total: {totalValue}</p>
                     </div>
                 </div>
             </div>
