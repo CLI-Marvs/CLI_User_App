@@ -19,15 +19,17 @@ class SendSurveyLinkEmail extends Mailable
     protected $buyer_name;
     protected $selectedSurveyType;
     protected $status;
+    protected $modifiedTicketId;
     /**
      * Create a new message instance.
      */
-    public function __construct($buyer_name, $selectedSurveyType, $buyerEmail, $status)
+    public function __construct($buyer_name, $selectedSurveyType, $buyerEmail, $status,$modifiedTicketId)
     {
         $this->buyerEmail = $buyerEmail;
         $this->buyer_name = $buyer_name;
         $this->selectedSurveyType = $selectedSurveyType;
         $this->status = $status;
+        $this->modifiedTicketId = $modifiedTicketId;
     }
 
 
@@ -87,6 +89,7 @@ class SendSurveyLinkEmail extends Mailable
                 'buyer_name' => $this->buyer_name,
                 'selectedSurveyType' => $this->selectedSurveyType,
                 'status' => $this->status,
+                'modifiedTicketId' => $this->modifiedTicketId,
             ]
         );
     }
