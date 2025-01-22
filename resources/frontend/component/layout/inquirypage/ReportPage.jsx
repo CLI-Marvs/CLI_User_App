@@ -545,9 +545,15 @@ const ReportPage = () => {
      }, []); */
 
     // console.log("department", department);
+    communicationTypeData
 
-
-    const totalValue = dataCategory.reduce((total, category) => total + category.value, 0); //total value of category
+    const totalValue = dataCategory.reduce((total, category) => total + category.value, 0);
+    const totalAll = dataSet.reduce(
+        (total, item) => total + item.Resolved + item.Unresolved + item.Closed,
+        0
+    );
+    const totalValueChannel = inquriesPerChannelData.reduce((total, channel) => total + channel.value, 0);
+    const totalValuetype = communicationTypeData.reduce((total, type) => total + type.value, 0);
 
     return (
         <div className="h-screen bg-custom-grayFA p-4 flex flex-col gap-[21px]">
@@ -738,8 +744,10 @@ const ReportPage = () => {
                     </ResponsiveContainer>
 
                 </div>
+                <div className="w-full h-[40px] flex items-start justify-start">
+                    <p className="text-[18px] montserrat-bold">Total: {totalAll}</p>
+                </div>
                 <div className="flex justify-end gap-6 text-sm">
-
                     <div className="flex items-center px-3 py-2 gap-3">
                         <span className="flex items-center text-custom-solidgreen text-2xl">
                             ●
@@ -818,7 +826,9 @@ const ReportPage = () => {
                             </BarChart>
                         </ResponsiveContainer>
 
-
+                        <div className="w-full h-[40px] flex items-start justify-start pl-[6%]">
+                            <p className="text-[18px] montserrat-bold">Total: {totalValuetype}</p>
+                        </div>
                         <div className="flex justify-end">
                             <div className="flex items-center pr-3 py-2 gap-2">
                                 <span className="flex h-[20px] items-center pb-1 text-[#EB4444] text-2xl">
@@ -855,9 +865,7 @@ const ReportPage = () => {
                         </div>
                        
                     </div>
-                    <div className="w-full h-[44px] flex items-center justify-end px-[12px]">
-                        <p className="text-[18px] montserrat-bold">Total: {totalValue}</p>
-                    </div>
+                    
                 </div>
                 <div className="w-[571px] pb-7  flex-grow-1 bg-[#F2F8FC] rounded-lg">
                     <div className="flex p-4 gap-[8px] text-base montserrat-bold">
@@ -916,6 +924,9 @@ const ReportPage = () => {
                                 </BarChart>
 
                             </ResponsiveContainer>
+                        </div>
+                        <div className="w-full h-[40px] flex items-start justify-start pl-[6%]">
+                            <p className="text-[18px] montserrat-bold">Total: {totalValueChannel}</p>
                         </div>
                         <div className="w-full px-[10px]">
                             <div className="flex flex-wrap justify-end text-[#121212]">
@@ -978,9 +989,7 @@ const ReportPage = () => {
                             </div>
                         </div>
                     </div>
-                    <div className="w-full h-[44px] flex items-center justify-end px-[12px]">
-                        <p className="text-[18px] montserrat-bold">Total: {totalValue}</p>
-                    </div>
+                    
                 </div>
             </div>
             <div className="relative flex gap-3 mt-[6px]  items-start">
