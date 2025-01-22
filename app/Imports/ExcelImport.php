@@ -124,7 +124,7 @@ class ExcelImport implements ToModel, WithHeadingRow, WithChunkReading, WithBatc
      */
     public function batchSize(): int
     {
-        return 500;
+        return 1000;
     }
 
     /**
@@ -139,7 +139,7 @@ class ExcelImport implements ToModel, WithHeadingRow, WithChunkReading, WithBatc
      */
     public function chunkSize(): int
     {
-        return 500;
+        return 1000;
     }
 
     /**
@@ -153,6 +153,6 @@ class ExcelImport implements ToModel, WithHeadingRow, WithChunkReading, WithBatc
      */
     public function headingRow(): int
     {
-        return 1; // Assuming first row contains headers
+        return 1;  
     }
 }

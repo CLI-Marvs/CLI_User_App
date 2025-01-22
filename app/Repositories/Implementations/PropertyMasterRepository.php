@@ -20,7 +20,7 @@ class PropertyMasterRepository
     */
 
     public function store(array $data)
-    {
+    {  
         DB::beginTransaction();
         try {
             $propertyMaster = $this->model->find($data['property_masters_id']);
