@@ -910,9 +910,9 @@ class ConcernController extends Controller
                 )
                 ->paginate(20);
 
-                \Log::info($allConcerns);
+            \Log::info($allConcerns);
 
-                /* dd($allConcerns); */
+            /* dd($allConcerns); */
 
             return response()->json($allConcerns);
         } catch (\Exception $e) {
@@ -974,7 +974,7 @@ class ConcernController extends Controller
             if (!empty($searchParams['hasAttachments'])) {
                 $query->whereHas('messages', function ($messageQuery) {
                     $messageQuery->whereNotNull('attachment')
-                                 ->whereJsonLength('attachment', '>', 0);   
+                        ->whereJsonLength('attachment', '>', 0);
                 });
             }
         }
@@ -1801,8 +1801,8 @@ class ConcernController extends Controller
      * Implement a function to resolve a ticket
      */
     public function markAsResolve(Request $request)
-    {   
- 
+    {
+
 
         try {
             $assignees = $request->assignees;
@@ -1841,8 +1841,8 @@ class ConcernController extends Controller
             }
 
             $this->inquiryResolveLogs($request, 'resolve');
-            
-            
+
+
             MarkResolvedToCustomerJob::dispatch($request->ticket_id, $buyerEmail, $buyer_lastname, $message_id, $admin_name, $department, $modifiedTicketId, $selectedSurveyType);
 
             SendSurveyLinkEmailJob::dispatch($buyerEmail,  $request->buyer_name, $selectedSurveyType, 'resolve', $modifiedTicketId);
@@ -1937,8 +1937,8 @@ class ConcernController extends Controller
     public function getCreatedDates(Request $request)
     {
         $years = Concerns::select(DB::raw('DISTINCT EXTRACT(YEAR FROM created_at) as year'))
-        ->orderBy('year', 'desc')
-        ->get();
+            ->orderBy('year', 'desc')
+            ->get();
 
         return response()->json($years);
     }
@@ -1953,7 +1953,7 @@ class ConcernController extends Controller
         $project = $request->property;
         $month = $request->month;
         /* $monthNumber = Carbon::parse($request->propertyMonth)->month; */
-        
+
         $query = Concerns::select(
             DB::raw('EXTRACT(MONTH FROM created_at) as month'),
             DB::raw('SUM(case when status = \'Resolved\' then 1 else 0 end) as Resolved'),
@@ -1980,7 +1980,7 @@ class ConcernController extends Controller
             ->orderBy('month')
             ->get()
             ->keyBy('month');
- 
+
         $allMonths = collect(range(1, 12))->map(function ($month) use ($reports) {
             return [
                 'month' => $month,
@@ -2076,7 +2076,7 @@ class ConcernController extends Controller
 
 
         $query = Concerns::select('channels', DB::raw('COUNT(*) as total'))
-            
+
             ->whereYear('created_at', $year)
             ->whereNotNull('channels');
 
@@ -2128,7 +2128,7 @@ class ConcernController extends Controller
         $department = $request->department;
         $month = $request->month;
         $project = $request->property;
-        
+
 
         // Query to count each <communication_t></communication_t>ype grouped by property
         $query = Concerns::select('communication_type', DB::raw('COUNT(*) as total'))
@@ -2148,7 +2148,7 @@ class ConcernController extends Controller
         if ($project && $project !== 'All') {
             $query->where('property', $project);
         }
-        
+
         $query->orderByRaw("
             CASE 
                 WHEN communication_type = 'Complaint' THEN 1
@@ -2158,7 +2158,7 @@ class ConcernController extends Controller
                 ELSE 5
             END
         ");
-        
+
         $communicationTypes = $query->groupBy('communication_type')->get();
 
 
@@ -2179,9 +2179,8 @@ class ConcernController extends Controller
             }
             return $item;
         });
-    
-        return response()->json($mappedCommunicationTypes);
 
+        return response()->json($mappedCommunicationTypes);
     }
 
 
@@ -2287,7 +2286,7 @@ class ConcernController extends Controller
             //Pass the selectedSurveyType as arguments to MarkResolvedToCustomerJob job 
             MarkClosedToCustomerJob::dispatch($request->ticket_id, $buyerEmail, $buyer_lastname, $message_id, $admin_name, $department, $modifiedTicketId, $selectedSurveyType);
 
-            SendSurveyLinkEmailJob::dispatch($buyerEmail,  $request->buyer_name, $selectedSurveyType, 'close');
+            SendSurveyLinkEmailJob::dispatch($buyerEmail,  $request->buyer_name, $selectedSurveyType, 'close', $modifiedTicketId);
         } catch (\Exception $e) {
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
         }
