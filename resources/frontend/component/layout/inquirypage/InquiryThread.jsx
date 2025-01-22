@@ -219,7 +219,7 @@ const InquiryThread = () => {
     };
 
     const handleBack = () => {
-        navigate("/inquirymanagement/inquirylist");
+        navigate(-1);
     };
 
     const handleCheckboxChange = () => {
