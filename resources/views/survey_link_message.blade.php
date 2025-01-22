@@ -155,7 +155,7 @@
 
     <p style="color:#404B52; font-size: 16px;">
         Please click the link below to access the survey: <br>
-        <a href="{{ $selectedSurveyType['surveyLink']}}?ticket_id={{ $ticketId }}"
+        <a href="{{ $selectedSurveyType['surveyLink']}}={{ $modifiedTicketId }}"
             style="color:#3D3D3D; border-radius: 15px; height: 50px; width: 225px; border-color:#3D3D3D; margin-top: 5px; font-weight: 600; font-size: 18px;"
             class="button">
             Click Here! 👈
