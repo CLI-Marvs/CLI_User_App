@@ -17,11 +17,6 @@ const UploadUnitDetailsModal = ({
     const [formData, setFormData] = useState({});
     const [loading, setLoading] = useState(false);
     const newFileInputRef = useRef();
-    const {
-        setPropertyFloors,
-        setFloorPremiumsAccordionOpen,
-        getPropertyFloors,
-    } = useStateContext();
     const [towerPhaseId, setTowerPhaseId] = useState();
     const [propertyMasterId, setPropertyMasterId] = useState();
     //Hooks
@@ -73,18 +68,19 @@ const UploadUnitDetailsModal = ({
                 );
                 //TODO: fetch the unit lloor
                 // Fetch floors immediately after successful upload to reflect the floor premium
-                const floorsResponse = await getPropertyFloors(towerPhaseId);
+                const floorsResponse = await unitService.countFloor(towerPhaseId);
+                console.log("floorsResponse", floorsResponse);
                 // Update propertyFloors in the context
-                setPropertyFloors((prev) => ({
-                    ...prev,
-                    [towerPhaseId]: floorsResponse,
-                }));
+                // setPropertyFloors((prev) => ({
+                //     ...prev,
+                //     [towerPhaseId]: floorsResponse,
+                // }));
             }
             alert(response.data.message);
             if (uploadUnitModalRef.current) {
                 uploadUnitModalRef.current.close();
             }
-            setFloorPremiumsAccordionOpen(true);
+           
         } catch (error) {
             console.log("error uploading excel", error);
         } finally {

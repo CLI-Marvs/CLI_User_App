@@ -19,7 +19,9 @@ export const unitService = {
     //Function to count all units floor in the uploaded excel
     countFloor: async (towerPhaseId) => {
         try {
-            const response = await apiService.post("units/floors", towerPhaseId);
+            const response = await apiService.get(
+                `units/floors/${towerPhaseId}`
+            );
             return response;
         } catch (error) {
             console.error("Error counting floor:", error);

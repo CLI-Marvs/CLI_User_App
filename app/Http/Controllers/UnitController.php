@@ -130,18 +130,10 @@ class UnitController extends Controller
     {
 
         $distinctFloors=$this->service->countFloor($towerPhaseId);
-        return response()->json($distinctFloors);
-        // Retrieve distinct floors for the given tower phase
-        // $distinctFloors = Unit::where('tower_phase_id', $towerPhaseId)
-        //     ->distinct('floor')
-        //     ->pluck('floor');
-
-        // //Count the number of distinct floors
-        // $count = $distinctFloors->count();
-        // return response()->json([
-        //     'count' => $count,
-        //     'floors' => $distinctFloors,
-        // ], 200);
+        return response()->json([
+            'data' => $distinctFloors,
+            'debug' => print_r($distinctFloors, true)
+        ]);
     }
 
     /**

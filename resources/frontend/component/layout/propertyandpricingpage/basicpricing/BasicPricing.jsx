@@ -34,7 +34,10 @@ const BasicPricing = () => {
     const [fileName, setFileName] = useState("");
     const [fileSelected, setFileSelected] = useState({});
     const [selectedExcelHeader, setSelectedExcelHeader] = useState([]);
-
+    const { pricingData, resetPricingData, setPricingData } = usePricing();
+    const { fetchPropertyListMasters } = usePriceListMaster();
+    const [isLoading, setIsLoading] = useState({});
+    
     //Hooks 
     useEffect(() => {
         if (data) {
@@ -51,7 +54,7 @@ const BasicPricing = () => {
 
             }
             // Update the payment schemes
-            if(data?.payment_scheme){
+            if (data?.payment_scheme) {
                 setPricingData(prev => ({
                     ...prev,
                     paymentSchemes: Array.isArray(data.payment_scheme)
@@ -62,7 +65,7 @@ const BasicPricing = () => {
         }
     }, [data]);
 
- 
+
     //Event handler
     // Open the add property modal
     const handleOpenAddPropertyModal = () => {
@@ -163,6 +166,20 @@ const BasicPricing = () => {
         reader.readAsArrayBuffer(file);
     };
 
+    /*
+   * Payload object for submission with the provided status.
+   * The payload includes employee ID, tower phase ID, price list settings, payment scheme, and the specified status.
+   * @param {*} status 
+   * @returns 
+  */
+    const buildSubmissionPayload = (status) => ({
+        emp_id: user?.id,
+        price_list_master_id: data?.price_list_master_id ?? null,
+        tower_phase_id: data.data?.tower_phases[0]?.id || data?.tower_phase_id,
+        priceListPayload: formatPayload.formatPriceListSettingsPayload(pricingData.priceListSettings),
+        paymentSchemePayload: pricingData.paymentSchemes,
+        status: status
+    });
     /**
      * Handles in submitting all data in creating price master list
      */
@@ -173,11 +190,11 @@ const BasicPricing = () => {
             showToast("Please fill all the fields in the price list settings section", "error");
             return;
         }
-        if(pricingData.paymentSchemes.length === 0){
+        if (pricingData.paymentSchemes.length === 0) {
             showToast("Please select at least one payment scheme", "error");
             return;
         }
-        
+
         if (action === "Edit") {
             try {
                 setIsLoading((prev) => ({ ...prev, [status]: true }));
