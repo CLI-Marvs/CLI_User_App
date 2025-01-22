@@ -677,11 +677,11 @@ const ReportPage = () => {
                         )}
                 </div>
                 <div className="overflow-x-auto mt-[40px]">
-                    <ResponsiveContainer width="100%" height={218}>
+                    <ResponsiveContainer width="100%" height={228}>
                         <BarChart
                             data={dataSet}
                             margin={{
-                                top: 5,
+                                top: 20,
                                 right: 30,
                                 left: -25,
                                 bottom: 5,
@@ -738,23 +738,44 @@ const ReportPage = () => {
                 </div>
                 <div className="flex justify-end gap-6 text-sm">
 
-                    <div className="flex items-center px-3 py-2 gap-3">
-                        <span className="flex items-center text-custom-solidgreen text-2xl">
+                    <div className="flex items-center px-3 gap-2">
+                        <span className="flex items-center mb-1 text-custom-solidgreen text-2xl">
                             ●
                         </span>
-                        <span className="text-custom-gray12">Resolved</span>
+                        <span className="text-custom-gray12 hover:underline hover:text-blue-500 cursor-pointer">
+                            <Link
+                                to={`/inquirymanagement/inquirylist?status=Resolved&year=${encodeURIComponent(yearValue)}${monthValue !== "All" ? `&month=${encodeURIComponent(monthValue)}` : ""}${departmentValue !== "All" ? `&department=${encodeURIComponent(departmentValue)}` : ""}
+                                ${projectValue !== "All" ? `&property=${encodeURIComponent(projectValue)}` : ""}`}
+                            >
+                                Resolved
+                            </Link>
+                        </span>
                     </div>
-                    <div className="flex items-center px-3 py-2 gap-3">
-                        <span className="flex items-center text-custom-lightestgreen text-2xl">
+                    <div className="flex items-center px-3 py-2 gap-2">
+                        <span className="flex items-center mb-1 text-custom-lightestgreen text-2xl">
                             ●
                         </span>
-                        <span className="text-custom-gray12">Closed</span>
+                        <span className="text-custom-gray12 hover:underline hover:text-blue-500 cursor-pointer">
+                            <Link
+                                to={`/inquirymanagement/inquirylist?status=Closed&year=${encodeURIComponent(yearValue)}${monthValue !== "All" ? `&month=${encodeURIComponent(monthValue)}` : ""}${departmentValue !== "All" ? `&department=${encodeURIComponent(departmentValue)}` : ""}
+                                ${projectValue !== "All" ? `&property=${encodeURIComponent(projectValue)}` : ""}`}
+                            >
+                                Closed
+                            </Link>
+                        </span>
                     </div>
-                    <div className="flex items-center px-3 py-2 gap-3">
-                        <span className="flex items-center text-red-500 text-2xl">
+                    <div className="flex items-center px-3 py-2 gap-2">
+                        <span className="flex items-center mb-1 text-red-500 text-2xl">
                             ●
                         </span>
-                        <span className="text-custom-gray12">Unresolved</span>
+                        <span className="text-custom-gray12 hover:underline hover:text-blue-500 cursor-pointer">
+                            <Link
+                                to={`/inquirymanagement/inquirylist?status=unresolved&year=${encodeURIComponent(yearValue)}${monthValue !== "All" ? `&month=${encodeURIComponent(monthValue)}` : ""}${departmentValue !== "All" ? `&department=${encodeURIComponent(departmentValue)}` : ""}
+                                ${projectValue !== "All" ? `&property=${encodeURIComponent(projectValue)}` : ""}`}
+                            >
+                                Unresolved
+                            </Link>
+                        </span>
                     </div>
 
                 </div>
@@ -822,32 +843,52 @@ const ReportPage = () => {
                                 <span className="flex h-[20px] items-center pb-1 text-[#EB4444] text-2xl">
                                     ●
                                 </span>
-                                <span className="text-custom-gray12 text-sm">
-                                    Complaints
+                                <span className="text-custom-gray12 text-sm hover:underline hover:text-blue-500 cursor-pointer">
+                                    <Link
+                                        to={`/inquirymanagement/inquirylist?type=Complaint&year=${encodeURIComponent(yearValue)}${monthValue !== "All" ? `&month=${encodeURIComponent(monthValue)}` : ""}${departmentValue !== "All" ? `&department=${encodeURIComponent(departmentValue)}` : ""}
+                                        ${projectValue !== "All" ? `&property=${encodeURIComponent(projectValue)}` : ""}`}
+                                    >
+                                        Complaints
+                                    </Link>
                                 </span>
                             </div>
                             <div className="flex items-center pr-3 py-2 gap-2">
                                 <span className="flex h-[20px] items-center pb-1 text-[#348017] text-2xl">
                                     ●
                                 </span>
-                                <span className="text-custom-gray12 text-sm">
-                                    Requests
+                                <span className="text-custom-gray12 text-sm hover:underline hover:text-blue-500 cursor-pointer">
+                                    <Link
+                                        to={`/inquirymanagement/inquirylist?type=Request&year=${encodeURIComponent(yearValue)}${monthValue !== "All" ? `&month=${encodeURIComponent(monthValue)}` : ""}${departmentValue !== "All" ? `&department=${encodeURIComponent(departmentValue)}` : ""}
+                                        ${projectValue !== "All" ? `&property=${encodeURIComponent(projectValue)}` : ""}`}
+                                    >
+                                        Requests
+                                    </Link>
                                 </span>
                             </div>
                             <div className="flex items-center pr-3 py-2 gap-2">
                                 <span className="flex h-[20px] items-center pb-1 text-[#1A73E8] text-2xl">
                                     ●
                                 </span>
-                                <span className="text-custom-gray12 text-sm">
-                                    Inquiries
+                                <span className="text-custom-gray12 text-sm hover:underline hover:text-blue-500 cursor-pointer">
+                                    <Link
+                                        to={`/inquirymanagement/inquirylist?type=Inquiry&year=${encodeURIComponent(yearValue)}${monthValue !== "All" ? `&month=${encodeURIComponent(monthValue)}` : ""}${departmentValue !== "All" ? `&department=${encodeURIComponent(departmentValue)}` : ""}
+                                        ${projectValue !== "All" ? `&property=${encodeURIComponent(projectValue)}` : ""}`}
+                                    >
+                                        Inquiries
+                                    </Link>
                                 </span>
                             </div>
                             <div className="flex items-center pr-3 py-2 gap-2">
                                 <span className="flex h-[20px] items-center pb-1 text-[#E4EA3B] text-2xl">
                                     ●
                                 </span>
-                                <span className="text-custom-gray12 text-sm">
-                                    Suggestion or Recommendations
+                                <span className="text-custom-gray12 text-sm hover:underline hover:text-blue-500 cursor-pointer">
+                                    <Link
+                                        to={`/inquirymanagement/inquirylist?type=Suggestion and recommendation&year=${encodeURIComponent(yearValue)}${monthValue !== "All" ? `&month=${encodeURIComponent(monthValue)}` : ""}${departmentValue !== "All" ? `&department=${encodeURIComponent(departmentValue)}` : ""}
+                                        ${projectValue !== "All" ? `&property=${encodeURIComponent(projectValue)}` : ""}`}
+                                    >
+                                        Suggestion and recommendations
+                                    </Link>
                                 </span>
                             </div>
                         </div>
@@ -917,56 +958,91 @@ const ReportPage = () => {
                                     <span className="flex h-[20px] items-center pb-1 text-custom-solidgreen text-2xl">
                                         ●
                                     </span>
-                                    <span className="text-custom-gray12 text-xs">
-                                        Email
+                                    <span className="text-custom-gray12 text-xs hover:underline hover:text-blue-500 cursor-pointer">
+                                        <Link
+                                            to={`/inquirymanagement/inquirylist?channels=Email&year=${encodeURIComponent(yearValue)}${monthValue !== "All" ? `&month=${encodeURIComponent(monthValue)}` : ""}${departmentValue !== "All" ? `&department=${encodeURIComponent(departmentValue)}` : ""}
+                                            ${projectValue !== "All" ? `&property=${encodeURIComponent(projectValue)}` : ""}`}
+                                        >
+                                            Email
+                                        </Link>
                                     </span>
                                 </div>
                                 <div className="flex items-center pr-3 gap-[11px]">
                                     <span className="flex h-[20px] items-center pb-1 text-custom-lightgreen text-2xl">
                                         ●
                                     </span>
-                                    <span className="text-custom-gray12 text-xs">
-                                        Call
+                                    <span className="text-custom-gray12 text-xs hover:underline hover:text-blue-500 cursor-pointer">
+                                        <Link
+                                            to={`/inquirymanagement/inquirylist?channels=Call&year=${encodeURIComponent(yearValue)}${monthValue !== "All" ? `&month=${encodeURIComponent(monthValue)}` : ""}${departmentValue !== "All" ? `&department=${encodeURIComponent(departmentValue)}` : ""}
+                                            ${projectValue !== "All" ? `&property=${encodeURIComponent(projectValue)}` : ""}`}
+                                        >
+                                            Call
+                                        </Link>
                                     </span>
                                 </div>
                                 <div className="flex items-center pr-3 gap-[11px]">
                                     <span className="flex h-[20px] items-center pb-1 text-[#1A73E8] text-2xl">
                                         ●
                                     </span>
-                                    <span className="text-custom-gray12 text-xs">
-                                        Walk-in
+                                    <span className="text-custom-gray12 text-xs hover:underline hover:text-blue-500 cursor-pointer">
+                                        <Link
+                                            to={`/inquirymanagement/inquirylist?channels=Walk in&year=${encodeURIComponent(yearValue)}${monthValue !== "All" ? `&month=${encodeURIComponent(monthValue)}` : ""}${departmentValue !== "All" ? `&department=${encodeURIComponent(departmentValue)}` : ""}
+                                            ${projectValue !== "All" ? `&property=${encodeURIComponent(projectValue)}` : ""}`}
+                                        >
+                                            Walk-in
+                                        </Link>
                                     </span>
                                 </div>
                                 <div className="flex items-center pr-3 gap-[11px]">
                                     <span className="flex h-[20px] items-center pb-1 text-[#5B9BD5] text-2xl">
                                         ●
                                     </span>
-                                    <span className="text-custom-gray12 text-sm">
-                                        Website
+                                    <span className="text-custom-gray12 text-xs hover:underline hover:text-blue-500 cursor-pointer">
+                                        <Link
+                                            to={`/inquirymanagement/inquirylist?channels=Website&year=${encodeURIComponent(yearValue)}${monthValue !== "All" ? `&month=${encodeURIComponent(monthValue)}` : ""}${departmentValue !== "All" ? `&department=${encodeURIComponent(departmentValue)}` : ""}
+                                            ${projectValue !== "All" ? `&property=${encodeURIComponent(projectValue)}` : ""}`}
+                                        >
+                                            Website
+                                        </Link>
                                     </span>
                                 </div>
                                 <div className="flex items-center pr-3 gap-[11px]">
                                     <span className="flex h-[20px] items-center pb-1 text-custom-bluegreen text-2xl">
                                         ●
                                     </span>
-                                    <span className="text-custom-gray12 text-xs">
-                                        Social Media
+                                    <span className="text-custom-gray12 text-xs hover:underline hover:text-blue-500 cursor-pointer">
+                                        <Link
+                                            to={`/inquirymanagement/inquirylist?channels=Social media&year=${encodeURIComponent(yearValue)}${monthValue !== "All" ? `&month=${encodeURIComponent(monthValue)}` : ""}${departmentValue !== "All" ? `&department=${encodeURIComponent(departmentValue)}` : ""}
+                                            ${projectValue !== "All" ? `&property=${encodeURIComponent(projectValue)}` : ""}`}
+                                        >
+                                            Social Media
+                                        </Link>
                                     </span>
                                 </div>
                                 <div className="flex items-center pr-3 gap-[11px] ">
                                     <span className="flex h-[20px] items-center pb-1 text-[#404B52] text-2xl">
                                         ●
                                     </span>
-                                    <span className="text-custom-gray12 text-xs">
-                                        Branch Tablet
+                                    <span className="text-custom-gray12 text-xs hover:underline hover:text-blue-500 cursor-pointer">
+                                        <Link
+                                            to={`/inquirymanagement/inquirylist?channels=Branch Tablet&year=${encodeURIComponent(yearValue)}${monthValue !== "All" ? `&month=${encodeURIComponent(monthValue)}` : ""}${departmentValue !== "All" ? `&department=${encodeURIComponent(departmentValue)}` : ""}
+                                            ${projectValue !== "All" ? `&property=${encodeURIComponent(projectValue)}` : ""}`}
+                                        >
+                                            Branch Tablet
+                                        </Link>
                                     </span>
                                 </div>
                                 <div className="flex items-center pr-3 gap-[11px] ">
                                     <span className="flex h-[20px] items-center pb-1 text-custom-grayA5 text-2xl">
                                         ●
                                     </span>
-                                    <span className="text-custom-gray12 text-xs">
-                                        Internal Endorsement
+                                    <span className="text-custom-gray12 text-xs hover:underline hover:text-blue-500 cursor-pointer">
+                                        <Link
+                                            to={`/inquirymanagement/inquirylist?channels=Internal Endorsement&year=${encodeURIComponent(yearValue)}${monthValue !== "All" ? `&month=${encodeURIComponent(monthValue)}` : ""}${departmentValue !== "All" ? `&department=${encodeURIComponent(departmentValue)}` : ""}
+                                            ${projectValue !== "All" ? `&property=${encodeURIComponent(projectValue)}` : ""}`}
+                                        >
+                                            Internal Endorsement
+                                        </Link>
                                     </span>
                                 </div>
                             </div>
@@ -1315,8 +1391,13 @@ const ReportPage = () => {
                                                 </span>
                                                 <div className="flex gap-1 shrink-0 items-center">
 
-                                                    <span className="text-[18px] text-[#121212] leading-[15px] py-[4px]">
-                                                        {category.name}
+                                                    <span className="text-[18px] text-[#121212] leading-[15px] py-[4px] hover:underline hover:text-blue-500 cursor-pointer">
+                                                        <Link
+                                                            to={`/inquirymanagement/inquirylist?category=${encodeURIComponent(category.name)}&year=${encodeURIComponent(yearValue)}${monthValue !== "All" ? `&month=${encodeURIComponent(monthValue)}` : ""}${departmentValue !== "All" ? `&department=${encodeURIComponent(departmentValue)}` : ""}
+                                                            ${projectValue !== "All" ? `&property=${encodeURIComponent(projectValue)}` : ""}`}
+                                                        >
+                                                            {category.name}
+                                                        </Link>
                                                     </span>
                                                 </div>
                                                 <div className="flex items-center gap-1">

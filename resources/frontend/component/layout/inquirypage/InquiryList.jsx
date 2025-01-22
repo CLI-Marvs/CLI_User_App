@@ -21,6 +21,9 @@ const InquiryList = () => {
     const searchParams = new URLSearchParams(location.search);
     const propertyParam = searchParams.get("property");
     const statusParam = searchParams.get("status");
+    const typeParam = searchParams.get("type");
+    const channelsParam = searchParams.get("channels");
+    const categoryParam = searchParams.get("category");
     const departmentParam = searchParams.get("department");
     const monthParam = searchParams.get("month");
     const yearParam = searchParams.get("year");
@@ -347,7 +350,13 @@ const InquiryList = () => {
         if (name) summaryParts.push(`Name -> ${name}`);
         if (type) summaryParts.push(`Type -> ${type}`);
         if (email) summaryParts.push(`Email -> ${email}`);
-        if (channels) summaryParts.push(`Channels -> ${channels}`);
+        if (channels) {
+            const formattedChannels =
+                    channels === 'Walk in' ? 'Walk-in' :
+                    channels === 'Social media' ? 'Social Media' :
+                    channels;
+            summaryParts.push(`Channels -> ${formattedChannels}`);
+        }
         if (departments) summaryParts.push(`Department -> ${departments}`);
         if (ticket) summaryParts.push(`Ticket -> ${ticket}`);
         if (startDate) summaryParts.push(`Start Date -> ${formatDate(startDate)}`);
@@ -396,18 +405,26 @@ const InquiryList = () => {
     };
 
     useEffect(() => {
-        if (propertyParam || statusParam || monthParam || yearParam || departmentParam) {
+
+        if (propertyParam || statusParam || monthParam || yearParam || departmentParam || channelsParam || categoryParam) {
 
         setResultSearchActive(true);
         
         let summaryParts = []; // Array to hold each part of the summary
 
-        if (category) summaryParts.push(`Category -> ${category}`);
+        if (categoryParam) summaryParts.push(`Category -> ${categoryParam}`);
         if (statusParam) summaryParts.push(`Status -> ${statusParam}`);
         if (name) summaryParts.push(`Name -> ${name}`);
-        if (type) summaryParts.push(`Type -> ${type}`);
+        if (typeParam) summaryParts.push(`Type -> ${typeParam}`);
         if (email) summaryParts.push(`Email -> ${email}`);
-        if (channels) summaryParts.push(`Channels -> ${channels}`);
+        if (channelsParam) {
+            // Format 'Walk in' to 'Walk-in'
+            const formattedChannel = 
+                    channelsParam === 'Walk in' ? 'Walk-in' : 
+                    channelsParam === 'Social media' ? 'Social Media' : 
+                    channelsParam;
+            summaryParts.push(`Channels -> ${formattedChannel}`);
+        }
         if (departmentParam) summaryParts.push(`Department -> ${departmentParam}`);
         if (ticket) summaryParts.push(`Ticket -> ${ticket}`);
         if (startDate) summaryParts.push(`Start Date -> ${formatDate(startDate)}`);
@@ -422,12 +439,12 @@ const InquiryList = () => {
 
         setSearchFilter({
             name,
-            category,
-            type,
+            category: categoryParam,
+            type: typeParam,
             status: statusParam,
             email,
-            channels,
-            department: departmentParam,
+            channels: channelsParam,
+            departments: departmentParam,
             ticket,
             startDate,
             selectedProperty: propertyParam,
@@ -437,7 +454,7 @@ const InquiryList = () => {
         });
 
         }
-    }, [propertyParam, statusParam]);
+    }, [propertyParam, statusParam, departmentParam, monthParam, yearParam]);
 
     useEffect(() => {
         if (isFilterVisible) {
