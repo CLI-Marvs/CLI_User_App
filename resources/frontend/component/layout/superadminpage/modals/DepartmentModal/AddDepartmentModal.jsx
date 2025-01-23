@@ -4,25 +4,22 @@ import { showToast } from "../../../../../util/toastUtil";
 import CircularProgress from "@mui/material/CircularProgress";
 import { isButtonDisabled } from './utils/isButtonDisabled';
 import Feature from '../../component/Feature';
-import { departmentPermissionService } from '../../../../servicesApi/apiCalls/roleManagement';
-import useFeatures from '../../hooks/useFeatures';
-const AddDepartmentModal = ({ departmentModalRef, onSubmitSuccess, employeeDepartments, onDeleteSuccess }) => {
+import { departmentPermissionService } from '@/component/servicesApi/apiCalls/roleManagement';
+import useFeature from '@/context/RoleManagement/FeatureContext';
+import useDepartmentPermission from '@/context/RoleManagement/DepartmentPermissionContext';
+
+const AddDepartmentModal = ({ departmentModalRef, employeeDepartments }) => {
 
     //States
-    const { features, fetchFeatures } = useFeatures();
+    const { fetchDepartmentPermissions } = useDepartmentPermission();
+    const { features } = useFeature();
     const [isLoading, setIsLoading] = useState(false);
     const [formData, setFormData] = useState({
         department_id: 0,
         features: [],
     });
 
-    //Hooks
-    useEffect(() => {
-        fetchFeatures();
-    }, [])
-
     //Event handler
-
     //Handle the change event of select tag for employee department
     const handleSelectDepartmentChange = (e) => {
         setFormData({ ...formData, department_id: parseInt(e.target.value) });
@@ -60,9 +57,11 @@ const AddDepartmentModal = ({ departmentModalRef, onSubmitSuccess, employeeDepar
             department_id: formData.department_id,
             features: formData.features
         };
+        (false);
         try {
             setIsLoading(true);
             const response = await departmentPermissionService.storeDepartmentsWithPermissions(payload);
+
             if (response.data?.statusCode === 200) {
                 showToast("Data added successfully!", "success");
                 setFormData({
@@ -75,8 +74,12 @@ const AddDepartmentModal = ({ departmentModalRef, onSubmitSuccess, employeeDepar
                     }, 1000);
                 }
             }
-            onSubmitSuccess(); // Call this callback from the parent component to refresh or fetch the updated department permissions data.
-            onDeleteSuccess(); // Call this callback to refresh or fetch the updated list of employee departments.
+            await fetchDepartmentPermissions(true);
+
+            // setDepartmentsWithPermissions((prevPermissions) => [
+            //     ...prevPermissions,
+            //     newPermission,
+            // ]);
         } catch (error) {
             if (error.response) {
                 const errorMessage = error.response.data?.error || "An error occurred.";
@@ -134,7 +137,7 @@ const AddDepartmentModal = ({ departmentModalRef, onSubmitSuccess, employeeDepar
                                     <option value="">
                                         (Select)
                                     </option>
-                                    {employeeDepartments.map((item) => (
+                                    {employeeDepartments && employeeDepartments.map((item) => (
                                         <option value={item.id} key={item.id}>
                                             {item.name}
                                         </option>

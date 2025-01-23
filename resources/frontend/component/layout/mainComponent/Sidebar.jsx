@@ -201,14 +201,14 @@ const Sidebar = () => {
             )
           }
           {ALLOWED_EMPLOYEES_CRS.includes(userLoggedInEmail) && (
-            <Link to="superadmin/userrightsandpermissions">
-              <ListItem
-                className={`h-[35px] w-[185px] text-sm pl-[12px] transition-all duration-300 ease-in-out 
-                  ${activeItem === "superadmin" ||
-                    location.pathname.startsWith("/superadmin")
-                    ? "bg-custom-lightestgreen text-custom-solidgreen font-semibold"
-                    : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
-                  }
+          <Link to="super-admin/user-rights-and-permissions">
+            <ListItem
+              className={`h-[35px] w-[185px] text-sm pl-[12px] transition-all duration-300 ease-in-out 
+                  ${activeItem === "super-admin" ||
+                  location.pathname.startsWith("/super-admin")
+                  ? "bg-custom-lightestgreen text-custom-solidgreen font-semibold"
+                  : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
+                }
                     ${isSuperAdminOpen
                     ? "rounded-[10px] rounded-b-none"
                     : "rounded-[10px]"
@@ -228,12 +228,12 @@ const Sidebar = () => {
           )}
 
           {ALLOWED_EMPLOYEES_CRS.includes(userLoggedInEmail) && isSuperAdminOpen &&
-            location.pathname.startsWith("/superadmin") && (
+            location.pathname.startsWith("/super-admin") && (
               <div className="px-[12px] py-[20px] w-[185px] min-h-[122px] flex flex-col gap-[5px] bg-custom-lightestgreen border-t rounded-t-none rounded-b-[10px] border-custom-solidgreen transition-all duration-300 ease-in-out">
-                <Link to="/superadmin/userrightsandpermissions">
+                <Link to="/super-admin/user-rights-and-permissions">
                   <ListItem
                     className={`h-[48px] w-full py-[8px] px-[18px]  text-sm rounded-[25px] ${location.pathname.startsWith(
-                      "/superadmin/userrightsandpermissions"
+                      "/super-admin/user-rights-and-permissions"
                     )
                       ? "bg-white text-custom-solidgreen font-semibold "
                       : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "

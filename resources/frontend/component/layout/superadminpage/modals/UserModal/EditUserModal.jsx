@@ -4,12 +4,13 @@ import CircularProgress from "@mui/material/CircularProgress";
 import { normalizeData } from '../UserModal/utils/normalizeData';
 import isEqual from 'lodash/isEqual';
 import Feature from '../../component/Feature';
-import useFeatures from '../../hooks/useFeatures';
+import useFeature from '@/context/RoleManagement/FeatureContext';
+
 import { employeePermissionService } from '../../../../servicesApi/apiCalls/roleManagement';
 
 const EditUserModal = ({ editEmployeeModalRef, selectedEmployee, onSubmitSuccess }) => {
     //States
-    const { features, fetchFeatures } = useFeatures();
+    const { features, fetchFeatures } = useFeature();
     const [isLoading, setIsLoading] = useState(false);
     const [formData, setFormData] = useState({
         employee_id: 0,
