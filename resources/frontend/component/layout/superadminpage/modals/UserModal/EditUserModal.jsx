@@ -1,15 +1,16 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { showToast } from "../../../../../util/toastUtil";
+import { showToast } from "@/util/toastUtil";
 import CircularProgress from "@mui/material/CircularProgress";
-import { normalizeData } from '../UserModal/utils/normalizeData';
+import { normalizeData } from '@/component/layout/superadminpage/modals/UserModal/utils/normalizeData';
 import isEqual from 'lodash/isEqual';
-import Feature from '../../component/Feature';
+import Feature from '@/component/layout/superadminpage/component/Feature';
 import useFeature from '@/context/RoleManagement/FeatureContext';
+import useEmployeePermission from '@/context/RoleManagement/EmployeePermissionContext';
+import { employeePermissionService } from '@/component/servicesApi/apiCalls/roleManagement';
 
-import { employeePermissionService } from '../../../../servicesApi/apiCalls/roleManagement';
-
-const EditUserModal = ({ editEmployeeModalRef, selectedEmployee, onSubmitSuccess }) => {
+const EditUserModal = ({ editEmployeeModalRef, selectedEmployee }) => {
     //States
+    const {  fetchEmployeeWithPermissions } = useEmployeePermission();
     const { features, fetchFeatures } = useFeature();
     const [isLoading, setIsLoading] = useState(false);
     const [formData, setFormData] = useState({
@@ -84,11 +85,12 @@ const EditUserModal = ({ editEmployeeModalRef, selectedEmployee, onSubmitSuccess
                     employee_id: 0,
                     features: [],
                 });
-                onSubmitSuccess();
+            
                 if (editEmployeeModalRef.current) {
                     editEmployeeModalRef.current.close();
                 }
             }
+            await fetchEmployeeWithPermissions(true,false);
         } catch (error) {
             console.log("Error updating user permission:", error);
         } finally {

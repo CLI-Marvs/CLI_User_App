@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react'
 import { IoMdArrowDropdown } from 'react-icons/io'
-import { showToast } from "../../../../../util/toastUtil";
+import { showToast } from "@/util/toastUtil"
 import CircularProgress from "@mui/material/CircularProgress";
-import { isButtonDisabled } from './utils/isButtonDisabled';
-import Feature from '../../component/Feature';
+import { isButtonDisabled } from '@/component/layout/superadminpage/modals/DepartmentModal/utils/isButtonDisabled';
+import Feature from '@/component/layout/superadminpage/component/Feature';
 import { departmentPermissionService } from '@/component/servicesApi/apiCalls/roleManagement';
 import useFeature from '@/context/RoleManagement/FeatureContext';
 import useDepartmentPermission from '@/context/RoleManagement/DepartmentPermissionContext';
@@ -74,12 +74,7 @@ const AddDepartmentModal = ({ departmentModalRef, employeeDepartments }) => {
                     }, 1000);
                 }
             }
-            await fetchDepartmentPermissions(true);
-
-            // setDepartmentsWithPermissions((prevPermissions) => [
-            //     ...prevPermissions,
-            //     newPermission,
-            // ]);
+            await fetchDepartmentPermissions(true, false);
         } catch (error) {
             if (error.response) {
                 const errorMessage = error.response.data?.error || "An error occurred.";
@@ -167,7 +162,6 @@ const AddDepartmentModal = ({ departmentModalRef, employeeDepartments }) => {
                                 handleFeaturePermissionChange={handleFeaturePermissionChange}
                             />
                         ))}
-
                     </div>
                 </div>
                 <div className="">

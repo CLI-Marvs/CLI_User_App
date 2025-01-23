@@ -11,13 +11,14 @@ export const DepartmentPermissionProvider = ({ children }) => {
     const [error, setError] = useState(null);
 
     // This function does the actual database fetch
-    const fetchDepartmentPermissions = useCallback(async (forceFetch = false) => {
+    const fetchDepartmentPermissions = useCallback(async (forceFetch = false ,setLoading = true) => {
         if (departmentsWithPermissions && !forceFetch) {
             return departmentsWithPermissions;
         }
 
-        setIsDepartmentPermissionsLoading(true);
+    
         try {
+            if (setLoading) setIsDepartmentPermissionsLoading(true);
             const response = await departmentPermissionService.getDepartmentsWithPermissions();
             setDepartmentsWithPermissions(response);
             await fetchEmployeeDepartments(true);
@@ -26,10 +27,11 @@ export const DepartmentPermissionProvider = ({ children }) => {
         } catch (error) {
             setError(error.message);
             console.error("Error fetching department permisions:", error);
-        } finally {
-            setIsDepartmentPermissionsLoading(false);
+        } 
+        finally {
+            if (setLoading) setIsDepartmentPermissionsLoading(false);
         }
-    }, []);
+    }, [fetchEmployeeDepartments, isDepartmentPermissionsLoading, departmentsWithPermissions]);
 
 
     const value = {

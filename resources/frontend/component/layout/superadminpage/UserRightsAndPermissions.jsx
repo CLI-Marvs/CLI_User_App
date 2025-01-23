@@ -3,11 +3,11 @@ import AddDepartmentModal from './modals/DepartmentModal/AddDepartmentModal';
 import AddUserModals from './modals/UserModal/AddUserModals';
 import EditDepartmentModal from './modals/DepartmentModal/EditDepartmentModal';
 import EditEmployeeModal from './modals/UserModal/EditUserModal';
-import { PERMISSIONS } from '../../../constant/data/permissions';
+import { PERMISSIONS } from '@/constant/data/permissions';
 import { HiPencil } from "react-icons/hi";
 import { MdDelete } from "react-icons/md";
-import { showToast } from "../../../util/toastUtil"
-import Alert from "../mainComponent/Alert";
+import { showToast } from "@/util/toastUtil"
+import Alert from "@/component/layout/mainComponent/Alert";
 import CircularProgress from "@mui/material/CircularProgress";
 import Skeleton from 'react-loading-skeleton'
 import 'react-loading-skeleton/dist/skeleton.css'
@@ -45,8 +45,8 @@ const UserRightsAndPermissions = () => {
 
   useEffect(() => {
     if (!departmentsWithPermissions || !employeesWithPermissions || !departments) {
-      fetchDepartmentPermissions();
-      fetchEmployeeWithPermissions();
+      fetchDepartmentPermissions(true);
+      fetchEmployeeWithPermissions(true);
       fetchEmployeeDepartments();
     }
   }, [departmentsWithPermissions, fetchEmployeeWithPermissions, employeesWithPermissions, fetchEmployeeDepartments, departments])
@@ -95,7 +95,7 @@ const UserRightsAndPermissions = () => {
       const response = await departmentPermissionService.editDepartmentPermissionsStatus(payload);
       if (response.data?.statusCode === 200) {
         showToast("Data deleted successfully!", "success");
-        await fetchDepartmentPermissions(true);
+        await fetchDepartmentPermissions(true, false);
         await fetchEmployeeDepartments(true);
       }
     } catch (error) {
@@ -116,7 +116,7 @@ const UserRightsAndPermissions = () => {
       const response = await employeePermissionService.editEmployeesPermissionsStatus(payload);
       if (response.data?.statusCode === 200) {
         showToast("Data deleted successfully!", "success");
-        await fetchEmployeeWithPermissions(true);
+        await fetchEmployeeWithPermissions(true, false);
       }
     } catch (error) {
       console.log("error", error);
@@ -380,7 +380,7 @@ const UserRightsAndPermissions = () => {
 
                       <div className='w-[200px] flex flex-col items-start justify-center gap-2'>
                         <div className='w-full h-[31px] flex items-center justify-center bg-white rounded-[5px]'>
-                          <p className='montserrat-regular text-custom-lightgreen text-sm'>
+                          <p className='montserrat-regular text-custom-lightgreen text-sm text-center'>
                             {employee?.firstname} {employee?.lastname}
                           </p>
                         </div>
@@ -499,7 +499,6 @@ const UserRightsAndPermissions = () => {
         <EditEmployeeModal
           editEmployeeModalRef={editEmployeeModalRef}
           selectedEmployee={selectedEmployee}
-          onSubmitSuccess={fetchEmployeeWithPermissions}
         />
       </div>
       <div className="">

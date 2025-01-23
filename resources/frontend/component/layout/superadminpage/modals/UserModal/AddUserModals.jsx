@@ -1,12 +1,12 @@
 import React, { useRef, useState, useEffect } from 'react'
 import { AiFillInfoCircle } from 'react-icons/ai'
-import { useStateContext } from '../../../../../context/contextprovider';
-import highlightText from '../../../../../util/hightlightText.jsx';
-import { isButtonDisabled } from '../UserModal/utils/isButtonDisabled.js'
+import { useStateContext } from '@/context/contextprovider';
+import highlightText from '@/util/hightlightText';
+import { isButtonDisabled } from '@/component/layout/superadminpage/modals/UserModal/utils/isButtonDisabled'
 import CircularProgress from "@mui/material/CircularProgress";
-import { showToast } from "../../../../../util/toastUtil.js";
-import { getFilteredEmployeeOptions } from '../UserModal/utils/employeeUtils';
-import Feature from '../../component/Feature.jsx'
+import { showToast } from "@/util/toastUtil";
+import { getFilteredEmployeeOptions } from '@/component/layout/superadminpage/modals/UserModal/utils/employeeUtils';
+import Feature from '@/component/layout/superadminpage/component/Feature';
 import useFeature from '@/context/RoleManagement/FeatureContext';
 import { employeePermissionService } from '@/component/servicesApi/apiCalls/roleManagement';
 import useEmployeePermission from '@/context/RoleManagement/EmployeePermissionContext';
@@ -146,11 +146,12 @@ const AddUserModals = ({ userModalRef, employeesWithPermissions }) => {
                 });
                 setSearch("");
                 setSelectedEmployee(null);
-                await fetchEmployeeWithPermissions(true);
+               
                 if (userModalRef.current) {
                     userModalRef.current.close();
                 }
             }
+            await fetchEmployeeWithPermissions(true,false);
         } catch (error) {
             console.log("Error saving add user modal:", error);
         } finally {

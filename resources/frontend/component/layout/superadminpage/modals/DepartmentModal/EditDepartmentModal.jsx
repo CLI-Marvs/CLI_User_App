@@ -1,9 +1,9 @@
 import React, { useEffect, useState, useMemo } from 'react'
-import { showToast } from "../../../../../util/toastUtil";
+import { showToast } from "@/util/toastUtil"
 import CircularProgress from "@mui/material/CircularProgress";
 import isEqual from 'lodash/isEqual';
-import { normalizeData } from '../DepartmentModal/utils/normalizeData';
-import Feature from '../../component/Feature';
+import { normalizeData } from '@/component/layout/superadminpage/modals/DepartmentModal/utils/normalizeData';
+import Feature from '@/component/layout/superadminpage/component/Feature';
 import useFeature from '@/context/RoleManagement/FeatureContext';
 import { departmentPermissionService } from '@/component/servicesApi/apiCalls/roleManagement';
 import useDepartmentPermission from '@/context/RoleManagement/DepartmentPermissionContext';
@@ -86,7 +86,7 @@ const EditDepartmentModal = ({ editDepartmentModalRef, selectedDepartment }) => 
                     department_id: 0,
                     features: [],
                 });
-                await fetchDepartmentPermissions(true)
+                await fetchDepartmentPermissions(true,false)
 
                 if (editDepartmentModalRef.current) {
                     editDepartmentModalRef.current.close();

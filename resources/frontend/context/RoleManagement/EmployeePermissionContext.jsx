@@ -10,13 +10,13 @@ export const EmployeePermissionProvider = ({ children }) => {
     const [error, setError] = useState(null);
 
     // This function does the actual database fetch
-    const fetchEmployeeWithPermissions = useCallback(async (forceFetch = false) => {
+    const fetchEmployeeWithPermissions = useCallback(async (forceFetch = false, setLoading = true) => {
         if (employeesWithPermissions && !forceFetch) {
             return employeesWithPermissions;
         }
 
-        setIsEmployeePermissionLoading(true);
         try {
+            if (setLoading) setIsEmployeePermissionLoading(true);
             const response = await employeePermissionService.getEmployeesWithPermissions();
             setEmployeesWithPermissions(response);
             setError(null);
@@ -25,9 +25,10 @@ export const EmployeePermissionProvider = ({ children }) => {
             setError(error.message);
             console.error("Error fetching employee permisions:", error);
         } finally {
-            setIsEmployeePermissionLoading(false);
+            if (setLoading) setIsEmployeePermissionLoading(false);
+
         }
-    }, [employeesWithPermissions]);
+    }, [employeesWithPermissions, isEmployeePermissionLoading]);
 
 
     const value = {
