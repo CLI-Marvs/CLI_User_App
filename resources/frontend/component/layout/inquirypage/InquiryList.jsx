@@ -11,9 +11,26 @@ import { MdRefresh } from "react-icons/md";
 import InquiryFormModal from "./InquiryFormModal";
 import axios from "axios";
 import { toast } from "react-toastify";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useLocation} from "react-router-dom";
 import Spinner from "../../../util/Spinner";
 const InquiryList = () => {
+
+    const location = useLocation();
+    
+
+    const searchParams = new URLSearchParams(location.search);
+    const propertyParam = searchParams.get("property");
+    const statusParam = searchParams.get("status");
+    const typeParam = searchParams.get("type");
+    const channelsParam = searchParams.get("channels");
+    const categoryParam = searchParams.get("category");
+    const departmentParam = searchParams.get("department");
+    const monthParam = searchParams.get("month");
+    const yearParam = searchParams.get("year");
+
+
+   
+
     const {
         currentPage,
         setCurrentPage,
@@ -339,7 +356,6 @@ const InquiryList = () => {
 
     const handleSearch = () => {
         setResultSearchActive(true);
-
         let summaryParts = []; // Array to hold each part of the summary
 
         if (category) summaryParts.push(`Category -> ${category}`);
@@ -347,7 +363,13 @@ const InquiryList = () => {
         if (name) summaryParts.push(`Name -> ${name}`);
         if (type) summaryParts.push(`Type -> ${type}`);
         if (email) summaryParts.push(`Email -> ${email}`);
-        if (channels) summaryParts.push(`Channels -> ${channels}`);
+        if (channels) {
+            const formattedChannels =
+                    channels === 'Walk in' ? 'Walk-in' :
+                    channels === 'Social media' ? 'Social Media' :
+                    channels;
+            summaryParts.push(`Channels -> ${formattedChannels}`);
+        }
         if (departments) summaryParts.push(`Department -> ${departments}`);
         if (ticket) summaryParts.push(`Ticket -> ${ticket}`);
         if (startDate) summaryParts.push(`Start Date -> ${formatDate(startDate)}`);
@@ -367,13 +389,14 @@ const InquiryList = () => {
             status,
             email,
             channels,
+            departments,
             ticket,
             startDate,
             selectedProperty,
             hasAttachments,
             selectedMonth,
             selectedYear,
-            departments,
+            
         });
         setDaysFilter(null);
         setStatusFilter(null);
@@ -393,6 +416,59 @@ const InquiryList = () => {
         setSelectedMonth("");
         setDepartments("");
     };
+
+    useEffect(() => {
+
+
+        if (propertyParam || statusParam || monthParam || yearParam || departmentParam || channelsParam || categoryParam) {
+
+        setResultSearchActive(true);
+        
+        let summaryParts = []; // Array to hold each part of the summary
+
+        if (categoryParam) summaryParts.push(`Category -> ${categoryParam}`);
+        if (statusParam) summaryParts.push(`Status -> ${statusParam}`);
+        if (name) summaryParts.push(`Name -> ${name}`);
+        if (typeParam) summaryParts.push(`Type -> ${typeParam}`);
+        if (email) summaryParts.push(`Email -> ${email}`);
+        if (channelsParam) {
+            // Format 'Walk in' to 'Walk-in'
+            const formattedChannel = 
+                    channelsParam === 'Walk in' ? 'Walk-in' : 
+                    channelsParam === 'Social media' ? 'Social Media' : 
+                    channelsParam;
+            summaryParts.push(`Channels -> ${formattedChannel}`);
+        }
+        if (departmentParam) summaryParts.push(`Department -> ${departmentParam}`);
+        if (ticket) summaryParts.push(`Ticket -> ${ticket}`);
+        if (startDate) summaryParts.push(`Start Date -> ${formatDate(startDate)}`);
+        if (propertyParam) summaryParts.push(`Property -> ${propertyParam}`);
+        if (yearParam) summaryParts.push(`Year -> ${yearParam}`);
+        if (monthParam) summaryParts.push(`Month -> ${ formatMonth(monthParam)}`);
+        if (hasAttachments) summaryParts.push(`Attachments -> Yes`);
+
+        let summary = `${summaryParts.join(" + ")}`;
+
+        setSearchSummary(summary.trim());
+
+        setSearchFilter({
+            name,
+            category: categoryParam,
+            type: typeParam,
+            status: statusParam,
+            email,
+            channels: channelsParam,
+            departments: departmentParam,
+            ticket,
+            startDate,
+            selectedProperty: propertyParam,
+            hasAttachments,
+            selectedMonth: monthParam,
+            selectedYear: yearParam,
+        });
+
+        }
+    }, [propertyParam, statusParam, departmentParam, monthParam, yearParam]);
 
     useEffect(() => {
         if (isFilterVisible) {
