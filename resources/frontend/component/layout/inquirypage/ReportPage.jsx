@@ -753,7 +753,7 @@ const ReportPage = () => {
                 <div className="w-full flex-col flex items-start justify-start h-max pl-[15px]">
                     <p className="text-[18px] montserrat-bold">Resolved: {totalResolved}</p>
                     <p className="text-[18px] montserrat-bold">Closed: {totalClosed}</p>
-                    <p className="text-[18px] montserrat-bold">Unresolved: {totalUnresolved}</p>
+                    <p className="text-[18px] montserrat-bold text-red-500">Unresolved: {totalUnresolved}</p>
                     <p className="text-[18px] montserrat-bold">Total: {totalAll}</p>
                 </div>
                 <div className="flex justify-end gap-6 text-sm">
