@@ -676,6 +676,7 @@ export const ContextProvider = ({ children }) => {
                 await fetchCategory();
                 await getCommunicationTypePerProperty();
                 await getInquiriesPerChannel();
+                await getFullYear();
                 
             } catch (error) {
                 console.error("Error fetching data:", error);
