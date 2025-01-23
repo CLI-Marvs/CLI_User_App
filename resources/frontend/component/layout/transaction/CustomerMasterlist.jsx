@@ -1,11 +1,22 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import SearchTransactions from "@/component/layout/transaction/SearchBar";
 import { useNavigate } from "react-router-dom";
 import { useStateContext } from "@/context/contextprovider";
 import { data } from "@/component/servicesApi/apiCalls/transactions/customer";
+import { set } from "lodash";
+import ReactPaginate from "react-paginate";
+import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md";
 
 const CustomerMasterlist = () => {
-    const { customerData, setCustomerData } = useStateContext();
+    const {
+        customerData,
+        setCustomerData,
+        currentPageCustomer,
+        setCurrentPageCustomer,
+        totalPagesCustomer,
+        setTotalPagesCustomer,
+    } = useStateContext();
+
     const navigate = useNavigate();
     const navigateToDetails = (e, item) => {
         e.preventDefault();
@@ -13,16 +24,25 @@ const CustomerMasterlist = () => {
         navigate(`/transaction/details/${emailAsNumber}`);
     };
 
+    const handlePageClick = (data) => {
+        console.log("data", data);
+        setCurrentPageCustomer(data.selected);
+    };
+
+    console.log("currentPage", currentPageCustomer);
+
     const fetchDataCustomer = async () => {
-        const response = await data.getCustomerData();
+        const response = await data.getCustomerData(currentPageCustomer);
         setCustomerData(response.data);
+        setTotalPagesCustomer(response.last_page);
+        setCurrentPageCustomer(currentPageCustomer);
     };
     useEffect(() => {
         fetchDataCustomer();
-    }, []);
+    }, [currentPageCustomer]);
 
     return (
-        <div className="w-auto h-auto p-[20px] customer-scrollbar">
+        <div className="flex flex-col w-auto h-auto p-[20px] customer-scrollbar">
             <SearchTransactions />
             <div className="mt-[31px]">
                 <table className="border-collapse">
@@ -56,7 +76,9 @@ const CustomerMasterlist = () => {
                                     <tr
                                         key={index}
                                         className={rowClass}
-                                        onClick={(e) => navigateToDetails(e, item)}
+                                        onClick={(e) =>
+                                            navigateToDetails(e, item)
+                                        }
                                     >
                                         <td
                                             className={`py-[16px] px-[10px] cursor-pointer text-xs ${rowClass}`}
@@ -71,12 +93,12 @@ const CustomerMasterlist = () => {
                                         <td
                                             className={`py-[16px] px-[10px] cursor-pointer text-xs ${rowClass}`}
                                         >
-                                           {/*  {item.ticket_id} */}
+                                            {/*  {item.ticket_id} */}
                                         </td>
                                         <td
                                             className={`py-[16px] px-[10px] cursor-pointer text-xs ${rowClass}`}
                                         >
-                                         {/*    {item.ticket_id} */}
+                                            {/*    {item.ticket_id} */}
                                         </td>
                                         <td
                                             className={`py-[16px] px-[10px] cursor-pointer text-xs ${rowClass}`}
@@ -86,13 +108,41 @@ const CustomerMasterlist = () => {
                                         <td
                                             className={`py-[16px] px-[10px] cursor-pointer text-xs ${rowClass}`}
                                         >
-                                          {/*   {item.ticket_id} */}
+                                            {/*   {item.ticket_id} */}
                                         </td>
                                     </tr>
                                 );
                             })}
                     </tbody>
                 </table>
+                <div className="flex justify-end mt-4">
+                    <div className="flex w-full justify-end mt-3 mb-10">
+                        <ReactPaginate
+                            previousLabel={
+                                <MdKeyboardArrowLeft className="text-[#404B52]" />
+                            }
+                            nextLabel={
+                                <MdKeyboardArrowRight className="text-[#404B52]" />
+                            }
+                            breakLabel={"..."}
+                            pageCount={totalPagesCustomer}
+                            marginPagesDisplayed={2}
+                            pageRangeDisplayed={1}
+                            onPageChange={handlePageClick}
+                            containerClassName={"flex gap-2"}
+                            previousClassName="border border-[#EEEEEE] text-custom-bluegreen font-semibold w-[26px] h-[24px] rounded-[4px] flex justify-center items-center hover:text-white hover:bg-custom-lightgreen hover:text-white"
+                            nextClassName="border border-[#EEEEEE] text-custom-bluegreen font-semibold w-[26px] h-[24px] rounded-[4px] flex justify-center items-center hover:text-white hover:bg-custom-lightgreen hover:text-white"
+                            pageClassName=" border border-[#EEEEEE] bg- text-black w-[26px] h-[24px] rounded-[4px] flex justify-center items-center hover:bg-custom-lightgreen text-[12px]"
+                            activeClassName="w-[26px] h-[24px] border border-[#EEEEEE] bg-custom-lightgreen text-[#404B52] rounded-[4px] text-white text-[12px]"
+                            pageLinkClassName="w-full h-full flex justify-center items-center"
+                            activeLinkClassName="w-full h-full flex justify-center items-center"
+                            disabledLinkClassName={
+                                "text-gray-300 cursor-not-allowed"
+                            }
+                            forcePage={currentPageCustomer}
+                        />
+                    </div>
+                </div>
             </div>
         </div>
     );

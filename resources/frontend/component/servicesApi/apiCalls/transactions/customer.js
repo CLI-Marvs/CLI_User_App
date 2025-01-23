@@ -3,7 +3,6 @@ import apiService from "@/component/servicesApi/apiService";
 export const data = {
     getCustomerInquiries: async (params) => {
         try {
-            console.log("params", params);
             const response = await apiService.get("customer/inquiries", {
                 params: { ticketId: params.ticket_id, page: params.page }
             });
@@ -14,9 +13,11 @@ export const data = {
         }
     },
 
-    getCustomerData: async () => {
+    getCustomerData: async (currentPage) => {
         try {
-            const response = await apiService.get("customer/data");
+            const response = await apiService.get("customer/data", {
+                params: { page: currentPage + 1}
+            });
 
             return response?.data;
         } catch (error) {

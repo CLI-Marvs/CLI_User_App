@@ -251,7 +251,7 @@ textarea {
 
 
 .transaction-scrollbar {
-  overflow-y: auto; /* Hide the scrollbar initially */
+  overflow-y: hidden; /* Hide the scrollbar initially */
 }
 
 .transaction-scrollbar:hover {

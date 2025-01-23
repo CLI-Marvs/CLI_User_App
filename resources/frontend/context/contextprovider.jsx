@@ -10,12 +10,11 @@ import debounce from "lodash/debounce";
 import { set } from "lodash";
 import { json } from "react-router-dom";
 
-
 const StateContext = createContext({
     user: null,
     token: null,
-    setUser: () => { },
-    setToken: () => { },
+    setUser: () => {},
+    setToken: () => {},
 });
 
 export const ContextProvider = ({ children }) => {
@@ -49,7 +48,8 @@ export const ContextProvider = ({ children }) => {
     const [specificInquiry, setSpecificInquiry] = useState(null);
     const [dataSet, setDataSet] = useState([]);
 
-
+    const [currentPageCustomer, setCurrentPageCustomer] = useState(0);
+    const [totalPagesCustomer, setTotalPagesCustomer] = useState(0);
     const [department, setDepartment] = useState("All");
     const [project, setProject] = useState("All");
     const [month, setMonth] = useState("All");
@@ -57,13 +57,16 @@ export const ContextProvider = ({ children }) => {
     const [fullYear, setFullYear] = useState([]);
 
     const [departmentStatusYear, setDepartmentStatusYear] = useState("");
-    const [inquiriesPerCategoryYear, setInquiriesPerCategoryYear] = useState("");
-    const [inquiriesPerPropertyYear, setInquiriesPerPropertyYear] = useState("");
+    const [inquiriesPerCategoryYear, setInquiriesPerCategoryYear] =
+        useState("");
+    const [inquiriesPerPropertyYear, setInquiriesPerPropertyYear] =
+        useState("");
     const [communicationTypeYear, setCommunicationTypeYear] = useState("");
     const [isDepartmentInitialized, setIsDepartmentInitialized] =
         useState(false);
     const [inquiriesPerChanelYear, setInquiriesPerChanelYear] = useState("");
-    const [inquiriesPerChannelMonth, setInquiriesPerChannelMonth] = useState("");
+    const [inquiriesPerChannelMonth, setInquiriesPerChannelMonth] =
+        useState("");
     const [pricingMasterLists, setPricingMasterLists] = useState([]);
     const [bannerLists, setBannerLists] = useState([]);
     const [paymentSchemes, setPaymentSchemes] = useState([]);
@@ -99,12 +102,17 @@ export const ContextProvider = ({ children }) => {
     const [customerData, setCustomerData] = useState([]);
     const [customerDetails, setCustomerDetails] = useState([]);
     const [messageData, setMessageData] = useState([]);
+    const [isTotalPages, setIsTotalPages] = useState(false);
+
 
     useEffect(() => {
         if (user && user.department && !isDepartmentInitialized) {
-            setDepartment(user.department === "Customer Relations - Services" ? "All" : user.department);
+            setDepartment(
+                user.department === "Customer Relations - Services"
+                    ? "All"
+                    : user.department
+            );
             setIsDepartmentInitialized(true);
-
         }
     }, [user, isDepartmentInitialized]);
 
@@ -194,12 +202,13 @@ export const ContextProvider = ({ children }) => {
             const searchParams = new URLSearchParams({
                 /*   search: JSON.stringify(searchFilter), */
                 page: currentPageTransaction + 1,
-                bank_name: bankNames ? bankNames : null
+                bank_name: bankNames ? bankNames : null,
             }).toString();
-            const response = await apiService.get(`get-transactions?${searchParams}`);
+            const response = await apiService.get(
+                `get-transactions?${searchParams}`
+            );
             setTransactions(response.data.data);
             setTransactionsPageCount(response.data.last_page);
-
         } catch (error) {
             console.error("Error fetching data: ", error);
         }
@@ -222,7 +231,9 @@ export const ContextProvider = ({ children }) => {
                 dueDate: filterDueDate ? filterDueDate : null,
                 page: currentPageInvoices,
             });
-            const response = await apiService.get(`get-invoices?${searchParams}`);
+            const response = await apiService.get(
+                `get-invoices?${searchParams}`
+            );
             setInvoices(response.data.data);
             setInvoicesPageCount(response.data.last_page);
         } catch (error) {
@@ -234,7 +245,12 @@ export const ContextProvider = ({ children }) => {
         if (!isDepartmentInitialized) return;
         try {
             const response = await apiService.get("category-monthly", {
-                params: { department: department, property: project, month: month, year: year },
+                params: {
+                    department: department,
+                    property: project,
+                    month: month,
+                    year: year,
+                },
             });
             const result = response.data;
             const formattedData = result.map((item) => ({
@@ -246,7 +262,6 @@ export const ContextProvider = ({ children }) => {
             console.log("Error retrieving data", error);
         }
     };
-
 
     const getPropertyNames = async () => {
         if (token) {
@@ -261,9 +276,13 @@ export const ContextProvider = ({ children }) => {
     const fetchDataReport = async () => {
         if (!isDepartmentInitialized) return;
         try {
-
             const response = await apiService.get("report-monthly", {
-                params: { department: department, property: project, month: month, year: year },
+                params: {
+                    department: department,
+                    property: project,
+                    month: month,
+                    year: year,
+                },
             });
             const result = response.data;
 
@@ -271,7 +290,7 @@ export const ContextProvider = ({ children }) => {
                 name: item.month.toString().padStart(2, "0"),
                 Resolved: item.resolved,
                 Unresolved: item.unresolved,
-                Closed: item.closed
+                Closed: item.closed,
             }));
 
             setDataSet(formattedData);
@@ -288,7 +307,7 @@ export const ContextProvider = ({ children }) => {
                     month: month,
                     property: project,
                     department: department,
-                    year: year
+                    year: year,
                 },
             });
             const result = response.data;
@@ -312,7 +331,7 @@ export const ContextProvider = ({ children }) => {
                     month: month,
                     property: project,
                     department: department,
-                    year: year
+                    year: year,
                 },
             });
             const result = response.data;
@@ -331,14 +350,17 @@ export const ContextProvider = ({ children }) => {
     const getCommunicationTypePerProperty = async () => {
         if (!isDepartmentInitialized) return;
         try {
-            const response = await apiService.get("communication-type-property", {
-                params: {
-                    month: month,
-                    property: project,
-                    department: department,
-                    year: year
-                },
-            });
+            const response = await apiService.get(
+                "communication-type-property",
+                {
+                    params: {
+                        month: month,
+                        property: project,
+                        department: department,
+                        year: year,
+                    },
+                }
+            );
             const result = response.data;
             const formattedData = result.map((item) => ({
                 name: item.communication_type,
@@ -360,11 +382,10 @@ export const ContextProvider = ({ children }) => {
                     month: month,
                     property: project,
                     department: department,
-                    year: year
+                    year: year,
                 },
             });
             const result = response.data;
-
 
             const formattedData = result.map((item) => ({
                 name: item.channels,
@@ -402,7 +423,8 @@ export const ContextProvider = ({ children }) => {
         if (token) {
             try {
                 const response = await apiService.get(
-                    `notifications?page=${notifCurrentPage + 1}&status=${notifStatus || ""
+                    `notifications?page=${notifCurrentPage + 1}&status=${
+                        notifStatus || ""
                     }`
                 );
                 setNotifications(response.data.data);
@@ -418,7 +440,9 @@ export const ContextProvider = ({ children }) => {
             try {
                 const encodedTicketId = encodeURIComponent(ticketId);
 
-                const response = await apiService.get(`navbar-data?ticketId=${encodedTicketId}`);
+                const response = await apiService.get(
+                    `navbar-data?ticketId=${encodedTicketId}`
+                );
 
                 const data = response.data;
 
@@ -431,7 +455,6 @@ export const ContextProvider = ({ children }) => {
             } /* finally {
                 setLoading(false); 
             } */
-
         }
     };
 
@@ -475,7 +498,6 @@ export const ContextProvider = ({ children }) => {
     };
 
     const getFullYear = async () => {
-
         try {
             const response = await apiService.get("concern-year");
             setFullYear(response.data);
@@ -483,7 +505,6 @@ export const ContextProvider = ({ children }) => {
             console.log("error retrieving", error);
         }
     };
-
 
     const getMessages = async (ticketId) => {
         /* if (messages[id]) return; */
@@ -603,20 +624,16 @@ export const ContextProvider = ({ children }) => {
 
     const getBannerData = async () => {
         try {
-            const response = await apiService.get(
-                "get-banner"
-            );
+            const response = await apiService.get("get-banner");
             setBannerLists(response.data.data);
         } catch (error) {
             console.log("error", error);
         }
-    }
-
+    };
 
     // const getUserAccessData = async () => {
     //     try {
     //         const response = await apiService.get("get-user-access-data", { token });
-
 
     //         // Get existing data from sessionStorage
     //         const storedData = sessionStorage.getItem("userAccessData");
@@ -716,7 +733,7 @@ export const ContextProvider = ({ children }) => {
 
     useEffect(() => {
         getInvoices();
-    }, [currentPageInvoices, filterDueDate])
+    }, [currentPageInvoices, filterDueDate]);
 
     /*  useEffect(() => {
          getNotifications();
@@ -758,7 +775,20 @@ export const ContextProvider = ({ children }) => {
         };
 
         fetchData();
-    }, [department, propertyMonth, month, project, year, departmentStatusYear, inquiriesPerCategoryYear, inquiriesPerPropertyYear, communicationTypeYear, communicationTypeMonth, inquiriesPerChannelMonth, inquiriesPerChanelYear]);
+    }, [
+        department,
+        propertyMonth,
+        month,
+        project,
+        year,
+        departmentStatusYear,
+        inquiriesPerCategoryYear,
+        inquiriesPerPropertyYear,
+        communicationTypeYear,
+        communicationTypeMonth,
+        inquiriesPerChannelMonth,
+        inquiriesPerChanelYear,
+    ]);
 
     return (
         <StateContext.Provider
@@ -905,10 +935,14 @@ export const ContextProvider = ({ children }) => {
                 setCustomerDetails,
                 customerDetails,
                 setMessageData,
-                messageData
-
+                messageData,
+                currentPageCustomer,
+                setCurrentPageCustomer,
+                totalPagesCustomer,
+                setTotalPagesCustomer,
+                isTotalPages,
+                setIsTotalPages
             }}
-
         >
             {children}
         </StateContext.Provider>
