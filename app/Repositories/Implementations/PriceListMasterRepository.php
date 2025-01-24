@@ -117,6 +117,7 @@ class PriceListMasterRepository
      */
     public function update(array $data)
     {
+        
         DB::beginTransaction();
         try {
             $updatedPriceListMaster = $this->model->where('id', $data['price_list_master_id'])->first();
@@ -126,38 +127,62 @@ class PriceListMasterRepository
                     {$data['tower_phase_id']}");
             }
 
-            //Update or Create a PriceBasicDetail for the PriceListMaster
-            $priceBasicDetailUpdated = $updatedPriceListMaster->priceBasicDetail()->update(
-                [
+            // Fetch the current PriceBasicDetail ID in the PriceListMaster table
+            $currentPriceBasicDetailsId = $updatedPriceListMaster->pricebasic_details_id;
+            if ($currentPriceBasicDetailsId) {
+                // PriceBasicDetail ID is present, proceed to update it
+                $priceBasicDetailUpdated = $updatedPriceListMaster->priceBasicDetail()->update([
                     'base_price' => $data['priceListPayload']['base_price'],
                     'transfer_charge' => $data['priceListPayload']['transfer_charge'],
                     'effective_balcony_base' => $data['priceListPayload']['effective_balcony_base'],
                     'vat' => $data['priceListPayload']['vat'],
                     'vatable_less_price' => $data['priceListPayload']['vatable_less_price'],
                     'reservation_fee' => $data['priceListPayload']['reservation_fee'],
-                ]
-            );
+                ]);
 
-            $priceBasicDetail = $updatedPriceListMaster->priceBasicDetail()->first();
-            if (!$priceBasicDetailUpdated || !$priceBasicDetail) {
-                throw new \Exception('Failed to update or retrieve PriceBasicDetail.');
+                if (!$priceBasicDetailUpdated) {
+                    throw new \Exception('Failed to update PriceBasicDetail.');
+                }
+            } else {
+                // PriceBasicDetail ID is null, create a new PriceBasicDetail and associate it
+                $priceBasicDetail = $updatedPriceListMaster->priceBasicDetail()->create([
+                    'base_price' => $data['priceListPayload']['base_price'],
+                    'transfer_charge' => $data['priceListPayload']['transfer_charge'],
+                    'effective_balcony_base' => $data['priceListPayload']['effective_balcony_base'],
+                    'vat' => $data['priceListPayload']['vat'],
+                    'vatable_less_price' => $data['priceListPayload']['vatable_less_price'],
+                    'reservation_fee' => $data['priceListPayload']['reservation_fee'],
+                ]);
+
+                if (!$priceBasicDetail) {
+                    throw new \Exception('Failed to create PriceBasicDetail.');
+                }
+
+                $currentPriceBasicDetailsId = $priceBasicDetail->id;
             }
+     
 
             $updatedPriceListMaster->update([
                 'status' => $data['status'],
                 'date_last_update' => now(),
-                'pricebasic_details_id' => $priceBasicDetail->id,
+                'pricebasic_details_id' => $currentPriceBasicDetailsId,
                 'payment_scheme_id' => json_encode($data['paymentSchemePayload']),
             ]);
 
             DB::commit();
-            return $updatedPriceListMaster->fresh();
+            return [
+                'success' => true,
+                'message' => 'Price List Master updated successfully.',
+                'data' => $updatedPriceListMaster->fresh() // Return the updated model
+            ];
         } catch (\Exception $e) {
             DB::rollBack();
             // Return failure status and error message
             return [
                 'success' => false,
-                'message' => 'Failed to add property: ' . $e->getMessage(),
+                'message' => 'Error updating Price List Master: ' . $e->getMessage(),
+                'error_type' => 'UPDATE_FAILURE',
+                'error_details' => $e->getTraceAsString() // Include stack trace for debugging
             ];
         }
     }

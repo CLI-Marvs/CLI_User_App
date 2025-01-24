@@ -9,14 +9,15 @@ export const PriceListMasterProvider = ({ children }) => {
     const [error, setError] = useState(null);
 
     // This function does the actual database fetch
-    const fetchPropertyListMasters = useCallback(async (forceFetch = false) => {
+    const fetchPropertyListMasters = useCallback(async (forceFetch = false, setLoading = true) => {
 
         if (priceListMaster && !forceFetch) {
             return priceListMaster;
         }
 
-        setIsLoading(true);
+         
         try {
+            if (setLoading) setIsLoading(true);
             const response = await priceListMasterService.getPriceListMasters();
             setPriceListMaster(response.data);
             setError(null);
@@ -25,7 +26,7 @@ export const PriceListMasterProvider = ({ children }) => {
             setError(error.message);
             console.error("Error fetching property master list:", error);
         } finally {
-            setIsLoading(false);
+            if (setLoading) setIsLoading(false);
         }
     }, [priceListMaster]);
 

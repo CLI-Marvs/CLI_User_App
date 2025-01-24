@@ -35,7 +35,7 @@ class UpdatePriceListMasterRequest extends FormRequest
 
             // Payment scheme payload
             'paymentSchemePayload' => 'array',
-            'paymentSchemePayload' => 'array|min:1',
+            'paymentSchemePayload' => 'array',
             'paymentSchemePayload.*' => 'integer',
 
             'status' =>

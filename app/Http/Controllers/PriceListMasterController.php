@@ -63,14 +63,20 @@ class PriceListMasterController extends Controller
     public function update(UpdatePriceListMasterRequest $request)
     {
         $validatedData = $request->validated();
-  
+       
         try {
-            $updatePriceListMaster = $this->service->update($validatedData, $validatedData['tower_phase_id']);
+            $result  = $this->service->update($validatedData, $validatedData['tower_phase_id']);
+         
+            if ($result['success']) {
+                return response()->json([
+                    'message' => $result['message'],
+                    'data' => $result['data'],
+                ], 200);
+            }
             
             return response()->json([
-                'message' => 'Price list master updated successfully',
-                'data' => $updatePriceListMaster,
-            ], 201);
+                'message' => $result['message']
+            ], 400);
         } catch (\Exception $e) {
             return response()->json(
                 [

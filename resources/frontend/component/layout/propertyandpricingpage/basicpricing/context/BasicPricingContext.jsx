@@ -1,6 +1,8 @@
 import { createContext, useContext, useState } from 'react';
-
+import moment from 'moment';
 const BasicPricingContext = createContext();
+
+
 const initialState = () => ({
     priceListSettings: {
         base_price: "",
@@ -12,9 +14,16 @@ const initialState = () => ({
     },
     floorPremiums: {},
     additionalPremiums: {},
-    priceVersions: {},
-    paymentSchemes: [],
-    reviewsAndApproval: {}
+    priceVersions: [
+        {
+            name: "",
+            percent_increase: 0,
+            no_of_allowed_buyers: 0,
+            expiry_date: moment(new Date()).format("MM-DD-YYYY HH:mm:ss"),
+            payment_scheme: [],
+        },
+    ],
+    reviewsAndApproval: {},
 });
 export default function BasicPricingProvider({ children }) {
     const [pricingData, setPricingData] = useState(initialState());

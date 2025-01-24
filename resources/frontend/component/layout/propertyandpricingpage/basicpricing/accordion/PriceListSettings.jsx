@@ -70,7 +70,7 @@ const PriceListSettings = ({ }) => {
                                     name="base_price"
                                     type="number"
                                     onChange={handleInputChange}
-                                    value={pricingData.priceListSettings.base_price}
+                                    value={pricingData?.priceListSettings?.base_price}
                                     className="w-full px-4 focus:outline-none "
 
                                 />
@@ -83,7 +83,7 @@ const PriceListSettings = ({ }) => {
                                 <input
                                     onChange={handleInputChange}
                                     value={
-                                        pricingData.priceListSettings.transfer_charge
+                                        pricingData?.priceListSettings?.transfer_charge
                                     }
                                     name="transfer_charge"
                                     type="number"
@@ -102,7 +102,7 @@ const PriceListSettings = ({ }) => {
                                     type="number"
                                     onChange={handleInputChange}
                                     value={
-                                        pricingData.priceListSettings.effective_balcony_base
+                                        pricingData?.priceListSettings?.effective_balcony_base
                                     }
                                     className="w-full px-4 focus:outline-none"
                                 />
@@ -114,7 +114,7 @@ const PriceListSettings = ({ }) => {
                                 <input
                                     name="vat"
                                     onChange={handleInputChange}
-                                    value={pricingData.priceListSettings.vat}
+                                    value={pricingData?.priceListSettings?.vat}
                                     type="number"
                                     className="w-full px-4 focus:outline-none"
                                 />
@@ -133,7 +133,7 @@ const PriceListSettings = ({ }) => {
                                     type="number"
                                     onChange={handleInputChange}
                                     value={
-                                        pricingData.priceListSettings.vatable_less_price
+                                        pricingData?.priceListSettings?.vatable_less_price
                                     }
                                     className="w-full px-4 focus:outline-none"
                                 />
@@ -147,7 +147,7 @@ const PriceListSettings = ({ }) => {
                                     type="number"
                                     onChange={handleInputChange}
                                     value={
-                                        pricingData.priceListSettings.reservation_fee
+                                        pricingData?.priceListSettings?.reservation_fee
                                     }
                                     className="w-full px-4 focus:outline-none"
                                     placeholder=""

@@ -185,15 +185,15 @@ const BasicPricing = () => {
      */
     const handleSubmit = async (e, status) => {
         e.preventDefault();
-        if (pricingData.priceListSettings.base_price === "" ||
-            pricingData.priceListSettings.reservation_fee === "") {
-            showToast("Please fill all the fields in the price list settings section", "error");
-            return;
-        }
-        if (pricingData.paymentSchemes.length === 0) {
-            showToast("Please select at least one payment scheme", "error");
-            return;
-        }
+        // if (pricingData.priceListSettings.base_price === "" ||
+        //     pricingData.priceListSettings.reservation_fee === "") {
+        //     showToast("Please fill all the fields in the price list settings section", "error");
+        //     return;
+        // }
+        // if (pricingData.paymentSchemes.length === 0) {
+        //     showToast("Please select at least one payment scheme", "error");
+        //     return;
+        // }
 
         if (action === "Edit") {
             try {
@@ -201,6 +201,7 @@ const BasicPricing = () => {
                 const payload = buildSubmissionPayload(status);
                 console.log("Edit Payload", payload);
                 const response = await priceListMasterService.updatePriceListMasters(payload);
+                console.log("response", response);
                 if (response?.status === 201 || response?.status === 200) {
                     showToast(response?.data?.message || "Data updated successfully", "success");
 
@@ -338,8 +339,8 @@ const BasicPricing = () => {
                 <PriceListSettings />
                 <FloorPremiums />
                 <AdditionalPremiums />
-                <PriceVersions />
-                <PaymentSchemes action={action} priceListMasterData={data} />
+                <PriceVersions priceListMasterData={data} action={action} />
+                {/* <PaymentSchemes action={action} priceListMasterData={data} /> */}
                 <ReviewsandApprovalRouting />
             </div>
             {/* <div>

@@ -5,7 +5,7 @@ import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import DateLogo from "../../../../../../public/Images/Date_range.svg";
-import AddPropertyModal from "../basicpricing/modals/Property/AddPropertyModal";
+import AddPropertyModal from "@/component/layout/propertyandpricingpage/basicpricing/modals/Property/AddPropertyModal";
 import moment from "moment";
 import { useNavigate } from "react-router-dom";
 import { usePriceListMaster } from '@/context/PropertyPricing/PriceListMasterContext';
@@ -27,8 +27,7 @@ const PricingMasterList = () => {
     //Hooks
     useEffect(() => {
         if (!priceListMaster) {
-            console.log("priceListMaster", priceListMaster);
-            fetchPropertyListMasters();
+            fetchPropertyListMasters(true);
         }
     }, [fetchPropertyListMasters, priceListMaster]);
 
