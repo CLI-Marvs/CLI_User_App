@@ -62,6 +62,7 @@ const InquiryThread = () => {
         setSearchFilter,
         data,
         dataCount,
+        fullYear,
         allEmployees,
         setMessages,
         setIsUserTypeChange,
@@ -113,6 +114,21 @@ const InquiryThread = () => {
             setDataConcern(updatedData);
         }
     }, []);
+
+    const monthNames = {
+        "01": "January",
+        "02": "February",
+        "03": "March",
+        "04": "April",
+        "05": "May",
+        "06": "June",
+        "07": "July",
+        "08": "August",
+        "09": "September",
+        "10": "October",
+        "11": "November",
+        "12": "December",
+    };
 
     /*  const dataConcern = data?.find((item) => item.ticket_id === ticketId) || {}; */
 
@@ -908,7 +924,7 @@ const InquiryThread = () => {
                                                 Month
                                             </label>
                                             <select
-                                                className="w-[220px] border-b-1 outline-none appearance-none text-sm px-[8px]"
+                                                className="w-[179px] border-b-1 outline-none appearance-none text-sm px-[8px]"
                                                 onChange={(e) =>
                                                     setSelectedMonth(e.target.value)
                                                 }
