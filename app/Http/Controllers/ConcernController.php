@@ -1814,6 +1814,7 @@ class ConcernController extends Controller
     {   
  
 
+
         try {
             $assignees = $request->assignees;
             $concerns = Concerns::where('ticket_id', $request->ticket_id)->first();
@@ -1840,8 +1841,14 @@ class ConcernController extends Controller
                         'buyer_name' => $buyer_name,
                         'admin_name' => $admin_name,
                         'details_concern' => $details_concern,
-                        'modifiedTicketId' => $modifiedTicketId
+                        'modifiedTicketId' => $modifiedTicketId,
+                        'status' => 'Resolved'
                     ];
+
+                    \Log::info([
+                        'datasssssss' => $data,
+                    ]);
+
                     NotifyAssignedCliOfResolvedInquiryJob::dispatch(
                         $assignee['employee_email'],
                         $assignee['name'],
@@ -2275,7 +2282,8 @@ class ConcernController extends Controller
                         'buyer_name' => $buyer_name,
                         'admin_name' => $admin_name,
                         'details_concern' => $details_concern,
-                        'modifiedTicketId' => $modifiedTicketId
+                        'modifiedTicketId' => $modifiedTicketId,
+                        'status' => 'Closed'
                     ];
                     NotifyAssignedCliOfResolvedInquiryJob::dispatch(
                         $assignee['employee_email'],

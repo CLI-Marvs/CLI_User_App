@@ -135,6 +135,19 @@
     <p>Please review the concern in your <span> <a href="{{ $data['adminLink'] }}">Masters Admin
                 Dashboard.</a> </span> </p>
 
+
+    <hr style="border: none; border-top: 1px solid #000; width: 50%; margin: 10px 0 10px 0;">
+
+
+    <p style="margin-top: 5px;">
+        <strong>
+            Reminder:
+            This is an automated message from a no-reply email address.
+            <br>
+            Please do not reply directly to this email as your message will not be received.
+        </strong>
+    </p>
+    
     <p style="margin: 0; padding: 0;">Thank you,</p>
     <p style="margin: 0; padding: 0;">Cebu Landmasters, Inc.</p>
     <br>
@@ -142,13 +155,13 @@
         src="https://storage.googleapis.com/super-app-storage/concerns/67219ce89c592.png?GoogleAccessId=799945112092-compute%40developer.gserviceaccount.com&Expires=2045788905&Signature=aIFtdGmczZSDdCikC8VR%2FIEnS6g0bLs%2BXhOP7lekJ5m10Qktmc%2FotqfUrpYCFyC9qBizDk5zo4jhc1ebO54YBPc45h1qYf%2B96R8m2v0AWzo9NED1sD6i4qgKPd4Nn5wJ19iZFPPpSXWrht7idXcg9Ja05hd%2BpuxoknvV0%2BP%2Fnh9W%2B4pucqoT%2Fo6C7jN9Rp2gvrkH04EgjgrsSfgTkxraaURAs0IcUlmq7Ma4eBQU%2FDL2uMuSsupk9%2FyxisXoI2PT%2FOAdjanl9uxSNFqnR2dg8YUmF2NcxRPaSjcojZfcwZEiuz%2B9Pc50f1DvqVNOe06hl%2BCw9i7dJMsKUNN0tgkz0w%3D%3D"
         title="clisignature" />
 
-    <p style="margin-top: 5px;">
+    {{--   <p style="margin-top: 5px;">
         <strong>
             Reminder:
             This is an automated message from a no-reply email address.
-        <br>
+            <br>
             Please do not reply directly to this email as your message will not be received.
         </strong>
-    </p>
+    </p> --}}
 
 </body>

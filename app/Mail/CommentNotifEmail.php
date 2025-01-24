@@ -38,7 +38,7 @@ class CommentNotifEmail extends Mailable
     {
         return new Envelope(
             from: new Address('noreply@cebulandmasters.com', 'noreply@cebulandmasters.com'),
-            subject: "New Comment from Ticket#{$this->data['ticket_id']}",
+            subject: "[Do Not Reply] New Comment from Ticket#{$this->data['ticket_id']}",
         );
     }
 
