@@ -922,6 +922,35 @@ class ConcernController extends Controller
         }
     }
 
+    public function getCountAllConcerns(Request $request)
+{
+    try {
+
+        $totalCount = Concerns::count();
+
+       
+        $resolvedCount = Concerns::where('status', 'Resolved')->count();
+        $closedCount = Concerns::where('status', 'Closed')->count();
+        $unresolvedCount = Concerns::where('status', 'unresolved')->count();
+
+        
+        $response = [
+            'counts' => [
+                'all' => $totalCount,
+                'resolved' => $resolvedCount,
+                'closed' => $closedCount,
+                'unresolved' => $unresolvedCount,
+            ],
+        ];
+
+        \Log::info($response);
+        
+        return response()->json($response);
+    } catch (\Exception $e) {
+        return response()->json(['message' => 'Error occurred.', 'error' => $e->getMessage()], 500);
+    }
+}
+
 
     private function getLatestMessage()
     {

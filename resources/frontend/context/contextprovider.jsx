@@ -93,6 +93,9 @@ export const ContextProvider = ({ children }) => {
     const [loading, setLoading] = useState(false);
     const [navBarData, setNavBarData] = useState([]);
     const [isUserTypeChange, setIsUserTypeChange] = useState(false);
+    const [countAllConcerns, setCountAllConcerns] = useState({});
+
+
 
     useEffect(() => {
         if (user && user.department && !isDepartmentInitialized) {
@@ -444,6 +447,16 @@ export const ContextProvider = ({ children }) => {
         }
     };
 
+
+    const getCountAllConcerns = async () => {
+        try {
+            const response = await apiService.get("get-count-all-concerns");
+            setCountAllConcerns(response.data);
+        } catch (error) {
+            console.log("error retrieving", error);
+        }
+    };
+
     const getFullYear = async () => {
 
             try {
@@ -689,6 +702,7 @@ export const ContextProvider = ({ children }) => {
         fetchData();
     }, [department, propertyMonth, month, project, year, departmentStatusYear, inquiriesPerCategoryYear, inquiriesPerPropertyYear, communicationTypeYear, communicationTypeMonth, inquiriesPerChannelMonth, inquiriesPerChanelYear]);
 
+
     return (
         <StateContext.Provider
             value={{
@@ -728,6 +742,9 @@ export const ContextProvider = ({ children }) => {
                 month,
                 fullYear,
                 getFullYear,
+                getCountAllConcerns,
+                setCountAllConcerns,
+                countAllConcerns,
                 dataCategory,
                 fetchCategory,
                 propertyMonth,

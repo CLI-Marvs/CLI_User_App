@@ -51,6 +51,8 @@ const InquiryList = () => {
         department,
         loading,
         allEmployees,
+        countAllConcerns,
+        getCountAllConcerns,
         /*  setHasAttachments,
         hasAttachments */
     } = useStateContext();
@@ -149,7 +151,7 @@ const InquiryList = () => {
             setIsFilterVisible(false);
         }
     };
-
+ 
     const handleOptionClick = (option) => {
         setResultSearchActive(false);
         setSelectedOption(option);
@@ -164,18 +166,24 @@ const InquiryList = () => {
             setSpecificAssigneeCsr("");
             setAssignedToMeActive(false);
         } else if (option === "Resolved") {
+            console.log(data.filter(item => item.status === "Resolved").length);
+            setResolvedCount(data.filter(item => item.status === "Resolved").length);
             setStatusFilter("Resolved");
             setCurrentPage(0);
             setSearchFilter("");
             setSpecificAssigneeCsr("");
             setAssignedToMeActive(false);
         } else if (option === "Closed") {
+            console.log(data.filter(item => item.status === "Closed").length);
+            setClosedCount(data.filter(item => item.status === "Closed").length);
             setStatusFilter("Closed");
             setCurrentPage(0);
             setSearchFilter("");
             setSpecificAssigneeCsr("");
             setAssignedToMeActive(false);
         } else if (option === "Unresolved") {
+            console.log(data.filter(item => item.status === "unresolved").length);
+            setUnresolvedCount(data.filter(item => item.status === "unresolved").length);
             setStatusFilter("unresolved");
             setCurrentPage(0);
             setSearchFilter("");
@@ -405,8 +413,7 @@ const InquiryList = () => {
     };
 
     useEffect(() => {
-
-
+        
         if (propertyParam || statusParam || monthParam || yearParam || departmentParam || channelsParam || categoryParam) {
 
         setResultSearchActive(true);
@@ -474,6 +481,7 @@ const InquiryList = () => {
 
     useEffect(() => {
         updateLastActivity();
+        getCountAllConcerns();
         getAllConcerns();
     }, [
         searchFilter,
@@ -973,7 +981,12 @@ const InquiryList = () => {
                                         <p>{dataCount} Results Found</p>
                                     )
                                 ) : (
-                                    <p>{selectedOption}</p>
+                                    <p>
+                                        {selectedOption} 
+                                        {" "}
+                                        ({dataCount})
+                                    
+                                    </p>
                                 )}
                             </button>
                         
@@ -987,7 +1000,7 @@ const InquiryList = () => {
                                                 handleOptionClick("All")
                                             }
                                         >
-                                            All
+                                            All ({countAllConcerns.counts.all})
                                         </li>
                                         <li
                                             className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
@@ -995,7 +1008,7 @@ const InquiryList = () => {
                                                 handleOptionClick("Resolved")
                                             }
                                         >
-                                            Resolved
+                                            Resolved ({countAllConcerns.counts.resolved})
                                         </li>
                                         <li
                                             className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
@@ -1003,7 +1016,7 @@ const InquiryList = () => {
                                                 handleOptionClick("Closed")
                                             }
                                         >
-                                            Closed
+                                            Closed ({countAllConcerns.counts.closed})
                                         </li>
                                         <li
                                             className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
@@ -1011,7 +1024,7 @@ const InquiryList = () => {
                                                 handleOptionClick("Unresolved")
                                             }
                                         >
-                                            Unresolved
+                                            Unresolved ({countAllConcerns.counts.unresolved})
                                         </li>
                                     </ul>
                                 </div>
