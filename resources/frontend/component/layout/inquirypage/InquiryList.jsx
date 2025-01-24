@@ -415,7 +415,10 @@ const InquiryList = () => {
         let summaryParts = []; // Array to hold each part of the summary
 
         if (categoryParam) summaryParts.push(`Category -> ${categoryParam}`);
-        if (statusParam) summaryParts.push(`Status -> ${statusParam}`);
+        if (statusParam) {
+            const displayStatus = status === "unresolved" ? "Unresolved" : statusParam;
+            summaryParts.push(`Status: ${displayStatus}`);
+          }
         if (name) summaryParts.push(`Name -> ${name}`);
         if (typeParam) summaryParts.push(`Type -> ${typeParam}`);
         if (email) summaryParts.push(`Email -> ${email}`);
@@ -435,9 +438,9 @@ const InquiryList = () => {
         if (monthParam) summaryParts.push(`Month -> ${ formatMonth(monthParam)}`);
         if (hasAttachments) summaryParts.push(`Attachments -> Yes`);
 
-        let summary = `${summaryParts.join(" + ")}`;
+       
 
-        setSearchSummary(summary.trim());
+        setSearchSummary(summaryParts);
 
         setSearchFilter({
             name,
