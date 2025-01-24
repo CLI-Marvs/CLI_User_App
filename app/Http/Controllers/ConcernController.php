@@ -2041,15 +2041,15 @@ class ConcernController extends Controller
         $month = $request->month;
         $project = $request->property;
         $year = $request->year ?? Carbon::now()->year;
+
         $query = Concerns::select(
             DB::raw("jsonb_array_elements(assign_to::jsonb)->>'department' as department"),
-            DB::raw('SUM(case when status = \'Resolved\' then 1 else 0 end) as Resolved'),
-            DB::raw('SUM(case when status = \'unresolved\' then 1 else 0 end) as Unresolved'),
-            DB::raw('SUM(case when status = \'Closed\' then 1 else 0 end) as Closed')
-
+            DB::raw('COUNT(DISTINCT CASE WHEN status = \'Resolved\' THEN id ELSE NULL END) as resolved'),
+            DB::raw('COUNT(DISTINCT CASE WHEN status = \'unresolved\' THEN id ELSE NULL END) as unresolved'),
+            DB::raw('COUNT(DISTINCT CASE WHEN status = \'Closed\' THEN id ELSE NULL END) as closed')
         )
-            ->whereYear('created_at', $year)
-            ->whereNotNull('status');
+        ->whereYear('created_at', $year)
+        ->whereNotNull('status');
 
         if ($project && $project !== 'All') {
             $query->where('property', $project);
@@ -2059,13 +2059,18 @@ class ConcernController extends Controller
             $query->whereMonth('created_at', $month);
         }
 
-        if ($department && $department !== "All") {
-            $query->whereRaw("resolve_from::jsonb @> ?", json_encode([['department' => $department]]));
+        if ($department && $department !== 'All') {
+            $query->whereRaw("assign_to::jsonb @> ?", [json_encode([['department' => $department]])]);
         }
 
-        $concerns = $query->groupBy('department')->get();
+        $concerns = $query
+            ->groupBy('department')
+            ->orderBy('department') // Optional: For consistent ordering
+            ->get();
+
         return response()->json($concerns);
     }
+
 
     /**
      * Get Inquiries per channel data
