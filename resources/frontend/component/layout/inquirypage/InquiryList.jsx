@@ -345,29 +345,30 @@ const InquiryList = () => {
         setResultSearchActive(true);
         let summaryParts = []; // Array to hold each part of the summary
 
-        if (category) summaryParts.push(`Category -> ${category}`);
-        if (status) summaryParts.push(`Status -> ${status}`);
-        if (name) summaryParts.push(`Name -> ${name}`);
-        if (type) summaryParts.push(`Type -> ${type}`);
-        if (email) summaryParts.push(`Email -> ${email}`);
+        if (category) summaryParts.push(`Category: ${category}`);
+        if (status) {
+            const displayStatus = status === "unresolved" ? "Unresolved" : status;
+            summaryParts.push(`Status: ${displayStatus}`);
+          }
+        if (name) summaryParts.push(`Name: ${name}`);
+        if (type) summaryParts.push(`Type: ${type}`);
+        if (email) summaryParts.push(`Email: ${email}`);
         if (channels) {
             const formattedChannels =
                     channels === 'Walk in' ? 'Walk-in' :
                     channels === 'Social media' ? 'Social Media' :
                     channels;
-            summaryParts.push(`Channels -> ${formattedChannels}`);
+            summaryParts.push(`Channels: ${formattedChannels}`);
         }
-        if (departments) summaryParts.push(`Department -> ${departments}`);
-        if (ticket) summaryParts.push(`Ticket -> ${ticket}`);
-        if (startDate) summaryParts.push(`Start Date -> ${formatDate(startDate)}`);
-        if (selectedProperty) summaryParts.push(`Property -> ${selectedProperty}`);
-        if (selectedYear) summaryParts.push(`Year -> ${selectedYear}`);
-        if (selectedMonth) summaryParts.push(`Month -> ${ formatMonth(selectedMonth)}`);
-        if (hasAttachments) summaryParts.push(`Attachments -> Yes`);
+        if (departments) summaryParts.push(`Department: ${departments}`);
+        if (ticket) summaryParts.push(`Ticket: ${ticket}`);
+        if (startDate) summaryParts.push(`Start Date: ${formatDate(startDate)}`);
+        if (selectedProperty) summaryParts.push(`Property: ${selectedProperty}`);
+        if (selectedMonth) summaryParts.push(`Month: ${ formatMonth(selectedMonth)}`);
+        if (selectedYear) summaryParts.push(`Year: ${selectedYear}`);
+        if (hasAttachments) summaryParts.push(`Attachments: Yes`);
 
-        let summary = `${summaryParts.join(" + ")}`;
-
-        setSearchSummary(summary.trim());
+        setSearchSummary(summaryParts);
 
         setSearchFilter({
             name,
@@ -952,7 +953,14 @@ const InquiryList = () => {
                     {resultSearchActive && (
                         <div className="flex flex-col gap-1 p-2 mt-[15px] bg-white w-max rounded-[8px] shadow-custom7 text-sm">
                             <div className="flex">
-                                <strong>Search Result For : &nbsp;</strong><p>{searchSummary}</p>
+                                <div>
+                                    <strong>Search Result For: &nbsp;</strong>
+                                </div>
+                                <div className="flex flex-col flex-wrap gap-2">
+                                    {searchSummary.map((part, index) => (
+                                        <div key={index}>{part}</div>
+                                    ))}
+                                </div>
                             </div>
                         </div>
                     )}
