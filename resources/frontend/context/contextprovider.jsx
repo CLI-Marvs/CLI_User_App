@@ -260,13 +260,16 @@ export const ContextProvider = ({ children }) => {
 
     const fetchDataReport = async () => {
         try {
-
             const response = await apiService.get("report-monthly", {
                 params: { department: department, property: project, month: month, year: year },
             });
             const result = response.data;
+           
+            const filteredResult = result.filter(
+                (item) => item.resolved !== 0 || item.unresolved !== 0 || item.closed !== 0
+            );
 
-            const formattedData = result.map((item) => ({
+            const formattedData = filteredResult.map((item) => ({
                 name: item.month.toString().padStart(2, "0"),
                 Resolved: item.resolved,
                 Unresolved: item.unresolved,
@@ -753,6 +756,8 @@ export const ContextProvider = ({ children }) => {
                 await getCommunicationTypePerProperty();
                 await getInquiriesPerChannel();
 
+                await getFullYear();
+                
             } catch (error) {
                 console.error("Error fetching data:", error);
             }

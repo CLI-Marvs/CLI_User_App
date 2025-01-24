@@ -136,7 +136,7 @@
     @if (!is_null($selectedSurveyType) && $selectedSurveyType['surveyName'] !== 'N/A')
     <p>
         Please click this link
-        <a href="{{ $selectedSurveyType['surveyLink']}}">
+        <a href="{{ $selectedSurveyType['surveyLink']}}={{ $modifiedTicketId }}">
             {{$selectedSurveyType['surveyName']}}
         </a>
     </p>
