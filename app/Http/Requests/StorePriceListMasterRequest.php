@@ -38,13 +38,22 @@ class StorePriceListMasterRequest extends FormRequest
             'paymentSchemePayload.selectedSchemes' => 'array',
             'paymentSchemePayload.selectedSchemes.*' => 'integer',
 
-            
+            //Price versions
+            'priceVersionsPayload' => 'array',
+            'priceVersionsPayload.*.name' => 'string',
+            'priceVersionsPayload.*.percent_increase' => 'integer',
+            'priceVersionsPayload.*.no_of_allowed_buyers' => 'integer',
+            'priceVersionsPayload.*.expiry_date' => 'date_format:m-d-Y H:i:s',
+            'priceVersionsPayload.*.payment_scheme' => 'array',
+
+
             'status' =>
             'required|string|max:255',
             'emp_id' =>
             'required|integer',
             'tower_phase_id' =>
             'required|integer',
+            'price_list_master_id' => 'integer'
         ];
     }
 }

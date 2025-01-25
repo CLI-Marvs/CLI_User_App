@@ -34,25 +34,33 @@ class PriceListMasterController extends Controller
     public function store(StorePriceListMasterRequest $request)
     {
 
-
         try {
             //TODO: validate the request to make sure it's valid and match in the request
-            $priceListMaster = $this->service->store($request->validated());
+            $result = $this->service->store($request->validated());
+
+
+            if ($result['success']) {
+                return response()->json([
+                    'message' => $result['message'],
+                    'data' => $result['data'],
+                ], 200);
+            }
 
             return response()->json([
-                'message' => 'Price list master created successfully',
-                'data' => $priceListMaster,
-            ], 201);
+                'message' => $result['message']
+            ], 400);
         } catch (ValidationException $e) {
             return response()->json([
                 'error' => 'Validation failed',
                 'messages' => $e->errors(),
             ], 422);
         } catch (\Exception $e) {
-            return response()->json([
-                'error' => $e->getMessage(),
-                'message' => 'Failed to create property',
-            ], 500);
+            return response()->json(
+                [
+                    'Error creating price list master' => $e->getMessage()
+                ],
+                500
+            );
         }
     }
 
@@ -63,17 +71,17 @@ class PriceListMasterController extends Controller
     public function update(UpdatePriceListMasterRequest $request)
     {
         $validatedData = $request->validated();
-       
+
         try {
             $result  = $this->service->update($validatedData, $validatedData['tower_phase_id']);
-         
+
             if ($result['success']) {
                 return response()->json([
                     'message' => $result['message'],
                     'data' => $result['data'],
                 ], 200);
             }
-            
+
             return response()->json([
                 'message' => $result['message']
             ], 400);

@@ -23,9 +23,11 @@ const PricingMasterList = () => {
     const toggleFilterBox = () => {
         setIsFilterVisible(!isFilterVisible);
     };
- 
+
     //Hooks
     useEffect(() => {
+        console.log("priceListMaster", priceListMaster)
+
         if (!priceListMaster) {
             fetchPropertyListMasters(true);
         }
@@ -419,7 +421,7 @@ const PricingMasterList = () => {
                                     <td className="w-[100px] flex items-center justify-start"></td>
                                     <td className="w-[150px] flex items-center justify-start rounded-r-lg text-sm">
                                         <div>
-                                            <p> 
+                                            <p>
                                                 {item?.payment_scheme?.map((scheme, index) => {
                                                     return (
                                                         <span key={index}>
@@ -429,7 +431,7 @@ const PricingMasterList = () => {
                                                     )
                                                 })}
                                             </p>
-                                            
+
                                         </div>
                                     </td>
                                 </tr>

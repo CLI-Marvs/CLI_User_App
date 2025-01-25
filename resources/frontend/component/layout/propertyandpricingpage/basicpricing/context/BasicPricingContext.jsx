@@ -1,7 +1,6 @@
-import { createContext, useContext, useState } from 'react';
-import moment from 'moment';
+import { createContext, useContext, useState } from "react";
+import moment from "moment";
 const BasicPricingContext = createContext();
-
 
 const initialState = () => ({
     priceListSettings: {
@@ -20,38 +19,44 @@ const initialState = () => ({
             percent_increase: 0,
             no_of_allowed_buyers: 0,
             expiry_date: moment(new Date()).format("MM-DD-YYYY HH:mm:ss"),
-            payment_scheme: [],
-        },
+            payment_scheme: [], 
+        }
     ],
     reviewsAndApproval: {},
 });
 export default function BasicPricingProvider({ children }) {
     const [pricingData, setPricingData] = useState(initialState());
 
-
     const updatePricingSection = (section, newData) => {
-        setPricingData(prev => ({
+        setPricingData((prev) => ({
             ...prev,
-            [section]: { ...prev[section], ...newData }
+            [section]: { ...prev[section], ...newData },
         }));
     };
 
     //Reset the all state
     const resetPricingData = () => {
         setPricingData(initialState());
-    }
+    };
 
     return (
-        <BasicPricingContext.Provider value={{ pricingData, updatePricingSection, resetPricingData, setPricingData }}>
+        <BasicPricingContext.Provider
+            value={{
+                pricingData,
+                updatePricingSection,
+                resetPricingData,
+                setPricingData,
+            }}
+        >
             {children}
         </BasicPricingContext.Provider>
     );
-};
+}
 
 export const usePricing = () => {
     const context = useContext(BasicPricingContext);
     if (!context) {
-        throw new Error('usePricing must be used within a PricingProvider');
+        throw new Error("usePricing must be used within a PricingProvider");
     }
     return context;
 };

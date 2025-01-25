@@ -2,6 +2,7 @@
 
 namespace App\Repositories\Implementations;
 
+use App\Models\PriceVersion;
 use App\Models\PaymentScheme;
 use App\Models\PriceListMaster;
 use App\Models\PriceBasicDetail;
@@ -38,12 +39,14 @@ class PriceListMasterRepository
         // Transform the data to get specific fields
         $transformedData = $priceListMasters->map(function ($priceList) {
             // Decode payment_scheme_id and ensure it's an array (default to empty array if null)
-            $paymentSchemeIds = json_decode($priceList->payment_scheme_id, true);
+            $priceVersionIds = json_decode($priceList->price_versions_id, true);
             // Ensure it's an array (fallback to empty array if null)
-            $paymentSchemeIds = is_array($paymentSchemeIds) ? $paymentSchemeIds : [];
+            $priceVersionIds = is_array($priceVersionIds) ? $priceVersionIds : [];
             // Fetch PaymentSchemes by the decoded IDs
-            $paymentSchemeData = PaymentScheme::whereIn('id', $paymentSchemeIds)->get();
-
+            $priceVersionData = PriceVersion::whereIn('id', $priceVersionIds)->get();
+           
+            // Fetch PaymentSchemes by the decoded IDs
+            
             return [
                 'price_list_master_id' => $priceList->id,
                 'updated_at' => $priceList->updated_at,
@@ -53,10 +56,10 @@ class PriceListMasterRepository
                 'property_name' => $priceList->towerPhase->propertyMaster->property_name ?? null,
                 'pricebasic_details' => $priceList->priceBasicDetail ? $priceList->priceBasicDetail->toArray() : null,
                 'property_commercial_detail' => $priceList->towerPhase->propertyMaster->propertyCommercialDetail->toArray(),
-                'payment_scheme' => $paymentSchemeData->map(function ($scheme) {
+                'price_versions' => $priceVersionData->map(function ($version) {
                     return [
-                        'payment_scheme_name' => $scheme->payment_scheme_name,
-                        'id' => $scheme->id,
+                        'payment_scheme_name' => $version->version_name,
+                        'id' => $version->id,
                     ];
                 }),
 
@@ -71,12 +74,9 @@ class PriceListMasterRepository
      */
     public function store(array $data)
     {
-
         DB::beginTransaction();
         try {
             $priceListMaster = $this->model->where('tower_phase_id', $data['tower_phase_id'])->first();
-
-
             if (!$priceListMaster) {
                 throw new \Exception("PriceListMaster not found for tower_phase_id: {$data['tower_phase_id']}");
             }
@@ -92,22 +92,49 @@ class PriceListMasterRepository
             ]);
 
 
+            //Create a Price version
+            if (isset($data['priceVersionsPayload']) && is_array($data['priceVersionsPayload'])) {
+                $createdPriceVersionIds = []; // Store the created IDs
+                foreach ($data['priceVersionsPayload'] as $priceVersionData) {
+                    $firstPaymentScheme = $priceVersionData['payment_scheme'][0] ?? null; //TODO: not always the 1st one, need to fix to handle multiple payment schemes ids
+                    $expiryDate = \DateTime::createFromFormat('m-d-Y H:i:s', $priceVersionData['expiry_date']);
+
+                    // Create a Price version
+                    $priceVersion = $priceListMaster->priceVersions()->create([
+                        'version_name' => $priceVersionData['name'],
+                        'percent_increase' => $priceVersionData['percent_increase'],
+                        'allowed_buyer' => $priceVersionData['no_of_allowed_buyers'],
+                        'expiry_date' => $expiryDate->format('Y-m-d H:i:s'),
+                        'payment_scheme_id' => $firstPaymentScheme['id'] ?? null, // Store the payment scheme Id  
+                        'tower_phase_name' => $data['tower_phase_id'],
+                        'price_list_masters_id' => $data['price_list_master_id'],
+                    ]);
+                    // Store the created ID
+                    $createdPriceVersionIds[] = $priceVersion->id;
+                }
+            }
 
             $priceListMaster->update([
                 'status' => $data['status'],
                 'date_last_update' => now(),
                 'pricebasic_details_id' => $priceBasicDetail->id,
-                'payment_scheme_id' => json_encode($data['paymentSchemePayload']['selectedSchemes']),
+                'price_versions_id' => json_encode($createdPriceVersionIds),
             ]);
 
             DB::commit();
-            return $priceListMaster->fresh();
+
+            return [
+                'success' => true,
+                'message' => 'Price List Master created successfully.',
+                'data' => $priceListMaster->fresh() // Return the updated model
+            ];
         } catch (\Exception $e) {
             DB::rollBack();
             // Return failure status and error message
             return [
                 'success' => false,
-                'message' => 'Failed to add property: ' . $e->getMessage(),
+                'message' => 'Error creating Price List Master: ' . $e->getMessage(),
+                'error_details' => $e->getTraceAsString() // Include stack trace for debugging
             ];
         }
     }
@@ -117,7 +144,7 @@ class PriceListMasterRepository
      */
     public function update(array $data)
     {
-        
+
         DB::beginTransaction();
         try {
             $updatedPriceListMaster = $this->model->where('id', $data['price_list_master_id'])->first();
@@ -160,7 +187,7 @@ class PriceListMasterRepository
 
                 $currentPriceBasicDetailsId = $priceBasicDetail->id;
             }
-     
+
 
             $updatedPriceListMaster->update([
                 'status' => $data['status'],

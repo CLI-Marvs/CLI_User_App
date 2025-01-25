@@ -28,7 +28,7 @@ class PriceVersion extends Model
 
     public function priceListMaster(): BelongsTo
     {
-        return $this->belongsTo(PriceListMaster::class);
+        return $this->belongsTo(PriceListMaster::class, 'price_list_masters_id', 'id');
     }
 
     public function paymentSchemes(): HasMany

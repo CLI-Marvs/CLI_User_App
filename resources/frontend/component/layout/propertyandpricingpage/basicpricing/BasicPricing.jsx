@@ -37,9 +37,10 @@ const BasicPricing = () => {
     const { pricingData, resetPricingData, setPricingData } = usePricing();
     const { fetchPropertyListMasters } = usePriceListMaster();
     const [isLoading, setIsLoading] = useState({});
-    
+ 
     //Hooks 
     useEffect(() => {
+        
         if (data) {
             setPropertyData(data);
             // Update the priceListSettings
@@ -174,10 +175,11 @@ const BasicPricing = () => {
   */
     const buildSubmissionPayload = (status) => ({
         emp_id: user?.id,
-        price_list_master_id: data?.price_list_master_id ?? null,
+        price_list_master_id: data?.price_list_master_id || data?.data?.property_commercial_detail?.property_master_id,
         tower_phase_id: data.data?.tower_phases[0]?.id || data?.tower_phase_id,
         priceListPayload: formatPayload.formatPriceListSettingsPayload(pricingData.priceListSettings),
         paymentSchemePayload: pricingData.paymentSchemes,
+        priceVersionsPayload: pricingData.priceVersions,
         status: status
     });
     /**
@@ -231,6 +233,7 @@ const BasicPricing = () => {
                 console.log("ADd Payload", payload);
 
                 const response = await priceListMasterService.storePriceListMasters(payload);
+                console.log("response 235", response);
                 if (response?.status === 201 || response?.status === 200) {
                     showToast(response?.data?.message || "Data added successfully", "success");
 
@@ -240,6 +243,8 @@ const BasicPricing = () => {
                     setTimeout(() => {
                         navigate("/property-pricing/master-lists");
                     }, 1000);
+
+                
                 } else {
                     console.log("Unexpected response status:", response?.status, response);
                     showToast("Unexpected response received. Please verify the changes.", "warning");
