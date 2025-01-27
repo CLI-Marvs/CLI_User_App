@@ -179,21 +179,21 @@ const InquiryList = () => {
             setSpecificAssigneeCsr("");
             setAssignedToMeActive(false);
         } else if (option === "Resolved") {
-            console.log(data.filter(item => item.status === "Resolved").length);
+            
             setStatusFilter("Resolved");
             setCurrentPage(0);
             setSearchFilter("");
             setSpecificAssigneeCsr("");
             setAssignedToMeActive(false);
         } else if (option === "Closed") {
-            console.log(data.filter(item => item.status === "Closed").length);
+            
             setStatusFilter("Closed");
             setCurrentPage(0);
             setSearchFilter("");
             setSpecificAssigneeCsr("");
             setAssignedToMeActive(false);
         } else if (option === "Unresolved") {
-            console.log(data.filter(item => item.status === "unresolved").length);
+           
             setStatusFilter("unresolved");
             setCurrentPage(0);
             setSearchFilter("");
@@ -1108,12 +1108,12 @@ const InquiryList = () => {
                                 <div className="absolute top-full mt-2 w-48 bg-white border border-gray-200 shadow-lg rounded-md">
                                     <ul className="py-2">
                                         <li
-                                            className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                                            className={`px-4 py-2`}
                                             onClick={() =>
                                                 handleOptionClick("All")
                                             }
                                         >
-                                            All ({countAllConcerns.counts.all})
+                                            All ({countAllConcerns?.counts?.all ?? ""})
                                         </li>
                                         <li
                                             className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
@@ -1121,7 +1121,7 @@ const InquiryList = () => {
                                                 handleOptionClick("Resolved")
                                             }
                                         >
-                                            Resolved ({countAllConcerns.counts.resolved})
+                                            Resolved ({countAllConcerns?.counts?.resolved ?? ""})
                                         </li>
                                         <li
                                             className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
@@ -1129,7 +1129,7 @@ const InquiryList = () => {
                                                 handleOptionClick("Closed")
                                             }
                                         >
-                                            Closed ({countAllConcerns.counts.closed})
+                                            Closed ({countAllConcerns?.counts?.closed ?? ""})
                                         </li>
                                         <li
                                             className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
@@ -1137,7 +1137,7 @@ const InquiryList = () => {
                                                 handleOptionClick("Unresolved")
                                             }
                                         >
-                                            Unresolved ({countAllConcerns.counts.unresolved})
+                                            Unresolved ({countAllConcerns?.counts?.unresolved ?? ""})
                                         </li>
                                     </ul>
                                 </div>
