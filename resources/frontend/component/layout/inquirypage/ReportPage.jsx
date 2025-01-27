@@ -565,7 +565,7 @@ const ReportPage = () => {
         getCommunicationTypePerProperty();
         getInquiriesPerChannel();
         getFullYear();
-        setYear(currentYear);
+        setYear(yearValue);
     }, []);
 
     /*  useEffect(() => {
@@ -611,6 +611,8 @@ const ReportPage = () => {
         (total, type) => total + type.value,
         0
     );
+
+    console.log("yearValue", yearValue);
 
     return (
         <div className="h-screen bg-custom-grayFA p-4 flex flex-col gap-[21px]">
