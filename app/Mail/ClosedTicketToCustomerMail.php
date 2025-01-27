@@ -21,12 +21,12 @@ class ClosedTicketToCustomerMail extends Mailable
     protected $admin_name;
     protected $department;
     protected $modifiedTicketId;
-    protected $selectedSurveyType;
+
 
     /**
      * Create a new message instance.
      */
-    public function __construct($ticket_id, $email, $buyer_lastname, $message_id, $admin_name, $department, $modifiedTicketId, $selectedSurveyType)
+    public function __construct($ticket_id, $email, $buyer_lastname, $message_id, $admin_name, $department, $modifiedTicketId)
     {
         $this->ticket_id = $ticket_id;
         $this->email = $email;
@@ -35,7 +35,6 @@ class ClosedTicketToCustomerMail extends Mailable
         $this->admin_name = $admin_name;
         $this->department = $department;
         $this->modifiedTicketId = $modifiedTicketId;
-        $this->selectedSurveyType = $selectedSurveyType;
     }
 
     /**
@@ -49,15 +48,15 @@ class ClosedTicketToCustomerMail extends Mailable
                 from: new Address('ask@cebulandmasters.com', 'Cebu Landmasters Inc.'),
                 subject: "[Test] [CLI Inquiry] Transaction {$this->ticket_id}",
             );
-        } 
-        if(config('services.app_url') === 'https://admin-uat.cebulandmasters.com') {
+        }
+        if (config('services.app_url') === 'https://admin-uat.cebulandmasters.com') {
             return new Envelope(
                 from: new Address('ask@cebulandmasters.com', 'Cebu Landmasters Inc.'),
                 subject: "[SML] [CLI Inquiry] Transaction {$this->ticket_id}",
             );
         }
 
-        if(config('services.app_url') === 'https://admin.cebulandmasters.com') {
+        if (config('services.app_url') === 'https://admin.cebulandmasters.com') {
             return new Envelope(
                 from: new Address('ask@cebulandmasters.com', 'Cebu Landmasters Inc.'),
                 subject: "[CLI Inquiry] Transaction {$this->ticket_id}",
@@ -99,7 +98,6 @@ class ClosedTicketToCustomerMail extends Mailable
                 'admin_name' => $this->admin_name,
                 'department' => $this->department,
                 'modifiedTicketId' => $this->modifiedTicketId,
-                'selectedSurveyType' => $this->selectedSurveyType
             ],
         );
     }

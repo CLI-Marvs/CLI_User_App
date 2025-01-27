@@ -549,7 +549,7 @@ class ConcernController extends Controller
             $nextId = $lastConcern ? $lastConcern->id + 1 : 1;
             $formattedId = str_pad($nextId, 8, '0', STR_PAD_LEFT);
 
-            $ticketId = 'Ticket#'.$this->dynamicTicketYear . $formattedId;
+            $ticketId = 'Ticket#' . $this->dynamicTicketYear . $formattedId;
 
 
 
@@ -1084,12 +1084,12 @@ class ConcernController extends Controller
 
         if (!empty($searchParams['departments'])) {
             $departments = $searchParams['departments'];
-        
+
             // Ensure $departments is an array
             if (!is_array($departments)) {
                 $departments = explode(',', $departments); // Convert string to array
             }
-        
+
             foreach ($departments as $department) {
                 $query->whereJsonContains('assign_to', [['department' => $department]]);
             }
@@ -2059,8 +2059,8 @@ class ConcernController extends Controller
             DB::raw('COUNT(DISTINCT CASE WHEN status = \'unresolved\' THEN id ELSE NULL END) as unresolved'),
             DB::raw('COUNT(DISTINCT CASE WHEN status = \'Closed\' THEN id ELSE NULL END) as closed')
         )
-        ->whereYear('created_at', $year)
-        ->whereNotNull('status');
+            ->whereYear('created_at', $year)
+            ->whereNotNull('status');
 
         if ($project && $project !== 'All') {
             $query->where('property', $project);
@@ -2269,7 +2269,6 @@ class ConcernController extends Controller
         try {
             $assignees = $request->assignees;
             $concerns = Concerns::where('ticket_id', $request->ticket_id)->first();
-            $selectedSurveyType = $request->selectedSurveyType;
             $modifiedTicketId = str_replace('Ticket#', '', $request->ticket_id);
             $buyerEmail = $request->buyer_email;
             $admin_name = $request->admin_name;
@@ -2278,7 +2277,6 @@ class ConcernController extends Controller
             $buyer_name = $request->buyer_name;
             $concerns->communication_type = $request->communication_type;
             $concerns->status = "Closed";
-            $concerns->survey_link = $selectedSurveyType['surveyName']; // Save the survey name to database
             $buyer_lastname = $request->buyer_lastname;
             $message_id = $request->message_id;
             $concerns->save();
@@ -2304,9 +2302,7 @@ class ConcernController extends Controller
             $this->inquiryResolveLogs($request, 'close');
 
             //Pass the selectedSurveyType as arguments to MarkResolvedToCustomerJob job 
-            MarkClosedToCustomerJob::dispatch($request->ticket_id, $buyerEmail, $buyer_lastname, $message_id, $admin_name, $department, $modifiedTicketId, $selectedSurveyType);
-
-            SendSurveyLinkEmailJob::dispatch($buyerEmail,  $request->buyer_name, $selectedSurveyType, 'close', $modifiedTicketId);
+            MarkClosedToCustomerJob::dispatch($request->ticket_id, $buyerEmail, $buyer_lastname, $message_id, $admin_name, $department, $modifiedTicketId);
         } catch (\Exception $e) {
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
         }
