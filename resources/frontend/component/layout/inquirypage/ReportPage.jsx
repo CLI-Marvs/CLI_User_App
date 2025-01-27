@@ -23,8 +23,9 @@ import { TiDownload } from "react-icons/ti";
 import { useStateContext } from "../../../context/contextprovider";
 import { IoMdArrowDropdown } from "react-icons/io";
 import { MdCalendarToday } from "react-icons/md";
-import { useLocation, Link } from "react-router-dom";
+import { useLocation, Link, useNavigate } from "react-router-dom";
 import { get, set } from "lodash";
+import { toast } from "react-toastify";
 
 const barHeight = 20;
 
@@ -72,10 +73,19 @@ const ReportPage = () => {
         setInquiriesPerChannelMonth,
         getInquiriesPerChannel,
         inquriesPerChannelData,
-        propertyNamesList
+        propertyNamesList,
+        setSearchFilter,
     } = useStateContext();
 
-    const colors = ["#348017", "#70AD47", "#1A73E8", "#5B9BD5", "#175D5F", "#404B52", "#A5A5A5"];
+    const colors = [
+        "#348017",
+        "#70AD47",
+        "#1A73E8",
+        "#5B9BD5",
+        "#175D5F",
+        "#404B52",
+        "#A5A5A5",
+    ];
 
     const COLORS = [
         "#1F77B4", // Blue
@@ -87,34 +97,35 @@ const ReportPage = () => {
         "#E377C2", // Pink
         "#7F7F7F", // Gray
         "#BCBD22", // Olive
-        "#17BECF"  // Teal
+        "#17BECF", // Teal
     ];
 
+    const navigate = useNavigate();
     const getBarColorPerType = (name) => {
         const colors = {
-            'Complaints': '#EB4444',
-            'Requests': '#348017',
-            'Inquiries': '#1A73E8',
-            'Suggestion or Recommendations': '#E4EA3B',
+            Complaints: "#EB4444",
+            Requests: "#348017",
+            Inquiries: "#1A73E8",
+            "Suggestion or Recommendations": "#E4EA3B",
         };
-        return colors[name] || '#CCCCCC';
+        return colors[name] || "#CCCCCC";
     };
 
     const getBarColorPerChannel = (name) => {
         const colors = {
-            'Email': '#348017',
-            'Call': '#70AD47',
-            'Walk-in': '#1A73E8',
-            'Website': '#5B9BD5',
-            'Social Media': '#175D5F',
-            'Branch Tablet': '#404B52',
-            'Internal Endorsement': '#A5A5A5',
+            Email: "#348017",
+            Call: "#70AD47",
+            "Walk-in": "#1A73E8",
+            Website: "#5B9BD5",
+            "Social Media": "#175D5F",
+            "Branch Tablet": "#404B52",
+            "Internal Endorsement": "#A5A5A5",
         };
-        return colors[name] || '#CCCCCC'; // Default to gray if no match
+        return colors[name] || "#CCCCCC"; // Default to gray if no match
     };
 
     const CustomTick = ({ x, y, payload }) => {
-        const words = payload.value.split(' '); // Split by spaces to handle word wrapping
+        const words = payload.value.split(" "); // Split by spaces to handle word wrapping
         return (
             <g transform={`translate(${x},${y})`}>
                 {words.map((word, index) => (
@@ -133,12 +144,9 @@ const ReportPage = () => {
         );
     };
 
-
-
-
     const categoryColors = {
-        "Commissions": COLORS[0],
-        "Leasing": COLORS[1],
+        Commissions: COLORS[0],
+        Leasing: COLORS[1],
         "Loan Application": COLORS[2],
         "Other Concerns": COLORS[3],
         "Payment Issues": COLORS[4],
@@ -148,7 +156,7 @@ const ReportPage = () => {
         "Turn Over Status": COLORS[8],
         "Unit Status": COLORS[9],
     };
-    // Function to get a unique color from COLORS if a category is missing from categoryColors 
+    // Function to get a unique color from COLORS if a category is missing from categoryColors
     const getColor = (category, index) => {
         if (categoryColors[category]) return categoryColors[category];
         return COLORS[index % COLORS.length];
@@ -174,7 +182,6 @@ const ReportPage = () => {
         return null;
     };
 
-
     const CustomTooltipPieChart = ({ active, payload, label }) => {
         if (active && payload && payload.length) {
             return (
@@ -191,8 +198,6 @@ const ReportPage = () => {
 
         return null;
     };
-
-
 
     const CustomTooltip2 = ({ active, payload }) => {
         if (active && payload && payload.length) {
@@ -220,9 +225,9 @@ const ReportPage = () => {
         "07": "July",
         "08": "August",
         "09": "September",
-        "10": "October",
-        "11": "November",
-        "12": "December",
+        10: "October",
+        11: "November",
+        12: "December",
     };
 
     const CustomTooltip1 = ({ active, payload, label }) => {
@@ -231,17 +236,25 @@ const ReportPage = () => {
 
             return (
                 <div className="custom-tooltip bg-white p-3 shadow-lg rounded-lg border border-gray-200">
-                    <p className="font-bold text-lg text-gray-800">{monthName}</p>
+                    <p className="font-bold text-lg text-gray-800">
+                        {monthName}
+                    </p>
                     <div className="mt-2">
-
                         <p className="text-sm text-gray-600">
-                            <span className="text-custom-solidgreen">Resolved:</span> {payload[0].value}
+                            <span className="text-custom-solidgreen">
+                                Resolved:
+                            </span>{" "}
+                            {payload[0].value}
                         </p>
                         <p className="text-sm text-gray-600">
-                            <span className="text-custom-lightgreen">Closed:</span> {payload[1].value}
+                            <span className="text-custom-lightgreen">
+                                Closed:
+                            </span>{" "}
+                            {payload[1].value}
                         </p>
                         <p className="text-sm text-gray-600">
-                            <span className="text-red-500 ">Unresolved:</span> {payload[2].value}
+                            <span className="text-red-500 ">Unresolved:</span>{" "}
+                            {payload[2].value}
                         </p>
                     </div>
                 </div>
@@ -250,7 +263,6 @@ const ReportPage = () => {
 
         return null;
     };
-
 
     const CustomTooltip3 = ({ active, payload, label }) => {
         if (active && payload && payload.length) {
@@ -258,19 +270,25 @@ const ReportPage = () => {
 
             return (
                 <div className="custom-tooltip bg-white p-3 shadow-lg rounded-lg border border-gray-200">
-                    <p className="font-bold text-lg text-gray-800">{monthName}</p>
+                    <p className="font-bold text-lg text-gray-800">
+                        {monthName}
+                    </p>
                     <div className="mt-2">
                         <p className="text-sm text-gray-600">
-                            <span className="text-red-500">Complaint:</span> {payload[0].value}
+                            <span className="text-red-500">Complaint:</span>{" "}
+                            {payload[0].value}
                         </p>
                         <p className="text-sm text-gray-600">
-                            <span className="text-green-500">Request:</span> {payload[1].value}
+                            <span className="text-green-500">Request:</span>{" "}
+                            {payload[1].value}
                         </p>
                         <p className="text-sm text-gray-600">
-                            <span className="text-blue-500">Inquiry:</span> {payload[2].value}
+                            <span className="text-blue-500">Inquiry:</span>{" "}
+                            {payload[2].value}
                         </p>
                         <p className="text-sm text-gray-600">
-                            <span className="text-yellow-500">Suggestion:</span> {payload[3].value}
+                            <span className="text-yellow-500">Suggestion:</span>{" "}
+                            {payload[3].value}
                         </p>
                     </div>
                 </div>
@@ -280,24 +298,22 @@ const ReportPage = () => {
         return null;
     };
 
-
     const CustomTooltipBar1 = ({ active, payload, label }) => {
         if (active && payload && payload.length) {
-
             const colorMapping = {
-                'Email': '#348017', // Green
-                'Call': '#70ad47', // Light green
-                'Walk-in': '#1A73E8', // Blue
-                'Website': '#5B9BD5', // Light blue
-                'Social Media': '#175d5f', // Dark green
-                'Branch Tablet': '#404B52', // Dark gray
-                'Internal Endorsement': '#a5a5a5' // Gray
+                Email: "#348017", // Green
+                Call: "#70ad47", // Light green
+                "Walk-in": "#1A73E8", // Blue
+                Website: "#5B9BD5", // Light blue
+                "Social Media": "#175d5f", // Dark green
+                "Branch Tablet": "#404B52", // Dark gray
+                "Internal Endorsement": "#a5a5a5", // Gray
             };
 
             const dataType = label; // Or use payload[0].name if `label` is not directly available
 
             // Get the color corresponding to the data type
-            const color = colorMapping[dataType] || '#000000'; // Default to black if no color found
+            const color = colorMapping[dataType] || "#000000"; // Default to black if no color found
 
             return (
                 <div
@@ -311,13 +327,13 @@ const ReportPage = () => {
                         >
                             ●
                         </span>
-                        <span className="text-custom-gray12 text-sm">{dataType}</span>
+                        <span className="text-custom-gray12 text-sm">
+                            {dataType}
+                        </span>
                     </div>
                     <p>
                         Count:{" "}
-                        <span className="font-bold">
-                            {payload[0].value}
-                        </span>
+                        <span className="font-bold">{payload[0].value}</span>
                     </p>
                 </div>
             );
@@ -328,19 +344,17 @@ const ReportPage = () => {
 
     const CustomTooltipBar2 = ({ active, payload, label }) => {
         if (active && payload && payload.length) {
-
             const colorMapping = {
-                'Complaints': '#EB4444',
-                'Requests': '#348017',
-                'Inquiries': '#1A73E8',
-                'Suggestion or Recommendations': '#E4EA3B',
-
+                Complaints: "#EB4444",
+                Requests: "#348017",
+                Inquiries: "#1A73E8",
+                "Suggestion or Recommendations": "#E4EA3B",
             };
 
             const dataType = label; // Or use payload[0].name if `label` is not directly available
 
             // Get the color corresponding to the data type
-            const color = colorMapping[dataType] || '#000000'; // Default to black if no color found
+            const color = colorMapping[dataType] || "#000000"; // Default to black if no color found
 
             return (
                 <div
@@ -354,13 +368,13 @@ const ReportPage = () => {
                         >
                             ●
                         </span>
-                        <span className="text-custom-gray12 text-sm">{dataType}</span>
+                        <span className="text-custom-gray12 text-sm">
+                            {dataType}
+                        </span>
                     </div>
                     <p>
                         Count:{" "}
-                        <span className="font-bold">
-                            {payload[0].value}
-                        </span>
+                        <span className="font-bold">{payload[0].value}</span>
                     </p>
                 </div>
             );
@@ -382,8 +396,18 @@ const ReportPage = () => {
     /*  console.log("inquriesPerChannelData", inquriesPerChannelData); */
     const getCurrentMonth = () => {
         const months = [
-            'january', 'february', 'march', 'april', 'may', 'june',
-            'july', 'august', 'september', 'october', 'november', 'december'
+            "january",
+            "february",
+            "march",
+            "april",
+            "may",
+            "june",
+            "july",
+            "august",
+            "september",
+            "october",
+            "november",
+            "december",
         ];
         const currentMonthIndex = new Date().getMonth();
         return months[currentMonthIndex];
@@ -395,18 +419,20 @@ const ReportPage = () => {
             .replace(/\b\w/g, (char) => char.toUpperCase());
     };
 
+    const totalValuePieChart = dataCategory.reduce(
+        (acc, curr) => acc + curr.value,
+        0
+    );
 
-    const totalValuePieChart = dataCategory.reduce((acc, curr) => acc + curr.value, 0);
-
-    const formatPercentage = (value) => ((value / totalValuePieChart) * 100).toFixed(2) + '%';
-
+    const formatPercentage = (value) =>
+        ((value / totalValuePieChart) * 100).toFixed(2) + "%";
 
     const renderCustomLabel = ({ x, y, value, index, payload, cx }) => {
         const percentage = formatPercentage(value);
         const name = payload.name;
 
         // Adjust text alignment based on label's position relative to pie center
-        const textAnchor = x > cx ? 'start' : 'end';
+        const textAnchor = x > cx ? "start" : "end";
 
         return (
             <text
@@ -426,51 +452,63 @@ const ReportPage = () => {
         "N/A",
         ...(Array.isArray(propertyNamesList) && propertyNamesList.length > 0
             ? propertyNamesList
-                .filter((item) => !item.toLowerCase().includes("phase"))
-                .map((item) => {
-                    let formattedItem = formatFunc(item);
+                  .filter((item) => !item.toLowerCase().includes("phase"))
+                  .map((item) => {
+                      let formattedItem = formatFunc(item);
 
-                    // Capitalize each word in the string
-                    formattedItem = formattedItem
-                        .split(" ")
-                        .map((word) => {
-                            // Check for specific words that need to be fully capitalized
-                            if (/^(Sjmv|Lpu|Cdo|Dgt)$/i.test(word)) {
-                                return word.toUpperCase();
-                            }
-                            // Capitalize the first letter of all other words
-                            return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
-                        })
-                        .join(" ");
+                      // Capitalize each word in the string
+                      formattedItem = formattedItem
+                          .split(" ")
+                          .map((word) => {
+                              // Check for specific words that need to be fully capitalized
+                              if (/^(Sjmv|Lpu|Cdo|Dgt)$/i.test(word)) {
+                                  return word.toUpperCase();
+                              }
+                              // Capitalize the first letter of all other words
+                              return (
+                                  word.charAt(0).toUpperCase() +
+                                  word.slice(1).toLowerCase()
+                              );
+                          })
+                          .join(" ");
 
-                    // Replace specific names if needed
-                    if (formattedItem === "Casamira South") {
-                        formattedItem = "Casa Mira South";
-                    }
+                      // Replace specific names if needed
+                      if (formattedItem === "Casamira South") {
+                          formattedItem = "Casa Mira South";
+                      }
 
-                    return formattedItem;
-                })
-                .sort((a, b) => {
-                    if (a === "N/A") return -1;
-                    if (b === "N/A") return 1;
-                    return a.localeCompare(b);
-                })
+                      return formattedItem;
+                  })
+                  .sort((a, b) => {
+                      if (a === "N/A") return -1;
+                      if (b === "N/A") return 1;
+                      return a.localeCompare(b);
+                  })
             : []),
     ];
 
     //Get current year
 
-
     const chartHeight = dataProperty.length * (barHeight + 80);
     const chartHeight2 = communicationTypeData.length * (barHeight + 100);
 
     const allDepartment = allEmployees
-        ? ["All", ...Array.from(new Set(allEmployees
-            .map((employee) => employee.department)
-            .filter((department) => department !== null && department !== undefined && department !== "PM")
-        ))]
+        ? [
+              "All",
+              ...Array.from(
+                  new Set(
+                      allEmployees
+                          .map((employee) => employee.department)
+                          .filter(
+                              (department) =>
+                                  department !== null &&
+                                  department !== undefined &&
+                                  department !== "PM"
+                          )
+                  )
+              ),
+          ]
         : ["All"];
-
 
     const handleInputChange = (e) => {
         setMonth(e.target.value);
@@ -479,22 +517,22 @@ const ReportPage = () => {
     // Handle year change from the dropdown
     const handleDepartmentYearChange = (e) => {
         setDepartmentStatusYear(e.target.value);
-    }
+    };
 
     const handleInquiriesPerCategoryYearChange = (e) => {
         setInquiriesPerCategoryYear(e.target.value);
-    }
+    };
     const handleInquiriesPerPropertyYearChange = (e) => {
         setInquiriesPerPropertyYear(e.target.value);
-    }
+    };
 
     const handleCommunicationTypeYearChange = (e) => {
         setCommunicationTypeYear(e.target.value);
-    }
+    };
 
     const handleInquiriesPerChannelYearChange = (e) => {
         setInquiriesPerChanelYear(e.target.value);
-    }
+    };
     const handleKeyDown = (e) => {
         if (e.key === "Enter") {
             fetchCategory(month);
@@ -515,7 +553,6 @@ const ReportPage = () => {
     };
 
     useEffect(() => {
-
         fetchCategory();
         getInquiriesPerDepartment();
         getInquiriesPerProperty();
@@ -524,10 +561,7 @@ const ReportPage = () => {
         getInquiriesPerChannel();
         getFullYear();
         setYear(currentYear);
-
     }, []);
-
-
 
     /*  useEffect(() => {
          setMonth(getCurrentMonth());
@@ -543,21 +577,35 @@ const ReportPage = () => {
      }, []); */
 
     // console.log("department", department);
-    communicationTypeData
+    communicationTypeData;
 
-    const totalValue = dataCategory.reduce((total, category) => total + category.value, 0);
+    const totalValue = dataCategory.reduce(
+        (total, category) => total + category.value,
+        0
+    );
 
-    const totalResolved = dataSet.reduce((total, item) => total + item.Resolved, 0);
-    const totalUnresolved = dataSet.reduce((total, item) => total + item.Unresolved, 0);
+    const totalResolved = dataSet.reduce(
+        (total, item) => total + item.Resolved,
+        0
+    );
+    const totalUnresolved = dataSet.reduce(
+        (total, item) => total + item.Unresolved,
+        0
+    );
     const totalClosed = dataSet.reduce((total, item) => total + item.Closed, 0);
     const totalAll = dataSet.reduce(
         (total, item) => total + item.Resolved + item.Unresolved + item.Closed,
         0
     );
 
-    const totalValueChannel = inquriesPerChannelData.reduce((total, channel) => total + channel.value, 0);
-    const totalValuetype = communicationTypeData.reduce((total, type) => total + type.value, 0);
-
+    const totalValueChannel = inquriesPerChannelData.reduce(
+        (total, channel) => total + channel.value,
+        0
+    );
+    const totalValuetype = communicationTypeData.reduce(
+        (total, type) => total + type.value,
+        0
+    );
 
     return (
         <div className="h-screen bg-custom-grayFA p-4 flex flex-col gap-[21px]">
@@ -574,7 +622,10 @@ const ReportPage = () => {
                             onChange={(e) => setYearValue(e.target.value)}
                         >
                             {fullYear.map((item, index) => (
-                                <option key={index} value={item.year}>  {item.year}</option>
+                                <option key={index} value={item.year}>
+                                    {" "}
+                                    {item.year}
+                                </option>
                             ))}
                         </select>
                         <span className="absolute inset-y-0 right-0 flex items-center text-white pr-3 pl-3 bg-custom-lightgreen pointer-events-none">
@@ -615,22 +666,18 @@ const ReportPage = () => {
                                 name="concern"
                                 className="appearance-none w-full px-4 py-1 bg-white focus:outline-none border-0"
                                 value={projectValue}
-                                onChange={(e) => setProjectValue(e.target.value)}
+                                onChange={(e) =>
+                                    setProjectValue(e.target.value)
+                                }
                             >
                                 <option value="All">All</option>
-                                {formattedPropertyNames.map(
-                                    (item, index) => {
-                                        return (
-                                            <option
-                                                key={index}
-                                                value={item}
-                                            >
-                                                {item}
-                                            </option>
-                                        );
-                                    }
-                                )}
-
+                                {formattedPropertyNames.map((item, index) => {
+                                    return (
+                                        <option key={index} value={item}>
+                                            {item}
+                                        </option>
+                                    );
+                                })}
                             </select>
                             <span className="absolute inset-y-0 right-0 flex items-center text-white pr-3 pl-3 bg-custom-lightgreen pointer-events-none">
                                 <IoMdArrowDropdown />
@@ -646,10 +693,13 @@ const ReportPage = () => {
                                 name="concern"
                                 className="appearance-none w-full px-4 py-1 bg-white focus:outline-none border-0"
                                 value={departmentValue}
-                                onChange={(e) => setDepartmentValue(e.target.value)}
+                                onChange={(e) =>
+                                    setDepartmentValue(e.target.value)
+                                }
                             >
                                 <option value="All">All</option>
-                                {user?.department === "Customer Relations - Services" ? (
+                                {user?.department ===
+                                "Customer Relations - Services" ? (
                                     allDepartment
                                         .filter((item) => item !== "All")
                                         .sort()
@@ -657,7 +707,7 @@ const ReportPage = () => {
                                             <option key={index} value={item}>
                                                 {item}
                                             </option>
-                                    ))
+                                        ))
                                 ) : (
                                     <option value={user?.department}>
                                         {user?.department}
@@ -669,24 +719,26 @@ const ReportPage = () => {
                             </span>
                         </div>
                     </div>
-
                 </div>
                 <div>
-                    <button onClick={handleSearchFilter} className="hover:shadow-custom4 h-[35px] w-[88px] gradient-btn rounded-[10px] text-white text-sm">
+                    <button
+                        onClick={handleSearchFilter}
+                        className="hover:shadow-custom4 h-[35px] w-[88px] gradient-btn rounded-[10px] text-white text-sm"
+                    >
                         Search
                     </button>
                 </div>
             </div>
             <div className="bg-[#F2F8FC] p-4 rounded-[10px]">
                 <div className=" mb-2 flex gap-[8px] text-lg montserrat-bold">
-                    <p className="">
-                        Resolved vs. Closed vs. Unresolved 
-                    </p>
-                    {dataSet && dataSet.every(item => item.Resolved === 0 && item.Unresolved === 0 && item.Closed === 0) && (
-                        <p>
-                          - (No results found)
-                        </p>
-                        )}
+                    <p className="">Resolved vs. Closed vs. Unresolved</p>
+                    {dataSet &&
+                        dataSet.every(
+                            (item) =>
+                                item.Resolved === 0 &&
+                                item.Unresolved === 0 &&
+                                item.Closed === 0
+                        ) && <p>- (No results found)</p>}
                 </div>
                 <div className="overflow-x-auto mt-[40px]">
                     <ResponsiveContainer width="100%" height={228}>
@@ -699,22 +751,26 @@ const ReportPage = () => {
                                 bottom: 5,
                             }}
                         >
-                            <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                            <XAxis dataKey="name"
+                            <CartesianGrid
+                                strokeDasharray="3 3"
+                                vertical={false}
+                            />
+                            <XAxis
+                                dataKey="name"
                                 tick={{
-                                    fill: '#175D5F', // Change the tick color
-                                    fontSize: 10,    // Set font size
+                                    fill: "#175D5F", // Change the tick color
+                                    fontSize: 10, // Set font size
                                     fontWeight: 600, // Set font weight
                                 }}
                             />
                             <YAxis
                                 tickCount={8} // Divides the Y-axis into increments of 10
                                 interval={0} // Ensures all ticks are displayed
-                                domain={[0, 'dataMax + 10']} // Adjusts the range dynamically
+                                domain={[0, "dataMax + 10"]} // Adjusts the range dynamically
                                 tickFormatter={(value) => `${value}`} // Optional: Customize tick format
                                 tick={{
-                                    fill: '#348017', // Change the tick color
-                                    fontSize: 12,    // Set font size
+                                    fill: "#348017", // Change the tick color
+                                    fontSize: 12, // Set font size
                                     fontWeight: 400, // Set font weight
                                 }}
                             />
@@ -742,28 +798,55 @@ const ReportPage = () => {
                                 barSize={15}
                                 radius={[3, 3, 0, 0]}
                             >
-                                <LabelList dataKey="Unresolved" position="top" />
+                                <LabelList
+                                    dataKey="Unresolved"
+                                    position="top"
+                                />
                             </Bar>
                         </BarChart>
                     </ResponsiveContainer>
-
                 </div>
                 <div className="w-full flex-col flex items-start justify-start h-max pl-[15px]">
-                    <p className="text-[18px] montserrat-bold">Resolved: {totalResolved}</p>
-                    <p className="text-[18px] montserrat-bold">Closed: {totalClosed}</p>
-                    <p className="text-[18px] montserrat-bold text-red-500">Unresolved: {totalUnresolved}</p>
-                    <p className="text-[18px] montserrat-bold">Total: {totalAll}</p>
+                    <p className="text-[18px] montserrat-bold">
+                        Resolved: {totalResolved}
+                    </p>
+                    <p className="text-[18px] montserrat-bold">
+                        Closed: {totalClosed}
+                    </p>
+                    <p className="text-[18px] montserrat-bold text-red-500">
+                        Unresolved: {totalUnresolved}
+                    </p>
+                    <p className="text-[18px] montserrat-bold">
+                        Total: {totalAll}
+                    </p>
                 </div>
                 <div className="flex justify-end gap-6 text-sm">
-
                     <div className="flex items-center px-3 gap-2">
                         <span className="flex items-center mb-1 text-custom-solidgreen text-2xl">
                             ●
                         </span>
                         <span className="text-custom-gray12 hover:underline hover:text-blue-500 cursor-pointer">
                             <Link
-                                to={`/inquirymanagement/inquirylist?status=Resolved&year=${encodeURIComponent(yearValue)}${monthValue !== "All" ? `&month=${encodeURIComponent(monthValue)}` : ""}${departmentValue !== "All" ? `&department=${encodeURIComponent(departmentValue)}` : ""}
-                                ${projectValue !== "All" ? `&property=${encodeURIComponent(projectValue)}` : ""}`}
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    setSearchFilter({
+                                        status: "Resolved",
+                                        selectedYear: yearValue,
+                                        selectedMonth:
+                                            monthValue !== "All"
+                                                ? monthValue
+                                                : "",
+                                        departments:
+                                            departmentValue !== "All"
+                                                ? departmentValue
+                                                : "",
+                                        selectedProperty:
+                                            projectValue !== "All"
+                                                ? projectValue
+                                                : "",
+                                    });
+                                    navigate("/inquirymanagement/inquirylist");
+                                }}
                             >
                                 Resolved
                             </Link>
@@ -775,8 +858,48 @@ const ReportPage = () => {
                         </span>
                         <span className="text-custom-gray12 hover:underline hover:text-blue-500 cursor-pointer">
                             <Link
-                                to={`/inquirymanagement/inquirylist?status=Closed&year=${encodeURIComponent(yearValue)}${monthValue !== "All" ? `&month=${encodeURIComponent(monthValue)}` : ""}${departmentValue !== "All" ? `&department=${encodeURIComponent(departmentValue)}` : ""}
-                                ${projectValue !== "All" ? `&property=${encodeURIComponent(projectValue)}` : ""}`}
+                                /*  to={`/inquirymanagement/inquirylist?status=Closed&year=${encodeURIComponent(
+                                    yearValue
+                                )}${
+                                    monthValue !== "All"
+                                        ? `&month=${encodeURIComponent(
+                                              monthValue
+                                          )}`
+                                        : ""
+                                }${
+                                    departmentValue !== "All"
+                                        ? `&department=${encodeURIComponent(
+                                              departmentValue
+                                          )}`
+                                        : ""
+                                }
+                                ${
+                                    projectValue !== "All"
+                                        ? `&property=${encodeURIComponent(
+                                              projectValue
+                                          )}`
+                                        : ""
+                                }`} */
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    setSearchFilter({
+                                        status: "Closed",
+                                        selectedYear: yearValue,
+                                        selectedMonth:
+                                            monthValue !== "All"
+                                                ? monthValue
+                                                : "",
+                                        departments:
+                                            departmentValue !== "All"
+                                                ? departmentValue
+                                                : "",
+                                        selectedProperty:
+                                            projectValue !== "All"
+                                                ? projectValue
+                                                : "",
+                                    });
+                                    navigate("/inquirymanagement/inquirylist");
+                                }}
                             >
                                 Closed
                             </Link>
@@ -788,29 +911,65 @@ const ReportPage = () => {
                         </span>
                         <span className="text-custom-gray12 hover:underline hover:text-blue-500 cursor-pointer">
                             <Link
-                                to={`/inquirymanagement/inquirylist?status=unresolved&year=${encodeURIComponent(yearValue)}${monthValue !== "All" ? `&month=${encodeURIComponent(monthValue)}` : ""}${departmentValue !== "All" ? `&department=${encodeURIComponent(departmentValue)}` : ""}
-                                ${projectValue !== "All" ? `&property=${encodeURIComponent(projectValue)}` : ""}`}
+                                /*    to={`/inquirymanagement/inquirylist?status=unresolved&year=${encodeURIComponent(
+                                    yearValue
+                                )}${
+                                    monthValue !== "All"
+                                        ? `&month=${encodeURIComponent(
+                                              monthValue
+                                          )}`
+                                        : ""
+                                }${
+                                    departmentValue !== "All"
+                                        ? `&department=${encodeURIComponent(
+                                              departmentValue
+                                          )}`
+                                        : ""
+                                }
+                                ${
+                                    projectValue !== "All"
+                                        ? `&property=${encodeURIComponent(
+                                              projectValue
+                                          )}`
+                                        : ""
+                                }`} */
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    setSearchFilter({
+                                        status: "unresolved",
+                                        selectedYear: yearValue,
+                                        selectedMonth:
+                                            monthValue !== "All"
+                                                ? monthValue
+                                                : "",
+                                        departments:
+                                            departmentValue !== "All"
+                                                ? departmentValue
+                                                : "",
+                                        selectedProperty:
+                                            projectValue !== "All"
+                                                ? projectValue
+                                                : "",
+                                    });
+                                    navigate("/inquirymanagement/inquirylist");
+                                }}
                             >
                                 Unresolved
                             </Link>
                         </span>
                     </div>
-
                 </div>
             </div>
             <div className="flex gap-[10px]">
                 <div className=" w-[579px] pb-7 min-h-[335px] flex-grow-1 bg-[#F2F8FC] rounded-lg">
                     <div className="flex p-4 gap-[8px] text-base montserrat-bold">
-                        <p className="">
-                            By Type
-                        </p>
-                        {communicationTypeData && communicationTypeData.every(item => item.value === 0) && (
-                            <p>
-                              - (No results found)
-                            </p>
-                            )}
+                        <p className="">By Type</p>
+                        {communicationTypeData &&
+                            communicationTypeData.every(
+                                (item) => item.value === 0
+                            ) && <p>- (No results found)</p>}
                     </div>
-                    
+
                     <div className="border border-t-1"></div>
                     <div className="flex-grow mt-[40px]">
                         <ResponsiveContainer width="100%" height={300}>
@@ -824,39 +983,55 @@ const ReportPage = () => {
                                     bottom: 15,
                                 }}
                             >
-                                <CartesianGrid strokeDasharray="3 3" horizontal={false} />
+                                <CartesianGrid
+                                    strokeDasharray="3 3"
+                                    horizontal={false}
+                                />
                                 <XAxis
                                     type="number"
                                     tick={{
                                         fontSize: 12,
-                                        fill: '#000',
+                                        fill: "#000",
                                     }}
-                                    domain={[0, 'dataMax + 10']}
+                                    domain={[0, "dataMax + 10"]}
                                 />
                                 <YAxis
                                     type="category"
                                     dataKey="name"
                                     tick={{
                                         fontSize: 12,
-                                        fill: '#000',
+                                        fill: "#000",
                                     }}
                                     width={100}
                                 />
                                 <Tooltip content={<CustomTooltipBar2 />} />
                                 <Bar
-                                    dataKey="value" // Green color for values    
+                                    dataKey="value" // Green color for values
                                     barSize={45}
                                 >
-                                    {communicationTypeData.map((entry, index) => (
-                                        <Cell key={`cell-${index}`} fill={getBarColorPerType(entry.name)} />
-                                    ))}
-                                    <LabelList dataKey="value" fill="#4a5568" position="right" />
+                                    {communicationTypeData.map(
+                                        (entry, index) => (
+                                            <Cell
+                                                key={`cell-${index}`}
+                                                fill={getBarColorPerType(
+                                                    entry.name
+                                                )}
+                                            />
+                                        )
+                                    )}
+                                    <LabelList
+                                        dataKey="value"
+                                        fill="#4a5568"
+                                        position="right"
+                                    />
                                 </Bar>
                             </BarChart>
                         </ResponsiveContainer>
 
                         <div className="w-full h-[40px] flex items-start justify-start pl-[6%]">
-                            <p className="text-[18px] montserrat-bold">Total: {totalValuetype}</p>
+                            <p className="text-[18px] montserrat-bold">
+                                Total: {totalValuetype}
+                            </p>
                         </div>
                         <div className="flex justify-end">
                             <div className="flex items-center pr-3 py-2 gap-2">
@@ -865,8 +1040,50 @@ const ReportPage = () => {
                                 </span>
                                 <span className="text-custom-gray12 text-sm hover:underline hover:text-blue-500 cursor-pointer">
                                     <Link
-                                        to={`/inquirymanagement/inquirylist?type=Complaint&year=${encodeURIComponent(yearValue)}${monthValue !== "All" ? `&month=${encodeURIComponent(monthValue)}` : ""}${departmentValue !== "All" ? `&department=${encodeURIComponent(departmentValue)}` : ""}
-                                        ${projectValue !== "All" ? `&property=${encodeURIComponent(projectValue)}` : ""}`}
+                                        /*  to={`/inquirymanagement/inquirylist?type=Complaint&year=${encodeURIComponent(
+                                            yearValue
+                                        )}${
+                                            monthValue !== "All"
+                                                ? `&month=${encodeURIComponent(
+                                                      monthValue
+                                                  )}`
+                                                : ""
+                                        }${
+                                            departmentValue !== "All"
+                                                ? `&department=${encodeURIComponent(
+                                                      departmentValue
+                                                  )}`
+                                                : ""
+                                        }
+                                        ${
+                                            projectValue !== "All"
+                                                ? `&property=${encodeURIComponent(
+                                                      projectValue
+                                                  )}`
+                                                : ""
+                                        }`} */
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            setSearchFilter({
+                                                type: "Complaint",
+                                                selectedYear: yearValue,
+                                                selectedMonth:
+                                                    monthValue !== "All"
+                                                        ? monthValue
+                                                        : "",
+                                                departments:
+                                                    departmentValue !== "All"
+                                                        ? departmentValue
+                                                        : "",
+                                                selectedProperty:
+                                                    projectValue !== "All"
+                                                        ? projectValue
+                                                        : "",
+                                            });
+                                            navigate(
+                                                "/inquirymanagement/inquirylist"
+                                            );
+                                        }}
                                     >
                                         Complaints
                                     </Link>
@@ -878,8 +1095,51 @@ const ReportPage = () => {
                                 </span>
                                 <span className="text-custom-gray12 text-sm hover:underline hover:text-blue-500 cursor-pointer">
                                     <Link
-                                        to={`/inquirymanagement/inquirylist?type=Request&year=${encodeURIComponent(yearValue)}${monthValue !== "All" ? `&month=${encodeURIComponent(monthValue)}` : ""}${departmentValue !== "All" ? `&department=${encodeURIComponent(departmentValue)}` : ""}
-                                        ${projectValue !== "All" ? `&property=${encodeURIComponent(projectValue)}` : ""}`}
+                                        /*  to={`/inquirymanagement/inquirylist?type=Request&year=${encodeURIComponent(
+                                            yearValue
+                                        )}${
+                                            monthValue !== "All"
+                                                ? `&month=${encodeURIComponent(
+                                                      monthValue
+                                                  )}`
+                                                : ""
+                                        }${
+                                            departmentValue !== "All"
+                                                ? `&department=${encodeURIComponent(
+                                                      departmentValue
+                                                  )}`
+                                                : ""
+                                        }
+                                        ${
+                                            projectValue !== "All"
+                                                ? `&property=${encodeURIComponent(
+                                                      projectValue
+                                                  )}`
+                                                : ""
+                                        }`} */
+
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            setSearchFilter({
+                                                type: "Request",
+                                                selectedYear: yearValue,
+                                                selectedMonth:
+                                                    monthValue !== "All"
+                                                        ? monthValue
+                                                        : "",
+                                                departments:
+                                                    departmentValue !== "All"
+                                                        ? departmentValue
+                                                        : "",
+                                                selectedProperty:
+                                                    projectValue !== "All"
+                                                        ? projectValue
+                                                        : "",
+                                            });
+                                            navigate(
+                                                "/inquirymanagement/inquirylist"
+                                            );
+                                        }}
                                     >
                                         Requests
                                     </Link>
@@ -891,8 +1151,51 @@ const ReportPage = () => {
                                 </span>
                                 <span className="text-custom-gray12 text-sm hover:underline hover:text-blue-500 cursor-pointer">
                                     <Link
-                                        to={`/inquirymanagement/inquirylist?type=Inquiry&year=${encodeURIComponent(yearValue)}${monthValue !== "All" ? `&month=${encodeURIComponent(monthValue)}` : ""}${departmentValue !== "All" ? `&department=${encodeURIComponent(departmentValue)}` : ""}
-                                        ${projectValue !== "All" ? `&property=${encodeURIComponent(projectValue)}` : ""}`}
+                                        /* to={`/inquirymanagement/inquirylist?type=Inquiry&year=${encodeURIComponent(
+                                            yearValue
+                                        )}${
+                                            monthValue !== "All"
+                                                ? `&month=${encodeURIComponent(
+                                                      monthValue
+                                                  )}`
+                                                : ""
+                                        }${
+                                            departmentValue !== "All"
+                                                ? `&department=${encodeURIComponent(
+                                                      departmentValue
+                                                  )}`
+                                                : ""
+                                        }
+                                        ${
+                                            projectValue !== "All"
+                                                ? `&property=${encodeURIComponent(
+                                                      projectValue
+                                                  )}`
+                                                : ""
+                                        }`} */
+
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            setSearchFilter({
+                                                type: "Inquiry",
+                                                selectedYear: yearValue,
+                                                selectedMonth:
+                                                    monthValue !== "All"
+                                                        ? monthValue
+                                                        : "",
+                                                departments:
+                                                    departmentValue !== "All"
+                                                        ? departmentValue
+                                                        : "",
+                                                selectedProperty:
+                                                    projectValue !== "All"
+                                                        ? projectValue
+                                                        : "",
+                                            });
+                                            navigate(
+                                                "/inquirymanagement/inquirylist"
+                                            );
+                                        }}
                                     >
                                         Inquiries
                                     </Link>
@@ -904,26 +1207,63 @@ const ReportPage = () => {
                                 </span>
                                 <span className="text-custom-gray12 text-sm hover:underline hover:text-blue-500 cursor-pointer">
                                     <Link
-                                        to={`/inquirymanagement/inquirylist?type=Suggestion or Recommendation&year=${encodeURIComponent(yearValue)}${monthValue !== "All" ? `&month=${encodeURIComponent(monthValue)}` : ""}${departmentValue !== "All" ? `&department=${encodeURIComponent(departmentValue)}` : ""}
-                                        ${projectValue !== "All" ? `&property=${encodeURIComponent(projectValue)}` : ""}`}
+                                        /*  to={`/inquirymanagement/inquirylist?type=Suggestion or Recommendation&year=${encodeURIComponent(
+                                            yearValue
+                                        )}${
+                                            monthValue !== "All"
+                                                ? `&month=${encodeURIComponent(
+                                                      monthValue
+                                                  )}`
+                                                : ""
+                                        }${
+                                            departmentValue !== "All"
+                                                ? `&department=${encodeURIComponent(
+                                                      departmentValue
+                                                  )}`
+                                                : ""
+                                        }
+                                        ${
+                                            projectValue !== "All"
+                                                ? `&property=${encodeURIComponent(
+                                                      projectValue
+                                                  )}`
+                                                : ""
+                                        }`} */
+
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            setSearchFilter({
+                                                type: "Suggestion or Recommendation",
+                                                selectedYear: yearValue,
+                                                selectedMonth:
+                                                    monthValue !== "All"
+                                                        ? monthValue
+                                                        : "",
+                                                departments:
+                                                    departmentValue !== "All"
+                                                        ? departmentValue
+                                                        : "",
+
+                                            });
+                                            navigate(
+                                                "/inquirymanagement/inquirylist"
+                                            );
+                                        }}
                                     >
                                         Suggestion or recommendations
                                     </Link>
                                 </span>
                             </div>
                         </div>
-                       
                     </div>
-                    
                 </div>
                 <div className="w-[571px] pb-7  flex-grow-1 bg-[#F2F8FC] rounded-lg">
                     <div className="flex p-4 gap-[8px] text-base montserrat-bold">
-                        <p className="">
-                            By Channel
-                        </p>
-                        {inquriesPerChannelData && inquriesPerChannelData.every(item => item.value === 0) && (
-                            <p> - (No results found)</p>    
-                            )}
+                        <p className="">By Channel</p>
+                        {inquriesPerChannelData &&
+                            inquriesPerChannelData.every(
+                                (item) => item.value === 0
+                            ) && <p> - (No results found)</p>}
                     </div>
                     <div className="border border-t-1"></div>
                     <div className="mt-4"></div>
@@ -940,42 +1280,55 @@ const ReportPage = () => {
                                         bottom: 15,
                                     }}
                                 >
-                                    <CartesianGrid strokeDasharray="3 3" horizontal={false} />
+                                    <CartesianGrid
+                                        strokeDasharray="3 3"
+                                        horizontal={false}
+                                    />
                                     <XAxis
                                         type="number"
                                         tick={{
                                             fontSize: 12,
-                                            fill: '#000',
+                                            fill: "#000",
                                         }}
-                                        domain={[0, 'dataMax + 10']}
+                                        domain={[0, "dataMax + 10"]}
                                     />
                                     <YAxis
                                         type="category"
                                         dataKey="name"
                                         tick={{
                                             fontSize: 12,
-                                            fill: '#000',
+                                            fill: "#000",
                                         }}
                                         width={100}
                                     />
                                     <Tooltip content={<CustomTooltipBar1 />} />
                                     <Bar
-                                        dataKey="value" // Green color for values    
+                                        dataKey="value" // Green color for values
                                         barSize={25}
                                     >
-                                        {inquriesPerChannelData.map((entry, index) => (
-                                            <Cell key={`cell-${index}`} fill={getBarColorPerChannel(entry.name)} />
-
-                                        ))}
-                                        <LabelList dataKey="value" fill="#4a5568" position="right" />
+                                        {inquriesPerChannelData.map(
+                                            (entry, index) => (
+                                                <Cell
+                                                    key={`cell-${index}`}
+                                                    fill={getBarColorPerChannel(
+                                                        entry.name
+                                                    )}
+                                                />
+                                            )
+                                        )}
+                                        <LabelList
+                                            dataKey="value"
+                                            fill="#4a5568"
+                                            position="right"
+                                        />
                                     </Bar>
-
                                 </BarChart>
-
                             </ResponsiveContainer>
                         </div>
                         <div className="w-full h-[40px] flex items-start justify-start pl-[6%]">
-                            <p className="text-[18px] montserrat-bold">Total: {totalValueChannel}</p>
+                            <p className="text-[18px] montserrat-bold">
+                                Total: {totalValueChannel}
+                            </p>
                         </div>
                         <div className="w-full px-[10px]">
                             <div className="flex flex-wrap justify-end text-[#121212]">
@@ -985,8 +1338,52 @@ const ReportPage = () => {
                                     </span>
                                     <span className="text-custom-gray12 text-xs hover:underline hover:text-blue-500 cursor-pointer">
                                         <Link
-                                            to={`/inquirymanagement/inquirylist?channels=Email&year=${encodeURIComponent(yearValue)}${monthValue !== "All" ? `&month=${encodeURIComponent(monthValue)}` : ""}${departmentValue !== "All" ? `&department=${encodeURIComponent(departmentValue)}` : ""}
-                                            ${projectValue !== "All" ? `&property=${encodeURIComponent(projectValue)}` : ""}`}
+                                            /*  to={`/inquirymanagement/inquirylist?channels=Email&year=${encodeURIComponent(
+                                                yearValue
+                                            )}${
+                                                monthValue !== "All"
+                                                    ? `&month=${encodeURIComponent(
+                                                          monthValue
+                                                      )}`
+                                                    : ""
+                                            }${
+                                                departmentValue !== "All"
+                                                    ? `&department=${encodeURIComponent(
+                                                          departmentValue
+                                                      )}`
+                                                    : ""
+                                            }
+                                            ${
+                                                projectValue !== "All"
+                                                    ? `&property=${encodeURIComponent(
+                                                          projectValue
+                                                      )}`
+                                                    : ""
+                                            }`} */
+
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                setSearchFilter({
+                                                    channels: "Email",
+                                                    selectedYear: yearValue,
+                                                    selectedMonth:
+                                                        monthValue !== "All"
+                                                            ? monthValue
+                                                            : "",
+                                                    departments:
+                                                        departmentValue !==
+                                                        "All"
+                                                            ? departmentValue
+                                                            : "",
+                                                    selectedProperty:
+                                                        projectValue !== "All"
+                                                            ? projectValue
+                                                            : "",
+                                                });
+                                                navigate(
+                                                    "/inquirymanagement/inquirylist"
+                                                );
+                                            }}
                                         >
                                             Email
                                         </Link>
@@ -998,8 +1395,52 @@ const ReportPage = () => {
                                     </span>
                                     <span className="text-custom-gray12 text-xs hover:underline hover:text-blue-500 cursor-pointer">
                                         <Link
-                                            to={`/inquirymanagement/inquirylist?channels=Call&year=${encodeURIComponent(yearValue)}${monthValue !== "All" ? `&month=${encodeURIComponent(monthValue)}` : ""}${departmentValue !== "All" ? `&department=${encodeURIComponent(departmentValue)}` : ""}
-                                            ${projectValue !== "All" ? `&property=${encodeURIComponent(projectValue)}` : ""}`}
+                                            /*  to={`/inquirymanagement/inquirylist?channels=Call&year=${encodeURIComponent(
+                                                yearValue
+                                            )}${
+                                                monthValue !== "All"
+                                                    ? `&month=${encodeURIComponent(
+                                                          monthValue
+                                                      )}`
+                                                    : ""
+                                            }${
+                                                departmentValue !== "All"
+                                                    ? `&department=${encodeURIComponent(
+                                                          departmentValue
+                                                      )}`
+                                                    : ""
+                                            }
+                                            ${
+                                                projectValue !== "All"
+                                                    ? `&property=${encodeURIComponent(
+                                                          projectValue
+                                                      )}`
+                                                    : ""
+                                            }`} */
+
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                setSearchFilter({
+                                                    channels: "Call",
+                                                    selectedYear: yearValue,
+                                                    selectedMonth:
+                                                        monthValue !== "All"
+                                                            ? monthValue
+                                                            : "",
+                                                    departments:
+                                                        departmentValue !==
+                                                        "All"
+                                                            ? departmentValue
+                                                            : "",
+                                                    selectedProperty:
+                                                        projectValue !== "All"
+                                                            ? projectValue
+                                                            : "",
+                                                });
+                                                navigate(
+                                                    "/inquirymanagement/inquirylist"
+                                                );
+                                            }}
                                         >
                                             Call
                                         </Link>
@@ -1011,8 +1452,52 @@ const ReportPage = () => {
                                     </span>
                                     <span className="text-custom-gray12 text-xs hover:underline hover:text-blue-500 cursor-pointer">
                                         <Link
-                                            to={`/inquirymanagement/inquirylist?channels=Walk in&year=${encodeURIComponent(yearValue)}${monthValue !== "All" ? `&month=${encodeURIComponent(monthValue)}` : ""}${departmentValue !== "All" ? `&department=${encodeURIComponent(departmentValue)}` : ""}
-                                            ${projectValue !== "All" ? `&property=${encodeURIComponent(projectValue)}` : ""}`}
+                                            /*  to={`/inquirymanagement/inquirylist?channels=Walk in&year=${encodeURIComponent(
+                                                yearValue
+                                            )}${
+                                                monthValue !== "All"
+                                                    ? `&month=${encodeURIComponent(
+                                                          monthValue
+                                                      )}`
+                                                    : ""
+                                            }${
+                                                departmentValue !== "All"
+                                                    ? `&department=${encodeURIComponent(
+                                                          departmentValue
+                                                      )}`
+                                                    : ""
+                                            }
+                                            ${
+                                                projectValue !== "All"
+                                                    ? `&property=${encodeURIComponent(
+                                                          projectValue
+                                                      )}`
+                                                    : ""
+                                            }`} */
+
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                setSearchFilter({
+                                                    channels: "Walk in",
+                                                    selectedYear: yearValue,
+                                                    selectedMonth:
+                                                        monthValue !== "All"
+                                                            ? monthValue
+                                                            : "",
+                                                    departments:
+                                                        departmentValue !==
+                                                        "All"
+                                                            ? departmentValue
+                                                            : "",
+                                                    selectedProperty:
+                                                        projectValue !== "All"
+                                                            ? projectValue
+                                                            : "",
+                                                });
+                                                navigate(
+                                                    "/inquirymanagement/inquirylist"
+                                                );
+                                            }}
                                         >
                                             Walk-in
                                         </Link>
@@ -1024,8 +1509,52 @@ const ReportPage = () => {
                                     </span>
                                     <span className="text-custom-gray12 text-xs hover:underline hover:text-blue-500 cursor-pointer">
                                         <Link
-                                            to={`/inquirymanagement/inquirylist?channels=Website&year=${encodeURIComponent(yearValue)}${monthValue !== "All" ? `&month=${encodeURIComponent(monthValue)}` : ""}${departmentValue !== "All" ? `&department=${encodeURIComponent(departmentValue)}` : ""}
-                                            ${projectValue !== "All" ? `&property=${encodeURIComponent(projectValue)}` : ""}`}
+                                            /*  to={`/inquirymanagement/inquirylist?channels=Website&year=${encodeURIComponent(
+                                                yearValue
+                                            )}${
+                                                monthValue !== "All"
+                                                    ? `&month=${encodeURIComponent(
+                                                          monthValue
+                                                      )}`
+                                                    : ""
+                                            }${
+                                                departmentValue !== "All"
+                                                    ? `&department=${encodeURIComponent(
+                                                          departmentValue
+                                                      )}`
+                                                    : ""
+                                            }
+                                            ${
+                                                projectValue !== "All"
+                                                    ? `&property=${encodeURIComponent(
+                                                          projectValue
+                                                      )}`
+                                                    : ""
+                                            }`} */
+
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                setSearchFilter({
+                                                    channels: "Website",
+                                                    selectedYear: yearValue,
+                                                    selectedMonth:
+                                                        monthValue !== "All"
+                                                            ? monthValue
+                                                            : "",
+                                                    departments:
+                                                        departmentValue !==
+                                                        "All"
+                                                            ? departmentValue
+                                                            : "",
+                                                    selectedProperty:
+                                                        projectValue !== "All"
+                                                            ? projectValue
+                                                            : "",
+                                                });
+                                                navigate(
+                                                    "/inquirymanagement/inquirylist"
+                                                );
+                                            }}
                                         >
                                             Website
                                         </Link>
@@ -1037,8 +1566,52 @@ const ReportPage = () => {
                                     </span>
                                     <span className="text-custom-gray12 text-xs hover:underline hover:text-blue-500 cursor-pointer">
                                         <Link
-                                            to={`/inquirymanagement/inquirylist?channels=Social media&year=${encodeURIComponent(yearValue)}${monthValue !== "All" ? `&month=${encodeURIComponent(monthValue)}` : ""}${departmentValue !== "All" ? `&department=${encodeURIComponent(departmentValue)}` : ""}
-                                            ${projectValue !== "All" ? `&property=${encodeURIComponent(projectValue)}` : ""}`}
+                                            /*  to={`/inquirymanagement/inquirylist?channels=Social media&year=${encodeURIComponent(
+                                                yearValue
+                                            )}${
+                                                monthValue !== "All"
+                                                    ? `&month=${encodeURIComponent(
+                                                          monthValue
+                                                      )}`
+                                                    : ""
+                                            }${
+                                                departmentValue !== "All"
+                                                    ? `&department=${encodeURIComponent(
+                                                          departmentValue
+                                                      )}`
+                                                    : ""
+                                            }
+                                            ${
+                                                projectValue !== "All"
+                                                    ? `&property=${encodeURIComponent(
+                                                          projectValue
+                                                      )}`
+                                                    : ""
+                                            }`} */
+
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                setSearchFilter({
+                                                    channels: "Social media",
+                                                    selectedYear: yearValue,
+                                                    selectedMonth:
+                                                        monthValue !== "All"
+                                                            ? monthValue
+                                                            : "",
+                                                    departments:
+                                                        departmentValue !==
+                                                        "All"
+                                                            ? departmentValue
+                                                            : "",
+                                                    selectedProperty:
+                                                        projectValue !== "All"
+                                                            ? projectValue
+                                                            : "",
+                                                });
+                                                navigate(
+                                                    "/inquirymanagement/inquirylist"
+                                                );
+                                            }}
                                         >
                                             Social Media
                                         </Link>
@@ -1050,8 +1623,52 @@ const ReportPage = () => {
                                     </span>
                                     <span className="text-custom-gray12 text-xs hover:underline hover:text-blue-500 cursor-pointer">
                                         <Link
-                                            to={`/inquirymanagement/inquirylist?channels=Branch Tablet&year=${encodeURIComponent(yearValue)}${monthValue !== "All" ? `&month=${encodeURIComponent(monthValue)}` : ""}${departmentValue !== "All" ? `&department=${encodeURIComponent(departmentValue)}` : ""}
-                                            ${projectValue !== "All" ? `&property=${encodeURIComponent(projectValue)}` : ""}`}
+                                            /*   to={`/inquirymanagement/inquirylist?channels=Branch Tablet&year=${encodeURIComponent(
+                                                yearValue
+                                            )}${
+                                                monthValue !== "All"
+                                                    ? `&month=${encodeURIComponent(
+                                                          monthValue
+                                                      )}`
+                                                    : ""
+                                            }${
+                                                departmentValue !== "All"
+                                                    ? `&department=${encodeURIComponent(
+                                                          departmentValue
+                                                      )}`
+                                                    : ""
+                                            }
+                                            ${
+                                                projectValue !== "All"
+                                                    ? `&property=${encodeURIComponent(
+                                                          projectValue
+                                                      )}`
+                                                    : ""
+                                            }`} */
+
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                setSearchFilter({
+                                                    channels: "Branch Tablet",
+                                                    selectedYear: yearValue,
+                                                    selectedMonth:
+                                                        monthValue !== "All"
+                                                            ? monthValue
+                                                            : "",
+                                                    departments:
+                                                        departmentValue !==
+                                                        "All"
+                                                            ? departmentValue
+                                                            : "",
+                                                    selectedProperty:
+                                                        projectValue !== "All"
+                                                            ? projectValue
+                                                            : "",
+                                                });
+                                                navigate(
+                                                    "/inquirymanagement/inquirylist"
+                                                );
+                                            }}
                                         >
                                             Branch Tablet
                                         </Link>
@@ -1063,8 +1680,53 @@ const ReportPage = () => {
                                     </span>
                                     <span className="text-custom-gray12 text-xs hover:underline hover:text-blue-500 cursor-pointer">
                                         <Link
-                                            to={`/inquirymanagement/inquirylist?channels=Internal Endorsement&year=${encodeURIComponent(yearValue)}${monthValue !== "All" ? `&month=${encodeURIComponent(monthValue)}` : ""}${departmentValue !== "All" ? `&department=${encodeURIComponent(departmentValue)}` : ""}
-                                            ${projectValue !== "All" ? `&property=${encodeURIComponent(projectValue)}` : ""}`}
+                                            /*  to={`/inquirymanagement/inquirylist?channels=Internal Endorsement&year=${encodeURIComponent(
+                                                yearValue
+                                            )}${
+                                                monthValue !== "All"
+                                                    ? `&month=${encodeURIComponent(
+                                                          monthValue
+                                                      )}`
+                                                    : ""
+                                            }${
+                                                departmentValue !== "All"
+                                                    ? `&department=${encodeURIComponent(
+                                                          departmentValue
+                                                      )}`
+                                                    : ""
+                                            }
+                                            ${
+                                                projectValue !== "All"
+                                                    ? `&property=${encodeURIComponent(
+                                                          projectValue
+                                                      )}`
+                                                    : ""
+                                            }`} */
+
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                setSearchFilter({
+                                                    channels:
+                                                        "Internal Endorsement",
+                                                    selectedYear: yearValue,
+                                                    selectedMonth:
+                                                        monthValue !== "All"
+                                                            ? monthValue
+                                                            : "",
+                                                    departments:
+                                                        departmentValue !==
+                                                        "All"
+                                                            ? departmentValue
+                                                            : "",
+                                                    selectedProperty:
+                                                        projectValue !== "All"
+                                                            ? projectValue
+                                                            : "",
+                                                });
+                                                navigate(
+                                                    "/inquirymanagement/inquirylist"
+                                                );
+                                            }}
                                         >
                                             Internal Endorsement
                                         </Link>
@@ -1073,32 +1735,39 @@ const ReportPage = () => {
                             </div>
                         </div>
                     </div>
-                    
                 </div>
             </div>
             <div className="relative flex gap-3 mt-[6px]  items-start">
                 <div className="flex flex-col gap-3">
                     <div className=" bg-whiterounded-[10px] bg-[#F2F8FC] w-[579px] flex flex-col overflow-y-auto">
                         <div className="p-4 flex gap-[8px] text-base montserrat-bold">
-                            <p className="">
-                                By Property
-                            </p>
-                            {dataProperty && dataProperty.every(item => item.resolved === 0 && item.unresolved === 0 && item.closed === 0) && (
-                                <p>
-                                  - (No results found)
-                                </p>    
-                                )}
+                            <p className="">By Property</p>
+                            {dataProperty &&
+                                dataProperty.every(
+                                    (item) =>
+                                        item.resolved === 0 &&
+                                        item.unresolved === 0 &&
+                                        item.closed === 0
+                                ) && <p>- (No results found)</p>}
                         </div>
-                        
+
                         <div className="border border-t-1"></div>
                         <div className="flex-grow overflow-x-auto px-[10px] mt-[5px] pb-[50px]">
                             <table className="table-auto border-collapse border border-gray-300 w-full text-sm text-left">
                                 <thead className="bg-gray-100">
                                     <tr>
-                                        <th className="border border-gray-300 px-4 py-2 w-[300px]">Property</th>
-                                        <th className="border border-gray-300 px-4 py-2">Resolved</th>
-                                        <th className="border border-gray-300 px-4 py-2">Closed</th>
-                                        <th className="border border-gray-300 text-red-500 px-4 py-2">Unresolved</th>
+                                        <th className="border border-gray-300 px-4 py-2 w-[300px]">
+                                            Property
+                                        </th>
+                                        <th className="border border-gray-300 px-4 py-2">
+                                            Resolved
+                                        </th>
+                                        <th className="border border-gray-300 px-4 py-2">
+                                            Closed
+                                        </th>
+                                        <th className="border border-gray-300 text-red-500 px-4 py-2">
+                                            Unresolved
+                                        </th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -1110,41 +1779,152 @@ const ReportPage = () => {
                                             return a.name.localeCompare(b.name); // Sort alphabetically
                                         })
                                         .map((item, index) => (
-                                            <tr className="hover:bg-gray-50" key={index}>
+                                            <tr
+                                                className="hover:bg-gray-50"
+                                                key={index}
+                                            >
                                                 <td className="border border-gray-300 px-4 py-2 hover:text-blue-500 hover:underline cursor-pointer">
                                                     <Link
-                                                        to={`/inquirymanagement/inquirylist?property=${encodeURIComponent(item.name)}&year=${encodeURIComponent(yearValue)}${monthValue !== "All" ? `&month=${encodeURIComponent(monthValue)}` : ""
-                                                            }`}
+                                                        /*  to={`/inquirymanagement/inquirylist?property=${encodeURIComponent(
+                                                            item.name
+                                                        )}&year=${encodeURIComponent(
+                                                            yearValue
+                                                        )}${
+                                                            monthValue !== "All"
+                                                                ? `&month=${encodeURIComponent(
+                                                                      monthValue
+                                                                  )}`
+                                                                : ""
+                                                        }`} */
+
+                                                        onClick={(e) => {
+                                                            e.preventDefault();
+                                                            setSearchFilter({
+                                                                selectedProperty:
+                                                                    item.name,
+                                                                selectedYear:
+                                                                    yearValue,
+                                                                selectedMonth:
+                                                                    monthValue !==
+                                                                    "All"
+                                                                        ? monthValue
+                                                                        : "",
+                                                            });
+                                                            navigate(
+                                                                "/inquirymanagement/inquirylist"
+                                                            );
+                                                        }}
                                                     >
                                                         {item.name}
                                                     </Link>
                                                 </td>
                                                 <td className="border border-gray-300 px-4 py-2 hover:text-blue-500 hover:underline cursor-pointer">
                                                     <Link
-                                                        to={`/inquirymanagement/inquirylist?property=${encodeURIComponent(
+                                                        /* to={`/inquirymanagement/inquirylist?property=${encodeURIComponent(
                                                             item.name
-                                                        )}&status=Resolved&year=${encodeURIComponent(yearValue)}${monthValue !== "All" ? `&month=${encodeURIComponent(monthValue)}` : ""
-                                                            }`}
+                                                        )}&status=Resolved&year=${encodeURIComponent(
+                                                            yearValue
+                                                        )}${
+                                                            monthValue !== "All"
+                                                                ? `&month=${encodeURIComponent(
+                                                                      monthValue
+                                                                  )}`
+                                                                : ""
+                                                        }`} */
+
+                                                        onClick={(e) => {
+                                                            e.preventDefault();
+                                                            setSearchFilter({
+                                                                selectedProperty:
+                                                                    item.name,
+                                                                selectedYear:
+                                                                    yearValue,
+                                                                status: "Resolved",
+                                                                selectedMonth:
+                                                                    monthValue !==
+                                                                    "All"
+                                                                        ? monthValue
+                                                                        : "",
+                                                                /* department: departmentValue, */
+                                                            });
+                                                            navigate(
+                                                                "/inquirymanagement/inquirylist"
+                                                            );
+                                                        }}
                                                     >
                                                         {item.resolved}
                                                     </Link>
                                                 </td>
                                                 <td className="border border-gray-300 px-4 py-2 hover:text-blue-500 hover:underline cursor-pointer">
                                                     <Link
-                                                        to={`/inquirymanagement/inquirylist?property=${encodeURIComponent(
+                                                        /*   to={`/inquirymanagement/inquirylist?property=${encodeURIComponent(
                                                             item.name
-                                                        )}&status=Closed&year=${encodeURIComponent(yearValue)}${monthValue !== "All" ? `&month=${encodeURIComponent(monthValue)}` : ""
-                                                            }`}
+                                                        )}&status=Closed&year=${encodeURIComponent(
+                                                            yearValue
+                                                        )}${
+                                                            monthValue !== "All"
+                                                                ? `&month=${encodeURIComponent(
+                                                                      monthValue
+                                                                  )}`
+                                                                : ""
+                                                        }`} */
+
+                                                        onClick={(e) => {
+                                                            e.preventDefault();
+                                                            setSearchFilter({
+                                                                selectedProperty:
+                                                                    item.name,
+                                                                status: "Closed",
+                                                                selectedYear:
+                                                                    yearValue,
+                                                                selectedMonth:
+                                                                    monthValue !==
+                                                                    "All"
+                                                                        ? monthValue
+                                                                        : "",
+                                                                /* department: departmentValue, */
+                                                            });
+                                                            navigate(
+                                                                "/inquirymanagement/inquirylist"
+                                                            );
+                                                        }}
                                                     >
                                                         {item.closed}
                                                     </Link>
                                                 </td>
                                                 <td className="border border-gray-300 px-4 py-2 hover:text-blue-500 hover:underline cursor-pointer">
                                                     <Link
-                                                        to={`/inquirymanagement/inquirylist?property=${encodeURIComponent(
+                                                        /*   to={`/inquirymanagement/inquirylist?property=${encodeURIComponent(
                                                             item.name
-                                                        )}&status=unresolved&year=${encodeURIComponent(yearValue)}${monthValue !== "All" ? `&month=${encodeURIComponent(monthValue)}` : ""
-                                                            }`}
+                                                        )}&status=unresolved&year=${encodeURIComponent(
+                                                            yearValue
+                                                        )}${
+                                                            monthValue !== "All"
+                                                                ? `&month=${encodeURIComponent(
+                                                                      monthValue
+                                                                  )}`
+                                                                : ""
+                                                        }`} */
+
+                                                        onClick={(e) => {
+                                                            e.preventDefault();
+                                                            setSearchFilter({
+                                                                selectedProperty:
+                                                                    item.name,
+                                                                status: "unresolved",
+                                                                selectedYear:
+                                                                    yearValue,
+                                                                selectedMonth:
+                                                                    monthValue !==
+                                                                    "All"
+                                                                        ? monthValue
+                                                                        : "",
+                                                                /* department: departmentValue, */
+                                                            });
+                                                            navigate(
+                                                                "/inquirymanagement/inquirylist"
+                                                            );
+                                                        }}
                                                     >
                                                         {item.unresolved}
                                                     </Link>
@@ -1152,15 +1932,29 @@ const ReportPage = () => {
                                             </tr>
                                         ))}
                                     <tr className="bg-gray-100 font-semibold">
-                                        <td className="border border-gray-300 px-4 py-2">Total</td>
                                         <td className="border border-gray-300 px-4 py-2">
-                                            {dataProperty.reduce((sum, item) => sum + item.resolved, 0)}
+                                            Total
                                         </td>
                                         <td className="border border-gray-300 px-4 py-2">
-                                            {dataProperty.reduce((sum, item) => sum + item.closed, 0)}
+                                            {dataProperty.reduce(
+                                                (sum, item) =>
+                                                    sum + item.resolved,
+                                                0
+                                            )}
                                         </td>
                                         <td className="border border-gray-300 px-4 py-2">
-                                            {dataProperty.reduce((sum, item) => sum + item.unresolved, 0)}
+                                            {dataProperty.reduce(
+                                                (sum, item) =>
+                                                    sum + item.closed,
+                                                0
+                                            )}
+                                        </td>
+                                        <td className="border border-gray-300 px-4 py-2">
+                                            {dataProperty.reduce(
+                                                (sum, item) =>
+                                                    sum + item.unresolved,
+                                                0
+                                            )}
                                         </td>
                                     </tr>
                                 </tbody>
@@ -1269,61 +2063,217 @@ const ReportPage = () => {
                 <div className="flex flex-col gap-3">
                     <div className=" bg-whiterounded-[10px] bg-[#F2F8FC] w-[579px] flex flex-col overflow-y-auto">
                         <div className="flex p-4 gap-[8px] text-base montserrat-bold">
-                            <p className="">
-                                By Department
-                            </p>
-                            {dataDepartment && dataDepartment.every(item => item.resolved === 0 && item.unresolved === 0 && item.closed === 0) && (
-                                <p>
-                                  - (No results found)
-                                </p>    
-                                )}
+                            <p className="">By Department</p>
+                            {dataDepartment &&
+                                dataDepartment.every(
+                                    (item) =>
+                                        item.resolved === 0 &&
+                                        item.unresolved === 0 &&
+                                        item.closed === 0
+                                ) && <p>- (No results found)</p>}
                         </div>
                         <div className="border border-t-1"></div>
                         <div className="flex-grow overflow-x-auto px-[10px] mt-[5px] pb-[50px]">
                             <table className="table-auto border-collapse border border-gray-300 w-full text-sm text-left">
                                 <thead className="bg-gray-100">
                                     <tr>
-                                        <th className="border border-gray-300 px-4 py-2 w-[300px]">Department</th>
-                                        <th className="border border-gray-300 px-4 py-2">Resolved</th>
-                                        <th className="border border-gray-300 px-4 py-2">Closed</th>
-                                        <th className="border border-gray-300 text-red-500 px-4 py-2">Unresolved</th>
+                                        <th className="border border-gray-300 px-4 py-2 w-[300px]">
+                                            Department
+                                        </th>
+                                        <th className="border border-gray-300 px-4 py-2">
+                                            Resolved
+                                        </th>
+                                        <th className="border border-gray-300 px-4 py-2">
+                                            Closed
+                                        </th>
+                                        <th className="border border-gray-300 text-red-500 px-4 py-2">
+                                            Unresolved
+                                        </th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {dataDepartment
                                         .slice() // Create a copy to avoid mutating the original array
-                                        .filter(item => item.name !== null)
-                                        .sort((a, b) => a.name.localeCompare(b.name)) // Sort alphabetically by name
+                                        .filter((item) => item.name !== null)
+                                        .sort((a, b) =>
+                                            a.name.localeCompare(b.name)
+                                        ) // Sort alphabetically by name
                                         .map((item, index) => (
-                                            <tr className="hover:bg-gray-50" key={index}>
+                                            <tr
+                                                className="hover:bg-gray-50"
+                                                key={index}
+                                            >
                                                 <td className="border border-gray-300 px-4 py-2 hover:text-blue-500 hover:underline cursor-pointer">
                                                     <Link
-                                                        to={`/inquirymanagement/inquirylist?${item.name !== "All" ? `department=${encodeURIComponent(item.name)}&` : ""}year=${encodeURIComponent(yearValue)}${monthValue !== "All" ? `&month=${encodeURIComponent(monthValue)}` : ""
-                                                            }`}
+                                                        /* to={`/inquirymanagement/inquirylist?${
+                                                            item.name !== "All"
+                                                                ? `department=${encodeURIComponent(
+                                                                      item.name
+                                                                  )}&`
+                                                                : ""
+                                                        }year=${encodeURIComponent(
+                                                            yearValue
+                                                        )}${
+                                                            monthValue !== "All"
+                                                                ? `&month=${encodeURIComponent(
+                                                                      monthValue
+                                                                  )}`
+                                                                : ""
+                                                        }`} */
+
+                                                        onClick={(e) => {
+                                                            e.preventDefault();
+                                                            setSearchFilter({
+                                                                departments:
+                                                                    item.name !==
+                                                                    "All"
+                                                                        ? item.name
+                                                                        : "",
+                                                                selectedYear:
+                                                                    yearValue,
+                                                                selectedMonth:
+                                                                    monthValue !==
+                                                                    "All"
+                                                                        ? monthValue
+                                                                        : "",
+                                                                /* department: departmentValue, */
+                                                            });
+                                                            navigate(
+                                                                "/inquirymanagement/inquirylist"
+                                                            );
+                                                        }}
                                                     >
                                                         {item.name}
                                                     </Link>
                                                 </td>
                                                 <td className="border border-gray-300 px-4 py-2 hover:text-blue-500 hover:underline cursor-pointer">
                                                     <Link
-                                                        to={`/inquirymanagement/inquirylist?${item.name !== "All" ? `department=${encodeURIComponent(item.name)}&` : ""}status=Resolved&year=${encodeURIComponent(yearValue)}${monthValue !== "All" ? `&month=${encodeURIComponent(monthValue)}` : ""
-                                                            }`}
+                                                        /* to={`/inquirymanagement/inquirylist?${
+                                                            item.name !== "All"
+                                                                ? `department=${encodeURIComponent(
+                                                                      item.name
+                                                                  )}&`
+                                                                : ""
+                                                        }status=Resolved&year=${encodeURIComponent(
+                                                            yearValue
+                                                        )}${
+                                                            monthValue !== "All"
+                                                                ? `&month=${encodeURIComponent(
+                                                                      monthValue
+                                                                  )}`
+                                                                : ""
+                                                        }`} */
+
+                                                        onClick={(e) => {
+                                                            e.preventDefault();
+                                                            setSearchFilter({
+                                                                departments:
+                                                                    item.name !==
+                                                                    "All"
+                                                                        ? item.name
+                                                                        : "",
+                                                                selectedYear:
+                                                                    yearValue,
+                                                                status: "Resolved",
+                                                                selectedMonth:
+                                                                    monthValue !==
+                                                                    "All"
+                                                                        ? monthValue
+                                                                        : "",
+                                                                /* department: departmentValue, */
+                                                            });
+                                                            navigate(
+                                                                "/inquirymanagement/inquirylist"
+                                                            );
+                                                        }}
                                                     >
                                                         {item.resolved}
                                                     </Link>
                                                 </td>
                                                 <td className="border border-gray-300 px-4 py-2 hover:text-blue-500 hover:underline cursor-pointer">
                                                     <Link
-                                                        to={`/inquirymanagement/inquirylist?${item.name !== "All" ? `department=${encodeURIComponent(item.name)}&` : ""}status=Closed&year=${encodeURIComponent(yearValue)}${monthValue !== "All" ? `&month=${encodeURIComponent(monthValue)}` : ""
-                                                            }`}
+                                                        /*  to={`/inquirymanagement/inquirylist?${
+                                                            item.name !== "All"
+                                                                ? `department=${encodeURIComponent(
+                                                                      item.name
+                                                                  )}&`
+                                                                : ""
+                                                        }status=Closed&year=${encodeURIComponent(
+                                                            yearValue
+                                                        )}${
+                                                            monthValue !== "All"
+                                                                ? `&month=${encodeURIComponent(
+                                                                      monthValue
+                                                                  )}`
+                                                                : ""
+                                                        }`} */
+
+                                                        onClick={(e) => {
+                                                            e.preventDefault();
+                                                            setSearchFilter({
+                                                                departments:
+                                                                    item.name !==
+                                                                    "All"
+                                                                        ? item.name
+                                                                        : "",
+                                                                status: "Closed",
+                                                                selectedYear:
+                                                                    yearValue,
+                                                                selectedMonth:
+                                                                    monthValue !==
+                                                                    "All"
+                                                                        ? monthValue
+                                                                        : "",
+                                                                /* department: departmentValue, */
+                                                            });
+                                                            navigate(
+                                                                "/inquirymanagement/inquirylist"
+                                                            );
+                                                        }}
                                                     >
                                                         {item.closed}
                                                     </Link>
                                                 </td>
                                                 <td className="border border-gray-300 px-4 py-2 hover:text-blue-500 hover:underline cursor-pointer">
                                                     <Link
-                                                        to={`/inquirymanagement/inquirylist?${item.name !== "All" ? `department=${encodeURIComponent(item.name)}&` : ""}status=unresolved&year=${encodeURIComponent(yearValue)}${monthValue !== "All" ? `&month=${encodeURIComponent(monthValue)}` : ""
-                                                            }`}
+                                                        /*  to={`/inquirymanagement/inquirylist?${
+                                                            item.name !== "All"
+                                                                ? `department=${encodeURIComponent(
+                                                                      item.name
+                                                                  )}&`
+                                                                : ""
+                                                        }status=unresolved&year=${encodeURIComponent(
+                                                            yearValue
+                                                        )}${
+                                                            monthValue !== "All"
+                                                                ? `&month=${encodeURIComponent(
+                                                                      monthValue
+                                                                  )}`
+                                                                : ""
+                                                        }`} */
+
+                                                        onClick={(e) => {
+                                                            e.preventDefault();
+                                                            setSearchFilter({
+                                                                departments:
+                                                                    item.name !==
+                                                                    "All"
+                                                                        ? item.name
+                                                                        : "",
+                                                                status: "unresolved",
+                                                                selectedYear:
+                                                                    yearValue,
+                                                                selectedMonth:
+                                                                    monthValue !==
+                                                                    "All"
+                                                                        ? monthValue
+                                                                        : "",
+                                                                /* department: departmentValue, */
+                                                            });
+                                                            navigate(
+                                                                "/inquirymanagement/inquirylist"
+                                                            );
+                                                        }}
                                                     >
                                                         {item.unresolved}
                                                     </Link>
@@ -1331,15 +2281,29 @@ const ReportPage = () => {
                                             </tr>
                                         ))}
                                     <tr className="bg-gray-100 font-semibold">
-                                        <td className="border border-gray-300 px-4 py-2">Total</td>
                                         <td className="border border-gray-300 px-4 py-2">
-                                            {dataDepartment.reduce((sum, item) => sum + item.resolved, 0)}
+                                            Total
                                         </td>
                                         <td className="border border-gray-300 px-4 py-2">
-                                            {dataDepartment.reduce((sum, item) => sum + item.closed, 0)}
+                                            {dataDepartment.reduce(
+                                                (sum, item) =>
+                                                    sum + item.resolved,
+                                                0
+                                            )}
                                         </td>
                                         <td className="border border-gray-300 px-4 py-2">
-                                            {dataDepartment.reduce((sum, item) => sum + item.unresolved, 0)}
+                                            {dataDepartment.reduce(
+                                                (sum, item) =>
+                                                    sum + item.closed,
+                                                0
+                                            )}
+                                        </td>
+                                        <td className="border border-gray-300 px-4 py-2">
+                                            {dataDepartment.reduce(
+                                                (sum, item) =>
+                                                    sum + item.unresolved,
+                                                0
+                                            )}
                                         </td>
                                     </tr>
                                 </tbody>
@@ -1352,16 +2316,13 @@ const ReportPage = () => {
                 <div className="flex flex-col gap-[15px] w-full">
                     <div className="w-full pb-7 min-h-[335px] flex-grow-1 bg-[#F2F8FC] rounded-lg">
                         <div className="flex p-4 gap-[8px] text-base montserrat-bold">
-                            <p className="">
-                                By Category
-                            </p>
-                            {dataCategory && dataCategory.every(item => item.value === 0) && (
-                                <p>
-                                  - (No results found)
-                                </p>    
-                                )}
+                            <p className="">By Category</p>
+                            {dataCategory &&
+                                dataCategory.every(
+                                    (item) => item.value === 0
+                                ) && <p>- (No results found)</p>}
                         </div>
-                        
+
                         <div className="border border-t-1"></div>
                         <div className="flex flex-col">
                             <div className="flex justify-center">
@@ -1386,21 +2347,27 @@ const ReportPage = () => {
                                         {dataCategory.map((entry, index) => (
                                             <Cell
                                                 key={index}
-                                                fill={getColor(entry.name, index)}
+                                                fill={getColor(
+                                                    entry.name,
+                                                    index
+                                                )}
                                             />
                                         ))}
                                     </Pie>
-                                    <Tooltip content={<CustomTooltipPieChart />} />
+                                    <Tooltip
+                                        content={<CustomTooltipPieChart />}
+                                    />
                                 </PieChart>
-
-
                             </div>
                             <div className="flex justify-center w-full">
-                                <div className="flex w-[150px]"></div> {/* dummy div to align the chart */}
+                                <div className="flex w-[150px]"></div>{" "}
+                                {/* dummy div to align the chart */}
                                 <div className="grid grid-cols-2 gap-[3px]">
                                     {dataCategory.map((category, index) => (
-
-                                        <div className=" shrink-0 items-center" key={index}>
+                                        <div
+                                            className=" shrink-0 items-center"
+                                            key={index}
+                                        >
                                             <div
                                                 className="flex w-[450px] gap-[10px]"
                                                 key={index}
@@ -1416,11 +2383,37 @@ const ReportPage = () => {
                                                     ●
                                                 </span>
                                                 <div className="flex gap-1 shrink-0 items-center">
-
                                                     <span className="text-[18px] text-[#121212] leading-[15px] py-[4px] hover:underline hover:text-blue-500 cursor-pointer">
                                                         <Link
-                                                            to={`/inquirymanagement/inquirylist?category=${encodeURIComponent(category.name)}&year=${encodeURIComponent(yearValue)}${monthValue !== "All" ? `&month=${encodeURIComponent(monthValue)}` : ""}${departmentValue !== "All" ? `&department=${encodeURIComponent(departmentValue)}` : ""}
-                                                            ${projectValue !== "All" ? `&property=${encodeURIComponent(projectValue)}` : ""}`}
+                                                            onClick={(e) => {
+                                                                e.preventDefault();
+                                                                setSearchFilter(
+                                                                    {
+                                                                        category:
+                                                                            category.name,
+                                                                        departments:
+                                                                            departmentValue !==
+                                                                            "All"
+                                                                                ? departmentValue
+                                                                                : "",
+                                                                        selectedYear:
+                                                                            yearValue,
+                                                                        selectedMonth:
+                                                                            monthValue !==
+                                                                            "All"
+                                                                                ? monthValue
+                                                                                : "",
+                                                                        selectedProperty:
+                                                                            projectValue !==
+                                                                            "All"
+                                                                                ? projectValue
+                                                                                : "",
+                                                                    }
+                                                                );
+                                                                navigate(
+                                                                    "/inquirymanagement/inquirylist"
+                                                                );
+                                                            }}
                                                         >
                                                             {category.name}
                                                         </Link>
@@ -1428,10 +2421,16 @@ const ReportPage = () => {
                                                 </div>
                                                 <div className="flex items-center gap-1">
                                                     <span className="text-gray-500 font-bold text-sm">
-                                                        {`${((category.value / totalValue) * 100).toFixed(2)}%`}
+                                                        {`${(
+                                                            (category.value /
+                                                                totalValue) *
+                                                            100
+                                                        ).toFixed(2)}%`}
                                                     </span>
                                                     <span className="text-gray-500 font-bold text-sm">
-                                                        {"("}{category.value}{")"}
+                                                        {"("}
+                                                        {category.value}
+                                                        {")"}
                                                     </span>
                                                 </div>
                                             </div>
@@ -1439,7 +2438,6 @@ const ReportPage = () => {
                                     ))}
                                 </div>
                             </div>
-
                         </div>
                     </div>
                 </div>
