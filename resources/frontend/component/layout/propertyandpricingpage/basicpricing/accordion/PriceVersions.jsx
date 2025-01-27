@@ -313,7 +313,7 @@ const PriceVersions = ({ priceListMasterData, action }) => {
                                                                                 index
                                                                             )
                                                                         }
-                                                                        className="text-red-500 h-6 w-6 cursor-pointer "
+                                                                    className="text-custom-gray h-6 w-6 cursor-pointer hover:text-red-500"
                                                                     />
                                                                 )}
                                                         </td>

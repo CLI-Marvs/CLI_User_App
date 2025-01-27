@@ -390,34 +390,17 @@ const PricingMasterList = () => {
                                             </p>
                                         </div>
                                     </td>
+                                    {/* Render the price version */}
                                     <td className="w-[150px] flex items-center justify-start">
-                                        <div>
-                                            <p className="space-x-1">
-                                                <span>Version 1 -</span>
-                                                <span>2</span>
-                                            </p>
-                                        </div>
+                                        {item?.price_versions?.map((version, versionIndex) => (
+                                            <span key={versionIndex}>
+                                                {version?.version_name}
+                                               
+                                            </span>
+                                        ))}
+
                                     </td>
-                                    <td className="w-[150px] flex items-center justify-start">
-                                        <div>
-                                            <p className="space-x-1">
-                                                <span>Version 1 -</span>
-                                                <span>2</span>
-                                            </p>
-                                            <p className="space-x-1">
-                                                <span>Version 2 -</span>
-                                                <span>0</span>
-                                            </p>
-                                            <p className="space-x-1">
-                                                <span>Version 3 -</span>
-                                                <span>0</span>
-                                            </p>
-                                            <p className="space-x-1">
-                                                <span>Version 4 -</span>
-                                                <span>0</span>
-                                            </p>
-                                        </div>
-                                    </td>
+
                                     <td className="w-[100px] flex items-center justify-start"></td>
                                     <td className="w-[150px] flex items-center justify-start rounded-r-lg text-sm">
                                         <div>

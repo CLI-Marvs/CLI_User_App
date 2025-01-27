@@ -38,15 +38,12 @@ class PriceListMasterRepository
 
         // Transform the data to get specific fields
         $transformedData = $priceListMasters->map(function ($priceList) {
-            // Decode payment_scheme_id and ensure it's an array (default to empty array if null)
             $priceVersionIds = json_decode($priceList->price_versions_id, true);
-            // Ensure it's an array (fallback to empty array if null)
             $priceVersionIds = is_array($priceVersionIds) ? $priceVersionIds : [];
-            // Fetch PaymentSchemes by the decoded IDs
             $priceVersionData = PriceVersion::whereIn('id', $priceVersionIds)->get();
            
             // Fetch PaymentSchemes by the decoded IDs
-            
+
             return [
                 'price_list_master_id' => $priceList->id,
                 'updated_at' => $priceList->updated_at,
@@ -58,8 +55,9 @@ class PriceListMasterRepository
                 'property_commercial_detail' => $priceList->towerPhase->propertyMaster->propertyCommercialDetail->toArray(),
                 'price_versions' => $priceVersionData->map(function ($version) {
                     return [
-                        'payment_scheme_name' => $version->version_name,
+                        'version_name' => $version->version_name,
                         'id' => $version->id,
+                        'payment_scheme' => json_decode($version->payment_scheme_id, true),
                     ];
                 }),
 
@@ -94,9 +92,9 @@ class PriceListMasterRepository
 
             //Create a Price version
             if (isset($data['priceVersionsPayload']) && is_array($data['priceVersionsPayload'])) {
-                $createdPriceVersionIds = []; // Store the created IDs
+
                 foreach ($data['priceVersionsPayload'] as $priceVersionData) {
-                    $firstPaymentScheme = $priceVersionData['payment_scheme'][0] ?? null; //TODO: not always the 1st one, need to fix to handle multiple payment schemes ids
+
                     $expiryDate = \DateTime::createFromFormat('m-d-Y H:i:s', $priceVersionData['expiry_date']);
 
                     // Create a Price version
@@ -105,7 +103,8 @@ class PriceListMasterRepository
                         'percent_increase' => $priceVersionData['percent_increase'],
                         'allowed_buyer' => $priceVersionData['no_of_allowed_buyers'],
                         'expiry_date' => $expiryDate->format('Y-m-d H:i:s'),
-                        'payment_scheme_id' => $firstPaymentScheme['id'] ?? null, // Store the payment scheme Id  
+                        // Convert array of payment scheme IDs to JSON string
+                        'payment_scheme_id' => json_encode(array_column($priceVersionData['payment_scheme'], 'id')) ?? null,
                         'tower_phase_name' => $data['tower_phase_id'],
                         'price_list_masters_id' => $data['price_list_master_id'],
                     ]);
@@ -212,5 +211,15 @@ class PriceListMasterRepository
                 'error_details' => $e->getTraceAsString() // Include stack trace for debugging
             ];
         }
+    }
+
+    /**
+     * Function to extract the payment scheme IDs from the payment_schemes array
+     */
+    public static function extractSchemeIds(array $paymentSchemes): array
+    {
+        return array_map(function ($scheme) {
+            return $scheme['id'];
+        }, $paymentSchemes);
     }
 }
