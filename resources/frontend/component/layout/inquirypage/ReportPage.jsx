@@ -1365,7 +1365,7 @@ const ReportPage = () => {
                         <div className="border border-t-1"></div>
                         <div className="flex flex-col">
                             <div className="flex justify-center">
-                                <PieChart width={1648} height={800}>
+                                <PieChart width={1648} height={620}>
                                     <Pie
                                         data={dataCategory}
                                         cx="50%"
@@ -1395,8 +1395,13 @@ const ReportPage = () => {
 
 
                             </div>
+                            <div className="flex w-full justify-center">
+                                    <div className="flex w-[150px] py-4 justify-center"> {/* dummy div to align the chart */}
+                                        <p className="font-bold text-[20px]">Total: {totalValuetype}</p>
+                                    </div>
+                            </div>
                             <div className="flex justify-center w-full">
-                                <div className="flex w-[150px]"></div> {/* dummy div to align the chart */}
+                                <div className="flex w-[150px] "></div> {/* dummy div to align the chart */}
                                 <div className="grid grid-cols-2 gap-[3px]">
                                     {dataCategory.map((category, index) => (
 
