@@ -167,7 +167,6 @@ const InquiryList = () => {
             setAssignedToMeActive(false);
         } else if (option === "Resolved") {
             console.log(data.filter(item => item.status === "Resolved").length);
-            setResolvedCount(data.filter(item => item.status === "Resolved").length);
             setStatusFilter("Resolved");
             setCurrentPage(0);
             setSearchFilter("");
@@ -175,7 +174,6 @@ const InquiryList = () => {
             setAssignedToMeActive(false);
         } else if (option === "Closed") {
             console.log(data.filter(item => item.status === "Closed").length);
-            setClosedCount(data.filter(item => item.status === "Closed").length);
             setStatusFilter("Closed");
             setCurrentPage(0);
             setSearchFilter("");
@@ -183,7 +181,6 @@ const InquiryList = () => {
             setAssignedToMeActive(false);
         } else if (option === "Unresolved") {
             console.log(data.filter(item => item.status === "unresolved").length);
-            setUnresolvedCount(data.filter(item => item.status === "unresolved").length);
             setStatusFilter("unresolved");
             setCurrentPage(0);
             setSearchFilter("");
