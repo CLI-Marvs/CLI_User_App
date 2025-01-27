@@ -21,11 +21,10 @@ class MarkClosedToCustomerJob implements ShouldQueue
     protected $admin_name;
     protected $department;
     protected $modifiedTicketId;
-    protected $selectedSurveyType;
     /**
      * Create a new job instance.
      */
-    public function __construct($ticket_id, $email, $buyer_lastname, $message_id, $admin_name, $department, $modifiedTicketId, $selectedSurveyType)
+    public function __construct($ticket_id, $email, $buyer_lastname, $message_id, $admin_name, $department, $modifiedTicketId)
     {
         $this->email = $email;
         $this->ticket_id = $ticket_id;
@@ -34,7 +33,6 @@ class MarkClosedToCustomerJob implements ShouldQueue
         $this->admin_name = $admin_name;
         $this->department = $department;
         $this->modifiedTicketId = $modifiedTicketId;
-        $this->selectedSurveyType = $selectedSurveyType;
     }
 
     /**
@@ -45,10 +43,8 @@ class MarkClosedToCustomerJob implements ShouldQueue
     public function handle(Mailer $mailer): void
     {
         //Check if the survey name is equal to N/A
-        if ($this->selectedSurveyType['surveyName'] === 'N/A') {
-            $this->selectedSurveyType = null;
-        }
+
         $mailer->to($this->email)
-            ->send(new ClosedTicketToCustomerMail($this->ticket_id, $this->email, $this->buyer_lastname, $this->message_id, $this->admin_name, $this->department, $this->modifiedTicketId, $this->selectedSurveyType));
+            ->send(new ClosedTicketToCustomerMail($this->ticket_id, $this->email, $this->buyer_lastname, $this->message_id, $this->admin_name, $this->department, $this->modifiedTicketId));
     }
 }

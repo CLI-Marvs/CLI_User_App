@@ -309,6 +309,10 @@ const App = () => {
                             element: <InquiryListView />,
                         },
                         {
+                            path: "inquirymanagement/inquirylist/:filter",
+                            element: <InquiryListView />,
+                        },
+                        {
                             path: "inquirymanagement/thread/:id",
                             element: <InquiryThreadView />,
                         },
