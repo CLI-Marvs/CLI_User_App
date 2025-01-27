@@ -1243,10 +1243,7 @@ const ReportPage = () => {
                                                     departmentValue !== "All"
                                                         ? departmentValue
                                                         : "",
-                                                selectedYear:
-                                                    projectValue !== "All"
-                                                        ? projectValue
-                                                        : "",
+
                                             });
                                             navigate(
                                                 "/inquirymanagement/inquirylist"
