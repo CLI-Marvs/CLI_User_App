@@ -23,8 +23,9 @@ import { TiDownload } from "react-icons/ti";
 import { useStateContext } from "../../../context/contextprovider";
 import { IoMdArrowDropdown } from "react-icons/io";
 import { MdCalendarToday } from "react-icons/md";
-import { useLocation, Link } from "react-router-dom";
+import { useLocation, Link, useNavigate } from "react-router-dom";
 import { get, set } from "lodash";
+import { toast } from "react-toastify";
 
 const barHeight = 20;
 
@@ -99,6 +100,7 @@ const ReportPage = () => {
         "#17BECF", // Teal
     ];
 
+    const navigate = useNavigate();
     const getBarColorPerType = (name) => {
         const colors = {
             Complaints: "#EB4444",
@@ -825,15 +827,25 @@ const ReportPage = () => {
                         </span>
                         <span className="text-custom-gray12 hover:underline hover:text-blue-500 cursor-pointer">
                             <Link
-                                to="/inquirymanagement/inquirylist"
                                 onClick={(e) => {
+                                    e.preventDefault();
                                     setSearchFilter({
                                         status: "Resolved",
                                         selectedYear: yearValue,
-                                        month: monthValue,
-                                        department: departmentValue,
-                                        property: projectValue,
+                                        selectedMonth:
+                                            monthValue !== "All"
+                                                ? monthValue
+                                                : "",
+                                        departments:
+                                            departmentValue !== "All"
+                                                ? departmentValue
+                                                : "",
+                                        selectedProperty:
+                                            projectValue !== "All"
+                                                ? projectValue
+                                                : "",
                                     });
+                                    navigate("/inquirymanagement/inquirylist");
                                 }}
                             >
                                 Resolved
@@ -868,15 +880,25 @@ const ReportPage = () => {
                                           )}`
                                         : ""
                                 }`} */
-                                to="/inquirymanagement/inquirylist"
                                 onClick={(e) => {
+                                    e.preventDefault();
                                     setSearchFilter({
                                         status: "Closed",
                                         selectedYear: yearValue,
-                                        month: monthValue,
-                                        department: departmentValue,
-                                        property: projectValue,
+                                        selectedMonth:
+                                            monthValue !== "All"
+                                                ? monthValue
+                                                : "",
+                                        departments:
+                                            departmentValue !== "All"
+                                                ? departmentValue
+                                                : "",
+                                        selectedProperty:
+                                            projectValue !== "All"
+                                                ? projectValue
+                                                : "",
                                     });
+                                    navigate("/inquirymanagement/inquirylist");
                                 }}
                             >
                                 Closed
@@ -911,15 +933,25 @@ const ReportPage = () => {
                                           )}`
                                         : ""
                                 }`} */
-                                to="/inquirymanagement/inquirylist"
                                 onClick={(e) => {
+                                    e.preventDefault();
                                     setSearchFilter({
                                         status: "unresolved",
                                         selectedYear: yearValue,
-                                        month: monthValue,
-                                        department: departmentValue,
-                                        property: projectValue,
+                                        selectedMonth:
+                                            monthValue !== "All"
+                                                ? monthValue
+                                                : "",
+                                        departments:
+                                            departmentValue !== "All"
+                                                ? departmentValue
+                                                : "",
+                                        selectedProperty:
+                                            projectValue !== "All"
+                                                ? projectValue
+                                                : "",
                                     });
+                                    navigate("/inquirymanagement/inquirylist");
                                 }}
                             >
                                 Unresolved
@@ -1030,15 +1062,27 @@ const ReportPage = () => {
                                                   )}`
                                                 : ""
                                         }`} */
-                                        to="/inquirymanagement/inquirylist"
                                         onClick={(e) => {
+                                            e.preventDefault();
                                             setSearchFilter({
                                                 type: "Complaint",
                                                 selectedYear: yearValue,
-                                                month: monthValue,
-                                                department: departmentValue,
-                                                property: projectValue,
+                                                selectedMonth:
+                                                    monthValue !== "All"
+                                                        ? monthValue
+                                                        : "",
+                                                departments:
+                                                    departmentValue !== "All"
+                                                        ? departmentValue
+                                                        : "",
+                                                selectedProperty:
+                                                    projectValue !== "All"
+                                                        ? projectValue
+                                                        : "",
                                             });
+                                            navigate(
+                                                "/inquirymanagement/inquirylist"
+                                            );
                                         }}
                                     >
                                         Complaints
@@ -1073,15 +1117,28 @@ const ReportPage = () => {
                                                   )}`
                                                 : ""
                                         }`} */
-                                        to="/inquirymanagement/inquirylist"
+
                                         onClick={(e) => {
+                                            e.preventDefault();
                                             setSearchFilter({
                                                 type: "Request",
                                                 selectedYear: yearValue,
-                                                month: monthValue,
-                                                department: departmentValue,
-                                                property: projectValue,
+                                                selectedMonth:
+                                                    monthValue !== "All"
+                                                        ? monthValue
+                                                        : "",
+                                                departments:
+                                                    departmentValue !== "All"
+                                                        ? departmentValue
+                                                        : "",
+                                                selectedProperty:
+                                                    projectValue !== "All"
+                                                        ? projectValue
+                                                        : "",
                                             });
+                                            navigate(
+                                                "/inquirymanagement/inquirylist"
+                                            );
                                         }}
                                     >
                                         Requests
@@ -1116,15 +1173,28 @@ const ReportPage = () => {
                                                   )}`
                                                 : ""
                                         }`} */
-                                        to="/inquirymanagement/inquirylist"
+
                                         onClick={(e) => {
+                                            e.preventDefault();
                                             setSearchFilter({
                                                 type: "Inquiry",
                                                 selectedYear: yearValue,
-                                                month: monthValue,
-                                                department: departmentValue,
-                                                property: projectValue,
+                                                selectedMonth:
+                                                    monthValue !== "All"
+                                                        ? monthValue
+                                                        : "",
+                                                departments:
+                                                    departmentValue !== "All"
+                                                        ? departmentValue
+                                                        : "",
+                                                selectedProperty:
+                                                    projectValue !== "All"
+                                                        ? projectValue
+                                                        : "",
                                             });
+                                            navigate(
+                                                "/inquirymanagement/inquirylist"
+                                            );
                                         }}
                                     >
                                         Inquiries
@@ -1159,15 +1229,28 @@ const ReportPage = () => {
                                                   )}`
                                                 : ""
                                         }`} */
-                                        to="/inquirymanagement/inquirylist"
+
                                         onClick={(e) => {
+                                            e.preventDefault();
                                             setSearchFilter({
                                                 type: "Suggestion or Recommendation",
                                                 selectedYear: yearValue,
-                                                month: monthValue,
-                                                department: departmentValue,
-                                                property: projectValue,
+                                                selectedMonth:
+                                                    monthValue !== "All"
+                                                        ? monthValue
+                                                        : "",
+                                                departments:
+                                                    departmentValue !== "All"
+                                                        ? departmentValue
+                                                        : "",
+                                                selectedYear:
+                                                    projectValue !== "All"
+                                                        ? projectValue
+                                                        : "",
                                             });
+                                            navigate(
+                                                "/inquirymanagement/inquirylist"
+                                            );
                                         }}
                                     >
                                         Suggestion or recommendations
@@ -1280,15 +1363,29 @@ const ReportPage = () => {
                                                       )}`
                                                     : ""
                                             }`} */
-                                            to="/inquirymanagement/inquirylist"
+
                                             onClick={(e) => {
+                                                e.preventDefault();
                                                 setSearchFilter({
                                                     channels: "Email",
                                                     selectedYear: yearValue,
-                                                    month: monthValue,
-                                                    department: departmentValue,
-                                                    property: projectValue,
+                                                    selectedMonth:
+                                                        monthValue !== "All"
+                                                            ? monthValue
+                                                            : "",
+                                                    departments:
+                                                        departmentValue !==
+                                                        "All"
+                                                            ? departmentValue
+                                                            : "",
+                                                    selectedProperty:
+                                                        projectValue !== "All"
+                                                            ? projectValue
+                                                            : "",
                                                 });
+                                                navigate(
+                                                    "/inquirymanagement/inquirylist"
+                                                );
                                             }}
                                         >
                                             Email
@@ -1323,15 +1420,29 @@ const ReportPage = () => {
                                                       )}`
                                                     : ""
                                             }`} */
-                                            to="/inquirymanagement/inquirylist"
+
                                             onClick={(e) => {
+                                                e.preventDefault();
                                                 setSearchFilter({
                                                     channels: "Call",
                                                     selectedYear: yearValue,
-                                                    month: monthValue,
-                                                    department: departmentValue,
-                                                    property: projectValue,
+                                                    selectedMonth:
+                                                        monthValue !== "All"
+                                                            ? monthValue
+                                                            : "",
+                                                    departments:
+                                                        departmentValue !==
+                                                        "All"
+                                                            ? departmentValue
+                                                            : "",
+                                                    selectedProperty:
+                                                        projectValue !== "All"
+                                                            ? projectValue
+                                                            : "",
                                                 });
+                                                navigate(
+                                                    "/inquirymanagement/inquirylist"
+                                                );
                                             }}
                                         >
                                             Call
@@ -1344,7 +1455,7 @@ const ReportPage = () => {
                                     </span>
                                     <span className="text-custom-gray12 text-xs hover:underline hover:text-blue-500 cursor-pointer">
                                         <Link
-                                           /*  to={`/inquirymanagement/inquirylist?channels=Walk in&year=${encodeURIComponent(
+                                            /*  to={`/inquirymanagement/inquirylist?channels=Walk in&year=${encodeURIComponent(
                                                 yearValue
                                             )}${
                                                 monthValue !== "All"
@@ -1366,15 +1477,29 @@ const ReportPage = () => {
                                                       )}`
                                                     : ""
                                             }`} */
-                                            to="/inquirymanagement/inquirylist"
+
                                             onClick={(e) => {
+                                                e.preventDefault();
                                                 setSearchFilter({
                                                     channels: "Walk in",
                                                     selectedYear: yearValue,
-                                                    month: monthValue,
-                                                    department: departmentValue,
-                                                    property: projectValue,
+                                                    selectedMonth:
+                                                        monthValue !== "All"
+                                                            ? monthValue
+                                                            : "",
+                                                    departments:
+                                                        departmentValue !==
+                                                        "All"
+                                                            ? departmentValue
+                                                            : "",
+                                                    selectedProperty:
+                                                        projectValue !== "All"
+                                                            ? projectValue
+                                                            : "",
                                                 });
+                                                navigate(
+                                                    "/inquirymanagement/inquirylist"
+                                                );
                                             }}
                                         >
                                             Walk-in
@@ -1387,7 +1512,7 @@ const ReportPage = () => {
                                     </span>
                                     <span className="text-custom-gray12 text-xs hover:underline hover:text-blue-500 cursor-pointer">
                                         <Link
-                                           /*  to={`/inquirymanagement/inquirylist?channels=Website&year=${encodeURIComponent(
+                                            /*  to={`/inquirymanagement/inquirylist?channels=Website&year=${encodeURIComponent(
                                                 yearValue
                                             )}${
                                                 monthValue !== "All"
@@ -1409,6 +1534,30 @@ const ReportPage = () => {
                                                       )}`
                                                     : ""
                                             }`} */
+
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                setSearchFilter({
+                                                    channels: "Website",
+                                                    selectedYear: yearValue,
+                                                    selectedMonth:
+                                                        monthValue !== "All"
+                                                            ? monthValue
+                                                            : "",
+                                                    departments:
+                                                        departmentValue !==
+                                                        "All"
+                                                            ? departmentValue
+                                                            : "",
+                                                    selectedProperty:
+                                                        projectValue !== "All"
+                                                            ? projectValue
+                                                            : "",
+                                                });
+                                                navigate(
+                                                    "/inquirymanagement/inquirylist"
+                                                );
+                                            }}
                                         >
                                             Website
                                         </Link>
@@ -1420,7 +1569,7 @@ const ReportPage = () => {
                                     </span>
                                     <span className="text-custom-gray12 text-xs hover:underline hover:text-blue-500 cursor-pointer">
                                         <Link
-                                           /*  to={`/inquirymanagement/inquirylist?channels=Social media&year=${encodeURIComponent(
+                                            /*  to={`/inquirymanagement/inquirylist?channels=Social media&year=${encodeURIComponent(
                                                 yearValue
                                             )}${
                                                 monthValue !== "All"
@@ -1442,15 +1591,29 @@ const ReportPage = () => {
                                                       )}`
                                                     : ""
                                             }`} */
-                                            to="/inquirymanagement/inquirylist"
+
                                             onClick={(e) => {
+                                                e.preventDefault();
                                                 setSearchFilter({
                                                     channels: "Social media",
                                                     selectedYear: yearValue,
-                                                    month: monthValue,
-                                                    department: departmentValue,
-                                                    property: projectValue,
+                                                    selectedMonth:
+                                                        monthValue !== "All"
+                                                            ? monthValue
+                                                            : "",
+                                                    departments:
+                                                        departmentValue !==
+                                                        "All"
+                                                            ? departmentValue
+                                                            : "",
+                                                    selectedProperty:
+                                                        projectValue !== "All"
+                                                            ? projectValue
+                                                            : "",
                                                 });
+                                                navigate(
+                                                    "/inquirymanagement/inquirylist"
+                                                );
                                             }}
                                         >
                                             Social Media
@@ -1463,7 +1626,7 @@ const ReportPage = () => {
                                     </span>
                                     <span className="text-custom-gray12 text-xs hover:underline hover:text-blue-500 cursor-pointer">
                                         <Link
-                                          /*   to={`/inquirymanagement/inquirylist?channels=Branch Tablet&year=${encodeURIComponent(
+                                            /*   to={`/inquirymanagement/inquirylist?channels=Branch Tablet&year=${encodeURIComponent(
                                                 yearValue
                                             )}${
                                                 monthValue !== "All"
@@ -1485,15 +1648,29 @@ const ReportPage = () => {
                                                       )}`
                                                     : ""
                                             }`} */
-                                            to="/inquirymanagement/inquirylist"
+
                                             onClick={(e) => {
+                                                e.preventDefault();
                                                 setSearchFilter({
                                                     channels: "Branch Tablet",
                                                     selectedYear: yearValue,
-                                                    month: monthValue,
-                                                    department: departmentValue,
-                                                    property: projectValue,
+                                                    selectedMonth:
+                                                        monthValue !== "All"
+                                                            ? monthValue
+                                                            : "",
+                                                    departments:
+                                                        departmentValue !==
+                                                        "All"
+                                                            ? departmentValue
+                                                            : "",
+                                                    selectedProperty:
+                                                        projectValue !== "All"
+                                                            ? projectValue
+                                                            : "",
                                                 });
+                                                navigate(
+                                                    "/inquirymanagement/inquirylist"
+                                                );
                                             }}
                                         >
                                             Branch Tablet
@@ -1506,7 +1683,7 @@ const ReportPage = () => {
                                     </span>
                                     <span className="text-custom-gray12 text-xs hover:underline hover:text-blue-500 cursor-pointer">
                                         <Link
-                                           /*  to={`/inquirymanagement/inquirylist?channels=Internal Endorsement&year=${encodeURIComponent(
+                                            /*  to={`/inquirymanagement/inquirylist?channels=Internal Endorsement&year=${encodeURIComponent(
                                                 yearValue
                                             )}${
                                                 monthValue !== "All"
@@ -1528,15 +1705,30 @@ const ReportPage = () => {
                                                       )}`
                                                     : ""
                                             }`} */
-                                            to="/inquirymanagement/inquirylist"
+
                                             onClick={(e) => {
+                                                e.preventDefault();
                                                 setSearchFilter({
-                                                    channels: "Internal Endorsement",
+                                                    channels:
+                                                        "Internal Endorsement",
                                                     selectedYear: yearValue,
-                                                    month: monthValue,
-                                                    department: departmentValue,
-                                                    property: projectValue,
+                                                    selectedMonth:
+                                                        monthValue !== "All"
+                                                            ? monthValue
+                                                            : "",
+                                                    departments:
+                                                        departmentValue !==
+                                                        "All"
+                                                            ? departmentValue
+                                                            : "",
+                                                    selectedProperty:
+                                                        projectValue !== "All"
+                                                            ? projectValue
+                                                            : "",
                                                 });
+                                                navigate(
+                                                    "/inquirymanagement/inquirylist"
+                                                );
                                             }}
                                         >
                                             Internal Endorsement
@@ -1596,7 +1788,7 @@ const ReportPage = () => {
                                             >
                                                 <td className="border border-gray-300 px-4 py-2 hover:text-blue-500 hover:underline cursor-pointer">
                                                     <Link
-                                                       /*  to={`/inquirymanagement/inquirylist?property=${encodeURIComponent(
+                                                        /*  to={`/inquirymanagement/inquirylist?property=${encodeURIComponent(
                                                             item.name
                                                         )}&year=${encodeURIComponent(
                                                             yearValue
@@ -1607,15 +1799,23 @@ const ReportPage = () => {
                                                                   )}`
                                                                 : ""
                                                         }`} */
-                                                        to="/inquirymanagement/inquirylist"
+
                                                         onClick={(e) => {
+                                                            e.preventDefault();
                                                             setSearchFilter({
-                                                                property: item.name,
-                                                                selectedYear: yearValue,
-                                                                month: monthValue,
-                                                                /* department: departmentValue, */
-                                                                /* property: projectValue, */
+                                                                selectedProperty:
+                                                                    item.name,
+                                                                selectedYear:
+                                                                    yearValue,
+                                                                selectedMonth:
+                                                                    monthValue !==
+                                                                    "All"
+                                                                        ? monthValue
+                                                                        : "",
                                                             });
+                                                            navigate(
+                                                                "/inquirymanagement/inquirylist"
+                                                            );
                                                         }}
                                                     >
                                                         {item.name}
@@ -1634,15 +1834,25 @@ const ReportPage = () => {
                                                                   )}`
                                                                 : ""
                                                         }`} */
-                                                        to="/inquirymanagement/inquirylist"
+
                                                         onClick={(e) => {
+                                                            e.preventDefault();
                                                             setSearchFilter({
-                                                                property: item.name,
-                                                                selectedYear: yearValue,
-                                                                month: monthValue,
+                                                                selectedProperty:
+                                                                    item.name,
+                                                                selectedYear:
+                                                                    yearValue,
+                                                                status: "Resolved",
+                                                                selectedMonth:
+                                                                    monthValue !==
+                                                                    "All"
+                                                                        ? monthValue
+                                                                        : "",
                                                                 /* department: departmentValue, */
-                                                                property: projectValue,
                                                             });
+                                                            navigate(
+                                                                "/inquirymanagement/inquirylist"
+                                                            );
                                                         }}
                                                     >
                                                         {item.resolved}
@@ -1650,7 +1860,7 @@ const ReportPage = () => {
                                                 </td>
                                                 <td className="border border-gray-300 px-4 py-2 hover:text-blue-500 hover:underline cursor-pointer">
                                                     <Link
-                                                      /*   to={`/inquirymanagement/inquirylist?property=${encodeURIComponent(
+                                                        /*   to={`/inquirymanagement/inquirylist?property=${encodeURIComponent(
                                                             item.name
                                                         )}&status=Closed&year=${encodeURIComponent(
                                                             yearValue
@@ -1661,15 +1871,25 @@ const ReportPage = () => {
                                                                   )}`
                                                                 : ""
                                                         }`} */
-                                                        to="/inquirymanagement/inquirylist"
+
                                                         onClick={(e) => {
+                                                            e.preventDefault();
                                                             setSearchFilter({
-                                                                property: item.name,
-                                                                selectedYear: yearValue,
-                                                                month: monthValue,
+                                                                selectedProperty:
+                                                                    item.name,
+                                                                status: "Closed",
+                                                                selectedYear:
+                                                                    yearValue,
+                                                                selectedMonth:
+                                                                    monthValue !==
+                                                                    "All"
+                                                                        ? monthValue
+                                                                        : "",
                                                                 /* department: departmentValue, */
-                                                                property: projectValue,
                                                             });
+                                                            navigate(
+                                                                "/inquirymanagement/inquirylist"
+                                                            );
                                                         }}
                                                     >
                                                         {item.closed}
@@ -1677,7 +1897,7 @@ const ReportPage = () => {
                                                 </td>
                                                 <td className="border border-gray-300 px-4 py-2 hover:text-blue-500 hover:underline cursor-pointer">
                                                     <Link
-                                                      /*   to={`/inquirymanagement/inquirylist?property=${encodeURIComponent(
+                                                        /*   to={`/inquirymanagement/inquirylist?property=${encodeURIComponent(
                                                             item.name
                                                         )}&status=unresolved&year=${encodeURIComponent(
                                                             yearValue
@@ -1688,15 +1908,25 @@ const ReportPage = () => {
                                                                   )}`
                                                                 : ""
                                                         }`} */
-                                                        to="/inquirymanagement/inquirylist"
+
                                                         onClick={(e) => {
+                                                            e.preventDefault();
                                                             setSearchFilter({
-                                                                property: item.name,
-                                                                selectedYear: yearValue,
-                                                                month: monthValue,
+                                                                selectedProperty:
+                                                                    item.name,
+                                                                status: "unresolved",
+                                                                selectedYear:
+                                                                    yearValue,
+                                                                selectedMonth:
+                                                                    monthValue !==
+                                                                    "All"
+                                                                        ? monthValue
+                                                                        : "",
                                                                 /* department: departmentValue, */
-                                                                property: projectValue,
                                                             });
+                                                            navigate(
+                                                                "/inquirymanagement/inquirylist"
+                                                            );
                                                         }}
                                                     >
                                                         {item.unresolved}
@@ -1878,7 +2108,7 @@ const ReportPage = () => {
                                             >
                                                 <td className="border border-gray-300 px-4 py-2 hover:text-blue-500 hover:underline cursor-pointer">
                                                     <Link
-                                                        to={`/inquirymanagement/inquirylist?${
+                                                        /* to={`/inquirymanagement/inquirylist?${
                                                             item.name !== "All"
                                                                 ? `department=${encodeURIComponent(
                                                                       item.name
@@ -1892,14 +2122,36 @@ const ReportPage = () => {
                                                                       monthValue
                                                                   )}`
                                                                 : ""
-                                                        }`}
+                                                        }`} */
+
+                                                        onClick={(e) => {
+                                                            e.preventDefault();
+                                                            setSearchFilter({
+                                                                departments:
+                                                                    item.name !==
+                                                                    "All"
+                                                                        ? item.name
+                                                                        : "",
+                                                                selectedYear:
+                                                                    yearValue,
+                                                                selectedMonth:
+                                                                    monthValue !==
+                                                                    "All"
+                                                                        ? monthValue
+                                                                        : "",
+                                                                /* department: departmentValue, */
+                                                            });
+                                                            navigate(
+                                                                "/inquirymanagement/inquirylist"
+                                                            );
+                                                        }}
                                                     >
                                                         {item.name}
                                                     </Link>
                                                 </td>
                                                 <td className="border border-gray-300 px-4 py-2 hover:text-blue-500 hover:underline cursor-pointer">
                                                     <Link
-                                                        to={`/inquirymanagement/inquirylist?${
+                                                        /* to={`/inquirymanagement/inquirylist?${
                                                             item.name !== "All"
                                                                 ? `department=${encodeURIComponent(
                                                                       item.name
@@ -1913,14 +2165,37 @@ const ReportPage = () => {
                                                                       monthValue
                                                                   )}`
                                                                 : ""
-                                                        }`}
+                                                        }`} */
+
+                                                        onClick={(e) => {
+                                                            e.preventDefault();
+                                                            setSearchFilter({
+                                                                departments:
+                                                                    item.name !==
+                                                                    "All"
+                                                                        ? item.name
+                                                                        : "",
+                                                                selectedYear:
+                                                                    yearValue,
+                                                                status: "Resolved",
+                                                                selectedMonth:
+                                                                    monthValue !==
+                                                                    "All"
+                                                                        ? monthValue
+                                                                        : "",
+                                                                /* department: departmentValue, */
+                                                            });
+                                                            navigate(
+                                                                "/inquirymanagement/inquirylist"
+                                                            );
+                                                        }}
                                                     >
                                                         {item.resolved}
                                                     </Link>
                                                 </td>
                                                 <td className="border border-gray-300 px-4 py-2 hover:text-blue-500 hover:underline cursor-pointer">
                                                     <Link
-                                                        to={`/inquirymanagement/inquirylist?${
+                                                        /*  to={`/inquirymanagement/inquirylist?${
                                                             item.name !== "All"
                                                                 ? `department=${encodeURIComponent(
                                                                       item.name
@@ -1934,14 +2209,37 @@ const ReportPage = () => {
                                                                       monthValue
                                                                   )}`
                                                                 : ""
-                                                        }`}
+                                                        }`} */
+
+                                                        onClick={(e) => {
+                                                            e.preventDefault();
+                                                            setSearchFilter({
+                                                                departments:
+                                                                    item.name !==
+                                                                    "All"
+                                                                        ? item.name
+                                                                        : "",
+                                                                status: "Closed",
+                                                                selectedYear:
+                                                                    yearValue,
+                                                                selectedMonth:
+                                                                    monthValue !==
+                                                                    "All"
+                                                                        ? monthValue
+                                                                        : "",
+                                                                /* department: departmentValue, */
+                                                            });
+                                                            navigate(
+                                                                "/inquirymanagement/inquirylist"
+                                                            );
+                                                        }}
                                                     >
                                                         {item.closed}
                                                     </Link>
                                                 </td>
                                                 <td className="border border-gray-300 px-4 py-2 hover:text-blue-500 hover:underline cursor-pointer">
                                                     <Link
-                                                        to={`/inquirymanagement/inquirylist?${
+                                                        /*  to={`/inquirymanagement/inquirylist?${
                                                             item.name !== "All"
                                                                 ? `department=${encodeURIComponent(
                                                                       item.name
@@ -1955,7 +2253,30 @@ const ReportPage = () => {
                                                                       monthValue
                                                                   )}`
                                                                 : ""
-                                                        }`}
+                                                        }`} */
+
+                                                        onClick={(e) => {
+                                                            e.preventDefault();
+                                                            setSearchFilter({
+                                                                departments:
+                                                                    item.name !==
+                                                                    "All"
+                                                                        ? item.name
+                                                                        : "",
+                                                                status: "unresolved",
+                                                                selectedYear:
+                                                                    yearValue,
+                                                                selectedMonth:
+                                                                    monthValue !==
+                                                                    "All"
+                                                                        ? monthValue
+                                                                        : "",
+                                                                /* department: departmentValue, */
+                                                            });
+                                                            navigate(
+                                                                "/inquirymanagement/inquirylist"
+                                                            );
+                                                        }}
                                                     >
                                                         {item.unresolved}
                                                     </Link>
@@ -2067,33 +2388,35 @@ const ReportPage = () => {
                                                 <div className="flex gap-1 shrink-0 items-center">
                                                     <span className="text-[18px] text-[#121212] leading-[15px] py-[4px] hover:underline hover:text-blue-500 cursor-pointer">
                                                         <Link
-                                                            to={`/inquirymanagement/inquirylist?category=${encodeURIComponent(
-                                                                category.name
-                                                            )}&year=${encodeURIComponent(
-                                                                yearValue
-                                                            )}${
-                                                                monthValue !==
-                                                                "All"
-                                                                    ? `&month=${encodeURIComponent(
-                                                                          monthValue
-                                                                      )}`
-                                                                    : ""
-                                                            }${
-                                                                departmentValue !==
-                                                                "All"
-                                                                    ? `&department=${encodeURIComponent(
-                                                                          departmentValue
-                                                                      )}`
-                                                                    : ""
-                                                            }
-                                                            ${
-                                                                projectValue !==
-                                                                "All"
-                                                                    ? `&property=${encodeURIComponent(
-                                                                          projectValue
-                                                                      )}`
-                                                                    : ""
-                                                            }`}
+                                                            onClick={(e) => {
+                                                                e.preventDefault();
+                                                                setSearchFilter(
+                                                                    {
+                                                                        category:
+                                                                            category.name,
+                                                                        departments:
+                                                                            departmentValue !==
+                                                                            "All"
+                                                                                ? departmentValue
+                                                                                : "",
+                                                                        selectedYear:
+                                                                            yearValue,
+                                                                        selectedMonth:
+                                                                            monthValue !==
+                                                                            "All"
+                                                                                ? monthValue
+                                                                                : "",
+                                                                        selectedProperty:
+                                                                            projectValue !==
+                                                                            "All"
+                                                                                ? projectValue
+                                                                                : "",
+                                                                    }
+                                                                );
+                                                                navigate(
+                                                                    "/inquirymanagement/inquirylist"
+                                                                );
+                                                            }}
                                                         >
                                                             {category.name}
                                                         </Link>

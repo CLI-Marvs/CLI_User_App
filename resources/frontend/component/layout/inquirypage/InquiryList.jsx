@@ -52,14 +52,13 @@ const InquiryList = () => {
         hasAttachments */
     } = useStateContext();
 
-    console.log("searchFilter", searchFilter);
-    const propertyParam = searchFilter?.property;
+    const propertyParam = searchFilter?.selectedProperty;
     const statusParam = searchFilter?.status;
     const typeParam = searchFilter?.type;
     const channelsParam = searchFilter?.channels;
     const categoryParam = searchFilter?.category;
-    const departmentParam = searchFilter?.department;
-    const monthParam = searchFilter?.month;
+    const departmentParam = searchFilter?.departments;
+    const monthParam = searchFilter?.selectedMonth;
     const yearParam = searchFilter?.selectedYear;
 
     const [name, setName] = useState("");
@@ -360,6 +359,7 @@ const InquiryList = () => {
     const [searchSummary, setSearchSummary] = useState("");
 
     const handleSearch = () => {
+        console.log("selectedProprt", selectedProperty);
         setResultSearchActive(true);
         let summaryParts = []; // Array to hold each part of the summary
 
@@ -428,6 +428,7 @@ const InquiryList = () => {
         setDepartments("");
     };
 
+    console.log("searchSummary", searchSummary);
     useEffect(() => {
       /*   console.log("categoryParam", categoryParam);
         console.log("statusParam", statusParam);
@@ -436,6 +437,8 @@ const InquiryList = () => {
         console.log("departmentParam", departmentParam);
         console.log("channelsParam", channelsParam);
  */
+
+        console.log("trigger here");
         if (
             propertyParam ||
             statusParam ||
@@ -446,16 +449,16 @@ const InquiryList = () => {
             categoryParam
         ) {
 
-            console.log("monthParam", monthParam);
             setResultSearchActive(true);
 
             let summaryParts = []; // Array to hold each part of the summary
 
+            console.log("statusParam", statusParam);
             if (categoryParam)
                 summaryParts.push(`Category: ${categoryParam}`);
             if (statusParam) {
                 const displayStatus =
-                    status === "unresolved" ? "Unresolved" : statusParam;
+                statusParam === "unresolved" ? "Unresolved" : statusParam;
                 summaryParts.push(`Status: ${displayStatus}`);
             }
             if (name) summaryParts.push(`Name: ${name}`);
@@ -480,12 +483,12 @@ const InquiryList = () => {
                 summaryParts.push(`Property: ${propertyParam}`);
             if (yearParam) summaryParts.push(`Year: ${yearParam}`);
             if (monthParam)
-                summaryParts.push(`Month: ${monthParam !== "All" ? formatMonth(monthParam) : "All"}`);
+                summaryParts.push(`Month: ${formatMonth(monthParam)}`);
             if (hasAttachments) summaryParts.push(`Attachments: Yes`);
 
             setSearchSummary(summaryParts);
 
-           /*   setSearchFilter({
+          /*   setSearchFilter({
             name,
             category: categoryParam,
             type: typeParam,
@@ -501,7 +504,7 @@ const InquiryList = () => {
             selectedYear: yearParam,
         }); */
         }
-    }, [propertyParam, statusParam, departmentParam, monthParam, yearParam]);
+    }, [/* propertyParam, statusParam, departmentParam, monthParam, yearParam */]);
 
     useEffect(() => {
         if (isFilterVisible) {
