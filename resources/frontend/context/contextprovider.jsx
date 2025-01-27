@@ -98,6 +98,10 @@ export const ContextProvider = ({ children }) => {
     const [loading, setLoading] = useState(false);
     const [navBarData, setNavBarData] = useState([]);
     const [isUserTypeChange, setIsUserTypeChange] = useState(false);
+    const [searchSummary, setSearchSummary] = useState("");
+    const [resultSearchActive, setResultSearchActive] = useState(false);
+
+
 
     useEffect(() => {
         if (user && user.department && !isDepartmentInitialized) {
@@ -861,7 +865,11 @@ export const ContextProvider = ({ children }) => {
                 selectedOption,
                 setSelectedOption,
                 setActiveDayButton,
-                activeDayButton
+                activeDayButton,
+                searchSummary,
+                setSearchSummary,
+                resultSearchActive,
+                setResultSearchActive
             }}
         >
             {children}

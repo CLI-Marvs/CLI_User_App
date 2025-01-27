@@ -54,7 +54,11 @@ const InquiryList = () => {
         selectedOption,
         setSelectedOption,
         activeDayButton,
-        setActiveDayButton
+        setActiveDayButton,
+        searchSummary,
+        setSearchSummary,
+        resultSearchActive,
+        setResultSearchActive
         /*  setHasAttachments,
         hasAttachments */
     } = useStateContext();
@@ -81,7 +85,6 @@ const InquiryList = () => {
     const filterBoxRef = useRef(null);
     const [isOpenSelect, setIsOpenSelect] = useState(false);
 
-    const [resultSearchActive, setResultSearchActive] = useState(false);
    
 
 
@@ -343,7 +346,6 @@ const InquiryList = () => {
     return monthNames[parseInt(monthNumber, 10) - 1]; // Adjust for zero-based index
     };
 
-    const [searchSummary, setSearchSummary] = useState("");
 
     const handleSearch = () => {
         setResultSearchActive(true);
