@@ -51,6 +51,10 @@ const InquiryList = () => {
         department,
         loading,
         allEmployees,
+        selectedOption,
+        setSelectedOption,
+        activeDayButton,
+        setActiveDayButton
         /*  setHasAttachments,
         hasAttachments */
     } = useStateContext();
@@ -69,12 +73,10 @@ const InquiryList = () => {
     const [selectedMonth, setSelectedMonth] = useState("");
     const [hasAttachments, setHasAttachments] = useState(false);
     const { propertyNamesList } = useStateContext();
-    const [activeDayButton, setActiveDayButton] = useState(null);
     const [assignedToMeActive, setAssignedToMeActive] = useState(false);
     const [startDate, setStartDate] = useState(null);
     const [isFilterVisible, setIsFilterVisible] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
-    const [selectedOption, setSelectedOption] = useState("All");
     const [lastActivity, setLastActivity] = useState(null);
     const filterBoxRef = useRef(null);
     const [isOpenSelect, setIsOpenSelect] = useState(false);
@@ -94,6 +96,8 @@ const InquiryList = () => {
         const selectedPage = data.selected;
         setCurrentPage(selectedPage);
     };
+
+    console.log("statusFilter", statusFilter);
 
     const handleRefresh = () => {
         setResultSearchActive(false);
