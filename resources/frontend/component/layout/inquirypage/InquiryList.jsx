@@ -106,7 +106,6 @@ const InquiryList = () => {
         setCurrentPage(selectedPage);
     };
 
-    console.log("statusFilter", statusFilter);
 
     const handleRefresh = () => {
         setResultSearchActive(false);
@@ -367,7 +366,6 @@ const InquiryList = () => {
 
 
     const handleSearch = () => {
-        console.log("selectedProprt", selectedProperty);
         setResultSearchActive(true);
         let summaryParts = []; // Array to hold each part of the summary
 
@@ -436,17 +434,7 @@ const InquiryList = () => {
         setDepartments("");
     };
 
-    console.log("searchSummary", searchSummary);
     useEffect(() => {
-      /*   console.log("categoryParam", categoryParam);
-        console.log("statusParam", statusParam);
-        console.log("monthParam", monthParam);
-        console.log("yearParam", yearParam);
-        console.log("departmentParam", departmentParam);
-        console.log("channelsParam", channelsParam);
- */
-
-        console.log("trigger here");
         if (
             propertyParam ||
             statusParam ||
@@ -461,7 +449,6 @@ const InquiryList = () => {
 
             let summaryParts = []; // Array to hold each part of the summary
 
-            console.log("statusParam", statusParam);
             if (categoryParam)
                 summaryParts.push(`Category: ${categoryParam}`);
             if (statusParam) {
