@@ -29,7 +29,6 @@ class AssignedCliResolvedInquiryNotification extends Mailable
         $this->employee_email = $employee_email;
         $this->assignee_name = $assignee_name;
         $this->data = $data;
-        
     }
 
     /**
@@ -39,7 +38,7 @@ class AssignedCliResolvedInquiryNotification extends Mailable
     {
         return new Envelope(
             from: new Address('noreply@cebulandmasters.com', 'noreply@cebulandmasters.com'),
-            subject: "Resolved [{$this->data['ticket_id']}]"
+            subject: "[Do Not Reply] {$this->data['status']} {$this->data['ticket_id']}"
 
         );
     }
@@ -76,7 +75,8 @@ class AssignedCliResolvedInquiryNotification extends Mailable
                 'ticket_id' => $this->data['ticket_id'],
                 'admin_name' => $this->data['admin_name'],
                 'details_concern' => $this->data['details_concern'],
-                'modifiedTicketId' => $this->data['modifiedTicketId']
+                'modifiedTicketId' => $this->data['modifiedTicketId'],
+                'status' => $this->data['status']
 
             ],
         );

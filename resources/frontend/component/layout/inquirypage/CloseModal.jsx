@@ -3,7 +3,6 @@ import { useStateContext } from "../../../context/contextprovider";
 import apiService from "../../servicesApi/apiService";
 import { AiFillInfoCircle } from "react-icons/ai";
 import { IoMdArrowDropdown } from "react-icons/io";
-import { SURVEY_LINKS } from '../../../constant/data/surveyLink';
 import CircularProgress from "@mui/material/CircularProgress";
 
 const CloseModal = ({ modalRef, ticketId, dataRef, onupdate }) => {
@@ -49,27 +48,7 @@ const CloseModal = ({ modalRef, ticketId, dataRef, onupdate }) => {
         setIsCommunicationTypeRequired(false);
     };
 
-    /*
-     * Function to update selected survey type
-    */
-    const handleSurveyChange = (selectedSurveyType) => {
-        setSelectedSurveyType(selectedSurveyType);
-        setIsSurveyRequired(false);
-    };
-
-    /* const capitalizeWords = (name) => {
-        if (name) {
-            return name
-                .split(" ")
-                .map(
-                    (word) =>
-                        word.charAt(0).toUpperCase() +
-                        word.slice(1).toLowerCase()
-                )
-                .join(" ");
-        }
-    };
- */
+ 
     /**
      * Function to handle marking a ticket as closed
      */
@@ -78,14 +57,9 @@ const CloseModal = ({ modalRef, ticketId, dataRef, onupdate }) => {
             setIsCommunicationTypeRequired(true);
             return;
         }
-        //Check if a survey type has been selected
-        if (!selectedSurveyType || selectedSurveyType.length === 0) {
-            setIsSurveyRequired(true);
-            return;
-        }
 
-        const formattedSurveyType =
-            selectedSurveyType?.surveyName?.split(" (")[0] || "";
+
+
         try {
             setIsLoading(true);
             const response = await apiService.post("close-concerns", {
@@ -98,11 +72,6 @@ const CloseModal = ({ modalRef, ticketId, dataRef, onupdate }) => {
                 details_concern: dataRef.details_concern,
                 remarks: remarks,
                 communication_type: communicationType,
-                selectedSurveyType:
-                {
-                    surveyName: formattedSurveyType,
-                    surveyLink: selectedSurveyType.surveyLink,
-                },
                 assignees: assigneesPersonnel[ticketId],
                 message_id: messageId,
                 status: status
@@ -133,7 +102,6 @@ const CloseModal = ({ modalRef, ticketId, dataRef, onupdate }) => {
         setRemarks("");
         setIsCommunicationTypeRequired(false);
         setIsSurveyRequired(false);
-        setSelectedSurveyType([]);
     };
 
     const handleCancel = () => {
@@ -142,7 +110,6 @@ const CloseModal = ({ modalRef, ticketId, dataRef, onupdate }) => {
             setRemarks("");
             setIsCommunicationTypeRequired(false);
             setIsSurveyRequired(false);
-            setSelectedSurveyType([]);
             modalRef.current.close();
         }
     };
@@ -233,39 +200,6 @@ const CloseModal = ({ modalRef, ticketId, dataRef, onupdate }) => {
                             <option value="Request">Request</option>
                             <option value="Inquiry">Inquiry</option>
                             <option value="Suggestion or recommendation">Suggestion or Recommendation</option>
-                        </select>
-                        <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3 bg-[#EDEDED] text-custom-gray81 pointer-events-none">
-                            <IoMdArrowDropdown />
-                        </span>
-                    </div>
-                </div>
-
-                {/**
-                 * Loop through SURVEY_LINKS to create options;
-                 * Display item.surveyName 
-                */}
-                <div
-                    className={`flex items-center border border-[D6D6D6] rounded-[5px] overflow-hidden mt-[12px]`}
-                >
-                    <span className="text-custom-gray81 text-sm bg-[#EDEDED] flex items-center w-[308px] tablet:w-[175px] mobile:w-[270px] mobile:text-xs -mr-3 pl-3 py-1">
-                        Send Survey
-                    </span>
-                    <div className="relative w-full">
-                        {/**
-                         * SET onChange TO handleSurveyChange with parsed value from the selected option
-                         *SET value TO JSON string of selectedSurveyType
-                        */}
-                        <select
-                            onChange={(e) => handleSurveyChange(JSON.parse(e.target.value))}
-                            value={JSON.stringify(selectedSurveyType)}
-                            className="appearance-none w-full px-4 text-sm py-1 bg-white focus:outline-none border-0 mobile:text-xs"
-                        >
-                            <option value="">(Select)</option>
-                            {SURVEY_LINKS.map((item, index) => (
-                                <option key={index} value={JSON.stringify(item)}>
-                                    {item.surveyName}
-                                </option>
-                            ))}
                         </select>
                         <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3 bg-[#EDEDED] text-custom-gray81 pointer-events-none">
                             <IoMdArrowDropdown />

@@ -30,7 +30,7 @@ class BuyerReplyInResolveOrClose extends Mailable
     {
         return new Envelope(
             from: new Address('noreply@cebulandmasters.com', 'noreply@cebulandmasters.com'),
-            subject: '[No Reply] CLI Notification',
+            subject: '[Do Not Reply] CLI Notification',
             
         );
     }
