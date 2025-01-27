@@ -295,7 +295,7 @@ export const ContextProvider = ({ children }) => {
             });
             const result = response.data;
             const formattedData = result.map((item) => ({
-                name: item.property,
+                name: item.property ?? "Property not specified (Direct email)",
                 resolved: item.resolved,
                 unresolved: item.unresolved,
                 closed: item.closed,
