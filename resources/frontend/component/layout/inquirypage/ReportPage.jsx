@@ -75,6 +75,14 @@ const ReportPage = () => {
         inquriesPerChannelData,
         propertyNamesList,
         setSearchFilter,
+        setDepartmentValue,
+        departmentValue,
+        setProjectValue,
+        projectValue,
+        setYearValue,
+        yearValue,
+        setMonthValue,
+        monthValue  
     } = useStateContext();
 
     const colors = [
@@ -385,10 +393,7 @@ const ReportPage = () => {
 
     const currentYear = new Date().getFullYear();
 
-    const [departmentValue, setDepartmentValue] = useState("All");
-    const [projectValue, setProjectValue] = useState("All");
-    const [yearValue, setYearValue] = useState(currentYear);
-    const [monthValue, setMonthValue] = useState("All");
+  
 
     const defaultData = [{ name: "No Data" }];
     const dataToDisplay = dataCategory.length > 0 ? dataCategory : defaultData;
@@ -1809,6 +1814,7 @@ const ReportPage = () => {
                                                                     "All"
                                                                         ? monthValue
                                                                         : "",
+                                                                departments: departmentValue !== "All" ? departmentValue : "" 
                                                             });
                                                             navigate(
                                                                 "/inquirymanagement/inquirylist"
@@ -1845,7 +1851,8 @@ const ReportPage = () => {
                                                                     "All"
                                                                         ? monthValue
                                                                         : "",
-                                                                /* department: departmentValue, */
+                                                                departments: departmentValue !== "All" ? departmentValue : "" 
+                                                                
                                                             });
                                                             navigate(
                                                                 "/inquirymanagement/inquirylist"
@@ -1882,7 +1889,8 @@ const ReportPage = () => {
                                                                     "All"
                                                                         ? monthValue
                                                                         : "",
-                                                                /* department: departmentValue, */
+                                                                departments: departmentValue !== "All" ? departmentValue : "" 
+                                                                
                                                             });
                                                             navigate(
                                                                 "/inquirymanagement/inquirylist"

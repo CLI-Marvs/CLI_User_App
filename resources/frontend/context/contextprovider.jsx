@@ -100,6 +100,10 @@ export const ContextProvider = ({ children }) => {
     const [isUserTypeChange, setIsUserTypeChange] = useState(false);
     const [searchSummary, setSearchSummary] = useState("");
     const [resultSearchActive, setResultSearchActive] = useState(false);
+    const [departmentValue, setDepartmentValue] = useState("All");
+    const [projectValue, setProjectValue] = useState("All");
+    const [yearValue, setYearValue] = useState(new Date().getFullYear());
+    const [monthValue, setMonthValue] = useState("All");
 
 
 
@@ -869,7 +873,15 @@ export const ContextProvider = ({ children }) => {
                 searchSummary,
                 setSearchSummary,
                 resultSearchActive,
-                setResultSearchActive
+                setResultSearchActive,
+                setDepartmentValue,
+                departmentValue,
+                setProjectValue,
+                projectValue,
+                setYearValue,
+                yearValue,
+                setMonthValue,
+                monthValue
             }}
         >
             {children}
