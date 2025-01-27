@@ -11,14 +11,12 @@ import { MdRefresh } from "react-icons/md";
 import InquiryFormModal from "./InquiryFormModal";
 import axios from "axios";
 import { toast } from "react-toastify";
-import { useSearchParams, useLocation} from "react-router-dom";
+import { useSearchParams, useLocation } from "react-router-dom";
 import Spinner from "../../../util/Spinner";
 const InquiryList = () => {
-
     const location = useLocation();
-    
 
-    const searchParams = new URLSearchParams(location.search);
+    /*   const searchParams = new URLSearchParams(location.search);
     const propertyParam = searchParams.get("property");
     const statusParam = searchParams.get("status");
     const typeParam = searchParams.get("type");
@@ -26,10 +24,9 @@ const InquiryList = () => {
     const categoryParam = searchParams.get("category");
     const departmentParam = searchParams.get("department");
     const monthParam = searchParams.get("month");
-    const yearParam = searchParams.get("year");
+    const yearParam = searchParams.get("year"); */
 
-
-   
+    /*    const searchParams = new URLSearchParams(location.search); */
 
     const {
         currentPage,
@@ -54,6 +51,16 @@ const InquiryList = () => {
         /*  setHasAttachments,
         hasAttachments */
     } = useStateContext();
+
+    console.log("searchFilter", searchFilter);
+    const propertyParam = searchFilter?.property;
+    const statusParam = searchFilter?.status;
+    const typeParam = searchFilter?.type;
+    const channelsParam = searchFilter?.channels;
+    const categoryParam = searchFilter?.category;
+    const departmentParam = searchFilter?.department;
+    const monthParam = searchFilter?.month;
+    const yearParam = searchFilter?.selectedYear;
 
     const [name, setName] = useState("");
     const [category, setCategory] = useState("");
@@ -80,8 +87,6 @@ const InquiryList = () => {
     const [isOpenSelect, setIsOpenSelect] = useState(false);
 
     const [resultSearchActive, setResultSearchActive] = useState(false);
-   
-
 
     const handleSelect = (option) => {
         onChange(option);
@@ -115,7 +120,7 @@ const InquiryList = () => {
             setAssignedToMeActive(false);
             setDaysFilter(null);
         }
-        
+
         getAllConcerns();
     };
 
@@ -256,35 +261,38 @@ const InquiryList = () => {
         "N/A",
         ...(Array.isArray(propertyNamesList) && propertyNamesList.length > 0
             ? propertyNamesList
-                .filter((item) => !item.toLowerCase().includes("phase"))
-                .map((item) => {
-                    let formattedItem = formatFunc(item);
+                  .filter((item) => !item.toLowerCase().includes("phase"))
+                  .map((item) => {
+                      let formattedItem = formatFunc(item);
 
-                // Capitalize each word in the string
-                formattedItem = formattedItem
-                    .split(" ")
-                    .map((word) => {
-                        // Check for specific words that need to be fully capitalized
-                        if (/^(Sjmv|Lpu|Cdo|Dgt)$/i.test(word)) {
-                            return word.toUpperCase();
-                        }
-                        // Capitalize the first letter of all other words
-                        return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
-                    })
-                    .join(" ");
+                      // Capitalize each word in the string
+                      formattedItem = formattedItem
+                          .split(" ")
+                          .map((word) => {
+                              // Check for specific words that need to be fully capitalized
+                              if (/^(Sjmv|Lpu|Cdo|Dgt)$/i.test(word)) {
+                                  return word.toUpperCase();
+                              }
+                              // Capitalize the first letter of all other words
+                              return (
+                                  word.charAt(0).toUpperCase() +
+                                  word.slice(1).toLowerCase()
+                              );
+                          })
+                          .join(" ");
 
-                // Replace specific names if needed
-                if (formattedItem === "Casamira South") {
-                    formattedItem = "Casa Mira South";
-                }
+                      // Replace specific names if needed
+                      if (formattedItem === "Casamira South") {
+                          formattedItem = "Casa Mira South";
+                      }
 
-                return formattedItem;
-                })
-                .sort((a, b) => {
-                    if (a === "N/A") return -1;
-                    if (b === "N/A") return 1;
-                    return a.localeCompare(b);
-                })
+                      return formattedItem;
+                  })
+                  .sort((a, b) => {
+                      if (a === "N/A") return -1;
+                      if (b === "N/A") return 1;
+                      return a.localeCompare(b);
+                  })
             : []),
     ];
 
@@ -298,9 +306,9 @@ const InquiryList = () => {
         "07": "July",
         "08": "August",
         "09": "September",
-        "10": "October",
-        "11": "November",
-        "12": "December",
+        10: "October",
+        11: "November",
+        12: "December",
     };
 
     const updateLastActivity = () => {
@@ -324,19 +332,29 @@ const InquiryList = () => {
 
     const formatDate = (dateString) => {
         const date = new Date(dateString);
-        return date.toLocaleDateString('en-US', {
-          month: 'short', // Jan
-          day: '2-digit', // 16
-          year: 'numeric' // 2025
+        return date.toLocaleDateString("en-US", {
+            month: "short", // Jan
+            day: "2-digit", // 16
+            year: "numeric", // 2025
         });
-      };
+    };
 
     const formatMonth = (monthNumber) => {
-    const monthNames = [
-        "January", "February", "March", "April", "May", "June",
-        "July", "August", "September", "October", "November", "December"
-    ];
-    return monthNames[parseInt(monthNumber, 10) - 1]; // Adjust for zero-based index
+        const monthNames = [
+            "January",
+            "February",
+            "March",
+            "April",
+            "May",
+            "June",
+            "July",
+            "August",
+            "September",
+            "October",
+            "November",
+            "December",
+        ];
+        return monthNames[parseInt(monthNumber, 10) - 1]; // Adjust for zero-based index
     };
 
     const [searchSummary, setSearchSummary] = useState("");
@@ -347,24 +365,30 @@ const InquiryList = () => {
 
         if (category) summaryParts.push(`Category: ${category}`);
         if (status) {
-            const displayStatus = status === "unresolved" ? "Unresolved" : status;
+            const displayStatus =
+                status === "unresolved" ? "Unresolved" : status;
             summaryParts.push(`Status: ${displayStatus}`);
-          }
+        }
         if (name) summaryParts.push(`Name: ${name}`);
         if (type) summaryParts.push(`Type: ${type}`);
         if (email) summaryParts.push(`Email: ${email}`);
         if (channels) {
             const formattedChannels =
-                    channels === 'Walk in' ? 'Walk-in' :
-                    channels === 'Social media' ? 'Social Media' :
-                    channels;
+                channels === "Walk in"
+                    ? "Walk-in"
+                    : channels === "Social media"
+                    ? "Social Media"
+                    : channels;
             summaryParts.push(`Channels: ${formattedChannels}`);
         }
         if (departments) summaryParts.push(`Department: ${departments}`);
         if (ticket) summaryParts.push(`Ticket: ${ticket}`);
-        if (startDate) summaryParts.push(`Start Date: ${formatDate(startDate)}`);
-        if (selectedProperty) summaryParts.push(`Property: ${selectedProperty}`);
-        if (selectedMonth) summaryParts.push(`Month: ${ formatMonth(selectedMonth)}`);
+        if (startDate)
+            summaryParts.push(`Start Date: ${formatDate(startDate)}`);
+        if (selectedProperty)
+            summaryParts.push(`Property: ${selectedProperty}`);
+        if (selectedMonth)
+            summaryParts.push(`Month: ${formatMonth(selectedMonth)}`);
         if (selectedYear) summaryParts.push(`Year: ${selectedYear}`);
         if (hasAttachments) summaryParts.push(`Attachments: Yes`);
 
@@ -384,7 +408,6 @@ const InquiryList = () => {
             hasAttachments,
             selectedMonth,
             selectedYear,
-            
         });
         setDaysFilter(null);
         setStatusFilter(null);
@@ -406,43 +429,63 @@ const InquiryList = () => {
     };
 
     useEffect(() => {
+      /*   console.log("categoryParam", categoryParam);
+        console.log("statusParam", statusParam);
+        console.log("monthParam", monthParam);
+        console.log("yearParam", yearParam);
+        console.log("departmentParam", departmentParam);
+        console.log("channelsParam", channelsParam);
+ */
+        if (
+            propertyParam ||
+            statusParam ||
+            monthParam ||
+            yearParam ||
+            departmentParam ||
+            channelsParam ||
+            categoryParam
+        ) {
 
+            console.log("monthParam", monthParam);
+            setResultSearchActive(true);
 
-        if (propertyParam || statusParam || monthParam || yearParam || departmentParam || channelsParam || categoryParam) {
+            let summaryParts = []; // Array to hold each part of the summary
 
-        setResultSearchActive(true);
-        
-        let summaryParts = []; // Array to hold each part of the summary
+            if (categoryParam)
+                summaryParts.push(`Category: ${categoryParam}`);
+            if (statusParam) {
+                const displayStatus =
+                    status === "unresolved" ? "Unresolved" : statusParam;
+                summaryParts.push(`Status: ${displayStatus}`);
+            }
+            if (name) summaryParts.push(`Name: ${name}`);
+            if (typeParam) summaryParts.push(`Type: ${typeParam}`);
+            if (email) summaryParts.push(`Email: ${email}`);
+            if (channelsParam) {
+                // Format 'Walk in' to 'Walk-in'
+                const formattedChannel =
+                    channelsParam === "Walk in"
+                        ? "Walk-in"
+                        : channelsParam === "Social media"
+                        ? "Social Media"
+                        : channelsParam;
+                summaryParts.push(`Channels: ${formattedChannel}`);
+            }
+            if (departmentParam)
+                summaryParts.push(`Department: ${departmentParam}`);
+            if (ticket) summaryParts.push(`Ticket: ${ticket}`);
+            if (startDate)
+                summaryParts.push(`Start Date: ${formatDate(startDate)}`);
+            if (propertyParam)
+                summaryParts.push(`Property: ${propertyParam}`);
+            if (yearParam) summaryParts.push(`Year: ${yearParam}`);
+            if (monthParam)
+                summaryParts.push(`Month: ${monthParam !== "All" ? formatMonth(monthParam) : "All"}`);
+            if (hasAttachments) summaryParts.push(`Attachments: Yes`);
 
-        if (categoryParam) summaryParts.push(`Category -> ${categoryParam}`);
-        if (statusParam) {
-            const displayStatus = status === "unresolved" ? "Unresolved" : statusParam;
-            summaryParts.push(`Status: ${displayStatus}`);
-          }
-        if (name) summaryParts.push(`Name -> ${name}`);
-        if (typeParam) summaryParts.push(`Type -> ${typeParam}`);
-        if (email) summaryParts.push(`Email -> ${email}`);
-        if (channelsParam) {
-            // Format 'Walk in' to 'Walk-in'
-            const formattedChannel = 
-                    channelsParam === 'Walk in' ? 'Walk-in' : 
-                    channelsParam === 'Social media' ? 'Social Media' : 
-                    channelsParam;
-            summaryParts.push(`Channels -> ${formattedChannel}`);
-        }
-        if (departmentParam) summaryParts.push(`Department -> ${departmentParam}`);
-        if (ticket) summaryParts.push(`Ticket -> ${ticket}`);
-        if (startDate) summaryParts.push(`Start Date -> ${formatDate(startDate)}`);
-        if (propertyParam) summaryParts.push(`Property -> ${propertyParam}`);
-        if (yearParam) summaryParts.push(`Year -> ${yearParam}`);
-        if (monthParam) summaryParts.push(`Month -> ${ formatMonth(monthParam)}`);
-        if (hasAttachments) summaryParts.push(`Attachments -> Yes`);
+            setSearchSummary(summaryParts);
 
-       
-
-        setSearchSummary(summaryParts);
-
-        setSearchFilter({
+           /*   setSearchFilter({
             name,
             category: categoryParam,
             type: typeParam,
@@ -456,8 +499,7 @@ const InquiryList = () => {
             hasAttachments,
             selectedMonth: monthParam,
             selectedYear: yearParam,
-        });
-
+        }); */
         }
     }, [propertyParam, statusParam, departmentParam, monthParam, yearParam]);
 
@@ -486,7 +528,7 @@ const InquiryList = () => {
         specificAssigneeCsr,
         currentPage,
     ]);
- 
+
 
     return (
         <>
@@ -770,23 +812,48 @@ const InquiryList = () => {
                                                 className="w-full border-b-1 outline-none appearance-none text-sm absolute px-[8px]"
                                                 value={departments}
                                                 onChange={(e) =>
-                                                    setDepartments(e.target.value)
+                                                    setDepartments(
+                                                        e.target.value
+                                                    )
                                                 }
                                             >
                                                 <option value="">
                                                     {" "}
                                                     Select Department
                                                 </option>
-                                                {[...new Set(allEmployees
-                                                    .map(item => item.department)
-                                                    .filter(department => department !== null && department !== undefined && department !== "NULL")
-                                                    )]
-                                                    .sort((a, b) => a.localeCompare(b))
-                                                    .map((department, index) => (
-                                                    <option key={index} value={department}>
-                                                        {department}
-                                                    </option>
-                                                ))}
+                                                {[
+                                                    ...new Set(
+                                                        allEmployees
+                                                            .map(
+                                                                (item) =>
+                                                                    item.department
+                                                            )
+                                                            .filter(
+                                                                (department) =>
+                                                                    department !==
+                                                                        null &&
+                                                                    department !==
+                                                                        undefined &&
+                                                                    department !==
+                                                                        "NULL"
+                                                            )
+                                                    ),
+                                                ]
+                                                    .sort((a, b) =>
+                                                        a.localeCompare(b)
+                                                    )
+                                                    .map(
+                                                        (department, index) => (
+                                                            <option
+                                                                key={index}
+                                                                value={
+                                                                    department
+                                                                }
+                                                            >
+                                                                {department}
+                                                            </option>
+                                                        )
+                                                    )}
                                             </select>
                                         </div>
                                         <span className="absolute inset-y-0 right-0 flex items-center  pl-3 pointer-events-none">
@@ -879,23 +946,36 @@ const InquiryList = () => {
                                             </label>
                                             <div className="relative w-[146px]">
                                                 <select
-                                                className="w-full border-b-1 outline-none appearance-none text-sm absolute px-[8px]"
-                                                value={selectedYear}
-                                                onChange={(e) =>
-                                                    setSelectedYear(e.target.value)
-                                                }
-                                            >
-                                                <option value="">
-                                                    {" "}
-                                                    Select Year
-                                                </option>
-                                                {fullYear && fullYear.map((item, index) => (
-                                                    <option key={index} value={item.year}>  {item.year}</option>
-                                                ))}
-                                            </select>
-                                            <span className="absolute inset-y-0 right-0 flex items-center  pl-3 pointer-events-none">
-                                                <IoIosArrowDown />
-                                            </span>
+                                                    className="w-full border-b-1 outline-none appearance-none text-sm absolute px-[8px]"
+                                                    value={selectedYear}
+                                                    onChange={(e) =>
+                                                        setSelectedYear(
+                                                            e.target.value
+                                                        )
+                                                    }
+                                                >
+                                                    <option value="">
+                                                        {" "}
+                                                        Select Year
+                                                    </option>
+                                                    {fullYear &&
+                                                        fullYear.map(
+                                                            (item, index) => (
+                                                                <option
+                                                                    key={index}
+                                                                    value={
+                                                                        item.year
+                                                                    }
+                                                                >
+                                                                    {" "}
+                                                                    {item.year}
+                                                                </option>
+                                                            )
+                                                        )}
+                                                </select>
+                                                <span className="absolute inset-y-0 right-0 flex items-center  pl-3 pointer-events-none">
+                                                    <IoIosArrowDown />
+                                                </span>
                                             </div>
                                         </div>
                                         <div className="flex relative">
@@ -906,7 +986,9 @@ const InquiryList = () => {
                                             <select
                                                 className="w-[220px] border-b-1 outline-none appearance-none text-sm px-[8px]"
                                                 onChange={(e) =>
-                                                    setSelectedMonth(e.target.value)
+                                                    setSelectedMonth(
+                                                        e.target.value
+                                                    )
                                                 }
                                                 value={selectedMonth}
                                             >
@@ -915,12 +997,18 @@ const InquiryList = () => {
                                                     Select Month
                                                 </option>
                                                 {Object.entries(monthNames)
-                                                    .sort(([keyA], [keyB]) => keyA - keyB)
+                                                    .sort(
+                                                        ([keyA], [keyB]) =>
+                                                            keyA - keyB
+                                                    )
                                                     .map(([key, name]) => (
-                                                        <option key={key} value={key}>
+                                                        <option
+                                                            key={key}
+                                                            value={key}
+                                                        >
                                                             {name}
                                                         </option>
-                                                ))}
+                                                    ))}
                                             </select>
                                             <span className="absolute inset-y-0 right-0 flex items-center  pl-3 pointer-events-none">
                                                 <IoIosArrowDown />
@@ -955,19 +1043,24 @@ const InquiryList = () => {
                     </div> */}
                     {resultSearchActive && (
                         <div className="flex flex-col gap-1 p-2 mt-[15px] bg-white w-max rounded-[8px] shadow-custom7 text-sm">
-                            <div className="flex">
-                                <div>
-                                    <strong>Search Result For: &nbsp;</strong>
+                            <div className="flex flex-col">
+                                <div className="mb-5">
+                                    <strong>Search Result For &nbsp;</strong>
                                 </div>
                                 <div className="flex flex-col flex-wrap gap-2">
-                                    {searchSummary.map((part, index) => (
-                                        <div key={index}>{part}</div>
-                                    ))}
+                                    {searchSummary.map((part, index) => {
+                                        const [label, value] = part.split(": ");
+                                        return (
+                                            <div key={index}>
+                                                <strong>{label}:</strong>{" "}
+                                                {value}
+                                            </div>
+                                        );
+                                    })}
                                 </div>
                             </div>
                         </div>
                     )}
-                    
                 </div>
                 <div className="max-w-[1260px] ">
                     <div className="flex justify-between items-center h-12 mt-[15px] px-6 bg-white rounded-t-lg mb-1 ">
@@ -987,7 +1080,7 @@ const InquiryList = () => {
                                     <p>{selectedOption}</p>
                                 )}
                             </button>
-                        
+
                             {/* Dropdown Menu */}
                             {isOpen && (
                                 <div className="absolute top-full mt-2 w-48 bg-white border border-gray-200 shadow-lg rounded-md">
@@ -1097,7 +1190,7 @@ const InquiryList = () => {
                         </div>
                     </div>
                     <div className="w-[1260px]">
-                       {/*  {loading ? (
+                        {/*  {loading ? (
                             <>
                              <p className="text-center">
                                <Spinner/>
@@ -1115,12 +1208,12 @@ const InquiryList = () => {
                            </>
                         )} */}
                         {data && data.length === 0 ? (
-                                <p className="text-center text-gray-500 py-4">
-                                    No records found.
-                                </p>
-                            ) : (
-                                <TicketTable concernData={data || []} />
-                            )}
+                            <p className="text-center text-gray-500 py-4">
+                                No records found.
+                            </p>
+                        ) : (
+                            <TicketTable concernData={data || []} />
+                        )}
                     </div>
                     <div className="flex justify-end items-center h-12 px-6 gap-2 bg-white rounded-b-lg">
                         <p className="text-sm text-gray-400 hidden">
