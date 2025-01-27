@@ -24,47 +24,9 @@ class PriceListMasterRepository
     public function index()
     {
         //TODO: Paginate here into 10 per page
-        $priceListMasters = $this->model->with([
-            'towerPhase.propertyMaster',  // Nested relationship to get property details
-            'towerPhase',
-            'priceBasicDetail',
-            'towerPhase.propertyMaster.propertyCommercialDetail',
-            'paymentSchemes',
-        ])->select('price_list_masters.*')  // Select all fields from price list masters
-            ->orderBy('created_at', 'desc')
-            ->get();
-
-
-
-        // Transform the data to get specific fields
-        $transformedData = $priceListMasters->map(function ($priceList) {
-            $priceVersionIds = json_decode($priceList->price_versions_id, true);
-            $priceVersionIds = is_array($priceVersionIds) ? $priceVersionIds : [];
-            $priceVersionData = PriceVersion::whereIn('id', $priceVersionIds)->get();
-           
-            // Fetch PaymentSchemes by the decoded IDs
-
-            return [
-                'price_list_master_id' => $priceList->id,
-                'updated_at' => $priceList->updated_at,
-                'tower_phase_id' => $priceList->towerPhase->id,
-                'tower_phase_name' => $priceList->towerPhase->tower_phase_name,
-                'status' => $priceList->status,
-                'property_name' => $priceList->towerPhase->propertyMaster->property_name ?? null,
-                'pricebasic_details' => $priceList->priceBasicDetail ? $priceList->priceBasicDetail->toArray() : null,
-                'property_commercial_detail' => $priceList->towerPhase->propertyMaster->propertyCommercialDetail->toArray(),
-                'price_versions' => $priceVersionData->map(function ($version) {
-                    return [
-                        'version_name' => $version->version_name,
-                        'id' => $version->id,
-                        'payment_scheme' => json_decode($version->payment_scheme_id, true),
-                    ];
-                }),
-
-            ];
-        });
-
-        return $transformedData;
+        $priceListMasters = $this->getPriceListMastersWithRelations();
+        return $priceListMasters->map(fn($priceList) => 
+        $this->transformPriceListMaster($priceList));
     }
 
     /**
@@ -214,12 +176,64 @@ class PriceListMasterRepository
     }
 
     /**
-     * Function to extract the payment scheme IDs from the payment_schemes array
+     * Fetch price list masters with related models and fields.
      */
-    public static function extractSchemeIds(array $paymentSchemes): array
+    public function getPriceListMastersWithRelations()
     {
-        return array_map(function ($scheme) {
-            return $scheme['id'];
-        }, $paymentSchemes);
+       return $this->model->with([
+            'towerPhase.propertyMaster',  // Nested relationship to get property details
+            'towerPhase',
+            'priceBasicDetail',
+            'towerPhase.propertyMaster.propertyCommercialDetail',
+            'paymentSchemes',
+            'priceVersions',
+        ])->select('price_list_masters.*')  // Select all fields from price list masters
+            ->orderBy('created_at', 'desc')
+            ->get();
     }
+    
+    /**
+     * Transform the price list master data
+     */
+    protected function transformPriceListMaster($priceList)
+    {
+        return [
+            'price_list_master_id' => $priceList->id,
+            'updated_at' => $priceList->updated_at,
+            'tower_phase_id' => $priceList->towerPhase->id,
+            'tower_phase_name' => $priceList->towerPhase->tower_phase_name,
+            'status' => $priceList->status,
+            'property_name' => $priceList->towerPhase->propertyMaster->property_name ?? null,
+            'pricebasic_details' => $priceList->priceBasicDetail ? $priceList->priceBasicDetail->toArray() : null,
+            'property_commercial_detail' => $priceList->towerPhase->propertyMaster->propertyCommercialDetail->toArray(),
+            'price_versions' => $this->transformPriceVersions($priceList->priceVersions),
+        ];
+    }
+
+    /**
+     * Transform the price list  versions data
+     */
+    protected function transformPriceVersions($priceVersions)
+    {
+        return $priceVersions->map(function ($version) {
+            $paymentSchemeIds = json_decode($version->payment_scheme_id, true);
+            $priceVersionIds = is_array($paymentSchemeIds) ? $paymentSchemeIds : [];
+
+            $paymentSchemeData = PaymentScheme::whereIn('id', $priceVersionIds)->get();
+
+            $paymentSchemes = $paymentSchemeData->map(function ($scheme) {
+                return [
+                    'id' => $scheme->id,
+                    'name' => $scheme->payment_scheme_name,
+                ];
+            });
+
+            return [
+                'version_name' => $version->version_name,
+                'id' => $version->id,
+                'payment_schemes' => $paymentSchemes,
+            ];
+        });
+    }
+
 }

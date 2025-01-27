@@ -3,7 +3,7 @@ import { usePaymentScheme } from "@/context/PropertyPricing/PaymentSchemeContext
 import { usePricing } from "@/component/layout/propertyandpricingpage/basicpricing/context/BasicPricingContext";
 import paymentScheme from "./../../accordion/PaymentSchemes";
 const AddPaymentSchemeModal = ({
-    paymentSchemeModalRef,
+    addPaymentSchemeModalRef,
     priceListMasterData,
     action,
     versionIndex,
@@ -38,7 +38,7 @@ const AddPaymentSchemeModal = ({
     //Event handler
     const handleCancel = () => {
         setSelectedSchemes(null);
-        paymentSchemeModalRef.current.close();
+        addPaymentSchemeModalRef.current.close();
     };
 
     //Confirm the payment scheme selected
@@ -62,11 +62,10 @@ const AddPaymentSchemeModal = ({
                 )
             );
             updatePricingSection("priceVersions", updatedPriceVersionsObject);
-            if (paymentSchemeModalRef.current) {
-                paymentSchemeModalRef.current.close();
+            if (addPaymentSchemeModalRef.current) {
+                addPaymentSchemeModalRef.current.close();
             }
         } else {
- 
             console.log("add payment scheme");
             const updatedPriceVersions = Object.entries(
                 pricingData?.priceVersions || {}
@@ -87,9 +86,11 @@ const AddPaymentSchemeModal = ({
             );
             
             updatePricingSection("priceVersions", updatedPriceVersionsObject);
-              if (paymentSchemeModalRef.current) {
-                  paymentSchemeModalRef.current.close();
+            if (addPaymentSchemeModalRef.current) {
+                  setSelectedSchemes(null);
+                  addPaymentSchemeModalRef.current.close();
               }
+            
         }
     };
 
@@ -145,18 +146,7 @@ const AddPaymentSchemeModal = ({
                 const isSelected = schemes.some(
                     (scheme) => scheme.id === schemeId
                 );
-                //   const newSchemes =
-                //       isChecked && !isSelected
-                //           ? [
-                //                 ...schemes,
-                //                 {
-                //                     id: schemeId,
-                //                     payment_scheme_name:
-                //                         item.payment_scheme_name,
-                //                 },
-                //             ]
-                //           : schemes.filter((id) => id !== schemeId);
-                // Toggle logic: If selected, remove it; if not, add it
+               
                 const updatedPaymentSchemes = isSelected
                     ? schemes.filter((scheme) => scheme.id !== schemeId) // Remove the selected scheme
                     : [
@@ -165,11 +155,7 @@ const AddPaymentSchemeModal = ({
                               id: schemeId,
                               payment_scheme_name: item.payment_scheme_name,
                           },
-                      ]; // Add the new scheme as an object
-                console.log("newSchemes", updatedPaymentSchemes);
-                //   updatePricingSection("paymentSchemes", {
-                //       selectedSchemes: newSchemes,
-                //   });
+                      ];
                 return updatedPaymentSchemes;
             });
         }
@@ -223,7 +209,7 @@ const AddPaymentSchemeModal = ({
         <dialog
             id="Resolved"
             className="modal w-[900px] rounded-[10px] shadow-custom5 backdrop:bg-black/50  "
-            ref={paymentSchemeModalRef}
+            ref={addPaymentSchemeModalRef}
         >
             <div className=" px-[25px] rounded-lg  overflow-hidden">
                 <div className="p-[20px] flex flex-wrap justify-center gap-[20px]">
@@ -248,6 +234,7 @@ const AddPaymentSchemeModal = ({
                             onClick={handleConfirm}
                             className={`h-[37px] w-[185px] text-white rounded-[10px] gradient-btn2 hover:shadow-custom4`}
                         >
+                            {/* TODO: disable if there is no selected scheme */}
                             <> Confirm </>
                         </button>
                     </div>

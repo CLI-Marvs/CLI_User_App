@@ -10,14 +10,18 @@ import moment from "moment";
 import { useNavigate } from "react-router-dom";
 import { usePriceListMaster } from '@/context/PropertyPricing/PriceListMasterContext';
 import TableSkeleton from "@/component/layout/propertyandpricingpage/component/TableSkeleton";
+import { usePaymentScheme } from "@/context/PropertyPricing/PaymentSchemeContext";
 
 const PricingMasterList = () => {
 
     //States
     const { priceListMaster, isLoading, fetchPropertyListMasters } = usePriceListMaster();
+    const { paymentScheme, fetchPaymentSchemes } = usePaymentScheme();
+
     const [startDate, setStartDate] = useState(new Date());
     const [toggled, setToggled] = useState(false);
     const [isFilterVisible, setIsFilterVisible] = useState(false);
+    const [paymentSchemes, setPaymentSchemes] = useState([]);
     const navigate = useNavigate();
     const propertyModalRef = useRef(null);
     const toggleFilterBox = () => {
@@ -26,12 +30,13 @@ const PricingMasterList = () => {
 
     //Hooks
     useEffect(() => {
-        console.log("priceListMaster", priceListMaster)
-
+        fetchPaymentSchemes();
         if (!priceListMaster) {
             fetchPropertyListMasters(true);
         }
     }, [fetchPropertyListMasters, priceListMaster]);
+
+
 
     //Event handler
     /**
@@ -390,26 +395,64 @@ const PricingMasterList = () => {
                                             </p>
                                         </div>
                                     </td>
+
                                     {/* Render the price version */}
                                     <td className="w-[150px] flex items-center justify-start">
-                                        {item?.price_versions?.map((version, versionIndex) => (
-                                            <span key={versionIndex}>
-                                                {version?.version_name}
-                                               
-                                            </span>
-                                        ))}
+                                        <div>
+                                            <p>
+                                                {item?.price_versions?.map((version, versionIndex) => {
+                                                    return (
+                                                        <span key={versionIndex}>
+                                                            {version?.version_name} -
+                                                            {versionIndex < item?.price_versions?.length - 1 ? <br /> : ""}
+                                                        </span>
+                                                    )
+                                                })}
+                                            </p>
 
+                                        </div>
                                     </td>
 
-                                    <td className="w-[100px] flex items-center justify-start"></td>
+                                    {/* Render the sold per price version */}
+                                    <td className="w-[150px] flex items-center justify-start">
+                                        <div>
+                                            <p className="space-x-1">
+                                                <span>Version 1 - 0</span>
+
+                                            </p>
+                                            <p className="space-x-1">
+                                                <span>Version 1 - 0</span>
+
+                                            </p>
+
+                                        </div>
+                                    </td>
+
+                                    {/* render the Promos*/}
+                                    <td className="w-[140px] flex items-center justify-start">
+                                        <div>
+                                            <p className="space-x-1">
+                                                <span>Version 1 - 0</span>
+
+                                            </p>
+                                        </div>
+                                    </td>
+
+                                    {/* render payment schemes */}
                                     <td className="w-[150px] flex items-center justify-start rounded-r-lg text-sm">
                                         <div>
                                             <p>
-                                                {item?.payment_scheme?.map((scheme, index) => {
+                                                {item?.price_versions?.map((version, versionIndex) => {
                                                     return (
-                                                        <span key={index}>
-                                                            {scheme?.payment_scheme_name}
-                                                            {index < item?.payment_scheme?.length - 1 ? <br /> : ""}
+                                                        <span key={versionIndex}>
+                                                            {version?.payment_schemes?.map((scheme, schemeIndex) => {
+                                                                return (
+                                                                    <span key={schemeIndex}>
+                                                                        {scheme?.name}
+                                                                        {schemeIndex < version?.payment_schemes?.length - 1 ? <br /> : ""}
+                                                                    </span>
+                                                                )
+                                                            })}
                                                         </span>
                                                     )
                                                 })}

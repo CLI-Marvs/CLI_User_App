@@ -3,39 +3,25 @@ import { FaRegTrashAlt, FaRegCalendar } from "react-icons/fa";
 import { IoIosArrowDown } from "react-icons/io";
 import { MdFormatListBulletedAdd } from "react-icons/md";
 import AddPaymentSchemeModal from "@/component/layout/propertyandpricingpage/basicpricing/modals/PaymentScheme/AddPaymentSchemeModal";
+import EditPaymentSchemeModal from "@/component/layout/propertyandpricingpage/basicpricing/modals/PaymentScheme/EditPaymentSchemeModal";
 import { IoIosCloseCircle } from "react-icons/io";
 import moment from "moment";
 import { usePricing } from "@/component/layout/propertyandpricingpage/basicpricing/context/BasicPricingContext";
 import { HiPencil } from "react-icons/hi";
 import { MdDelete } from "react-icons/md";
-import { usePaymentScheme } from "@/context/PropertyPricing/PaymentSchemeContext";
 
 const PriceVersions = ({ priceListMasterData, action }) => {
     //States
     const [accordionOpen, setAccordionOpen] = useState(false);
-    const paymentSchemeModalRef = useRef(null);
+    const addPaymentSchemeModalRef = useRef(null);
+    const editPaymentSchemeModalRef = useRef(null);
     const { pricingData, updatePricingSection, setPricingData } = usePricing();
     const [versionIndex, setVersionIndex] = useState(0);
+    const [selectedPaymentSchemes, setSelectedPaymentSchemes] = useState([]);
+
     // const { paymentScheme, fetchPaymentSchemes } = usePaymentScheme();
     // const [selectedPaymentSchemes, setSelectedPaymentSchemes] = useState([]);
     console.log("pricingData", pricingData);
-    //Hooks
-    // useEffect(() => {
-    //     if (paymentScheme && pricingData) {
-    //         // Retrieve all payment schemes and filter base on the selected payment scheme
-    //         const selectedPaymentSchemes = paymentScheme.filter((scheme) =>
-    //             pricingData?.priceVersions?.[
-    //                 versionIndex
-    //             ]?.payment_scheme?.includes(scheme.id)
-    //         );
-
-    //         if (selectedPaymentSchemes) {
-    //             setSelectedPaymentSchemes(selectedPaymentSchemes);
-    //         } else {
-    //             console.log("No matching payment scheme found.");
-    //         }
-    //     }
-    // }, [paymentScheme, pricingData, versionIndex]);
 
     //Event handler
     //Handle change in the input field for price version
@@ -65,9 +51,9 @@ const PriceVersions = ({ priceListMasterData, action }) => {
      * @param {*} index
      */
     const handleShowPaymentSchemeModal = (index) => {
-        if (paymentSchemeModalRef.current) {
+        if (addPaymentSchemeModalRef.current) {
             setVersionIndex(index);
-            paymentSchemeModalRef.current.showModal();
+            addPaymentSchemeModalRef.current.showModal();
         }
     };
 
@@ -112,36 +98,66 @@ const PriceVersions = ({ priceListMasterData, action }) => {
         });
     };
 
+    /**
+     * Handle remove selected payment scheme
+     * Copy the existing priceVersions object in
+     * Delete the specific key from the object
+     * Set again the payment_scheme array to null
+     * @param {*} index
+     */
+    const handleRemovePaymentScheme = (index) => {
+        const updatedPriceVersions = { ...pricingData.priceVersions };
+
+        delete updatedPriceVersions[index].payment_scheme;
+        updatedPriceVersions[index].payment_scheme = [];
+
+        setPricingData({
+            ...pricingData,
+            priceVersions: updatedPriceVersions,
+        });
+    };
+
+    //Handle edit payment scheme
+    const handleEditPaymentScheme = (index) => {
+        if (editPaymentSchemeModalRef.current) {
+            setVersionIndex(index);
+            editPaymentSchemeModalRef.current.showModal();
+        }
+    };
     return (
         <>
             <div
                 className={`transition-all duration-2000 ease-in-out
-      ${accordionOpen
-                        ? "h-[74px] mx-5 bg-white shadow-custom5 rounded-[10px]"
-                        : "h-[72px]  gradient-btn3 rounded-[10px] p-[1px]"
-                    } `}
+      ${
+          accordionOpen
+              ? "h-[74px] mx-5 bg-white shadow-custom5 rounded-[10px]"
+              : "h-[72px]  gradient-btn3 rounded-[10px] p-[1px]"
+      } `}
             >
                 <button
                     onClick={() => setAccordionOpen(!accordionOpen)}
                     className={`
-            ${accordionOpen
-                            ? "flex justify-between items-center h-full w-full bg-white rounded-[9px] px-[15px]"
-                            : "flex justify-between items-center h-full w-full bg-custom-grayFA rounded-[9px] px-[15px]"
-                        } `}
+            ${
+                accordionOpen
+                    ? "flex justify-between items-center h-full w-full bg-white rounded-[9px] px-[15px]"
+                    : "flex justify-between items-center h-full w-full bg-custom-grayFA rounded-[9px] px-[15px]"
+            } `}
                 >
                     <span
-                        className={` text-custom-solidgreen ${accordionOpen
-                            ? "text-[20px] montserrat-semibold"
-                            : "text-[18px] montserrat-regular"
-                            }`}
+                        className={` text-custom-solidgreen ${
+                            accordionOpen
+                                ? "text-[20px] montserrat-semibold"
+                                : "text-[18px] montserrat-regular"
+                        }`}
                     >
                         Price Versions
                     </span>
                     <span
-                        className={`flex justify-center items-center h-[40px] w-[40px] rounded-full  transform transition-transform duration-300 ease-in-out ${accordionOpen
-                            ? "rotate-180 bg-[#F3F7F2] text-custom-solidgreen"
-                            : "rotate-0 gradient-btn2 text-white"
-                            }`}
+                        className={`flex justify-center items-center h-[40px] w-[40px] rounded-full  transform transition-transform duration-300 ease-in-out ${
+                            accordionOpen
+                                ? "rotate-180 bg-[#F3F7F2] text-custom-solidgreen"
+                                : "rotate-0 gradient-btn2 text-white"
+                        }`}
                     >
                         <IoIosArrowDown className=" text-[18px]" />
                     </span>
@@ -149,10 +165,11 @@ const PriceVersions = ({ priceListMasterData, action }) => {
             </div>
             <div
                 className={`mx-5 rounded-[10px] shadow-custom5 grid overflow-hidden transition-all duration-300 ease-in-out
-            ${accordionOpen
-                        ? "mt-2 mb-4 grid-rows-[1fr] opacity-100"
-                        : "grid-rows-[0fr] opacity-0"
-                    }
+            ${
+                accordionOpen
+                    ? "mt-2 mb-4 grid-rows-[1fr] opacity-100"
+                    : "grid-rows-[0fr] opacity-0"
+            }
             `}
             >
                 <div className=" overflow-hidden">
@@ -256,31 +273,75 @@ const PriceVersions = ({ priceListMasterData, action }) => {
                                                             <FaRegCalendar className="size-5 text-custom-gray81 hover:text-red-500" />
                                                         </td>
                                                         <td className="">
-                                                            {paymentScheme &&
-                                                                paymentScheme.length >
-                                                                1 ? (
-                                                                <div>
-                                                                    <p> MPS </p>
-                                                                </div>
-                                                            ) : (
-                                                                <div className="flex items-center">
-                                                                    <p className="flex flex-1 mx-1">
-                                                                        {paymentScheme &&
-                                                                            paymentScheme[0]
-                                                                                ?.payment_scheme_name
-                                                                        }
-                                                                    </p>
-                                                                        {paymentScheme && paymentScheme.length > 0 && (
+                                                            <div className="flex items-center">
+                                                                <div className="flex flex-1">
+                                                                    {paymentScheme &&
+                                                                    paymentScheme.length >
+                                                                        1 ? (
+                                                                        <div className="">
+                                                                            <p className="">
+                                                                                {paymentScheme.map(
+                                                                                    (
+                                                                                        scheme,
+                                                                                        schemeIndex
+                                                                                    ) => (
+                                                                                        <span
+                                                                                            className="h-auto bg-custom-lightestgreen rounded-lg px-1"
+                                                                                            key={
+                                                                                                schemeIndex
+                                                                                            }
+                                                                                        >
+                                                                                            {
+                                                                                                scheme?.payment_scheme_name
+                                                                                            }
+                                                                                            {schemeIndex <
+                                                                                                paymentScheme.length -
+                                                                                                    1 &&
+                                                                                                ", "}
+                                                                                        </span>
+                                                                                    )
+                                                                                )}
+                                                                            </p>
+                                                                        </div>
+                                                                    ) : (
                                                                         <div className="flex items-center">
-                                                                            <HiPencil className="text-custom-solidgreen h-6 w-6 cursor-pointer" />
-                                                                            <MdDelete className="text-red-500 h-6 w-6 cursor-pointer" />
+                                                                            <p className="bg-custom-lightestgreen rounded-lg px-1">
+                                                                                {paymentScheme &&
+                                                                                    paymentScheme[0]
+                                                                                        ?.payment_scheme_name}
+                                                                            </p>
                                                                         </div>
                                                                     )}
                                                                 </div>
-                                                            )}
+                                                                <div>
+                                                                    {paymentScheme &&
+                                                                        paymentScheme.length >
+                                                                            0 && (
+                                                                            <div className="flex items-center">
+                                                                                <HiPencil
+                                                                                    onClick={() =>
+                                                                                        handleEditPaymentScheme(
+                                                                                            index
+                                                                                        )
+                                                                                    }
+                                                                                    className="text-custom-solidgreen h-6 w-6 cursor-pointer"
+                                                                                />
+                                                                                <MdDelete
+                                                                                    onClick={() =>
+                                                                                        handleRemovePaymentScheme(
+                                                                                            index
+                                                                                        )
+                                                                                    }
+                                                                                    className="text-red-500 h-6 w-6 cursor-pointer"
+                                                                                />
+                                                                            </div>
+                                                                        )}
+                                                                </div>
+                                                            </div>
+
                                                             {paymentScheme &&
                                                                 paymentScheme.length ===
-                                                                0 && (
+                                                                    0 && (
                                                                     <div className="flex justify-center items-center">
                                                                         <button
                                                                             className="gradient-btn5 p-[1px] w-[84px] h-[27px] rounded-[10px] mt-2"
@@ -306,14 +367,14 @@ const PriceVersions = ({ priceListMasterData, action }) => {
                                                                 Object.keys(
                                                                     pricingData?.priceVersions
                                                                 ).length >
-                                                                1 && (
+                                                                    1 && (
                                                                     <IoIosCloseCircle
                                                                         onClick={() =>
                                                                             handleRemoveFields(
                                                                                 index
                                                                             )
                                                                         }
-                                                                    className="text-custom-gray h-6 w-6 cursor-pointer hover:text-red-500"
+                                                                        className="text-custom-gray h-6 w-6 cursor-pointer hover:text-red-500"
                                                                     />
                                                                 )}
                                                         </td>
@@ -340,9 +401,13 @@ const PriceVersions = ({ priceListMasterData, action }) => {
             </div>
             <div>
                 <AddPaymentSchemeModal
-                    paymentSchemeModalRef={paymentSchemeModalRef}
+                    addPaymentSchemeModalRef={addPaymentSchemeModalRef}
                     priceListMasterData={priceListMasterData}
                     action={action}
+                    versionIndex={versionIndex}
+                />
+                <EditPaymentSchemeModal
+                    editPaymentSchemeModalRef={editPaymentSchemeModalRef}
                     versionIndex={versionIndex}
                 />
             </div>

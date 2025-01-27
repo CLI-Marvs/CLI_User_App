@@ -54,13 +54,13 @@ const BasicPricing = () => {
                 }));
 
             }
-            // Update the payment schemes
-            if (data?.payment_scheme) {
+            console.log("data", data);
+            if (data?.price_versions) {
                 setPricingData(prev => ({
                     ...prev,
-                    paymentSchemes: Array.isArray(data.payment_scheme)
-                        ? data.payment_scheme.map(scheme => scheme.id)
-                        : [data.payment_scheme.id],
+                    priceVersions: Array.isArray(data.price_versions)
+                        ? data.price_versions.map(version => version.id)
+                        : [data.price_versions.id],
                 }));
             }
         }
