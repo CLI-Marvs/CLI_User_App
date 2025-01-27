@@ -24,6 +24,7 @@ class NotifyAssignedCliOfResolvedInquiryJob implements ShouldQueue
         $this->employee_email = $employee_email;
         $this->assignee_name = $assignee_name;
         $this->data = $data;
+        
     }
     public function handle(Mailer $mailer)
     {
