@@ -2024,11 +2024,8 @@ class ConcernController extends Controller
             DB::raw('SUM(case when status = \'Resolved\' then 1 else 0 end) as Resolved'),
             DB::raw('SUM(case when status = \'unresolved\' then 1 else 0 end) as Unresolved'),
             DB::raw('SUM(case when status = \'Closed\' then 1 else 0 end) as Closed')
-
         )
-            ->whereYear('created_at', $year)
-            ->whereNotNull('property');
-
+            ->whereYear('created_at', $year);
 
         if ($project && $project !== 'All') {
             $query->where('property', $project);
