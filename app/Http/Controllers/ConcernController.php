@@ -1060,13 +1060,22 @@ class ConcernController extends Controller
             $query->where('status', $searchParams['status']);
         }
         if (!empty($searchParams['type'])) {
-            $query->where('communication_type', 'ILIKE', '%' . $searchParams['type'] . '%');
+            if ($searchParams['type'] === 'No Type') {
+                $query->whereNull('communication_type');
+            }else {
+                $query->where('communication_type', 'ILIKE', '%' . $searchParams['type'] . '%');
+            }
         }
         if (!empty($searchParams['selectedProperty'])) {
             $query->where('property', 'ILIKE', '%' . $searchParams['selectedProperty'] . '%');
         }
         if (!empty($searchParams['channels'])) {
-            $query->where('channels', $searchParams['channels']);
+            if ($searchParams['type'] === 'No Channel') {
+                $query->whereNull('channels');
+            }else {
+                $query->where('channels', $searchParams['channels']);
+            }
+           
         }
 
         if (!empty($searchParams['startDate'])) {
@@ -2149,9 +2158,8 @@ class ConcernController extends Controller
         // Query to count each <communication_t></communication_t>ype grouped by property
         $query = Concerns::select('communication_type', DB::raw('COUNT(*) as total'))
 
-
-            ->whereYear('created_at', $year)
-            ->whereNotNull('communication_type');
+            ->whereYear('created_at', $year);
+            
 
         if ($department && $department !== "All") {
             $query->whereRaw("resolve_from::jsonb @> ?", json_encode([['department' => $department]]));

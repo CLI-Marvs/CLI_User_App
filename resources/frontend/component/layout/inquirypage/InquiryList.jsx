@@ -106,7 +106,7 @@ const InquiryList = () => {
         setCurrentPage(selectedPage);
     };
 
-    console.log("statusFilter", statusFilter);
+    
 
     const handleRefresh = () => {
         setResultSearchActive(false);
@@ -436,7 +436,7 @@ const InquiryList = () => {
         setDepartments("");
     };
 
-    console.log("searchSummary", searchSummary);
+   
     useEffect(() => {
       /*   console.log("categoryParam", categoryParam);
         console.log("statusParam", statusParam);
@@ -446,7 +446,6 @@ const InquiryList = () => {
         console.log("channelsParam", channelsParam);
  */
 
-        console.log("trigger here");
         if (
             propertyParam ||
             statusParam ||
@@ -710,6 +709,9 @@ const InquiryList = () => {
                                                 <option value="Suggestion or Recommendation">
                                                     Suggestion or Recommendation
                                                 </option>
+                                                <option value="No Type">
+                                                    No Type
+                                                </option>
                                             </select>
                                         </div>
 
@@ -799,6 +801,9 @@ const InquiryList = () => {
                                                 </option>
                                                 <option value="Internal Endorsement">
                                                     Internal Endorsement
+                                                </option>
+                                                <option value="No Channel">
+                                                    No Channel
                                                 </option>
                                             </select>
                                         </div>

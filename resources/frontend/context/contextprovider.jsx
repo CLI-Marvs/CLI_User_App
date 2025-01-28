@@ -123,7 +123,6 @@ export const ContextProvider = ({ children }) => {
         }
     };
 
-    console.log("searchFilter", searchFilter);
     const getAllConcerns = async () => {
         if (token) {
             setLoading(true);
@@ -341,7 +340,7 @@ export const ContextProvider = ({ children }) => {
             );
             const result = response.data;
             const formattedData = result.map((item) => ({
-                name: item.communication_type,
+                name: item.communication_type || "No type",
                 value: item.total,
             }));
 
@@ -364,7 +363,7 @@ export const ContextProvider = ({ children }) => {
             const result = response.data;
 
             const formattedData = result.map((item) => ({
-                name: item.channels,
+                name: item.channels || "No Channel",
                 value: item.total,
             }));
 

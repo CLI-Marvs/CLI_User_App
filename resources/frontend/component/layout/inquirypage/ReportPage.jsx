@@ -119,7 +119,7 @@ const ReportPage = () => {
             Website: "#5B9BD5",
             "Social Media": "#175D5F",
             "Branch Tablet": "#404B52",
-            "Internal Endorsement": "#A5A5A5",
+            "Internal Endorsement": "#F3D48F",
         };
         return colors[name] || "#CCCCCC"; // Default to gray if no match
     };
@@ -307,7 +307,7 @@ const ReportPage = () => {
                 Website: "#5B9BD5", // Light blue
                 "Social Media": "#175d5f", // Dark green
                 "Branch Tablet": "#404B52", // Dark gray
-                "Internal Endorsement": "#a5a5a5", // Gray
+                "Internal Endorsement": "#F3D48F", // Gray
             };
 
             const dataType = label; // Or use payload[0].name if `label` is not directly available
@@ -452,38 +452,38 @@ const ReportPage = () => {
         "N/A",
         ...(Array.isArray(propertyNamesList) && propertyNamesList.length > 0
             ? propertyNamesList
-                  .filter((item) => !item.toLowerCase().includes("phase"))
-                  .map((item) => {
-                      let formattedItem = formatFunc(item);
+                .filter((item) => !item.toLowerCase().includes("phase"))
+                .map((item) => {
+                    let formattedItem = formatFunc(item);
 
-                      // Capitalize each word in the string
-                      formattedItem = formattedItem
-                          .split(" ")
-                          .map((word) => {
-                              // Check for specific words that need to be fully capitalized
-                              if (/^(Sjmv|Lpu|Cdo|Dgt)$/i.test(word)) {
-                                  return word.toUpperCase();
-                              }
-                              // Capitalize the first letter of all other words
-                              return (
-                                  word.charAt(0).toUpperCase() +
-                                  word.slice(1).toLowerCase()
-                              );
-                          })
-                          .join(" ");
+                    // Capitalize each word in the string
+                    formattedItem = formattedItem
+                        .split(" ")
+                        .map((word) => {
+                            // Check for specific words that need to be fully capitalized
+                            if (/^(Sjmv|Lpu|Cdo|Dgt)$/i.test(word)) {
+                                return word.toUpperCase();
+                            }
+                            // Capitalize the first letter of all other words
+                            return (
+                                word.charAt(0).toUpperCase() +
+                                word.slice(1).toLowerCase()
+                            );
+                        })
+                        .join(" ");
 
-                      // Replace specific names if needed
-                      if (formattedItem === "Casamira South") {
-                          formattedItem = "Casa Mira South";
-                      }
+                    // Replace specific names if needed
+                    if (formattedItem === "Casamira South") {
+                        formattedItem = "Casa Mira South";
+                    }
 
-                      return formattedItem;
-                  })
-                  .sort((a, b) => {
-                      if (a === "N/A") return -1;
-                      if (b === "N/A") return 1;
-                      return a.localeCompare(b);
-                  })
+                    return formattedItem;
+                })
+                .sort((a, b) => {
+                    if (a === "N/A") return -1;
+                    if (b === "N/A") return 1;
+                    return a.localeCompare(b);
+                })
             : []),
     ];
 
@@ -494,20 +494,20 @@ const ReportPage = () => {
 
     const allDepartment = allEmployees
         ? [
-              "All",
-              ...Array.from(
-                  new Set(
-                      allEmployees
-                          .map((employee) => employee.department)
-                          .filter(
-                              (department) =>
-                                  department !== null &&
-                                  department !== undefined &&
-                                  department !== "PM"
-                          )
-                  )
-              ),
-          ]
+            "All",
+            ...Array.from(
+                new Set(
+                    allEmployees
+                        .map((employee) => employee.department)
+                        .filter(
+                            (department) =>
+                                department !== null &&
+                                department !== undefined &&
+                                department !== "PM"
+                        )
+                )
+            ),
+        ]
         : ["All"];
 
     const handleInputChange = (e) => {
@@ -699,7 +699,7 @@ const ReportPage = () => {
                             >
                                 <option value="All">All</option>
                                 {user?.department ===
-                                "Customer Relations - Services" ? (
+                                    "Customer Relations - Services" ? (
                                     allDepartment
                                         .filter((item) => item !== "All")
                                         .sort()
@@ -1033,64 +1033,231 @@ const ReportPage = () => {
                                 Total: {totalValuetype}
                             </p>
                         </div>
-                        <div className="flex justify-end">
-                            <div className="flex items-center pr-3 py-2 gap-2">
-                                <span className="flex h-[20px] items-center pb-1 text-[#EB4444] text-2xl">
-                                    ●
-                                </span>
-                                <span className="text-custom-gray12 text-sm hover:underline hover:text-blue-500 cursor-pointer">
-                                    <Link
-                                        /*  to={`/inquirymanagement/inquirylist?type=Complaint&year=${encodeURIComponent(
-                                            yearValue
-                                        )}${
-                                            monthValue !== "All"
-                                                ? `&month=${encodeURIComponent(
-                                                      monthValue
-                                                  )}`
-                                                : ""
-                                        }${
-                                            departmentValue !== "All"
-                                                ? `&department=${encodeURIComponent(
-                                                      departmentValue
-                                                  )}`
-                                                : ""
-                                        }
-                                        ${
-                                            projectValue !== "All"
-                                                ? `&property=${encodeURIComponent(
-                                                      projectValue
-                                                  )}`
-                                                : ""
-                                        }`} */
-                                        onClick={(e) => {
-                                            e.preventDefault();
-                                            setSearchFilter({
-                                                type: "Complaint",
-                                                selectedYear: yearValue,
-                                                selectedMonth:
-                                                    monthValue !== "All"
-                                                        ? monthValue
-                                                        : "",
-                                                departments:
-                                                    departmentValue !== "All"
-                                                        ? departmentValue
-                                                        : "",
-                                                selectedProperty:
-                                                    projectValue !== "All"
-                                                        ? projectValue
-                                                        : "",
-                                            });
-                                            navigate(
-                                                "/inquirymanagement/inquirylist"
-                                            );
-                                        }}
-                                    >
-                                        Complaints
-                                    </Link>
-                                </span>
+                        <div className="flex flex-col items-end ">
+                            <div className="flex">
+                                <div className="flex items-center pr-3 gap-2">
+                                    <span className="flex h-[20px] items-center pb-1 text-[#EB4444] text-2xl">
+                                        ●
+                                    </span>
+                                    <span className="text-custom-gray12 text-sm hover:underline hover:text-blue-500 cursor-pointer">
+                                        <Link
+                                            /*  to={`/inquirymanagement/inquirylist?type=Complaint&year=${encodeURIComponent(
+                                                yearValue
+                                            )}${
+                                                monthValue !== "All"
+                                                    ? `&month=${encodeURIComponent(
+                                                          monthValue
+                                                      )}`
+                                                    : ""
+                                            }${
+                                                departmentValue !== "All"
+                                                    ? `&department=${encodeURIComponent(
+                                                          departmentValue
+                                                      )}`
+                                                    : ""
+                                            }
+                                            ${
+                                                projectValue !== "All"
+                                                    ? `&property=${encodeURIComponent(
+                                                          projectValue
+                                                      )}`
+                                                    : ""
+                                            }`} */
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                setSearchFilter({
+                                                    type: "Complaint",
+                                                    selectedYear: yearValue,
+                                                    selectedMonth:
+                                                        monthValue !== "All"
+                                                            ? monthValue
+                                                            : "",
+                                                    departments:
+                                                        departmentValue !== "All"
+                                                            ? departmentValue
+                                                            : "",
+                                                    selectedProperty:
+                                                        projectValue !== "All"
+                                                            ? projectValue
+                                                            : "",
+                                                });
+                                                navigate(
+                                                    "/inquirymanagement/inquirylist"
+                                                );
+                                            }}
+                                        >
+                                            Complaints
+                                        </Link>
+                                    </span>
+                                </div>
+                                <div className="flex items-center pr-3 gap-2">
+                                    <span className="flex h-[20px] items-center pb-1 text-[#348017] text-2xl">
+                                        ●
+                                    </span>
+                                    <span className="text-custom-gray12 text-sm hover:underline hover:text-blue-500 cursor-pointer">
+                                        <Link
+                                            /*  to={`/inquirymanagement/inquirylist?type=Request&year=${encodeURIComponent(
+                                                yearValue
+                                            )}${
+                                                monthValue !== "All"
+                                                    ? `&month=${encodeURIComponent(
+                                                          monthValue
+                                                      )}`
+                                                    : ""
+                                            }${
+                                                departmentValue !== "All"
+                                                    ? `&department=${encodeURIComponent(
+                                                          departmentValue
+                                                      )}`
+                                                    : ""
+                                            }
+                                            ${
+                                                projectValue !== "All"
+                                                    ? `&property=${encodeURIComponent(
+                                                          projectValue
+                                                      )}`
+                                                    : ""
+                                            }`} */
+
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                setSearchFilter({
+                                                    type: "Request",
+                                                    selectedYear: yearValue,
+                                                    selectedMonth:
+                                                        monthValue !== "All"
+                                                            ? monthValue
+                                                            : "",
+                                                    departments:
+                                                        departmentValue !== "All"
+                                                            ? departmentValue
+                                                            : "",
+                                                    selectedProperty:
+                                                        projectValue !== "All"
+                                                            ? projectValue
+                                                            : "",
+                                                });
+                                                navigate(
+                                                    "/inquirymanagement/inquirylist"
+                                                );
+                                            }}
+                                        >
+                                            Requests
+                                        </Link>
+                                    </span>
+                                </div>
+                                <div className="flex items-center pr-3 gap-2">
+                                    <span className="flex h-[20px] items-center pb-1 text-[#1A73E8] text-2xl">
+                                        ●
+                                    </span>
+                                    <span className="text-custom-gray12 text-sm hover:underline hover:text-blue-500 cursor-pointer">
+                                        <Link
+                                            /* to={`/inquirymanagement/inquirylist?type=Inquiry&year=${encodeURIComponent(
+                                                yearValue
+                                            )}${
+                                                monthValue !== "All"
+                                                    ? `&month=${encodeURIComponent(
+                                                          monthValue
+                                                      )}`
+                                                    : ""
+                                            }${
+                                                departmentValue !== "All"
+                                                    ? `&department=${encodeURIComponent(
+                                                          departmentValue
+                                                      )}`
+                                                    : ""
+                                            }
+                                            ${
+                                                projectValue !== "All"
+                                                    ? `&property=${encodeURIComponent(
+                                                          projectValue
+                                                      )}`
+                                                    : ""
+                                            }`} */
+
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                setSearchFilter({
+                                                    type: "Inquiry",
+                                                    selectedYear: yearValue,
+                                                    selectedMonth:
+                                                        monthValue !== "All"
+                                                            ? monthValue
+                                                            : "",
+                                                    departments:
+                                                        departmentValue !== "All"
+                                                            ? departmentValue
+                                                            : "",
+                                                    selectedProperty:
+                                                        projectValue !== "All"
+                                                            ? projectValue
+                                                            : "",
+                                                });
+                                                navigate(
+                                                    "/inquirymanagement/inquirylist"
+                                                );
+                                            }}
+                                        >
+                                            Inquiries
+                                        </Link>
+                                    </span>
+                                </div>
+                                <div className="flex items-center pr-3 py-1 gap-2">
+                                    <span className="flex h-[20px] items-center pb-1 text-[#E4EA3B] text-2xl">
+                                        ●
+                                    </span>
+                                    <span className="text-custom-gray12 text-sm hover:underline hover:text-blue-500 cursor-pointer">
+                                        <Link
+                                            /*  to={`/inquirymanagement/inquirylist?type=Suggestion or Recommendation&year=${encodeURIComponent(
+                                                yearValue
+                                            )}${
+                                                monthValue !== "All"
+                                                    ? `&month=${encodeURIComponent(
+                                                          monthValue
+                                                      )}`
+                                                    : ""
+                                            }${
+                                                departmentValue !== "All"
+                                                    ? `&department=${encodeURIComponent(
+                                                          departmentValue
+                                                      )}`
+                                                    : ""
+                                            }
+                                            ${
+                                                projectValue !== "All"
+                                                    ? `&property=${encodeURIComponent(
+                                                          projectValue
+                                                      )}`
+                                                    : ""
+                                            }`} */
+
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                setSearchFilter({
+                                                    type: "Suggestion or Recommendation",
+                                                    selectedYear: yearValue,
+                                                    selectedMonth:
+                                                        monthValue !== "All"
+                                                            ? monthValue
+                                                            : "",
+                                                    departments:
+                                                        departmentValue !== "All"
+                                                            ? departmentValue
+                                                            : "",
+
+                                                });
+                                                navigate(
+                                                    "/inquirymanagement/inquirylist"
+                                                );
+                                            }}
+                                        >
+                                            Suggestion or recommendations
+                                        </Link>
+                                    </span>
+                                </div>
                             </div>
-                            <div className="flex items-center pr-3 py-2 gap-2">
-                                <span className="flex h-[20px] items-center pb-1 text-[#348017] text-2xl">
+                            <div className="flex items-center pr-3 gap-2">
+                                <span className="flex h-[20px] items-center pb-1 text-gray-400 text-2xl">
                                     ●
                                 </span>
                                 <span className="text-custom-gray12 text-sm hover:underline hover:text-blue-500 cursor-pointer">
@@ -1121,7 +1288,7 @@ const ReportPage = () => {
                                         onClick={(e) => {
                                             e.preventDefault();
                                             setSearchFilter({
-                                                type: "Request",
+                                                type: "No Type",
                                                 selectedYear: yearValue,
                                                 selectedMonth:
                                                     monthValue !== "All"
@@ -1141,116 +1308,7 @@ const ReportPage = () => {
                                             );
                                         }}
                                     >
-                                        Requests
-                                    </Link>
-                                </span>
-                            </div>
-                            <div className="flex items-center pr-3 py-2 gap-2">
-                                <span className="flex h-[20px] items-center pb-1 text-[#1A73E8] text-2xl">
-                                    ●
-                                </span>
-                                <span className="text-custom-gray12 text-sm hover:underline hover:text-blue-500 cursor-pointer">
-                                    <Link
-                                        /* to={`/inquirymanagement/inquirylist?type=Inquiry&year=${encodeURIComponent(
-                                            yearValue
-                                        )}${
-                                            monthValue !== "All"
-                                                ? `&month=${encodeURIComponent(
-                                                      monthValue
-                                                  )}`
-                                                : ""
-                                        }${
-                                            departmentValue !== "All"
-                                                ? `&department=${encodeURIComponent(
-                                                      departmentValue
-                                                  )}`
-                                                : ""
-                                        }
-                                        ${
-                                            projectValue !== "All"
-                                                ? `&property=${encodeURIComponent(
-                                                      projectValue
-                                                  )}`
-                                                : ""
-                                        }`} */
-
-                                        onClick={(e) => {
-                                            e.preventDefault();
-                                            setSearchFilter({
-                                                type: "Inquiry",
-                                                selectedYear: yearValue,
-                                                selectedMonth:
-                                                    monthValue !== "All"
-                                                        ? monthValue
-                                                        : "",
-                                                departments:
-                                                    departmentValue !== "All"
-                                                        ? departmentValue
-                                                        : "",
-                                                selectedProperty:
-                                                    projectValue !== "All"
-                                                        ? projectValue
-                                                        : "",
-                                            });
-                                            navigate(
-                                                "/inquirymanagement/inquirylist"
-                                            );
-                                        }}
-                                    >
-                                        Inquiries
-                                    </Link>
-                                </span>
-                            </div>
-                            <div className="flex items-center pr-3 py-2 gap-2">
-                                <span className="flex h-[20px] items-center pb-1 text-[#E4EA3B] text-2xl">
-                                    ●
-                                </span>
-                                <span className="text-custom-gray12 text-sm hover:underline hover:text-blue-500 cursor-pointer">
-                                    <Link
-                                        /*  to={`/inquirymanagement/inquirylist?type=Suggestion or Recommendation&year=${encodeURIComponent(
-                                            yearValue
-                                        )}${
-                                            monthValue !== "All"
-                                                ? `&month=${encodeURIComponent(
-                                                      monthValue
-                                                  )}`
-                                                : ""
-                                        }${
-                                            departmentValue !== "All"
-                                                ? `&department=${encodeURIComponent(
-                                                      departmentValue
-                                                  )}`
-                                                : ""
-                                        }
-                                        ${
-                                            projectValue !== "All"
-                                                ? `&property=${encodeURIComponent(
-                                                      projectValue
-                                                  )}`
-                                                : ""
-                                        }`} */
-
-                                        onClick={(e) => {
-                                            e.preventDefault();
-                                            setSearchFilter({
-                                                type: "Suggestion or Recommendation",
-                                                selectedYear: yearValue,
-                                                selectedMonth:
-                                                    monthValue !== "All"
-                                                        ? monthValue
-                                                        : "",
-                                                departments:
-                                                    departmentValue !== "All"
-                                                        ? departmentValue
-                                                        : "",
-
-                                            });
-                                            navigate(
-                                                "/inquirymanagement/inquirylist"
-                                            );
-                                        }}
-                                    >
-                                        Suggestion or recommendations
+                                        No Type
                                     </Link>
                                 </span>
                             </div>
@@ -1372,7 +1430,7 @@ const ReportPage = () => {
                                                             : "",
                                                     departments:
                                                         departmentValue !==
-                                                        "All"
+                                                            "All"
                                                             ? departmentValue
                                                             : "",
                                                     selectedProperty:
@@ -1429,7 +1487,7 @@ const ReportPage = () => {
                                                             : "",
                                                     departments:
                                                         departmentValue !==
-                                                        "All"
+                                                            "All"
                                                             ? departmentValue
                                                             : "",
                                                     selectedProperty:
@@ -1486,7 +1544,7 @@ const ReportPage = () => {
                                                             : "",
                                                     departments:
                                                         departmentValue !==
-                                                        "All"
+                                                            "All"
                                                             ? departmentValue
                                                             : "",
                                                     selectedProperty:
@@ -1543,7 +1601,7 @@ const ReportPage = () => {
                                                             : "",
                                                     departments:
                                                         departmentValue !==
-                                                        "All"
+                                                            "All"
                                                             ? departmentValue
                                                             : "",
                                                     selectedProperty:
@@ -1600,7 +1658,7 @@ const ReportPage = () => {
                                                             : "",
                                                     departments:
                                                         departmentValue !==
-                                                        "All"
+                                                            "All"
                                                             ? departmentValue
                                                             : "",
                                                     selectedProperty:
@@ -1657,7 +1715,7 @@ const ReportPage = () => {
                                                             : "",
                                                     departments:
                                                         departmentValue !==
-                                                        "All"
+                                                            "All"
                                                             ? departmentValue
                                                             : "",
                                                     selectedProperty:
@@ -1675,7 +1733,7 @@ const ReportPage = () => {
                                     </span>
                                 </div>
                                 <div className="flex items-center pr-3 gap-[11px] ">
-                                    <span className="flex h-[20px] items-center pb-1 text-custom-grayA5 text-2xl">
+                                    <span className="flex h-[20px] items-center pb-1 text-[#F3D48F] text-2xl">
                                         ●
                                     </span>
                                     <span className="text-custom-gray12 text-xs hover:underline hover:text-blue-500 cursor-pointer">
@@ -1715,7 +1773,7 @@ const ReportPage = () => {
                                                             : "",
                                                     departments:
                                                         departmentValue !==
-                                                        "All"
+                                                            "All"
                                                             ? departmentValue
                                                             : "",
                                                     selectedProperty:
@@ -1729,6 +1787,64 @@ const ReportPage = () => {
                                             }}
                                         >
                                             Internal Endorsement
+                                        </Link>
+                                    </span>
+                                </div>
+                                <div className="flex items-center pr-3 gap-[11px] ">
+                                    <span className="flex h-[20px] items-center pb-1 text-custom-grayA5 text-2xl">
+                                        ●
+                                    </span>
+                                    <span className="text-custom-gray12 text-xs hover:underline hover:text-blue-500 cursor-pointer">
+                                        <Link
+                                            /*  to={`/inquirymanagement/inquirylist?channels=Internal Endorsement&year=${encodeURIComponent(
+                                                yearValue
+                                            )}${
+                                                monthValue !== "All"
+                                                    ? `&month=${encodeURIComponent(
+                                                          monthValue
+                                                      )}`
+                                                    : ""
+                                            }${
+                                                departmentValue !== "All"
+                                                    ? `&department=${encodeURIComponent(
+                                                          departmentValue
+                                                      )}`
+                                                    : ""
+                                            }
+                                            ${
+                                                projectValue !== "All"
+                                                    ? `&property=${encodeURIComponent(
+                                                          projectValue
+                                                      )}`
+                                                    : ""
+                                            }`} */
+
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                setSearchFilter({
+                                                    channels:
+                                                        "No Channel",
+                                                    selectedYear: yearValue,
+                                                    selectedMonth:
+                                                        monthValue !== "All"
+                                                            ? monthValue
+                                                            : "",
+                                                    departments:
+                                                        departmentValue !==
+                                                            "All"
+                                                            ? departmentValue
+                                                            : "",
+                                                    selectedProperty:
+                                                        projectValue !== "All"
+                                                            ? projectValue
+                                                            : "",
+                                                });
+                                                navigate(
+                                                    "/inquirymanagement/inquirylist"
+                                                );
+                                            }}
+                                        >
+                                            No Channel
                                         </Link>
                                     </span>
                                 </div>
@@ -1806,7 +1922,7 @@ const ReportPage = () => {
                                                                     yearValue,
                                                                 selectedMonth:
                                                                     monthValue !==
-                                                                    "All"
+                                                                        "All"
                                                                         ? monthValue
                                                                         : "",
                                                             });
@@ -1842,7 +1958,7 @@ const ReportPage = () => {
                                                                 status: "Resolved",
                                                                 selectedMonth:
                                                                     monthValue !==
-                                                                    "All"
+                                                                        "All"
                                                                         ? monthValue
                                                                         : "",
                                                                 /* department: departmentValue, */
@@ -1879,7 +1995,7 @@ const ReportPage = () => {
                                                                     yearValue,
                                                                 selectedMonth:
                                                                     monthValue !==
-                                                                    "All"
+                                                                        "All"
                                                                         ? monthValue
                                                                         : "",
                                                                 /* department: departmentValue, */
@@ -1916,7 +2032,7 @@ const ReportPage = () => {
                                                                     yearValue,
                                                                 selectedMonth:
                                                                     monthValue !==
-                                                                    "All"
+                                                                        "All"
                                                                         ? monthValue
                                                                         : "",
                                                                 /* department: departmentValue, */
@@ -2126,14 +2242,14 @@ const ReportPage = () => {
                                                             setSearchFilter({
                                                                 departments:
                                                                     item.name !==
-                                                                    "All"
+                                                                        "All"
                                                                         ? item.name
                                                                         : "",
                                                                 selectedYear:
                                                                     yearValue,
                                                                 selectedMonth:
                                                                     monthValue !==
-                                                                    "All"
+                                                                        "All"
                                                                         ? monthValue
                                                                         : "",
                                                                 /* department: departmentValue, */
@@ -2169,7 +2285,7 @@ const ReportPage = () => {
                                                             setSearchFilter({
                                                                 departments:
                                                                     item.name !==
-                                                                    "All"
+                                                                        "All"
                                                                         ? item.name
                                                                         : "",
                                                                 selectedYear:
@@ -2177,7 +2293,7 @@ const ReportPage = () => {
                                                                 status: "Resolved",
                                                                 selectedMonth:
                                                                     monthValue !==
-                                                                    "All"
+                                                                        "All"
                                                                         ? monthValue
                                                                         : "",
                                                                 /* department: departmentValue, */
@@ -2213,7 +2329,7 @@ const ReportPage = () => {
                                                             setSearchFilter({
                                                                 departments:
                                                                     item.name !==
-                                                                    "All"
+                                                                        "All"
                                                                         ? item.name
                                                                         : "",
                                                                 status: "Closed",
@@ -2221,7 +2337,7 @@ const ReportPage = () => {
                                                                     yearValue,
                                                                 selectedMonth:
                                                                     monthValue !==
-                                                                    "All"
+                                                                        "All"
                                                                         ? monthValue
                                                                         : "",
                                                                 /* department: departmentValue, */
@@ -2257,7 +2373,7 @@ const ReportPage = () => {
                                                             setSearchFilter({
                                                                 departments:
                                                                     item.name !==
-                                                                    "All"
+                                                                        "All"
                                                                         ? item.name
                                                                         : "",
                                                                 status: "unresolved",
@@ -2265,7 +2381,7 @@ const ReportPage = () => {
                                                                     yearValue,
                                                                 selectedMonth:
                                                                     monthValue !==
-                                                                    "All"
+                                                                        "All"
                                                                         ? monthValue
                                                                         : "",
                                                                 /* department: departmentValue, */
@@ -2360,9 +2476,9 @@ const ReportPage = () => {
                                 </PieChart>
                             </div>
                             <div className="flex w-full justify-center">
-                                    <div className="flex w-[150px] py-4 justify-center"> {/* dummy div to align the chart */}
-                                        <p className="font-bold text-[20px]">Total: {totalValuetype}</p>
-                                    </div>
+                                <div className="flex w-[150px] py-4 justify-center"> {/* dummy div to align the chart */}
+                                    <p className="font-bold text-[20px]">Total: {totalValuetype}</p>
+                                </div>
                             </div>
                             <div className="flex justify-center w-full">
                                 <div className="flex w-[150px]"></div>{" "}
@@ -2398,19 +2514,19 @@ const ReportPage = () => {
                                                                             category.name,
                                                                         departments:
                                                                             departmentValue !==
-                                                                            "All"
+                                                                                "All"
                                                                                 ? departmentValue
                                                                                 : "",
                                                                         selectedYear:
                                                                             yearValue,
                                                                         selectedMonth:
                                                                             monthValue !==
-                                                                            "All"
+                                                                                "All"
                                                                                 ? monthValue
                                                                                 : "",
                                                                         selectedProperty:
                                                                             projectValue !==
-                                                                            "All"
+                                                                                "All"
                                                                                 ? projectValue
                                                                                 : "",
                                                                     }
