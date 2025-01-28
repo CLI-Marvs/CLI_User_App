@@ -106,7 +106,6 @@ const InquiryList = () => {
         setCurrentPage(selectedPage);
     };
 
-    
 
     const handleRefresh = () => {
         setResultSearchActive(false);
@@ -367,7 +366,6 @@ const InquiryList = () => {
 
 
     const handleSearch = () => {
-        console.log("selectedProprt", selectedProperty);
         setResultSearchActive(true);
         let summaryParts = []; // Array to hold each part of the summary
 
@@ -460,7 +458,6 @@ const InquiryList = () => {
 
             let summaryParts = []; // Array to hold each part of the summary
 
-            console.log("statusParam", statusParam);
             if (categoryParam)
                 summaryParts.push(`Category: ${categoryParam}`);
             if (statusParam) {
