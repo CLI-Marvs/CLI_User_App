@@ -611,6 +611,10 @@ const ReportPage = () => {
         (total, type) => total + type.value,
         0
     );
+    const totalValueCategory = dataCategory.reduce(
+        (total, category) => total + category.value,
+        0
+    );
 
     
 
@@ -2371,7 +2375,7 @@ const ReportPage = () => {
                             </div>
                             <div className="flex w-full justify-center">
                                     <div className="flex w-[150px] py-4 justify-center"> {/* dummy div to align the chart */}
-                                        <p className="font-bold text-[20px]">Total: {totalValuetype}</p>
+                                        <p className="font-bold text-[20px]">Total: {totalValueCategory}</p>
                                     </div>
                             </div>
                             <div className="flex justify-center w-full">
