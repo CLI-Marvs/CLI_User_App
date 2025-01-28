@@ -802,7 +802,7 @@ const InquiryList = () => {
                                         <div className="flex bg-red-900 justify-start w-full relative">
                                             <label
                                                 htmlFor=""
-                                                className="w-full border-b-2"
+                                                className="w-full border-b-2" 
                                             >
                                                 {""}
                                             </label>
