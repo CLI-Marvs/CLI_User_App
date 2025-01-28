@@ -127,7 +127,7 @@ export const ContextProvider = ({ children }) => {
         }
     };
 
-    console.log("searchFilter", searchFilter);
+    
     const getAllConcerns = async () => {
         if (token) {
             setLoading(true);

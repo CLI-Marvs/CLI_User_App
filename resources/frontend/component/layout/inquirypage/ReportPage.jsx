@@ -612,7 +612,7 @@ const ReportPage = () => {
         0
     );
 
-    console.log("yearValue", yearValue);
+    
 
     return (
         <div className="h-screen bg-custom-grayFA p-4 flex flex-col gap-[21px]">
