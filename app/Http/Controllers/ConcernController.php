@@ -1070,7 +1070,7 @@ class ConcernController extends Controller
             $query->where('property', 'ILIKE', '%' . $searchParams['selectedProperty'] . '%');
         }
         if (!empty($searchParams['channels'])) {
-            if ($searchParams['type'] === 'No Channel') {
+            if ($searchParams['channels'] === 'No Channel') {
                 $query->whereNull('channels');
             }else {
                 $query->where('channels', $searchParams['channels']);
@@ -2102,8 +2102,7 @@ class ConcernController extends Controller
 
         $query = Concerns::select('channels', DB::raw('COUNT(*) as total'))
 
-            ->whereYear('created_at', $year)
-            ->whereNotNull('channels');
+            ->whereYear('created_at', $year);
 
         if ($department && $department !== "All") {
             $query->whereRaw("resolve_from::jsonb @> ?", json_encode([['department' => $department]]));
