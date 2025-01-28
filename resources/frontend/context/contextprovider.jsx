@@ -14,8 +14,8 @@ import { json } from "react-router-dom";
 const StateContext = createContext({
     user: null,
     token: null,
-    setUser: () => { },
-    setToken: () => { },
+    setUser: () => {},
+    setToken: () => {},
 });
 
 export const ContextProvider = ({ children }) => {
@@ -30,6 +30,8 @@ export const ContextProvider = ({ children }) => {
     const [notifStatus, setNotifStatus] = useState("");
     const [specificAssigneeCsr, setSpecificAssigneeCsr] = useState("");
     const [currentPage, setCurrentPage] = useState(0);
+    const [selectedOption, setSelectedOption] = useState("All");
+
     const [notifCurrentPage, setNotifCurrentPage] = useState(0);
     const [searchFilter, setSearchFilter] = useState({});
     const [data, setData] = useState([]);
@@ -50,21 +52,25 @@ export const ContextProvider = ({ children }) => {
     const [specificInquiry, setSpecificInquiry] = useState(null);
     const [dataSet, setDataSet] = useState([]);
 
-
     const [department, setDepartment] = useState("All");
     const [project, setProject] = useState("All");
     const [month, setMonth] = useState("All");
     const [year, setYear] = useState("");
     const [fullYear, setFullYear] = useState([]);
 
+    const [activeDayButton, setActiveDayButton] = useState(null);
+
     const [departmentStatusYear, setDepartmentStatusYear] = useState("");
-    const [inquiriesPerCategoryYear, setInquiriesPerCategoryYear] = useState("");
-    const [inquiriesPerPropertyYear, setInquiriesPerPropertyYear] = useState("");
+    const [inquiriesPerCategoryYear, setInquiriesPerCategoryYear] =
+        useState("");
+    const [inquiriesPerPropertyYear, setInquiriesPerPropertyYear] =
+        useState("");
     const [communicationTypeYear, setCommunicationTypeYear] = useState("");
     const [isDepartmentInitialized, setIsDepartmentInitialized] =
         useState(false);
     const [inquiriesPerChanelYear, setInquiriesPerChanelYear] = useState("");
-    const [inquiriesPerChannelMonth, setInquiriesPerChannelMonth] = useState("");
+    const [inquiriesPerChannelMonth, setInquiriesPerChannelMonth] =
+        useState("");
     const [pricingMasterLists, setPricingMasterLists] = useState([]);
     const [bannerLists, setBannerLists] = useState([]);
     const [paymentSchemes, setPaymentSchemes] = useState([]);
@@ -96,12 +102,23 @@ export const ContextProvider = ({ children }) => {
     const [isUserTypeChange, setIsUserTypeChange] = useState(false);
     const [userAccessData, setUserAccessData] = useState([]); //Holds the user and department access data
     const [permissions, setPermissions] = useState({});
+    const [searchSummary, setSearchSummary] = useState("");
+    const [resultSearchActive, setResultSearchActive] = useState(false);
+    const [departmentValue, setDepartmentValue] = useState("All");
+    const [projectValue, setProjectValue] = useState("All");
+    const [yearValue, setYearValue] = useState(new Date().getFullYear());
+    const [monthValue, setMonthValue] = useState("All");
+
+
 
     useEffect(() => {
         if (user && user.department && !isDepartmentInitialized) {
-            setDepartment(user.department === "Customer Relations - Services" ? "All" : user.department);
+            setDepartment(
+                user.department === "Customer Relations - Services"
+                    ? "All"
+                    : user.department
+            );
             setIsDepartmentInitialized(true);
-
         }
     }, [user, isDepartmentInitialized]);
 
@@ -141,6 +158,7 @@ export const ContextProvider = ({ children }) => {
     const hasPermission = (permissionName) => {
         return permissions[permissionName]?.can_read || false;
     };
+    console.log("searchFilter", searchFilter);
     const getAllConcerns = async () => {
         if (token) {
             setLoading(true);
@@ -193,12 +211,13 @@ export const ContextProvider = ({ children }) => {
             const searchParams = new URLSearchParams({
                 /*   search: JSON.stringify(searchFilter), */
                 page: currentPageTransaction + 1,
-                bank_name: bankNames ? bankNames : null
+                bank_name: bankNames ? bankNames : null,
             }).toString();
-            const response = await apiService.get(`get-transactions?${searchParams}`);
+            const response = await apiService.get(
+                `get-transactions?${searchParams}`
+            );
             setTransactions(response.data.data);
             setTransactionsPageCount(response.data.last_page);
-
         } catch (error) {
             console.error("Error fetching data: ", error);
         }
@@ -221,7 +240,9 @@ export const ContextProvider = ({ children }) => {
                 dueDate: filterDueDate ? filterDueDate : null,
                 page: currentPageInvoices,
             });
-            const response = await apiService.get(`get-invoices?${searchParams}`);
+            const response = await apiService.get(
+                `get-invoices?${searchParams}`
+            );
             setInvoices(response.data.data);
             setInvoicesPageCount(response.data.last_page);
         } catch (error) {
@@ -230,10 +251,14 @@ export const ContextProvider = ({ children }) => {
     };
 
     const fetchCategory = async () => {
-       
         try {
             const response = await apiService.get("category-monthly", {
-                params: { department: department, property: project, month: month, year: year },
+                params: {
+                    department: department,
+                    property: project,
+                    month: month,
+                    year: year,
+                },
             });
             const result = response.data;
             const formattedData = result.map((item) => ({
@@ -245,7 +270,6 @@ export const ContextProvider = ({ children }) => {
             console.log("Error retrieving data", error);
         }
     };
-
 
     const getPropertyNames = async () => {
         if (token) {
@@ -261,19 +285,27 @@ export const ContextProvider = ({ children }) => {
     const fetchDataReport = async () => {
         try {
             const response = await apiService.get("report-monthly", {
-                params: { department: department, property: project, month: month, year: year },
+                params: {
+                    department: department,
+                    property: project,
+                    month: month,
+                    year: year,
+                },
             });
             const result = response.data;
-           
+
             const filteredResult = result.filter(
-                (item) => item.resolved !== 0 || item.unresolved !== 0 || item.closed !== 0
+                (item) =>
+                    item.resolved !== 0 ||
+                    item.unresolved !== 0 ||
+                    item.closed !== 0
             );
 
             const formattedData = filteredResult.map((item) => ({
                 name: item.month.toString().padStart(2, "0"),
                 Resolved: item.resolved,
                 Unresolved: item.unresolved,
-                Closed: item.closed
+                Closed: item.closed,
             }));
 
             setDataSet(formattedData);
@@ -289,12 +321,12 @@ export const ContextProvider = ({ children }) => {
                     month: month,
                     property: project,
                     department: department,
-                    year: year
+                    year: year,
                 },
             });
             const result = response.data;
             const formattedData = result.map((item) => ({
-                name: item.property,
+                name: item.property ?? "Property not specified (Direct email)",
                 resolved: item.resolved,
                 unresolved: item.unresolved,
                 closed: item.closed,
@@ -306,15 +338,13 @@ export const ContextProvider = ({ children }) => {
     };
 
     const getInquiriesPerDepartment = async () => {
-
-
         try {
             const response = await apiService.get("inquiries-department", {
                 params: {
                     month: month,
                     property: project,
                     department: department,
-                    year: year
+                    year: year,
                 },
             });
             const result = response.data;
@@ -324,7 +354,7 @@ export const ContextProvider = ({ children }) => {
                 unresolved: item.unresolved,
                 closed: item.closed,
             }));
-            
+
             setDataDepartment(formattedData);
         } catch (error) {
             console.log("error retrieving", error);
@@ -332,16 +362,18 @@ export const ContextProvider = ({ children }) => {
     };
 
     const getCommunicationTypePerProperty = async () => {
-
         try {
-            const response = await apiService.get("communication-type-property", {
-                params: {
-                    month: month,
-                    property: project,
-                    department: department,
-                    year: year
-                },
-            });
+            const response = await apiService.get(
+                "communication-type-property",
+                {
+                    params: {
+                        month: month,
+                        property: project,
+                        department: department,
+                        year: year,
+                    },
+                }
+            );
             const result = response.data;
             const formattedData = result.map((item) => ({
                 name: item.communication_type,
@@ -355,18 +387,16 @@ export const ContextProvider = ({ children }) => {
     };
 
     const getInquiriesPerChannel = async () => {
-
         try {
             const response = await apiService.get("inquiries-channel", {
                 params: {
                     month: month,
                     property: project,
                     department: department,
-                    year: year
+                    year: year,
                 },
             });
             const result = response.data;
-
 
             const formattedData = result.map((item) => ({
                 name: item.channels,
@@ -404,7 +434,8 @@ export const ContextProvider = ({ children }) => {
         if (token) {
             try {
                 const response = await apiService.get(
-                    `notifications?page=${notifCurrentPage + 1}&status=${notifStatus || ""
+                    `notifications?page=${notifCurrentPage + 1}&status=${
+                        notifStatus || ""
                     }`
                 );
                 setNotifications(response.data.data);
@@ -420,7 +451,9 @@ export const ContextProvider = ({ children }) => {
             try {
                 const encodedTicketId = encodeURIComponent(ticketId);
 
-                const response = await apiService.get(`navbar-data?ticketId=${encodedTicketId}`);
+                const response = await apiService.get(
+                    `navbar-data?ticketId=${encodedTicketId}`
+                );
 
                 const data = response.data;
 
@@ -485,7 +518,6 @@ export const ContextProvider = ({ children }) => {
             console.log("error retrieving", error);
         }
     };
-
 
     const getMessages = async (ticketId) => {
         /* if (messages[id]) return; */
@@ -605,9 +637,7 @@ export const ContextProvider = ({ children }) => {
 
     const getBannerData = async () => {
         try {
-            const response = await apiService.get(
-                "get-banner"
-            );
+            const response = await apiService.get("get-banner");
             setBannerLists(response.data.data);
         } catch (error) {
             console.log("error", error);
@@ -718,7 +748,7 @@ export const ContextProvider = ({ children }) => {
 
     useEffect(() => {
         getInvoices();
-    }, [currentPageInvoices, filterDueDate])
+    }, [currentPageInvoices, filterDueDate]);
 
     /*  useEffect(() => {
          getNotifications();
@@ -746,7 +776,6 @@ export const ContextProvider = ({ children }) => {
 
     //* For Report Page
     useEffect(() => {
-
         const fetchData = async () => {
             try {
                 await getInquiriesPerDepartment();
@@ -757,14 +786,26 @@ export const ContextProvider = ({ children }) => {
                 await getInquiriesPerChannel();
 
                 await getFullYear();
-                
             } catch (error) {
                 console.error("Error fetching data:", error);
             }
         };
 
         fetchData();
-    }, [department, propertyMonth, month, project, year, departmentStatusYear, inquiriesPerCategoryYear, inquiriesPerPropertyYear, communicationTypeYear, communicationTypeMonth, inquiriesPerChannelMonth, inquiriesPerChanelYear]);
+    }, [
+        department,
+        propertyMonth,
+        month,
+        project,
+        year,
+        departmentStatusYear,
+        inquiriesPerCategoryYear,
+        inquiriesPerPropertyYear,
+        communicationTypeYear,
+        communicationTypeMonth,
+        inquiriesPerChannelMonth,
+        inquiriesPerChanelYear,
+    ]);
 
     return (
         <StateContext.Provider
@@ -906,8 +947,23 @@ export const ContextProvider = ({ children }) => {
                 setUserAccessData,
                 hasPermission,
 
+                selectedOption,
+                setSelectedOption,
+                setActiveDayButton,
+                activeDayButton,
+                searchSummary,
+                setSearchSummary,
+                resultSearchActive,
+                setResultSearchActive,
+                setDepartmentValue,
+                departmentValue,
+                setProjectValue,
+                projectValue,
+                setYearValue,
+                yearValue,
+                setMonthValue,
+                monthValue
             }}
-
         >
             {children}
         </StateContext.Provider>
