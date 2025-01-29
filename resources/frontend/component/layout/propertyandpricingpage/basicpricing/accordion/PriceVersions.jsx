@@ -9,6 +9,8 @@ import moment from "moment";
 import { usePricing } from "@/component/layout/propertyandpricingpage/basicpricing/context/BasicPricingContext";
 import { HiPencil } from "react-icons/hi";
 import { MdDelete } from "react-icons/md";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 const PriceVersions = ({ priceListMasterData, action }) => {
     //States
@@ -18,7 +20,8 @@ const PriceVersions = ({ priceListMasterData, action }) => {
     const { pricingData, updatePricingSection, setPricingData } = usePricing();
     const [versionIndex, setVersionIndex] = useState(0);
     const [selectedPaymentSchemes, setSelectedPaymentSchemes] = useState([]);
-
+    const [isDatePickerVisible, setIsDatePickerVisible] = useState(false);
+    const [startDate, setStartDate] = useState(null);
     // const { paymentScheme, fetchPaymentSchemes } = usePaymentScheme();
     // const [selectedPaymentSchemes, setSelectedPaymentSchemes] = useState([]);
     console.log("pricingData", pricingData);
@@ -28,21 +31,34 @@ const PriceVersions = ({ priceListMasterData, action }) => {
     const handlePriceVersionInputChange = (event, formIndex) => {
         const { name, value } = event.target;
 
-        // Map through the priceVersions object and update the correct entry by index
-        const updatedPriceVersions = Object.entries(
-            pricingData?.priceVersions || {}
-        ).map(([key, version], index) =>
-            index === formIndex ? { ...version, [name]: value } : version
-        );
+        // Ensure pricingData and priceVersions are valid
+        if (!Array.isArray(pricingData?.priceVersions)) {
+            console.error(
+                "pricingData.priceVersions is not an array",
+                pricingData?.priceVersions
+            );
+            return; // If it's not an array, return early to avoid further issues
+        }
 
-        // Convert back to object format after updating
-        const updatedPriceVersionsObject = Object.fromEntries(
-            Object.keys(pricingData?.priceVersions || {}).map((key, index) => [
-                key,
-                updatedPriceVersions[index],
-            ])
-        );
-        updatePricingSection("priceVersions", updatedPriceVersionsObject);
+        const updatedPriceVersions = [...pricingData.priceVersions]; // Make a copy of the priceVersions array
+
+        // Check if formIndex is within bounds
+        if (formIndex >= updatedPriceVersions.length || formIndex < 0) {
+            console.error("Form index is out of bounds");
+            return; // If index out of bounds, return early
+        }
+
+        // Update the specific form object at the given index
+        updatedPriceVersions[formIndex] = {
+            ...updatedPriceVersions[formIndex],
+            [name]: value, // Update only the changed field
+        };
+
+        // After updating, update the state with the new priceVersions
+        setPricingData((prevPricingData) => ({
+            ...prevPricingData,
+            priceVersions: updatedPriceVersions,
+        }));
     };
 
     /**
@@ -60,47 +76,51 @@ const PriceVersions = ({ priceListMasterData, action }) => {
     //Handle click to iterate more fields
     const handleAddFields = () => {
         setPricingData((prev) => {
-            // Copy the current priceVersions object
-            const currentPriceVersions = { ...prev.priceVersions };
+            // Ensure priceVersions is always an array
+            const priceVersions = Array.isArray(prev.priceVersions)
+                ? [...prev.priceVersions] // Make sure priceVersions is always an array
+                : []; // Default to empty array if it's not
 
-            // Find the next numeric key for the new priceVersion
-            const nextKey = Object.keys(currentPriceVersions).length.toString();
-
-            // Add the new priceVersion
-            currentPriceVersions[nextKey] = {
+            // Add a new price version
+            priceVersions.push({
                 name: "",
                 percent_increase: 0,
                 no_of_allowed_buyers: 0,
-                expiry_date: moment(new Date()).format("MM-DD-YYYY HH:mm:ss"),
+                expiry_date: moment().isValid()
+                    ? moment(new Date()).format("MM-DD-YYYY HH:mm:ss")
+                    : "", // Safe fallback for expiry_date
                 payment_scheme: [],
-            };
+            });
 
-            // Return the updated state
+            // Update the state
             return {
                 ...prev,
-                priceVersions: currentPriceVersions,
+                priceVersions: priceVersions, // Add the newly updated array
             };
         });
     };
 
     //Handle remove the fields
     const handleRemoveFields = (index) => {
-        // Copy the existing priceVersions object
-        const updatedPriceVersions = { ...pricingData.priceVersions };
+        //TODO: KUNG Edit mode, then ang versions kay naa nay data, if iyang e remove, ma remove siya but ang status sa price versions kay ma in active na isya
+        setPricingData((prev) => {
+            // Copy the current priceVersions array
+            const updatedPriceVersions = [...prev.priceVersions];
 
-        // Delete the specific key from the object
-        delete updatedPriceVersions[index];
+            // Remove the item at the specified index using splice
+            updatedPriceVersions.splice(index, 1);
 
-        // Update the state with the modified priceVersions
-        setPricingData({
-            ...pricingData,
-            priceVersions: updatedPriceVersions,
+            // Return the updated state
+            return {
+                ...prev,
+                priceVersions: updatedPriceVersions,
+            };
         });
     };
 
     /**
      * Handle remove selected payment scheme
-     * Copy the existing priceVersions object in
+     * Copy the existing priceVersions object
      * Delete the specific key from the object
      * Set again the payment_scheme array to null
      * @param {*} index
@@ -124,10 +144,36 @@ const PriceVersions = ({ priceListMasterData, action }) => {
             editPaymentSchemeModalRef.current.showModal();
         }
     };
+
+    //Handle date change
+    const handleDateChange = (date, formIndex) => {
+        // You can set the date field based on your specific naming convention for form fields
+
+        const updatedPriceVersions = Object.fromEntries(
+            Object.keys(pricingData?.priceVersions || {}).map(
+                (versionKey, index) =>
+                    index === formIndex
+                        ? [
+                              versionKey, // retain the original key
+                              {
+                                  ...pricingData.priceVersions[versionKey],
+                                  expiry_date: moment(date).format(
+                                      "MM-DD-YYYY HH:mm:ss"
+                                  ),
+                              },
+                          ]
+                        : [versionKey, pricingData.priceVersions[versionKey]]
+            )
+        );
+
+        // Update pricing section after updating
+        updatePricingSection("priceVersions", updatedPriceVersions);
+    };
+
     return (
         <>
             <div
-                className={`transition-all duration-2000 ease-in-out
+                className={`transition-all duration-2000 ease-in-out relative
       ${
           accordionOpen
               ? "h-[74px] mx-5 bg-white shadow-custom5 rounded-[10px]"
@@ -198,190 +244,213 @@ const PriceVersions = ({ priceListMasterData, action }) => {
                                         </tr>
                                     </thead>
                                     {pricingData &&
-                                        Object.keys(
+                                        Array.isArray(
                                             pricingData?.priceVersions
-                                        ).map((form, index) => {
-                                            const paymentScheme =
-                                                pricingData?.priceVersions[
-                                                    index
-                                                ]?.payment_scheme;
+                                        ) &&
+                                        pricingData?.priceVersions.map(
+                                            (form, index) => {
+                                                const paymentScheme =
+                                                    pricingData?.priceVersions[
+                                                        index
+                                                    ]?.payment_scheme;
 
-                                            return (
-                                                <tbody>
-                                                    <tr className="h-[66px] bg-white text-sm">
-                                                        <td className="px-[10px]">
-                                                            <input
-                                                                type="text"
-                                                                name="name"
-                                                                className="pl-3 w-[150px] border border-custom-grayF1 rounded-[5px] h-[31px]"
-                                                                value={
-                                                                    form.name
-                                                                }
-                                                                onChange={(
-                                                                    event
-                                                                ) =>
-                                                                    handlePriceVersionInputChange(
-                                                                        event,
-                                                                        index
-                                                                    )
-                                                                }
-                                                            />
-                                                        </td>
-                                                        <td className="px-[10px]">
-                                                            <input
-                                                                type="number"
-                                                                name="percent_increase"
-                                                                className="pl-3 w-[100px] border border-custom-grayF1 rounded-[5px] h-[31px]"
-                                                                value={
-                                                                    form.percent_increase
-                                                                }
-                                                                onChange={(
-                                                                    event
-                                                                ) =>
-                                                                    handlePriceVersionInputChange(
-                                                                        event,
-                                                                        index
-                                                                    )
-                                                                }
-                                                            />
-                                                        </td>
-                                                        <td className="px-[10px]">
-                                                            <input
-                                                                type="number"
-                                                                className=" w-[100px] border 
+                                                return (
+                                                    <tbody>
+                                                        <tr
+                                                            className="h-[66px] bg-white text-sm"
+                                                            key={index}
+                                                        >
+                                                            <td className="px-[10px]">
+                                                                <input
+                                                                    type="text"
+                                                                    name="name"
+                                                                    className="pl-3 w-[150px] border border-custom-grayF1 rounded-[5px] h-[31px]"
+                                                                    value={
+                                                                        form.name
+                                                                    }
+                                                                    onChange={(
+                                                                        event
+                                                                    ) =>
+                                                                        handlePriceVersionInputChange(
+                                                                            event,
+                                                                            index
+                                                                        )
+                                                                    }
+                                                                />
+                                                            </td>
+                                                            <td className="px-[10px]">
+                                                                <input
+                                                                    type="number"
+                                                                    name="percent_increase"
+                                                                    className="pl-3 w-[100px] border border-custom-grayF1 rounded-[5px] h-[31px]"
+                                                                    value={
+                                                                        form.percent_increase
+                                                                    }
+                                                                    onChange={(
+                                                                        event
+                                                                    ) =>
+                                                                        handlePriceVersionInputChange(
+                                                                            event,
+                                                                            index
+                                                                        )
+                                                                    }
+                                                                />
+                                                            </td>
+                                                            <td className="px-[10px]">
+                                                                {/* TODO: add padding when typing data */}
+                                                                <input
+                                                                    type="number"
+                                                                    className=" w-[100px] border 
                                                         border-custom-grayF1 rounded-[5px] h-[31px]"
-                                                                name="no_of_allowed_buyers"
-                                                                value={
-                                                                    form.no_of_allowed_buyers
-                                                                }
-                                                                onChange={(
-                                                                    event
-                                                                ) =>
-                                                                    handlePriceVersionInputChange(
-                                                                        event,
-                                                                        index
-                                                                    )
-                                                                }
-                                                            />
-                                                        </td>
-                                                        <td className="px-[10px] flex items-center mt-5 gap-x-1">
-                                                            <input
-                                                                type="text"
-                                                                className=" w-[100px] border border-custom-grayF1 rounded-[5px] h-[31px]"
-                                                                placeholder="NA"
-                                                            />
-                                                            <FaRegCalendar className="size-5 text-custom-gray81 hover:text-red-500" />
-                                                        </td>
-                                                        <td className="">
-                                                            <div className="flex items-center">
-                                                                <div className="flex flex-1">
-                                                                    {paymentScheme &&
-                                                                    paymentScheme.length >
-                                                                        1 ? (
-                                                                        <div className="">
-                                                                            <p className="">
-                                                                                {paymentScheme.map(
-                                                                                    (
-                                                                                        scheme,
-                                                                                        schemeIndex
-                                                                                    ) => (
-                                                                                        <span
-                                                                                            className="h-auto bg-custom-lightestgreen rounded-lg px-1"
-                                                                                            key={
-                                                                                                schemeIndex
-                                                                                            }
-                                                                                        >
-                                                                                            {
-                                                                                                scheme?.payment_scheme_name
-                                                                                            }
-                                                                                            {schemeIndex <
-                                                                                                paymentScheme.length -
-                                                                                                    1 &&
-                                                                                                ", "}
-                                                                                        </span>
-                                                                                    )
-                                                                                )}
-                                                                            </p>
-                                                                        </div>
-                                                                    ) : (
-                                                                        <div className="flex items-center">
-                                                                            <p className="bg-custom-lightestgreen rounded-lg px-1">
-                                                                                {paymentScheme &&
-                                                                                    paymentScheme[0]
-                                                                                        ?.payment_scheme_name}
-                                                                            </p>
-                                                                        </div>
-                                                                    )}
-                                                                </div>
-                                                                <div>
-                                                                    {paymentScheme &&
-                                                                        paymentScheme.length >
-                                                                            0 && (
-                                                                            <div className="flex items-center">
-                                                                                <HiPencil
-                                                                                    onClick={() =>
-                                                                                        handleEditPaymentScheme(
-                                                                                            index
-                                                                                        )
-                                                                                    }
-                                                                                    className="text-custom-solidgreen h-6 w-6 cursor-pointer"
-                                                                                />
-                                                                                <MdDelete
-                                                                                    onClick={() =>
-                                                                                        handleRemovePaymentScheme(
-                                                                                            index
-                                                                                        )
-                                                                                    }
-                                                                                    className="text-red-500 h-6 w-6 cursor-pointer"
-                                                                                />
-                                                                            </div>
-                                                                        )}
-                                                                </div>
-                                                            </div>
-
-                                                            {paymentScheme &&
-                                                                paymentScheme.length ===
-                                                                    0 && (
-                                                                    <div className="flex justify-center items-center">
-                                                                        <button
-                                                                            className="gradient-btn5 p-[1px] w-[84px] h-[27px] rounded-[10px] mt-2"
-                                                                            onClick={() =>
-                                                                                handleShowPaymentSchemeModal(
-                                                                                    index
-                                                                                )
-                                                                            }
-                                                                        >
-                                                                            <div className="w-full h-full rounded-[9px] bg-white flex justify-center items-center text-sm montserrat-regular">
-                                                                                <p className="text-base bg-gradient-to-r from-custom-bluegreen via-custom-solidgreen to-custom-solidgreen bg-clip-text text-transparent">
-                                                                                    Add
-                                                                                    +
-                                                                                </p>
-                                                                            </div>
-                                                                        </button>
-                                                                    </div>
-                                                                )}
-                                                        </td>
-
-                                                        <td className="px-[10px]">
-                                                            {pricingData &&
-                                                                Object.keys(
-                                                                    pricingData?.priceVersions
-                                                                ).length >
-                                                                    1 && (
-                                                                    <IoIosCloseCircle
-                                                                        onClick={() =>
-                                                                            handleRemoveFields(
+                                                                    name="no_of_allowed_buyers"
+                                                                    value={
+                                                                        form.no_of_allowed_buyers
+                                                                    }
+                                                                    onChange={(
+                                                                        event
+                                                                    ) =>
+                                                                        handlePriceVersionInputChange(
+                                                                            event,
+                                                                            index
+                                                                        )
+                                                                    }
+                                                                />
+                                                            </td>
+                                                            <td className="px-[10px] flex items-center mt-4 gap-x-1">
+                                                                <div className=" flex gap-x-1   items-center">
+                                                                    <DatePicker
+                                                                        selected={
+                                                                            form.expiry_date
+                                                                        }
+                                                                        onChange={(
+                                                                            date
+                                                                        ) =>
+                                                                            handleDateChange(
+                                                                                date,
                                                                                 index
                                                                             )
                                                                         }
-                                                                        className="text-custom-gray h-6 w-6 cursor-pointer hover:text-red-500"
+                                                                        className="w-[100px] border border-custom-grayF1 rounded-[5px] h-[31px] pl-2"
+                                                                        name="expiry_date"
+                                                                        calendarClassName="custom-calendar"
+                                                                        
+                                                                        placeholderText="N/A"
                                                                     />
-                                                                )}
-                                                        </td>
-                                                    </tr>
-                                                </tbody>
-                                            );
-                                        })}
+
+                                                                    <FaRegCalendar className="size-5 text-custom-gray81 hover:text-red-500" />
+                                                                </div>
+                                                            </td>
+                                                            <td className="">
+                                                                <div className="flex items-center">
+                                                                    <div className="flex flex-1">
+                                                                        {paymentScheme &&
+                                                                        paymentScheme.length >
+                                                                            1 ? (
+                                                                            <div className="">
+                                                                                <p className="">
+                                                                                    {paymentScheme.map(
+                                                                                        (
+                                                                                            scheme,
+                                                                                            schemeIndex
+                                                                                        ) => (
+                                                                                            <span
+                                                                                                className="h-auto bg-custom-lightestgreen rounded-lg px-1"
+                                                                                                key={
+                                                                                                    schemeIndex
+                                                                                                }
+                                                                                            >
+                                                                                                {
+                                                                                                    scheme?.payment_scheme_name
+                                                                                                }
+                                                                                                {schemeIndex <
+                                                                                                    paymentScheme.length -
+                                                                                                        1 &&
+                                                                                                    ", "}
+                                                                                            </span>
+                                                                                        )
+                                                                                    )}
+                                                                                </p>
+                                                                            </div>
+                                                                        ) : (
+                                                                            <div className="flex items-center">
+                                                                                <p className="bg-custom-lightestgreen rounded-lg px-1">
+                                                                                    {paymentScheme &&
+                                                                                        paymentScheme[0]
+                                                                                            ?.payment_scheme_name}
+                                                                                </p>
+                                                                            </div>
+                                                                        )}
+                                                                    </div>
+                                                                    <div>
+                                                                        {paymentScheme &&
+                                                                            paymentScheme.length >
+                                                                                0 && (
+                                                                                <div className="flex items-center">
+                                                                                    <HiPencil
+                                                                                        onClick={() =>
+                                                                                            handleEditPaymentScheme(
+                                                                                                index
+                                                                                            )
+                                                                                        }
+                                                                                        className="text-custom-solidgreen h-6 w-6 cursor-pointer"
+                                                                                    />
+                                                                                    <MdDelete
+                                                                                        onClick={() =>
+                                                                                            handleRemovePaymentScheme(
+                                                                                                index
+                                                                                            )
+                                                                                        }
+                                                                                        className="text-red-500 h-6 w-6 cursor-pointer"
+                                                                                    />
+                                                                                </div>
+                                                                            )}
+                                                                    </div>
+                                                                </div>
+
+                                                                {paymentScheme &&
+                                                                    paymentScheme.length ===
+                                                                        0 && (
+                                                                        <div className="flex justify-center items-center">
+                                                                            <button
+                                                                                className="gradient-btn5 p-[1px] w-[84px] h-[27px] rounded-[10px] mt-2"
+                                                                                onClick={() =>
+                                                                                    handleShowPaymentSchemeModal(
+                                                                                        index
+                                                                                    )
+                                                                                }
+                                                                            >
+                                                                                <div className="w-full h-full rounded-[9px] bg-white flex justify-center items-center text-sm montserrat-regular">
+                                                                                    <p className="text-base bg-gradient-to-r from-custom-bluegreen via-custom-solidgreen to-custom-solidgreen bg-clip-text text-transparent">
+                                                                                        Add
+                                                                                        +
+                                                                                    </p>
+                                                                                </div>
+                                                                            </button>
+                                                                        </div>
+                                                                    )}
+                                                            </td>
+
+                                                            <td className="px-[10px]">
+                                                                {pricingData &&
+                                                                    Object.keys(
+                                                                        pricingData?.priceVersions
+                                                                    ).length >
+                                                                        1 && (
+                                                                        <IoIosCloseCircle
+                                                                            onClick={() =>
+                                                                                handleRemoveFields(
+                                                                                    index
+                                                                                )
+                                                                            }
+                                                                            className="text-custom-gray h-6 w-6 cursor-pointer hover:text-red-500"
+                                                                        />
+                                                                    )}
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                );
+                                            }
+                                        )}
                                 </table>
                                 <div className="flex justify-center mt-4">
                                     <button

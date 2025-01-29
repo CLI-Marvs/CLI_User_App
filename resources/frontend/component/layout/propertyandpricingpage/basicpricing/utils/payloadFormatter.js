@@ -14,6 +14,20 @@ export const formatPayload = {
         return formattedPriceListSettings;
     },
 
+    formatPriceVersionsPayload: (priceVersions = []) => {
+        const formattedPriceVersions = priceVersions.map((priceVersion) => {
+            const formattedPriceVersion = {
+                name: priceVersion.name,
+                percent_increase: parseInt(priceVersion.percent_increase) || 0,
+                no_of_allowed_buyers:
+                    parseInt(priceVersion.no_of_allowed_buyers) || 0,
+                expiry_date: priceVersion.expiry_date,
+                payment_scheme: priceVersion.payment_scheme,
+            };
+            return formattedPriceVersion;
+        });
+        return formattedPriceVersions;
+    },
     // formatPaymentSchemePayload: (paymentScheme) => {
     //     const formattedPaymentScheme = {
     //         payment_scheme_name: paymentScheme.paymentSchemeName,

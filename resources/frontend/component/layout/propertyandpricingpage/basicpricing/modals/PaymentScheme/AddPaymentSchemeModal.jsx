@@ -11,8 +11,8 @@ const AddPaymentSchemeModal = ({
     //States
     const { paymentScheme, fetchPaymentSchemes } = usePaymentScheme();
     const [selectedSchemes, setSelectedSchemes] = useState([]);
-    const { updatePricingSection, pricingData } = usePricing();
-    
+    const { updatePricingSection, pricingData, setPricingData } = usePricing();
+
     //Hooks
     useEffect(() => {
         fetchPaymentSchemes();
@@ -44,53 +44,56 @@ const AddPaymentSchemeModal = ({
     //Confirm the payment scheme selected
     const handleConfirm = () => {
         if (action === "Edit") {
-            // Map through the priceVersions object and update the correct entry by index
-            const updatedPriceVersions = Object.entries(
-                pricingData?.priceVersions || {}
-            ).map(([key, version], index) =>
-                index === versionIndex
-                    ? {
-                          ...version,
-                          payment_scheme: selectedSchemes?.paymentSchemes,
-                      }
-                    : version
+            // When editing, we directly modify the array, no need to convert to object
+            const updatedPriceVersions = pricingData?.priceVersions?.map(
+                (version, index) =>
+                    index === versionIndex
+                        ? {
+                              ...version,
+                              payment_scheme: selectedSchemes?.paymentSchemes,
+                          }
+                        : version
             );
-            // Convert back to object format after updating
-            const updatedPriceVersionsObject = Object.fromEntries(
-                Object.keys(pricingData?.priceVersions || {}).map(
-                    (key, index) => [key, updatedPriceVersions[index]]
-                )
+
+            console.log(
+                "updatedPriceVersions after edit",
+                updatedPriceVersions
             );
-            updatePricingSection("priceVersions", updatedPriceVersionsObject);
+            //   updatePricingSection("priceVersions", updatedPriceVersions); // Keep the array intact
+            setPricingData((prev) => ({
+                ...prev,
+                priceVersions: updatedPriceVersions,
+            }));
             if (addPaymentSchemeModalRef.current) {
+                setSelectedSchemes(null);
                 addPaymentSchemeModalRef.current.close();
             }
         } else {
             console.log("add payment scheme");
-            const updatedPriceVersions = Object.entries(
-                pricingData?.priceVersions || {}
-            ).map(([key, version], index) =>
-                index === versionIndex
-                    ? {
-                          ...version,
-                          payment_scheme: selectedSchemes
-                      }
-                    : version
+
+            // In the else block (for adding a version)
+            const updatedPriceVersions = pricingData?.priceVersions?.map(
+                (version, index) =>
+                    index === versionIndex
+                        ? {
+                              ...version,
+                              payment_scheme: selectedSchemes,
+                          }
+                        : version
             );
+
             console.log("updatedPriceVersions", updatedPriceVersions);
-            // Convert back to object format after updating
-            const updatedPriceVersionsObject = Object.fromEntries(
-                Object.keys(pricingData?.priceVersions || {}).map(
-                    (key, index) => [key, updatedPriceVersions[index]]
-                )
-            );
-            
-            updatePricingSection("priceVersions", updatedPriceVersionsObject);
+            console.log(Array.isArray(updatedPriceVersions)); // Should always be true
+
+            //   updatePricingSection("priceVersions", updatedPriceVersions); // Again, just work with the array
+            setPricingData((prev) => ({
+                ...prev,
+                priceVersions: updatedPriceVersions,
+            }));
             if (addPaymentSchemeModalRef.current) {
-                  setSelectedSchemes(null);
-                  addPaymentSchemeModalRef.current.close();
-              }
-            
+                setSelectedSchemes(null);
+                addPaymentSchemeModalRef.current.close();
+            }
         }
     };
 
@@ -146,7 +149,7 @@ const AddPaymentSchemeModal = ({
                 const isSelected = schemes.some(
                     (scheme) => scheme.id === schemeId
                 );
-               
+
                 const updatedPaymentSchemes = isSelected
                     ? schemes.filter((scheme) => scheme.id !== schemeId) // Remove the selected scheme
                     : [
@@ -190,7 +193,7 @@ const AddPaymentSchemeModal = ({
                                 }
                             />
                             <p className="montserrat-semibold text-[21px]">
-                                {item?.payment_scheme_name} ID: {item?.id}
+                                {item?.payment_scheme_name}
                             </p>
                         </div>
                         <div className="flex flex-col gap-1 text-sm pr-4">

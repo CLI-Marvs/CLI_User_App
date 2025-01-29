@@ -7,9 +7,9 @@ const EditPaymentSchemeModal = ({
     versionIndex,
 }) => {
     const [selectedPaymentSchemes, setSelectedPaymentSchemes] = useState([]);
-    const { updatePricingSection, pricingData } = usePricing();
+    const { updatePricingSection, pricingData , setPricingData} = usePricing();
     const { paymentScheme } = usePaymentScheme();
-    console.log("selectedPaymentSchemes", selectedPaymentSchemes);
+ 
     //Hooks
     /**
      * This effect is triggered when the versionIndex changes
@@ -26,9 +26,13 @@ const EditPaymentSchemeModal = ({
             const currentPaymentSchemeIds =
                 pricingData?.priceVersions?.[versionIndex]?.payment_scheme ||
                 [];
-            const selectedPaymentSchemes = paymentScheme.filter((scheme) =>
-                currentPaymentSchemeIds.some((item) => item.id === scheme.id)
-            );
+            const selectedPaymentSchemes =
+                paymentScheme &&
+                paymentScheme.filter((scheme) =>
+                    currentPaymentSchemeIds.some(
+                        (item) => item.id === scheme.id
+                    )
+                );
             setSelectedPaymentSchemes(selectedPaymentSchemes);
         }
     }, [paymentScheme, versionIndex, pricingData]);
@@ -38,26 +42,49 @@ const EditPaymentSchemeModal = ({
     //Confirm the payment scheme selected
     const handleConfirm = () => {
         console.log("add payment scheme");
-        const updatedPriceVersions = Object.entries(
-            pricingData?.priceVersions || {}
-        ).map(([key, version], index) =>
-            index === versionIndex
-                ? {
-                      ...version,
-                      payment_scheme: selectedPaymentSchemes,
-                  }
-                : version
-        );
-        console.log("updatedPriceVersions", updatedPriceVersions);
-        // Convert back to object format after updating
-        const updatedPriceVersionsObject = Object.fromEntries(
-            Object.keys(pricingData?.priceVersions || {}).map((key, index) => [
-                key,
-                updatedPriceVersions[index],
-            ])
+        // const updatedPriceVersions = Object.entries(
+        //     pricingData?.priceVersions || {}
+        // ).map(([key, version], index) =>
+        //     index === versionIndex
+        //         ? {
+        //               ...version,
+        //               payment_scheme: selectedPaymentSchemes,
+        //           }
+        //         : version
+        // );
+        // console.log("updatedPriceVersions", updatedPriceVersions);
+        // // Convert back to object format after updating
+        // const updatedPriceVersionsObject = Object.fromEntries(
+        //     Object.keys(pricingData?.priceVersions || {}).map((key, index) => [
+        //         key,
+        //         updatedPriceVersions[index],
+        //     ])
+        // );
+
+        // updatePricingSection("priceVersions", updatedPriceVersionsObject);
+        // if (editPaymentSchemeModalRef.current) {
+        //     editPaymentSchemeModalRef.current.close();
+        // }
+
+        // In the else block (for adding a version)
+        const updatedPriceVersions = pricingData?.priceVersions?.map(
+            (version, index) =>
+                index === versionIndex
+                    ? {
+                          ...version,
+                          payment_scheme: selectedPaymentSchemes,
+                      }
+                    : version
         );
 
-        updatePricingSection("priceVersions", updatedPriceVersionsObject);
+        console.log("updatedPriceVersions", updatedPriceVersions);
+        console.log(Array.isArray(updatedPriceVersions)); // Should always be true
+
+        //   updatePricingSection("priceVersions", updatedPriceVersions); // Again, just work with the array
+        setPricingData((prev) => ({
+            ...prev,
+            priceVersions: updatedPriceVersions,
+        }));
         if (editPaymentSchemeModalRef.current) {
             editPaymentSchemeModalRef.current.close();
         }

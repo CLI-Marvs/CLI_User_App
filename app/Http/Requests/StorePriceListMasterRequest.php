@@ -43,7 +43,7 @@ class StorePriceListMasterRequest extends FormRequest
             'priceVersionsPayload.*.name' => 'string',
             'priceVersionsPayload.*.percent_increase' => 'integer',
             'priceVersionsPayload.*.no_of_allowed_buyers' => 'integer',
-            'priceVersionsPayload.*.expiry_date' => 'date_format:m-d-Y H:i:s',
+            'priceVersionsPayload.*.expiry_date' => 'nullable | date_format:m-d-Y H:i:s',
             'priceVersionsPayload.*.payment_scheme' => 'array',
 
 

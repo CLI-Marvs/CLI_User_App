@@ -18,9 +18,12 @@ const initialState = () => ({
             name: "",
             percent_increase: 0,
             no_of_allowed_buyers: 0,
-            expiry_date: moment(new Date()).format("MM-DD-YYYY HH:mm:ss"),
-            payment_scheme: [], 
-        }
+            expiry_date: moment().isValid()
+                ? moment(new Date()).format("MM-DD-YYYY HH:mm:ss")
+                : "", // Safe fallback for expiry_date
+            // expiry_date: null,
+            payment_scheme: [],
+        },
     ],
     reviewsAndApproval: {},
 });
