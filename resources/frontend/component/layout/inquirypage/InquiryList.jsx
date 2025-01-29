@@ -447,7 +447,16 @@ const InquiryList = () => {
         setDepartments("");
     };
 
+   
     useEffect(() => {
+      /*   console.log("categoryParam", categoryParam);
+        console.log("statusParam", statusParam);
+        console.log("monthParam", monthParam);
+        console.log("yearParam", yearParam);
+        console.log("departmentParam", departmentParam);
+        console.log("channelsParam", channelsParam);
+ */
+
         if (
             propertyParam ||
             statusParam ||
@@ -708,6 +717,9 @@ const InquiryList = () => {
                                                 <option value="Suggestion or Recommendation">
                                                     Suggestion or Recommendation
                                                 </option>
+                                                <option value="No Type">
+                                                    No Type
+                                                </option>
                                             </select>
                                         </div>
 
@@ -797,6 +809,9 @@ const InquiryList = () => {
                                                 </option>
                                                 <option value="Internal Endorsement">
                                                     Internal Endorsement
+                                                </option>
+                                                <option value="No Channel">
+                                                    No Channel
                                                 </option>
                                             </select>
                                         </div>
