@@ -127,10 +127,7 @@ export const ContextProvider = ({ children }) => {
         }
     };
 
-<<<<<<< HEAD
     
-=======
->>>>>>> b7aceb8e7b22620b301d83944a7462b7481c07e8
     const getAllConcerns = async () => {
         if (token) {
             setLoading(true);
