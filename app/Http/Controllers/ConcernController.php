@@ -1066,7 +1066,11 @@ class ConcernController extends Controller
             $query->where('status', $searchParams['status']);
         }
         if (!empty($searchParams['type'])) {
-            $query->where('communication_type', 'ILIKE', '%' . $searchParams['type'] . '%');
+            if ($searchParams['type'] === 'No Type') {
+                $query->whereNull('communication_type');
+            }else {
+                $query->where('communication_type', 'ILIKE', '%' . $searchParams['type'] . '%');
+            }
         }
         if (!empty($searchParams['selectedProperty'] ?? null) && $searchParams['selectedProperty'] !== 'N/A') {
             $query->where('property', 'ILIKE', '%' . $searchParams['selectedProperty'] . '%');
@@ -1077,7 +1081,12 @@ class ConcernController extends Controller
             });
         }
         if (!empty($searchParams['channels'])) {
-            $query->where('channels', $searchParams['channels']);
+            if ($searchParams['channels'] === 'No Channel') {
+                $query->whereNull('channels');
+            }else {
+                $query->where('channels', $searchParams['channels']);
+            }
+           
         }
 
         if (!empty($searchParams['startDate'])) {
@@ -2111,8 +2120,7 @@ class ConcernController extends Controller
 
         $query = Concerns::select('channels', DB::raw('COUNT(*) as total'))
 
-            ->whereYear('created_at', $year)
-            ->whereNotNull('channels');
+            ->whereYear('created_at', $year);
 
         if ($department && $department !== "All") {
             $query->whereRaw("resolve_from::jsonb @> ?", json_encode([['department' => $department]]));
@@ -2167,9 +2175,8 @@ class ConcernController extends Controller
         // Query to count each <communication_t></communication_t>ype grouped by property
         $query = Concerns::select('communication_type', DB::raw('COUNT(*) as total'))
 
-
-            ->whereYear('created_at', $year)
-            ->whereNotNull('communication_type');
+            ->whereYear('created_at', $year);
+            
 
         if ($department && $department !== "All") {
             $query->whereRaw("resolve_from::jsonb @> ?", json_encode([['department' => $department]]));

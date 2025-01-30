@@ -127,7 +127,10 @@ export const ContextProvider = ({ children }) => {
         }
     };
 
+<<<<<<< HEAD
     
+=======
+>>>>>>> b7aceb8e7b22620b301d83944a7462b7481c07e8
     const getAllConcerns = async () => {
         if (token) {
             setLoading(true);
@@ -373,7 +376,7 @@ export const ContextProvider = ({ children }) => {
             );
             const result = response.data;
             const formattedData = result.map((item) => ({
-                name: item.communication_type,
+                name: item.communication_type || "No type",
                 value: item.total,
             }));
 
@@ -396,7 +399,7 @@ export const ContextProvider = ({ children }) => {
             const result = response.data;
 
             const formattedData = result.map((item) => ({
-                name: item.channels,
+                name: item.channels || "No Channel",
                 value: item.total,
             }));
 
