@@ -434,7 +434,16 @@ const InquiryList = () => {
         setDepartments("");
     };
 
+   
     useEffect(() => {
+      /*   console.log("categoryParam", categoryParam);
+        console.log("statusParam", statusParam);
+        console.log("monthParam", monthParam);
+        console.log("yearParam", yearParam);
+        console.log("departmentParam", departmentParam);
+        console.log("channelsParam", channelsParam);
+ */
+
         if (
             propertyParam ||
             statusParam ||
@@ -697,6 +706,9 @@ const InquiryList = () => {
                                                 <option value="Suggestion or Recommendation">
                                                     Suggestion or Recommendation
                                                 </option>
+                                                <option value="No Type">
+                                                    No Type
+                                                </option>
                                             </select>
                                         </div>
 
@@ -787,6 +799,9 @@ const InquiryList = () => {
                                                 <option value="Internal Endorsement">
                                                     Internal Endorsement
                                                 </option>
+                                                <option value="No Channel">
+                                                    No Channel
+                                                </option>
                                             </select>
                                         </div>
 
@@ -802,7 +817,7 @@ const InquiryList = () => {
                                         <div className="flex bg-red-900 justify-start w-full relative">
                                             <label
                                                 htmlFor=""
-                                                className="w-full border-b-2"
+                                                className="w-full border-b-2" 
                                             >
                                                 {""}
                                             </label>
