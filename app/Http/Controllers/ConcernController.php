@@ -2060,7 +2060,7 @@ class ConcernController extends Controller
         $year = $request->year ?? Carbon::now()->year;
 
         $query = Concerns::select(
-            DB::raw("jsonb_array_elements(assign_to::jsonb)->>'department' as department"),
+            DB::raw("jsonb_array_elements(assign_to::jsonb)->>'department'  as department"),
             DB::raw('COUNT(DISTINCT CASE WHEN status = \'Resolved\' THEN id ELSE NULL END) as resolved'),
             DB::raw('COUNT(DISTINCT CASE WHEN status = \'unresolved\' THEN id ELSE NULL END) as unresolved'),
             DB::raw('COUNT(DISTINCT CASE WHEN status = \'Closed\' THEN id ELSE NULL END) as closed')
