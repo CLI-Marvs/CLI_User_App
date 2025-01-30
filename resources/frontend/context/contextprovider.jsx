@@ -127,6 +127,7 @@ export const ContextProvider = ({ children }) => {
         }
     };
 
+    
     const getAllConcerns = async () => {
         if (token) {
             setLoading(true);
@@ -229,11 +230,27 @@ export const ContextProvider = ({ children }) => {
                 },
             });
             const result = response.data;
-            const formattedData = result.map((item) => ({
-                name: item.details_concern,
-                value: item.total,
-            }));
-            setDataCategory(formattedData);
+    
+            // Aggregate data into a single "Other Concerns" entry for null or "Other Concerns"
+            const aggregatedData = result.reduce((acc, item) => {
+                const name = item.details_concern || "Other Concerns"; // Replace null with "Other Concerns"
+                const existingIndex = acc.findIndex((entry) => entry.name === name);
+    
+                if (existingIndex > -1) {
+                    // If "Other Concerns" already exists, add to its value
+                    acc[existingIndex].value += item.total;
+                } else {
+                    // Otherwise, create a new entry
+                    acc.push({
+                        name: name,
+                        value: item.total,
+                    });
+                }
+    
+                return acc;
+            }, []);
+    
+            setDataCategory(aggregatedData);
         } catch (error) {
             console.log("Error retrieving data", error);
         }
@@ -293,12 +310,24 @@ export const ContextProvider = ({ children }) => {
                 },
             });
             const result = response.data;
-            const formattedData = result.map((item) => ({
-                name: item.property ?? "Property not specified (Direct email)",
-                resolved: item.resolved,
-                unresolved: item.unresolved,
-                closed: item.closed,
-            }));
+            const formattedData = result.reduce((acc, item) => {
+                const propertyName = item.property ? item.property : "N/A";
+                const existingProperty = acc.find((entry) => entry.name === propertyName);
+                if(existingProperty) {
+                    existingProperty.resolved += item.resolved;
+                    existingProperty.unresolved += item.unresolved;
+                    existingProperty.closed += item.closed;
+                } else {
+                    acc.push({
+                        name: propertyName,
+                        resolved: item.resolved,
+                        unresolved: item.unresolved,
+                        closed: item.closed,
+                    });
+                }
+                return acc;
+            }, []);
+    
             setDataPropery(formattedData);
         } catch (error) {
             console.log("error retrieving", error);
