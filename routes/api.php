@@ -161,7 +161,7 @@ Route::middleware('auth:sanctum')->group(function () {
     //Get all units
     Route::get('/', [UnitController::class, 'index']);
     //Count units floors
-    Route::get('/floors/{towerPhaseId}', [UnitController::class, 'countFloors']);
+    Route::get('/floors/{towerPhaseId}/{excelId}', [UnitController::class, 'countFloors']);
   });
 
   /* Price Versioning */

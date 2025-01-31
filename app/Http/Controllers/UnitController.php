@@ -31,14 +31,15 @@ class UnitController extends Controller
      * Store a newly created resource in storage.
      */
 
-    public function store(StoreUnitRequest $request) {
-       
+    public function store(StoreUnitRequest $request)
+    {
+
         $validatedData = $request->validated();
         try {
-            $unit = $this->service->store($validatedData);
+            $result = $this->service->store($validatedData);
             return response()->json([
-                'message' => 'Unit created successfully',
-                'data' => $unit,
+                'message' => $result['message'],
+                'data' => $result['excel_id'],
             ], 201);
         } catch (\Exception $e) {
             return response()->json([
@@ -126,13 +127,12 @@ class UnitController extends Controller
      * @param int $towerPhaseId The ID of the tower phase.
      * @return \Illuminate\Http\JsonResponse A JSON response containing the count of distinct floors and the floors themselves.
      */
-    public function countFloors(int $towerPhaseId)
+    public function countFloors(int $towerPhaseId, string $excelId)
     {
 
-        $distinctFloors=$this->service->countFloor($towerPhaseId);
+        $distinctFloors = $this->service->countFloor($towerPhaseId, $excelId);
         return response()->json([
             'data' => $distinctFloors,
-            'debug' => print_r($distinctFloors, true)
         ]);
     }
 

@@ -106,7 +106,7 @@ const BasicPricing = () => {
             fileInputRef.current.click();
         }
     };
-    console.log("Pricing Data", pricingData);
+    // console.log("Pricing Data", pricingData);
     /**
      * Handles the process of uploading an Excel file, extracting the headers
      */

@@ -17,10 +17,10 @@ export const unitService = {
     },
 
     //Function to count all units floor in the uploaded excel
-    countFloor: async (towerPhaseId) => {
+    countFloor: async (towerPhaseId, excelId) => {
         try {
             const response = await apiService.get(
-                `units/floors/${towerPhaseId}`
+                `units/floors/${towerPhaseId}/${excelId}`
             );
             return response;
         } catch (error) {

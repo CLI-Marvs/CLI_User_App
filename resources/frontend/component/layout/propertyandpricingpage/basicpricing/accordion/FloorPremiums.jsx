@@ -7,19 +7,8 @@ import { useStateContext } from "../../../../../context/contextprovider";
 // import { useFloorPremiumStateContext } from "../../../../../context/FloorPremium/FloorPremiumContext";
 import CircularProgress from "@mui/material/CircularProgress";
 
-const FloorPremiums = ({ propertyId }) => {
-    //State
-    const {
-        towerPhaseId,
-        floorPremiumsAccordionOpen,
-        setFloorPremiumsAccordionOpen,
-        propertyFloors,
-        setTowerPhaseId,
-        isLoading,
-        setPropertyFloors,
-        getPropertyFloors,
-        setSelectedFloor,
-    } = useStateContext();
+const FloorPremiums = ({   }) => {
+ 
     // const { floorPremiumFormData, setFloorPremiumFormData } =
     //     useFloorPremiumStateContext();
     const modalRef = useRef(null);
