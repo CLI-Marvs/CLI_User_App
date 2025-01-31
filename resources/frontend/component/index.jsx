@@ -10,6 +10,7 @@ const rootElement = document.getElementById("root");
 
 if (rootElement) {
     ReactDOM.createRoot(rootElement).render(
+        <React.StrictMode>
             <ContextProvider>
                 <ToastContainer />
                 <App />
@@ -19,5 +20,7 @@ if (rootElement) {
                     </FloorPremiumFormDataProvider>
                 </PriceBasicDetailsFormDataProvider> */}
             </ContextProvider>
+        </React.StrictMode>
+
     );
 }
