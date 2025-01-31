@@ -518,8 +518,8 @@ const PricingMasterList = () => {
                                             </div>
                                         </td>
 
-                                        {/* render the Promos*/}
-                                        <td className="w-[140px] flex items-center justify-start">
+                                        {/* Render the promos*/}
+                                        <td className="w-[100px] flex items-center justify-start">
                                             <div>
                                                 <p className="space-x-1">
                                                     <span>Version 1 - 0</span>
@@ -527,7 +527,7 @@ const PricingMasterList = () => {
                                             </div>
                                         </td>
 
-                                        {/* render payment schemes */}
+                                        {/* Render payment schemes */}
                                         <td className="w-[150px] flex items-center justify-start rounded-r-lg text-sm">
                                             <div>
                                                 <p>
@@ -554,7 +554,7 @@ const PricingMasterList = () => {
                                                                                     }
                                                                                 >
                                                                                     {
-                                                                                        scheme?.name
+                                                                                        scheme?.payment_scheme_name
                                                                                     }
                                                                                     {schemeIndex <
                                                                                     version

@@ -7,6 +7,8 @@ use App\Models\PaymentScheme;
 use App\Models\PriceListMaster;
 use App\Models\PriceBasicDetail;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+
 
 class PriceListMasterRepository
 {
@@ -52,28 +54,28 @@ class PriceListMasterRepository
                 'reservation_fee' => $data['priceListPayload']['reservation_fee'],
             ]);
 
-            //TODO: make this dynamic, what if walay price versions nga ge select si user then dapat dili siya mo create og data
-            //Create a Price version
-            if (isset($data['priceVersionsPayload']) && is_array($data['priceVersionsPayload'])) {
-
+            if (isset($data['priceVersionsPayload']) && is_array($data['priceVersionsPayload'])&& !empty($data['priceVersionsPayload'])) {
+                $createdPriceVersionIds = []; // Initialize the array to store created IDs
                 foreach ($data['priceVersionsPayload'] as $priceVersionData) {
 
-                    $expiryDate = \DateTime::createFromFormat('m-d-Y H:i:s', $priceVersionData['expiry_date']);
+                    if (!empty($priceVersionData['name']) || $priceVersionData['percent_increase'] > 0 || $priceVersionData['no_of_allowed_buyers'] > 0) {
 
-                    // Create a Price version
-                    $priceVersion = $priceListMaster->priceVersions()->create([
-                        'version_name' => $priceVersionData['name'],
-                        'percent_increase' => $priceVersionData['percent_increase'],
-                        'allowed_buyer' => $priceVersionData['no_of_allowed_buyers'],
-                        'expiry_date' => $expiryDate->format('Y-m-d H:i:s'),
-                        'status' => $priceVersionData['status'],
-                        // Convert array of payment scheme IDs to JSON string
-                        'payment_scheme_id' => json_encode(array_column($priceVersionData['payment_scheme'], 'id')),
-                        'tower_phase_name' => $data['tower_phase_id'],
-                        'price_list_masters_id' => $data['price_list_master_id'],
-                    ]);
-                    // Store the created ID
-                    $createdPriceVersionIds[] = $priceVersion->id;
+                        $expiryDate = \DateTime::createFromFormat('m-d-Y H:i:s', $priceVersionData['expiry_date']);
+
+                        // Create a Price version
+                        $priceVersion = $priceListMaster->priceVersions()->create([
+                            'version_name' => $priceVersionData['name'],
+                            'percent_increase' => $priceVersionData['percent_increase'],
+                            'allowed_buyer' => $priceVersionData['no_of_allowed_buyers'],
+                            'expiry_date' => $expiryDate->format('Y-m-d H:i:s'),
+                            'status' => $priceVersionData['status'],
+                            'payment_scheme_id' => json_encode(array_column($priceVersionData['payment_scheme'], 'id')),
+                            'tower_phase_name' => $data['tower_phase_id'],
+                            'price_list_masters_id' => $data['price_list_master_id'],
+                        ]);
+                        // Store the created ID
+                        $createdPriceVersionIds[] = $priceVersion->id;
+                    }
                 }
             }
 
@@ -89,7 +91,7 @@ class PriceListMasterRepository
             return [
                 'success' => true,
                 'message' => 'Price List Master created successfully.',
-                'data' => $priceListMaster->fresh() // Return the updated model
+                'data' => $priceListMaster->fresh()
             ];
         } catch (\Exception $e) {
             DB::rollBack();
@@ -109,8 +111,6 @@ class PriceListMasterRepository
      */
     public function update(array $data)
     {
-
-        // dd($data);
         DB::beginTransaction();
         try {
             $priceListMaster = $this->model->where('id', $data['price_list_master_id'])->first();

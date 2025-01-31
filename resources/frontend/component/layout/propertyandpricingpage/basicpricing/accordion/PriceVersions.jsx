@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { FaRegTrashAlt, FaRegCalendar } from "react-icons/fa";
+import {  FaRegCalendar } from "react-icons/fa";
 import { IoIosArrowDown } from "react-icons/io";
 import { MdFormatListBulletedAdd } from "react-icons/md";
 import AddPaymentSchemeModal from "@/component/layout/propertyandpricingpage/basicpricing/modals/PaymentScheme/AddPaymentSchemeModal";
@@ -102,6 +102,9 @@ const PriceVersions = ({ priceListMasterData, action }) => {
         });
     };
 
+    //TODO: 1. Assume the price version have 1 data, and the ACTION Is EDIT then the user can view the Remove button, and remove the version data.
+    
+    
     //Handle remove the fields
     const handleRemoveFields = (index) => {
         //TODO: KUNG Edit mode, then ang versions kay naa nay data, if iyang e remove, ma remove siya but ang status sa price versions kay ma in active na isya
@@ -387,7 +390,8 @@ const PriceVersions = ({ priceListMasterData, action }) => {
                                                                             paymentScheme.length >
                                                                                 0 && (
                                                                                 <div className="flex items-center">
-                                                                                    {/* TODO: DOnt show edit and delete button if the Status is Ongoing approve, approved live */}
+                                                                                    {/* TODO: DOnt show edit and delete button , X button, if the Status is Ongoing approve, approved live */}
+
                                                                                     <HiPencil
                                                                                         onClick={() =>
                                                                                             handleEditPaymentScheme(
@@ -396,6 +400,9 @@ const PriceVersions = ({ priceListMasterData, action }) => {
                                                                                         }
                                                                                         className="text-custom-solidgreen h-6 w-6 cursor-pointer"
                                                                                     />
+                                                                                    {/**
+                                                                                     *TODO:  If many data in price versions, assume 2 data with corresponding payment scheme, then if user will click the delete button then only the payment scheme of that version will remove
+                                                                                     */}
                                                                                     <MdDelete
                                                                                         onClick={() =>
                                                                                             handleRemovePaymentScheme(

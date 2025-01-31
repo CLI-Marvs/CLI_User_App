@@ -39,9 +39,9 @@ class StorePriceListMasterRequest extends FormRequest
             'paymentSchemePayload.selectedSchemes.*' => 'integer',
 
             //Price versions
-            'priceVersionsPayload' => 'array',
+            'priceVersionsPayload' => 'array | nullable',
             'priceVersionsPayload.*.name' => 'string | nullable',
-            'priceVersionPayload.*.status' => 'status',
+            'priceVersionPayload.*.status' => 'string',
             'priceVersionsPayload.*.percent_increase' => 'integer|nullable',
             'priceVersionsPayload.*.no_of_allowed_buyers' => 'integer | nullable',
             'priceVersionsPayload.*.expiry_date' => 'nullable | date_format:m-d-Y H:i:s',

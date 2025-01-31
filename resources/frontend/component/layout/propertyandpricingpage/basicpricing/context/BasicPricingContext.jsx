@@ -15,17 +15,17 @@ const initialState = () => ({
     additionalPremiums: {},
     priceVersions: [
         {
-            id:0,
+            id: 0,
             name: "",
             percent_increase: "",
             no_of_allowed_buyers: "",
-            status: 'Active',
+            status: "Active",
             expiry_date: moment().isValid()
                 ? moment(new Date()).format("MM-DD-YYYY HH:mm:ss")
                 : "", // Safe fallback for expiry_date
+            // expiry_date:"N/A",
             // expiry_date: null,
             payment_scheme: [],
-
         },
     ],
     reviewsAndApproval: {},

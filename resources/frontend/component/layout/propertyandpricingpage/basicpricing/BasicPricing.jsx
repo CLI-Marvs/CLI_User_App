@@ -23,6 +23,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 
 const BasicPricing = () => {
     //State
+    const navigate = useNavigate();
     const { user } = useStateContext();
     const modalRef = useRef(null);
     const uploadUnitModalRef = useRef(null);
@@ -30,7 +31,6 @@ const BasicPricing = () => {
     const location = useLocation();
     const { data = {}, action = null } = location.state || {};
     const [propertyData, setPropertyData] = useState(data);
-    const navigate = useNavigate();
     const [fileName, setFileName] = useState("");
     const [fileSelected, setFileSelected] = useState({});
     const [selectedExcelHeader, setSelectedExcelHeader] = useState([]);
@@ -208,7 +208,6 @@ const BasicPricing = () => {
             pricingData.priceListSettings
         ),
         paymentSchemePayload: pricingData.paymentSchemes,
-        // priceVersionsPayload: pricingData.priceVersions,
         priceVersionsPayload: formatPayload.formatPriceVersionsPayload(
             pricingData.priceVersions
         ),
