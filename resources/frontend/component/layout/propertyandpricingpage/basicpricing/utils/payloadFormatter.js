@@ -17,7 +17,9 @@ export const formatPayload = {
     formatPriceVersionsPayload: (priceVersions = []) => {
         const formattedPriceVersions = priceVersions.map((priceVersion) => {
             const formattedPriceVersion = {
+                version_id: priceVersion.id || 0,
                 name: priceVersion.name,
+                status: priceVersion.status,
                 percent_increase: parseInt(priceVersion.percent_increase) || 0,
                 no_of_allowed_buyers:
                     parseInt(priceVersion.no_of_allowed_buyers) || 0,
@@ -26,6 +28,8 @@ export const formatPayload = {
             };
             return formattedPriceVersion;
         });
+        console.log("formatter", formattedPriceVersions);
+
         return formattedPriceVersions;
     },
     // formatPaymentSchemePayload: (paymentScheme) => {

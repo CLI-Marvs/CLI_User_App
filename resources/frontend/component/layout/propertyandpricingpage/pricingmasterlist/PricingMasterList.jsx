@@ -478,6 +478,7 @@ const PricingMasterList = () => {
                                                                         versionIndex
                                                                     }
                                                                 >
+                                                                    {/*TODO: dont show the - and 0 if there is no value */}
                                                                     {
                                                                         version?.version_name
                                                                     }{" "}

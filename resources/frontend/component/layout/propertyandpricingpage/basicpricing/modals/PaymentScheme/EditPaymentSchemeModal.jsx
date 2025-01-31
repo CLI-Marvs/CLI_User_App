@@ -115,6 +115,23 @@ const EditPaymentSchemeModal = ({
 
     //Handle to cancel the modal
     const handleCancel = () => {
+         if (
+             versionIndex !== undefined &&
+             paymentScheme !== undefined &&
+             pricingData !== undefined
+         ) {
+             const currentPaymentSchemeIds =
+                 pricingData?.priceVersions?.[versionIndex]?.payment_scheme ||
+                 [];
+             const selectedPaymentSchemes =
+                 paymentScheme &&
+                 paymentScheme.filter((scheme) =>
+                     currentPaymentSchemeIds.some(
+                         (item) => item.id === scheme.id
+                     )
+                 );
+             setSelectedPaymentSchemes(selectedPaymentSchemes);
+         }
         editPaymentSchemeModalRef.current.close();
     };
 

@@ -53,14 +53,14 @@ const BasicPricing = () => {
                 }));
             }
             if (data?.price_versions) {
-       
-
                 setPricingData((prev) => ({
                     ...prev,
                     priceVersions: data.price_versions.length
                         ? data.price_versions.map((version) => ({
+                              id: version.version_id || "",
                               name: version.version_name || "",
                               percent_increase: version.percent_increase || 0,
+                              status: version.status,
                               no_of_allowed_buyers:
                                   version.no_of_allowed_buyers || 0,
                               expiry_date: version.expiry_date
@@ -74,12 +74,16 @@ const BasicPricing = () => {
                           }))
                         : [
                               {
+                                  id: 0,
                                   name: "",
-                                  percent_increase: 0,
-                                  no_of_allowed_buyers: 0,
+                                  percent_increase: "",
+                                  no_of_allowed_buyers: "",
+                                  status: "Active",
                                   expiry_date: moment().isValid()
-                                                  ? moment(new Date()).format("MM-DD-YYYY HH:mm:ss")
-                                                  : "",
+                                      ? moment(new Date()).format(
+                                            "MM-DD-YYYY HH:mm:ss"
+                                        )
+                                      : "",
                                   payment_scheme: [],
                               },
                           ],
@@ -102,7 +106,7 @@ const BasicPricing = () => {
             fileInputRef.current.click();
         }
     };
-
+    console.log("Pricing Data", pricingData);
     /**
      * Handles the process of uploading an Excel file, extracting the headers
      */
@@ -205,7 +209,9 @@ const BasicPricing = () => {
         ),
         paymentSchemePayload: pricingData.paymentSchemes,
         // priceVersionsPayload: pricingData.priceVersions,
-        priceVersionsPayload: formatPayload.formatPriceVersionsPayload(pricingData.priceVersions),
+        priceVersionsPayload: formatPayload.formatPriceVersionsPayload(
+            pricingData.priceVersions
+        ),
         status: status,
     });
     /**

@@ -24,7 +24,7 @@ const PriceVersions = ({ priceListMasterData, action }) => {
     const [startDate, setStartDate] = useState(null);
     // const { paymentScheme, fetchPaymentSchemes } = usePaymentScheme();
     // const [selectedPaymentSchemes, setSelectedPaymentSchemes] = useState([]);
-    console.log("pricingData", pricingData);
+    // console.log("pricingData", pricingData);
 
     //Event handler
     //Handle change in the input field for price version
@@ -83,8 +83,10 @@ const PriceVersions = ({ priceListMasterData, action }) => {
 
             // Add a new price version
             priceVersions.push({
+                id: 0,
                 name: "",
                 percent_increase: 0,
+                status: "Active",
                 no_of_allowed_buyers: 0,
                 expiry_date: moment().isValid()
                     ? moment(new Date()).format("MM-DD-YYYY HH:mm:ss")
@@ -333,7 +335,6 @@ const PriceVersions = ({ priceListMasterData, action }) => {
                                                                         className="w-[100px] border border-custom-grayF1 rounded-[5px] h-[31px] pl-2"
                                                                         name="expiry_date"
                                                                         calendarClassName="custom-calendar"
-                                                                        
                                                                         placeholderText="N/A"
                                                                     />
 
@@ -386,6 +387,7 @@ const PriceVersions = ({ priceListMasterData, action }) => {
                                                                             paymentScheme.length >
                                                                                 0 && (
                                                                                 <div className="flex items-center">
+                                                                                    {/* TODO: DOnt show edit and delete button if the Status is Ongoing approve, approved live */}
                                                                                     <HiPencil
                                                                                         onClick={() =>
                                                                                             handleEditPaymentScheme(

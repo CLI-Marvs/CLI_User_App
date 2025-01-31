@@ -41,10 +41,12 @@ class UpdatePriceListMasterRequest extends FormRequest
             //Price versions
             'priceVersionsPayload' => 'array',
             'priceVersionsPayload.*.name' => 'string',
+            'priceVersionPayload.*.status' => 'status',
             'priceVersionsPayload.*.percent_increase' => 'integer',
             'priceVersionsPayload.*.no_of_allowed_buyers' => 'integer',
             'priceVersionsPayload.*.expiry_date' => 'nullable | date_format:m-d-Y H:i:s',
             'priceVersionsPayload.*.payment_scheme' => 'array',
+            'priceVersionsPayload.*.version_id' => 'integer',
 
             'status' =>
             'required|string|max:255',

@@ -11,10 +11,11 @@ use Illuminate\Support\Facades\DB;
 class PriceListMasterRepository
 {
     protected $model;
-
-    public function __construct(PriceListMaster $model)
+    protected $priceVersionModel;
+    public function __construct(PriceListMaster $model, PriceVersion $priceVersionModel)
     {
         $this->model = $model;
+        $this->priceVersionModel = $priceVersionModel;
     }
 
 
@@ -51,7 +52,7 @@ class PriceListMasterRepository
                 'reservation_fee' => $data['priceListPayload']['reservation_fee'],
             ]);
 
-
+            //TODO: make this dynamic, what if walay price versions nga ge select si user then dapat dili siya mo create og data
             //Create a Price version
             if (isset($data['priceVersionsPayload']) && is_array($data['priceVersionsPayload'])) {
 
@@ -65,6 +66,7 @@ class PriceListMasterRepository
                         'percent_increase' => $priceVersionData['percent_increase'],
                         'allowed_buyer' => $priceVersionData['no_of_allowed_buyers'],
                         'expiry_date' => $expiryDate->format('Y-m-d H:i:s'),
+                        'status' => $priceVersionData['status'],
                         // Convert array of payment scheme IDs to JSON string
                         'payment_scheme_id' => json_encode(array_column($priceVersionData['payment_scheme'], 'id')),
                         'tower_phase_name' => $data['tower_phase_id'],
@@ -107,8 +109,8 @@ class PriceListMasterRepository
      */
     public function update(array $data)
     {
-        // dd($data); 
 
+        // dd($data);
         DB::beginTransaction();
         try {
             $priceListMaster = $this->model->where('id', $data['price_list_master_id'])->first();
@@ -119,118 +121,68 @@ class PriceListMasterRepository
             }
 
             // Fetch the current PriceBasicDetail ID in the PriceListMaster table
-            $currentPriceBasicDetailsId = $priceListMaster->pricebasic_details_id;
-            if ($currentPriceBasicDetailsId) {
-                // PriceBasicDetail ID is present, proceed to update it
-                $priceBasicDetailUpdated = $priceListMaster->priceBasicDetail()->update([
-                    'base_price' => $data['priceListPayload']['base_price'],
-                    'transfer_charge' => $data['priceListPayload']['transfer_charge'],
-                    'effective_balcony_base' => $data['priceListPayload']['effective_balcony_base'],
-                    'vat' => $data['priceListPayload']['vat'],
-                    'vatable_less_price' => $data['priceListPayload']['vatable_less_price'],
-                    'reservation_fee' => $data['priceListPayload']['reservation_fee'],
-                ]);
+            $currentPriceVersionIds = json_decode($priceListMaster->price_versions_id, true);
 
-                if (!$priceBasicDetailUpdated) {
-                    throw new \Exception('Failed to update PriceBasicDetail.');
-                }
-            } else {
-                // PriceBasicDetail ID is null, create a new PriceBasicDetail and associate it
-                $priceBasicDetail = $priceListMaster->priceBasicDetail()->create([
-                    'base_price' => $data['priceListPayload']['base_price'],
-                    'transfer_charge' => $data['priceListPayload']['transfer_charge'],
-                    'effective_balcony_base' => $data['priceListPayload']['effective_balcony_base'],
-                    'vat' => $data['priceListPayload']['vat'],
-                    'vatable_less_price' => $data['priceListPayload']['vatable_less_price'],
-                    'reservation_fee' => $data['priceListPayload']['reservation_fee'],
-                ]);
+            if (!empty($data['priceVersionsPayload']) && is_array($data['priceVersionsPayload'])) {
+                $newPriceVersionIds = []; // Keep track of versions in the payload
 
-                if (!$priceBasicDetail) {
-                    throw new \Exception('Failed to create PriceBasicDetail.');
-                }
-
-                $currentPriceBasicDetailsId = $priceBasicDetail->id;
-            }
-
-            //Fetch the current price version Id in the PriceListMaster table
-            // $currentPriceVersionId= is_array($priceListMaster->price_versions_id)
-            // ? $priceListMaster->price_versions_id
-            // : [];
-            // foreach ($data['priceVersionsPayload'] as $priceVersionData) {
-            //     $expiryDate = \DateTime::createFromFormat('m-d-Y H:i:s', $priceVersionData['expiry_date']);
-            //     if (!empty($currentPriceVersionId)) {
-            //         // PriceBasicDetail ID is present, proceed to update it
-            //         $priceVersionUpdated = $priceListMaster->priceVersions()->update([
-            //             'version_name' => $priceVersionData['name'],
-            //             'percent_increase' => $priceVersionData['percent_increase'],
-            //             'allowed_buyer' => $priceVersionData['no_of_allowed_buyers'],
-            //             'expiry_date' => $expiryDate,
-            //             'payment_scheme_id' => json_encode(array_column($priceVersionData['payment_scheme'], 'id')),
-            //         ]);
-            //         if (!$priceVersionUpdated) {
-            //             throw new \Exception('Failed to update PriceBasicDetail.');
-            //         }
-            //     } else {
-
-            //         $newPriceVersion  = $priceListMaster->priceVersions()->create([
-            //             'version_name' => $priceVersionData['name'],
-            //             'percent_increase' => $priceVersionData['percent_increase'],
-            //             'allowed_buyer' => $priceVersionData['no_of_allowed_buyers'],
-            //             'expiry_date' => $expiryDate,
-            //             'payment_scheme_id' => json_encode(array_column($priceVersionData['payment_scheme'], 'id')),
-            //         ]);
-            //         if (! $newPriceVersion) {
-            //             throw new \Exception('Failed to update PriceBasicDetail.');
-            //         }
-            //         // Append new ID to the array
-            //         $currentPriceVersionId[] = $newPriceVersion->id;
-            //     }
-            // }
-            $currentPriceVersionId = is_array($priceListMaster->price_versions_id)
-                ? $priceListMaster->price_versions_id
-                : [];
-            if (isset($data['priceVersionsPayload']) && is_array($data['priceVersionsPayload'])) {
                 foreach ($data['priceVersionsPayload'] as $priceVersionData) {
-                    $expiryDate = \DateTime::createFromFormat('m-d-Y H:i:s', $priceVersionData['expiry_date']);
+                    $expiryDate = \DateTime::createFromFormat('m-d-Y H:i:s', $priceVersionData['expiry_date'])->format('Y-m-d H:i:s');
+                    $versionId = $priceVersionData['version_id'] ?? null; // Handle cases where version_id might be missing
 
-                    if (!empty($currentPriceVersionId)) {
-                        // Update existing PriceVersion
-                        $priceVersionUpdated = $priceListMaster->priceVersions()->update([
+                    if ($versionId && in_array($versionId, $currentPriceVersionIds)) {
+                        // UPDATE existing PriceVersion
+                        $priceVersion = $this->priceVersionModel->find($versionId);
+
+                        if ($priceVersion) {
+                            $priceVersion->update([
+                                'version_name' => $priceVersionData['name'],
+                                'percent_increase' => $priceVersionData['percent_increase'],
+                                'allowed_buyer' => $priceVersionData['no_of_allowed_buyers'],
+                                'expiry_date' => $expiryDate,
+                                'status' => $priceVersionData['status'],
+                                'payment_scheme_id' => json_encode(array_column($priceVersionData['payment_scheme'], 'id')),
+                            ]);
+                            $newPriceVersionIds[] = $versionId; // Add to the new list
+                        }
+                    } else {
+                        // CREATE new PriceVersion
+                        $newPriceVersion = $priceListMaster->priceVersions()->create([
                             'version_name' => $priceVersionData['name'],
                             'percent_increase' => $priceVersionData['percent_increase'],
                             'allowed_buyer' => $priceVersionData['no_of_allowed_buyers'],
                             'expiry_date' => $expiryDate,
-                            'payment_scheme_id' => json_encode(array_column($priceVersionData['payment_scheme'], 'id')),
-                        ]);
-
-                        if (!$priceVersionUpdated) {
-                            throw new \Exception('Failed to update PriceBasicDetail.');
-                        }
-                    } else {
-                        // Create a new PriceVersion
-                        $priceVersion = $priceListMaster->priceVersions()->create([
-                            'version_name' => $priceVersionData['name'],
-                            'percent_increase' => $priceVersionData['percent_increase'],
-                            'allowed_buyer' => $priceVersionData['no_of_allowed_buyers'],
-                            'expiry_date' => $expiryDate->format('Y-m-d H:i:s'),
+                            'status' => $priceVersionData['status'],
                             'payment_scheme_id' => json_encode(array_column($priceVersionData['payment_scheme'], 'id')),
                             'tower_phase_name' => $data['tower_phase_id'],
                             'price_list_masters_id' => $data['price_list_master_id'],
                         ]);
 
-                        // Append newly created ID to the array
-                        $currentPriceVersionId[] = $priceVersion->id;
+                        $newPriceVersionIds[] = $newPriceVersion->id;
                     }
                 }
+
+                // Find and deactivate removed PriceVersions
+                $removedPriceVersionIds = array_diff($currentPriceVersionIds, $newPriceVersionIds);
+
+                if (!empty($removedPriceVersionIds)) {
+                    $this->priceVersionModel->whereIn('id', $removedPriceVersionIds)->update([
+                        'status' => 'InActive',
+                        'price_list_masters_id' => null
+                    ]); // Assuming you have a 'status' column
+                }
+
+
+                $priceListMaster->update([
+                    'status' => $data['status'],
+                    'date_last_update' => now(),
+                    'price_versions_id' => json_encode($newPriceVersionIds), // Use the new list of IDs
+                ]);
             }
 
 
-            $priceListMaster->update([
-                'status' => $data['status'],
-                'date_last_update' => now(),
-                'pricebasic_details_id' => $currentPriceBasicDetailsId,
-                'price_versions_id' =>  json_encode($currentPriceVersionId),
-            ]);
+
+
 
             DB::commit();
             return [
@@ -245,7 +197,7 @@ class PriceListMasterRepository
                 'success' => false,
                 'message' => 'Error updating Price List Master: ' . $e->getMessage(),
                 'error_type' => 'UPDATE_FAILURE',
-                'error_details' => $e->getTraceAsString()  
+                'error_details' => $e->getTraceAsString()
             ];
         }
     }
@@ -261,7 +213,9 @@ class PriceListMasterRepository
             'priceBasicDetail',
             'towerPhase.propertyMaster.propertyCommercialDetail',
             'paymentSchemes',
-            'priceVersions',
+            'priceVersions' => function ($query) {  // Add a closure to filter priceVersions
+                $query->where('status', 'Active'); // Filter for active price versions
+            },
         ])->select('price_list_masters.*')  // Select all fields from price list masters
             ->orderBy('created_at', 'desc')
             ->get();
@@ -295,6 +249,8 @@ class PriceListMasterRepository
             $priceVersionIds = is_array($paymentSchemeIds) ? $paymentSchemeIds : [];
 
             $paymentSchemeData = PaymentScheme::whereIn('id', $priceVersionIds)->get();
+            // Add this line to filter for active payment schemes
+
 
             $paymentSchemes = $paymentSchemeData->map(function ($scheme) {
                 return [
@@ -305,10 +261,11 @@ class PriceListMasterRepository
 
             return [
                 'version_name' => $version->version_name,
+                'status' => $version->status,
                 'percent_increase' => $version->percent_increase,
                 'no_of_allowed_buyers' => $version->allowed_buyer,
                 'expiry_date' => $version->expiry_date,
-                'id' => $version->id,
+                'version_id' => $version->id,
                 'payment_schemes' => $paymentSchemes,
             ];
         });

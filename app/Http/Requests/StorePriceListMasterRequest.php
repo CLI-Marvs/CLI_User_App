@@ -40,9 +40,10 @@ class StorePriceListMasterRequest extends FormRequest
 
             //Price versions
             'priceVersionsPayload' => 'array',
-            'priceVersionsPayload.*.name' => 'string',
-            'priceVersionsPayload.*.percent_increase' => 'integer',
-            'priceVersionsPayload.*.no_of_allowed_buyers' => 'integer',
+            'priceVersionsPayload.*.name' => 'string | nullable',
+            'priceVersionPayload.*.status' => 'status',
+            'priceVersionsPayload.*.percent_increase' => 'integer|nullable',
+            'priceVersionsPayload.*.no_of_allowed_buyers' => 'integer | nullable',
             'priceVersionsPayload.*.expiry_date' => 'nullable | date_format:m-d-Y H:i:s',
             'priceVersionsPayload.*.payment_scheme' => 'array',
 
