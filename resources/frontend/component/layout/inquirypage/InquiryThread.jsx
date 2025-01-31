@@ -993,7 +993,6 @@ const InquiryThread = () => {
                                     ) <span>-</span> {dataConcern?.ticket_id}
                                 </p>
                             </div>
-
                             <div className="flex justify-end shrink-0">
                                 <button
                                     onClick={handleOpenModal}

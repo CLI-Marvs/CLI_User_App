@@ -16,5 +16,6 @@ if (rootElement) {
                 </PropertyPricingProvider>
             </ContextProvider>
         </React.StrictMode>
+
     );
 }
