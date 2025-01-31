@@ -3,6 +3,7 @@
 namespace App\Models;
 
  
+use App\Models\PriceVersion;
 use App\Models\PriceListMaster;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -19,5 +20,10 @@ class PaymentScheme extends Model
     public function priceListMaster(): BelongsTo
     {
         return $this->belongsTo(PriceListMaster::class, 'price_list_masters_id', 'id');
+    }
+
+    public function priceVersion(): BelongsTo
+    {
+        return $this->belongsTo(PriceVersion::class);
     }
 }

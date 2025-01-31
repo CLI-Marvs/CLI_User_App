@@ -12,6 +12,7 @@ import { PREDEFINED_USER_TYPES } from "../../../constant/data/preDefinedUserType
 * Strip out fields that needed to compare (like `id`, `status`, `created_at`, `updated_at`, etc.)
 */
 const normalizeData = (data) => {
+    console.log("data", data);
     return {
         ticket_id: data.ticket_id || "",
         details_concern: data.details_concern || "",
@@ -445,7 +446,11 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
                             <div className="relative w-full">
                                 <select
                                     name="communication_type"
-                                    value={dataToUpdate.communication_type || ""}
+                                    value={
+                                        dataToUpdate.communication_type?.toLowerCase() === "suggestion or recommendation"
+                                            ? "Suggestion or Recommendation"
+                                            : dataToUpdate.communication_type || ""
+                                    }
                                     onChange={handleChange}
                                     className="appearance-none w-full px-4 text-sm py-1 bg-white focus:outline-none border-0 mobile:text-xs"
                                 >

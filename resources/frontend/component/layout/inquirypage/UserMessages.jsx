@@ -118,7 +118,7 @@ const UserMessages = ({ items, dataConcern }) => {
             <div className="w-full mt-[10px]">
                 <div className="w-full h-auto gradient-background1 rounded-b-[10px] rounded-r-[10px]  p-[20px] pl-[31px] text-xs text-white">
                     <div className="break-words whitespace-pre-wrap">
-                        <p className="cursor-pointer"
+                        <p className=""
                             dangerouslySetInnerHTML={{
                                 __html: items.details_message,
                             }}

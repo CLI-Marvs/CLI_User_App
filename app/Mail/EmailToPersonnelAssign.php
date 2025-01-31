@@ -36,7 +36,7 @@ class EmailToPersonnelAssign extends Mailable
     {
         return new Envelope(
             from: new Address('noreply@cebulandmasters.com', 'noreply@cebulandmasters.com'),
-            subject: ucwords($this->data['buyer_name'] ?? '')
+            subject: ucwords('[Do Not Reply] ' . $this->data['buyer_name'] ?? '')
                 . ' - '
                . (($this->data['property'] ?? 'N/A') !== 'N/A' ? $this->data['property'] . ' - ' : '')
                 . ($this->data['details_concern'] ?? '')

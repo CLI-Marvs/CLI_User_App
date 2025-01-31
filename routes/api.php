@@ -160,8 +160,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/', [UnitController::class, 'store']);
     //Get all units
     Route::get('/', [UnitController::class, 'index']);
-    //Update a price list masters
-    Route::put('/floors/{towerPhaseId}', [UnitController::class, 'countFloors']);
+    //Count units floors
+    Route::get('/floors/{towerPhaseId}/{excelId}', [UnitController::class, 'countFloors']);
   });
 
   /* Price Versioning */
