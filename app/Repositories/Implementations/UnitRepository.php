@@ -23,7 +23,7 @@ class UnitRepository
     public function store(array $data)
     {
         // Increase PHP limits for this request
-        ini_set('max_execution_time', 300); // 5 minutes
+        ini_set('max_execution_time', 300);
         ini_set('memory_limit', '512M');
 
         $file = $data['file'];
@@ -37,15 +37,16 @@ class UnitRepository
                     // Extract the rowHeader values directly from the decoded array
                     $actualHeaders = array_column($headers, 'rowHeader');
 
-                    $import = new ExcelImport($actualHeaders, $propertyId, $towerPhaseId);
+                    $import = new ExcelImport($actualHeaders, $propertyId, $towerPhaseId, 'Active');
                     Excel::import($import, $file);
-
                     DB::commit();
 
-                    return response()->json([
+                    $excelId = $import->getExcelId();
+                    return [
                         'success' => true,
-                        'message' => 'File uploaded successfully and data returned.'
-                    ]);
+                        'excel_id' => ['excel_id' => $excelId],
+                        'message' => 'File uploaded successfully.'
+                    ];
                 } catch (\Exception $e) {
                     DB::rollBack();
                     return response()->json([
@@ -67,42 +68,5 @@ class UnitRepository
                 'message' => 'Failed to insert unit: ' . $e->getMessage()
             ], 500);
         }
-    }
-
-    /**
-     * Count floors in the uploaded excel
-     */
-    public function countFloor($towerPhaseId)
-    {
-        DB::beginTransaction();
-        try {
-            $distinctFloors = $this->model->where('tower_phase_id', $towerPhaseId)
-                ->distinct('floor')
-                ->pluck('floor');
-
-            //Count the number of distinct floors
-            $count = $distinctFloors->count();
-
-            return [
-                $count,
-                $distinctFloors
-            ];
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to count floor: ' . $e->getMessage()
-            ], 500);
-        }
-        // $distinctFloors = Unit::where('tower_phase_id', $towerPhaseId)
-        //     ->distinct('floor')
-        //     ->pluck('floor');
-
-        // //Count the number of distinct floors
-        // $count = $distinctFloors->count();
-        // return response()->json([
-        //     'count' => $count,
-        //     'floors' => $distinctFloors,
-        // ], 200);
     }
 }

@@ -5,38 +5,43 @@ import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import DateLogo from "../../../../../../public/Images/Date_range.svg";
-import AddPropertyModal from "../basicpricing/modals/Property/AddPropertyModal";
+import AddPropertyModal from "@/component/layout/propertyandpricingpage/basicpricing/modals/Property/AddPropertyModal";
 import moment from "moment";
 import { useNavigate } from "react-router-dom";
-import { usePriceListMaster } from '@/context/PropertyPricing/PriceListMasterContext';
+import { usePriceListMaster } from "@/context/PropertyPricing/PriceListMasterContext";
 import TableSkeleton from "@/component/layout/propertyandpricingpage/component/TableSkeleton";
+import { usePaymentScheme } from "@/context/PropertyPricing/PaymentSchemeContext";
 
 const PricingMasterList = () => {
-
     //States
-    const { priceListMaster, isLoading, fetchPropertyListMasters } = usePriceListMaster();
+    const { priceListMaster, isLoading, fetchPropertyListMasters } =
+        usePriceListMaster();
+    const { paymentScheme, fetchPaymentSchemes } = usePaymentScheme();
+
     const [startDate, setStartDate] = useState(new Date());
     const [toggled, setToggled] = useState(false);
     const [isFilterVisible, setIsFilterVisible] = useState(false);
+    const [paymentSchemes, setPaymentSchemes] = useState([]);
     const navigate = useNavigate();
     const propertyModalRef = useRef(null);
     const toggleFilterBox = () => {
         setIsFilterVisible(!isFilterVisible);
     };
- 
+
     //Hooks
     useEffect(() => {
+        fetchPaymentSchemes();
+        console.log("priceListMaster", priceListMaster);
         if (!priceListMaster) {
-            console.log("priceListMaster", priceListMaster);
-            fetchPropertyListMasters();
+            fetchPropertyListMasters(true);
         }
     }, [fetchPropertyListMasters, priceListMaster]);
 
     //Event handler
     /**
      * Handle to navigate to basic pricing component, only if the Status !== On-going Approval
-     * @param {*} id 
-     * @param {*} status 
+     * @param {*} id
+     * @param {*} status
      */
     const handleNavigateToBasicPricing = async (item, action) => {
         const status = item.status;
@@ -48,7 +53,7 @@ const PricingMasterList = () => {
                 navigate(`/property-pricing/basic-pricing/${id}`, {
                     state: {
                         data: item,
-                        action: action
+                        action: action,
                     },
                 });
             } catch (error) {
@@ -297,174 +302,293 @@ const PricingMasterList = () => {
 
                         {isLoading ? (
                             <tr>
-                                <td className='w-full mt-1'>
+                                <td className="w-full mt-1">
                                     <TableSkeleton />
                                 </td>
                             </tr>
                         ) : priceListMaster && priceListMaster.length > 0 ? (
-                            Object.values(priceListMaster).map((item, index) => (
-                                <tr
-                                    key={index}
-                                    className={`flex gap-4 mt-2 h-[144px] shadow-custom5 rounded-[10px] overflow-hidden px-4 ${item?.status === "Draft"
-                                        ? "bg-white"
-                                        : item?.status === "Approved"
-                                            ? "bg-[#F0F3EE]"
-                                            : "bg-[#EBF0F6]"
+                            Object.values(priceListMaster).map(
+                                (item, index) => (
+                                    <tr
+                                        key={index}
+                                        className={`flex gap-4 mt-2 h-[144px] shadow-custom5 rounded-[10px] overflow-hidden px-4 ${
+                                            item?.status === "Draft"
+                                                ? "bg-white"
+                                                : item?.status === "Approved"
+                                                ? "bg-[#F0F3EE]"
+                                                : "bg-[#EBF0F6]"
                                         } text-custom-bluegreen text-sm`}
-                                >
-                                    <td className="w-[100px] flex flex-col items-start justify-center gap-2">
-                                        <div>
-                                            <p
-                                                className={`font-bold ${item?.status === "Draft"
-                                                    ? "text-custom-gray81"
-                                                    : item?.status === "Approved"
-                                                        ? "text-custom-solidgreen"
-                                                        : "text-[#5B9BD5]"
+                                    >
+                                        <td className="w-[100px] flex flex-col items-start justify-center gap-2">
+                                            <div>
+                                                <p
+                                                    className={`font-bold ${
+                                                        item?.status === "Draft"
+                                                            ? "text-custom-gray81"
+                                                            : item?.status ===
+                                                              "Approved"
+                                                            ? "text-custom-solidgreen"
+                                                            : "text-[#5B9BD5]"
                                                     }`}
-                                            >
-                                                {/* TODO: Dont show Edit if the status is Approved */}
-                                                {item?.status}
-                                            </p>
-                                            <span>
-                                                {/* Fix the formatting */}
-                                                {moment(item.updated_at).format("M / D / YYYY")}
-                                            </span>
-                                        </div>
-                                        <div>
-                                            <p
-                                                className="underline text-blue-500 cursor-pointer"
-                                                onClick={() =>
-                                                    handleNavigateToBasicPricing(
-                                                        item,
-                                                        item?.status === "On-going Approval" ? "Cancel" : "Edit"
-                                                    )
-                                                }
-                                            >
-                                                {item?.status === "On-going Approval" ? "Cancel" : "Edit"}
-                                            </p>
-                                        </div>
-                                    </td>
-                                    <td className="w-[150px] flex items-center justify-start">
-                                        <div>
-                                            <p>
-                                                {item?.property_name}
-                                            </p>
-                                            <p>
-                                                Tower {item?.tower_phase_name}
-                                            </p>
-                                        </div>
-                                    </td>
-                                    <td className="w-[200px] flex items-center justify-start">
-                                        <div>
-                                            <p className="space-x-1">
-                                                <span>Base Price (Sq.M.)</span>
-                                                <span>{item?.pricebasic_details?.base_price}</span>
-                                            </p>
-                                            <p className="space-x-1">
-                                                <span>Reservation</span>
-                                                <span>{item?.pricebasic_details?.reservation_fee}</span>
-                                            </p>
-                                            <p className="space-x-1">
-                                                <span>Transfer Charge</span>
-                                                <span>{item?.pricebasic_details?.transfer_charge}</span>
+                                                >
+                                                    {/* TODO: Dont show Edit if the status is Approved */}
+                                                    {item?.status}
+                                                </p>
                                                 <span>
-                                                    {item?.pricebasic_details?.transfer_charge ? "%" : ""}
+                                                    {/* Fix the formatting */}
+                                                    {moment(
+                                                        item.updated_at
+                                                    ).format("M / D / YYYY")}
                                                 </span>
-                                            </p>
-                                            <p className="space-x-1">
-                                                <span>VAT</span>
-                                                <span>{item?.pricebasic_details?.vat}</span>
-                                                <span>{item?.pricebasic_details?.vat ? "%" : ""}</span>
-                                            </p>
-                                            <p className="space-x-1">
-                                                <span>VATable Threshold</span>
-                                                <span>{item?.pricebasic_details?.vatable_less_price}</span>
-                                            </p>
-                                            <p className="space-x-1">
-                                                <span>Effective Balcony Base</span>
-                                                <span>{item?.pricebasic_details?.effective_balcony_base}</span>
-                                                <span>
-                                                    {item?.pricebasic_details?.effective_balcony_base ? "%" : ""}
-                                                </span>
-                                            </p>
-                                        </div>
-                                    </td>
-                                    <td className="w-[150px] flex items-center justify-start">
-                                        <div>
-                                            <p className="space-x-1">
-                                                <span>Version 1 -</span>
-                                                <span>2</span>
-                                            </p>
-                                        </div>
-                                    </td>
-                                    <td className="w-[150px] flex items-center justify-start">
-                                        <div>
-                                            <p className="space-x-1">
-                                                <span>Version 1 -</span>
-                                                <span>2</span>
-                                            </p>
-                                            <p className="space-x-1">
-                                                <span>Version 2 -</span>
-                                                <span>0</span>
-                                            </p>
-                                            <p className="space-x-1">
-                                                <span>Version 3 -</span>
-                                                <span>0</span>
-                                            </p>
-                                            <p className="space-x-1">
-                                                <span>Version 4 -</span>
-                                                <span>0</span>
-                                            </p>
-                                        </div>
-                                    </td>
-                                    <td className="w-[100px] flex items-center justify-start"></td>
-                                    <td className="w-[150px] flex items-center justify-start rounded-r-lg text-sm">
-                                        <div>
-                                            <p> 
-                                                {item?.payment_scheme?.map((scheme, index) => {
-                                                    return (
-                                                        <span key={index}>
-                                                            {scheme?.payment_scheme_name}
-                                                            {index < item?.payment_scheme?.length - 1 ? <br /> : ""}
-                                                        </span>
-                                                    )
-                                                })}
-                                            </p>
-                                            
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))
+                                            </div>
+                                            <div>
+                                                <p
+                                                    className="underline text-blue-500 cursor-pointer"
+                                                    onClick={() =>
+                                                        handleNavigateToBasicPricing(
+                                                            item,
+                                                            item?.status ===
+                                                                "On-going Approval"
+                                                                ? "Cancel"
+                                                                : "Edit"
+                                                        )
+                                                    }
+                                                >
+                                                    {item?.status ===
+                                                    "On-going Approval"
+                                                        ? "Cancel"
+                                                        : "Edit"}
+                                                    - {item?.price_list_master_id}
+                                                </p>
+                                            </div>
+                                        </td>
+                                        <td className="w-[150px] flex items-center justify-start">
+                                            <div>
+                                                <p>{item?.property_name}</p>
+                                                <p>
+                                                    Tower{" "}
+                                                    {item?.tower_phase_name}
+                                                </p>
+                                            </div>
+                                        </td>
+                                        <td className="w-[200px] flex items-center justify-start">
+                                            <div>
+                                                <p className="space-x-1">
+                                                    <span>
+                                                        Base Price (Sq.M.)
+                                                    </span>
+                                                    <span>
+                                                        {
+                                                            item
+                                                                ?.pricebasic_details
+                                                                ?.base_price
+                                                        }
+                                                    </span>
+                                                </p>
+                                                <p className="space-x-1">
+                                                    <span>Reservation</span>
+                                                    <span>
+                                                        {
+                                                            item
+                                                                ?.pricebasic_details
+                                                                ?.reservation_fee
+                                                        }
+                                                    </span>
+                                                </p>
+                                                <p className="space-x-1">
+                                                    <span>Transfer Charge</span>
+                                                    <span>
+                                                        {
+                                                            item
+                                                                ?.pricebasic_details
+                                                                ?.transfer_charge
+                                                        }
+                                                    </span>
+                                                    <span>
+                                                        {item
+                                                            ?.pricebasic_details
+                                                            ?.transfer_charge
+                                                            ? "%"
+                                                            : ""}
+                                                    </span>
+                                                </p>
+                                                <p className="space-x-1">
+                                                    <span>VAT</span>
+                                                    <span>
+                                                        {
+                                                            item
+                                                                ?.pricebasic_details
+                                                                ?.vat
+                                                        }
+                                                    </span>
+                                                    <span>
+                                                        {item
+                                                            ?.pricebasic_details
+                                                            ?.vat
+                                                            ? "%"
+                                                            : ""}
+                                                    </span>
+                                                </p>
+                                                <p className="space-x-1">
+                                                    <span>
+                                                        VATable Threshold
+                                                    </span>
+                                                    <span>
+                                                        {
+                                                            item
+                                                                ?.pricebasic_details
+                                                                ?.vatable_less_price
+                                                        }
+                                                    </span>
+                                                </p>
+                                                <p className="space-x-1">
+                                                    <span>
+                                                        Effective Balcony Base
+                                                    </span>
+                                                    <span>
+                                                        {
+                                                            item
+                                                                ?.pricebasic_details
+                                                                ?.effective_balcony_base
+                                                        }
+                                                    </span>
+                                                    <span>
+                                                        {item
+                                                            ?.pricebasic_details
+                                                            ?.effective_balcony_base
+                                                            ? "%"
+                                                            : ""}
+                                                    </span>
+                                                </p>
+                                            </div>
+                                        </td>
+
+                                        {/* Render the price version */}
+                                        <td className="w-[150px] flex items-center justify-start">
+                                            <div>
+                                                <p>
+                                                    {item?.price_versions?.map(
+                                                        (
+                                                            version,
+                                                            versionIndex
+                                                        ) => {
+                                                            return (
+                                                                <span
+                                                                    key={
+                                                                        versionIndex
+                                                                    }
+                                                                >
+                                                                    {/*TODO: dont show the - and 0 if there is no value */}
+                                                                    {
+                                                                        version?.version_name
+                                                                    }{" "}
+                                                                    -{" "}
+                                                                    {
+                                                                        version?.percent_increase
+                                                                    }
+                                                                    {version?.percent_increase
+                                                                        ? "%"
+                                                                        : ""}
+                                                                    {versionIndex <
+                                                                    item
+                                                                        ?.price_versions
+                                                                        ?.length -
+                                                                        1 ? (
+                                                                        <br />
+                                                                    ) : (
+                                                                        ""
+                                                                    )}
+                                                                </span>
+                                                            );
+                                                        }
+                                                    )}
+                                                </p>
+                                            </div>
+                                        </td>
+
+                                        {/* Render the sold per price version */}
+                                        <td className="w-[150px] flex items-center justify-start">
+                                            <div>
+                                                <p className="space-x-1">
+                                                    <span>Version 1 - 0</span>
+                                                </p>
+                                                <p className="space-x-1">
+                                                    <span>Version 1 - 0</span>
+                                                </p>
+                                            </div>
+                                        </td>
+
+                                        {/* Render the promos*/}
+                                        <td className="w-[100px] flex items-center justify-start">
+                                            <div>
+                                                <p className="space-x-1">
+                                                    <span>Version 1 - 0</span>
+                                                </p>
+                                            </div>
+                                        </td>
+
+                                        {/* Render payment schemes */}
+                                        <td className="w-[150px] flex items-center justify-start rounded-r-lg text-sm">
+                                            <div>
+                                                <p>
+                                                    {item?.price_versions?.map(
+                                                        (
+                                                            version,
+                                                            versionIndex
+                                                        ) => {
+                                                            return (
+                                                                <span
+                                                                    key={
+                                                                        versionIndex
+                                                                    }
+                                                                >
+                                                                    {version?.payment_schemes?.map(
+                                                                        (
+                                                                            scheme,
+                                                                            schemeIndex
+                                                                        ) => {
+                                                                            return (
+                                                                                <span
+                                                                                    key={
+                                                                                        schemeIndex
+                                                                                    }
+                                                                                >
+                                                                                    {
+                                                                                        scheme?.payment_scheme_name
+                                                                                    }
+                                                                                    {schemeIndex <
+                                                                                    version
+                                                                                        ?.payment_schemes
+                                                                                        ?.length -
+                                                                                        1 ? (
+                                                                                        <br />
+                                                                                    ) : (
+                                                                                        ""
+                                                                                    )}
+                                                                                </span>
+                                                                            );
+                                                                        }
+                                                                    )}
+                                                                </span>
+                                                            );
+                                                        }
+                                                    )}
+                                                </p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                )
+                            )
                         ) : (
                             <tr>
-                                <td colSpan={8} className="text-center py-4 text-custom-bluegreen">
+                                <td
+                                    colSpan={8}
+                                    className="text-center py-4 text-custom-bluegreen"
+                                >
                                     No data found
                                 </td>
                             </tr>
                         )}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
                         {/*                                                         END                                                     */}
                         {/*                                            APPROVED LIVE                                               */}
@@ -605,12 +729,11 @@ const PricingMasterList = () => {
                     pageLinkClassName="w-full h-full flex justify-center items-center"
                     activeLinkClassName="w-full h-full flex justify-center items-center"
                     disabledLinkClassName={"text-gray-300 cursor-not-allowed"}
-                /* forcePage={currentPage} */
+                    /* forcePage={currentPage} */
                 />
             </div>
             <div>
-                <AddPropertyModal
-                    propertyModalRef={propertyModalRef} />
+                <AddPropertyModal propertyModalRef={propertyModalRef} />
             </div>
         </div>
     );

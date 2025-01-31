@@ -101,7 +101,7 @@ const paymentScheme = ({ action, priceListMasterData }) => {
 
                 return (
                     <div
-                        className="w-[240px] p-[20px]   rounded-[10px]"
+                        className="w-[240px] p-[20px]  rounded-[10px]"
                         key={index}
                     >
                         <div className="flex items-center gap-[15px] h-[36px] w-full mb-[10px]">

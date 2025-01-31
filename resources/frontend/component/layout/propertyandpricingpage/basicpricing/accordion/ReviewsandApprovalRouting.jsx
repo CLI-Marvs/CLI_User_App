@@ -26,11 +26,15 @@ const ReviewsandApprovalRouting = () => {
                             <p className='underline text-blue-500 text-sm cursor-pointer'>Download Excel</p>
                         </div>
                         <div>
-                            <iframe src="" frameborder="0" className="w-[814px] h-[400px] overflow-auto"></iframe>
+                              //TODO: Reviewed by and approved by, add plus sign, when click, another select tag to show, so that can select another employee
+                            <iframe src="" frameBorder="0" className="w-[814px] h-[400px] overflow-auto">
+                                
+                            </iframe>
                         </div>
                         <div className='flex flex-col gap-[10px] w-[429px]'>
                             <div className="flex  items-center border border-custom-grayF1 rounded-md overflow-hidden w-[375px] text-sm">
-                                <span className="text-custom-gray81 bg-custom-grayFA flex w-[80%] h-[31px] pl-3 py-1">Prepared by</span>
+                                <span className="text-custom-gray81 bg-custom-grayFA flex w-[80%] h-[31px] pl-3 py-1">Prepared by
+                                </span>
                                 <input name='preparedBy' type="text" className="w-full h-[31px] px-4 focus:outline-none" placeholder="" />
                             </div>
                             <div className="flex items-center border border-custom-grayF1 rounded-md overflow-hidden w-[375px] text-sm">
@@ -40,7 +44,7 @@ const ReviewsandApprovalRouting = () => {
                                         <option value="">Firstname M. Lastname</option>
                                     </select>
                                     <span className="absolute inset-y-0 right-0 flex text-custom-gray81 items-center pr-3 pl-3 bg-custom-grayFA pointer-events-none">
-                                        <IoMdArrowDropdown/>
+                                        <IoMdArrowDropdown />
                                     </span>
                                 </div>
                             </div>
@@ -51,7 +55,7 @@ const ReviewsandApprovalRouting = () => {
                                         <option value="">Firstname M. Lastname</option>
                                     </select>
                                     <span className="absolute inset-y-0 right-0 flex items-center text-custom-gray81 pr-3 pl-3 bg-custom-grayFA pointer-events-none">
-                                        <IoMdArrowDropdown/>
+                                        <IoMdArrowDropdown />
                                     </span>
                                 </div>
                             </div>

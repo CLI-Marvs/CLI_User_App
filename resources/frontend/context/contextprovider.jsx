@@ -158,7 +158,7 @@ export const ContextProvider = ({ children }) => {
     const hasPermission = (permissionName) => {
         return permissions[permissionName]?.can_read || false;
     };
-    console.log("searchFilter", searchFilter);
+ 
     const getAllConcerns = async () => {
         if (token) {
             setLoading(true);

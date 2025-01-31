@@ -1,29 +1,24 @@
 import React, { useRef, useEffect, useState } from "react";
 import { IoMdArrowDropdown } from "react-icons/io";
-import { unitService } from '@/component/servicesApi/apiCalls/propertyPricing/unit/unitService';
-import { useStateContext } from "../../../../../context/contextprovider";
+import { unitService } from "@/component/servicesApi/apiCalls/propertyPricing/unit/unitService";
 import CircularProgress from "@mui/material/CircularProgress";
-
+import { useCountFloors } from "@/component/layout/propertyandpricingpage/basicpricing/hooks/useCountFloors";
 const UploadUnitDetailsModal = ({
     uploadUnitModalRef,
     fileName,
     selectedExcelHeader,
     fileSelected,
     handleFileChange,
-    propertyData
+    propertyData,
 }) => {
-
     //State
     const [formData, setFormData] = useState({});
     const [loading, setLoading] = useState(false);
     const newFileInputRef = useRef();
-    const {
-        setPropertyFloors,
-        setFloorPremiumsAccordionOpen,
-        getPropertyFloors,
-    } = useStateContext();
     const [towerPhaseId, setTowerPhaseId] = useState();
     const [propertyMasterId, setPropertyMasterId] = useState();
+    const { fetchFloorCount } = useCountFloors();
+
     //Hooks
     useEffect(() => {
         if (selectedExcelHeader || propertyData) {
@@ -36,22 +31,26 @@ const UploadUnitDetailsModal = ({
             }, {});
             setFormData(initialFormData);
             setTowerPhaseId(propertyData?.tower_phase_id);
-            setPropertyMasterId(propertyData?.property_commercial_detail?.property_master_id);
+            setPropertyMasterId(
+                propertyData?.property_commercial_detail?.property_master_id
+            );
         }
     }, [selectedExcelHeader, propertyData]); //Initialize formData once selectedExcelHeader is available
 
     //Event hander
     const handleColumnChange = (newColumnIndex, rowHeader) => {
-        // console.log("newColumnIndex", newColumnIndex);
         setFormData((prevFormData) => ({
             ...prevFormData,
             [rowHeader]: {
                 ...prevFormData[rowHeader],
-                columnIndex: parseInt(newColumnIndex), // Update columnIndex for the selected rowHeader
+                columnIndex: parseInt(newColumnIndex),
             },
         }));
     }; // Handle change in column selection
 
+    /**
+     * Handle submit units from excel file
+     */
     const handleSubmit = async (e) => {
         e.preventDefault();
         const payload = {
@@ -60,44 +59,43 @@ const UploadUnitDetailsModal = ({
             tower_phase_id: towerPhaseId,
             property_masters_id: propertyMasterId,
         };
-        console.log("payload", JSON.stringify(payload));
+        console.log("payload", payload);
 
         try {
             setLoading(true);
             const response = await unitService.storeUnit(payload);
- 
-            if (towerPhaseId) {
-                console.log(
-                    "towerPhaseId UploadUnitDetailsModal",
-                    towerPhaseId
-                );
+            console.log("response", response);
+            if (response?.status === 201) {
+                const excelId = response?.data?.data?.excel_id;
+
                 //TODO: fetch the unit lloor
                 // Fetch floors immediately after successful upload to reflect the floor premium
-                const floorsResponse = await getPropertyFloors(towerPhaseId);
-                // Update propertyFloors in the context
-                setPropertyFloors((prev) => ({
-                    ...prev,
-                    [towerPhaseId]: floorsResponse,
-                }));
+                const floorsResponse = fetchFloorCount(towerPhaseId, excelId);
+                console.log("floorsResponse", floorsResponse);
+                alert(response.data.message);
+                // if (uploadUnitModalRef.current) {
+                //     uploadUnitModalRef.current.close();
+                // }
             }
-            alert(response.data.message);
-            if (uploadUnitModalRef.current) {
-                uploadUnitModalRef.current.close();
-            }
-            setFloorPremiumsAccordionOpen(true);
         } catch (error) {
             console.log("error uploading excel", error);
         } finally {
             setLoading(false);
         }
-    }; //Handle submit units from excel file
+    };
 
     const replaceFile = async (event) => {
         // Trigger the `handleFileChange` function received from BasicPricing
         await handleFileChange(event);
     }; //Handle in replacing the file
 
-
+    //Handle close the unit upload modal
+    const handleClose = () => {
+        //TODO: if close, reset the ref of file input field
+        if (uploadUnitModalRef.current) {
+            uploadUnitModalRef.current.close();
+        }
+    };
     return (
         <dialog
             className="modal w-[474px] rounded-lg backdrop:bg-black/50"
@@ -109,7 +107,10 @@ const UploadUnitDetailsModal = ({
                         method="dialog"
                         className="pt-2 flex justify-end -mr-[50px]"
                     >
-                        <button className="flex justify-center w-10 h-10 items-center rounded-full bg-custom-grayFA3 text-custom-bluegreen hover:bg-custom-grayFA">
+                        <button
+                            className="flex justify-center w-10 h-10 items-center rounded-full bg-custom-grayFA3 text-custom-bluegreen hover:bg-custom-grayFA"
+                            onClick={handleClose}
+                        >
                             ✕
                         </button>
                     </div>
@@ -332,8 +333,9 @@ const UploadUnitDetailsModal = ({
                 <div className="flex justify-center mt-4 mb-8">
                     {selectedExcelHeader && selectedExcelHeader.length > 0 ? (
                         <button
-                            className={`w-[177px] h-[37px] text-white montserrat-semibold text-sm gradient-btn2 rounded-[10px] hover:shadow-custom4  ${loading ? "cursor-not-allowed" : ""
-                                }`}
+                            className={`w-[177px] h-[37px] text-white montserrat-semibold text-sm gradient-btn2 rounded-[10px] hover:shadow-custom4  ${
+                                loading ? "cursor-not-allowed" : ""
+                            }`}
                             type="submit"
                             onClick={handleSubmit}
                         >

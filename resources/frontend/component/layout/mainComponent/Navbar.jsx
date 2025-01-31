@@ -24,7 +24,7 @@ const Navbar = () => {
 
 
     const pathnames = location.pathname.split("/").filter((x) => x);
-
+ 
     const handleOpenModal = () => {
         if (modalRef.current) {
             modalRef.current.showModal();
@@ -147,7 +147,15 @@ const Navbar = () => {
                     </span>
                 );
             }
-
+            if (value.toLowerCase()==='property-pricing') {
+                breadcrumbLabel = "Property Pricing";
+                
+            }
+            if (value.toLowerCase()==='master-lists') {
+                breadcrumbLabel = "Master Lists";
+                
+            }
+            
             if (value.toLowerCase() === "inquirylist") {
                 breadcrumbLabel = "Inquiries";
             }
