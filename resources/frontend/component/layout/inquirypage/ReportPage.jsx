@@ -611,8 +611,12 @@ const ReportPage = () => {
         (total, type) => total + type.value,
         0
     );
+    const totalValueCategory = dataCategory.reduce(
+        (total, category) => total + category.value,
+        0
+    );
 
-    console.log("yearValue", yearValue);
+    
 
     return (
         <div className="h-screen bg-custom-grayFA p-4 flex flex-col gap-[21px]">
@@ -2486,9 +2490,9 @@ const ReportPage = () => {
                                 </PieChart>
                             </div>
                             <div className="flex w-full justify-center">
-                                <div className="flex w-[150px] py-4 justify-center"> {/* dummy div to align the chart */}
-                                    <p className="font-bold text-[20px]">Total: {totalValuetype}</p>
-                                </div>
+                                    <div className="flex w-[150px] py-4 justify-center"> {/* dummy div to align the chart */}
+                                        <p className="font-bold text-[20px]">Total: {totalValueCategory}</p>
+                                    </div>
                             </div>
                             <div className="flex justify-center w-full">
                                 <div className="flex w-[150px]"></div>{" "}
