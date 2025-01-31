@@ -35,8 +35,18 @@ class UpdatePriceListMasterRequest extends FormRequest
 
             // Payment scheme payload
             'paymentSchemePayload' => 'array',
-            'paymentSchemePayload' => 'array|min:1',
+            'paymentSchemePayload' => 'array',
             'paymentSchemePayload.*' => 'integer',
+
+            //Price versions
+            'priceVersionsPayload' => 'array',
+            'priceVersionsPayload.*.name' => 'string',
+            'priceVersionsPayload.*.status' => 'string',
+            'priceVersionsPayload.*.percent_increase' => 'integer',
+            'priceVersionsPayload.*.no_of_allowed_buyers' => 'integer',
+            'priceVersionsPayload.*.expiry_date' => 'nullable | date_format:m-d-Y H:i:s',
+            'priceVersionsPayload.*.payment_scheme' => 'array',
+            'priceVersionsPayload.*.version_id' => 'integer',
 
             'status' =>
             'required|string|max:255',

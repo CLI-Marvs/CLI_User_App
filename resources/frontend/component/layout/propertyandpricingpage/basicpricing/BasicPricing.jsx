@@ -4,65 +4,94 @@ import PriceListSettings from "./accordion/PriceListSettings";
 import AdditionalPremiums from "./accordion/AdditionalPremiums";
 import PriceVersions from "./accordion/PriceVersions";
 import PaymentSchemes from "./accordion/PaymentSchemes";
+import moment from "moment";
 import ReviewsandApprovalRouting from "./accordion/ReviewsandApprovalRouting";
 import FloorPremiums from "./accordion/FloorPremiums";
 import { Form, useLocation } from "react-router-dom";
 import UploadUnitDetailsModal from "./modals/UploadUnitDetailsModal";
 import { useStateContext } from "../../../../context/contextprovider";
-import { priceListMasterService } from '@/component/servicesApi/apiCalls/propertyPricing/priceListMaster/priceListMasterService';
+import { priceListMasterService } from "@/component/servicesApi/apiCalls/propertyPricing/priceListMaster/priceListMasterService";
 import expectedHeaders from "@/constant/data/excelHeader";
 import * as XLSX from "xlsx";
 import { useNavigate } from "react-router-dom";
 import { usePricing } from "@/component/layout/propertyandpricingpage/basicpricing/context/BasicPricingContext";
-import { formatPayload } from '@/component/layout/propertyandpricingpage/basicpricing/utils/payloadFormatter';
-import { showToast } from '@/util/toastUtil';
-import { usePriceListMaster } from '@/context/PropertyPricing/PriceListMasterContext';
+import { formatPayload } from "@/component/layout/propertyandpricingpage/basicpricing/utils/payloadFormatter";
+import { showToast } from "@/util/toastUtil";
+import { usePriceListMaster } from "@/context/PropertyPricing/PriceListMasterContext";
 import paymentScheme from "./accordion/PaymentSchemes";
 import CircularProgress from "@mui/material/CircularProgress";
 
 const BasicPricing = () => {
     //State
+    const navigate = useNavigate();
     const { user } = useStateContext();
     const modalRef = useRef(null);
     const uploadUnitModalRef = useRef(null);
     const fileInputRef = useRef(null);
     const location = useLocation();
     const { data = {}, action = null } = location.state || {};
-    const [propertyData, setPropertyData] =
-        useState(data);
-    const navigate = useNavigate();
+    const [propertyData, setPropertyData] = useState(data);
     const [fileName, setFileName] = useState("");
     const [fileSelected, setFileSelected] = useState({});
     const [selectedExcelHeader, setSelectedExcelHeader] = useState([]);
+    const { pricingData, resetPricingData, setPricingData } = usePricing();
+    const { fetchPropertyListMasters } = usePriceListMaster();
+    const [isLoading, setIsLoading] = useState({});
 
-    //Hooks 
+    //Hooks
     useEffect(() => {
         if (data) {
             setPropertyData(data);
             // Update the priceListSettings
             if (data?.pricebasic_details) {
-                setPricingData(prev => ({
+                setPricingData((prev) => ({
                     ...prev,
                     priceListSettings: {
                         ...prev.pricebasic_details,
-                        ...data.pricebasic_details
+                        ...data.pricebasic_details,
                     },
                 }));
-
             }
-            // Update the payment schemes
-            if(data?.payment_scheme){
-                setPricingData(prev => ({
+            if (data?.price_versions) {
+                setPricingData((prev) => ({
                     ...prev,
-                    paymentSchemes: Array.isArray(data.payment_scheme)
-                        ? data.payment_scheme.map(scheme => scheme.id)
-                        : [data.payment_scheme.id],
+                    priceVersions: data.price_versions.length
+                        ? data.price_versions.map((version) => ({
+                              id: version.version_id || "",
+                              name: version.version_name || "",
+                              percent_increase: version.percent_increase || 0,
+                              status: version.status,
+                              no_of_allowed_buyers:
+                                  version.no_of_allowed_buyers || 0,
+                              expiry_date: version.expiry_date
+                                  ? moment(version.expiry_date).format(
+                                        "MM-DD-YYYY HH:mm:ss"
+                                    )
+                                  : moment(new Date()).format(
+                                        "MM-DD-YYYY HH:mm:ss"
+                                    ),
+                              payment_scheme: version.payment_schemes || [],
+                          }))
+                        : [
+                              {
+                                  id: 0,
+                                  name: "",
+                                  percent_increase: "",
+                                  no_of_allowed_buyers: "",
+                                  status: "Active",
+                                  expiry_date: moment().isValid()
+                                      ? moment(new Date()).format(
+                                            "MM-DD-YYYY HH:mm:ss"
+                                        )
+                                      : "",
+                                  payment_scheme: [],
+                              },
+                          ],
                 }));
             }
         }
     }, [data]);
 
- 
     //Event handler
     // Open the add property modal
     const handleOpenAddPropertyModal = () => {
@@ -77,7 +106,7 @@ const BasicPricing = () => {
             fileInputRef.current.click();
         }
     };
-
+    // console.log("Pricing Data", pricingData);
     /**
      * Handles the process of uploading an Excel file, extracting the headers
      */
@@ -163,29 +192,59 @@ const BasicPricing = () => {
         reader.readAsArrayBuffer(file);
     };
 
+    /*
+     * Payload object for submission with the provided status.
+     * The payload includes employee ID, tower phase ID, price list settings, payment scheme, and the specified status.
+     * @param {*} status
+     * @returns
+     */
+    const buildSubmissionPayload = (status) => ({
+        emp_id: user?.id,
+        price_list_master_id:
+            data?.price_list_master_id ||
+            data?.data?.property_commercial_detail?.property_master_id,
+        tower_phase_id: data.data?.tower_phases[0]?.id || data?.tower_phase_id,
+        priceListPayload: formatPayload.formatPriceListSettingsPayload(
+            pricingData.priceListSettings
+        ),
+        paymentSchemePayload: pricingData.paymentSchemes,
+        priceVersionsPayload: formatPayload.formatPriceVersionsPayload(
+            pricingData.priceVersions
+        ),
+        status: status,
+    });
     /**
      * Handles in submitting all data in creating price master list
      */
     const handleSubmit = async (e, status) => {
         e.preventDefault();
-        if (pricingData.priceListSettings.base_price === "" ||
-            pricingData.priceListSettings.reservation_fee === "") {
-            showToast("Please fill all the fields in the price list settings section", "error");
-            return;
-        }
-        if(pricingData.paymentSchemes.length === 0){
-            showToast("Please select at least one payment scheme", "error");
-            return;
-        }
-        
+        // if (pricingData.priceListSettings.base_price === "" ||
+        //     pricingData.priceListSettings.reservation_fee === "") {
+        //     showToast("Please fill all the fields in the price list settings section", "error");
+        //     return;
+        // }
+        // if (pricingData.paymentSchemes.length === 0) {
+        //     showToast("Please select at least one payment scheme", "error");
+        //     return;
+        // }
+
         if (action === "Edit") {
             try {
                 setIsLoading((prev) => ({ ...prev, [status]: true }));
                 const payload = buildSubmissionPayload(status);
                 console.log("Edit Payload", payload);
-                const response = await priceListMasterService.updatePriceListMasters(payload);
+                console.log("Edit Payload", JSON.stringify(payload));
+
+                const response =
+                    await priceListMasterService.updatePriceListMasters(
+                        payload
+                    );
+                console.log("response", response);
                 if (response?.status === 201 || response?.status === 200) {
-                    showToast(response?.data?.message || "Data updated successfully", "success");
+                    showToast(
+                        response?.data?.message || "Data updated successfully",
+                        "success"
+                    );
 
                     // Reset data and navigate to master list page
                     await fetchPropertyListMasters(true);
@@ -193,17 +252,26 @@ const BasicPricing = () => {
                         navigate("/property-pricing/master-lists");
                     }, 1000);
                 } else {
-                    console.log("Unexpected response status:", response?.status, response);
-                    showToast("Unexpected response received. Please verify the changes.", "warning");
+                    console.log(
+                        "Unexpected response status:",
+                        response?.status,
+                        response
+                    );
+                    showToast(
+                        "Unexpected response received. Please verify the changes.",
+                        "warning"
+                    );
                 }
             } catch (error) {
                 if (error.response?.data?.message) {
                     showToast(error.response.data.message, "error");
                 } else {
-                    showToast("An error occurred during submission. Please try again.", "error");
+                    showToast(
+                        "An error occurred during submission. Please try again.",
+                        "error"
+                    );
                 }
-            }
-            finally {
+            } finally {
                 setIsLoading((prev) => ({ ...prev, [status]: false }));
             }
         } else {
@@ -212,9 +280,14 @@ const BasicPricing = () => {
                 const payload = buildSubmissionPayload(status);
                 console.log("ADd Payload", payload);
 
-                const response = await priceListMasterService.storePriceListMasters(payload);
+                const response =
+                    await priceListMasterService.storePriceListMasters(payload);
+                console.log("response 235", response);
                 if (response?.status === 201 || response?.status === 200) {
-                    showToast(response?.data?.message || "Data added successfully", "success");
+                    showToast(
+                        response?.data?.message || "Data added successfully",
+                        "success"
+                    );
 
                     // Reset data and navigate to master list page
                     resetPricingData();
@@ -223,23 +296,30 @@ const BasicPricing = () => {
                         navigate("/property-pricing/master-lists");
                     }, 1000);
                 } else {
-                    console.log("Unexpected response status:", response?.status, response);
-                    showToast("Unexpected response received. Please verify the changes.", "warning");
+                    console.log(
+                        "Unexpected response status:",
+                        response?.status,
+                        response
+                    );
+                    showToast(
+                        "Unexpected response received. Please verify the changes.",
+                        "warning"
+                    );
                 }
             } catch (error) {
                 if (error.response?.data?.message) {
                     showToast(error.response.data.message, "error");
                 } else {
-                    showToast("An error occurred during submission. Please try again.", "error");
+                    showToast(
+                        "An error occurred during submission. Please try again.",
+                        "error"
+                    );
                 }
-            }
-            finally {
+            } finally {
                 setIsLoading((prev) => ({ ...prev, [status]: false }));
             }
         }
     };
-
-
 
     return (
         <div className="h-screen max-w-[957px] min-w-[897px] bg-custom-grayFA px-[30px] ">
@@ -267,35 +347,36 @@ const BasicPricing = () => {
                     Upload Unit Details
                 </button>
                 <button
-                    className={`h-[37px] w-[176px] rounded-[10px] text-white montserrat-semibold text-sm gradient-btn2 hover:shadow-custom4 ${isLoading['On-going Approval'] ? "cursor-not-allowed opacity-50" : ""
-                        }`}
+                    className={`h-[37px] w-[176px] rounded-[10px] text-white montserrat-semibold text-sm gradient-btn2 hover:shadow-custom4 ${
+                        isLoading["On-going Approval"]
+                            ? "cursor-not-allowed opacity-50"
+                            : ""
+                    }`}
                     type="submit"
                     onClick={(e) => handleSubmit(e, "On-going Approval")}
                 >
-
-                    {isLoading['On-going Approval'] ? (
+                    {isLoading["On-going Approval"] ? (
                         <CircularProgress className="spinnerSize" />
                     ) : (
                         <> Submit for Approval </>
                     )}
                 </button>
                 <button
-                    className={`h-[37px] w-[117px] rounded-[10px] text-custom-solidgreen montserrat-semibold text-sm gradient-btn2 hover:shadow-custom4 p-[3px] ${isLoading['On-going Approval'] ? "cursor-not-allowed opacity-50" : ""
-                        }`}
+                    className={`h-[37px] w-[117px] rounded-[10px] text-custom-solidgreen montserrat-semibold text-sm gradient-btn2 hover:shadow-custom4 p-[3px] ${
+                        isLoading["On-going Approval"]
+                            ? "cursor-not-allowed opacity-50"
+                            : ""
+                    }`}
                     type="submit"
                     onClick={(e) => handleSubmit(e, "Draft")}
                 >
                     <div className="flex justify-center items-center h-full w-full rounded-[8px] bg-white">
-                        {isLoading['Draft'] ? (
+                        {isLoading["Draft"] ? (
                             <CircularProgress className="spinnerSize" />
                         ) : (
                             <>Save as Draft</>
                         )}
-                        <span>
-                            {
-                                data?.price_list_master_id
-                            }
-                        </span>
+                        <span>{data?.price_list_master_id}</span>
                     </div>
                 </button>
             </div>
@@ -321,16 +402,14 @@ const BasicPricing = () => {
                 <PriceListSettings />
                 <FloorPremiums />
                 <AdditionalPremiums />
-                <PriceVersions />
-                <PaymentSchemes action={action} priceListMasterData={data} />
+                <PriceVersions priceListMasterData={data} action={action} />
+                {/* <PaymentSchemes action={action} priceListMasterData={data} /> */}
                 <ReviewsandApprovalRouting />
             </div>
             {/* <div>
                 <AddPropertyModal modalRef={modalRef} />
             </div> */}
         </div>
-
-
     );
 };
 

@@ -27,7 +27,7 @@ class StoreUnitRequest extends FormRequest
             'headers.*.columnIndex' => 'required|integer|min:1|max:8',
             'file' => 'required|file|mimes:csv,txt,xlsx|max:5120',
             'tower_phase_id' => 'integer',
-            'property_masters_id' => 'integer'
+            'property_masters_id' => 'integer',
         ];
     }
 }

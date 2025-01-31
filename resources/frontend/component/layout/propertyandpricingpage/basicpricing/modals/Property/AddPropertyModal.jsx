@@ -73,7 +73,7 @@ const AddPropertyModal = ({ propertyModalRef }) => {
             if (response.status === 201) {
                 showToast("Data added successfully!", "success");
                 setFormData(formDataState);
-                await fetchPropertyListMasters(true); 
+                await fetchPropertyListMasters(true,false); 
                 
                 if (propertyModalRef.current) {
                     propertyModalRef.current.close();
