@@ -1879,7 +1879,6 @@ class ConcernController extends Controller
 
             $this->inquiryResolveLogs($request, 'resolve');
 
-
             MarkResolvedToCustomerJob::dispatch($request->ticket_id, $buyerEmail, $buyer_lastname, $message_id, $admin_name, $department, $modifiedTicketId, $selectedSurveyType);
 
             SendSurveyLinkEmailJob::dispatch($buyerEmail,  $request->buyer_name, $selectedSurveyType, 'resolve', $modifiedTicketId);
@@ -2078,7 +2077,11 @@ class ConcernController extends Controller
         $year = $request->year ?? Carbon::now()->year;
 
         $query = Concerns::select(
-            DB::raw("jsonb_array_elements(assign_to::jsonb)->>'department' as department"),
+            DB::raw("COALESCE(
+                (SELECT jsonb_array_elements(assign_to::jsonb)->>'department' 
+                 LIMIT 1), 
+                'Customer Relations - Services'
+            ) as department"),
             DB::raw('COUNT(DISTINCT CASE WHEN status = \'Resolved\' THEN id ELSE NULL END) as resolved'),
             DB::raw('COUNT(DISTINCT CASE WHEN status = \'unresolved\' THEN id ELSE NULL END) as unresolved'),
             DB::raw('COUNT(DISTINCT CASE WHEN status = \'Closed\' THEN id ELSE NULL END) as closed')
@@ -2209,6 +2212,9 @@ class ConcernController extends Controller
                     $item->communication_type = 'Complaints';
                     break;
                 case 'Suggestion or Recommendation':
+                    $item->communication_type = 'Suggestion or Recommendations';
+                    break;
+                case 'Suggestion or recommendation':
                     $item->communication_type = 'Suggestion or Recommendations';
                     break;
                 case 'Request':
