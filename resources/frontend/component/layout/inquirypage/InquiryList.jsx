@@ -385,7 +385,7 @@ const InquiryList = () => {
                     : channels === "Social media"
                     ? "Social Media"
                     : channels;
-            summaryParts.push(`Channels: ${formattedChannels}`);
+            summaryParts.push(`Channel: ${formattedChannels}`);
         }
         if (departments) summaryParts.push(`Department: ${departments}`);
         if (ticket) summaryParts.push(`Ticket: ${ticket}`);
@@ -476,7 +476,7 @@ const InquiryList = () => {
                         : channelsParam === "Social media"
                         ? "Social Media"
                         : channelsParam;
-                summaryParts.push(`Channels: ${formattedChannel}`);
+                summaryParts.push(`Channel: ${formattedChannel}`);
             }
             if (departmentParam)
                 summaryParts.push(`Department: ${departmentParam}`);
