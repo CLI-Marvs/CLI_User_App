@@ -375,19 +375,52 @@ export const ContextProvider = ({ children }) => {
                     year: year,
                 },
             });
+    
             const result = response.data;
-            const formattedData = result.map((item) => ({
-                name: item.department,
-                resolved: item.resolved,
-                unresolved: item.unresolved,
-                closed: item.closed,
+    
+            // Initialize an object to accumulate the totals for CRS and other departments
+            const departmentTotals = {};
+    
+            // Process each item in the result
+            result.forEach((item) => {
+                // If the department is not CRS, add its counts normally
+                if (item.department !== "Customer Relations - Services") {
+                    departmentTotals[item.department] = departmentTotals[item.department] || {
+                        resolved: 0,
+                        unresolved: 0,
+                        closed: 0,
+                    };
+                    departmentTotals[item.department].resolved += item.resolved;
+                    departmentTotals[item.department].unresolved += item.unresolved;
+                    departmentTotals[item.department].closed += item.closed;
+                }
+    
+                // Add all departments' counts to CRS
+                departmentTotals["Customer Relations - Services"] = departmentTotals["Customer Relations - Services"] || {
+                    resolved: 0,
+                    unresolved: 0,
+                    closed: 0,
+                };
+                departmentTotals["Customer Relations - Services"].resolved += item.resolved;
+                departmentTotals["Customer Relations - Services"].unresolved += item.unresolved;
+                departmentTotals["Customer Relations - Services"].closed += item.closed;
+            });
+    
+            // Prepare formatted data including CRS and other departments
+            const formattedData = Object.keys(departmentTotals).map((department) => ({
+                name: department,
+                resolved: departmentTotals[department].resolved,
+                unresolved: departmentTotals[department].unresolved,
+                closed: departmentTotals[department].closed,
             }));
-
+    
             setDataDepartment(formattedData);
         } catch (error) {
             console.log("error retrieving", error);
         }
     };
+    
+    
 
     const getCommunicationTypePerProperty = async () => {
         try {
@@ -403,10 +436,18 @@ export const ContextProvider = ({ children }) => {
                 }
             );
             const result = response.data;
-            const formattedData = result.map((item) => ({
-                name: item.communication_type || "No type",
-                value: item.total,
-            }));
+            const formattedData = result.reduce((acc, item) => {
+                const name = item.communication_type || "No type";
+                const existing = acc.find((entry) => entry.name === name);
+    
+                if (existing) {
+                    existing.value += item.total;
+                } else {
+                    acc.push({ name, value: item.total });
+                }
+    
+                return acc;
+            }, []);
 
             setCommunicationTypeData(formattedData);
         } catch (error) {
