@@ -11,6 +11,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UnitController;
 use App\Http\Controllers\ConcernController;
 use App\Http\Controllers\FeatureController;
+use App\Http\Controllers\PriceVersionController;
 use App\Http\Controllers\DynamicBannerController;
 use App\Http\Controllers\PaymentSchemeController;
 use App\Http\Controllers\PropertyMasterController;
@@ -65,7 +66,7 @@ Route::post('conversation', [ConcernController::class, 'sendMessageConcerns']);
 Route::get('/get-concern-messages', [ConcernController::class, 'retrieveConcernsMessages']);
 Route::get('/personnel-assignee', [ConcernController::class, 'retrieveAssignees']);
 Route::post('/update-info', [ConcernController::class, 'updateInfo']);
-Route::post('/add-property-sap', [PropertyMasterController::class, 'storePropertyFromSap']);
+// Route::post('/add-property-sap', [PropertyMasterController::class, 'storePropertyFromSap']);
 Route::post('/buyer-reply', [ConcernController::class, 'fromAppSript']);
 
 //* For Sap 
@@ -119,25 +120,61 @@ Route::middleware('auth:sanctum')->group(function () {
   Route::post('/isread/{concernId}', [ConcernController::class, 'readNotifByUser']);
   Route::get('/specific-assignee', [ConcernController::class, 'getSpecificInquiry']);
   Route::post('/remove-assignee', [ConcernController::class, 'removeAssignee']);
-  Route::get('/property-name', [PropertyMasterController::class, 'getPropertyName']);
   /* Download the file attachment */
   Route::post('/download-file', [ConcernController::class, 'downloadFileFromGCS']);
-  /* Pricing Master List */
-  Route::get('/get-pricing-master-lists', [PriceListMasterController::class, 'getAllPricingMasterLists']);
+
   /*Basic Pricing */
   Route::post('/basic-pricing', [PriceBasicDetailController::class, 'storeBasicPricing']);
-  /*Payment Scheme */
-  Route::post('/payment-schemes', [PaymentSchemeController::class, 'storePaymentScheme']);
-  Route::get('/get-payment-schemes', [PaymentSchemeController::class, 'getAllPaymentSchemes']);
-  /* Property Master */
-  Route::post('/property-details', [PropertyMasterController::class, 'storePropertyDetail']);
-  Route::get('/get-property-master/{id}', [PropertyMasterController::class, 'getPropertyMaster']);
 
-  /* Unit */
-  // Route::post('/units-import', [UnitController::class, 'importUnitsFromExcel']);
-  Route::post('/upload-units', [UnitController::class, 'uploadUnits']);
-  Route::get('/property-floors/{towerPhaseId}', [UnitController::class, 'countFloors']);
-  Route::post('/property-units', [UnitController::class, 'getUnits']);
+
+
+
+  /*Property Data*/
+  Route::prefix('properties')->group(function () {
+    // Get property names  
+    Route::get('names', [PropertyMasterController::class, 'getPropertyNames']);
+    Route::get('names/with-ids', [PropertyMasterController::class, 'getPropertyNamesWithIds']);
+    // Store property details
+    Route::post('/', [PropertyMasterController::class, 'store']);
+    // Get single property
+    Route::get('{property}', [PropertyMasterController::class, 'show']);
+  });
+
+  /*Payment Scheme */
+  Route::prefix('payment-schemes')->group(function () {
+    // Get list of all payment schemes
+    Route::get('/', [PaymentSchemeController::class, 'index']);
+    // Store payment scheme
+    Route::post('/', [PaymentSchemeController::class, 'store']);
+  });
+
+  /*Property Price Master List */
+  Route::prefix('price-list-masters')->group(function () {
+    // Get price list masters
+    Route::get('/', [PriceListMasterController::class, 'index']);
+    //Store a price list masters
+    Route::post('/', [PriceListMasterController::class, 'store']);
+    //Update a price list masters
+    Route::put('/update', [PriceListMasterController::class, 'update']);
+  });
+
+  /* Units */
+  Route::prefix('units')->group(function () {
+    // Store unit details
+    Route::post('/', [UnitController::class, 'store']);
+    //Get all units
+    Route::get('/', [UnitController::class, 'index']);
+    //Count units floors
+    Route::get('/floors/{towerPhaseId}/{excelId}', [UnitController::class, 'countFloors']);
+  });
+
+  /* Price Versioning */
+  Route::prefix('/price-version')->group(function () {
+    // Store unit details
+    Route::post('/', [PriceVersionController::class, 'store']);
+    //Get all units
+    Route::get('/', [PriceVersionController::class, 'index']);
+  });
 
   //for banner
   Route::post('/store-banner', [DynamicBannerController::class, 'storeBanner']);

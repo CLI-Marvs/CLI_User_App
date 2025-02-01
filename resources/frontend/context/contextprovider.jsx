@@ -29,9 +29,12 @@ export const ContextProvider = ({ children }) => {
     const [notifStatus, setNotifStatus] = useState("");
     const [specificAssigneeCsr, setSpecificAssigneeCsr] = useState("");
     const [currentPage, setCurrentPage] = useState(0);
+    const [selectedOption, setSelectedOption] = useState("All");
+
     const [notifCurrentPage, setNotifCurrentPage] = useState(0);
     const [searchFilter, setSearchFilter] = useState({});
     const [data, setData] = useState([]);
+    const [dataCount, setDataCount] = useState([]);
     const itemsPerPage = 20;
     const [pageCount, setPageCount] = useState(0);
     const [notifPageCount, setNotifPageCount] = useState(0);
@@ -55,6 +58,8 @@ export const ContextProvider = ({ children }) => {
     const [month, setMonth] = useState("All");
     const [year, setYear] = useState("");
     const [fullYear, setFullYear] = useState([]);
+
+    const [activeDayButton, setActiveDayButton] = useState(null);
 
     const [departmentStatusYear, setDepartmentStatusYear] = useState("");
     const [inquiriesPerCategoryYear, setInquiriesPerCategoryYear] =
@@ -98,6 +103,14 @@ export const ContextProvider = ({ children }) => {
     const [isUserTypeChange, setIsUserTypeChange] = useState(false);
     const [userAccessData, setUserAccessData] = useState([]); //Holds the user and department access data
     const [permissions, setPermissions] = useState({});
+    const [searchSummary, setSearchSummary] = useState("");
+    const [resultSearchActive, setResultSearchActive] = useState(false);
+    const [departmentValue, setDepartmentValue] = useState("All");
+    const [projectValue, setProjectValue] = useState("All");
+    const [yearValue, setYearValue] = useState(new Date().getFullYear());
+    const [monthValue, setMonthValue] = useState("All");
+
+
 
     const [customerData, setCustomerData] = useState([]);
     const [customerDetails, setCustomerDetails] = useState([]);
@@ -152,6 +165,7 @@ export const ContextProvider = ({ children }) => {
     const hasPermission = (permissionName) => {
         return permissions[permissionName]?.can_read || false;
     };
+ 
     const getAllConcerns = async () => {
         if (token) {
             setLoading(true);
@@ -168,7 +182,9 @@ export const ContextProvider = ({ children }) => {
                 const response = await apiService.get(
                     `/get-concern?${searchParams}`
                 );
+
                 setData(response.data.data);
+                setDataCount(response.data.total);
                 setPageCount(response.data.last_page);
             } catch (error) {
                 console.error("Error fetching data: ", error);
@@ -242,7 +258,6 @@ export const ContextProvider = ({ children }) => {
     };
 
     const fetchCategory = async () => {
-        if (!isDepartmentInitialized) return;
         try {
             const response = await apiService.get("category-monthly", {
                 params: {
@@ -253,11 +268,27 @@ export const ContextProvider = ({ children }) => {
                 },
             });
             const result = response.data;
-            const formattedData = result.map((item) => ({
-                name: item.details_concern,
-                value: item.total,
-            }));
-            setDataCategory(formattedData);
+    
+            // Aggregate data into a single "Other Concerns" entry for null or "Other Concerns"
+            const aggregatedData = result.reduce((acc, item) => {
+                const name = item.details_concern || "Other Concerns"; // Replace null with "Other Concerns"
+                const existingIndex = acc.findIndex((entry) => entry.name === name);
+    
+                if (existingIndex > -1) {
+                    // If "Other Concerns" already exists, add to its value
+                    acc[existingIndex].value += item.total;
+                } else {
+                    // Otherwise, create a new entry
+                    acc.push({
+                        name: name,
+                        value: item.total,
+                    });
+                }
+    
+                return acc;
+            }, []);
+    
+            setDataCategory(aggregatedData);
         } catch (error) {
             console.log("Error retrieving data", error);
         }
@@ -266,15 +297,15 @@ export const ContextProvider = ({ children }) => {
     const getPropertyNames = async () => {
         if (token) {
             try {
-                const response = await apiService.get("property-name");
+                const response = await apiService.get("properties/names");
                 setPropertyNamesList(response.data);
             } catch (error) {
                 console.log("Error retrieving data", error);
             }
         }
     };
+
     const fetchDataReport = async () => {
-        if (!isDepartmentInitialized) return;
         try {
             const response = await apiService.get("report-monthly", {
                 params: {
@@ -286,7 +317,14 @@ export const ContextProvider = ({ children }) => {
             });
             const result = response.data;
 
-            const formattedData = result.map((item) => ({
+            const filteredResult = result.filter(
+                (item) =>
+                    item.resolved !== 0 ||
+                    item.unresolved !== 0 ||
+                    item.closed !== 0
+            );
+
+            const formattedData = filteredResult.map((item) => ({
                 name: item.month.toString().padStart(2, "0"),
                 Resolved: item.resolved,
                 Unresolved: item.unresolved,
@@ -300,7 +338,6 @@ export const ContextProvider = ({ children }) => {
     };
 
     const getInquiriesPerProperty = async () => {
-        if (!isDepartmentInitialized) return;
         try {
             const response = await apiService.get("inquiries-property", {
                 params: {
@@ -311,12 +348,24 @@ export const ContextProvider = ({ children }) => {
                 },
             });
             const result = response.data;
-            const formattedData = result.map((item) => ({
-                name: item.property,
-                resolved: item.resolved,
-                unresolved: item.unresolved,
-                closed: item.closed,
-            }));
+            const formattedData = result.reduce((acc, item) => {
+                const propertyName = item.property ? item.property : "N/A";
+                const existingProperty = acc.find((entry) => entry.name === propertyName);
+                if(existingProperty) {
+                    existingProperty.resolved += item.resolved;
+                    existingProperty.unresolved += item.unresolved;
+                    existingProperty.closed += item.closed;
+                } else {
+                    acc.push({
+                        name: propertyName,
+                        resolved: item.resolved,
+                        unresolved: item.unresolved,
+                        closed: item.closed,
+                    });
+                }
+                return acc;
+            }, []);
+    
             setDataPropery(formattedData);
         } catch (error) {
             console.log("error retrieving", error);
@@ -324,7 +373,6 @@ export const ContextProvider = ({ children }) => {
     };
 
     const getInquiriesPerDepartment = async () => {
-        if (!isDepartmentInitialized) return;
         try {
             const response = await apiService.get("inquiries-department", {
                 params: {
@@ -334,21 +382,54 @@ export const ContextProvider = ({ children }) => {
                     year: year,
                 },
             });
+    
             const result = response.data;
-            const formattedData = result.map((item) => ({
-                name: item.department,
-                resolved: item.resolved,
-                unresolved: item.unresolved,
-                closed: item.closed,
+    
+            // Initialize an object to accumulate the totals for CRS and other departments
+            const departmentTotals = {};
+    
+            // Process each item in the result
+            result.forEach((item) => {
+                // If the department is not CRS, add its counts normally
+                if (item.department !== "Customer Relations - Services") {
+                    departmentTotals[item.department] = departmentTotals[item.department] || {
+                        resolved: 0,
+                        unresolved: 0,
+                        closed: 0,
+                    };
+                    departmentTotals[item.department].resolved += item.resolved;
+                    departmentTotals[item.department].unresolved += item.unresolved;
+                    departmentTotals[item.department].closed += item.closed;
+                }
+    
+                // Add all departments' counts to CRS
+                departmentTotals["Customer Relations - Services"] = departmentTotals["Customer Relations - Services"] || {
+                    resolved: 0,
+                    unresolved: 0,
+                    closed: 0,
+                };
+                departmentTotals["Customer Relations - Services"].resolved += item.resolved;
+                departmentTotals["Customer Relations - Services"].unresolved += item.unresolved;
+                departmentTotals["Customer Relations - Services"].closed += item.closed;
+            });
+    
+            // Prepare formatted data including CRS and other departments
+            const formattedData = Object.keys(departmentTotals).map((department) => ({
+                name: department,
+                resolved: departmentTotals[department].resolved,
+                unresolved: departmentTotals[department].unresolved,
+                closed: departmentTotals[department].closed,
             }));
+    
             setDataDepartment(formattedData);
         } catch (error) {
             console.log("error retrieving", error);
         }
     };
+    
+    
 
     const getCommunicationTypePerProperty = async () => {
-        if (!isDepartmentInitialized) return;
         try {
             const response = await apiService.get(
                 "communication-type-property",
@@ -362,10 +443,18 @@ export const ContextProvider = ({ children }) => {
                 }
             );
             const result = response.data;
-            const formattedData = result.map((item) => ({
-                name: item.communication_type,
-                value: item.total,
-            }));
+            const formattedData = result.reduce((acc, item) => {
+                const name = item.communication_type || "No type";
+                const existing = acc.find((entry) => entry.name === name);
+    
+                if (existing) {
+                    existing.value += item.total;
+                } else {
+                    acc.push({ name, value: item.total });
+                }
+    
+                return acc;
+            }, []);
 
             setCommunicationTypeData(formattedData);
         } catch (error) {
@@ -374,8 +463,6 @@ export const ContextProvider = ({ children }) => {
     };
 
     const getInquiriesPerChannel = async () => {
-        if (!isDepartmentInitialized) return;
-
         try {
             const response = await apiService.get("inquiries-channel", {
                 params: {
@@ -388,7 +475,7 @@ export const ContextProvider = ({ children }) => {
             const result = response.data;
 
             const formattedData = result.map((item) => ({
-                name: item.channels,
+                name: item.channels || "No Channel",
                 value: item.total,
             }));
 
@@ -540,87 +627,87 @@ export const ContextProvider = ({ children }) => {
         }
     };
 
-    const getPricingMasterLists = useCallback(async () => {
-        if (token) {
-            try {
-                setIsLoading(true);
-                const response = await apiService.get(
-                    "get-pricing-master-lists"
-                );
-                setPricingMasterLists(response.data);
-            } catch (error) {
-                console.error("Error fetching pricing master lists:", error);
-            } finally {
-                setIsLoading(false);
-            }
-        }
-    }, []); //get all pricing master lists data
+    // const    = useCallback(async () => {
+    //     if (token) {
+    //         try {
+    //             setIsLoading(true);
+    //             const response = await apiService.get(
+    //                 "get-pricing-master-lists"
+    //             );
+    //             setPricingMasterLists(response.data);
+    //         } catch (error) {
+    //             console.error("Error fetching pricing master lists:", error);
+    //         } finally {
+    //             setIsLoading(false);
+    //         }
+    //     }
+    // }, []);  
 
-    const getPaymentSchemes = useCallback(async () => {
-        if (token) {
-            try {
-                const response = await apiService.get("get-payment-schemes");
+    // const getPaymentSchemes = useCallback(async () => {
+    //     if (token) {
+    //         try {
+    //             const response = await apiService.get("get-payment-schemes");
 
-                setPaymentSchemes(response.data);
-            } catch (error) {
-                console.error("Error fetching data:", error);
-            }
-        }
-    }, []); //get all payment schemes
-    const getPropertyFloors = useCallback(async (towerPhaseId) => {
-        // Check if property floors have already been fetched
-        if (!propertyFloors[towerPhaseId] && towerPhaseId && token) {
-            try {
-                setIsLoading(true);
-                const response = await apiService.get(
-                    `property-floors/${towerPhaseId}`
-                );
-                return response.data; // Return the data
-                // Merge the new floors data with existing propertyFloors
-                // setPropertyFloors((prev) => ({
-                //     ...prev,
-                //     [towerPhaseId]: response.data, // Store floors based on towerPhaseId
-                // }));
-            } catch (error) {
-                console.error("Error fetching property floors:", error);
-                return null;
-            } finally {
-                setIsLoading(false);
-            }
-        }
-    }, []); //get property floors
+    //             setPaymentSchemes(response.data);
+    //         } catch (error) {
+    //             console.error("Error fetching data:", error);
+    //         }
+    //     }
+    // }, []); 
+    // const getPropertyFloors = useCallback(async (towerPhaseId) => {
 
-    const getPropertyUnits = async (towerPhaseId, selectedFloor) => {
-        if (token || selectedFloor || towerPhaseId) {
-            try {
-                setIsLoading(true);
-                const response = await apiService.post("property-units", {
-                    towerPhaseId,
-                    selectedFloor,
-                });
-                setPropertyUnits(response.data);
-            } catch (error) {
-                console.error("Error fetching property units:", error);
-            } finally {
-                setIsLoading(false);
-            }
-        }
-    }; //get property units
+    //     if (!propertyFloors[towerPhaseId] && towerPhaseId && token) {
+    //         try {
+    //             setIsLoading(true);
+    //             const response = await apiService.get(
+    //                 `property-floors/${towerPhaseId}`
+    //             );
+    //             return response.data; // Return the data
+    //             // Merge the new floors data with existing propertyFloors
+    //             // setPropertyFloors((prev) => ({
+    //             //     ...prev,
+    //             //     [towerPhaseId]: response.data, // Store floors based on towerPhaseId
+    //             // }));
+    //         } catch (error) {
+    //             console.error("Error fetching property floors:", error);
+    //             return null;
+    //         } finally {
+    //             setIsLoading(false);
+    //         }
+    //     }
+    // }, []); //get property floors
 
-    const getPropertyMaster = async (id) => {
-        if (token) {
-            try {
-                setIsLoading(true);
-                const response = await apiService.get(
-                    `get-property-master/${id}`
-                );
+    // const getPropertyUnits = async (towerPhaseId, selectedFloor) => {
+    //     if (token || selectedFloor || towerPhaseId) {
+    //         try {
+    //             setIsLoading(true);
+    //             const response = await apiService.post("property-units", {
+    //                 towerPhaseId,
+    //                 selectedFloor,
+    //             });
+    //             setPropertyUnits(response.data);
+    //         } catch (error) {
+    //             console.error("Error fetching property units:", error);
+    //         } finally {
+    //             setIsLoading(false);
+    //         }
+    //     }
+    // }; //get property units
 
-                return response.data;
-            } catch (e) {
-                console.error("Error fetching propertymaster data:", error);
-            }
-        }
-    };
+    // const getPropertyMaster = async (id) => {
+    //     // if (token) {
+    //     //     try {
+    //     //         setIsLoading(true);
+    //     //         const response = await apiService.get(
+    //     //             `get-property-master/${id}`
+    //     //         );
+
+    //     //         return response.data;
+    //     //     } catch (e) {
+    //     //         console.error("Error fetching propertymaster data:", error);
+    //     //     }
+    //     // }
+    // };
 
     const getBannerData = async () => {
         try {
@@ -679,7 +766,7 @@ export const ContextProvider = ({ children }) => {
     // }, [towerPhaseId, selectedFloor]);
 
     // useEffect(() => {
-    //     getPricingMasterLists();
+    //       ();
     //     getPaymentSchemes();
     // }, []);
 
@@ -769,6 +856,8 @@ export const ContextProvider = ({ children }) => {
                 await fetchCategory();
                 await getCommunicationTypePerProperty();
                 await getInquiriesPerChannel();
+
+                await getFullYear();
             } catch (error) {
                 console.error("Error fetching data:", error);
             }
@@ -844,6 +933,8 @@ export const ContextProvider = ({ children }) => {
                 setCommunicationTypeMonth,
                 communicationTypeMonth,
                 setData,
+                dataCount,
+                setDataCount,
                 searchFilter,
                 statusFilter,
                 specificInquiry,
@@ -859,10 +950,9 @@ export const ContextProvider = ({ children }) => {
                 fetchDataReport,
                 dataSet,
                 pricingMasterLists,
-                getPricingMasterLists,
+
                 paymentSchemes,
-                getPaymentSchemes,
-                getPropertyFloors,
+
                 setPropertyId,
                 propertyFloors,
                 propertyId,
@@ -872,7 +962,6 @@ export const ContextProvider = ({ children }) => {
                 setSelectedFloor,
                 propertyUnit,
                 setPropertyUnits,
-                getPropertyUnits,
                 towerPhaseId,
                 setTowerPhaseId,
                 isLoading,
@@ -881,7 +970,6 @@ export const ContextProvider = ({ children }) => {
                 setConcernMessages,
                 concernId,
                 setConcernId,
-                getPropertyMaster,
                 getConcernMessages,
                 setAssigneesPersonnel,
                 assigneesPersonnel,
@@ -941,7 +1029,24 @@ export const ContextProvider = ({ children }) => {
                 totalPagesCustomer,
                 setTotalPagesCustomer,
                 isTotalPages,
-                setIsTotalPages
+                setIsTotalPages,
+
+                selectedOption,
+                setSelectedOption,
+                setActiveDayButton,
+                activeDayButton,
+                searchSummary,
+                setSearchSummary,
+                resultSearchActive,
+                setResultSearchActive,
+                setDepartmentValue,
+                departmentValue,
+                setProjectValue,
+                projectValue,
+                setYearValue,
+                yearValue,
+                setMonthValue,
+                monthValue
             }}
         >
             {children}

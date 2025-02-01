@@ -28,6 +28,7 @@ class Unit extends Model
     {
         return $this->belongsTo(FloorPremium::class);
     }
+    
     public function towerPhase(){
         return $this->belongsTo(TowerPhase::class);
     }

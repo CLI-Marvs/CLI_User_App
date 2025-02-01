@@ -11,14 +11,29 @@ import { MdRefresh } from "react-icons/md";
 import InquiryFormModal from "./InquiryFormModal";
 import axios from "axios";
 import { toast } from "react-toastify";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useLocation } from "react-router-dom";
 import Spinner from "../../../util/Spinner";
 const InquiryList = () => {
+    const location = useLocation();
+
+    /*   const searchParams = new URLSearchParams(location.search);
+    const propertyParam = searchParams.get("property");
+    const statusParam = searchParams.get("status");
+    const typeParam = searchParams.get("type");
+    const channelsParam = searchParams.get("channels");
+    const categoryParam = searchParams.get("category");
+    const departmentParam = searchParams.get("department");
+    const monthParam = searchParams.get("month");
+    const yearParam = searchParams.get("year"); */
+
+    /*    const searchParams = new URLSearchParams(location.search); */
+
     const {
         currentPage,
         setCurrentPage,
         data,
         pageCount,
+        fullYear,
         getAllConcerns,
         daysFilter,
         setDaysFilter,
@@ -27,13 +42,33 @@ const InquiryList = () => {
         statusFilter,
         searchFilter,
         user,
+        dataCount,
         setSpecificAssigneeCsr,
         specificAssigneeCsr,
+        department,
         loading,
+        allEmployees,
+        selectedOption,
+        setSelectedOption,
+        activeDayButton,
+        setActiveDayButton,
+        searchSummary,
+        setSearchSummary,
+        resultSearchActive,
+        setResultSearchActive,
         /*  setHasAttachments,
         hasAttachments */
         userAccessData
     } = useStateContext();
+
+    const propertyParam = searchFilter?.selectedProperty;
+    const statusParam = searchFilter?.status;
+    const typeParam = searchFilter?.type;
+    const channelsParam = searchFilter?.channels;
+    const categoryParam = searchFilter?.category;
+    const departmentParam = searchFilter?.departments;
+    const monthParam = searchFilter?.selectedMonth;
+    const yearParam = searchFilter?.selectedYear;
 
     const [name, setName] = useState("");
     const [category, setCategory] = useState("");
@@ -43,16 +78,16 @@ const InquiryList = () => {
     const [status, setStatus] = useState("");
     const [type, setType] = useState("");
     const [channels, setChannels] = useState("");
-
+    const [departments, setDepartments] = useState("");
     const [selectedProperty, setSelectedProperty] = useState("");
+    const [selectedYear, setSelectedYear] = useState("");
+    const [selectedMonth, setSelectedMonth] = useState("");
     const [hasAttachments, setHasAttachments] = useState(false);
     const { propertyNamesList } = useStateContext();
-    const [activeDayButton, setActiveDayButton] = useState(null);
     const [assignedToMeActive, setAssignedToMeActive] = useState(false);
     const [startDate, setStartDate] = useState(null);
     const [isFilterVisible, setIsFilterVisible] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
-    const [selectedOption, setSelectedOption] = useState("All");
     const [lastActivity, setLastActivity] = useState(null);
     const filterBoxRef = useRef(null);
     const [isOpenSelect, setIsOpenSelect] = useState(false);
@@ -69,6 +104,9 @@ const InquiryList = () => {
         }
     }, [userAccessData]);
 
+   
+
+
     const handleSelect = (option) => {
         onChange(option);
         setIsOpenSelect(false);
@@ -81,7 +119,9 @@ const InquiryList = () => {
         setCurrentPage(selectedPage);
     };
 
+
     const handleRefresh = () => {
+        setResultSearchActive(false);
         if (daysFilter) {
             setDaysFilter(null);
             setActiveDayButton(null);
@@ -100,6 +140,7 @@ const InquiryList = () => {
             setAssignedToMeActive(false);
             setDaysFilter(null);
         }
+
         getAllConcerns();
     };
 
@@ -135,6 +176,7 @@ const InquiryList = () => {
     };
 
     const handleOptionClick = (option) => {
+        setResultSearchActive(false);
         setSelectedOption(option);
         setIsOpen(false);
 
@@ -148,6 +190,12 @@ const InquiryList = () => {
             setAssignedToMeActive(false);
         } else if (option === "Resolved") {
             setStatusFilter("Resolved");
+            setCurrentPage(0);
+            setSearchFilter("");
+            setSpecificAssigneeCsr("");
+            setAssignedToMeActive(false);
+        } else if (option === "Closed") {
+            setStatusFilter("Closed");
             setCurrentPage(0);
             setSearchFilter("");
             setSpecificAssigneeCsr("");
@@ -233,37 +281,55 @@ const InquiryList = () => {
         "N/A",
         ...(Array.isArray(propertyNamesList) && propertyNamesList.length > 0
             ? propertyNamesList
-                .filter((item) => !item.toLowerCase().includes("phase"))
-                .map((item) => {
-                    let formattedItem = formatFunc(item);
+                  .filter((item) => !item.toLowerCase().includes("phase"))
+                  .map((item) => {
+                      let formattedItem = formatFunc(item);
 
-                    // Capitalize each word in the string
-                    formattedItem = formattedItem
-                        .split(" ")
-                        .map((word) => {
-                            // Check for specific words that need to be fully capitalized
-                            if (/^(Sjmv|Lpu|Cdo|Dgt)$/i.test(word)) {
-                                return word.toUpperCase();
-                            }
-                            // Capitalize the first letter of all other words
-                            return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
-                        })
-                        .join(" ");
+                      // Capitalize each word in the string
+                      formattedItem = formattedItem
+                          .split(" ")
+                          .map((word) => {
+                              // Check for specific words that need to be fully capitalized
+                              if (/^(Sjmv|Lpu|Cdo|Dgt)$/i.test(word)) {
+                                  return word.toUpperCase();
+                              }
+                              // Capitalize the first letter of all other words
+                              return (
+                                  word.charAt(0).toUpperCase() +
+                                  word.slice(1).toLowerCase()
+                              );
+                          })
+                          .join(" ");
 
-                    // Replace specific names if needed
-                    if (formattedItem === "Casamira South") {
-                        formattedItem = "Casa Mira South";
-                    }
+                      // Replace specific names if needed
+                      if (formattedItem === "Casamira South") {
+                          formattedItem = "Casa Mira South";
+                      }
 
-                    return formattedItem;
-                })
-                .sort((a, b) => {
-                    if (a === "N/A") return -1;
-                    if (b === "N/A") return 1;
-                    return a.localeCompare(b);
-                })
+                      return formattedItem;
+                  })
+                  .sort((a, b) => {
+                      if (a === "N/A") return -1;
+                      if (b === "N/A") return 1;
+                      return a.localeCompare(b);
+                  })
             : []),
     ];
+
+    const monthNames = {
+        "01": "January",
+        "02": "February",
+        "03": "March",
+        "04": "April",
+        "05": "May",
+        "06": "June",
+        "07": "July",
+        "08": "August",
+        "09": "September",
+        10: "October",
+        11: "November",
+        12: "December",
+    };
 
     const updateLastActivity = () => {
         const currentTime = new Date();
@@ -284,7 +350,69 @@ const InquiryList = () => {
         return diff === 0 ? "0 minutes" : `${diff} minutes ago`;
     };
 
+    const formatDate = (dateString) => {
+        const date = new Date(dateString);
+        return date.toLocaleDateString("en-US", {
+            month: "short", // Jan
+            day: "2-digit", // 16
+            year: "numeric", // 2025
+        });
+    };
+
+    const formatMonth = (monthNumber) => {
+        const monthNames = [
+            "January",
+            "February",
+            "March",
+            "April",
+            "May",
+            "June",
+            "July",
+            "August",
+            "September",
+            "October",
+            "November",
+            "December",
+        ];
+        return monthNames[parseInt(monthNumber, 10) - 1]; // Adjust for zero-based index
+    };
+
+
     const handleSearch = () => {
+        setResultSearchActive(true);
+        let summaryParts = []; // Array to hold each part of the summary
+
+        if (category) summaryParts.push(`Category: ${category}`);
+        if (status) {
+            const displayStatus =
+                status === "unresolved" ? "Unresolved" : status;
+            summaryParts.push(`Status: ${displayStatus}`);
+        }
+        if (name) summaryParts.push(`Name: ${name}`);
+        if (type) summaryParts.push(`Type: ${type}`);
+        if (email) summaryParts.push(`Email: ${email}`);
+        if (channels) {
+            const formattedChannels =
+                channels === "Walk in"
+                    ? "Walk-in"
+                    : channels === "Social media"
+                    ? "Social Media"
+                    : channels;
+            summaryParts.push(`Channel: ${formattedChannels}`);
+        }
+        if (departments) summaryParts.push(`Department: ${departments}`);
+        if (ticket) summaryParts.push(`Ticket: ${ticket}`);
+        if (startDate)
+            summaryParts.push(`Start Date: ${formatDate(startDate)}`);
+        if (selectedProperty)
+            summaryParts.push(`Property: ${selectedProperty}`);
+        if (selectedMonth)
+            summaryParts.push(`Month: ${formatMonth(selectedMonth)}`);
+        if (selectedYear) summaryParts.push(`Year: ${selectedYear}`);
+        if (hasAttachments) summaryParts.push(`Attachments: Yes`);
+
+        setSearchSummary(summaryParts);
+
         setSearchFilter({
             name,
             category,
@@ -292,10 +420,13 @@ const InquiryList = () => {
             status,
             email,
             channels,
+            departments,
             ticket,
             startDate,
             selectedProperty,
             hasAttachments,
+            selectedMonth,
+            selectedYear,
         });
         setDaysFilter(null);
         setStatusFilter(null);
@@ -311,7 +442,86 @@ const InquiryList = () => {
         setSelectedProperty("");
         setHasAttachments(false);
         setSpecificAssigneeCsr("");
+        setSelectedYear("");
+        setSelectedMonth("");
+        setDepartments("");
     };
+
+   
+    useEffect(() => {
+      /*   console.log("categoryParam", categoryParam);
+        console.log("statusParam", statusParam);
+        console.log("monthParam", monthParam);
+        console.log("yearParam", yearParam);
+        console.log("departmentParam", departmentParam);
+        console.log("channelsParam", channelsParam);
+ */
+
+        if (
+            propertyParam ||
+            statusParam ||
+            monthParam ||
+            yearParam ||
+            departmentParam ||
+            channelsParam ||
+            categoryParam
+        ) {
+
+            setResultSearchActive(true);
+
+            let summaryParts = []; // Array to hold each part of the summary
+
+            if (categoryParam)
+                summaryParts.push(`Category: ${categoryParam}`);
+            if (statusParam) {
+                const displayStatus =
+                statusParam === "unresolved" ? "Unresolved" : statusParam;
+                summaryParts.push(`Status: ${displayStatus}`);
+            }
+            if (name) summaryParts.push(`Name: ${name}`);
+            if (typeParam) summaryParts.push(`Type: ${typeParam}`);
+            if (email) summaryParts.push(`Email: ${email}`);
+            if (channelsParam) {
+                // Format 'Walk in' to 'Walk-in'
+                const formattedChannel =
+                    channelsParam === "Walk in"
+                        ? "Walk-in"
+                        : channelsParam === "Social media"
+                        ? "Social Media"
+                        : channelsParam;
+                summaryParts.push(`Channel: ${formattedChannel}`);
+            }
+            if (departmentParam)
+                summaryParts.push(`Department: ${departmentParam}`);
+            if (ticket) summaryParts.push(`Ticket: ${ticket}`);
+            if (startDate)
+                summaryParts.push(`Start Date: ${formatDate(startDate)}`);
+            if (propertyParam)
+                summaryParts.push(`Property: ${propertyParam}`);
+            if (yearParam) summaryParts.push(`Year: ${yearParam}`);
+            if (monthParam)
+                summaryParts.push(`Month: ${formatMonth(monthParam)}`);
+            if (hasAttachments) summaryParts.push(`Attachments: Yes`);
+
+            setSearchSummary(summaryParts);
+
+          /*   setSearchFilter({
+            name,
+            category: categoryParam,
+            type: typeParam,
+            status: statusParam,
+            email,
+            channels: channelsParam,
+            departments: departmentParam,
+            ticket,
+            startDate,
+            selectedProperty: propertyParam,
+            hasAttachments,
+            selectedMonth: monthParam,
+            selectedYear: yearParam,
+        }); */
+        }
+    }, [/* propertyParam, statusParam, departmentParam, monthParam, yearParam */]);
 
     useEffect(() => {
         if (isFilterVisible) {
@@ -507,6 +717,9 @@ const InquiryList = () => {
                                                 <option value="Suggestion or Recommendation">
                                                     Suggestion or Recommendation
                                                 </option>
+                                                <option value="No Type">
+                                                    No Type
+                                                </option>
                                             </select>
                                         </div>
 
@@ -597,9 +810,76 @@ const InquiryList = () => {
                                                 <option value="Internal Endorsement">
                                                     Internal Endorsement
                                                 </option>
+                                                <option value="No Channel">
+                                                    No Channel
+                                                </option>
                                             </select>
                                         </div>
 
+                                        <span className="absolute inset-y-0 right-0 flex items-center  pl-3 pointer-events-none">
+                                            <IoIosArrowDown />
+                                        </span>
+                                    </div>
+                                    <div className="flex relative">
+                                        <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
+                                            {" "}
+                                            Department
+                                        </label>
+                                        <div className="flex bg-red-900 justify-start w-full relative">
+                                            <label
+                                                htmlFor=""
+                                                className="w-full border-b-2" 
+                                            >
+                                                {""}
+                                            </label>
+                                            <select
+                                                className="w-full border-b-1 outline-none appearance-none text-sm absolute px-[8px]"
+                                                value={departments}
+                                                onChange={(e) =>
+                                                    setDepartments(
+                                                        e.target.value
+                                                    )
+                                                }
+                                            >
+                                                <option value="">
+                                                    {" "}
+                                                    Select Department
+                                                </option>
+                                                {[
+                                                    ...new Set(
+                                                        allEmployees
+                                                            .map(
+                                                                (item) =>
+                                                                    item.department
+                                                            )
+                                                            .filter(
+                                                                (department) =>
+                                                                    department !==
+                                                                        null &&
+                                                                    department !==
+                                                                        undefined &&
+                                                                    department !==
+                                                                        "NULL"
+                                                            )
+                                                    ),
+                                                ]
+                                                    .sort((a, b) =>
+                                                        a.localeCompare(b)
+                                                    )
+                                                    .map(
+                                                        (department, index) => (
+                                                            <option
+                                                                key={index}
+                                                                value={
+                                                                    department
+                                                                }
+                                                            >
+                                                                {department}
+                                                            </option>
+                                                        )
+                                                    )}
+                                            </select>
+                                        </div>
                                         <span className="absolute inset-y-0 right-0 flex items-center  pl-3 pointer-events-none">
                                             <IoIosArrowDown />
                                         </span>
@@ -683,6 +963,82 @@ const InquiryList = () => {
                                             </span>
                                         </div>
                                     </div>
+                                    <div className="flex gap-3">
+                                        <div className="flex">
+                                            <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[94px]">
+                                                Year
+                                            </label>
+                                            <div className="relative w-[146px]">
+                                                <select
+                                                    className="w-full border-b-1 outline-none appearance-none text-sm absolute px-[8px]"
+                                                    value={selectedYear}
+                                                    onChange={(e) =>
+                                                        setSelectedYear(
+                                                            e.target.value
+                                                        )
+                                                    }
+                                                >
+                                                    <option value="">
+                                                        {" "}
+                                                        Select Year
+                                                    </option>
+                                                    {fullYear &&
+                                                        fullYear.map(
+                                                            (item, index) => (
+                                                                <option
+                                                                    key={index}
+                                                                    value={
+                                                                        item.year
+                                                                    }
+                                                                >
+                                                                    {" "}
+                                                                    {item.year}
+                                                                </option>
+                                                            )
+                                                        )}
+                                                </select>
+                                                <span className="absolute inset-y-0 right-0 flex items-center  pl-3 pointer-events-none">
+                                                    <IoIosArrowDown />
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div className="flex relative">
+                                            <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[65px]">
+                                                {" "}
+                                                Month
+                                            </label>
+                                            <select
+                                                className="w-[220px] border-b-1 outline-none appearance-none text-sm px-[8px]"
+                                                onChange={(e) =>
+                                                    setSelectedMonth(
+                                                        e.target.value
+                                                    )
+                                                }
+                                                value={selectedMonth}
+                                            >
+                                                <option value="">
+                                                    {" "}
+                                                    Select Month
+                                                </option>
+                                                {Object.entries(monthNames)
+                                                    .sort(
+                                                        ([keyA], [keyB]) =>
+                                                            keyA - keyB
+                                                    )
+                                                    .map(([key, name]) => (
+                                                        <option
+                                                            key={key}
+                                                            value={key}
+                                                        >
+                                                            {name}
+                                                        </option>
+                                                    ))}
+                                            </select>
+                                            <span className="absolute inset-y-0 right-0 flex items-center  pl-3 pointer-events-none">
+                                                <IoIosArrowDown />
+                                            </span>
+                                        </div>
+                                    </div>
                                     <div className="mt-5 flex gap-5">
                                         <input
                                             type="checkbox"
@@ -709,16 +1065,44 @@ const InquiryList = () => {
                     {/*  <div className="flex items-center">
                         <button onClick={handleOpenModal} className='h-[38px] w-[121px] gradient-btn5 text-white  text-xs rounded-[10px]'> <span className='text-[18px]'>+</span> Add Inquiry</button>
                     </div> */}
+                    {resultSearchActive && (
+                        <div className="flex flex-col gap-1 p-2 mt-[15px] bg-white w-max rounded-[8px] shadow-custom7 text-sm">
+                            <div className="flex flex-col">
+                                <div className="mb-5">
+                                    <strong>Search {data?.length > 1 ? 'results for' : 'result for'} &nbsp;</strong>
+                                </div>
+                                <div className="flex flex-col flex-wrap gap-2">
+                                    {searchSummary.map((part, index) => {
+                                        const [label, value] = part.split(": ");
+                                        return (
+                                            <div key={index}>
+                                                <strong>{label}:</strong>{" "}
+                                                {value}
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </div>
                 <div className="max-w-[1260px]">
                     <div className="flex justify-between items-center h-12 mt-[15px] px-6 bg-white rounded-t-lg mb-1 ">
                         <div className="relative mr-4 ">
                             <button
-                                className="flex text-[20px] w-[130px] items-center gap-3 text-custom-bluegreen font-semibold"
+                                className="flex text-[20px] w-max items-center gap-3 text-custom-bluegreen font-semibold"
                                 onClick={toggleDropdown}
                             >
                                 {isOpen ? <IoIosArrowUp /> : <IoIosArrowDown />}{" "}
-                                {selectedOption}
+                                {resultSearchActive ? (
+                                    dataCount && dataCount === 0 ? (
+                                        <p>No Records Found</p>
+                                    ) : (
+                                        <p>{dataCount} {data?.length > 1 ? 'Results' : 'Result'} Found</p>
+                                    )
+                                ) : (
+                                    <p>{selectedOption}</p>
+                                )}
                             </button>
 
                             {/* Dropdown Menu */}
@@ -740,6 +1124,14 @@ const InquiryList = () => {
                                             }
                                         >
                                             Resolved
+                                        </li>
+                                        <li
+                                            className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                                            onClick={() =>
+                                                handleOptionClick("Closed")
+                                            }
+                                        >
+                                            Closed
                                         </li>
                                         <li
                                             className="px-4 py-2 hover:bg-gray-100 cursor-pointer"

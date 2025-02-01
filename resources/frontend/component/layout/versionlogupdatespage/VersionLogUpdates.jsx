@@ -4,13 +4,15 @@ import ReactPaginate from 'react-paginate'
 import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from 'react-icons/md'
 import Dec_2_24 from './logs/Dec_2_24'
 import Dec_18_24 from './logs/Dec_18_24'
-
+import Jan_27_25 from './logs/Jan_27_25'
 const VersionLogUpdates = () => {
 
     const items = [
-        { id: 1, content: <Dec_2_24 /> },
+        { id: 1, content: <Jan_27_25 /> },
         { id: 2, content: <Dec_18_24 /> },
-       
+        { id: 3, content: <Dec_2_24 /> },
+
+
         // Add more items as needed...
     ];
 
@@ -36,7 +38,7 @@ const VersionLogUpdates = () => {
             <div className="flex flex-col items-start">
                 {/* Render the paginated items */}
                 <div className="w-[1033px] flex flex-col gap-4">
-                    {currentItems.reverse().map((item) => (
+                    {currentItems.map((item) => (
                         <div key={item.id} >
                             {item.content}
                             <div className="w-full border border-t-[1px] border-[#EDEBE9]"></div>
@@ -65,7 +67,7 @@ const VersionLogUpdates = () => {
                         forcePage={currentPage}
                     />
                 </div>
-                
+
             </div>
         </div>
     )

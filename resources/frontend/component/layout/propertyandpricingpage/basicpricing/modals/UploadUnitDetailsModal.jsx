@@ -1,33 +1,27 @@
 import React, { useRef, useEffect, useState } from "react";
 import { IoMdArrowDropdown } from "react-icons/io";
-import apiService from "../../../../servicesApi/apiService";
-import { useStateContext } from "../../../../../context/contextprovider";
+import { unitService } from "@/component/servicesApi/apiCalls/propertyPricing/unit/unitService";
 import CircularProgress from "@mui/material/CircularProgress";
-
+import { useCountFloors } from "@/component/layout/propertyandpricingpage/basicpricing/hooks/useCountFloors";
 const UploadUnitDetailsModal = ({
     uploadUnitModalRef,
     fileName,
     selectedExcelHeader,
     fileSelected,
     handleFileChange,
+    propertyData,
 }) => {
-    
     //State
     const [formData, setFormData] = useState({});
-    const [loading, setLoading] = useState(false); 
+    const [loading, setLoading] = useState(false);
     const newFileInputRef = useRef();
-    const {
-        setTowerPhaseId,
-        towerPhaseId,
-        propertyId,
-        setPropertyFloors,
-        setFloorPremiumsAccordionOpen,
-        getPropertyFloors,
-    } = useStateContext();
+    const [towerPhaseId, setTowerPhaseId] = useState();
+    const [propertyMasterId, setPropertyMasterId] = useState();
+    const { fetchFloorCount } = useCountFloors();
 
     //Hooks
     useEffect(() => {
-        if (selectedExcelHeader) {
+        if (selectedExcelHeader || propertyData) {
             const initialFormData = selectedExcelHeader.reduce((acc, item) => {
                 acc[item.rowHeader] = {
                     rowHeader: item.rowHeader,
@@ -36,79 +30,72 @@ const UploadUnitDetailsModal = ({
                 return acc;
             }, {});
             setFormData(initialFormData);
+            setTowerPhaseId(propertyData?.tower_phase_id);
+            setPropertyMasterId(
+                propertyData?.property_commercial_detail?.property_master_id
+            );
         }
-    }, [selectedExcelHeader]); //Initialize formData once selectedExcelHeader is available
+    }, [selectedExcelHeader, propertyData]); //Initialize formData once selectedExcelHeader is available
 
     //Event hander
     const handleColumnChange = (newColumnIndex, rowHeader) => {
-        // console.log("newColumnIndex", newColumnIndex);
         setFormData((prevFormData) => ({
             ...prevFormData,
             [rowHeader]: {
                 ...prevFormData[rowHeader],
-                columnIndex: parseInt(newColumnIndex), // Update columnIndex for the selected rowHeader
+                columnIndex: parseInt(newColumnIndex),
             },
         }));
     }; // Handle change in column selection
 
+    /**
+     * Handle submit units from excel file
+     */
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!fileSelected || !propertyId || !towerPhaseId) {
-            alert(
-                "Please ensure a file is selected and all fields are filled."
-            );
-            return;
-        }
+        const payload = {
+            headers: Object.values(formData),
+            file: fileSelected,
+            tower_phase_id: towerPhaseId,
+            property_masters_id: propertyMasterId,
+        };
+        console.log("payload", payload);
+
         try {
             setLoading(true);
-            const submittedHeader = Object.values(formData);
-            const form = new FormData();
-            submittedHeader.forEach((header) => {
-                form.append("headers[]", JSON.stringify(header)); // Convert each header object to a JSON string rowHeader
-            });
-            // Append the file if necessary
-            form.append("file", fileSelected);
-            form.append("towerPhaseId", towerPhaseId);
-            form.append("propertyId", propertyId);
+            const response = await unitService.storeUnit(payload);
+            console.log("response", response);
+            if (response?.status === 201) {
+                const excelId = response?.data?.data?.excel_id;
 
-            const response = await apiService.post("upload-units", form, {
-                headers: {
-                    "Content-Type": "multipart/form-data",
-                },
-            });
-
-            //setTowerPhaseId(towerPhaseId);
-            if (towerPhaseId) {
-                console.log(
-                    "towerPhaseId UploadUnitDetailsModal",
-                    towerPhaseId
-                );
-
+                //TODO: fetch the unit lloor
                 // Fetch floors immediately after successful upload to reflect the floor premium
-                const floorsResponse = await getPropertyFloors(towerPhaseId);
-                // Update propertyFloors in the context
-                setPropertyFloors((prev) => ({
-                    ...prev,
-                    [towerPhaseId]: floorsResponse,
-                }));
+                const floorsResponse = fetchFloorCount(towerPhaseId, excelId);
+                console.log("floorsResponse", floorsResponse);
+                alert(response.data.message);
+                // if (uploadUnitModalRef.current) {
+                //     uploadUnitModalRef.current.close();
+                // }
             }
-            alert(response.data.message);
-            if (uploadUnitModalRef.current) {
-                uploadUnitModalRef.current.close();
-            }
-            setFloorPremiumsAccordionOpen(true);
         } catch (error) {
             console.log("error uploading excel", error);
         } finally {
             setLoading(false);
         }
-    }; //Handle submit units from excel file
+    };
 
     const replaceFile = async (event) => {
         // Trigger the `handleFileChange` function received from BasicPricing
         await handleFileChange(event);
     }; //Handle in replacing the file
 
+    //Handle close the unit upload modal
+    const handleClose = () => {
+        //TODO: if close, reset the ref of file input field
+        if (uploadUnitModalRef.current) {
+            uploadUnitModalRef.current.close();
+        }
+    };
     return (
         <dialog
             className="modal w-[474px] rounded-lg backdrop:bg-black/50"
@@ -116,20 +103,23 @@ const UploadUnitDetailsModal = ({
         >
             <div className=" px-14 mb-5 rounded-[10px]">
                 <div className="">
-                    <form
+                    <div
                         method="dialog"
                         className="pt-2 flex justify-end -mr-[50px]"
                     >
-                        <button className="flex justify-center w-10 h-10 items-center rounded-full bg-custom-grayFA3 text-custom-bluegreen hover:bg-custom-grayFA">
+                        <button
+                            className="flex justify-center w-10 h-10 items-center rounded-full bg-custom-grayFA3 text-custom-bluegreen hover:bg-custom-grayFA"
+                            onClick={handleClose}
+                        >
                             ✕
                         </button>
-                    </form>
+                    </div>
                 </div>
                 <div className="flex justify-between items-center bg-custom-grayFA h-[54px] px-[15px] mb-3">
                     <div>
                         <p className="underline text-blue-500 cursor-pointer">
                             {fileName} -TowerId- {towerPhaseId}- PropertyId-{" "}
-                            {propertyId}
+                            {propertyMasterId}
                         </p>
                     </div>
                     <div>
@@ -153,6 +143,12 @@ const UploadUnitDetailsModal = ({
                 <div className="flex justify-start items-center h-40px my-6">
                     <p className="montserrat-bold">Confirm Columns</p>
                 </div>
+                {/* <div className="py-2 bg-red-900">
+                    <p>
+                        Loader/ progress bar here
+                        TODO: add loader here or progress bar
+                    </p>
+                </div> */}
                 <div className="flex flex-col gap-2">
                     {selectedExcelHeader &&
                         Object.values(formData).map((item, index) => {

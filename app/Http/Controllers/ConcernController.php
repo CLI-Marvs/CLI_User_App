@@ -33,6 +33,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use App\Events\InquiryAssignedLogs;
 use Illuminate\Support\Facades\Log;
+use App\Jobs\SendSurveyLinkEmailJob;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 use App\Jobs\MarkClosedToCustomerJob;
@@ -51,9 +52,11 @@ class ConcernController extends Controller
     private $keyJson;
     private $bucket;
     private $folderName;
+    private $dynamicTicketYear;
 
     public function __construct()
     {
+        $this->dynamicTicketYear = date('y');
         if (config('services.app_url') === 'http://localhost:8001' || config('services.app_url') === 'https://admin-dev.cebulandmasters.com') {
             $this->keyJson = config('services.gcs.key_json');
             $this->bucket = 'super-app-storage';
@@ -466,7 +469,7 @@ class ConcernController extends Controller
             $nextId = $lastConcern ? $lastConcern->id + 1 : 1;
             $formattedId = str_pad($nextId, 8, '0', STR_PAD_LEFT);
 
-            $ticketId = 'Ticket#24' . $formattedId;
+            $ticketId = 'Ticket#' . $this->dynamicTicketYear . $formattedId;
 
 
             $concerns = new Concerns();
@@ -546,7 +549,7 @@ class ConcernController extends Controller
             $nextId = $lastConcern ? $lastConcern->id + 1 : 1;
             $formattedId = str_pad($nextId, 8, '0', STR_PAD_LEFT);
 
-            $ticketId = 'Ticket#24' . $formattedId;
+            $ticketId = 'Ticket#' . $this->dynamicTicketYear . $formattedId;
 
 
 
@@ -909,6 +912,10 @@ class ConcernController extends Controller
                 )
                 ->paginate(20);
 
+            \Log::info($allConcerns);
+
+            /* dd($allConcerns); */
+
             return response()->json($allConcerns);
         } catch (\Exception $e) {
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
@@ -969,7 +976,7 @@ class ConcernController extends Controller
             if (!empty($searchParams['hasAttachments'])) {
                 $query->whereHas('messages', function ($messageQuery) {
                     $messageQuery->whereNotNull('attachment')
-                                 ->whereJsonLength('attachment', '>', 0);   
+                        ->whereJsonLength('attachment', '>', 0);
                 });
             }
         }
@@ -1039,8 +1046,14 @@ class ConcernController extends Controller
         if (!empty($searchParams['name'])) {
             $query->where('buyer_name', 'ILIKE', '%' . $searchParams['name'] . '%');
         }
-        if (!empty($searchParams['category'])) {
+        if (!empty($searchParams['category'] ?? null) && $searchParams['category'] !== 'Other Concerns') {
             $query->where('details_concern', 'ILIKE', '%' . $searchParams['category'] . '%');
+        } else {
+            $query->where(function($query) use ($searchParams) {
+                $query->where('details_concern', 'ILIKE', '%' . ($searchParams['category'] ?? '') . '%')
+                ->orWhereNull('details_concern');
+                      
+            });
         }
         if (!empty($searchParams['email'])) {
             $query->where('buyer_email', 'ILIKE', '%' . $searchParams['email'] . '%');
@@ -1053,18 +1066,52 @@ class ConcernController extends Controller
             $query->where('status', $searchParams['status']);
         }
         if (!empty($searchParams['type'])) {
-            $query->where('communication_type', 'ILIKE', '%' . $searchParams['type'] . '%');
+            if ($searchParams['type'] === 'No Type') {
+                $query->whereNull('communication_type');
+            }else {
+                $query->where('communication_type', 'ILIKE', '%' . $searchParams['type'] . '%');
+            }
         }
-        if (!empty($searchParams['selectedProperty'])) {
+        if (!empty($searchParams['selectedProperty'] ?? null) && $searchParams['selectedProperty'] !== 'N/A') {
             $query->where('property', 'ILIKE', '%' . $searchParams['selectedProperty'] . '%');
+        } else {
+            $query->where(function($query) use ($searchParams) {
+                $query->where('property', 'ILIKE', '%' . ($searchParams['selectedProperty'] ?? '') . '%')
+                      ->orWhereNull('property');
+            });
         }
         if (!empty($searchParams['channels'])) {
-            $query->where('channels', $searchParams['channels']);
+            if ($searchParams['channels'] === 'No Channel') {
+                $query->whereNull('channels');
+            }else {
+                $query->where('channels', $searchParams['channels']);
+            }
+           
         }
 
         if (!empty($searchParams['startDate'])) {
             $startDate = Carbon::parse($searchParams['startDate'])->setTimezone('Asia/Manila');
             $query->whereDate('concerns.created_at', '=', $startDate);
+        }
+
+        if (!empty($searchParams['selectedYear'])) {
+            $query->whereYear('created_at', $searchParams['selectedYear']);
+        }
+
+        if (!empty($searchParams['selectedMonth'])) {
+            $query->whereMonth('created_at', $searchParams['selectedMonth']);
+        }
+
+        if (!empty($searchParams['departments'])) {
+            $departments = $searchParams['departments'];
+
+            if (!is_array($departments)) {
+                $departments = explode(',', $departments); 
+            }
+
+            foreach ($departments as $department) {
+                $query->whereJsonContains('assign_to', [['department' => $department]]);
+            }
         }
 
         return $query;
@@ -1784,8 +1831,9 @@ class ConcernController extends Controller
      * Implement a function to resolve a ticket
      */
     public function markAsResolve(Request $request)
-    {   
- 
+    {
+
+
 
         try {
             $assignees = $request->assignees;
@@ -1813,8 +1861,14 @@ class ConcernController extends Controller
                         'buyer_name' => $buyer_name,
                         'admin_name' => $admin_name,
                         'details_concern' => $details_concern,
-                        'modifiedTicketId' => $modifiedTicketId
+                        'modifiedTicketId' => $modifiedTicketId,
+                        'status' => 'Resolved'
                     ];
+
+                    \Log::info([
+                        'datasssssss' => $data,
+                    ]);
+
                     NotifyAssignedCliOfResolvedInquiryJob::dispatch(
                         $assignee['employee_email'],
                         $assignee['name'],
@@ -1824,8 +1878,10 @@ class ConcernController extends Controller
             }
 
             $this->inquiryResolveLogs($request, 'resolve');
-            
+
             MarkResolvedToCustomerJob::dispatch($request->ticket_id, $buyerEmail, $buyer_lastname, $message_id, $admin_name, $department, $modifiedTicketId, $selectedSurveyType);
+
+            SendSurveyLinkEmailJob::dispatch($buyerEmail,  $request->buyer_name, $selectedSurveyType, 'resolve', $modifiedTicketId);
         } catch (\Exception $e) {
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
         }
@@ -1917,8 +1973,8 @@ class ConcernController extends Controller
     public function getCreatedDates(Request $request)
     {
         $years = Concerns::select(DB::raw('DISTINCT EXTRACT(YEAR FROM created_at) as year'))
-        ->orderBy('year', 'desc')
-        ->get();
+            ->orderBy('year', 'desc')
+            ->get();
 
         return response()->json($years);
     }
@@ -1933,7 +1989,7 @@ class ConcernController extends Controller
         $project = $request->property;
         $month = $request->month;
         /* $monthNumber = Carbon::parse($request->propertyMonth)->month; */
-        
+
         $query = Concerns::select(
             DB::raw('EXTRACT(MONTH FROM created_at) as month'),
             DB::raw('SUM(case when status = \'Resolved\' then 1 else 0 end) as Resolved'),
@@ -1960,7 +2016,7 @@ class ConcernController extends Controller
             ->orderBy('month')
             ->get()
             ->keyBy('month');
- 
+
         $allMonths = collect(range(1, 12))->map(function ($month) use ($reports) {
             return [
                 'month' => $month,
@@ -1986,13 +2042,19 @@ class ConcernController extends Controller
             DB::raw('SUM(case when status = \'Resolved\' then 1 else 0 end) as Resolved'),
             DB::raw('SUM(case when status = \'unresolved\' then 1 else 0 end) as Unresolved'),
             DB::raw('SUM(case when status = \'Closed\' then 1 else 0 end) as Closed')
-
         )
-            ->whereYear('created_at', $year)
-            ->whereNotNull('status');
+            ->whereYear('created_at', $year);
 
         if ($project && $project !== 'All') {
-            $query->where('property', $project);
+            if ($project === "N/A") {
+                $query->where(function ($subQuery) {
+                    $subQuery->where('property', 'N/A')
+                             ->orWhereNull('property');
+                });
+            } else {
+                $query->where('property', $project);
+            }
+            
         }
 
         if ($month && $month !== 'All') {
@@ -2013,16 +2075,16 @@ class ConcernController extends Controller
         $month = $request->month;
         $project = $request->property;
         $year = $request->year ?? Carbon::now()->year;
-        $query = Concerns::select(
-            DB::raw("
-                (SELECT COALESCE(string_agg(elem->>'department', ', '), 'CRS')
-                FROM jsonb_array_elements(assign_to::jsonb) AS elem
-                ) AS department
-            "),
-            DB::raw('SUM(case when status = \'Resolved\' then 1 else 0 end) as Resolved'),
-            DB::raw('SUM(case when status = \'unresolved\' then 1 else 0 end) as Unresolved'),
-            DB::raw('SUM(case when status = \'Closed\' then 1 else 0 end) as Closed')
 
+        $query = Concerns::select(
+            DB::raw("COALESCE(
+                (SELECT jsonb_array_elements(assign_to::jsonb)->>'department' 
+                 LIMIT 1), 
+                'Customer Relations - Services'
+            ) as department"),
+            DB::raw('COUNT(DISTINCT CASE WHEN status = \'Resolved\' THEN id ELSE NULL END) as resolved'),
+            DB::raw('COUNT(DISTINCT CASE WHEN status = \'unresolved\' THEN id ELSE NULL END) as unresolved'),
+            DB::raw('COUNT(DISTINCT CASE WHEN status = \'Closed\' THEN id ELSE NULL END) as closed')
         )
             ->whereYear('created_at', $year)
             ->whereNotNull('status');
@@ -2035,13 +2097,18 @@ class ConcernController extends Controller
             $query->whereMonth('created_at', $month);
         }
 
-        if ($department && $department !== "All") {
-            $query->whereRaw("resolve_from::jsonb @> ?", json_encode([['department' => $department]]));
+        if ($department && $department !== 'All') {
+            $query->whereRaw("assign_to::jsonb @> ?", [json_encode([['department' => $department]])]);
         }
 
-        $concerns = $query->groupBy('department')->get();
+        $concerns = $query
+            ->groupBy('department')
+            ->orderBy('department') // Optional: For consistent ordering
+            ->get();
+
         return response()->json($concerns);
     }
+
 
     /**
      * Get Inquiries per channel data
@@ -2055,9 +2122,8 @@ class ConcernController extends Controller
 
 
         $query = Concerns::select('channels', DB::raw('COUNT(*) as total'))
-            
-            ->whereYear('created_at', $year)
-            ->whereNotNull('channels');
+
+            ->whereYear('created_at', $year);
 
         if ($department && $department !== "All") {
             $query->whereRaw("resolve_from::jsonb @> ?", json_encode([['department' => $department]]));
@@ -2107,14 +2173,13 @@ class ConcernController extends Controller
         $department = $request->department;
         $month = $request->month;
         $project = $request->property;
-        
+
 
         // Query to count each <communication_t></communication_t>ype grouped by property
         $query = Concerns::select('communication_type', DB::raw('COUNT(*) as total'))
 
-
-            ->whereYear('created_at', $year)
-            ->whereNotNull('communication_type');
+            ->whereYear('created_at', $year);
+            
 
         if ($department && $department !== "All") {
             $query->whereRaw("resolve_from::jsonb @> ?", json_encode([['department' => $department]]));
@@ -2127,7 +2192,7 @@ class ConcernController extends Controller
         if ($project && $project !== 'All') {
             $query->where('property', $project);
         }
-        
+
         $query->orderByRaw("
             CASE 
                 WHEN communication_type = 'Complaint' THEN 1
@@ -2137,9 +2202,32 @@ class ConcernController extends Controller
                 ELSE 5
             END
         ");
-        
+
         $communicationTypes = $query->groupBy('communication_type')->get();
-        return response()->json($communicationTypes);
+
+
+        $mappedCommunicationTypes = $communicationTypes->map(function ($item) {
+            switch ($item->communication_type) {
+                case 'Complaint':
+                    $item->communication_type = 'Complaints';
+                    break;
+                case 'Suggestion or Recommendation':
+                    $item->communication_type = 'Suggestion or Recommendations';
+                    break;
+                case 'Suggestion or recommendation':
+                    $item->communication_type = 'Suggestion or Recommendations';
+                    break;
+                case 'Request':
+                    $item->communication_type = 'Requests';
+                    break;
+                case 'Inquiry':
+                    $item->communication_type = 'Inquiries';
+                    break;
+            }
+            return $item;
+        });
+
+        return response()->json($mappedCommunicationTypes);
     }
 
 
@@ -2158,8 +2246,7 @@ class ConcernController extends Controller
         $department = $request->department;
         $query = Concerns::select('details_concern', DB::raw('COUNT(*) as total'))
 
-            ->whereYear('created_at', $year)
-            ->whereNotNull('details_concern');
+            ->whereYear('created_at', $year);
 
         if ($department && $department !== "All") {
             $query->whereRaw("resolve_from::jsonb @> ?", json_encode([['department' => $department]]));
@@ -2209,7 +2296,6 @@ class ConcernController extends Controller
         try {
             $assignees = $request->assignees;
             $concerns = Concerns::where('ticket_id', $request->ticket_id)->first();
-            $selectedSurveyType = $request->selectedSurveyType;
             $modifiedTicketId = str_replace('Ticket#', '', $request->ticket_id);
             $buyerEmail = $request->buyer_email;
             $admin_name = $request->admin_name;
@@ -2218,7 +2304,6 @@ class ConcernController extends Controller
             $buyer_name = $request->buyer_name;
             $concerns->communication_type = $request->communication_type;
             $concerns->status = "Closed";
-            $concerns->survey_link = $selectedSurveyType['surveyName']; // Save the survey name to database
             $buyer_lastname = $request->buyer_lastname;
             $message_id = $request->message_id;
             $concerns->save();
@@ -2230,7 +2315,8 @@ class ConcernController extends Controller
                         'buyer_name' => $buyer_name,
                         'admin_name' => $admin_name,
                         'details_concern' => $details_concern,
-                        'modifiedTicketId' => $modifiedTicketId
+                        'modifiedTicketId' => $modifiedTicketId,
+                        'status' => 'Closed'
                     ];
                     NotifyAssignedCliOfResolvedInquiryJob::dispatch(
                         $assignee['employee_email'],
@@ -2243,7 +2329,7 @@ class ConcernController extends Controller
             $this->inquiryResolveLogs($request, 'close');
 
             //Pass the selectedSurveyType as arguments to MarkResolvedToCustomerJob job 
-            MarkClosedToCustomerJob::dispatch($request->ticket_id, $buyerEmail, $buyer_lastname, $message_id, $admin_name, $department, $modifiedTicketId, $selectedSurveyType);
+            MarkClosedToCustomerJob::dispatch($request->ticket_id, $buyerEmail, $buyer_lastname, $message_id, $admin_name, $department, $modifiedTicketId);
         } catch (\Exception $e) {
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
         }
@@ -2454,7 +2540,7 @@ class ConcernController extends Controller
                     $nextId = $lastConcern ? $lastConcern->id + 1 : 1;
 
                     $formattedId = str_pad($nextId, 8, '0', STR_PAD_LEFT);
-                    $ticketId = 'Ticket#24' . $formattedId;
+                    $ticketId = 'Ticket#' . $this->dynamicTicketYear . $formattedId;
 
                     $concerns = new Concerns();
                     $concerns->email_subject = $buyer['email_subject'];

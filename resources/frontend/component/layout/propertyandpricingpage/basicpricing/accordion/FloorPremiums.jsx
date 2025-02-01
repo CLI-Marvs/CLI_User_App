@@ -4,24 +4,13 @@ import { IoMdArrowDropdown } from "react-icons/io";
 import { FaRegTrashAlt } from "react-icons/fa";
 import FloorPremiumAssignModal from "../modals/FloorPremiumAssignModal";
 import { useStateContext } from "../../../../../context/contextprovider";
-import { useFloorPremiumStateContext } from "../../../../../context/FloorPremium/FloorPremiumContext";
+// import { useFloorPremiumStateContext } from "../../../../../context/FloorPremium/FloorPremiumContext";
 import CircularProgress from "@mui/material/CircularProgress";
 
-const FloorPremiums = ({ propertyId }) => {
-    //State
-    const {
-        towerPhaseId,
-        floorPremiumsAccordionOpen,
-        setFloorPremiumsAccordionOpen,
-        propertyFloors,
-        setTowerPhaseId,
-        isLoading,
-        setPropertyFloors,
-        getPropertyFloors,
-        setSelectedFloor,
-    } = useStateContext();
-    const { floorPremiumFormData, setFloorPremiumFormData } =
-        useFloorPremiumStateContext();
+const FloorPremiums = ({   }) => {
+ 
+    // const { floorPremiumFormData, setFloorPremiumFormData } =
+    //     useFloorPremiumStateContext();
     const modalRef = useRef(null);
     const [newFloor, setNewFloor] = useState("");
     const [newPremiumCost, setNewPremiumCost] = useState("");
@@ -30,55 +19,58 @@ const FloorPremiums = ({ propertyId }) => {
     /**
      * This hooks retrieves the floor data associated with the specified tower phase ID. It checks if the data already exists in the propertyFloors state; if it does, it initializes the floor premium form data with the necessary structure. If the data is not available, it resets the form data and initiates a fetch request to obtain the floor information. This ensures that the component has the most up-to-date floor data while maintaining the appropriate structure for further processing.
      */
-    useEffect(() => {
-        if (!towerPhaseId) return;
-        setTowerPhaseId(towerPhaseId);
+    // useEffect(() => {
+    //     if (!towerPhaseId) return;
+    //     setTowerPhaseId(towerPhaseId);
 
-        // Function to fetch floor data
-        const fetchFloorData = async () => {
-            const response = await getPropertyFloors(towerPhaseId);
-            setPropertyFloors((prev) => ({
-                ...prev,
-                [towerPhaseId]: response,
-            }));
-        };
+    //     // Function to fetch floor data
+    //     const fetchFloorData = async () => {
+    //         const response = await getPropertyFloors(towerPhaseId);
+    //         setPropertyFloors((prev) => ({
+    //             ...prev,
+    //             [towerPhaseId]: response,
+    //         }));
+    //     };
 
-        // Fetch or use existing floor data
-        if (
-            propertyFloors &&
-            propertyFloors[towerPhaseId] &&
-            propertyFloors[towerPhaseId].floors
-        ) {
-            const floors = propertyFloors[towerPhaseId].floors || [];
+    //     // Fetch or use existing floor data
+    //     if (
+    //         propertyFloors &&
+    //         propertyFloors[towerPhaseId] &&
+    //         propertyFloors[towerPhaseId].floors
+    //     ) {
+    //         const floors = propertyFloors[towerPhaseId].floors || [];
 
-            // Initialize floor data with the required structure from FloorPremiumContext
-            const initializedFloors = floors.map((floor) => ({
-                floor,
-                premiumCost: "",
-                luckyNumber: false,
-                excludedUnits: [],
-            }));
+    //         // Initialize floor data with the required structure from FloorPremiumContext
+    //         const initializedFloors = floors.map((floor) => ({
+    //             floor,
+    //             premiumCost: "",
+    //             luckyNumber: false,
+    //             excludedUnits: [],
+    //         }));
 
-            setFloorPremiumFormData((prevData) => ({
-                ...prevData,
-                floor: initializedFloors, // Update floor data in the form context
-            }));
-        } else {
-            // Reset form data if propertyFloors is not available
-            setFloorPremiumFormData((prevData) => ({
-                ...prevData,
-                floor: [],
-            }));
-            fetchFloorData(); // Fetch data if it's not already available
-        }
-    }, [
-        towerPhaseId,
-        propertyFloors,
-        setFloorPremiumFormData,
-        getPropertyFloors,
-    ]);
+    //         setFloorPremiumFormData((prevData) => ({
+    //             ...prevData,
+    //             floor: initializedFloors, // Update floor data in the form context
+    //         }));
+    //     } else {
+    //         // Reset form data if propertyFloors is not available
+    //         setFloorPremiumFormData((prevData) => ({
+    //             ...prevData,
+    //             floor: [],
+    //         }));
+    //         fetchFloorData(); // Fetch data if it's not already available
+    //     }
+    // }, [
+    //     towerPhaseId,
+    //     propertyFloors,
+    //     setFloorPremiumFormData,
+    //     getPropertyFloors,
+    // ]);
 
     //Event handler
+    //Fetch the unit floor
+    
+
     /**
      * Handle to open modal to assign floor premiums
      */
@@ -94,20 +86,20 @@ const FloorPremiums = ({ propertyId }) => {
     Handle to input floor premiums data(e.g premium cost)
     */
     const handleOnChange = (index, e) => {
-        const { name, type, checked, value } = e.target;
+        // const { name, type, checked, value } = e.target;
 
-        setFloorPremiumFormData((prevData) => {
-            const updatedFloors = [...prevData.floor];
-            updatedFloors[index] = {
-                ...updatedFloors[index],
-                [name]: type === "checkbox" ? checked : value,
-            };
-            // console.log("Updated Floors: ", updatedFloors);
-            return {
-                ...prevData,
-                floor: updatedFloors, // Update the floors in the context
-            };
-        });
+        // setFloorPremiumFormData((prevData) => {
+        //     const updatedFloors = [...prevData.floor];
+        //     updatedFloors[index] = {
+        //         ...updatedFloors[index],
+        //         [name]: type === "checkbox" ? checked : value,
+        //     };
+        //     // console.log("Updated Floors: ", updatedFloors);
+        //     return {
+        //         ...prevData,
+        //         floor: updatedFloors, // Update the floors in the context
+        //     };
+        // });
     };
 
     /*
@@ -139,27 +131,27 @@ const FloorPremiums = ({ propertyId }) => {
 
         if (newFloor && newPremiumCost) {
             // Check if the new floor already exists in the form data
-            const newFloorIsExist = floorPremiumFormData.floor.some(
-                (floorData) => parseInt(floorData.floor) === parseInt(newFloor)
-            );
+            // const newFloorIsExist = floorPremiumFormData.floor.some(
+            //     (floorData) => parseInt(floorData.floor) === parseInt(newFloor)
+            // );
             if (newFloorIsExist) {
                 alert("This floor already exists.");
                 return;
             }
 
             // Add the new floor and premium cost to the floorPremiumFormData
-            setFloorPremiumFormData((prevData) => ({
-                ...prevData,
-                floor: [
-                    ...prevData.floor,
-                    {
-                        floor: parseInt(newFloor),
-                        premiumCost: parseInt(newPremiumCost),
-                        luckyNumber: "",
-                        excludedUnits: [],
-                    },
-                ],
-            }));
+            // setFloorPremiumFormData((prevData) => ({
+            //     ...prevData,
+            //     floor: [
+            //         ...prevData.floor,
+            //         {
+            //             floor: parseInt(newFloor),
+            //             premiumCost: parseInt(newPremiumCost),
+            //             luckyNumber: "",
+            //             excludedUnits: [],
+            //         },
+            //     ],
+            // }));
 
             //Reset inputs after adding
             setNewFloor("");
@@ -300,7 +292,7 @@ const FloorPremiums = ({ propertyId }) => {
                                             <th className="rounded-tr-[10px] w-[62px]"></th>
                                         </tr>
                                     </thead>
-                                    <tbody className="">
+                                    {/* <tbody className="">
                                         {isLoading ? (
                                             <tr className="">
                                                 <CircularProgress className="spinnerSize " />
@@ -316,11 +308,11 @@ const FloorPremiums = ({ propertyId }) => {
                                                         key={index}
                                                     >
                                                         <td className="text-custom-gray81">
-                                                            {/* {floor} - index{" "} */}
+                                                           
                                                             {index}
 
                                                             <input
-                                                                type="text" // or "number" based on your needs
+                                                                type="text"  
                                                                 className="text-custom-gray81 bg-white h-[29px] w-[80px]   border-[#D9D9D9] rounded-[5px] px-2 outline-none"
                                                                 defaultValue={
                                                                     floor.floor
@@ -385,95 +377,8 @@ const FloorPremiums = ({ propertyId }) => {
                                             )
                                         )}
 
-                                        {/* <tr className="h-[46px] bg-custom-grayFA text-sm">
-                                            <td className="text-custom-gray81">
-                                                2
-                                            </td>
-                                            <td>
-                                                <div className="bg-white h-[29px] w-[120px] border border-[#D9D9D9] rounded-[5px] px-2">
-                                                    <p>1,000.00</p>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <input
-                                                    type="checkbox"
-                                                    className="h-[16px] w-[16px] ml-[16px] rounded-[2px] appearance-none border border-gray-400 checked:bg-transparent flex items-center justify-center checked:before:bg-black checked:before:w-[12px] checked:before:h-[12px] checked:before:block checked:before:content-['']"
-                                                />
-                                            </td>
-                                            <td className="text-blue-500 underline cursor-pointer">
-                                                Assign
-                                            </td>
-                                            <td>
-                                                <FaRegTrashAlt className="size-5 text-custom-gray81 hover:text-red-500" />
-                                            </td>
-                                        </tr>
-                                        <tr className="h-[46px] bg-white text-sm">
-                                            <td className="text-custom-gray81">
-                                                3
-                                            </td>
-                                            <td>
-                                                <div className="bg-white h-[29px] w-[120px] border border-[#D9D9D9] rounded-[5px] px-2">
-                                                    <p>900.00</p>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <input
-                                                    type="checkbox"
-                                                    className="h-[16px] w-[16px] ml-[16px] rounded-[2px] appearance-none border border-gray-400 checked:bg-transparent flex items-center justify-center checked:before:bg-black checked:before:w-[12px] checked:before:h-[12px] checked:before:block checked:before:content-['']"
-                                                />
-                                            </td>
-                                            <td className="text-blue-500 underline cursor-pointer">
-                                                Assign
-                                            </td>
-                                            <td>
-                                                <FaRegTrashAlt className="size-5 text-custom-gray81 hover:text-red-500" />
-                                            </td>
-                                        </tr>
-                                        <tr className="h-[46px] bg-custom-grayFA text-sm">
-                                            <td className="text-custom-gray81">
-                                                4
-                                            </td>
-                                            <td>
-                                                <div className="bg-white h-[29px] w-[120px] border border-[#D9D9D9] rounded-[5px] px-2">
-                                                    <p>800.00</p>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <input
-                                                    type="checkbox"
-                                                    className="h-[16px] w-[16px] ml-[16px] rounded-[2px] appearance-none border border-gray-400 checked:bg-transparent flex items-center justify-center checked:before:bg-black checked:before:w-[12px] checked:before:h-[12px] checked:before:block checked:before:content-['']"
-                                                />
-                                            </td>
-                                            <td className="text-blue-500 underline cursor-pointer">
-                                                Assign
-                                            </td>
-                                            <td>
-                                                <FaRegTrashAlt className="size-5 text-custom-gray81 hover:text-red-500" />
-                                            </td>
-                                        </tr>
-                                        <tr className="h-[46px] bg-white text-sm">
-                                            <td className="text-custom-gray81 ">
-                                                5
-                                            </td>
-                                            <td>
-                                                <div className="bg-white h-[29px] w-[120px] border border-[#D9D9D9] rounded-[5px] px-2 ">
-                                                    <p>700.00</p>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <input
-                                                    type="checkbox"
-                                                    className="h-[16px] w-[16px] ml-[16px] rounded-[2px] appearance-none border border-gray-400 checked:bg-transparent flex items-center justify-center checked:before:bg-black checked:before:w-[12px] checked:before:h-[12px] checked:before:block checked:before:content-['']"
-                                                />
-                                            </td>
-                                            <td className="text-blue-500 underline cursor-pointer">
-                                                Assign
-                                            </td>
-                                            <td>
-                                                <FaRegTrashAlt className="size-5 text-custom-gray81 hover:text-red-500" />
-                                            </td>
-                                        </tr> */}
-                                    </tbody>
+                                       
+                                    </tbody> */}
                                 </table>
                             </div>
                         </div>

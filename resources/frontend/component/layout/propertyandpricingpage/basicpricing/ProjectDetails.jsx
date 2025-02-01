@@ -1,23 +1,23 @@
 import React, { useEffect, useRef, useState } from "react";
-import UploadUnitDetailsModal from "./modals/UploadUnitDetailsModal";
-import { useStateContext } from "../../../../context/contextprovider";
-const ProjectDetails = ({ localPropertyData }) => {
-    //State
-    // Destructure the necessary data from localPropertyData
-    const { propertyMaster, towerPhase, propertyCommercialDetail } =
-        localPropertyData.propertyData || {};
-
-    const { property_name: propertyName, id } = propertyMaster || {};
-    const { type } = propertyCommercialDetail || {};
-    const { tower_phase_name, id: towerPhaseId } = towerPhase || {};
-    const { propertyId, setPropertyId, setTowerPhaseId } = useStateContext();
+ 
+const ProjectDetails = ({ propertyData }) => {
+ 
+    //State 
+    // Destructure the necessary data from propertyData
+    // const { towerPhase, propertyCommercialDetail } =
+    //     propertyData.propertyData || {};
+    // console.log("propertyData", propertyData);
+    // // const { property_name: propertyName, id } =   || {};
+    // const { type } = propertyCommercialDetail || {};
+    // const { tower_phase_name, id: towerPhaseId } = towerPhase || {};
+    // const { propertyId, setPropertyId, setTowerPhaseId } = useStateContext();
     //Hooks
-    useEffect(() => {
-        if (id || towerPhaseId) {
-            setPropertyId(id);
-            setTowerPhaseId(towerPhaseId);
-        }
-    }, [id, towerPhaseId]);
+    // useEffect(() => {
+    //     if (towerPhaseId) {
+    //         setPropertyId(id);
+    //         setTowerPhaseId(towerPhaseId);
+    //     }
+    // }, [towerPhaseId]);
     return (
         <>
             <div className="min-w-full h-[138px] bg-custom-lightestgreen p-[20px] rounded-[10px] ">
@@ -30,10 +30,11 @@ const ProjectDetails = ({ localPropertyData }) => {
                         </div>
                         <div className="h-[26px] w-auto px-[15px] py-[5px] bg-white rounded-[5px]">
                             <p className="text-custom-gray81 text-xs">
-                                {propertyName}
+                                {/*TODO: MAke this not all capitalized */}
+                                {propertyData?.data?.property_name || propertyData?.property_name}
                             </p>
                         </div>
-                        ID {id}
+                        {/* ID {id} */}
                     </div>
                     <div className="flex gap-1">
                         <div>
@@ -42,7 +43,12 @@ const ProjectDetails = ({ localPropertyData }) => {
                             </p>
                         </div>
                         <div className="h-[26px] w-auto px-[15px] py-[5px] bg-white rounded-[5px]">
-                            <p className="text-custom-gray81 text-xs">{type}</p>
+                            <p className="text-custom-gray81 text-xs">
+                                {
+                                    propertyData?.data?.property_commercial_detail
+                                    ?.type || propertyData?.property_commercial_detail?.type
+                                }
+                            </p>
                         </div>
                     </div>
                     <div className="flex gap-1">
@@ -53,7 +59,10 @@ const ProjectDetails = ({ localPropertyData }) => {
                         </div>
                         <div className=" w-auto h-[26px] px-[15px] py-[5px] bg-white rounded-[5px]">
                             <p className=" text-custom-gray81 text-xs">
-                                {tower_phase_name}
+                                {
+                                    propertyData?.data?.tower_phases[0]
+                                    ?.tower_phase_name || propertyData?.tower_phase_name
+                                }
                             </p>
                         </div>
                     </div>

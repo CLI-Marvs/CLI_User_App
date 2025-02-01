@@ -2,10 +2,11 @@
 
 namespace App\Models;
 
-use App\Models\BasicPricing;
 use App\Models\Unit;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\BasicPricing;
+use App\Models\PriceListMaster;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class FloorPremium extends Model
 {
@@ -13,6 +14,12 @@ class FloorPremium extends Model
     protected $table = 'floor_premiums';
     protected $guarded = array();
 
+
+    //Relationship
+    public function priceListMaster()
+    {
+        return $this->belongsTo(PriceListMaster::class);
+    }
     public function basicPricing()
     {
         return $this->belongsTo(BasicPricing::class);

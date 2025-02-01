@@ -2,12 +2,12 @@ import React, { useEffect, useRef, useState } from "react";
 import FloorPremiumAddUnitModal from "./FloorPremiumAddUnitModal";
 import { useStateContext } from "../../../../../context/contextprovider";
 import CircularProgress from "@mui/material/CircularProgress";
-import { useFloorPremiumStateContext } from "../../../../../context/FloorPremium/FloorPremiumContext";
+// import { useFloorPremiumStateContext } from "../../../../../context/FloorPremium/FloorPremiumContext";
 const FloorPremiumAssignModal = ({ modalRef }) => {
     //State
     const { selectedFloor, propertyUnit, isLoading, towerPhaseId } =
         useStateContext();
-    const { setFloorPremiumFormData } = useFloorPremiumStateContext();
+    // const { setFloorPremiumFormData } = useFloorPremiumStateContext();
     const modalRef2 = useRef(null);
     const [selectedUnit, setSelectedUnit] = useState([]);
 
@@ -35,32 +35,32 @@ const FloorPremiumAssignModal = ({ modalRef }) => {
                 return [...prevSelectedUnits, id];
             }
         });
-        setFloorPremiumFormData((prevData) => ({
-            // Spread the previous state data to retain all other fields unchanged
-            ...prevData,
-            // Update the 'floor' array, mapping through each 'floorItem'
-            floor: prevData.floor.map((floorItem) => {
-                // Check if the current 'floorItem' matches the selected floor
-                if (floorItem.floor === selectedFloor) {
-                    return {
-                        // Spread the existing 'floorItem' data to retain all other properties unchanged
-                        ...floorItem,
-                        // Check if the 'excludedUnits' array exists, and use an empty array if not
-                        excludedUnits: (floorItem.excludedUnits || []).includes(
-                            id
-                        )
-                            ? // If the unit is already in 'excludedUnits', remove it by filtering out the 'id'
-                              (floorItem.excludedUnits || []).filter(
-                                  (unitId) => unitId !== id
-                              )
-                            : // If the unit is not in 'excludedUnits', add it by appending the 'id'
-                              [...(floorItem.excludedUnits || []), id],
-                    };
-                }
-                // If it's not the selected floor, return the original 'floorItem' unchanged
-                return floorItem;
-            }),
-        }));
+        // setFloorPremiumFormData((prevData) => ({
+        //     // Spread the previous state data to retain all other fields unchanged
+        //     ...prevData,
+        //     // Update the 'floor' array, mapping through each 'floorItem'
+        //     floor: prevData.floor.map((floorItem) => {
+        //         // Check if the current 'floorItem' matches the selected floor
+        //         if (floorItem.floor === selectedFloor) {
+        //             return {
+        //                 // Spread the existing 'floorItem' data to retain all other properties unchanged
+        //                 ...floorItem,
+        //                 // Check if the 'excludedUnits' array exists, and use an empty array if not
+        //                 excludedUnits: (floorItem.excludedUnits || []).includes(
+        //                     id
+        //                 )
+        //                     ? // If the unit is already in 'excludedUnits', remove it by filtering out the 'id'
+        //                       (floorItem.excludedUnits || []).filter(
+        //                           (unitId) => unitId !== id
+        //                       )
+        //                     : // If the unit is not in 'excludedUnits', add it by appending the 'id'
+        //                       [...(floorItem.excludedUnits || []), id],
+        //             };
+        //         }
+        //         // If it's not the selected floor, return the original 'floorItem' unchanged
+        //         return floorItem;
+        //     }),
+        // }));
     }; // Handle key selection or deselection
 
     return (

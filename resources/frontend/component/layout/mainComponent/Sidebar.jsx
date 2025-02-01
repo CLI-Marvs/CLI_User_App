@@ -84,7 +84,7 @@ const Sidebar = () => {
       case "/inquirymanagement/settings":
       case "/inquirymanagement/settings/bannersettings":
       case "/inquirymanagement/settings/autoassign":
-        case "/inquirymanagement/settings/versionlogs":
+      case "/inquirymanagement/settings/versionlogs":
         setIsInvoiceOpen(false);
         setInquiryOpen(true);
         setSuperAdminOpen(false);
@@ -203,30 +203,30 @@ const Sidebar = () => {
             )
           }
           {ALLOWED_EMPLOYEES_CRS.includes(userLoggedInEmail) && (
-          <Link to="superadmin/userrightsandpermissions">
-            <ListItem
-              className={`h-[35px] w-[185px] text-sm pl-[12px] transition-all duration-300 ease-in-out 
+            <Link to="superadmin/userrightsandpermissions">
+              <ListItem
+                className={`h-[35px] w-[185px] text-sm pl-[12px] transition-all duration-300 ease-in-out 
                   ${activeItem === "superadmin" ||
-                  location.pathname.startsWith("/superadmin")
-                  ? "bg-custom-lightestgreen text-custom-solidgreen font-semibold"
-                  : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
-                }
+                    location.pathname.startsWith("/superadmin")
+                    ? "bg-custom-lightestgreen text-custom-solidgreen font-semibold"
+                    : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
+                  }
                     ${isSuperAdminOpen
-                  ? "rounded-[10px] rounded-b-none"
-                  : "rounded-[10px]"
-                }
+                    ? "rounded-[10px] rounded-b-none"
+                    : "rounded-[10px]"
+                  }
                     `}
-              onClick={handleSuperAdminDropdownClick}
-            >
+                onClick={handleSuperAdminDropdownClick}
+              >
                 Admin Setting
-              <ListItemSuffix>
-                <IoIosArrowDown
-                  className={`text-custom-solidgreen  transition-transform duration-200 ease-in-out ${isSuperAdminOpen ? "rotate-180" : ""
-                    }`}
-                />
-              </ListItemSuffix>
-            </ListItem>
-          </Link>
+                <ListItemSuffix>
+                  <IoIosArrowDown
+                    className={`text-custom-solidgreen  transition-transform duration-200 ease-in-out ${isSuperAdminOpen ? "rotate-180" : ""
+                      }`}
+                  />
+                </ListItemSuffix>
+              </ListItem>
+            </Link>
           )}
 
           {ALLOWED_EMPLOYEES_CRS.includes(userLoggedInEmail) && isSuperAdminOpen &&
@@ -237,8 +237,8 @@ const Sidebar = () => {
                     className={`h-[48px] w-full py-[8px] px-[18px]  text-sm rounded-[25px] ${location.pathname.startsWith(
                       "/superadmin/userrightsandpermissions"
                     )
-                        ? "bg-white text-custom-solidgreen font-semibold "
-                        : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
+                      ? "bg-white text-custom-solidgreen font-semibold "
+                      : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
                       }`}
                     onClick={() =>
                       handleItemClick(

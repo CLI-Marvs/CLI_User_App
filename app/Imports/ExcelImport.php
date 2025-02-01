@@ -19,12 +19,17 @@ class ExcelImport implements ToModel, WithHeadingRow, WithChunkReading, WithBatc
     protected $headers;
     protected $propertyId;
     protected $towerPhaseId;
+    protected $status;
+    protected $excelId;
 
-    public function __construct($headers, $propertyId, $towerPhaseId)
+    public function __construct($headers, $propertyId, $towerPhaseId, $status)
     {
         $this->headers = $headers;
         $this->propertyId = $propertyId;
         $this->towerPhaseId = $towerPhaseId;
+        $this->status = $status;
+        //Generate a unique id for the excel
+        $this->excelId =   'Excel_' . uniqid();
     }
 
 
@@ -55,7 +60,6 @@ class ExcelImport implements ToModel, WithHeadingRow, WithChunkReading, WithBatc
      */
     public function model(array $row)
     {
-
         $mappedData = $this->mapData($row);
         // Return null to skip invalid rows
         if (!$this->hasValidData($mappedData)) {
@@ -63,7 +67,7 @@ class ExcelImport implements ToModel, WithHeadingRow, WithChunkReading, WithBatc
         }
 
         // Accumulate rows in batches and return them
-        return new Unit([
+        $unit =   new Unit([
             'floor' => $mappedData['FLOOR'] ?? null,
             'room_number' => $mappedData['ROOM NUMBER'] ?? null,
             'unit' => $mappedData['UNIT'] ?? null,
@@ -73,8 +77,13 @@ class ExcelImport implements ToModel, WithHeadingRow, WithChunkReading, WithBatc
             'garden_area' => $mappedData['GARDEN AREA'] ?? null,
             'total_area' => $mappedData['TOTAL AREA'] ?? null,
             'property_masters_id' => $this->propertyId,
-            'tower_phase_id' => $this->towerPhaseId
+            'tower_phase_id' => $this->towerPhaseId,
+            'excel_id' => $this->excelId,
+            'status' => $this->status
         ]);
+
+        $this->data[] = $unit->toArray(); // Store the data as array
+        return $unit;
     }
 
     /**
@@ -87,10 +96,11 @@ class ExcelImport implements ToModel, WithHeadingRow, WithChunkReading, WithBatc
             $dbField = strtolower(str_replace(' ', '_', $header));
             $mappedData[$header] = $row[$dbField] ?? null;
         }
+
         return $mappedData;
     }
 
-     
+
     /**
      * Check if the row contains valid data.
      */
@@ -112,7 +122,15 @@ class ExcelImport implements ToModel, WithHeadingRow, WithChunkReading, WithBatc
     {
         return $this->data;
     }
+    
+    /**
+     * Get the excel Id
+     */
 
+    public function getExcelId()
+    {
+        return $this->excelId;
+    }
     /**
      * Returns the batch size for processing records.
      *
@@ -124,7 +142,7 @@ class ExcelImport implements ToModel, WithHeadingRow, WithChunkReading, WithBatc
      */
     public function batchSize(): int
     {
-        return 500;
+        return 1000;
     }
 
     /**
@@ -139,7 +157,7 @@ class ExcelImport implements ToModel, WithHeadingRow, WithChunkReading, WithBatc
      */
     public function chunkSize(): int
     {
-        return 500;
+        return 1000;
     }
 
     /**
@@ -153,6 +171,6 @@ class ExcelImport implements ToModel, WithHeadingRow, WithChunkReading, WithBatc
      */
     public function headingRow(): int
     {
-        return 1; // Assuming first row contains headers
+        return 1;
     }
 }
