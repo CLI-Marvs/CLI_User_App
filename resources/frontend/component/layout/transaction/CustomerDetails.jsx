@@ -12,7 +12,6 @@ import Skeleton from "react-loading-skeleton";
 import DatePicker from "react-datepicker";
 import arrowCutomer from "../../../../../public/Images/arrowcustomer.png";
 
-
 const CustomerDetails = () => {
     const transactModalRef = useRef(null);
     const { customerDetails, setCustomerDetails } = useStateContext();
@@ -91,7 +90,7 @@ const CustomerDetails = () => {
         },
         {
             title: "Occupation:",
-            value: "Medical Practitioner",
+            value: "Medical Practioner",
         },
         {
             title: "Date of Birth:",
@@ -128,45 +127,70 @@ const CustomerDetails = () => {
 
                 <div className="border-b-[1px] border-[#D6E4D1] w-full mb-[21px]"></div>
                 <SearchBar />
-                <div className="flex flex-col bg-custom-grayF1 mt-[21px] p-[5px] largeScreen:p-[20px] mediumScrren:p-[20px] rounded-xl">
-                    <div className="p-5">
-                        <div className="m-2.5">
-                            <img src={profile} alt="" className="size-10" />
+                <div className="flex flex-col bg-custom-grayF1 mt-[21px] p-[20px] largeScreen:p-[30px] mediumScrren:p-[30px] rounded-xl">
+                    <div className="p-5 flex flex-col bg-custom-grayFA rounded-xl">
+                        <div className="px-1 flex items-center">
+                            <div className="m-2.5">
+                                <img
+                                    src={profile}
+                                    alt=""
+                                    className="w-[50x] h-[50px]"
+                                />
+                            </div>
+                            <span className="text-2xl text-[#175D5F]">
+                                {buyer_name}
+                            </span>
                         </div>
-                        <span className="text-2xl text-[#175D5F]">
-                            {buyer_name}
-                        </span>
 
-                        <div className="flex bg-custom-grayFA px-5 py-5 w-full text-xs font-semibold rounded-xl mt-2">
-                            <div className="flex flex-col w-56 h-24 gap-2 mb-2.5">
-                                {data1.map((item, index) => (
-                                    <div
-                                        key={index}
-                                        className="flex items-center gap-2"
-                                    >
-                                        <span className="">{item.title}</span>
-                                        <span className=" text-[#818181]">
-                                            {item.value}
-                                        </span>
+                        <div className="px-5 flex gap-10 w-full text-xs font-semibold rounded-xl mt-2">
+                            <div className="flex flex-col w-1/2">
+                                <span className="text-lg">User Info</span>
+                                <div className="flex gap-20 mt-2.5">
+                                    <div className="w-1/2 flex flex-col gap-2 mb-2.5">
+                                        {data1.map((item, index) => (
+                                            <div
+                                                key={index}
+                                                className="flex items-center gap-2"
+                                            >
+                                                <span className="">
+                                                    {item.title}
+                                                </span>
+                                                <span className=" text-[#818181]">
+                                                    {item.value}
+                                                </span>
+                                            </div>
+                                        ))}
                                     </div>
-                                ))}
-                            </div>
-                            <div className="flex flex-col w-56 h-24 gap-2">
-                                {data2.map((item, index) => (
-                                    <div
-                                        key={index}
-                                        className="flex items-center gap-2"
-                                    >
-                                        <span className="">{item.title}</span>
-                                        <span className=" text-[#818181]">
-                                            {item.value}
-                                        </span>
+                                    <div className="w-1/2 flex flex-col gap-2 mr-3">
+                                        {data2.map((item, index) => (
+                                            <div
+                                                key={index}
+                                                className="flex items-center gap-2"
+                                            >
+                                                <span className="">
+                                                    {item.title}
+                                                </span>
+                                                <span className=" text-[#818181] break-all">
+                                                    {item.value}
+                                                </span>
+                                            </div>
+                                        ))}
                                     </div>
-                                ))}
+                                </div>
                             </div>
+                            <div className="w-auto">
+                            <hr className=" border-1 border-[#3A3A3A]  h-[150px] w-0" />
+
+                            </div>
+
+                            <div className="flex flex-col w-1/2">
+                                <span className="text-lg">Source of Funds</span>
+                                
+                            </div>
+
                         </div>
                     </div>
-                    <div className="flex gap-5 p-5">
+                    <div className="flex gap-5 mt-5">
                         <div className="py-4 px-5 bg-custom-grayFA w-1/3 largeScreen:w-1/3 mediumScrren:w-1/4 rounded-xl">
                             <div className="flex gap-2.5 items-center mb-5">
                                 <span className="font-semibold text-base">
@@ -266,7 +290,8 @@ const CustomerDetails = () => {
                                                             value={item}
                                                         >
                                                             {" "}
-                                                            &nbsp;&nbsp;&nbsp;{item}
+                                                            &nbsp;&nbsp;&nbsp;
+                                                            {item}
                                                         </option>
                                                     )
                                                 )}
@@ -326,10 +351,11 @@ const CustomerDetails = () => {
                                                         )
                                                     }
                                                 >
-                                                    {item.details_concern} 
+                                                    {item.details_concern}
                                                 </span>
                                                 <span className=" text-[#818181] text-xs 2xl:text-base">
-                                                    - {item.property}, {item.unit_number || ""} 
+                                                    - {item.property},{" "}
+                                                    {item.unit_number || ""}
                                                 </span>
                                             </div>
                                         );
