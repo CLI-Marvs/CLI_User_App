@@ -26,6 +26,7 @@ const Sidebar = () => {
     const location = useLocation();
     const [isInquiryOpen, setInquiryOpen] = useState(false);
     const [isSuperAdminOpen, setSuperAdminOpen] = useState(false);
+    const [isPropertyPricingOpen, setPropertyPricingOpen] = useState(false);
     const [isInvoiceOpen, setIsInvoiceOpen] = useState(false);
     const userLoggedInEmail = user?.employee_email;
     const [activeItemTransaction, setActiveItemTransaction] = useState(null);
@@ -49,7 +50,9 @@ const Sidebar = () => {
     const handleSuperAdminDropdownClick = () => {
         setSuperAdminOpen(!isSuperAdminOpen);
     };
-
+    const handlePropertyPricingOpen = () => {
+        setPropertyPricingOpen(!isPropertyPricingOpen);
+    };
     const handleInvoiceDropdownClick = () => {
         setIsInvoiceOpen((prev) => !prev);
     };
@@ -68,9 +71,8 @@ const Sidebar = () => {
                 setIsInvoiceOpen(false);
                 setSuperAdminOpen(true);
                 break;
-            case "/transaction/invoices":
-            case "/transaction/records":
-            case "/transaction/customer":
+            case "/transactionmanagement/invoices":
+            case "/transactionmanagement/transactionrecords":
                 setInquiryOpen(false);
                 setIsInvoiceOpen(true);
                 setSuperAdminOpen(false);
@@ -95,7 +97,7 @@ const Sidebar = () => {
 
     return (
         <>
-            <Card className="shadow-none w-[230px] max-w-[230px] p-[25px] pr-[20px] pt-0 rounded-none bg-custom-grayFA relative z-30 overflow-hidden">
+            <Card className="shadow-none w-[230px] max-w-[230px] p-[25px] pr-[20px] pt-0 rounded-none bg-custom-grayFA relative z-30">
                 <List className="p-0 gap-0">
                     <Link to="/notification">
                         <ListItem
@@ -353,10 +355,13 @@ const Sidebar = () => {
                         </p>
                     </div>
                     <div className=" text-sm p-4 h-auto rounded-[10px] text-gray-400 border border-custom-lightestgreen flex flex-col gap-4 cursor-not-allowed">
-                        <p>Property & Pricing</p>
+                        {/* <p>Property & Pricing</p> */}
                         <p>Sales Management</p>
                         <p>Broker Management</p>
-                        {/*  <p className='leading-none'>Transaction <br />Management</p> */}
+                        <p className="leading-none">
+                            Transaction <br />
+                            Management
+                        </p>
                         <p className="leading-none">
                             Document
                             <br /> Management

@@ -6,15 +6,18 @@ import FloorPremiumAssignModal from "../modals/FloorPremiumAssignModal";
 import { useStateContext } from "../../../../../context/contextprovider";
 // import { useFloorPremiumStateContext } from "../../../../../context/FloorPremium/FloorPremiumContext";
 import CircularProgress from "@mui/material/CircularProgress";
-
-const FloorPremiums = ({   }) => {
- 
-    // const { floorPremiumFormData, setFloorPremiumFormData } =
+import { useCountFloors } from "@/component/layout/propertyandpricingpage/basicpricing/hooks/useCountFloors";
+const FloorPremiums = ({}) => {
+    //States
+    const [floorPremiumsAccordionOpen, setFloorPremiumsAccordionOpen] =
+        useState(false);
     //     useFloorPremiumStateContext();
     const modalRef = useRef(null);
     const [newFloor, setNewFloor] = useState("");
     const [newPremiumCost, setNewPremiumCost] = useState("");
+    const { fetchFloorCount, floorCount } = useCountFloors();
 
+    console.log("floorCount", floorCount);
     //Hooks
     /**
      * This hooks retrieves the floor data associated with the specified tower phase ID. It checks if the data already exists in the propertyFloors state; if it does, it initializes the floor premium form data with the necessary structure. If the data is not available, it resets the form data and initiates a fetch request to obtain the floor information. This ensures that the component has the most up-to-date floor data while maintaining the appropriate structure for further processing.
@@ -69,25 +72,19 @@ const FloorPremiums = ({   }) => {
 
     //Event handler
     //Fetch the unit floor
-    
 
-    /**
-     * Handle to open modal to assign floor premiums
-     */
+    //Handle to open modal to assign floor premiums
     const handleOpenModal = (floor) => {
         setSelectedFloor(floor);
         setTowerPhaseId(towerPhaseId);
         if (modalRef.current) {
             modalRef.current.showModal();
         }
-    }; 
+    };
 
-    /*
-    Handle to input floor premiums data(e.g premium cost)
-    */
+    //  Handle to input floor premiums data(e.g premium cost)
     const handleOnChange = (index, e) => {
         // const { name, type, checked, value } = e.target;
-
         // setFloorPremiumFormData((prevData) => {
         //     const updatedFloors = [...prevData.floor];
         //     updatedFloors[index] = {
@@ -102,9 +99,7 @@ const FloorPremiums = ({   }) => {
         // });
     };
 
-    /*
-     Handling changes for adding  new floor
-    */
+    //Handling changes for adding  new floor
     function handleNewFloorChange(e) {
         const { name, value } = e.target;
         if (name === "newFloor") {
@@ -226,7 +221,13 @@ const FloorPremiums = ({   }) => {
                                     name="newFloor"
                                     value={newFloor}
                                     className="outline-none  -mr-3 pl-3 py-1 bg-custom-grayFA text-custom-gray81 w-full "
-                                    onInput={(e) => e.target.value = e.target.value.replace(/[^0-9]/g, '')}
+                                    onInput={(e) =>
+                                        (e.target.value =
+                                            e.target.value.replace(
+                                                /[^0-9]/g,
+                                                ""
+                                            ))
+                                    }
                                 />
                                 {/* <div className="relative w-full">
                                     <select
@@ -258,7 +259,13 @@ const FloorPremiums = ({   }) => {
                                     className="w-full px-4 focus:outline-none "
                                     placeholder=""
                                     value={newPremiumCost}
-                                    onInput={(e) => e.target.value = e.target.value.replace(/[^0-9]/g, '')}
+                                    onInput={(e) =>
+                                        (e.target.value =
+                                            e.target.value.replace(
+                                                /[^0-9]/g,
+                                                ""
+                                            ))
+                                    }
                                 />
                             </div>
                             <div>

@@ -37,8 +37,10 @@ class UnitRepository
                     // Extract the rowHeader values directly from the decoded array
                     $actualHeaders = array_column($headers, 'rowHeader');
 
-                    $import = new ExcelImport($actualHeaders, $propertyId, $towerPhaseId, 'Active');
+                   
+                    $import = new ExcelImport($actualHeaders, $propertyId, $towerPhaseId, 'Active', 'units');
                     Excel::import($import, $file);
+              
                     DB::commit();
 
                     $excelId = $import->getExcelId();
