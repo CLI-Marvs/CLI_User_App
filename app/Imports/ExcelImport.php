@@ -6,7 +6,7 @@ use App\Models\Unit;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Hash;
 use Maatwebsite\Excel\Concerns\ToModel;
-use Maatwebsite\Excel\Concerns\ToCollection;
+use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithBatchInserts;
 use Maatwebsite\Excel\Concerns\WithChunkReading;
@@ -15,6 +15,7 @@ use Maatwebsite\Excel\Concerns\WithMultipleSheets;
 class ExcelImport implements ToModel, WithHeadingRow, WithChunkReading, WithBatchInserts
 {
 
+    private $table;
     protected $data = [];
     protected $headers;
     protected $propertyId;
@@ -22,8 +23,9 @@ class ExcelImport implements ToModel, WithHeadingRow, WithChunkReading, WithBatc
     protected $status;
     protected $excelId;
 
-    public function __construct($headers, $propertyId, $towerPhaseId, $status)
+    public function __construct($headers, $propertyId, $towerPhaseId, $status, $table)
     {
+        $this->table = $table;
         $this->headers = $headers;
         $this->propertyId = $propertyId;
         $this->towerPhaseId = $towerPhaseId;
@@ -66,8 +68,8 @@ class ExcelImport implements ToModel, WithHeadingRow, WithChunkReading, WithBatc
             return null;
         }
 
-        // Accumulate rows in batches and return them
-        $unit =   new Unit([
+        // Store data in an array instead of inserting immediately
+        $this->data[] = [
             'floor' => $mappedData['FLOOR'] ?? null,
             'room_number' => $mappedData['ROOM NUMBER'] ?? null,
             'unit' => $mappedData['UNIT'] ?? null,
@@ -79,11 +81,16 @@ class ExcelImport implements ToModel, WithHeadingRow, WithChunkReading, WithBatc
             'property_masters_id' => $this->propertyId,
             'tower_phase_id' => $this->towerPhaseId,
             'excel_id' => $this->excelId,
-            'status' => $this->status
-        ]);
+            'status' => $this->status,
+        ];
 
-        $this->data[] = $unit->toArray(); // Store the data as array
-        return $unit;
+        // Perform batch insert every 500 rows
+        if (count($this->data) >= 500) {
+            DB::table($this->table)->insertOrIgnore($this->data);
+            $this->data = []; // Reset batch
+        }
+
+        return null;
     }
 
     /**
@@ -122,7 +129,7 @@ class ExcelImport implements ToModel, WithHeadingRow, WithChunkReading, WithBatc
     {
         return $this->data;
     }
-    
+
     /**
      * Get the excel Id
      */
@@ -131,6 +138,7 @@ class ExcelImport implements ToModel, WithHeadingRow, WithChunkReading, WithBatc
     {
         return $this->excelId;
     }
+
     /**
      * Returns the batch size for processing records.
      *
@@ -172,5 +180,13 @@ class ExcelImport implements ToModel, WithHeadingRow, WithChunkReading, WithBatc
     public function headingRow(): int
     {
         return 1;
+    }
+
+    public function __destruct()
+    {
+        // Insert remaining data at the end
+        if (!empty($this->data)) {
+            DB::table($this->table)->insert($this->data);
+        }
     }
 }
