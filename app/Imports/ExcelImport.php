@@ -22,6 +22,8 @@ class ExcelImport implements ToModel, WithHeadingRow, WithChunkReading, WithBatc
     protected $towerPhaseId;
     protected $status;
     protected $excelId;
+    protected  $rowCount = 0;
+
 
     public function __construct($headers, $propertyId, $towerPhaseId, $status, $table)
     {
@@ -32,6 +34,7 @@ class ExcelImport implements ToModel, WithHeadingRow, WithChunkReading, WithBatc
         $this->status = $status;
         //Generate a unique id for the excel
         $this->excelId =   'Excel_' . uniqid();
+        DB::disableQueryLog();
     }
 
 
@@ -84,10 +87,15 @@ class ExcelImport implements ToModel, WithHeadingRow, WithChunkReading, WithBatc
             'status' => $this->status,
         ];
 
-        // Perform batch insert every 500 rows
-        if (count($this->data) >= 500) {
-            DB::table($this->table)->insertOrIgnore($this->data);
-            $this->data = []; // Reset batch
+        // // Perform batch insert every 500 rows
+        // if (count($this->data) >= 500) {
+        //     DB::table($this->table)->insertOrIgnore($this->data);
+        //     $this->data = []; // Reset batch
+        // }
+        $this->rowCount++;
+
+        if ($this->rowCount >= $this->batchSize()) {
+            $this->insertBatch();
         }
 
         return null;
@@ -122,6 +130,29 @@ class ExcelImport implements ToModel, WithHeadingRow, WithChunkReading, WithBatc
         return false;
     }
 
+     private function insertBatch(): void {
+        if (empty($this->data)) {
+            return;
+        }
+        try {
+            DB::beginTransaction();
+
+            // Use chunks for very large batches
+            foreach (array_chunk($this->data, 500) as $chunk) {
+                DB::table($this->table)->insertOrIgnore($chunk);
+            }
+
+            DB::commit();
+
+            // Clear the processed data
+            $this->data = [];
+            $this->rowCount = 0;
+        } catch (\Exception $e) {
+            DB::rollBack();
+        }
+     }
+ 
+
     /**
      * Getter for the data array
      */
@@ -150,7 +181,7 @@ class ExcelImport implements ToModel, WithHeadingRow, WithChunkReading, WithBatc
      */
     public function batchSize(): int
     {
-        return 1000;
+        return 500;
     }
 
     /**
@@ -165,7 +196,7 @@ class ExcelImport implements ToModel, WithHeadingRow, WithChunkReading, WithBatc
      */
     public function chunkSize(): int
     {
-        return 1000;
+        return 500;
     }
 
     /**
