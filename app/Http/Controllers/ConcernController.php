@@ -2109,7 +2109,7 @@ class ConcernController extends Controller
             ->orderBy('department') // Optional: For consistent ordering
             ->get();
         
-
+        dd($concerns);
         return response()->json($concerns);
     }
 
