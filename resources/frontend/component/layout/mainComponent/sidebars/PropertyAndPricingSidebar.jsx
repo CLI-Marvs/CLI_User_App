@@ -25,7 +25,7 @@ const PropertyAndPricingSidebar = () => {
             <div className='flex flex-col space-y-1 mt-1'>
               <Link to="master-lists">
                 <ListItem className={`menu2 text-sm h-7 mb-1 flex justify-start pl-4 gap-2 rounded-full text-custom-solidgreen font-normal hover:font-semibold hover:bg-white ${location.pathname === '/property-pricing/master-lists' ? 'text-custom-solidgreen font-semibold bg-white' : 'text-custom-solidgreen'}`}>
-                  Pricing Master List
+                  Price List
                 </ListItem>
               </Link>
               <Link to="basic-pricing">

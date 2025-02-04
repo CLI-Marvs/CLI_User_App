@@ -13,7 +13,7 @@ export const useCountFloors = () => {
                 towerPhaseId,
                 excelId
             );
-
+            console.log("response fetchFloorCount", response);
             // Convert object to array of objects and sort
             const sortedProperties = Object.entries(response.data)
                 .map(([id, name]) => ({ id, name }))

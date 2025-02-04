@@ -61,6 +61,9 @@ export default {
         'custom7': '0px 0px 5px rgba(0, 0, 0, 0.20)',
         'custom8': '0px 10px 20px rgba(0, 0, 0, 0.50)',
         'custom9': '0px 3px 3px rgba(0, 0, 0, 0.10), 0px -3px 3px rgba(0, 0, 0, 0.10), 3px 0px 3px rgba(0, 0, 0, 0.10), -3px 0px 3px rgba(0, 0, 0, 0.10)',
+       'custom10': '0px 12px 7px -2px rgba(0, 0, 0, 0.25)',
+
+        
       },
       width: {
         '3/5': '60%',
@@ -160,6 +163,10 @@ export default {
         'gradient-custom': 'linear-gradient(to right, #348017, #067ACS)',
       },
     },
+    screens: {
+      largeScreen: '1900px',
+      mediumScrren: '1500px'
+    }
   },
   plugins: [],
 }

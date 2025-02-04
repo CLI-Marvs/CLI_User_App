@@ -14,7 +14,7 @@ class Unit extends Model
 {
     use HasFactory;
     protected $guarded = array();
-
+    protected $table = 'units';
     public function additionalPremiums()
     {
         return $this->hasMany(AdditionalPremium::class);
@@ -28,8 +28,9 @@ class Unit extends Model
     {
         return $this->belongsTo(FloorPremium::class);
     }
-    
-    public function towerPhase(){
+
+    public function towerPhase()
+    {
         return $this->belongsTo(TowerPhase::class);
     }
 }
