@@ -9,42 +9,49 @@ const PropertyCardTransaction = () => {
             name: "Casa Mira Towers",
             address: "G.M. Del Mar St., Cebu I.T. Park, Apas, Cebu City",
             image: SamplePic,
+            unit_number: "Unit T.127",
         },
         {
             id: 2,
             name: "Casa Mira Towers",
             address: "G.M. Del Mar St., Cebu I.T. Park, Apas, Cebu City",
             image: hero,
+            unit_number: "Unit T.127",
         },
         {
             id: 3,
             name: "Casa Mira Towers",
             address: "G.M. Del Mar St., Cebu I.T. Park, Apas, Cebu City",
             image: SamplePic,
+            unit_number: "Unit T.127",
         },
         {
             id: 4,
             name: "Casa Mira Towers",
             address: "G.M. Del Mar St., Cebu I.T. Park, Apas, Cebu City",
             image: SamplePic,
+            unit_number: "Unit T.127",
         },
         {
             id: 5,
             name: "Casa Mira Towers",
             address: "G.M. Del Mar St., Cebu I.T. Park, Apas, Cebu City",
             image: SamplePic,
+            unit_number: "Unit T.127",
         },
         {
             id: 6,
             name: "Casa Mira Towers",
             address: "G.M. Del Mar St., Cebu I.T. Park, Apas, Cebu City",
             image: hero,
+            unit_number: "Unit T.127",
         },
         {
             id: 7,
             name: "Casa Mira Towers",
             address: "G.M. Del Mar St., Cebu I.T. Park, Apas, Cebu City",
             image: SamplePic,
+            unit_number: "Unit T.127",
         },
     ];
 
@@ -65,12 +72,17 @@ const PropertyCardTransaction = () => {
                             <span className="text-[#A9EE90] text-xl">
                                 {item.name}
                             </span>
-                            <span className="text-xs text-white">
-                                {item.address}
+                           <div className="">
+                           <span className="text-xs text-white">
+                                {item.address}&nbsp;
                             </span>
                             <span className="text-xs text-white">
-                                3000000277
+                                {item.unit_number}&nbsp;
                             </span>
+                            <span className="text-xs text-white">
+                                (3000000277)
+                            </span>
+                           </div>
                         </div>
                     </div>
                 </div>
