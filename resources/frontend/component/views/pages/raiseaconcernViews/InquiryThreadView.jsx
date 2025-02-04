@@ -4,7 +4,7 @@ import InquiryThread from '../../../layout/inquirypage/InquiryThread'
 const InquiryThreadView = () => {
   return (
     <div>
-        <InquiryThread/>
+      <InquiryThread />
     </div>
   )
 }

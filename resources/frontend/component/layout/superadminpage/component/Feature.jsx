@@ -1,6 +1,7 @@
 import React from 'react'
-import { PERMISSIONS } from '../../../../constant/data/permissions';
-import PermissionCheckbox from './PermissionCheckbox';
+import { PERMISSIONS } from '@/constant/data/permissions';
+import PermissionCheckbox from '@/component/layout/superadminpage/component/PermissionCheckbox';
+
 const Feature = ({ item, formData, handleFeaturePermissionChange, checkedExtractor=null }) => {
     return (
         <div

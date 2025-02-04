@@ -1,19 +1,23 @@
 import React, { useRef, useState, useEffect } from 'react'
 import { AiFillInfoCircle } from 'react-icons/ai'
-import { useStateContext } from '../../../../../context/contextprovider';
-import highlightText from '../../../../../util/hightlightText.jsx';
-import { isButtonDisabled } from '../UserModal/utils/isButtonDisabled.js'
+import { useStateContext } from '@/context/contextprovider';
+import highlightText from '@/util/hightlightText';
+import { isButtonDisabled } from '@/component/layout/superadminpage/modals/UserModal/utils/isButtonDisabled'
 import CircularProgress from "@mui/material/CircularProgress";
-import { showToast } from "../../../../../util/toastUtil.js";
-import { getFilteredEmployeeOptions } from '../UserModal/utils/employeeUtils';
-import Feature from '../../component/Feature.jsx'
-import useFeatures from '../../hooks/useFeatures';
-import { employeePermissionService } from '../../../../servicesApi/apiCalls/roleManagement';
-const AddUserModals = ({ userModalRef, onSubmitSuccess, employeesWithPermissions }) => {
+import { showToast } from "@/util/toastUtil";
+import { getFilteredEmployeeOptions } from '@/component/layout/superadminpage/modals/UserModal/utils/employeeUtils';
+import Feature from '@/component/layout/superadminpage/component/Feature';
+import useFeature from '@/context/RoleManagement/FeatureContext';
+import { employeePermissionService } from '@/component/servicesApi/apiCalls/roleManagement';
+import useEmployeePermission from '@/context/RoleManagement/EmployeePermissionContext';
+
+
+const AddUserModals = ({ userModalRef, employeesWithPermissions }) => {
 
     //States
     const { allEmployees } = useStateContext();
-    const { features, fetchFeatures } = useFeatures();
+    const { fetchEmployeeWithPermissions } = useEmployeePermission();
+    const { features, fetchFeatures } = useFeature();
     const [isLoading, setIsLoading] = useState(false);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [search, setSearch] = useState("");
@@ -22,7 +26,7 @@ const AddUserModals = ({ userModalRef, onSubmitSuccess, employeesWithPermissions
         employee_id: 0,
         features: [],
     });
- 
+
     const dropdownRef = useRef(null);
     const filteredOptions = getFilteredEmployeeOptions(
         allEmployees,
@@ -142,11 +146,12 @@ const AddUserModals = ({ userModalRef, onSubmitSuccess, employeesWithPermissions
                 });
                 setSearch("");
                 setSelectedEmployee(null);
-                onSubmitSuccess();
+               
                 if (userModalRef.current) {
                     userModalRef.current.close();
                 }
             }
+            await fetchEmployeeWithPermissions(true,false);
         } catch (error) {
             console.log("Error saving add user modal:", error);
         } finally {
@@ -231,7 +236,7 @@ const AddUserModals = ({ userModalRef, onSubmitSuccess, employeesWithPermissions
                                 <>
                                     <div className="absolute w-[610px] space-y-2 border-t-0 border-gray-300 p-2 py-[20px] shadow-custom6 rounded-[10px] bg-white z-20 mt-1" ref={dropdownRef}>
                                         <ul className="flex flex-col space-y-2 max-h-[500px] overflow-auto ">
-                                            {filteredOptions.map((option, index) => {
+                                            {filteredOptions && filteredOptions.map((option, index) => {
                                                 return (
                                                     <li
                                                         key={index}
