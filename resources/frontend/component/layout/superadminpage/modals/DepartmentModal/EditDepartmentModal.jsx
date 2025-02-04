@@ -1,14 +1,17 @@
 import React, { useEffect, useState, useMemo } from 'react'
-import { showToast } from "../../../../../util/toastUtil";
+import { showToast } from "@/util/toastUtil"
 import CircularProgress from "@mui/material/CircularProgress";
 import isEqual from 'lodash/isEqual';
-import { normalizeData } from '../DepartmentModal/utils/normalizeData';
-import Feature from '../../component/Feature';
-import useFeatures from '../../hooks/useFeatures';
-import { departmentPermissionService } from '../../../../servicesApi/apiCalls/roleManagement';
-const EditDepartmentModal = ({ editDepartmentModalRef, selectedDepartment, onSubmitSuccess }) => {
+import { normalizeData } from '@/component/layout/superadminpage/modals/DepartmentModal/utils/normalizeData';
+import Feature from '@/component/layout/superadminpage/component/Feature';
+import useFeature from '@/context/RoleManagement/FeatureContext';
+import { departmentPermissionService } from '@/component/servicesApi/apiCalls/roleManagement';
+import useDepartmentPermission from '@/context/RoleManagement/DepartmentPermissionContext';
+
+const EditDepartmentModal = ({ editDepartmentModalRef, selectedDepartment }) => {
     //States
-    const { features, fetchFeatures } = useFeatures();
+    const { features, fetchFeatures } = useFeature();
+    const { fetchDepartmentPermissions } = useDepartmentPermission();
     const [isLoading, setIsLoading] = useState(false);
     const [selectedDepartmentOldData, setSelectedDepartmentOldData] = useState(null); //Holds the old data of the selected department
     const [formData, setFormData] = useState({
@@ -83,7 +86,8 @@ const EditDepartmentModal = ({ editDepartmentModalRef, selectedDepartment, onSub
                     department_id: 0,
                     features: [],
                 });
-                onSubmitSuccess(); // Call this callback from the parent component to refresh or fetch the updated department permissions data.
+                await fetchDepartmentPermissions(true,false)
+
                 if (editDepartmentModalRef.current) {
                     editDepartmentModalRef.current.close();
                 }

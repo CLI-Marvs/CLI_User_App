@@ -88,20 +88,6 @@ const App = () => {
                 </div>
             </div>
         );
-
-        /*  return (
-            <>
-                <div className="bg-white relative max-h-screen flex flex-col">
-                    <Navbar/>
-                    <div className="flex flex-1 overflow-hidden">
-                        <Sidebar/>
-                        <div className="flex-1 overflow-y-auto ">
-                            <Outlet />
-                        </div>
-                    </div>
-                </div>
-            </>
-        ); */
     };
 
     const SecondLayout = () => {
@@ -119,143 +105,6 @@ const App = () => {
         );
     };
 
-    // const router = createBrowserRouter([
-    //     {
-    //         path: "/",
-    //         element: <LoginView />,
-    //     },
-    //     {
-    //         path: "/login",
-    //         element: <LoginView />,
-    //     },
-
-    //     {
-    //         path: "/callback",
-    //         element: <CallBackView />,
-    //     },
-    //     {
-    //         path: "/chatbox",
-    //         element: <MainComponent />,
-    //     },
-    //     {
-    //         path: "/",
-    //         element: <Layout />,
-    //         children: [
-    //             {
-    //                 path: "home",
-    //                 element: <Home />,
-    //             },
-    //             {
-    //                 path: "notification",
-    //                 element: <NotificationView />,
-    //             },
-    //             {
-    //                 path: "transactionmanagement/invoices",
-    //                 element: <TransactionView />,
-    //             },
-    //             {
-    //                 path: "transactionmanagement/transactionrecords",
-    //                 element: <BankStatementView />,
-    //             },
-    //             /*  {
-    //                 path: "transaction",
-    //                 element: <SecondLayout />,
-    //                 children: [
-    //                     {
-    //                         path: "invoices",
-    //                         element: <TransactionView/>,
-    //                     },
-    //                     {
-    //                         path: "bankstatements",
-    //                         element: <BankStatementView/>,
-    //                     },
-    //                 ],
-
-    //             }, */
-    //             {
-    //                 path: "inquirymanagement/inquirylist",
-    //                 element: <InquiryListView />,
-    //             },
-    //             {
-    //                 path: "inquirymanagement/thread/:id",
-    //                 element: <InquiryThreadView />,
-    //             },
-    //             {
-    //                 path: "inquirymanagement/report",
-    //                 element: <ReportViews />,
-    //             },
-
-    //             {
-    //                 path: "propertyandpricing",
-    //                 element: <PropertyAndPricingLayout />,
-    //                 children: [
-    //                     {
-    //                         path: "pricingmasterlist",
-    //                         element: <PricingMasterListView />,
-    //                     },
-    //                     {
-    //                         path: "basicpricing/:id",
-    //                         element: <BasicPricingView />,
-    //                     },
-    //                     {
-    //                         path: "paymentscheme",
-    //                         element: <PaymentSchemeView />,
-    //                     },
-    //                     {
-    //                         path: "priceversioning",
-    //                         element: <PriceVersioningView />,
-    //                     },
-    //                     {
-    //                         path: "promotionalPricing",
-    //                         element: <PromotionalPricingView />,
-    //                     },
-    //                 ],
-    //             },
-    //             {
-    //                 path: "salesmanagement",
-    //                 element: <SalesManagementLayout />,
-    //                 children: [
-    //                     {
-    //                         path: "reservationlist",
-    //                         element: <ReservationListView />,
-    //                     },
-    //                     {
-    //                         path: "reservationpage",
-    //                         element: <ReservationPageView />,
-    //                     },
-    //                 ],
-    //             },
-    //             {
-    //                 path: "adminsettings",
-    //                 element: <AdminSettingView />,
-    //             },
-    //         ],
-    //     },
-    //     {
-    //         path: "/paymentmethod",
-    //         element: <PaymentMainView />,
-    //     },
-    //     {
-    //         path: "/file-viewer/attachment/:id",
-    //         element: <FileViewer />,
-    //     },
-    //     {
-    //         path: "/paymentmethod/payonlinenow",
-    //         element: <PaymentSectionView />,
-    //     },
-
-    // ]);
-    // router.beforeEach((to, from, next) => {
-    //     if (to.meta.requiresAuth && !localStorage.getItem("authToken")) {
-    //         router.replace({ name: "/" });
-    //     } else if (to.meta.requiresAuth && localStorage.getItem("authToken")) {
-    //         UserApi.check_authorization().then((callback) => {
-    //             if (callback.result) next();
-    //         });
-    //     } else {
-    //         next();
-    //     }
-    // });
     const router = createBrowserRouter([
         {
             path: "/",
@@ -418,7 +267,7 @@ const App = () => {
                             element: <AdminSettingView />,
                         },
                         {
-                            path: "superadmin/userrightsandpermissions",
+                            path: "super-admin/user-rights-and-permissions",
                             element: <UserRightsAndPermissionsView />,
                         },
                     ],

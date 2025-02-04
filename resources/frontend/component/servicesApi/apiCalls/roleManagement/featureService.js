@@ -1,4 +1,4 @@
-import apiService from '../../apiService';
+import apiService from '@/component/servicesApi/apiService';
 export const featureService = {
     getAllFeatures: async () => {
         try {
