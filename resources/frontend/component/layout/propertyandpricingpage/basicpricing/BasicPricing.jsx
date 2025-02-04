@@ -19,6 +19,7 @@ import { formatPayload } from "@/component/layout/propertyandpricingpage/basicpr
 import { showToast } from "@/util/toastUtil";
 import { usePriceListMaster } from "@/context/PropertyPricing/PriceListMasterContext";
 import paymentScheme from "./accordion/PaymentSchemes";
+import { useUnit } from "@/context/PropertyPricing/UnitContext";
 import CircularProgress from "@mui/material/CircularProgress";
 
 const BasicPricing = () => {
@@ -37,7 +38,9 @@ const BasicPricing = () => {
     const { pricingData, resetPricingData, setPricingData } = usePricing();
     const { fetchPropertyListMasters } = usePriceListMaster();
     const [isLoading, setIsLoading] = useState({});
+    const { checkExistingUnits, excelId, floors } = useUnit();
 
+    //  console.log("PricingData in BasicPricing", pricingData);
     //Hooks
     useEffect(() => {
         if (data) {
@@ -89,8 +92,42 @@ const BasicPricing = () => {
                           ],
                 }));
             }
+            if (data?.floor_premiums) {
+                console.log("Floor premiums have data")
+                const floorPremiumData = data?.floor_premiums.reduce(
+                    (acc, premium) => {
+                        acc[premium.floor] = {
+                            id: premium.id,
+                            premiumCost: premium.premium_cost,
+                            luckyNumber: premium.lucky_number,
+                            excludedUnits: premium.excluded_units,
+                        };
+                        return acc;
+                    },
+                    {}
+                );
+                setPricingData((prev) => ({
+                    ...prev,
+                    floorPremiums: floorPremiumData,
+                }));
+            } else if (
+                action === "Edit" &&
+                !excelId &&
+                (!floors || floors.length === 0)
+            ) {
+                console.log("Floor premiums doest not have data");
+                checkExistingUnits(data?.tower_phase_id);
+            }
         }
-    }, [data]);
+    }, [data, checkExistingUnits, action, floors, excelId]);
+
+    useEffect(() => {
+        console.log("excelId", excelId);
+        // Prevent calling the function if floors already have data
+        // if () {
+        //     console.log("it runs here in 118");
+        // }
+    }, [data?.tower_phase_id]);
 
     //Event handler
     // Open the add property modal
@@ -100,7 +137,7 @@ const BasicPricing = () => {
         }
     };
 
-    //Open the unit upload modal
+    //Handle to open the unit upload modal
     const handleOpenUnitUploadModal = () => {
         if (fileInputRef.current) {
             fileInputRef.current.click();
@@ -211,6 +248,9 @@ const BasicPricing = () => {
         priceVersionsPayload: formatPayload.formatPriceVersionsPayload(
             pricingData.priceVersions
         ),
+        floorPremiumsPayload: formatPayload.formatMultipleFloorPremiums(
+            pricingData.floorPremiums
+        ),
         status: status,
     });
     /**
@@ -233,13 +273,13 @@ const BasicPricing = () => {
                 setIsLoading((prev) => ({ ...prev, [status]: true }));
                 const payload = buildSubmissionPayload(status);
                 console.log("Edit Payload", payload);
-                console.log("Edit Payload", JSON.stringify(payload));
+                // console.log("Edit Payload", JSON.stringify(payload));
 
                 const response =
                     await priceListMasterService.updatePriceListMasters(
                         payload
                     );
-                console.log("response", response);
+                // console.log("response", response);
                 if (response?.status === 201 || response?.status === 200) {
                     showToast(
                         response?.data?.message || "Data updated successfully",
@@ -400,7 +440,7 @@ const BasicPricing = () => {
 
             <div className="flex flex-col gap-1 w-full border-t-1 border-custom-lightestgreen py-4  ">
                 <PriceListSettings />
-                <FloorPremiums />
+                <FloorPremiums propertyData={propertyData} />
                 <AdditionalPremiums />
                 <PriceVersions priceListMasterData={data} action={action} />
                 {/* <PaymentSchemes action={action} priceListMasterData={data} /> */}

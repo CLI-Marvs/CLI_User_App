@@ -28,4 +28,32 @@ export const unitService = {
             throw error;
         }
     },
+
+    //Function to check existing units for a tower phase
+    getExistingUnits: async (towerPhaseId) => {
+        try {
+            const response = await apiService.get(
+                `units/check/${towerPhaseId}`
+            );
+            return response;
+        } catch (error) {
+            console.error("Error checking existing units:", error);
+            throw error;
+        }
+    },
+
+    //Function to get all units in a tower phase and selected floor
+    getUnitsInTowerPhase: async (towerPhaseId, selectedFloor) => {
+ 
+
+        try {
+            const response = await apiService.get(
+                `units/tower/${towerPhaseId}/floor/${selectedFloor}/units`
+            );
+            return response;
+        } catch (error) {
+            console.error("Error getting units in tower phase:", error);
+            throw error;
+        }
+    },
 };

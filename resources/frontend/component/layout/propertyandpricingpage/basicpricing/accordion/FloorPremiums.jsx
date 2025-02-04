@@ -3,22 +3,55 @@ import { IoIosArrowDown } from "react-icons/io";
 import { IoMdArrowDropdown } from "react-icons/io";
 import { FaRegTrashAlt } from "react-icons/fa";
 import FloorPremiumAssignModal from "../modals/FloorPremiumAssignModal";
-import { useStateContext } from "../../../../../context/contextprovider";
-// import { useFloorPremiumStateContext } from "../../../../../context/FloorPremium/FloorPremiumContext";
 import CircularProgress from "@mui/material/CircularProgress";
-import { useCountFloors } from "@/component/layout/propertyandpricingpage/basicpricing/hooks/useCountFloors";
-const FloorPremiums = ({}) => {
+import { useUnit } from "@/context/PropertyPricing/UnitContext";
+import { usePricing } from "@/component/layout/propertyandpricingpage/basicpricing/context/BasicPricingContext";
+const FloorPremiums = ({ propertyData }) => {
     //States
-    const [floorPremiumsAccordionOpen, setFloorPremiumsAccordionOpen] =
-        useState(false);
+
     //     useFloorPremiumStateContext();
     const modalRef = useRef(null);
     const [newFloor, setNewFloor] = useState("");
     const [newPremiumCost, setNewPremiumCost] = useState("");
-    const { fetchFloorCount, floorCount } = useCountFloors();
-
-    console.log("floorCount", floorCount);
+    const {
+        floors,
+        isLoading,
+        floorPremiumsAccordionOpen,
+        setFloorPremiumsAccordionOpen,
+    } = useUnit();
+    const [selectedFloor, setSelectedFloor] = useState(null);
+    const { pricingData, setPricingData } = usePricing();
+    const [towerPhaseId, setTowerPhaseId] = useState(null);
+    //  console.log("PricingData",pricingData)
     //Hooks
+    useEffect(() => {
+        setTowerPhaseId(propertyData?.tower_phase_id);
+        if (floors && Object.keys(floors).length > 0) {
+            // Get the first (and only) key dynamically
+            const floorNumbers = floors[Object.keys(floors)[0]];
+
+            if (Array.isArray(floorNumbers) && floorNumbers.length > 0) {
+                const initialFloorPremiums = floorNumbers.reduce(
+                    (acc, floor) => {
+                        acc[floor] = {
+                            premiumCost: "",
+                            luckyNumber: false,
+                            excludedUnits: [],
+                        };
+                        return acc;
+                    },
+                    {}
+                );
+                //  setFloorPremiums(initialFloorPremiums); // Ensure this updates your state
+
+                setPricingData((prev) => ({
+                    ...prev,
+                    floorPremiums: initialFloorPremiums,
+                }));
+            }
+        }
+    }, [floors, propertyData]);
+
     /**
      * This hooks retrieves the floor data associated with the specified tower phase ID. It checks if the data already exists in the propertyFloors state; if it does, it initializes the floor premium form data with the necessary structure. If the data is not available, it resets the form data and initiates a fetch request to obtain the floor information. This ensures that the component has the most up-to-date floor data while maintaining the appropriate structure for further processing.
      */
@@ -76,27 +109,45 @@ const FloorPremiums = ({}) => {
     //Handle to open modal to assign floor premiums
     const handleOpenModal = (floor) => {
         setSelectedFloor(floor);
-        setTowerPhaseId(towerPhaseId);
+
         if (modalRef.current) {
             modalRef.current.showModal();
         }
     };
 
     //  Handle to input floor premiums data(e.g premium cost)
-    const handleOnChange = (index, e) => {
-        // const { name, type, checked, value } = e.target;
-        // setFloorPremiumFormData((prevData) => {
-        //     const updatedFloors = [...prevData.floor];
-        //     updatedFloors[index] = {
-        //         ...updatedFloors[index],
-        //         [name]: type === "checkbox" ? checked : value,
-        //     };
-        //     // console.log("Updated Floors: ", updatedFloors);
-        //     return {
-        //         ...prevData,
-        //         floor: updatedFloors, // Update the floors in the context
-        //     };
-        // });
+    const handleOnChange = (floorNumber, e) => {
+        const { name, type, checked, value } = e.target;
+
+        if (
+            !pricingData?.floorPremiums ||
+            Object.keys(pricingData?.floorPremiums).length === 0
+        ) {
+            console.log("pricingData.floorPremiums is empty or not available");
+            return;
+        }
+
+        const floorPremiums = pricingData.floorPremiums[floorNumber];
+
+        if (!floorPremiums) {
+            console.log(`No premium data for floor ${floorNumber}`);
+            return;
+        }
+
+        // Update the floorPremiums state
+        const updatedFloorPremiums = {
+            ...floorPremiums,
+            [name]: type === "checkbox" ? checked : value,
+        };
+
+        // Update the floorPremiums object (assuming you're using a state setter like setFloorPremiums)
+        setPricingData((prevState) => ({
+            ...prevState,
+            floorPremiums: {
+                ...prevState.floorPremiums,
+                [floorNumber]: updatedFloorPremiums,
+            },
+        }));
     };
 
     //Handling changes for adding  new floor
@@ -299,93 +350,101 @@ const FloorPremiums = ({}) => {
                                             <th className="rounded-tr-[10px] w-[62px]"></th>
                                         </tr>
                                     </thead>
-                                    {/* <tbody className="">
+                                    <tbody className="">
                                         {isLoading ? (
-                                            <tr className="">
+                                            <tr className="ml-4">
                                                 <CircularProgress className="spinnerSize " />
                                             </tr>
                                         ) : (
-                                            floorPremiumFormData.floor &&
-                                            floorPremiumFormData.floor.length >
-                                                0 &&
-                                            floorPremiumFormData.floor.map(
-                                                (floor, index) => (
-                                                    <tr
-                                                        className="h-[46px] bg-white text-sm"
-                                                        key={index}
-                                                    >
-                                                        <td className="text-custom-gray81">
-                                                           
-                                                            {index}
+                                            pricingData &&
+                                            Object.keys(
+                                                pricingData?.floorPremiums
+                                            ).length > 0 &&
+                                            Object.entries(
+                                                pricingData?.floorPremiums
+                                            ).map(
+                                                (
+                                                    [floorNumber, floorData],
+                                                    index
+                                                ) => {
+                                                    return (
+                                                        <tr
+                                                            className="h-[46px] bg-white text-sm"
+                                                            key={index}
+                                                        >
+                                                            <td className="text-custom-gray81 pl-4">
+                                                                {floorNumber}
 
-                                                            <input
-                                                                type="text"  
-                                                                className="text-custom-gray81 bg-white h-[29px] w-[80px]   border-[#D9D9D9] rounded-[5px] px-2 outline-none"
-                                                                defaultValue={
-                                                                    floor.floor
-                                                                }
-                                                                readOnly
-                                                            />
-                                                        </td>
-                                                        <td>
-                                                            <div className="">
-                                                                <input
-                                                                    type="number"
-                                                                    name="premiumCost"
-                                                                    id="premiumCost"
-                                                                    value={
-                                                                        floor.premiumCost
+                                                                {/* <input
+                                                                    type="text"
+                                                                    className="text-custom-gray81 bg-white h-[29px] w-[80px]   border-[#D9D9D9] rounded-[5px] px- outline-none ml-3"
+                                                                    defaultValue={
+                                                                        floorData
                                                                     }
+                                                                    readOnly
+                                                                /> */}
+                                                            </td>
+                                                            <td>
+                                                                <div className="">
+                                                                    <input
+                                                                        type="number"
+                                                                        name="premiumCost"
+                                                                        id="premiumCost"
+                                                                        value={
+                                                                            floorData.premiumCost
+                                                                        }
+                                                                        onChange={(
+                                                                            e
+                                                                        ) =>
+                                                                            handleOnChange(
+                                                                                floorNumber,
+                                                                                e
+                                                                            )
+                                                                        }
+                                                                        className="bg-white h-[29px] w-[120px] border border-[#D9D9D9] rounded-[5px] px-2 outline-none text-center"
+                                                                    />
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <input
                                                                     onChange={(
                                                                         e
                                                                     ) =>
                                                                         handleOnChange(
-                                                                            index,
+                                                                            floorNumber,
                                                                             e
                                                                         )
                                                                     }
-                                                                    className="bg-white h-[29px] w-[120px] border border-[#D9D9D9] rounded-[5px] px-2 outline-none"
+                                                                    checked={
+                                                                        floorData.luckyNumber ||
+                                                                        false
+                                                                    }
+                                                                    name="luckyNumber"
+                                                                    id="luckyNumber"
+                                                                    type="checkbox"
+                                                                    className="h-[16px] w-[16px] ml-[16px] rounded-[2px] appearance-none border border-gray-400 checked:bg-transparent flex items-center justify-center checked:before:bg-black checked:before:w-[12px] checked:before:h-[12px] checked:before:block checked:before:content-['']"
                                                                 />
-                                                            </div>
-                                                        </td>
-                                                        <td>
-                                                            <input
-                                                                onChange={(e) =>
-                                                                    handleOnChange(
-                                                                        index,
-                                                                        e
+                                                            </td>
+                                                            <td
+                                                                onClick={() =>
+                                                                    handleOpenModal(
+                                                                        floorNumber
                                                                     )
                                                                 }
-                                                                checked={
-                                                                    floor.luckyNumber ||
-                                                                    false
-                                                                }
-                                                                name="luckyNumber"
-                                                                id="luckyNumber"
-                                                                type="checkbox"
-                                                                className="h-[16px] w-[16px] ml-[16px] rounded-[2px] appearance-none border border-gray-400 checked:bg-transparent flex items-center justify-center checked:before:bg-black checked:before:w-[12px] checked:before:h-[12px] checked:before:block checked:before:content-['']"
-                                                            />
-                                                        </td>
-                                                        <td
-                                                            onClick={() =>
-                                                                handleOpenModal(
-                                                                    floor.floor
-                                                                )
-                                                            }
-                                                            className="text-blue-500 underline cursor-pointer"
-                                                        >
-                                                            Assign
-                                                        </td>
-                                                        <td>
-                                                            <FaRegTrashAlt className="size-5 text-custom-gray81 hover:text-red-500" />
-                                                        </td>
-                                                    </tr>
-                                                )
+                                                                className="text-blue-500 underline cursor-pointer"
+                                                            >
+                                                                Assign
+                                                            </td>
+                                                            <td>
+                                                                <FaRegTrashAlt
+                                                                    className="size-5 text-custom-gray81 hover:text-red-500 cursor-pointer" />
+                                                            </td>
+                                                        </tr>
+                                                    );
+                                                }
                                             )
                                         )}
-
-                                       
-                                    </tbody> */}
+                                    </tbody>
                                 </table>
                             </div>
                         </div>
@@ -393,7 +452,11 @@ const FloorPremiums = ({}) => {
                 </div>
             </div>
             <div>
-                <FloorPremiumAssignModal modalRef={modalRef} />
+                <FloorPremiumAssignModal
+                    modalRef={modalRef}
+                    selectedFloor={selectedFloor}
+                    towerPhaseId={towerPhaseId}
+                />
             </div>
         </>
     );

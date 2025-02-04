@@ -44,7 +44,7 @@ class PriceListMaster extends Model
 
     public function floorPremiums(): HasMany
     {
-        return $this->hasMany(FloorPremium::class);
+        return $this->hasMany(FloorPremium::class, 'pricelist_master_id', 'id');
     }
 
 

@@ -22,7 +22,7 @@ class ExcelImport implements ToModel, WithHeadingRow, WithChunkReading, WithBatc
     protected $towerPhaseId;
     protected $status;
     protected $excelId;
-    protected  $rowCount = 0;
+    protected $rowCount = 0;
 
 
     public function __construct($headers, $propertyId, $towerPhaseId, $status, $table)
@@ -130,7 +130,8 @@ class ExcelImport implements ToModel, WithHeadingRow, WithChunkReading, WithBatc
         return false;
     }
 
-     private function insertBatch(): void {
+    private function insertBatch(): void
+    {
         if (empty($this->data)) {
             return;
         }
@@ -139,7 +140,7 @@ class ExcelImport implements ToModel, WithHeadingRow, WithChunkReading, WithBatc
 
             // Use chunks for very large batches
             foreach (array_chunk($this->data, 500) as $chunk) {
-                DB::table($this->table)->insertOrIgnore($chunk);
+                DB::table($this->table)->insert($chunk);
             }
 
             DB::commit();
@@ -150,8 +151,8 @@ class ExcelImport implements ToModel, WithHeadingRow, WithChunkReading, WithBatc
         } catch (\Exception $e) {
             DB::rollBack();
         }
-     }
- 
+    }
+
 
     /**
      * Getter for the data array
@@ -181,7 +182,7 @@ class ExcelImport implements ToModel, WithHeadingRow, WithChunkReading, WithBatc
      */
     public function batchSize(): int
     {
-        return 500;
+        return 5000;
     }
 
     /**
@@ -196,7 +197,7 @@ class ExcelImport implements ToModel, WithHeadingRow, WithChunkReading, WithBatc
      */
     public function chunkSize(): int
     {
-        return 500;
+        return 5000;
     }
 
     /**

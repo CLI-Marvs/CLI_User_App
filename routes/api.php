@@ -22,7 +22,7 @@ use App\Http\Controllers\EmployeeFeaturePermissionController;
 use App\Http\Controllers\DepartmentFeaturePermissionController;
 
 Route::get('/user', function (Request $request) {
-  return $request->user();
+    return $request->user();
 })->middleware('auth:sanctum');
 
 
@@ -99,103 +99,107 @@ Route::get('/get-matches', [SapController::class, 'runAutoPosting']);
 
 
 Route::middleware('auth:sanctum')->group(function () {
-  Route::get('/get-transaction-bank', [SapController::class, 'getTransactionByBankName']);
-  Route::post('/upload-notepad', [SapController::class, 'uploadNotepad']);
-  Route::get('/get-concern', [ConcernController::class, 'getAllConcerns']);
-  Route::post('/add-concern', [ConcernController::class, 'addConcernPublic']);
-  Route::post('/add-concern-prev', [ConcernController::class, 'addConcernFromPreviousInquiry']);
-  Route::get('/get-message/{ticketId}', [ConcernController::class, 'getMessage']);
-  Route::post('/send-message', [ConcernController::class, 'sendMessage']);
-  Route::get('/get-logs/{ticketId}', [ConcernController::class, 'getInquiryLogs']);
-  Route::get('/get-messageId/{ticketId}', [ConcernController::class, 'getMessageId']);
-  Route::get('/employee-list', [ConcernController::class, 'getAllEmployeeList']);
-  Route::get('/notifications', [ConcernController::class, 'listOfNotifications']);
-  Route::get('/unread-count', [ConcernController::class, 'countUnreadNotifications']);
-  Route::post('/pin-concern/{id}', [ConcernController::class, 'pinConcern']);
-  Route::get('/navbar-data', [ConcernController::class, 'getNavBarData']);
-  Route::post('/isread/{concernId}', [ConcernController::class, 'readNotifByUser']);
-  Route::get('/specific-assignee', [ConcernController::class, 'getSpecificInquiry']);
-  Route::post('/remove-assignee', [ConcernController::class, 'removeAssignee']);
-  /* Download the file attachment */
-  Route::post('/download-file', [ConcernController::class, 'downloadFileFromGCS']);
+    Route::get('/get-transaction-bank', [SapController::class, 'getTransactionByBankName']);
+    Route::post('/upload-notepad', [SapController::class, 'uploadNotepad']);
+    Route::get('/get-concern', [ConcernController::class, 'getAllConcerns']);
+    Route::post('/add-concern', [ConcernController::class, 'addConcernPublic']);
+    Route::post('/add-concern-prev', [ConcernController::class, 'addConcernFromPreviousInquiry']);
+    Route::get('/get-message/{ticketId}', [ConcernController::class, 'getMessage']);
+    Route::post('/send-message', [ConcernController::class, 'sendMessage']);
+    Route::get('/get-logs/{ticketId}', [ConcernController::class, 'getInquiryLogs']);
+    Route::get('/get-messageId/{ticketId}', [ConcernController::class, 'getMessageId']);
+    Route::get('/employee-list', [ConcernController::class, 'getAllEmployeeList']);
+    Route::get('/notifications', [ConcernController::class, 'listOfNotifications']);
+    Route::get('/unread-count', [ConcernController::class, 'countUnreadNotifications']);
+    Route::post('/pin-concern/{id}', [ConcernController::class, 'pinConcern']);
+    Route::get('/navbar-data', [ConcernController::class, 'getNavBarData']);
+    Route::post('/isread/{concernId}', [ConcernController::class, 'readNotifByUser']);
+    Route::get('/specific-assignee', [ConcernController::class, 'getSpecificInquiry']);
+    Route::post('/remove-assignee', [ConcernController::class, 'removeAssignee']);
+    /* Download the file attachment */
+    Route::post('/download-file', [ConcernController::class, 'downloadFileFromGCS']);
 
-  /*Basic Pricing */
-  Route::post('/basic-pricing', [PriceBasicDetailController::class, 'storeBasicPricing']);
-
-
+    /*Basic Pricing */
+    Route::post('/basic-pricing', [PriceBasicDetailController::class, 'storeBasicPricing']);
 
 
-  /*Property Data*/
-  Route::prefix('properties')->group(function () {
-    // Get property names  
-    Route::get('names', [PropertyMasterController::class, 'getPropertyNames']);
-    Route::get('names/with-ids', [PropertyMasterController::class, 'getPropertyNamesWithIds']);
-    // Store property details
-    Route::post('/', [PropertyMasterController::class, 'store']);
-    // Get single property
-    Route::get('{property}', [PropertyMasterController::class, 'show']);
-  });
-
-  /*Payment Scheme */
-  Route::prefix('payment-schemes')->group(function () {
-    // Get list of all payment schemes
-    Route::get('/', [PaymentSchemeController::class, 'index']);
-    // Store payment scheme
-    Route::post('/', [PaymentSchemeController::class, 'store']);
-  });
-
-  /*Property Price Master List */
-  Route::prefix('price-list-masters')->group(function () {
-    // Get price list masters
-    Route::get('/', [PriceListMasterController::class, 'index']);
-    //Store a price list masters
-    Route::post('/', [PriceListMasterController::class, 'store']);
-    //Update a price list masters
-    Route::put('/update', [PriceListMasterController::class, 'update']);
-  });
-
-  /* Units */
-  Route::prefix('units')->group(function () {
-    // Store unit details
-    Route::post('/', [UnitController::class, 'store']);
-    //Get all units
-    Route::get('/', [UnitController::class, 'index']);
-    //Count units floors
-    Route::get('/floors/{towerPhaseId}/{excelId}', [UnitController::class, 'countFloors']);
-  });
-
-  /* Price Versioning */
-  Route::prefix('/price-version')->group(function () {
-    // Store unit details
-    Route::post('/', [PriceVersionController::class, 'store']);
-    //Get all units
-    Route::get('/', [PriceVersionController::class, 'index']);
-  });
-
-  //for banner
-  Route::post('/store-banner', [DynamicBannerController::class, 'storeBanner']);
-  Route::get('/get-banner', [DynamicBannerController::class, 'getBanner']);
-  Route::delete('/banner/{id}', [DynamicBannerController::class, 'deleteBanner']);
-  Route::post('/update-banner', [DynamicBannerController::class, 'updateBanner']);
-
-  //Employee Department
-  Route::get('/get-employees-departments', [EmployeeDepartmentController::class, 'index']);
-
-  //Features
-  Route::get('/get-features', [FeatureController::class, 'index']);
 
 
-  //Department Feature Permission
-  Route::get('/get-departments-with-permissions', [DepartmentFeaturePermissionController::class, 'index']);
-  Route::post('/departments-assign-feature-permissions', [DepartmentFeaturePermissionController::class, 'store']);
-  Route::patch('/update-departments-status', [DepartmentFeaturePermissionController::class, 'updateStatus']);
-  Route::put('/update-departments-feature-permissions', [DepartmentFeaturePermissionController::class, 'updatePermissions']);
+    /*Property Data*/
+    Route::prefix('properties')->group(function () {
+        // Get property names  
+        Route::get('names', [PropertyMasterController::class, 'getPropertyNames']);
+        Route::get('names/with-ids', [PropertyMasterController::class, 'getPropertyNamesWithIds']);
+        // Store property details
+        Route::post('/', [PropertyMasterController::class, 'store']);
+        // Get single property
+        Route::get('{property}', [PropertyMasterController::class, 'show']);
+    });
+
+    /*Payment Scheme */
+    Route::prefix('payment-schemes')->group(function () {
+        // Get list of all payment schemes
+        Route::get('/', [PaymentSchemeController::class, 'index']);
+        // Store payment scheme
+        Route::post('/', [PaymentSchemeController::class, 'store']);
+    });
+
+    /*Property Price Master List */
+    Route::prefix('price-list-masters')->group(function () {
+        // Get price list masters
+        Route::get('/', [PriceListMasterController::class, 'index']);
+        //Store a price list masters
+        Route::post('/', [PriceListMasterController::class, 'store']);
+        //Update a price list masters
+        Route::put('/update', [PriceListMasterController::class, 'update']);
+    });
+
+    /* Units */
+    Route::prefix('units')->group(function () {
+        // Store unit details
+        Route::post('/', [UnitController::class, 'store']);
+        //Get all units
+        Route::get('/', [UnitController::class, 'index']);
+        //Count units floors
+        Route::get('/floors/{towerPhaseId}/{excelId}', [UnitController::class, 'countFloors']);
+        // Check existing units for a tower phase
+        Route::get('/check/{towerPhaseId}', [UnitController::class, 'getExistingUnits']);
+        Route::get('/tower/{towerPhaseId}/floor/{selectedFloor}/units', [UnitController::class, 'getUnits']);
+
+    });
+
+    /* Price Versioning */
+    Route::prefix('/price-version')->group(function () {
+        // Store unit details
+        Route::post('/', [PriceVersionController::class, 'store']);
+        //Get all units
+        Route::get('/', [PriceVersionController::class, 'index']);
+    });
+
+    //for banner
+    Route::post('/store-banner', [DynamicBannerController::class, 'storeBanner']);
+    Route::get('/get-banner', [DynamicBannerController::class, 'getBanner']);
+    Route::delete('/banner/{id}', [DynamicBannerController::class, 'deleteBanner']);
+    Route::post('/update-banner', [DynamicBannerController::class, 'updateBanner']);
+
+    //Employee Department
+    Route::get('/get-employees-departments', [EmployeeDepartmentController::class, 'index']);
+
+    //Features
+    Route::get('/get-features', [FeatureController::class, 'index']);
 
 
-  //Employee Feature Permission
-  Route::get('/get-employees-with-permissions', [EmployeeFeaturePermissionController::class, 'index']);
-  Route::post('/employee-assign-feature-permissions', [EmployeeFeaturePermissionController::class, 'store']);
-  Route::patch('/update-employee-status', [EmployeeFeaturePermissionController::class, 'updateStatus']);
-  Route::patch('/update-employees-feature-permissions', [EmployeeFeaturePermissionController::class, 'updatePermissions']);
-  Route::get('/get-user-access-data', [EmployeeFeaturePermissionController::class, 'getUserAccessData']);
+    //Department Feature Permission
+    Route::get('/get-departments-with-permissions', [DepartmentFeaturePermissionController::class, 'index']);
+    Route::post('/departments-assign-feature-permissions', [DepartmentFeaturePermissionController::class, 'store']);
+    Route::patch('/update-departments-status', [DepartmentFeaturePermissionController::class, 'updateStatus']);
+    Route::put('/update-departments-feature-permissions', [DepartmentFeaturePermissionController::class, 'updatePermissions']);
+
+
+    //Employee Feature Permission
+    Route::get('/get-employees-with-permissions', [EmployeeFeaturePermissionController::class, 'index']);
+    Route::post('/employee-assign-feature-permissions', [EmployeeFeaturePermissionController::class, 'store']);
+    Route::patch('/update-employee-status', [EmployeeFeaturePermissionController::class, 'updateStatus']);
+    Route::patch('/update-employees-feature-permissions', [EmployeeFeaturePermissionController::class, 'updatePermissions']);
+    Route::get('/get-user-access-data', [EmployeeFeaturePermissionController::class, 'getUserAccessData']);
 });

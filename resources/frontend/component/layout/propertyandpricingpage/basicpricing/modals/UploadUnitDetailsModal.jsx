@@ -1,8 +1,8 @@
 import React, { useRef, useEffect, useState } from "react";
 import { IoMdArrowDropdown } from "react-icons/io";
-import { unitService } from "@/component/servicesApi/apiCalls/propertyPricing/unit/unitService";
 import CircularProgress from "@mui/material/CircularProgress";
-import { useCountFloors } from "@/component/layout/propertyandpricingpage/basicpricing/hooks/useCountFloors";
+import { useUnit } from "@/context/PropertyPricing/UnitContext";
+import { showToast } from "@/util/toastUtil";
 const UploadUnitDetailsModal = ({
     uploadUnitModalRef,
     fileName,
@@ -17,7 +17,7 @@ const UploadUnitDetailsModal = ({
     const newFileInputRef = useRef();
     const [towerPhaseId, setTowerPhaseId] = useState();
     const [propertyMasterId, setPropertyMasterId] = useState();
-    const { fetchFloorCount } = useCountFloors();
+    const { uploadUnits } = useUnit();
 
     //Hooks
     useEffect(() => {
@@ -63,19 +63,17 @@ const UploadUnitDetailsModal = ({
 
         try {
             setLoading(true);
-            const response = await unitService.storeUnit(payload);
-            console.log("response", response);
+            const response = await uploadUnits(payload);
+            console.log("response 66", response);
             if (response?.status === 201) {
-                const excelId = response?.data?.data?.excel_id;
-
+                // const excelId = response?.data?.data?.excel_id;
                 //TODO: fetch the unit lloor
                 // Fetch floors immediately after successful upload to reflect the floor premium
-                const floorsResponse = fetchFloorCount(towerPhaseId, excelId);
-                console.log("floorsResponse", floorsResponse);
-                alert(response.data.message);
-                // if (uploadUnitModalRef.current) {
-                //     uploadUnitModalRef.current.close();
-                // }
+
+                showToast(response.data.message, "success");
+                if (uploadUnitModalRef.current) {
+                    uploadUnitModalRef.current.close();
+                }
             }
         } catch (error) {
             console.log("error uploading excel", error);

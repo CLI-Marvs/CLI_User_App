@@ -30,7 +30,6 @@ class StorePriceListMasterRequest extends FormRequest
             'priceListPayload.vatable_less_price' => 'integer',
             'priceListPayload.reservation_fee' => 'integer',
 
-            //Floor premium
             //Additional premium
 
             // Payment scheme payload
@@ -47,7 +46,9 @@ class StorePriceListMasterRequest extends FormRequest
             'priceVersionsPayload.*.expiry_date' => 'nullable | date_format:m-d-Y H:i:s',
             'priceVersionsPayload.*.payment_scheme' => 'array',
 
-
+            //Floor premium
+            'floorPremiumPayload' => 'array | nullable',
+            
             'status' =>
             'required|string|max:255',
             'emp_id' =>

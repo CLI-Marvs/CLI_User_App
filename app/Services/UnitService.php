@@ -33,12 +33,12 @@ class UnitService
         DB::beginTransaction();
         try {
             $distinctFloors = $this->model->where([
-                    'tower_phase_id'
-                    => $towerPhaseId,
-                    'status' => 'Active',
-                    'excel_id' => $excelId,
+                'tower_phase_id'
+                => $towerPhaseId,
+                'status' => 'Active',
+                'excel_id' => $excelId,
 
-                ])
+            ])
                 ->distinct('floor')
                 ->pluck('floor');
 
@@ -46,7 +46,7 @@ class UnitService
             $count = $distinctFloors->count();
 
             return [
-                $count,
+                // $count,
                 $distinctFloors
             ];
         } catch (\Exception $e) {
@@ -66,5 +66,22 @@ class UnitService
         //     'count' => $count,
         //     'floors' => $distinctFloors,
         // ], 200);
+    }
+
+    /**
+     * Get existing units for a specific tower phase
+     */
+    public function getExistingUnits($towerPhaseId)
+    {
+        return $this->repository->getExistingUnits($towerPhaseId);
+    }
+
+    /**
+     * Get units for a specific tower phase and floor
+     */
+    public function getUnits($towerPhaseId, $selectedFloor)
+    {
+       
+        return $this->repository->getUnits($towerPhaseId, $selectedFloor);
     }
 }

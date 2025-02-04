@@ -37,10 +37,10 @@ class UnitRepository
                     // Extract the rowHeader values directly from the decoded array
                     $actualHeaders = array_column($headers, 'rowHeader');
 
-                   
+
                     $import = new ExcelImport($actualHeaders, $propertyId, $towerPhaseId, 'Active', 'units');
                     Excel::import($import, $file);
-              
+
                     DB::commit();
 
                     $excelId = $import->getExcelId();
@@ -70,5 +70,37 @@ class UnitRepository
                 'message' => 'Failed to insert unit: ' . $e->getMessage()
             ], 500);
         }
+    }
+
+    /**
+     * Get existing units for a specific tower phase
+     */
+    public function getExistingUnits($towerPhaseId)
+    {
+        $units = $this->model->where('tower_phase_id', $towerPhaseId)
+            ->where('status', 'Active')
+            ->get();
+
+        return $units;
+    }
+
+    /**
+     * Get units for a specific tower phase and floor
+     */
+    public function getUnits($towerPhaseId, $selectedFloor)
+    {
+     //   dd($selectedFloor);
+        $units = $this->model->where('tower_phase_id', 152)
+            ->where('floor', 2)
+            ->where('status', 'Active')
+            ->get();
+        // Check if any units exist
+        if ($units->isEmpty()) {
+            return [
+                'message' => "No active units found for the given tower phase and floor."
+            ];
+        }
+
+        return $units;
     }
 }

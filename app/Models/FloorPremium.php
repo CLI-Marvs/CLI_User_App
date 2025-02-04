@@ -18,7 +18,7 @@ class FloorPremium extends Model
     //Relationship
     public function priceListMaster()
     {
-        return $this->belongsTo(PriceListMaster::class);
+        return $this->belongsTo(PriceListMaster::class,'pricelist_master_id', 'id','id');
     }
     public function basicPricing()
     {
