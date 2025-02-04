@@ -4,55 +4,13 @@ import hero from "../../../../../public/Images/hero-section.png";
 
 const PropertyCardTransaction = () => {
     const data = [
-        {
-            id: 1,
-            name: "Casa Mira Towers",
-            address: "G.M. Del Mar St., Cebu I.T. Park, Apas, Cebu City",
-            image: SamplePic,
-            unit_number: "Unit T.127",
-        },
-        {
-            id: 2,
-            name: "Casa Mira Towers",
-            address: "G.M. Del Mar St., Cebu I.T. Park, Apas, Cebu City",
-            image: hero,
-            unit_number: "Unit T.127",
-        },
-        {
-            id: 3,
-            name: "Casa Mira Towers",
-            address: "G.M. Del Mar St., Cebu I.T. Park, Apas, Cebu City",
-            image: SamplePic,
-            unit_number: "Unit T.127",
-        },
-        {
-            id: 4,
-            name: "Casa Mira Towers",
-            address: "G.M. Del Mar St., Cebu I.T. Park, Apas, Cebu City",
-            image: SamplePic,
-            unit_number: "Unit T.127",
-        },
-        {
-            id: 5,
-            name: "Casa Mira Towers",
-            address: "G.M. Del Mar St., Cebu I.T. Park, Apas, Cebu City",
-            image: SamplePic,
-            unit_number: "Unit T.127",
-        },
-        {
-            id: 6,
-            name: "Casa Mira Towers",
-            address: "G.M. Del Mar St., Cebu I.T. Park, Apas, Cebu City",
-            image: hero,
-            unit_number: "Unit T.127",
-        },
-        {
-            id: 7,
-            name: "Casa Mira Towers",
-            address: "G.M. Del Mar St., Cebu I.T. Park, Apas, Cebu City",
-            image: SamplePic,
-            unit_number: "Unit T.127",
-        },
+        { id: 1, name: "Casa Mira Towers", address: "G.M. Del Mar St., Cebu I.T. Park, Apas, Cebu City", image: SamplePic, unit_number: "Unit T.127" },
+        { id: 2, name: "Casa Mira Towers", address: "G.M. Del Mar St., Cebu I.T. Park, Apas, Cebu City", image: hero, unit_number: "Unit T.127" },
+        { id: 3, name: "Casa Mira Towers", address: "G.M. Del Mar St., Cebu I.T. Park, Apas, Cebu City", image: SamplePic, unit_number: "Unit T.127" },
+        { id: 4, name: "Casa Mira Towers", address: "G.M. Del Mar St., Cebu I.T. Park, Apas, Cebu City", image: SamplePic, unit_number: "Unit T.127" },
+        { id: 5, name: "Casa Mira Towers", address: "G.M. Del Mar St., Cebu I.T. Park, Apas, Cebu City", image: SamplePic, unit_number: "Unit T.127" },
+        { id: 6, name: "Casa Mira Towers", address: "G.M. Del Mar St., Cebu I.T. Park, Apas, Cebu City", image: hero, unit_number: "Unit T.127" },
+        { id: 7, name: "Casa Mira Towers", address: "G.M. Del Mar St., Cebu I.T. Park, Apas, Cebu City", image: SamplePic, unit_number: "Unit T.127" },
     ];
 
     return (

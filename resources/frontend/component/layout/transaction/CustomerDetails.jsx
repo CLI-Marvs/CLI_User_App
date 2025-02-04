@@ -55,6 +55,7 @@ const CustomerDetails = () => {
         }
     };
 
+
     const categories = [
         "Reservation Documents",
         "Payment Issues",
@@ -263,12 +264,13 @@ const CustomerDetails = () => {
                                         <span className="text-white bg-black p-2 flex text-center items-center text-xs 2xl:text-base rounded-l-[5px] 2xl:rounded-l-[8px] h-full">
                                             Year
                                         </span>
-                                        <div className="bg-white border-b-[1px] border-t-[1px] border-[#3A3A3A] h-full flex flex-1 items-center justify-center">
+                                        <div className="bg-white border-b-[1px] border-t-[1px] border-[#3A3A3A] h-full w-full flex flex-1 items-center justify-center">
                                             <DatePicker
                                                 selected={startDateHistory}
                                                 onChange={handleDateHistoryChange}
                                                 className="outline-none text-center text-xs 2xl:text-base w-full"
                                                 calendarClassName="custom-calendar"
+                                                sx={{ width: '100%' }} 
                                             />
                                         </div>
 
