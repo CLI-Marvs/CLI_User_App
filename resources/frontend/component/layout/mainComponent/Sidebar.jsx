@@ -71,8 +71,9 @@ const Sidebar = () => {
                 setIsInvoiceOpen(false);
                 setSuperAdminOpen(true);
                 break;
-            case "/transactionmanagement/invoices":
-            case "/transactionmanagement/transactionrecords":
+            case "/transaction/invoices":
+            case "/transaction/records":
+            case "/transaction/customer":
                 setInquiryOpen(false);
                 setIsInvoiceOpen(true);
                 setSuperAdminOpen(false);
@@ -207,6 +208,34 @@ const Sidebar = () => {
                             </div>
                         )}
 
+                    <Link to="property-pricing/master-lists">
+                        <ListItem
+                            className={`h-[35px] w-[185px] text-sm pl-[12px] transition-all duration-300 ease-in-out 
+                  ${
+                      location.pathname.startsWith("/property-pricing")
+                          ? "bg-custom-lightestgreen text-custom-solidgreen font-semibold"
+                          : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
+                  }
+                    ${
+                        isPropertyPricingOpen
+                            ? "rounded-[10px]"
+                            : "rounded-[10px]"
+                    }
+                    `}
+                            onClick={handlePropertyPricingOpen}
+                        >
+                            Property Pricing
+                            <ListItemSuffix>
+                                <IoIosArrowDown
+                                    className={`text-custom-solidgreen  transition-transform duration-200 ease-in-out ${
+                                        isPropertyPricingOpen
+                                            ? "rotate-180"
+                                            : ""
+                                    }`}
+                                />
+                            </ListItemSuffix>
+                        </ListItem>
+                    </Link>
                     <Link to="/transaction/invoices">
                         <ListItem
                             className={`h-[35px] w-[210px] text-sm pl-[12px] transition-all duration-300 ease-in-out 
@@ -295,60 +324,6 @@ const Sidebar = () => {
                                 </Link>
                             </div>
                         )}
-
-                    {ALLOWED_EMPLOYEES_CRS.includes(userLoggedInEmail) && (
-                        <Link to="superadmin/userrightsandpermissions">
-                            <ListItem
-                                className={`h-[35px] w-[185px] text-sm pl-[12px] transition-all duration-300 ease-in-out 
-                  ${
-                      activeItem === "superadmin" ||
-                      location.pathname.startsWith("/superadmin")
-                          ? "bg-custom-lightestgreen text-custom-solidgreen font-semibold"
-                          : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
-                  }
-                    ${
-                        isSuperAdminOpen
-                            ? "rounded-[10px] rounded-b-none"
-                            : "rounded-[10px]"
-                    }
-                    `}
-                                onClick={handleSuperAdminDropdownClick}
-                            >
-                                Admin Setting
-                                <ListItemSuffix>
-                                    <IoIosArrowDown
-                                        className={`text-custom-solidgreen  transition-transform duration-200 ease-in-out ${
-                                            isSuperAdminOpen ? "rotate-180" : ""
-                                        }`}
-                                    />
-                                </ListItemSuffix>
-                            </ListItem>
-                        </Link>
-                    )}
-
-                    {ALLOWED_EMPLOYEES_CRS.includes(userLoggedInEmail) &&
-                        isSuperAdminOpen &&
-                        location.pathname.startsWith("/superadmin") && (
-                            <div className="px-[12px] py-[20px] w-[185px] min-h-[122px] flex flex-col gap-[5px] bg-custom-lightestgreen border-t rounded-t-none rounded-b-[10px] border-custom-solidgreen transition-all duration-300 ease-in-out">
-                                <Link to="/superadmin/userrightsandpermissions">
-                                    <ListItem
-                                        className={`h-[48px] w-full py-[8px] px-[18px]  text-sm rounded-[25px] ${
-                                            location.pathname.startsWith(
-                                                "/superadmin/userrightsandpermissions"
-                                            )
-                                                ? "bg-white text-custom-solidgreen font-semibold "
-                                                : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
-                                        }`}
-                                        onClick={() =>
-                                            handleItemClick("superadmin")
-                                        }
-                                    >
-                                        User Rights & Permissions
-                                    </ListItem>
-                                </Link>
-                            </div>
-                        )}
-
                     <div className="mt-3 mb-1 px-4">
                         <p className="text-[14px] font-bold bg-gradient-to-r from-custom-bluegreen via-custom-lightgreen to-custom-solidgreen bg-clip-text text-transparent">
                             Coming Soon
@@ -358,10 +333,10 @@ const Sidebar = () => {
                         {/* <p>Property & Pricing</p> */}
                         <p>Sales Management</p>
                         <p>Broker Management</p>
-                        <p className="leading-none">
+                        {/*  <p className="leading-none">
                             Transaction <br />
                             Management
-                        </p>
+                        </p> */}
                         <p className="leading-none">
                             Document
                             <br /> Management
@@ -445,6 +420,59 @@ const Sidebar = () => {
           <ListItem className='h-4 mb-1 px-6 gap-2 font-semibold'>
          
           </ListItem> */}
+
+                    {ALLOWED_EMPLOYEES_CRS.includes(userLoggedInEmail) && (
+                        <Link to="superadmin/userrightsandpermissions">
+                            <ListItem
+                                className={`h-[35px] w-[185px] text-sm pl-[12px] transition-all duration-300 ease-in-out 
+                  ${
+                      activeItem === "superadmin" ||
+                      location.pathname.startsWith("/superadmin")
+                          ? "bg-custom-lightestgreen text-custom-solidgreen font-semibold"
+                          : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
+                  }
+                    ${
+                        isSuperAdminOpen
+                            ? "rounded-[10px] rounded-b-none"
+                            : "rounded-[10px]"
+                    }
+                    `}
+                                onClick={handleSuperAdminDropdownClick}
+                            >
+                                Admin Setting
+                                <ListItemSuffix>
+                                    <IoIosArrowDown
+                                        className={`text-custom-solidgreen  transition-transform duration-200 ease-in-out ${
+                                            isSuperAdminOpen ? "rotate-180" : ""
+                                        }`}
+                                    />
+                                </ListItemSuffix>
+                            </ListItem>
+                        </Link>
+                    )}
+
+                    {ALLOWED_EMPLOYEES_CRS.includes(userLoggedInEmail) &&
+                        isSuperAdminOpen &&
+                        location.pathname.startsWith("/superadmin") && (
+                            <div className="px-[12px] py-[20px] w-[185px] min-h-[122px] flex flex-col gap-[5px] bg-custom-lightestgreen border-t rounded-t-none rounded-b-[10px] border-custom-solidgreen transition-all duration-300 ease-in-out">
+                                <Link to="/superadmin/userrightsandpermissions">
+                                    <ListItem
+                                        className={`h-[48px] w-full py-[8px] px-[18px]  text-sm rounded-[25px] ${
+                                            location.pathname.startsWith(
+                                                "/superadmin/userrightsandpermissions"
+                                            )
+                                                ? "bg-white text-custom-solidgreen font-semibold "
+                                                : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
+                                        }`}
+                                        onClick={() =>
+                                            handleItemClick("superadmin")
+                                        }
+                                    >
+                                        User Rights & Permissions
+                                    </ListItem>
+                                </Link>
+                            </div>
+                        )}
                 </List>
             </Card>
         </>

@@ -11,11 +11,13 @@ import { data } from "@/component/servicesApi/apiCalls/transactions/customer";
 import Skeleton from "react-loading-skeleton";
 import DatePicker from "react-datepicker";
 import arrowCutomer from "../../../../../public/Images/arrowcustomer.png";
+import PropertyCardTransaction from "@/component/layout/transaction/PropertyCardTransaction";
 
 const CustomerDetails = () => {
     const transactModalRef = useRef(null);
     const { customerDetails, setCustomerDetails } = useStateContext();
-    const [startDate, setStartDate] = useState(null);
+    const [startDate, setStartDate] = useState(new Date());
+    const [startDateHistory, setStartDateHistory] = useState(new Date());
 
     const { id } = useParams();
     const decodedEmail = atob(id);
@@ -41,6 +43,11 @@ const CustomerDetails = () => {
     const handleDateChange = (date) => {
         setStartDate(date);
     };
+
+    const handleDateHistoryChange = (date) => {
+        setStartDateHistory(date);
+    };
+
     const handleTransactModalOpen = (data) => {
         setTicketId(data);
         if (transactModalRef.current) {
@@ -143,9 +150,11 @@ const CustomerDetails = () => {
                         </div>
 
                         <div className="px-5 flex gap-10 w-full text-xs font-semibold rounded-xl mt-2">
-                            <div className="flex flex-col w-1/2">
-                                <span className="text-lg">User Info</span>
-                                <div className="flex gap-20 mt-2.5">
+                            <div className="flex flex-col w-2/3">
+                                <span className="text-lg largeScreen:text-xl">
+                                    User Info
+                                </span>
+                                <div className="flex gap-5 mt-2.5">
                                     <div className="w-1/2 flex flex-col gap-2 mb-2.5">
                                         {data1.map((item, index) => (
                                             <div
@@ -179,29 +188,52 @@ const CustomerDetails = () => {
                                 </div>
                             </div>
                             <div className="w-auto">
-                            <hr className=" border-1 border-[#3A3A3A]  h-[150px] w-0" />
-
+                                <hr className=" border-1 border-[#3A3A3A]  h-[150px] w-0" />
                             </div>
 
-                            <div className="flex flex-col w-1/2">
+                            <div className="flex flex-col w-2/3">
                                 <span className="text-lg">Source of Funds</span>
-                                
-                            </div>
-
-                        </div>
-                    </div>
-                    <div className="flex gap-5 mt-5">
-                        <div className="py-4 px-5 bg-custom-grayFA w-1/3 largeScreen:w-1/3 mediumScrren:w-1/4 rounded-xl">
-                            <div className="flex gap-2.5 items-center mb-5">
-                                <span className="font-semibold text-base">
-                                    Equities
-                                </span>
-                                <div className="flex justify-center w-full">
-                                    <div className="border-b-[1px] border-black w-full"></div>
+                                <div className="flex gap-5 mt-2.5">
+                                    <div className="flex flex-col gap-2">
+                                        <span className="text-base text-custom-solidgreen">
+                                            Source
+                                        </span>
+                                        <span className="text-sm text-custom-gray81">
+                                            Employed
+                                        </span>
+                                    </div>
+                                    <div className="flex flex-col gap-2">
+                                        <span className="text-base text-custom-solidgreen">
+                                            Details
+                                        </span>
+                                        <span className="text-sm text-custom-gray81">
+                                            Accenture Middle Manager
+                                        </span>
+                                    </div>
+                                    <div className="flex flex-col gap-2">
+                                        <span className="text-base text-custom-solidgreen">
+                                            Monthly Income
+                                        </span>
+                                        <span className="text-sm text-custom-gray81">
+                                            ₱80,000 - ₱99,999
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
+                        </div>
+                    </div>
 
-                            <div className="flex justify-center mb-3">
+                    <PropertyCardTransaction />
+                    <div className="flex gap-5 mt-5">
+                        <div className="py-4 px-5 bg-custom-grayFA rounded-xl w-1/2">
+                            <div className="flex items-center mb-5">
+                                <span className="font-semibold text-base">
+                                    Transaction History
+                                </span>
+                                <div className="flex-1 border-b-[1px] border-black ml-2"></div>
+                            </div>
+
+                        {/*     <div className="flex justify-center mb-3">
                                 <div className="flex justify-between outline-none text-xs w-full">
                                     <span className="text-white bg-black p-2 flex text-center items-center text-xs 2xl:text-base rounded-l-[5px] 2xl:rounded-l-[8px] h-full">
                                         Year
@@ -225,7 +257,26 @@ const CustomerDetails = () => {
                                         <MdCalendarToday />
                                     </span>
                                 </div>
-                            </div>
+                            </div> */}
+                             <div className="flex justify-center mb-3">
+                                    <div className="flex justify-between outline-none text-xs w-full">
+                                        <span className="text-white bg-black p-2 flex text-center items-center text-xs 2xl:text-base rounded-l-[5px] 2xl:rounded-l-[8px] h-full">
+                                            Year
+                                        </span>
+                                        <div className="bg-white border-b-[1px] border-t-[1px] border-[#3A3A3A] h-full flex flex-1 items-center justify-center">
+                                            <DatePicker
+                                                selected={startDateHistory}
+                                                onChange={handleDateHistoryChange}
+                                                className="outline-none text-center text-xs 2xl:text-base w-full"
+                                                calendarClassName="custom-calendar"
+                                            />
+                                        </div>
+
+                                        <span className="text-white p-2 2xl:p-5 h-full bg-black pointer-events-none rounded-r-[5px] 2xl:rounded-r-[8px]">
+                                            <MdCalendarToday />
+                                        </span>
+                                    </div>
+                                </div>
 
                             <div className="flex flex-col gap-2.5 mt-2.5">
                                 {[...Array(12)].map((_, index) => (
@@ -240,7 +291,38 @@ const CustomerDetails = () => {
                                 ))}
                             </div>
                         </div>
-                        <div className="py-4 px-5 bg-custom-grayFA w-2/3 rounded-xl">
+                        <div className="flex flex-col py-4 px-5 bg-[#FAFAFA] w-1/2 rounded-xl gap-2.5 h-[507px]">
+                            <div className="flex gap-2.5 items-center">
+                                <span className="font-semibold text-base">
+                                    Documents
+                                </span>
+                                <div className="flex justify-center w-full">
+                                    <div className="border-b-[1px] border-black w-full"></div>
+                                </div>
+                            </div>
+
+                            <div className="flex bg-[#FFFFFF] w-full shadow-sm p-2.5 rounded-xl">
+                                <span className="text-xs 2xl:text-base text-custom-solidgreen font-normal">
+                                    Valid ID
+                                </span>
+                            </div>
+                            <div className="flex bg-[#FFFFFF] w-full shadow-sm p-2.5 rounded-xl">
+                                <span className="text-xs 2xl:text-base text-custom-solidgreen font-normal">
+                                   Birth Certificate
+                                </span>
+                            </div>
+                            <div className="flex bg-[#FFFFFF] w-full shadow-sm p-2.5 rounded-xl">
+                                <span className="text-xs 2xl:text-base text-custom-solidgreen font-normal">
+                                    Spouse - Birth Certificate
+                                </span>
+                            </div>
+                            <div className="flex bg-[#FFFFFF] w-full shadow-sm p-2.5 rounded-xl">
+                                <span className="text-xs 2xl:text-base text-custom-solidgreen font-normal">
+                                   Marriage Certificate
+                                </span>
+                            </div>
+                        </div>
+                        <div className="py-4 px-5 bg-custom-grayFA rounded-xl w-1/2">
                             <div className="flex gap-2.5 items-center">
                                 <span className="font-semibold text-base">
                                     Inquiries
@@ -250,28 +332,8 @@ const CustomerDetails = () => {
                                 </div>
                             </div>
 
-                            <div className="flex justify-between gap-3 mt-5 mb-3">
-                                <div className="flex justify-center mb-3 w-1/2">
-                                    <div className="flex justify-between outline-none text-xs w-full">
-                                        <span className="text-white bg-black p-2 flex text-center items-center text-xs 2xl:text-base rounded-l-[5px] 2xl:rounded-l-[8px] h-full">
-                                            Year
-                                        </span>
-                                        <div className="bg-white border-b-[1px] border-t-[1px] border-[#3A3A3A] h-full flex items-center justify-center w-full">
-                                            <DatePicker
-                                                selected={startDate}
-                                                onChange={handleDateChange}
-                                                className="outline-none text-center text-xs 2xl:text-base w-[100px]"
-                                                calendarClassName="custom-calendar"
-                                            />
-                                        </div>
-
-                                        <span className="text-white p-2 2xl:p-5 h-full bg-black pointer-events-none rounded-r-[5px] 2xl:rounded-r-[8px]">
-                                            <MdCalendarToday />
-                                        </span>
-                                    </div>
-                                </div>
-
-                                <div className="flex justify-center mb-3 w-1/2">
+                            <div className="flex flex-col justify-between gap-3 mt-5 mb-3">
+                            <div className="flex justify-center mb-3">
                                     <div className="flex justify-between outline-none text-xs w-full">
                                         <span className="text-white bg-black p-2 flex text-center items-center text-xs 2xl:text-base rounded-l-[5px] 2xl:rounded-l-[8px] h-full">
                                             Inquiry
@@ -307,6 +369,27 @@ const CustomerDetails = () => {
                                         </div>
                                     </div>
                                 </div>
+                                <div className="flex justify-center mb-3">
+                                    <div className="flex justify-between outline-none text-xs w-full">
+                                        <span className="text-white bg-black p-2 flex text-center items-center text-xs 2xl:text-base rounded-l-[5px] 2xl:rounded-l-[8px] h-full">
+                                            Year
+                                        </span>
+                                        <div className="bg-white border-b-[1px] border-t-[1px] border-[#3A3A3A] h-full flex items-center justify-center w-full">
+                                            <DatePicker
+                                                selected={startDate}
+                                                onChange={handleDateChange}
+                                                className="outline-none text-center text-xs 2xl:text-base w-[100px]"
+                                                calendarClassName="custom-calendar"
+                                            />
+                                        </div>
+
+                                        <span className="text-white p-2 2xl:p-5 h-full bg-black pointer-events-none rounded-r-[5px] 2xl:rounded-r-[8px]">
+                                            <MdCalendarToday />
+                                        </span>
+                                    </div>
+                                </div>
+
+                               
                             </div>
 
                             {/*  <div className="flex flex-wrap mt-5 mb-5">
@@ -341,7 +424,7 @@ const CustomerDetails = () => {
                                         return (
                                             <div
                                                 key={index}
-                                                className="flex items-center gap-2 cursor-pointer bg-custom-grayFA rounded-xl shadow-md py-3 px-3"
+                                                className="gap-2 cursor-pointer bg-custom-grayFA rounded-xl shadow-md py-3 px-3"
                                             >
                                                 <span
                                                     className="text-custom-solidgreen text-xs 2xl:text-base underline font-normal"
@@ -354,8 +437,8 @@ const CustomerDetails = () => {
                                                     {item.details_concern}
                                                 </span>
                                                 <span className=" text-[#818181] text-xs 2xl:text-base">
-                                                    - {item.property},{" "}
-                                                    {item.unit_number || ""}
+                                                    - {item.property}
+                                                     {item.unit_number ? `,${item.unit_number}` : ""}
                                                 </span>
                                             </div>
                                         );
@@ -376,37 +459,6 @@ const CustomerDetails = () => {
                                         </div>
                                     </>
                                 )}
-                            </div>
-                        </div>
-                        <div className="flex flex-col py-4 px-5 bg-[#FAFAFA] w-1/3 2xl:w-2/3 largeScreen:w-2/3 mediumScrren:w-1/2 rounded-xl gap-2.5 h-[507px]">
-                            <div className="flex gap-2.5 items-center">
-                                <span className="font-semibold text-base">
-                                    Properties
-                                </span>
-                                <div className="flex justify-center w-full">
-                                    <div className="border-b-[1px] border-black w-full"></div>
-                                </div>
-                            </div>
-
-                            <div className="flex bg-[#FFFFFF] w-full shadow-sm p-2.5 rounded-xl">
-                                <span className="text-xs 2xl:text-base text-custom-solidgreen font-normal">
-                                    Asia Premier Residences
-                                </span>
-                            </div>
-                            <div className="flex bg-[#FFFFFF] w-full shadow-sm p-2.5 rounded-xl">
-                                <span className="text-xs 2xl:text-base text-custom-solidgreen font-normal">
-                                    Casa Mira Towers - Labangon
-                                </span>
-                            </div>
-                            <div className="flex bg-[#FFFFFF] w-full shadow-sm p-2.5 rounded-xl">
-                                <span className="text-xs 2xl:text-base text-custom-solidgreen font-normal">
-                                    Casa Mira Towers - Guadalupe
-                                </span>
-                            </div>
-                            <div className="flex bg-[#FFFFFF] w-full shadow-sm p-2.5 rounded-xl">
-                                <span className="text-xs 2xl:text-base text-custom-solidgreen font-normal">
-                                    Guadalupe Habitat at Pinamalayan Phase 2
-                                </span>
                             </div>
                         </div>
                     </div>
