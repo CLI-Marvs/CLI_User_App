@@ -139,7 +139,8 @@
     <p style="font-weight: bold;">{{ ucwords($admin_name) }}</p>
     <p style="font-weight: bold; margin-bottom: 10px;">CLI - Customer Relations Services</p> --}}
 
-    <hr style="border: none; border-top: 1px solid #000; width: 50%; margin: 10px 0 10px 0;">
+    <hr style="border: none; border-top: 1px solid #000; margin: 10px 0; width: 100%; max-width: 620px;">
+
     <p style="margin-top: 5px;">
         <strong>
             Reminder:
