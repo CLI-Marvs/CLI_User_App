@@ -429,16 +429,20 @@ const ReportPage = () => {
         0
     );
 
-    const formatPercentage = (value) =>
-        ((value / totalValuePieChart) * 100).toFixed(2) + "%";
-
+    const formatPercentage = (value) => {
+        const total = totalValuePieChart || 1; // Prevent division by zero
+        return ((value / total) * 100).toFixed(2) + "%";
+    };
+    
     const renderCustomLabel = ({ x, y, value, index, payload, cx }) => {
+        if (!value || !payload?.name) return null; // Prevent errors if data is missing
+    
         const percentage = formatPercentage(value);
         const name = payload.name;
-
+    
         // Adjust text alignment based on label's position relative to pie center
         const textAnchor = x > cx ? "start" : "end";
-
+    
         return (
             <text
                 x={x}
@@ -557,6 +561,8 @@ const ReportPage = () => {
         setMonth(monthValue);
     };
 
+    
+
     useEffect(() => {
         fetchCategory();
         getInquiriesPerDepartment();
@@ -565,8 +571,13 @@ const ReportPage = () => {
         getCommunicationTypePerProperty();
         getInquiriesPerChannel();
         getFullYear();
-        setYear(yearValue);
     }, []);
+
+    useEffect(() => {
+        if (yearValue) {
+            setYear(yearValue);
+        }
+    }, [yearValue]); 
 
     /*  useEffect(() => {
          setMonth(getCurrentMonth());
@@ -582,7 +593,7 @@ const ReportPage = () => {
      }, []); */
 
     // console.log("department", department);
-    communicationTypeData;
+    /* communicationTypeData; */
 
     const totalValue = dataCategory.reduce(
         (total, category) => total + category.value,

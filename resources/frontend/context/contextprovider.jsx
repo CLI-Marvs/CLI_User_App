@@ -346,7 +346,9 @@ export const ContextProvider = ({ children }) => {
             });
     
             const result = response.data;
-    
+            
+
+            console.log("result", result);
             // Initialize an object to accumulate the totals for CRS and other departments
             const departmentTotals = {};
     
@@ -382,6 +384,8 @@ export const ContextProvider = ({ children }) => {
                 unresolved: departmentTotals[department].unresolved,
                 closed: departmentTotals[department].closed,
             }));
+
+            console.log(formattedData);
     
             setDataDepartment(formattedData);
         } catch (error) {

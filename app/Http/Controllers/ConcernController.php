@@ -2078,34 +2078,32 @@ class ConcernController extends Controller
         $year = $request->year ?? Carbon::now()->year;
 
         $query = Concerns::select(
-            DB::raw("COALESCE(
-                (SELECT jsonb_array_elements(assign_to::jsonb)->>'department' 
-                 LIMIT 1), 
-                'Customer Relations - Services'
-            ) as department"),
-            DB::raw('COUNT(DISTINCT CASE WHEN status = \'Resolved\' THEN id ELSE NULL END) as resolved'),
+            DB::raw("jsonb_array_elements(assign_to::jsonb)->>'department' as department"),
             DB::raw('COUNT(DISTINCT CASE WHEN status = \'unresolved\' THEN id ELSE NULL END) as unresolved'),
-            DB::raw('COUNT(DISTINCT CASE WHEN status = \'Closed\' THEN id ELSE NULL END) as closed')
+            DB::raw('COUNT(DISTINCT CASE WHEN status = \'Closed\' THEN id ELSE NULL END) as closed'),
+            DB::raw('COUNT(DISTINCT CASE WHEN status = \'Resolved\' THEN id ELSE NULL END) as resolved'),
         )
-            ->whereYear('created_at', $year)
-            ->whereNotNull('status');
-
+        ->whereYear('created_at', $year)
+        ->whereNotNull('status'); // Ensure status is not null
+        
+        // Apply additional filters if specified
         if ($project && $project !== 'All') {
             $query->where('property', $project);
         }
-
+        
         if ($month && $month !== 'All') {
             $query->whereMonth('created_at', $month);
         }
-
+        
         if ($department && $department !== 'All') {
             $query->whereRaw("assign_to::jsonb @> ?", [json_encode([['department' => $department]])]);
         }
-
+        
         $concerns = $query
-            ->groupBy('department')
+            ->groupBy(DB::raw("jsonb_array_elements(assign_to::jsonb)->>'department'")) // Group by department
             ->orderBy('department') // Optional: For consistent ordering
             ->get();
+        
 
         return response()->json($concerns);
     }
