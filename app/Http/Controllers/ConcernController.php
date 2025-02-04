@@ -2084,7 +2084,6 @@ class ConcernController extends Controller
             DB::raw('COUNT(DISTINCT CASE WHEN status = \'Resolved\' THEN id ELSE NULL END) as resolved')
         )
         ->whereYear('created_at', $year)
-        ->orWhereNull('assign_to')
         ->whereNotNull('status'); // Ensure status is not null
         
         // Apply additional filters if specified
@@ -2099,17 +2098,12 @@ class ConcernController extends Controller
         if ($department && $department !== 'All') {
             $query->whereRaw("assign_to::jsonb @> ?", [json_encode([['department' => $department]])]);
         }
-
-        if ($department === null || $department === 'All') {
-            $query->orWhereNull('assign_to');
-        }
         
         $concerns = $query
-            ->groupBy(DB::raw("jsonb_array_elements(assign_to::jsonb)->>'department'")) // Group by department
+            ->groupBy(DB::raw("jsonb_array_elements(assign_to::jsonb)->>'department'")) // Group by department including unassigned
             ->orderBy('department') // Optional: For consistent ordering
             ->get();
         
-        dd($concerns);
         return response()->json($concerns);
     }
 
