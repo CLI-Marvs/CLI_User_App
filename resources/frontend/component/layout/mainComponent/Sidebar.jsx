@@ -71,8 +71,9 @@ const Sidebar = () => {
                 setIsInvoiceOpen(false);
                 setSuperAdminOpen(true);
                 break;
-            case "/transactionmanagement/invoices":
-            case "/transactionmanagement/transactionrecords":
+            case "/transaction/invoices":
+            case "/transaction/records":
+            case "/transaction/customer":
                 setInquiryOpen(false);
                 setIsInvoiceOpen(true);
                 setSuperAdminOpen(false);
@@ -206,58 +207,6 @@ const Sidebar = () => {
                                 </Link>
                             </div>
                         )}
-                    {ALLOWED_EMPLOYEES_CRS.includes(userLoggedInEmail) && (
-                        <Link to="superadmin/userrightsandpermissions">
-                            <ListItem
-                                className={`h-[35px] w-[185px] text-sm pl-[12px] transition-all duration-300 ease-in-out 
-                  ${
-                      activeItem === "superadmin" ||
-                      location.pathname.startsWith("/superadmin")
-                          ? "bg-custom-lightestgreen text-custom-solidgreen font-semibold"
-                          : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
-                  }
-                    ${
-                        isSuperAdminOpen
-                            ? "rounded-[10px] rounded-b-none"
-                            : "rounded-[10px]"
-                    }
-                    `}
-                                onClick={handleSuperAdminDropdownClick}
-                            >
-                                Admin Setting
-                                <ListItemSuffix>
-                                    <IoIosArrowDown
-                                        className={`text-custom-solidgreen  transition-transform duration-200 ease-in-out ${
-                                            isSuperAdminOpen ? "rotate-180" : ""
-                                        }`}
-                                    />
-                                </ListItemSuffix>
-                            </ListItem>
-                        </Link>
-                    )}
-
-                    {ALLOWED_EMPLOYEES_CRS.includes(userLoggedInEmail) &&
-                        isSuperAdminOpen &&
-                        location.pathname.startsWith("/superadmin") && (
-                            <div className="px-[12px] py-[20px] w-[185px] min-h-[122px] flex flex-col gap-[5px] bg-custom-lightestgreen border-t rounded-t-none rounded-b-[10px] border-custom-solidgreen transition-all duration-300 ease-in-out">
-                                <Link to="/superadmin/userrightsandpermissions">
-                                    <ListItem
-                                        className={`h-[48px] w-full py-[8px] px-[18px]  text-sm rounded-[25px] ${
-                                            location.pathname.startsWith(
-                                                "/superadmin/userrightsandpermissions"
-                                            )
-                                                ? "bg-white text-custom-solidgreen font-semibold "
-                                                : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
-                                        }`}
-                                        onClick={() =>
-                                            handleItemClick("superadmin")
-                                        }
-                                    >
-                                        User Rights & Permissions
-                                    </ListItem>
-                                </Link>
-                            </div>
-                        )}
 
                     <Link to="property-pricing/master-lists">
                         <ListItem
@@ -287,71 +236,94 @@ const Sidebar = () => {
                             </ListItemSuffix>
                         </ListItem>
                     </Link>
-                    {/* <Link to="/transactionmanagement/invoices">
-            <ListItem
-              className={`h-[35px] w-[210px] text-sm pl-[12px] transition-all duration-300 ease-in-out 
-            ${activeItemTransaction === "invoices" ||
-                        location.pathname.startsWith("/transactionmanagement")
-                        ? "bg-custom-lightestgreen text-custom-solidgreen font-semibold"
-                        : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
-                      }
-              ${isInvoiceOpen ? "rounded-[10px] rounded-b-none" : "rounded-[10px]"}
+                    <Link to="/transaction/invoices">
+                        <ListItem
+                            className={`h-[35px] w-[210px] text-sm pl-[12px] transition-all duration-300 ease-in-out 
+            ${
+                activeItemTransaction === "invoices" ||
+                location.pathname.startsWith("/transaction")
+                    ? "bg-custom-lightestgreen text-custom-solidgreen font-semibold"
+                    : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
+            }
+              ${
+                  isInvoiceOpen
+                      ? "rounded-[10px] rounded-b-none"
+                      : "rounded-[10px]"
+              }
             `}
-              onClick={handleInvoiceDropdownClick}
-            >
-              Transaction Management
-              <ListItemSuffix>
-                <IoIosArrowDown
-                  className={`text-custom-solidgreen transition-transform duration-200 ease-in-out ${isInvoiceOpen ? "rotate-180" : ""
-                    }`}
-                />
-              </ListItemSuffix>
-            </ListItem>
-          </Link> */}
-                    {/* 
-          {isInvoiceOpen &&
-            location.pathname.startsWith(
-              "/transactionmanagement"
-            ) && (
-              <div className="px-[12px] py-[20px] w-[210px] min-h-[122px] flex flex-col gap-[5px] bg-custom-lightestgreen border-t rounded-t-none rounded-b-[10px] border-custom-solidgreen transition-all duration-300 ease-in-out">
-                <Link to="/transactionmanagement/invoices">
-                  <ListItem
-                    className={`h-[32px] w-full py-[8px] px-[18px] text-sm rounded-[50px] ${location.pathname.startsWith(
-                      "/transactionmanagement/invoices"
-                    )
-                        ? "bg-white text-custom-solidgreen font-semibold"
-                        : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
-                      }`}
-                    onClick={() =>
-                      handleItemTransactionClick(
-                        "/invoices"
-                      )
-                    }
-                  >
-                    Invoices
-                  </ListItem>
-                </Link>
+                            onClick={handleInvoiceDropdownClick}
+                        >
+                            Transaction Management
+                            <ListItemSuffix>
+                                <IoIosArrowDown
+                                    className={`text-custom-solidgreen transition-transform duration-200 ease-in-out ${
+                                        isInvoiceOpen ? "rotate-180" : ""
+                                    }`}
+                                />
+                            </ListItemSuffix>
+                        </ListItem>
+                    </Link>
 
-                <Link to="/transactionmanagement/transactionrecords">
-                  <ListItem
-                    className={`h-[32px] w-full py-[8px] px-[18px] text-sm rounded-[50px] ${location.pathname.startsWith(
-                      "/transactionmanagement/transactionrecords"
-                    )
-                        ? "bg-white text-custom-solidgreen font-semibold"
-                        : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
-                      }`}
-                    onClick={() =>
-                      handleItemTransactionClick(
-                        "/transactionmanagement/transactionrecords"
-                      )
-                    }
-                  >
-                    Transaction Records
-                  </ListItem>
-                </Link>
-              </div>
-            )} */}
+                    {isInvoiceOpen &&
+                        location.pathname.startsWith("/transaction") && (
+                            <div className="px-[12px] py-[20px] w-[210px] min-h-[122px] flex flex-col gap-[5px] bg-custom-lightestgreen border-t rounded-t-none rounded-b-[10px] border-custom-solidgreen transition-all duration-300 ease-in-out">
+                                <Link to="/transaction/invoices">
+                                    <ListItem
+                                        className={`h-[32px] w-full py-[8px] px-[18px] text-sm rounded-[50px] ${
+                                            location.pathname.startsWith(
+                                                "/transaction/invoices"
+                                            )
+                                                ? "bg-white text-custom-solidgreen font-semibold"
+                                                : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
+                                        }`}
+                                        onClick={() =>
+                                            handleItemTransactionClick(
+                                                "/invoices"
+                                            )
+                                        }
+                                    >
+                                        Invoices
+                                    </ListItem>
+                                </Link>
 
+                                <Link to="/transaction/records">
+                                    <ListItem
+                                        className={`h-[32px] w-full py-[8px] px-[18px] text-sm rounded-[50px] ${
+                                            location.pathname.startsWith(
+                                                "/transaction/records"
+                                            )
+                                                ? "bg-white text-custom-solidgreen font-semibold"
+                                                : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
+                                        }`}
+                                        onClick={() =>
+                                            handleItemTransactionClick(
+                                                "/transaction/records"
+                                            )
+                                        }
+                                    >
+                                        Transaction Records
+                                    </ListItem>
+                                </Link>
+                                <Link to="/transaction/customer">
+                                    <ListItem
+                                        className={`h-[32px] w-full py-[8px] px-[18px] text-sm rounded-[50px] ${
+                                            location.pathname.startsWith(
+                                                "/transaction/customer"
+                                            )
+                                                ? "bg-white text-custom-solidgreen font-semibold"
+                                                : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
+                                        }`}
+                                        onClick={() =>
+                                            handleItemTransactionClick(
+                                                "/transaction/customer"
+                                            )
+                                        }
+                                    >
+                                        Customer Masterlist
+                                    </ListItem>
+                                </Link>
+                            </div>
+                        )}
                     <div className="mt-3 mb-1 px-4">
                         <p className="text-[14px] font-bold bg-gradient-to-r from-custom-bluegreen via-custom-lightgreen to-custom-solidgreen bg-clip-text text-transparent">
                             Coming Soon
@@ -361,10 +333,10 @@ const Sidebar = () => {
                         {/* <p>Property & Pricing</p> */}
                         <p>Sales Management</p>
                         <p>Broker Management</p>
-                        <p className="leading-none">
+                        {/*  <p className="leading-none">
                             Transaction <br />
                             Management
-                        </p>
+                        </p> */}
                         <p className="leading-none">
                             Document
                             <br /> Management
@@ -448,6 +420,59 @@ const Sidebar = () => {
           <ListItem className='h-4 mb-1 px-6 gap-2 font-semibold'>
          
           </ListItem> */}
+
+                    {ALLOWED_EMPLOYEES_CRS.includes(userLoggedInEmail) && (
+                        <Link to="superadmin/userrightsandpermissions">
+                            <ListItem
+                                className={`h-[35px] w-[185px] text-sm pl-[12px] transition-all duration-300 ease-in-out 
+                  ${
+                      activeItem === "superadmin" ||
+                      location.pathname.startsWith("/superadmin")
+                          ? "bg-custom-lightestgreen text-custom-solidgreen font-semibold"
+                          : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
+                  }
+                    ${
+                        isSuperAdminOpen
+                            ? "rounded-[10px] rounded-b-none"
+                            : "rounded-[10px]"
+                    }
+                    `}
+                                onClick={handleSuperAdminDropdownClick}
+                            >
+                                Admin Setting
+                                <ListItemSuffix>
+                                    <IoIosArrowDown
+                                        className={`text-custom-solidgreen  transition-transform duration-200 ease-in-out ${
+                                            isSuperAdminOpen ? "rotate-180" : ""
+                                        }`}
+                                    />
+                                </ListItemSuffix>
+                            </ListItem>
+                        </Link>
+                    )}
+
+                    {ALLOWED_EMPLOYEES_CRS.includes(userLoggedInEmail) &&
+                        isSuperAdminOpen &&
+                        location.pathname.startsWith("/superadmin") && (
+                            <div className="px-[12px] py-[20px] w-[185px] min-h-[122px] flex flex-col gap-[5px] bg-custom-lightestgreen border-t rounded-t-none rounded-b-[10px] border-custom-solidgreen transition-all duration-300 ease-in-out">
+                                <Link to="/superadmin/userrightsandpermissions">
+                                    <ListItem
+                                        className={`h-[48px] w-full py-[8px] px-[18px]  text-sm rounded-[25px] ${
+                                            location.pathname.startsWith(
+                                                "/superadmin/userrightsandpermissions"
+                                            )
+                                                ? "bg-white text-custom-solidgreen font-semibold "
+                                                : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
+                                        }`}
+                                        onClick={() =>
+                                            handleItemClick("superadmin")
+                                        }
+                                    >
+                                        User Rights & Permissions
+                                    </ListItem>
+                                </Link>
+                            </div>
+                        )}
                 </List>
             </Card>
         </>

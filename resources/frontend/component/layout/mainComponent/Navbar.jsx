@@ -12,16 +12,16 @@ import { startsWith } from "lodash";
 import Alert from "@mui/material/Alert";
 import { MdOutlineMail } from "react-icons/md";
 import FeedbackModal from "./FeedbackModal";
-import Skeleton from 'react-loading-skeleton'
-import 'react-loading-skeleton/dist/skeleton.css'
+import Skeleton from "react-loading-skeleton";
+import "react-loading-skeleton/dist/skeleton.css";
 
 const Navbar = () => {
-    const { data, ticketId, navBarData, loading, user, getNavBarData } = useStateContext();
+    const { data, ticketId, navBarData, loading, user, getNavBarData } =
+        useStateContext();
     const [isOpen, setIsOpen] = useState(false);
     const location = useLocation();
     const modalRef = useRef(null);
     const dropdownRef = useRef(null);
-
 
     const pathnames = location.pathname.split("/").filter((x) => x);
  
@@ -42,11 +42,9 @@ const Navbar = () => {
         };
     }, [isOpen]);
 
-
     useEffect(() => {
         getNavBarData();
     }, [ticketId]);
-
 
     /* const capitalizeWords = (name) => {
         if (name) {
@@ -60,7 +58,6 @@ const Navbar = () => {
                 .join(" ");
         }
     }; */
-
 
     const breadcrumbs = [
         ...pathnames.map((value, index) => {
@@ -178,6 +175,9 @@ const Navbar = () => {
             }
 
             
+            if (routeTo.startsWith("/transaction/details/")) {
+                return null; // Skip rendering this breadcrumb
+            }
 
             if (breadcrumbLabel.startsWith("Ticket#")) {
                 const ticketId = breadcrumbLabel;
@@ -199,13 +199,14 @@ const Navbar = () => {
                         key={routeTo}
                         className="text-custom-solidgreen cursor-default"
                     >
-                        {/* capitalizeWords()*/
+                        {
+                            /* capitalizeWords()*/
                             `${concernData?.buyer_firstname || ""} ${
                                 concernData?.buyer_middlename || ""
                             } ${concernData?.buyer_lastname || ""}`
                         }{" "}
-                        {/* capitalizeWords()*/concernData?.suffix_name || ""} {""}
-                        ({concernData?.details_concern || ""}) {" "} 
+                        {/* capitalizeWords()*/ concernData?.suffix_name || ""}{" "}
+                        {""}({concernData?.details_concern || ""}){" "}
                         {concernData?.property || ""} ({concernData?.ticket_id})
                     </span>
                 );
@@ -239,7 +240,6 @@ const Navbar = () => {
         }
     };
 
-
     const handleClickOutside = (event) => {
         if (
             dropdownRef.current &&
@@ -249,7 +249,6 @@ const Navbar = () => {
         }
     };
 
-   
     return (
         <>
             <div className="flex h-[100px] pr-16 w-screen bg-custom-grayFA">
