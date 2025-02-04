@@ -1,14 +1,14 @@
-import React, { Component, Suspense, lazy } from 'react';
+import React, { Component, Suspense, lazy } from "react";
 import {
     Outlet,
     RouterProvider,
     createBrowserRouter,
     Navigate,
 } from "react-router-dom";
-import { useEffect } from 'react';
+import { useEffect } from "react";
 import DasboardView from "../views/Dashboard/DasboardView";
-const LoginView = lazy(() => import("./views/pages/loginViews/LoginView"))
-import CLILoader from '../../../public/Images/CLI-Logo-Loading-Screen.gif';
+const LoginView = lazy(() => import("./views/pages/loginViews/LoginView"));
+import CLILoader from "../../../public/Images/CLI-Logo-Loading-Screen.gif";
 import "./layout/css/font.css";
 import "./layout/css/style.css";
 import Home from "./layout/Home";
@@ -39,13 +39,15 @@ import TransactionSidebar from "./views/pages/transactionViews/TransactionSideba
 import BankStatementView from "./views/pages/transactionViews/BankStatementView";
 import AutoAssignView from "./views/pages/raiseaconcernViews/AutoAssignView";
 import UserRightsAndPermissionsView from "./views/pages/userrightsandpermissionsViews/UserRightsAndPermissionsView";
-import FallbackLoader from './FallbackLoader';
+import FallbackLoader from "./FallbackLoader";
 import PreloadWrapper from "./PreloadWrapper";
-import BannerSettingsView from './views/pages/bannersettingsViews/BannerSettingsView';
-import CrsSettingsSidebar from './layout/mainComponent/sidebars/CrsSettingsSidebar';
-import VersionLogsView from './views/pages/raiseaconcernViews/VersionLogsView';
-import { useStateContext } from '../context/contextprovider';
-import { ALLOWED_EMPLOYEES_CRS } from '../constant/data/allowedEmployeesCRS';
+import BannerSettingsView from "./views/pages/bannersettingsViews/BannerSettingsView";
+import CrsSettingsSidebar from "./layout/mainComponent/sidebars/CrsSettingsSidebar";
+import VersionLogsView from "./views/pages/raiseaconcernViews/VersionLogsView";
+import { useStateContext } from "../context/contextprovider";
+import { ALLOWED_EMPLOYEES_CRS } from "../constant/data/allowedEmployeesCRS";
+import CustomerMasterListView from "@/component/views/pages/transactionViews/CustomerMasterListView";
+import CustomerDetailsView from "@/component/views/pages/transactionViews/CustomerDetailsView";
 
 // PrivateRoute component to check authentication and permissions( department and employee )
 const PrivateRoute = ({ requiredPermission }) => {
@@ -81,7 +83,6 @@ const PrivateRoute = ({ requiredPermission }) => {
     // Render the child routes if authentication and permission checks pass
     return <Outlet />;
 };
-
 const App = () => {
     /**
      * Implement storage event listener to handle authToken changes across tabs
@@ -112,20 +113,6 @@ const App = () => {
                 </div>
             </div>
         );
-
-        /*  return (
-            <>
-                <div className="bg-white relative max-h-screen flex flex-col">
-                    <Navbar/>
-                    <div className="flex flex-1 overflow-hidden">
-                        <Sidebar/>
-                        <div className="flex-1 overflow-y-auto ">
-                            <Outlet />
-                        </div>
-                    </div>
-                </div>
-            </>
-        ); */
     };
 
     const SecondLayout = () => {
@@ -143,151 +130,12 @@ const App = () => {
         );
     };
 
-    // const router = createBrowserRouter([
-    //     {
-    //         path: "/",
-    //         element: <LoginView />,
-    //     },
-    //     {
-    //         path: "/login",
-    //         element: <LoginView />,
-    //     },
-
-    //     {
-    //         path: "/callback",
-    //         element: <CallBackView />,
-    //     },
-    //     {
-    //         path: "/chatbox",
-    //         element: <MainComponent />,
-    //     },
-    //     {
-    //         path: "/",
-    //         element: <Layout />,
-    //         children: [
-    //             {
-    //                 path: "home",
-    //                 element: <Home />,
-    //             },
-    //             {
-    //                 path: "notification",
-    //                 element: <NotificationView />,
-    //             },
-    //             {
-    //                 path: "transactionmanagement/invoices",
-    //                 element: <TransactionView />,
-    //             },
-    //             {
-    //                 path: "transactionmanagement/transactionrecords",
-    //                 element: <BankStatementView />,
-    //             },
-    //             /*  {
-    //                 path: "transaction",
-    //                 element: <SecondLayout />,
-    //                 children: [
-    //                     {
-    //                         path: "invoices",
-    //                         element: <TransactionView/>,
-    //                     },
-    //                     {
-    //                         path: "bankstatements",
-    //                         element: <BankStatementView/>,
-    //                     },
-    //                 ],
-
-    //             }, */
-    //             {
-    //                 path: "inquirymanagement/inquirylist",
-    //                 element: <InquiryListView />,
-    //             },
-    //             {
-    //                 path: "inquirymanagement/thread/:id",
-    //                 element: <InquiryThreadView />,
-    //             },
-    //             {
-    //                 path: "inquirymanagement/report",
-    //                 element: <ReportViews />,
-    //             },
-
-    //             {
-    //                 path: "propertyandpricing",
-    //                 element: <PropertyAndPricingLayout />,
-    //                 children: [
-    //                     {
-    //                         path: "pricingmasterlist",
-    //                         element: <PricingMasterListView />,
-    //                     },
-    //                     {
-    //                         path: "basicpricing/:id",
-    //                         element: <BasicPricingView />,
-    //                     },
-    //                     {
-    //                         path: "paymentscheme",
-    //                         element: <PaymentSchemeView />,
-    //                     },
-    //                     {
-    //                         path: "priceversioning",
-    //                         element: <PriceVersioningView />,
-    //                     },
-    //                     {
-    //                         path: "promotionalPricing",
-    //                         element: <PromotionalPricingView />,
-    //                     },
-    //                 ],
-    //             },
-    //             {
-    //                 path: "salesmanagement",
-    //                 element: <SalesManagementLayout />,
-    //                 children: [
-    //                     {
-    //                         path: "reservationlist",
-    //                         element: <ReservationListView />,
-    //                     },
-    //                     {
-    //                         path: "reservationpage",
-    //                         element: <ReservationPageView />,
-    //                     },
-    //                 ],
-    //             },
-    //             {
-    //                 path: "adminsettings",
-    //                 element: <AdminSettingView />,
-    //             },
-    //         ],
-    //     },
-    //     {
-    //         path: "/paymentmethod",
-    //         element: <PaymentMainView />,
-    //     },
-    //     {
-    //         path: "/file-viewer/attachment/:id",
-    //         element: <FileViewer />,
-    //     },
-    //     {
-    //         path: "/paymentmethod/payonlinenow",
-    //         element: <PaymentSectionView />,
-    //     },
-
-    // ]);
-    // router.beforeEach((to, from, next) => {
-    //     if (to.meta.requiresAuth && !localStorage.getItem("authToken")) {
-    //         router.replace({ name: "/" });
-    //     } else if (to.meta.requiresAuth && localStorage.getItem("authToken")) {
-    //         UserApi.check_authorization().then((callback) => {
-    //             if (callback.result) next();
-    //         });
-    //     } else {
-    //         next();
-    //     }
-    // });
     const router = createBrowserRouter([
         {
             path: "/",
             element: (
                 <Suspense fallback={<FallbackLoader />}>
-                    <PreloadWrapper resources={[
-                        "/Images/Imagebg.webp",
-                    ]}>
+                    <PreloadWrapper resources={["/Images/Imagebg.webp"]}>
                         <LoginView />
                     </PreloadWrapper>
                 </Suspense>
@@ -297,9 +145,7 @@ const App = () => {
             path: "/login",
             element: (
                 <Suspense fallback={<FallbackLoader />}>
-                    <PreloadWrapper resources={[
-                        "/Images/Imagebg.webp",
-                    ]}>
+                    <PreloadWrapper resources={["/Images/Imagebg.webp"]}>
                         <LoginView />
                     </PreloadWrapper>
                 </Suspense>
@@ -327,38 +173,58 @@ const App = () => {
                         },
                         {
                             path: "notification",
-                            element: <PrivateRoute requiredPermission="Notification" />,
-                            children: [{ path: "", element: <NotificationView /> }],
+                            element: (
+                                <PrivateRoute requiredPermission="Notification" />
+                            ),
+                            children: [
+                                { path: "", element: <NotificationView /> },
+                            ],
                         },
                         {
-                            path: "transactionmanagement/invoices",
-                            element: <PrivateRoute requiredPermission="Transaction Management" />,
-                            children: [{ path: "", element: <TransactionView /> }],
-                        },
-                        {
-                            path: "transactionmanagement/transactionrecords",
-                            element: <PrivateRoute requiredPermission="Transaction Records" />,
-                            children: [{ path: "", element: <BankStatementView /> }],
+                            path: "transaction",
+                            element: (
+                                <PrivateRoute requiredPermission="Transaction Management" />
+                            ),
+                            children: [
+                                {
+                                    path: "invoices",
+                                    element: <TransactionView />,
+                                },
+                                {
+                                    path: "records",
+                                    element: <BankStatementView />,
+                                },
+                                {
+                                    path: "customer",
+                                    element: <CustomerMasterListView />,
+                                },
+                                {
+                                    path: "details/:id",
+                                    element: <CustomerDetailsView />,
+                                },
+                            ],
                         },
                         {
                             path: "inquirymanagement",
-                            element: <PrivateRoute requiredPermission="Inquiry Management" />,
+                            element: (
+                                <PrivateRoute requiredPermission="Inquiry Management" />
+                            ),
                             children: [
                                 {
                                     path: "inquirylist",
-                                    element: <InquiryListView />
+                                    element: <InquiryListView />,
                                 },
                                 {
                                     path: "thread/:id",
-                                    element: <InquiryThreadView />
+                                    element: <InquiryThreadView />,
                                 },
                                 {
                                     path: "report",
-                                    element: <ReportViews />
+                                    element: <ReportViews />,
                                 },
                                 {
                                     path: "autoassign",
-                                    element: <AutoAssignView />
+                                    element: <AutoAssignView />,
                                 },
                                 {
                                     path: "settings",
@@ -366,15 +232,15 @@ const App = () => {
                                     children: [
                                         {
                                             path: "autoassign",
-                                            element: <AutoAssignView />
+                                            element: <AutoAssignView />,
                                         },
                                         {
                                             path: "bannersettings",
-                                            element: <BannerSettingsView />
+                                            element: <BannerSettingsView />,
                                         },
                                         {
                                             path: "versionlogs",
-                                            element: <VersionLogsView />
+                                            element: <VersionLogsView />,
                                         },
                                     ],
                                 },
@@ -426,7 +292,7 @@ const App = () => {
                             element: <AdminSettingView />,
                         },
                         {
-                            path: "superadmin/userrightsandpermissions",
+                            path: "super-admin/user-rights-and-permissions",
                             element: <UserRightsAndPermissionsView />,
                         },
                     ],

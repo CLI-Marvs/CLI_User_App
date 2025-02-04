@@ -10,7 +10,6 @@ import debounce from "lodash/debounce";
 import { set } from "lodash";
 import { json } from "react-router-dom";
 
-
 const StateContext = createContext({
     user: null,
     token: null,
@@ -52,6 +51,8 @@ export const ContextProvider = ({ children }) => {
     const [specificInquiry, setSpecificInquiry] = useState(null);
     const [dataSet, setDataSet] = useState([]);
 
+    const [currentPageCustomer, setCurrentPageCustomer] = useState(0);
+    const [totalPagesCustomer, setTotalPagesCustomer] = useState(0);
     const [department, setDepartment] = useState("All");
     const [project, setProject] = useState("All");
     const [month, setMonth] = useState("All");
@@ -109,6 +110,12 @@ export const ContextProvider = ({ children }) => {
     const [yearValue, setYearValue] = useState(new Date().getFullYear());
     const [monthValue, setMonthValue] = useState("All");
 
+
+
+    const [customerData, setCustomerData] = useState([]);
+    const [customerDetails, setCustomerDetails] = useState([]);
+    const [messageData, setMessageData] = useState([]);
+    const [isTotalPages, setIsTotalPages] = useState(false);
 
 
     useEffect(() => {
@@ -535,7 +542,6 @@ export const ContextProvider = ({ children }) => {
             } /* finally {
                 setLoading(false); 
             } */
-
         }
     };
 
@@ -579,7 +585,6 @@ export const ContextProvider = ({ children }) => {
     };
 
     const getFullYear = async () => {
-
         try {
             const response = await apiService.get("concern-year");
             setFullYear(response.data);
@@ -711,13 +716,11 @@ export const ContextProvider = ({ children }) => {
         } catch (error) {
             console.log("error", error);
         }
-    }
-
+    };
 
     // const getUserAccessData = async () => {
     //     try {
     //         const response = await apiService.get("get-user-access-data", { token });
-
 
     //         // Get existing data from sessionStorage
     //         const storedData = sessionStorage.getItem("userAccessData");
@@ -1015,6 +1018,18 @@ export const ContextProvider = ({ children }) => {
                 userAccessData,
                 setUserAccessData,
                 hasPermission,
+                setCustomerData,
+                customerData,
+                setCustomerDetails,
+                customerDetails,
+                setMessageData,
+                messageData,
+                currentPageCustomer,
+                setCurrentPageCustomer,
+                totalPagesCustomer,
+                setTotalPagesCustomer,
+                isTotalPages,
+                setIsTotalPages,
 
                 selectedOption,
                 setSelectedOption,
