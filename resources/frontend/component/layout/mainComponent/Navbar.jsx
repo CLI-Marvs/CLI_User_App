@@ -24,7 +24,7 @@ const Navbar = () => {
     const dropdownRef = useRef(null);
 
     const pathnames = location.pathname.split("/").filter((x) => x);
- 
+
     const handleOpenModal = () => {
         if (modalRef.current) {
             modalRef.current.showModal();
@@ -144,15 +144,18 @@ const Navbar = () => {
                     </span>
                 );
             }
-            if (value.toLowerCase()==='property-pricing') {
+            if (value.toLowerCase() === "property-pricing") {
                 breadcrumbLabel = "Property Pricing";
-                
             }
-            if (value.toLowerCase()==='master-lists') {
+            if (value.toLowerCase() === "master-lists") {
                 breadcrumbLabel = "Master Lists";
-                
             }
-            
+            if (value.toLowerCase() === "super-admin") {
+                breadcrumbLabel = "Super Admin";
+            }
+            if (value.toLowerCase() === "user-rights-and-permissions") {
+               breadcrumbLabel = "User Rights & Permissions";
+            }
             if (value.toLowerCase() === "inquirylist") {
                 breadcrumbLabel = "Inquiries";
             }
@@ -174,7 +177,6 @@ const Navbar = () => {
                 );
             }
 
-            
             if (routeTo.startsWith("/transaction/details/")) {
                 return null; // Skip rendering this breadcrumb
             }
