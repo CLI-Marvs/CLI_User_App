@@ -346,45 +346,14 @@ export const ContextProvider = ({ children }) => {
             });
     
             const result = response.data;
-            
-
-            console.log("result", result);
-            // Initialize an object to accumulate the totals for CRS and other departments
-            const departmentTotals = {};
     
-            // Process each item in the result
-            result.forEach((item) => {
-                // If the department is not CRS, add its counts normally
-                if (item.department !== "Customer Relations - Services") {
-                    departmentTotals[item.department] = departmentTotals[item.department] || {
-                        resolved: 0,
-                        unresolved: 0,
-                        closed: 0,
-                    };
-                    departmentTotals[item.department].resolved += item.resolved;
-                    departmentTotals[item.department].unresolved += item.unresolved;
-                    departmentTotals[item.department].closed += item.closed;
-                }
-    
-                // Add all departments' counts to CRS
-                departmentTotals["Customer Relations - Services"] = departmentTotals["Customer Relations - Services"] || {
-                    resolved: 0,
-                    unresolved: 0,
-                    closed: 0,
-                };
-                departmentTotals["Customer Relations - Services"].resolved += item.resolved;
-                departmentTotals["Customer Relations - Services"].unresolved += item.unresolved;
-                departmentTotals["Customer Relations - Services"].closed += item.closed;
-            });
-    
-            // Prepare formatted data including CRS and other departments
-            const formattedData = Object.keys(departmentTotals).map((department) => ({
-                name: department,
-                resolved: departmentTotals[department].resolved,
-                unresolved: departmentTotals[department].unresolved,
-                closed: departmentTotals[department].closed,
+            const formattedData = result.map((item) => ({
+                name: item.department ? item.department : "Unassigned", // Replace null department with "Unassigned"
+                resolved: item.resolved,
+                unresolved: item.unresolved,
+                closed: item.closed,
             }));
-
+    
             console.log(formattedData);
     
             setDataDepartment(formattedData);
@@ -392,6 +361,7 @@ export const ContextProvider = ({ children }) => {
             console.log("error retrieving", error);
         }
     };
+    
     
     
 
