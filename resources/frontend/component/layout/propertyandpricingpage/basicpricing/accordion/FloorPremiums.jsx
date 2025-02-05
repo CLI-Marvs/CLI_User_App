@@ -7,6 +7,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 import { useUnit } from "@/context/PropertyPricing/UnitContext";
 import { usePricing } from "@/component/layout/propertyandpricingpage/basicpricing/context/BasicPricingContext";
 import { showToast } from "@/util/toastUtil";
+import { property } from "lodash";
 
 const newFloorState = {
     floor: null,
@@ -25,7 +26,10 @@ const FloorPremiums = ({ propertyData }) => {
         isLoading,
         floorPremiumsAccordionOpen,
         setFloorPremiumsAccordionOpen,
+        checkExistingUnits,
+        setFloors,
     } = useUnit();
+
     const [selectedFloor, setSelectedFloor] = useState(null);
     const { pricingData, setPricingData } = usePricing();
     const [towerPhaseId, setTowerPhaseId] = useState(null);
@@ -57,62 +61,20 @@ const FloorPremiums = ({ propertyData }) => {
                 }));
             }
         }
+
+        // if (floorPremiumsAccordionOpen) {
+        //     // console.log("it runs here")
+        //     checkExistingUnits(towerPhaseId, propertyData?.excel_id);
+        // }
     }, [floors, propertyData]);
 
-    /**
-     * This hooks retrieves the floor data associated with the specified tower phase ID. It checks if the data already exists in the propertyFloors state; if it does, it initializes the floor premium form data with the necessary structure. If the data is not available, it resets the form data and initiates a fetch request to obtain the floor information. This ensures that the component has the most up-to-date floor data while maintaining the appropriate structure for further processing.
-     */
-    // useEffect(() => {
-    //     if (!towerPhaseId) return;
-    //     setTowerPhaseId(towerPhaseId);
-
-    //     // Function to fetch floor data
-    //     const fetchFloorData = async () => {
-    //         const response = await getPropertyFloors(towerPhaseId);
-    //         setPropertyFloors((prev) => ({
-    //             ...prev,
-    //             [towerPhaseId]: response,
-    //         }));
-    //     };
-
-    //     // Fetch or use existing floor data
-    //     if (
-    //         propertyFloors &&
-    //         propertyFloors[towerPhaseId] &&
-    //         propertyFloors[towerPhaseId].floors
-    //     ) {
-    //         const floors = propertyFloors[towerPhaseId].floors || [];
-
-    //         // Initialize floor data with the required structure from FloorPremiumContext
-    //         const initializedFloors = floors.map((floor) => ({
-    //             floor,
-    //             premiumCost: "",
-    //             luckyNumber: false,
-    //             excludedUnits: [],
-    //         }));
-
-    //         setFloorPremiumFormData((prevData) => ({
-    //             ...prevData,
-    //             floor: initializedFloors, // Update floor data in the form context
-    //         }));
-    //     } else {
-    //         // Reset form data if propertyFloors is not available
-    //         setFloorPremiumFormData((prevData) => ({
-    //             ...prevData,
-    //             floor: [],
-    //         }));
-    //         fetchFloorData(); // Fetch data if it's not already available
-    //     }
-    // }, [
-    //     towerPhaseId,
-    //     propertyFloors,
-    //     setFloorPremiumFormData,
-    //     getPropertyFloors,
-    // ]);
+    useEffect(() => {
+        if (floorPremiumsAccordionOpen) {
+            setFloors([]);
+        }
+    }, [floorPremiumsAccordionOpen]);
 
     //Event handler
-    //Fetch the unit floor
-
     //Handle to open modal to assign floor premiums
     const handleOpenModal = (floor) => {
         setSelectedFloor(floor);

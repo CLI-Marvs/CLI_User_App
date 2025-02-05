@@ -38,9 +38,9 @@ const BasicPricing = () => {
     const { pricingData, resetPricingData, setPricingData } = usePricing();
     const { fetchPropertyListMasters } = usePriceListMaster();
     const [isLoading, setIsLoading] = useState({});
-    const { checkExistingUnits, floors } = useUnit();
+    const { checkExistingUnits, floors, setFloors } = useUnit();
 
-    console.log("PricingData in BasicPricing", pricingData);
+    // console.log("PricingData in BasicPricing", pricingData);
     //Hooks
     useEffect(() => {
         if (data) {
@@ -92,13 +92,16 @@ const BasicPricing = () => {
                           ],
                 }));
             }
-            if (data?.floor_premiums.length > 0 || data?.excel_id !== null) {
+            if (data?.floor_premiums.length > 0) {
                 console.log("Floor premiums have data 1", data?.floor_premiums);
                 const floorPremiumData = data?.floor_premiums.reduce(
                     (acc, premium) => {
                         acc[premium.floor] = {
                             id: premium.id,
-                            premiumCost: premium.premium_cost === '0.00' ? 0 : premium.premium_cost,
+                            premiumCost:
+                                premium.premium_cost === "0.00"
+                                    ? 0
+                                    : premium.premium_cost,
                             luckyNumber: premium.lucky_number,
                             excludedUnits: premium.excluded_units,
                         };
@@ -110,12 +113,30 @@ const BasicPricing = () => {
                     ...prev,
                     floorPremiums: floorPremiumData,
                 }));
-            } else if (data?.excel_id === null) {
-                console.log("Excel ID is null, skipping fetch", data?.excel_id);
-                return; // Stop execution if excel_id is null
-            } else {
-                checkExistingUnits(data.tower_phase_id, data.excel_id);
             }
+
+            if (data?.excel_id === null) {
+                console.log("Excel ID is null, skipping fetch", data?.excel_id);
+                setFloors(!floors);
+                console.log("Floors are set to empty");
+                return;
+            }
+            if (data?.excel_id && floors.length === 0) {
+                console.log("Excel ID is not null ", data?.excel_id);
+                checkExistingUnits(data.tower_phase_id, data.excel_id);
+                // setPricingData((prev) => ({
+                //     ...prev,
+                //     floorPremiums: [],
+                // }));
+            }
+            // else if (data?.excel_id === null) {
+            //     console.log("Excel ID is null, skipping fetch", data?.excel_id);
+            //     return; // Stop execution if excel_id is null
+            // } else {
+            //     console.log("It runs here 117")
+            //     checkExistingUnits(data.tower_phase_id, data.excel_id);
+            // }
+
             // else if (
             //     action === "Edit" &&
             //     !excelId &&
@@ -127,19 +148,19 @@ const BasicPricing = () => {
         }
     }, [data]);
 
-    useEffect(() => {
-        // Only proceed if all conditions are met
-        // const shouldCheckUnits =
-        //     action === "Edit" && (!floors || floors.length === 0);
-        // if (shouldCheckUnits) {
-        //     // Ensure tower_phase_id exists before calling the function
-        //     if (data?.tower_phase_id && data?.excel_id) {
-        //         checkExistingUnits(data.tower_phase_id, data.excel_id);
-        //     } else {
-        //         console.warn("No tower phase ID available");
-        //     }
-        // }
-    }, [data, checkExistingUnits, action, floors]);
+    // useEffect(() => {
+    //     // Only proceed if all conditions are met
+    //     // const shouldCheckUnits =
+    //     //     action === "Edit" && (!floors || floors.length === 0);
+    //     // if (shouldCheckUnits) {
+    //     //     // Ensure tower_phase_id exists before calling the function
+    //     //     if (data?.tower_phase_id && data?.excel_id) {
+    //     //         checkExistingUnits(data.tower_phase_id, data.excel_id);
+    //     //     } else {
+    //     //         console.warn("No tower phase ID available");
+    //     //     }
+    //     // }
+    // }, [data, checkExistingUnits, action, floors]);
 
     //Event handler
     // Open the add property modal

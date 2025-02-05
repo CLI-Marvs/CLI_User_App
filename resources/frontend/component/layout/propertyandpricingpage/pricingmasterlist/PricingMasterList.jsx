@@ -11,6 +11,7 @@ import { useNavigate } from "react-router-dom";
 import { usePriceListMaster } from "@/context/PropertyPricing/PriceListMasterContext";
 import TableSkeleton from "@/component/layout/propertyandpricingpage/component/TableSkeleton";
 import { usePaymentScheme } from "@/context/PropertyPricing/PaymentSchemeContext";
+import { toLowerCaseText } from '@/component/layout/propertyandpricingpage/utils/formatToLowerCase';
 
 const PricingMasterList = () => {
     //States
@@ -364,7 +365,10 @@ const PricingMasterList = () => {
                                         </td>
                                         <td className="w-[150px] flex items-center justify-start">
                                             <div>
-                                                <p>{item?.property_name}</p>
+                                                <p>
+                                                    {toLowerCaseText(item?.property_name)}
+
+                                                </p>
                                                 <p>
                                                     Tower{" "}
                                                     {item?.tower_phase_name}

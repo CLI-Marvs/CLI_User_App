@@ -56,6 +56,7 @@ export const UnitProvider = ({ children }) => {
                 console.log(
                     "Skipping API call because excelId is null or undefined"
                 );
+                setFloors([]);
                 return;
             }
 
@@ -138,6 +139,7 @@ export const UnitProvider = ({ children }) => {
         units,
         isUploadingUnits,
         setIsUploadingUnits,
+        setFloors,
     };
     return (
         <UnitContext.Provider value={value}>{children}</UnitContext.Provider>

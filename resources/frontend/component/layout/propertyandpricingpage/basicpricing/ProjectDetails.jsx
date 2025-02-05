@@ -1,8 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
- 
+import { toLowerCaseText } from "@/component/layout/propertyandpricingpage/utils/formatToLowerCase";
+
 const ProjectDetails = ({ propertyData }) => {
- 
-    //State 
+    //State
     // Destructure the necessary data from propertyData
     // const { towerPhase, propertyCommercialDetail } =
     //     propertyData.propertyData || {};
@@ -18,7 +18,7 @@ const ProjectDetails = ({ propertyData }) => {
     //         setTowerPhaseId(towerPhaseId);
     //     }
     // }, [towerPhaseId]);
- 
+
     return (
         <>
             <div className="min-w-full h-[180px] bg-custom-lightestgreen p-[20px] rounded-[10px] ">
@@ -32,8 +32,10 @@ const ProjectDetails = ({ propertyData }) => {
                         <div className="h-[26px] w-auto px-[15px] py-[5px] bg-white rounded-[5px]">
                             <p className="text-custom-gray81 text-xs">
                                 {/*TODO: MAke this not all capitalized */}
-                                {propertyData?.data?.property_name ||
-                                    propertyData?.property_name}
+                                {toLowerCaseText(
+                                    propertyData?.data?.property_name ||
+                                        propertyData?.property_name
+                                )}
                             </p>
                         </div>
                         {/* ID {id} */}
@@ -76,8 +78,7 @@ const ProjectDetails = ({ propertyData }) => {
                         <div className=" w-auto h-auto px-[15px] py-[5px] bg-white rounded-[5px]">
                             <p className=" text-custom-gray81 text-xs">
                                 {propertyData?.data?.tower_phases[0]
-                                    ?.description ||
-                                    propertyData?.description}
+                                    ?.description || propertyData?.description}
                             </p>
                         </div>
                     </div>
