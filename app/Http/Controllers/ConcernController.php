@@ -2547,6 +2547,7 @@ class ConcernController extends Controller
                     $concerns->ticket_id = $ticketId;
                     $concerns->buyer_email = $buyer['buyer_email'];
                     $concerns->buyer_firstname = $buyer['buyer_name'];
+                    $concerns->buyer_name = $buyer['buyer_name'];
                     $concerns->details_message = $buyer['details_message'];
                     $concerns->created_at = Carbon::parse(now())->setTimezone('Asia/Manila');
                     $concerns->status = "unresolved";
@@ -2588,6 +2589,7 @@ class ConcernController extends Controller
                         $messagesRef->attachment = json_encode($fileLinks);
                         $messagesRef->created_at = Carbon::parse(now())->setTimezone('Asia/Manila');
                         $messagesRef->buyer_firstname = $existingTicket->buyer_name;
+                        $messagesRef->buyer_name = $existingTicket->buyer_name;
                         $messagesRef->save();
                     }
 
