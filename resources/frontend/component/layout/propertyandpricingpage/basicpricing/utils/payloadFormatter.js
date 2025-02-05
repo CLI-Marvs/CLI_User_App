@@ -39,7 +39,8 @@ export const formatPayload = {
                 const formattedFloor = {
                     id: floor.id,
                     floor: parseInt(floorNumber, 10), // Convert floor number to integer
-                    premiumCost: parseInt(floor.premiumCost, 10) || 0, // Default to 0 if invalid
+                    premiumCost:
+                        parseFloat(floor.premiumCost).toFixed(2) || "0.00", // Default to 0 if invalid
                     luckyNumber:
                         typeof floor.luckyNumber === "boolean"
                             ? floor.luckyNumber
@@ -54,7 +55,7 @@ export const formatPayload = {
             []
         );
 
-        console.log("Formatted Floor Premiums:", formattedFloorPremiums);
+        
         return formattedFloorPremiums;
     },
 

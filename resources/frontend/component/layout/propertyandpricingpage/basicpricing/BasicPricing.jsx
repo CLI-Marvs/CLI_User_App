@@ -98,7 +98,7 @@ const BasicPricing = () => {
                     (acc, premium) => {
                         acc[premium.floor] = {
                             id: premium.id,
-                            premiumCost: premium.premium_cost,
+                            premiumCost: premium.premium_cost === '0.00' ? 0 : premium.premium_cost,
                             luckyNumber: premium.lucky_number,
                             excludedUnits: premium.excluded_units,
                         };

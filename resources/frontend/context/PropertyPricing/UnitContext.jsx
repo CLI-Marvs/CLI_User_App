@@ -18,7 +18,11 @@ export const UnitProvider = ({ children }) => {
     const [floorPremiumsAccordionOpen, setFloorPremiumsAccordionOpen] =
         useState(false);
     const [units, setUnits] = useState([]);
- 
+    const [isFloorCountLoading, setIsFloorCountLoading] = useState(false);
+    const [isCheckingUnits, setIsCheckingUnits] = useState(false);
+    const [isFetchingUnits, setIsFetchingUnits] = useState(false);
+    const [isUploadingUnits, setIsUploadingUnits] = useState(false);
+
     const fetchFloorCount = useCallback(
         async (towerPhaseId, excelId) => {
             if (towerPhaseId && excelId) {
@@ -81,7 +85,7 @@ export const UnitProvider = ({ children }) => {
     const uploadUnits = useCallback(
         async (payload) => {
             try {
-                setIsLoading(true);
+                setIsUploadingUnits(true);
                 const response = await unitService.storeUnit(payload);
                 if (response?.status === 201) {
                     const newExcelId = response?.data?.data?.excel_id;
@@ -93,7 +97,7 @@ export const UnitProvider = ({ children }) => {
                 setError(err);
                 return { success: false, error: err };
             } finally {
-                setIsLoading(false);
+                setIsUploadingUnits(false);
             }
         },
         [fetchFloorCount]
@@ -132,6 +136,8 @@ export const UnitProvider = ({ children }) => {
         setFloorPremiumsAccordionOpen,
         fetchUnitsInTowerPhase,
         units,
+        isUploadingUnits,
+        setIsUploadingUnits,
     };
     return (
         <UnitContext.Provider value={value}>{children}</UnitContext.Provider>

@@ -3,6 +3,7 @@ import { IoMdArrowDropdown } from "react-icons/io";
 import CircularProgress from "@mui/material/CircularProgress";
 import { useUnit } from "@/context/PropertyPricing/UnitContext";
 import { showToast } from "@/util/toastUtil";
+
 const UploadUnitDetailsModal = ({
     uploadUnitModalRef,
     fileName,
@@ -13,12 +14,11 @@ const UploadUnitDetailsModal = ({
 }) => {
     //State
     const [formData, setFormData] = useState({});
-    const [loading, setLoading] = useState(false);
     const newFileInputRef = useRef();
     const [towerPhaseId, setTowerPhaseId] = useState();
     const [propertyMasterId, setPropertyMasterId] = useState();
     const [priceListMasterId, setPriceListMasterId] = useState();
-    const { uploadUnits } = useUnit();
+    const { uploadUnits, isUploadingUnits } = useUnit();
 
     //Hooks
     useEffect(() => {
@@ -65,7 +65,7 @@ const UploadUnitDetailsModal = ({
         console.log("payload", payload);
 
         try {
-            setLoading(true);
+ 
             const response = await uploadUnits(payload);
             console.log("response 66", response);
             if (response?.message === 'success') {
@@ -80,9 +80,7 @@ const UploadUnitDetailsModal = ({
             }
         } catch (error) {
             console.log("error uploading excel", error);
-        } finally {
-            setLoading(false);
-        }
+        }  
     };
 
     const replaceFile = async (event) => {
@@ -335,12 +333,12 @@ const UploadUnitDetailsModal = ({
                     {selectedExcelHeader && selectedExcelHeader.length > 0 ? (
                         <button
                             className={`w-[177px] h-[37px] text-white montserrat-semibold text-sm gradient-btn2 rounded-[10px] hover:shadow-custom4  ${
-                                loading ? "cursor-not-allowed" : ""
+                                isUploadingUnits ? "cursor-not-allowed" : ""
                             }`}
                             type="submit"
                             onClick={handleSubmit}
                         >
-                            {loading ? (
+                            {isUploadingUnits ? (
                                 <CircularProgress className="spinnerSize" />
                             ) : (
                                 <>Confirm and Upload</>

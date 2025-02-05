@@ -6,13 +6,20 @@ import FloorPremiumAssignModal from "../modals/FloorPremiumAssignModal";
 import CircularProgress from "@mui/material/CircularProgress";
 import { useUnit } from "@/context/PropertyPricing/UnitContext";
 import { usePricing } from "@/component/layout/propertyandpricingpage/basicpricing/context/BasicPricingContext";
+import { showToast } from "@/util/toastUtil";
+
+const newFloorState = {
+    floor: null,
+    premiumCost: null,
+    excludedUnits: [],
+};
+
 const FloorPremiums = ({ propertyData }) => {
     //States
-
-    //     useFloorPremiumStateContext();
+    const [newFloorPremiumData, setNewFloorPremiumData] =
+        useState(newFloorState);
     const modalRef = useRef(null);
-    const [newFloor, setNewFloor] = useState("");
-    const [newPremiumCost, setNewPremiumCost] = useState("");
+
     const {
         floors,
         isLoading,
@@ -22,7 +29,7 @@ const FloorPremiums = ({ propertyData }) => {
     const [selectedFloor, setSelectedFloor] = useState(null);
     const { pricingData, setPricingData } = usePricing();
     const [towerPhaseId, setTowerPhaseId] = useState(null);
-    //  console.log("PricingData",pricingData)
+    // console.log("PricingData", pricingData);
     //Hooks
     useEffect(() => {
         setTowerPhaseId(propertyData?.tower_phase_id);
@@ -152,61 +159,71 @@ const FloorPremiums = ({ propertyData }) => {
     //Handling changes for adding  new floor
     function handleNewFloorChange(e) {
         const { name, value } = e.target;
-        if (name === "newFloor") {
-            setNewFloor(value);
-        } else if (name === "premiumCost") {
-            setNewPremiumCost(value);
-        }
+        setNewFloorPremiumData((prevData) => ({
+            ...prevData,
+            [name]: value,
+        }));
     }
 
     /**
      * Handling the button click for adding a new floor
-     * If entered new floor (e.g.2 ) is already in the 'floor array' [floor=2], it will not add it
-     * @returns
+     * If entered new floor (e.g.2 ) is already in the 'floor array' [floor=2], show an error toast
+     * Else, add to the floorPremiumFormData
      */
     const handleAddNewFloor = () => {
-        // Check if propertyFloors and towerPhaseId are defined before accessing them
-        if (
-            propertyFloors[towerPhaseId] &&
-            propertyFloors[towerPhaseId]["count"] === 0
-        ) {
-            alert(
-                "You cannot add a floor until you upload an Excel file first."
-            );
+        const { floor, premiumCost, excludedUnits } = newFloorPremiumData;
+
+        // Early return if required fields are missing
+        if (!floor || !premiumCost) {
+            showToast("Floor and Premium Cost are required", "error");
             return;
         }
 
-        if (newFloor && newPremiumCost) {
-            // Check if the new floor already exists in the form data
-            // const newFloorIsExist = floorPremiumFormData.floor.some(
-            //     (floorData) => parseInt(floorData.floor) === parseInt(newFloor)
-            // );
-            if (newFloorIsExist) {
-                alert("This floor already exists.");
-                return;
-            }
-
-            // Add the new floor and premium cost to the floorPremiumFormData
-            // setFloorPremiumFormData((prevData) => ({
-            //     ...prevData,
-            //     floor: [
-            //         ...prevData.floor,
-            //         {
-            //             floor: parseInt(newFloor),
-            //             premiumCost: parseInt(newPremiumCost),
-            //             luckyNumber: "",
-            //             excludedUnits: [],
-            //         },
-            //     ],
-            // }));
-
-            //Reset inputs after adding
-            setNewFloor("");
-            setNewPremiumCost("");
-        } else {
-            alert("Please fill in both floor and premium cost.");
+        // Handle the case when floorPremiums is empty
+        if (
+            !pricingData?.floorPremiums ||
+            Object.keys(pricingData.floorPremiums).length === 0
+        ) {
+            setPricingData((prevState) => ({
+                ...prevState,
+                floorPremiums: {
+                    [floor]: {
+                        premiumCost,
+                        luckyNumber: false,
+                        excludedUnits: excludedUnits || [],
+                    },
+                },
+                floors: [floor],
+            }));
+            return;
         }
+
+        // Check if floor already exists
+        const isFloorExist = Object.keys(pricingData.floorPremiums).includes(
+            floor.toString()
+        );
+
+        if (isFloorExist) {
+            showToast(`Floor ${floor} already exists.`, "error");
+            return;
+        }
+
+        // Add new floor data
+        setPricingData((prevState) => ({
+            ...prevState,
+            floorPremiums: {
+                ...prevState.floorPremiums,
+                [floor]: {
+                    premiumCost,
+                    luckyNumber: false,
+                    excludedUnits: excludedUnits || [],
+                },
+            },
+        }));
+
+        showToast(`Floor ${floor} added successfully`, "success");
     };
+
     //Utility function to format the premium cost
     const formatPremiumCost = (premiumCost) => {
         if (premiumCost === 0) {
@@ -275,10 +292,9 @@ const FloorPremiums = ({ propertyData }) => {
                                 </span>
                                 <input
                                     onChange={handleNewFloorChange}
-                                    type="number"
-                                    name="newFloor"
-                                    value={newFloor}
-                                    className="outline-none  -mr-3 pl-3 py-1 bg-custom-grayFA text-custom-gray81 w-full "
+                                    name="floor"
+                                    value={newFloorPremiumData.floor || ""}
+                                    className="outline-none  -mr-3 pl-3 py-1 bg-custom-grayFA   w-full "
                                     onInput={(e) =>
                                         (e.target.value =
                                             e.target.value.replace(
@@ -287,24 +303,6 @@ const FloorPremiums = ({ propertyData }) => {
                                             ))
                                     }
                                 />
-                                {/* <div className="relative w-full">
-                                    <select
-                                        name="transferCharge"
-                                        className="appearance-none w-full px-4 py-1 bg-white focus:outline-none border-0"
-                                    >
-                                        <option value="1">1</option>
-                                        <option value="2">2</option>
-                                        <option value="3">3</option>
-                                        <option value="4">4</option>
-                                        <option value="5">5</option>
-                                        <option value="6">6</option>
-                                        <option value="7">7</option>
-                                        <option value="8">8</option>
-                                    </select>
-                                    <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3 bg-custom-grayFA">
-                                        <IoMdArrowDropdown className="text-custom-gray81" />
-                                    </span>
-                                </div> */}
                             </div>
                             <div className="flex items-center border border-custom-grayF1 rounded-[5px] overflow-hidden w-[204px] text-sm">
                                 <span className="text-custom-gray81 bg-custom-grayFA font-semibold flex w-[250px] pl-3 py-1">
@@ -313,10 +311,11 @@ const FloorPremiums = ({ propertyData }) => {
                                 <input
                                     onChange={handleNewFloorChange}
                                     name="premiumCost"
-                                    type="number"
                                     className="w-full px-4 focus:outline-none "
                                     placeholder=""
-                                    value={newPremiumCost}
+                                    value={
+                                        newFloorPremiumData.premiumCost || ""
+                                    }
                                     onInput={(e) =>
                                         (e.target.value =
                                             e.target.value.replace(

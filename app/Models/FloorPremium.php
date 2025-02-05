@@ -13,7 +13,10 @@ class FloorPremium extends Model
     use HasFactory;
     protected $table = 'floor_premiums';
     protected $guarded = array();
- 
+    protected $casts = [
+        'premium_cost' => 'decimal:2', // Ensures it retains two decimal places
+    ];
+
 
     //Relationship
     public function priceListMaster()

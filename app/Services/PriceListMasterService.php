@@ -55,7 +55,7 @@ class PriceListMasterService
      */
     public function update(array $data)
     {
-
+        // dd($data);
         DB::beginTransaction();
         try {
             $priceListMaster = $this->model->where('id', $data['price_list_master_id'])->first();
@@ -152,7 +152,6 @@ class PriceListMasterService
             $newFloorPremiumID = [] ?? null; // Keep track of floor premium in the payload
             if (!empty($data['floorPremiumsPayload']) && is_array($data['floorPremiumsPayload'])) {
 
-
                 foreach ($data['floorPremiumsPayload'] as $floorPremium) {
                     $floorPremiumId = $floorPremium['id'] ?? null;
 
@@ -162,10 +161,8 @@ class PriceListMasterService
                         if (
                             $existingFloorPremium
                         ) {
-                            $premiumCost = $floorPremium['premiumCost'] ?? null;
-                            if (is_null($premiumCost) || $premiumCost === '') {
-                                $premiumCost = 0;
-                            }
+                            $premiumCost = isset($floorPremium['premiumCost']) ? (float) number_format($floorPremium['premiumCost'], 2, '.', '') : 0.00;
+
                             $existingFloorPremium->update([
                                 'floor' => $floorPremium['floor'],
                                 'premium_cost' => $premiumCost,
@@ -175,9 +172,8 @@ class PriceListMasterService
                                 'status' => 'Active'
                             ]);
                             $newFloorPremiumID[] = $floorPremiumId;
-                        }
+                        }  
                     } else {
-
                         $newFloorPremium = $priceListMaster->floorPremiums()->create([
                             'floor' => $floorPremium['floor'],
                             'premium_cost' => $floorPremium['premiumCost'],
