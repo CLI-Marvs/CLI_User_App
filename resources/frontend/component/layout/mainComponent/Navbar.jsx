@@ -178,6 +178,7 @@ const Navbar = () => {
 
                 const concernData = navBarData[ticketId] || [];
 
+                console.log("concernData", concernData);
                 if (concernData.length === 0) {
                     // Render skeleton while loading
                     return (
@@ -197,7 +198,8 @@ const Navbar = () => {
                             } ${concernData?.buyer_lastname || ""}`
                         }{" "}
                         {/* capitalizeWords()*/concernData?.suffix_name || ""} {""}
-                        ({concernData?.details_concern || ""}) {" "} 
+                        {concernData?.details_concern ? (concernData?.details_concern) : ""} {" "} 
+                        {concernData?.email_subject ? `[Direct Email] (Email Subject: ${concernData?.email_subject})` : ""}
                         {concernData?.property || ""} ({concernData?.ticket_id})
                     </span>
                 );
