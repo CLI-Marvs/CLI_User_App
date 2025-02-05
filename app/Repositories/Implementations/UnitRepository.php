@@ -30,6 +30,7 @@ class UnitRepository
         $headers = $data['headers'];
         $propertyId = $data['property_masters_id'];
         $towerPhaseId = $data['tower_phase_id'];
+        $priceListMasterId = $data['price_list_master_id'];
         DB::beginTransaction();
         try {
             if ($file && $headers) {
@@ -38,7 +39,7 @@ class UnitRepository
                     $actualHeaders = array_column($headers, 'rowHeader');
 
 
-                    $import = new ExcelImport($actualHeaders, $propertyId, $towerPhaseId, 'Active', 'units');
+                    $import = new ExcelImport($actualHeaders, $propertyId, $towerPhaseId, 'Active', 'units', $priceListMasterId);
                     Excel::import($import, $file);
 
                     DB::commit();
@@ -75,23 +76,29 @@ class UnitRepository
     /**
      * Get existing units for a specific tower phase
      */
-    public function getExistingUnits($towerPhaseId)
+    public function getExistingUnits($towerPhaseId, $excelId)
     {
-        $units = $this->model->where('tower_phase_id', $towerPhaseId)
+        if (empty($excelId)) {
+            throw new \InvalidArgumentException("excelId is required and cannot be empty.");
+        }
+
+        return $this->model->where('tower_phase_id', $towerPhaseId)
+            ->where('excel_id', $excelId)
             ->where('status', 'Active')
             ->get();
-
-        return $units;
     }
 
+
     /**
-     * Get units for a specific tower phase and floor
+     * Get all units for a specific tower phase and floor
      */
-    public function getUnits($towerPhaseId, $selectedFloor)
+    public function getUnits($towerPhaseId, $selectedFloor, $excelId)
     {
-     //   dd($selectedFloor);
-        $units = $this->model->where('tower_phase_id', 152)
-            ->where('floor', 2)
+
+
+        $units = $this->model->where('tower_phase_id', $towerPhaseId)
+            ->where('floor', $selectedFloor)
+            ->where('excel_id', $excelId)
             ->where('status', 'Active')
             ->get();
         // Check if any units exist
@@ -102,5 +109,30 @@ class UnitRepository
         }
 
         return $units;
+    }
+
+    /**
+     * Store unit details from the system
+     */
+    public function storeUnitDetails(array $data)
+    {
+
+
+        // $priceVersion = $this->model->create([
+        //     'property_masters_id' => $data['property_id'],
+        //     'tower_phase_name' => $data['tower_phase'],
+        //     'version_name' => $version['name'],
+        //     'percent_increase' => $version['percent_increase'],
+        //     'allowed_buyer' => $version['no_of_allowed_buyers'],
+        //     'expiry_date' => $expiryDate->format('Y-m-d H:i:s'),
+        // ]);
+        $units = $this->model->create(array_merge(
+            $data,
+            ['status' => 'Active']
+        ));
+        return [
+            'message' => 'Unit details stored successfully',
+            'data' => $units->fresh()
+        ];
     }
 }

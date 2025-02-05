@@ -100,9 +100,9 @@ class UnitController extends Controller
     /** 
      * Get existing units for a specific tower phase
      */
-    public function getExistingUnits(int $towerPhaseId)
+    public function getExistingUnits(int $towerPhaseId,string $excelId)
     {
-        $existingUnits = $this->service->getExistingUnits($towerPhaseId);
+        $existingUnits = $this->service->getExistingUnits($towerPhaseId, $excelId);
         return response()->json([
             'data' => $existingUnits,
         ]);
@@ -114,13 +114,14 @@ class UnitController extends Controller
      * @param Request $request The incoming HTTP request
      * @return \Illuminate\Http\JsonResponse JSON response containing units or error message
      */
-    public function getUnits($selectedFloor, $towerPhaseId)
+    public function getUnits($selectedFloor, $towerPhaseId, $excelId)
     {
-     
+       // dd($selectedFloor, $towerPhaseId, $excelId);
+
         try {
             // Query the database for units matching the specified towerPhaseId and selectedFloor
-            $units =  $this->service->getUnits($towerPhaseId, $selectedFloor);
-            
+            $units =  $this->service->getUnits($towerPhaseId, $selectedFloor, $excelId);
+
             return response()->json([
                 'data' => $units
             ]);
@@ -133,26 +134,19 @@ class UnitController extends Controller
     }
 
     //Add new units
-    public function addUnits(Request $request)
+    public function storeUnit(StoreUnitRequest $request)
     {
-        // $towerPhaseId = $request->input('towerPhaseId');
-        // $selectedFloor = $request->input('selectedFloor');
-        // $units = $request->input('units');
-        // try {
-        //     // Loop through the units array and create a new Unit model for each item
-        //     foreach ($units as $unit) {
-        //         $unitModel = new Unit();
-        //         $unitModel->tower_phase_id = $towerPhaseId;
-        //         $unitModel->floor = $selectedFloor;
-        //         $unitModel->unit = $unit;
-        //         $unitModel->save();
-
-        //     }
-        // } catch (\Exception $e) {
-        //     return response()->json([
-        //         'message' => 'Error getting the units.',
-        //         'error' => $e->getMessage(),
-        //     ], 500);
-        // }
+        try {
+            $validatedData = $request->validated();
+            $result = $this->service->storeUnitDetails($validatedData);
+            return response()->json([
+                'message' => $result['message'],
+            ], 201);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Validation failed',
+                'messages' => $e->getMessage(),
+            ], 422);
+        }
     }
 }

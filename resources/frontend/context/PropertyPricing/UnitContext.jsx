@@ -17,7 +17,7 @@ export const UnitProvider = ({ children }) => {
     const [towerPhaseId, setTowerPhaseId] = useState();
     const [floorPremiumsAccordionOpen, setFloorPremiumsAccordionOpen] =
         useState(false);
-    const [units,setUnits] = useState([]);
+    const [units, setUnits] = useState([]);
  
     const fetchFloorCount = useCallback(
         async (towerPhaseId, excelId) => {
@@ -28,7 +28,7 @@ export const UnitProvider = ({ children }) => {
                         towerPhaseId,
                         excelId
                     );
-
+                    console.log("response fetchFloorCount", response);
                     const sortedProperties = Object.entries(response.data.data)
                         .map(([id, name]) => ({ id, name }))
                         .sort((a, b) => a.name.localeCompare(b.name));
@@ -47,16 +47,26 @@ export const UnitProvider = ({ children }) => {
     );
 
     const checkExistingUnits = useCallback(
-        async (towerPhaseId) => {
+        async (towerPhaseId, excelId) => {
+            if (excelId === null || excelId === undefined) {
+                console.log(
+                    "Skipping API call because excelId is null or undefined"
+                );
+                return;
+            }
+
+            console.log("checkExistingUnits", towerPhaseId, excelId);
             try {
                 setTowerPhaseId(towerPhaseId);
                 setIsLoading(true);
                 const response = await unitService.getExistingUnits(
-                    towerPhaseId
+                    towerPhaseId,
+                    excelId
                 );
 
                 if (response?.data?.data[0]?.excel_id) {
                     const excelId = response?.data?.data[0]?.excel_id;
+
                     await fetchFloorCount(towerPhaseId, excelId);
                 }
             } catch (err) {
@@ -90,12 +100,13 @@ export const UnitProvider = ({ children }) => {
     );
 
     const fetchUnitsInTowerPhase = useCallback(
-        async (towerPhaseId, selectedFloor) => {
+        async (towerPhaseId, selectedFloor, excelId) => {
             try {
                 setIsLoading(true);
                 const response = await unitService.getUnitsInTowerPhase(
                     towerPhaseId,
-                    selectedFloor
+                    selectedFloor,
+                    excelId
                 );
                 setUnits(response?.data?.data);
                 return response?.data?.data;
@@ -120,7 +131,7 @@ export const UnitProvider = ({ children }) => {
         floorPremiumsAccordionOpen,
         setFloorPremiumsAccordionOpen,
         fetchUnitsInTowerPhase,
-        units
+        units,
     };
     return (
         <UnitContext.Provider value={value}>{children}</UnitContext.Provider>

@@ -109,7 +109,6 @@ const FloorPremiums = ({ propertyData }) => {
     //Handle to open modal to assign floor premiums
     const handleOpenModal = (floor) => {
         setSelectedFloor(floor);
-
         if (modalRef.current) {
             modalRef.current.showModal();
         }
@@ -160,9 +159,11 @@ const FloorPremiums = ({ propertyData }) => {
         }
     }
 
-    /*
-    Handling the button click for adding a new floor 
-    */
+    /**
+     * Handling the button click for adding a new floor
+     * If entered new floor (e.g.2 ) is already in the 'floor array' [floor=2], it will not add it
+     * @returns
+     */
     const handleAddNewFloor = () => {
         // Check if propertyFloors and towerPhaseId are defined before accessing them
         if (
@@ -206,7 +207,13 @@ const FloorPremiums = ({ propertyData }) => {
             alert("Please fill in both floor and premium cost.");
         }
     };
-
+    //Utility function to format the premium cost
+    const formatPremiumCost = (premiumCost) => {
+        if (premiumCost === 0) {
+            return "0";
+        }
+        return premiumCost;
+    };
     return (
         <>
             <div
@@ -436,8 +443,7 @@ const FloorPremiums = ({ propertyData }) => {
                                                                 Assign
                                                             </td>
                                                             <td>
-                                                                <FaRegTrashAlt
-                                                                    className="size-5 text-custom-gray81 hover:text-red-500 cursor-pointer" />
+                                                                <FaRegTrashAlt className="size-5 text-custom-gray81 hover:text-red-500 cursor-pointer" />
                                                             </td>
                                                         </tr>
                                                     );
@@ -456,6 +462,7 @@ const FloorPremiums = ({ propertyData }) => {
                     modalRef={modalRef}
                     selectedFloor={selectedFloor}
                     towerPhaseId={towerPhaseId}
+                    propertyData={propertyData}
                 />
             </div>
         </>

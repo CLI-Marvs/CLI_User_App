@@ -21,13 +21,36 @@ class StoreUnitRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
-            'headers' => 'required|array',
-            'headers.*.rowHeader' => 'required|string',
-            'headers.*.columnIndex' => 'required|integer|min:1|max:8',
-            'file' => 'required|file|mimes:csv,txt,xlsx|max:5120',
-            'tower_phase_id' => 'integer',
-            'property_masters_id' => 'integer',
-        ];
+        $method = $this->route()->getActionMethod(); // Get the current route name or method\
+        //Request if the user ADD UNIT from excel
+        if ($method === 'store') {
+            return [
+                'headers' => 'required|array',
+                'headers.*.rowHeader' => 'required|string',
+                'headers.*.columnIndex' => 'required|integer|min:1|max:8',
+                'file' => 'required|file|mimes:csv,txt,xlsx|max:5120',
+                'tower_phase_id' => 'integer',
+                'property_masters_id' => 'integer',
+                'price_list_master_id' => 'integer',
+            ];
+        }
+        //Request if the user ADD UNIT from the system 'admin'
+        if ($method === 'storeUnit') {
+            return [
+                'floor' => 'required|integer',
+                'room_number' => 'required|integer',
+                'unit' => 'required|string',
+                'type' => 'required|string',
+                'indoor_area' => 'required|integer',
+                'balcony_area' => 'required|integer',
+                'garden_area' => 'required|integer',
+                'total_area' => 'required|integer',
+                'tower_phase_id' => 'integer',
+                'property_masters_id' => 'integer',
+                'excel_id' => 'string',
+                'price_list_master_id' => 'integer',
+            ];
+        }
+       
     }
 }

@@ -13,7 +13,7 @@ class FloorPremium extends Model
     use HasFactory;
     protected $table = 'floor_premiums';
     protected $guarded = array();
-
+ 
 
     //Relationship
     public function priceListMaster()

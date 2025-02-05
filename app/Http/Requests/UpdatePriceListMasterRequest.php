@@ -51,7 +51,7 @@ class UpdatePriceListMasterRequest extends FormRequest
             'floorPremiumsPayload' =>  'array',
             'floorPremiumsPayload.*.id' => 'integer',
             'floorPremiumsPayload.*.floor' => 'integer',
-            'floorPremiumsPayload.*.premiumCost' => 'integer',
+            'floorPremiumsPayload.*.premiumCost' => 'nullable | numeric',
             'floorPremiumsPayload.*.luckyNumber' => 'boolean',
             'floorPremiumsPayload.*.excludedUnits' => 'array',
 

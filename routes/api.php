@@ -157,16 +157,19 @@ Route::middleware('auth:sanctum')->group(function () {
 
     /* Units */
     Route::prefix('units')->group(function () {
-        // Store unit details
+        // Store unit details from excel
         Route::post('/', [UnitController::class, 'store']);
         //Get all units
         Route::get('/', [UnitController::class, 'index']);
         //Count units floors
         Route::get('/floors/{towerPhaseId}/{excelId}', [UnitController::class, 'countFloors']);
         // Check existing units for a tower phase
-        Route::get('/check/{towerPhaseId}', [UnitController::class, 'getExistingUnits']);
-        Route::get('/tower/{towerPhaseId}/floor/{selectedFloor}/units', [UnitController::class, 'getUnits']);
+        Route::get('/check/{towerPhaseId}/{excelId}', [UnitController::class, 'getExistingUnits']);
+        //Get units for selected floor and tower phase
+        Route::get('/tower/{towerPhaseId}/floor/{selectedFloor}/units/{excelId}', [UnitController::class, 'getUnits']);
 
+        //Store  unit  details from the system
+        Route::post('/store-unit', [UnitController::class, 'storeUnit']);
     });
 
     /* Price Versioning */

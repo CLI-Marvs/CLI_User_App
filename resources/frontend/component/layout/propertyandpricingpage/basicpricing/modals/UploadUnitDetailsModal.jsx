@@ -17,6 +17,7 @@ const UploadUnitDetailsModal = ({
     const newFileInputRef = useRef();
     const [towerPhaseId, setTowerPhaseId] = useState();
     const [propertyMasterId, setPropertyMasterId] = useState();
+    const [priceListMasterId, setPriceListMasterId] = useState();
     const { uploadUnits } = useUnit();
 
     //Hooks
@@ -31,6 +32,7 @@ const UploadUnitDetailsModal = ({
             }, {});
             setFormData(initialFormData);
             setTowerPhaseId(propertyData?.tower_phase_id);
+            setPriceListMasterId(propertyData?.price_list_master_id);
             setPropertyMasterId(
                 propertyData?.property_commercial_detail?.property_master_id
             );
@@ -58,6 +60,7 @@ const UploadUnitDetailsModal = ({
             file: fileSelected,
             tower_phase_id: towerPhaseId,
             property_masters_id: propertyMasterId,
+            price_list_master_id: priceListMasterId,
         };
         console.log("payload", payload);
 
@@ -65,7 +68,7 @@ const UploadUnitDetailsModal = ({
             setLoading(true);
             const response = await uploadUnits(payload);
             console.log("response 66", response);
-            if (response?.status === 201) {
+            if (response?.message === 'success') {
                 // const excelId = response?.data?.data?.excel_id;
                 //TODO: fetch the unit lloor
                 // Fetch floors immediately after successful upload to reflect the floor premium

@@ -71,17 +71,24 @@ class UnitService
     /**
      * Get existing units for a specific tower phase
      */
-    public function getExistingUnits($towerPhaseId)
+    public function getExistingUnits($towerPhaseId, $excelId)
     {
-        return $this->repository->getExistingUnits($towerPhaseId);
+        return $this->repository->getExistingUnits($towerPhaseId, $excelId);
     }
 
     /**
      * Get units for a specific tower phase and floor
      */
-    public function getUnits($towerPhaseId, $selectedFloor)
+    public function getUnits($towerPhaseId, $selectedFloor,$excelId)
     {
        
-        return $this->repository->getUnits($towerPhaseId, $selectedFloor);
+        return $this->repository->getUnits($towerPhaseId, $selectedFloor, $excelId);
+    }
+
+    /**
+     * Store unit details from the system
+     */
+    public function storeUnitDetails(array $data) {
+        return $this->repository->storeUnitDetails($data);
     }
 }

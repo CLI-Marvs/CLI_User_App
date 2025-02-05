@@ -3,18 +3,33 @@ import FloorPremiumAddUnitModal from "./FloorPremiumAddUnitModal";
 import CircularProgress from "@mui/material/CircularProgress";
 import { useUnit } from "@/context/PropertyPricing/UnitContext";
 import { usePricing } from "@/component/layout/propertyandpricingpage/basicpricing/context/BasicPricingContext";
-const FloorPremiumAssignModal = ({ modalRef, selectedFloor, towerPhaseId }) => {
+const FloorPremiumAssignModal = ({
+    modalRef,
+    selectedFloor,
+    towerPhaseId,
+    propertyData,
+}) => {
     //State
     // const { setFloorPremiumFormData } = useFloorPremiumStateContext();
     const modalRef2 = useRef(null);
     const [excludedUnit, setExcludedUnit] = useState([]);
-    const { fetchUnitsInTowerPhase, units, isLoading } = useUnit();
+    const { fetchUnitsInTowerPhase, units, isLoading, excelId } = useUnit();
     const { pricingData, setPricingData } = usePricing();
 
     //Hooks
     useEffect(() => {
         if (selectedFloor) {
-            fetchUnitsInTowerPhase(selectedFloor, towerPhaseId);
+            console.log(
+                "selectedFloor towerPhaseId excelID25",
+                selectedFloor,
+                towerPhaseId,
+                propertyData?.excel_id || excelId
+            );
+            fetchUnitsInTowerPhase(
+                selectedFloor,
+                towerPhaseId,
+                propertyData?.excel_id || excelId
+            );
         }
     }, [selectedFloor]);
 
@@ -129,7 +144,8 @@ const FloorPremiumAssignModal = ({ modalRef, selectedFloor, towerPhaseId }) => {
                     <p className="montserrat-regular text-[21px]">Floor</p>
                     {excludedUnit && excludedUnit.length > 0 && (
                         <p className="ml-10 text-red-500">
-                            You made changes. Make sure to click 'Save as Draft.
+                            You made changes. Make sure to click 'Save as
+                            Draft'.
                         </p>
                     )}
                 </div>
@@ -162,11 +178,11 @@ const FloorPremiumAssignModal = ({ modalRef, selectedFloor, towerPhaseId }) => {
                     </div>
                     <div className="flex flex-wrap gap-3">
                         {isLoading ? (
-                            <div className=" flex items-center">
+                            <div className=" flex items-center  w-20 justify-center">
                                 <CircularProgress className="spinnerSize" />
                             </div>
                         ) : (
-                            units &&
+                            units.length > 0 &&
                             units.map((item, key) => {
                                 // Check if this unit's ID is in the excludedUnits for the current floor
                                 const isExcluded = pricingData?.floorPremiums?.[
@@ -206,7 +222,13 @@ const FloorPremiumAssignModal = ({ modalRef, selectedFloor, towerPhaseId }) => {
                 </div>
             </div>
             <div>
-                <FloorPremiumAddUnitModal modalRef={modalRef2} units={units} />
+                <FloorPremiumAddUnitModal
+                    modalRef={modalRef2}
+                    units={units}
+                    propertyData={propertyData}
+                    towerPhaseId={towerPhaseId}
+                    selectedFloor={selectedFloor}
+                />
             </div>
         </dialog>
     );

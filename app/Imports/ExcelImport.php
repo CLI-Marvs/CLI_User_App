@@ -23,15 +23,16 @@ class ExcelImport implements ToModel, WithHeadingRow, WithChunkReading, WithBatc
     protected $status;
     protected $excelId;
     protected $rowCount = 0;
+    protected $priceListMasterId;
 
-
-    public function __construct($headers, $propertyId, $towerPhaseId, $status, $table)
+    public function __construct($headers, $propertyId, $towerPhaseId, $status, $table, $priceListMasterId)
     {
         $this->table = $table;
         $this->headers = $headers;
         $this->propertyId = $propertyId;
         $this->towerPhaseId = $towerPhaseId;
         $this->status = $status;
+        $this->priceListMasterId = $priceListMasterId;
         //Generate a unique id for the excel
         $this->excelId =   'Excel_' . uniqid();
         DB::disableQueryLog();
@@ -85,6 +86,7 @@ class ExcelImport implements ToModel, WithHeadingRow, WithChunkReading, WithBatc
             'tower_phase_id' => $this->towerPhaseId,
             'excel_id' => $this->excelId,
             'status' => $this->status,
+            'price_list_master_id' => $this->priceListMasterId,
         ];
 
         // // Perform batch insert every 500 rows

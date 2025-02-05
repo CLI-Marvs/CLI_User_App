@@ -9,7 +9,7 @@ use App\Models\UnitFloorCount;
 use App\Models\PriceListMaster;
 
 
-use App\Models\  PriceBasicDetail;
+use App\Models\PriceBasicDetail;
 use App\Http\Controllers\Controller;
 
 class PriceBasicDetailController extends Controller
@@ -72,7 +72,7 @@ class PriceBasicDetailController extends Controller
     {
         $priceListData = $request->input('priceList');
         // Validate and handle the price list data
-        $priceListSetting = new   PriceBasicDetail();
+        $priceListSetting = new  PriceBasicDetail();
         $priceListSetting->base_price = $priceListData['basePrice'];
         $priceListSetting->transfer_charge = $priceListData['transferCharge'];
         $priceListSetting->effective_balcony_base = $priceListData['effectiveBalconyBase'];
