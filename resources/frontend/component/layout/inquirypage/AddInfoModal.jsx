@@ -12,7 +12,6 @@ import { PREDEFINED_USER_TYPES } from "../../../constant/data/preDefinedUserType
 * Strip out fields that needed to compare (like `id`, `status`, `created_at`, `updated_at`, etc.)
 */
 const normalizeData = (data) => {
-    console.log("data", data);
     return {
         ticket_id: data.ticket_id || "",
         details_concern: data.details_concern || "",
