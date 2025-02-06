@@ -91,9 +91,6 @@ class PriceListMasterService
                 ]);
             }
 
-
-
-
             // Fetch the current PriceBasicDetail ID in the PriceListMaster table
             $currentPriceVersionIds = json_decode($priceListMaster->price_versions_id, true);
 

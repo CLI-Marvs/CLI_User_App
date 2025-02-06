@@ -177,11 +177,7 @@ const FloorPremiumAssignModal = ({
                         </div>
                     </div>
                     <div className="flex flex-wrap gap-3">
-                        {isLoading ? (
-                            <div className=" flex items-center  w-20 justify-center">
-                                <CircularProgress className="spinnerSize" />
-                            </div>
-                        ) : (
+                        {units &&
                             units.length > 0 &&
                             units.map((item, key) => {
                                 // Check if this unit's ID is in the excludedUnits for the current floor
@@ -205,8 +201,7 @@ const FloorPremiumAssignModal = ({
                                         </div>
                                     </div>
                                 );
-                            })
-                        )}
+                            })}
 
                         <div>
                             <button

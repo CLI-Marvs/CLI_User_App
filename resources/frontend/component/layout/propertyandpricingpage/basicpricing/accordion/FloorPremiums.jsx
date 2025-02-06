@@ -45,7 +45,7 @@ const FloorPremiums = ({ propertyData }) => {
                 const initialFloorPremiums = floorNumbers.reduce(
                     (acc, floor) => {
                         acc[floor] = {
-                            premiumCost: "",
+                            premiumCost: 0,
                             luckyNumber: false,
                             excludedUnits: [],
                         };
@@ -321,13 +321,17 @@ const FloorPremiums = ({ propertyData }) => {
                                     <tbody className="">
                                         {isLoading ? (
                                             <tr className="ml-4">
-                                                <CircularProgress className="spinnerSize " />
+                                                <td
+                                                    colSpan="5"
+                                                    className="text-center"
+                                                >
+                                                    <CircularProgress className="spinnerSize" />
+                                                </td>
                                             </tr>
-                                        ) : (
-                                            pricingData &&
-                                            Object.keys(
-                                                pricingData?.floorPremiums
-                                            ).length > 0 &&
+                                        ) : pricingData &&
+                                          Object.keys(
+                                              pricingData?.floorPremiums
+                                          ).length > 0 ? (
                                             Object.entries(
                                                 pricingData?.floorPremiums
                                             ).map(
@@ -342,15 +346,6 @@ const FloorPremiums = ({ propertyData }) => {
                                                         >
                                                             <td className="text-custom-gray81 pl-4">
                                                                 {floorNumber}
-
-                                                                {/* <input
-                                                                    type="text"
-                                                                    className="text-custom-gray81 bg-white h-[29px] w-[80px]   border-[#D9D9D9] rounded-[5px] px- outline-none ml-3"
-                                                                    defaultValue={
-                                                                        floorData
-                                                                    }
-                                                                    readOnly
-                                                                /> */}
                                                             </td>
                                                             <td>
                                                                 <div className="">
@@ -410,6 +405,15 @@ const FloorPremiums = ({ propertyData }) => {
                                                     );
                                                 }
                                             )
+                                        ) : (
+                                            <tr>
+                                                <td
+                                                    colSpan="5"
+                                                    className="text-center text-custom-gray81 py-2 montserrat-semibold"
+                                                >
+                                                    No floor premiums
+                                                </td>
+                                            </tr>
                                         )}
                                     </tbody>
                                 </table>

@@ -27,7 +27,7 @@ const FloorPremiumAddUnitModal = ({
     const [excelId, setExcelId] = useState(null);
     const { fetchUnitsInTowerPhase } = useUnit();
     const [isLoading, setIsLoading] = useState(false);
-  
+ 
     //Hooks
     useEffect(() => {
         if (units && units.length > 0) {
@@ -58,10 +58,10 @@ const FloorPremiumAddUnitModal = ({
                 room_number: formData.roomNumber,
                 unit: formData.unit,
                 type: formData.type,
-                indoor_area: formData.indoorArea,
-                balcony_area: formData.balconyArea,
-                garden_area: formData.gardenArea,
-                total_area: formData.totalArea,
+                indoor_area: parseFloat(formData.indoorArea).toFixed(2),
+                balcony_area: parseFloat(formData.balconyArea).toFixed(2),
+                garden_area: parseFloat(formData.gardenArea).toFixed(2),
+                total_area: parseFloat(formData.totalArea).toFixed(2),
                 tower_phase_id: towerPhaseId,
                 excel_id: excelId,
                 property_masters_id: propertyData?.price_list_master_id,
@@ -76,7 +76,11 @@ const FloorPremiumAddUnitModal = ({
                     "success"
                 );
                 setFormData(formDataState);
-                await fetchUnitsInTowerPhase(selectedFloor, towerPhaseId,excelId);
+                await fetchUnitsInTowerPhase(
+                    selectedFloor,
+                    towerPhaseId,
+                    excelId
+                );
                 if (modalRef.current) {
                     modalRef.current.close();
                 }
@@ -88,12 +92,21 @@ const FloorPremiumAddUnitModal = ({
         }
     };
 
-    //Handle close the modal 
+    //Utility to disable the  button if form is empty
+    // Function to check if all fields are empty
+    const isDisabled = Object.values(formData).some((value) => value === "");
+
+    //Handle close the modal and reset all state
     const handleCloseModal = () => {
         if (modalRef.current) {
+            setFormData((prevData) => ({
+                ...formDataState,
+                floor: selectedFloor,
+            }));
             modalRef.current.close();
         }
     };
+
     return (
         <dialog className="modal w-[474px] rounded-lg" ref={modalRef}>
             <div className=" px-14 mb-5 rounded-[10px]">
@@ -146,7 +159,7 @@ const FloorPremiumAddUnitModal = ({
                         </span>
                         <input
                             name="unit"
-                            type="number"
+                            type="text"
                             onChange={handleChange}
                             className="w-full px-4 focus:outline-none"
                             placeholder=""
@@ -168,11 +181,11 @@ const FloorPremiumAddUnitModal = ({
                     </div>
                     <div className="flex items-center border rounded-md overflow-hidden h-[31px]">
                         <span className="text-custom-gray81 bg-custom-grayFA flex w-[180%] pl-3 py-1 border border-custom-grayF1 font-semibold">
-                            Floor Area
+                            Indoor Area
                         </span>
                         <input
                             name="indoorArea"
-                            type="text"
+                            type="number"
                             onChange={handleChange}
                             className="w-full px-4 focus:outline-none"
                             placeholder=""
@@ -185,7 +198,7 @@ const FloorPremiumAddUnitModal = ({
                         </span>
                         <input
                             name="balconyArea"
-                            type="text"
+                            type="number"
                             onChange={handleChange}
                             className="w-full px-4 focus:outline-none"
                             placeholder=""
@@ -198,7 +211,7 @@ const FloorPremiumAddUnitModal = ({
                         </span>
                         <input
                             name="gardenArea"
-                            type="text"
+                            type="number"
                             onChange={handleChange}
                             className="w-full px-4 focus:outline-none"
                             placeholder=""
@@ -211,7 +224,7 @@ const FloorPremiumAddUnitModal = ({
                         </span>
                         <input
                             name="totalArea"
-                            type="text"
+                            type="number"
                             onChange={handleChange}
                             className="w-full px-4 focus:outline-none"
                             placeholder=""
@@ -224,9 +237,11 @@ const FloorPremiumAddUnitModal = ({
                     <button
                         type="submit"
                         onClick={handleSubmit}
-                        disabled={isLoading}
+                        disabled={isLoading || isDisabled}
                         className={`w-[95px] h-[37px] text-white montserrat-semibold text-sm gradient-btn2 rounded-[10px] ${
-                            isLoading ? "opacity-50 cursor-not-allowed" : ""
+                            isLoading || isDisabled
+                                ? "opacity-50 cursor-not-allowed"
+                                : ""
                         }`}
                     >
                         {isLoading ? (

@@ -78,7 +78,8 @@ const ProjectDetails = ({ propertyData }) => {
                         <div className=" w-auto h-auto px-[15px] py-[5px] bg-white rounded-[5px]">
                             <p className=" text-custom-gray81 text-xs">
                                 {propertyData?.data?.tower_phases[0]
-                                    ?.description || propertyData?.description}
+                                    ?.tower_description ||
+                                    propertyData?.description}
                             </p>
                         </div>
                     </div>

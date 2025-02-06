@@ -38,9 +38,14 @@ const BasicPricing = () => {
     const { pricingData, resetPricingData, setPricingData } = usePricing();
     const { fetchPropertyListMasters } = usePriceListMaster();
     const [isLoading, setIsLoading] = useState({});
-    const { checkExistingUnits, floors, setFloors } = useUnit();
+    const {
+        checkExistingUnits,
+        floors,
+        setFloors,
+        setFloorPremiumsAccordionOpen,
+    } = useUnit();
 
-    // console.log("PricingData in BasicPricing", pricingData);
+    console.log("PricingData in BasicPricing", pricingData);
     //Hooks
     useEffect(() => {
         if (data) {
@@ -92,7 +97,8 @@ const BasicPricing = () => {
                           ],
                 }));
             }
-            if (data?.floor_premiums.length > 0) {
+            console.log("data", data);
+            if (data?.floor_premiums && data?.floor_premiums.length > 0) {
                 console.log("Floor premiums have data 1", data?.floor_premiums);
                 const floorPremiumData = data?.floor_premiums.reduce(
                     (acc, premium) => {
@@ -114,53 +120,30 @@ const BasicPricing = () => {
                     floorPremiums: floorPremiumData,
                 }));
             }
-
-            if (data?.excel_id === null) {
-                console.log("Excel ID is null, skipping fetch", data?.excel_id);
-                setFloors(!floors);
-                console.log("Floors are set to empty");
-                return;
-            }
-            if (data?.excel_id && floors.length === 0) {
-                console.log("Excel ID is not null ", data?.excel_id);
-                checkExistingUnits(data.tower_phase_id, data.excel_id);
-                // setPricingData((prev) => ({
-                //     ...prev,
-                //     floorPremiums: [],
-                // }));
-            }
-            // else if (data?.excel_id === null) {
-            //     console.log("Excel ID is null, skipping fetch", data?.excel_id);
-            //     return; // Stop execution if excel_id is null
-            // } else {
-            //     console.log("It runs here 117")
-            //     checkExistingUnits(data.tower_phase_id, data.excel_id);
-            // }
-
-            // else if (
-            //     action === "Edit" &&
-            //     !excelId &&
-            //     (!floors || floors.length === 0)
-            // ) {
-            //     console.log("Floor premiums doest not have data");
-            //     checkExistingUnits(data?.tower_phase_id);
-            // }
         }
     }, [data]);
 
-    // useEffect(() => {
-    //     // Only proceed if all conditions are met
-    //     // const shouldCheckUnits =
-    //     //     action === "Edit" && (!floors || floors.length === 0);
-    //     // if (shouldCheckUnits) {
-    //     //     // Ensure tower_phase_id exists before calling the function
-    //     //     if (data?.tower_phase_id && data?.excel_id) {
-    //     //         checkExistingUnits(data.tower_phase_id, data.excel_id);
-    //     //     } else {
-    //     //         console.warn("No tower phase ID available");
-    //     //     }
-    //     // }
-    // }, [data, checkExistingUnits, action, floors]);
+    // Separate useEffect for checkExistingUnits
+    useEffect(() => {
+        if (!data?.excel_id) {
+            console.log("Excel ID is null, skipping fetch", data?.excel_id);
+            setFloors([]);
+            setPricingData((prev) => ({
+                ...prev,
+                floorPremiums: [],
+            }));
+            console.log("Floors are set to empty");
+            return;
+        }
+        if (
+            data?.excel_id &&
+            floors.length === 0 &&
+            pricingData.floorPremiums.length === 0
+        ) {
+            console.log("Fetching floors because no existing data is found");
+            checkExistingUnits(data.tower_phase_id, data.excel_id);
+        }
+    }, [data?.excel_id, data?.tower_phase_id]);
 
     //Event handler
     // Open the add property modal
@@ -176,7 +159,7 @@ const BasicPricing = () => {
             fileInputRef.current.click();
         }
     };
-    // console.log("Pricing Data", pricingData);
+
     /**
      * Handles the process of uploading an Excel file, extracting the headers
      */
@@ -291,16 +274,6 @@ const BasicPricing = () => {
      */
     const handleSubmit = async (e, status) => {
         e.preventDefault();
-        // if (pricingData.priceListSettings.base_price === "" ||
-        //     pricingData.priceListSettings.reservation_fee === "") {
-        //     showToast("Please fill all the fields in the price list settings section", "error");
-        //     return;
-        // }
-        // if (pricingData.paymentSchemes.length === 0) {
-        //     showToast("Please select at least one payment scheme", "error");
-        //     return;
-        // }
-
         if (action === "Edit") {
             try {
                 setIsLoading((prev) => ({ ...prev, [status]: true }));
@@ -324,6 +297,7 @@ const BasicPricing = () => {
                     setTimeout(() => {
                         navigate("/property-pricing/master-lists");
                     }, 1000);
+                    setFloorPremiumsAccordionOpen(false);
                 } else {
                     console.log(
                         "Unexpected response status:",
@@ -361,13 +335,14 @@ const BasicPricing = () => {
                         response?.data?.message || "Data added successfully",
                         "success"
                     );
-
                     // Reset data and navigate to master list page
                     resetPricingData();
                     await fetchPropertyListMasters(true);
+
                     setTimeout(() => {
                         navigate("/property-pricing/master-lists");
                     }, 1000);
+                    setFloorPremiumsAccordionOpen(false);
                 } else {
                     console.log(
                         "Unexpected response status:",
@@ -449,7 +424,6 @@ const BasicPricing = () => {
                         ) : (
                             <>Save as Draft</>
                         )}
-                        <span>{data?.price_list_master_id}</span>
                     </div>
                 </button>
             </div>

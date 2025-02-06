@@ -20,7 +20,7 @@ class PropertyMasterRepository
     */
 
     public function store(array $data)
-    {  
+    {
         DB::beginTransaction();
         try {
             $propertyMaster = $this->model->find($data['property_masters_id']);
@@ -67,9 +67,10 @@ class PropertyMasterRepository
                         $query->select('id', 'property_master_id', 'type', 'barangay', 'city', 'province')
                             ->latest('id')
                             ->limit(1);
-                    }
+                    },
+                    
                 ])
-                ->select('id', 'property_name') // Add any other property master fields you need
+                ->select('id', 'property_name')
                 ->find($propertyMaster->id);
             // Return success status and optional message
             return [

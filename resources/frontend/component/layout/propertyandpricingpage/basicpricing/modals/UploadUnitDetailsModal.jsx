@@ -3,6 +3,7 @@ import { IoMdArrowDropdown } from "react-icons/io";
 import CircularProgress from "@mui/material/CircularProgress";
 import { useUnit } from "@/context/PropertyPricing/UnitContext";
 import { showToast } from "@/util/toastUtil";
+import { usePriceListMaster } from "@/context/PropertyPricing/PriceListMasterContext";
 
 const UploadUnitDetailsModal = ({
     uploadUnitModalRef,
@@ -19,6 +20,7 @@ const UploadUnitDetailsModal = ({
     const [propertyMasterId, setPropertyMasterId] = useState();
     const [priceListMasterId, setPriceListMasterId] = useState();
     const { uploadUnits, isUploadingUnits } = useUnit();
+    const { priceListMaster } = usePriceListMaster();
 
     //Hooks
     useEffect(() => {
@@ -30,12 +32,26 @@ const UploadUnitDetailsModal = ({
                 };
                 return acc;
             }, {});
+
+            const towerPhaseId = propertyData?.data?.tower_phases[0]?.id;
+            const priceListMasterId =
+                priceListMaster && priceListMaster.length > 0
+                    ? priceListMaster.find(
+                          (master) => master.tower_phase_id === towerPhaseId
+                      )?.price_list_master_id
+                    : null;
             setFormData(initialFormData);
-            setTowerPhaseId(propertyData?.tower_phase_id);
-            setPriceListMasterId(propertyData?.price_list_master_id);
+            setTowerPhaseId(propertyData?.tower_phase_id || towerPhaseId);
             setPropertyMasterId(
-                propertyData?.property_commercial_detail?.property_master_id
+                propertyData?.property_commercial_detail?.property_master_id ||
+                    propertyData?.data?.property_commercial_detail?.property_master_id
             );
+            console.log("propertyData", propertyData);
+            //If the mode is straight forward Add
+            console.log("priceListMasterId", priceListMasterId);
+            setPriceListMasterId(
+                propertyData?.price_list_master_id || priceListMasterId
+            ); //If the mode is not edit
         }
     }, [selectedExcelHeader, propertyData]); //Initialize formData once selectedExcelHeader is available
 
@@ -65,22 +81,21 @@ const UploadUnitDetailsModal = ({
         console.log("payload", payload);
 
         try {
- 
             const response = await uploadUnits(payload);
             console.log("response 66", response);
-            if (response?.message === 'success') {
+            if (response?.success === true) {
                 // const excelId = response?.data?.data?.excel_id;
                 //TODO: fetch the unit lloor
                 // Fetch floors immediately after successful upload to reflect the floor premium
 
-                showToast(response.data.message, "success");
+                showToast("Unit uploaded successfully", "success");
                 if (uploadUnitModalRef.current) {
                     uploadUnitModalRef.current.close();
                 }
             }
         } catch (error) {
             console.log("error uploading excel", error);
-        }  
+        }
     };
 
     const replaceFile = async (event) => {

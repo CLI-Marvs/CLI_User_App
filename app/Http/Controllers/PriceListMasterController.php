@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Services\PriceListMasterService;
 use App\Http\Requests\StorePriceListMasterRequest;
 use App\Http\Requests\UpdatePriceListMasterRequest;
+use Illuminate\Validation\ValidationException;
 
 class PriceListMasterController extends Controller
 {

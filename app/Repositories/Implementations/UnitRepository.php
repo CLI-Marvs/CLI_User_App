@@ -90,18 +90,16 @@ class UnitRepository
 
 
     /**
-     * Get all units for a specific tower phase and floor
+     * Get all units for a specific tower phase and selected floor
      */
     public function getUnits($towerPhaseId, $selectedFloor, $excelId)
     {
-
-
         $units = $this->model->where('tower_phase_id', $towerPhaseId)
             ->where('floor', $selectedFloor)
             ->where('excel_id', $excelId)
             ->where('status', 'Active')
             ->get();
-        // Check if any units exist
+
         if ($units->isEmpty()) {
             return [
                 'message' => "No active units found for the given tower phase and floor."
@@ -116,16 +114,6 @@ class UnitRepository
      */
     public function storeUnitDetails(array $data)
     {
-
-
-        // $priceVersion = $this->model->create([
-        //     'property_masters_id' => $data['property_id'],
-        //     'tower_phase_name' => $data['tower_phase'],
-        //     'version_name' => $version['name'],
-        //     'percent_increase' => $version['percent_increase'],
-        //     'allowed_buyer' => $version['no_of_allowed_buyers'],
-        //     'expiry_date' => $expiryDate->format('Y-m-d H:i:s'),
-        // ]);
         $units = $this->model->create(array_merge(
             $data,
             ['status' => 'Active']

@@ -40,6 +40,7 @@ class PriceListMasterRepository
      */
     public function store(array $data)
     {
+        // dd($data);
         DB::beginTransaction();
         try {
             $priceListMaster = $this->model->where('tower_phase_id', $data['tower_phase_id'])->first();
@@ -82,10 +83,30 @@ class PriceListMasterRepository
                 }
             }
 
+            //Fetch the current Floor Premiums ID in the Price List Master table
+
+            $newFloorPremiumID = [] ?? null; // Keep track of floor premium in the payload
+            if (!empty($data['floorPremiumsPayload']) && is_array($data['floorPremiumsPayload'])) {
+
+                foreach ($data['floorPremiumsPayload'] as $floorPremium) {
+                    // $floorPremiumId = $floorPremium['id'] ?? null;
+                    $newFloorPremium = $priceListMaster->floorPremiums()->create([
+                        'floor' => $floorPremium['floor'],
+                        'premium_cost' => $floorPremium['premiumCost'],
+                        'lucky_number' => $floorPremium['luckyNumber'],
+                        'excluded_unit' => json_encode($floorPremium['excludedUnits']),
+                        'tower_phase_id' => $data['tower_phase_id'],
+                        'status' => 'Active'
+                    ]);
+                    $newFloorPremiumID[] = $newFloorPremium->id;
+                }
+            }
+
             $priceListMaster->update([
                 'status' => $data['status'],
                 'date_last_update' => now(),
                 'pricebasic_details_id' => $priceBasicDetail->id,
+                'floor_premiums_id' => json_encode($newFloorPremiumID),
                 'price_versions_id' => json_encode($createdPriceVersionIds),
             ]);
 
@@ -107,25 +128,26 @@ class PriceListMasterRepository
         }
     }
 
-  
-    public function update(array $data)
-    {
-        DB::beginTransaction();
-        try {
-            $priceListMaster = $this->findPriceListMaster($data['price_list_master_id'], $data['tower_phase_id']);
 
-            $newPriceVersionIds = $this->handlePriceVersions($priceListMaster, $data);
-            $newFloorPremiumIds = $this->handleFloorPremiums($priceListMaster, $data);
+    // public function update(array $data)
+    // {
+    //     DB::beginTransaction();
+    //     try {
+    //         $priceListMaster = $this->findPriceListMaster($data['price_list_master_id'], $data['tower_phase_id']);
 
-            $this->updatePriceListMaster($priceListMaster, $data, $newPriceVersionIds, $newFloorPremiumIds);
+    //         $newPriceVersionIds = $this->handlePriceVersions($priceListMaster, $data);
+    //         $newFloorPremiumIds = $this->handleFloorPremiums($priceListMaster, $data);
 
-            DB::commit();
-            return $this->successResponse($priceListMaster);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return $this->errorResponse($e);
-        }
-    }
+    //         $this->updatePriceListMaster($priceListMaster, $data, $newPriceVersionIds, $newFloorPremiumIds);
+
+    //         DB::commit();
+    //         return $this->successResponse($priceListMaster);
+    //     } catch (\Exception $e) {
+    //         DB::rollBack();
+    //         return $this->errorResponse($e);
+    //     }
+    // }
+
     /**
      * Fetch price list masters with related models and fields.
      */

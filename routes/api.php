@@ -167,7 +167,6 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/check/{towerPhaseId}/{excelId}', [UnitController::class, 'getExistingUnits']);
         //Get units for selected floor and tower phase
         Route::get('/tower/{towerPhaseId}/floor/{selectedFloor}/units/{excelId}', [UnitController::class, 'getUnits']);
-
         //Store  unit  details from the system
         Route::post('/store-unit', [UnitController::class, 'storeUnit']);
     });

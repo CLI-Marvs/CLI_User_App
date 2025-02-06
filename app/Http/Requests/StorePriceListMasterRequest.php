@@ -47,7 +47,13 @@ class StorePriceListMasterRequest extends FormRequest
             'priceVersionsPayload.*.payment_scheme' => 'array',
 
             //Floor premium
-            'floorPremiumPayload' => 'array | nullable',
+            'floorPremiumsPayload' =>  'array',
+            'floorPremiumsPayload.*.id' => 'integer',
+            'floorPremiumsPayload.*.floor' => 'integer',
+            'floorPremiumsPayload.*.premiumCost' => 'nullable | numeric',
+            'floorPremiumsPayload.*.luckyNumber' => 'boolean',
+            'floorPremiumsPayload.*.excludedUnits' => 'array',
+
             
             'status' =>
             'required|string|max:255',
