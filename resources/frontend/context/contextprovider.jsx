@@ -105,8 +105,6 @@ export const ContextProvider = ({ children }) => {
     const [yearValue, setYearValue] = useState(new Date().getFullYear());
     const [monthValue, setMonthValue] = useState("All");
 
-
-
     useEffect(() => {
         if (user && user.department && !isDepartmentInitialized) {
             setDepartment(
@@ -127,7 +125,6 @@ export const ContextProvider = ({ children }) => {
         }
     };
 
-    
     const getAllConcerns = async () => {
         if (token) {
             setLoading(true);
@@ -230,12 +227,14 @@ export const ContextProvider = ({ children }) => {
                 },
             });
             const result = response.data;
-    
+
             // Aggregate data into a single "Other Concerns" entry for null or "Other Concerns"
             const aggregatedData = result.reduce((acc, item) => {
                 const name = item.details_concern || "Other Concerns"; // Replace null with "Other Concerns"
-                const existingIndex = acc.findIndex((entry) => entry.name === name);
-    
+                const existingIndex = acc.findIndex(
+                    (entry) => entry.name === name
+                );
+
                 if (existingIndex > -1) {
                     // If "Other Concerns" already exists, add to its value
                     acc[existingIndex].value += item.total;
@@ -246,10 +245,10 @@ export const ContextProvider = ({ children }) => {
                         value: item.total,
                     });
                 }
-    
+
                 return acc;
             }, []);
-    
+
             setDataCategory(aggregatedData);
         } catch (error) {
             console.log("Error retrieving data", error);
@@ -312,8 +311,10 @@ export const ContextProvider = ({ children }) => {
             const result = response.data;
             const formattedData = result.reduce((acc, item) => {
                 const propertyName = item.property ? item.property : "N/A";
-                const existingProperty = acc.find((entry) => entry.name === propertyName);
-                if(existingProperty) {
+                const existingProperty = acc.find(
+                    (entry) => entry.name === propertyName
+                );
+                if (existingProperty) {
                     existingProperty.resolved += item.resolved;
                     existingProperty.unresolved += item.unresolved;
                     existingProperty.closed += item.closed;
@@ -327,7 +328,7 @@ export const ContextProvider = ({ children }) => {
                 }
                 return acc;
             }, []);
-    
+
             setDataPropery(formattedData);
         } catch (error) {
             console.log("error retrieving", error);
@@ -342,28 +343,35 @@ export const ContextProvider = ({ children }) => {
                     property: project,
                     department: department,
                     year: year,
-                },
+                },  
             });
-    
-            const result = response.data;
-    
-            const formattedData = result.map((item) => ({
-                name: item.department ? item.department : "Unassigned", // Replace null department with "Unassigned"
+
+            const departments = response.data.departments;
+            const unassignedData = response.data.totalUnassigned;
+
+            const formattedData = departments.map((item) => ({
+                name: item.department,
                 resolved: item.resolved,
                 unresolved: item.unresolved,
                 closed: item.closed,
             }));
-    
-            console.log(formattedData);
-    
-            setDataDepartment(formattedData);
+
+            let concatData = [...formattedData];
+
+            if (unassignedData) {
+                const formattedDataUnassigned = {
+                    name: "Unassigned",
+                    resolved: unassignedData.total_resolved,
+                    unresolved: unassignedData.total_unresolved,
+                    closed: unassignedData.total_closed,
+                };
+                concatData.push(formattedDataUnassigned);
+            }
+            setDataDepartment(concatData);
         } catch (error) {
             console.log("error retrieving", error);
         }
     };
-    
-    
-    
 
     const getCommunicationTypePerProperty = async () => {
         try {
@@ -382,13 +390,13 @@ export const ContextProvider = ({ children }) => {
             const formattedData = result.reduce((acc, item) => {
                 const name = item.communication_type || "No type";
                 const existing = acc.find((entry) => entry.name === name);
-    
+
                 if (existing) {
                     existing.value += item.total;
                 } else {
                     acc.push({ name, value: item.total });
                 }
-    
+
                 return acc;
             }, []);
 
@@ -924,7 +932,7 @@ export const ContextProvider = ({ children }) => {
                 setYearValue,
                 yearValue,
                 setMonthValue,
-                monthValue
+                monthValue,
             }}
         >
             {children}
