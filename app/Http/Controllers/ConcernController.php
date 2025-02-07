@@ -2098,8 +2098,19 @@ class ConcernController extends Controller
         }
 
         if ($department && $department !== 'All') {
-            $query->whereRaw("resolve_from::jsonb @> ?", [json_encode([['department' => $department]])]);
+            if ($department === 'Unassigned') {
+                $query->whereRaw("resolve_from::jsonb @> ?", [json_encode([['department' => null]])]);
+            } else {
+                $query->whereRaw("
+                    EXISTS (
+                        SELECT 1 FROM jsonb_array_elements(resolve_from::jsonb) AS elem
+                        WHERE elem->>'department' = ?
+                    )
+                ", [$department]);
+            }
         }
+        
+        
 
         // Query for total unresolved, closed, resolved, and unassigned concerns
         $totalUnassigned = Concerns::selectRaw("

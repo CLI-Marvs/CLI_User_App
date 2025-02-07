@@ -345,20 +345,21 @@ export const ContextProvider = ({ children }) => {
                     year: year,
                 },  
             });
-
+    
             const departments = response.data.departments;
             const unassignedData = response.data.totalUnassigned;
-
+    
             const formattedData = departments.map((item) => ({
                 name: item.department,
                 resolved: item.resolved,
                 unresolved: item.unresolved,
                 closed: item.closed,
             }));
-
+    
             let concatData = [...formattedData];
-
-            if (unassignedData) {
+    
+            // Only push "Unassigned" data if it was requested explicitly
+            if (unassignedData && (department === 'Unassigned' || department === 'All')) {
                 const formattedDataUnassigned = {
                     name: "Unassigned",
                     resolved: unassignedData.total_resolved,
@@ -367,11 +368,13 @@ export const ContextProvider = ({ children }) => {
                 };
                 concatData.push(formattedDataUnassigned);
             }
+    
             setDataDepartment(concatData);
         } catch (error) {
             console.log("error retrieving", error);
         }
     };
+    
 
     const getCommunicationTypePerProperty = async () => {
         try {

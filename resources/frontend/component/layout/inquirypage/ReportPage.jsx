@@ -735,6 +735,7 @@ const ReportPage = () => {
                                         {user?.department}
                                     </option>
                                 )}
+                                <option value="Unassigned">Unassigned</option>
                             </select>
                             <span className="absolute inset-y-0 right-0 flex items-center text-white pr-3 pl-3 bg-custom-lightgreen pointer-events-none">
                                 <IoMdArrowDropdown />
