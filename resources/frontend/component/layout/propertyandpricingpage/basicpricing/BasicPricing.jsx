@@ -18,7 +18,6 @@ import { usePricing } from "@/component/layout/propertyandpricingpage/basicprici
 import { formatPayload } from "@/component/layout/propertyandpricingpage/basicpricing/utils/payloadFormatter";
 import { showToast } from "@/util/toastUtil";
 import { usePriceListMaster } from "@/context/PropertyPricing/PriceListMasterContext";
-import paymentScheme from "./accordion/PaymentSchemes";
 import { useUnit } from "@/context/PropertyPricing/UnitContext";
 import CircularProgress from "@mui/material/CircularProgress";
 
@@ -31,11 +30,16 @@ const BasicPricing = () => {
     const fileInputRef = useRef(null);
     const location = useLocation();
     const { data = {}, action = null } = location.state || {};
-    const [propertyData, setPropertyData] = useState(data);
+    const [propertyData, setPropertyData] = useState();
     const [fileName, setFileName] = useState("");
     const [fileSelected, setFileSelected] = useState({});
     const [selectedExcelHeader, setSelectedExcelHeader] = useState([]);
-    const { pricingData, resetPricingData, setPricingData } = usePricing();
+    const {
+        pricingData,
+        resetPricingData,
+        setPricingData,
+        additionalPremiums,
+    } = usePricing();
     const { fetchPropertyListMasters } = usePriceListMaster();
     const [isLoading, setIsLoading] = useState({});
     const {
@@ -43,9 +47,12 @@ const BasicPricing = () => {
         floors,
         setFloors,
         setFloorPremiumsAccordionOpen,
+        excelId
     } = useUnit();
 
     console.log("PricingData in BasicPricing", pricingData);
+    console.log("data in BasicPricing", data);
+
     //Hooks
     useEffect(() => {
         if (data) {
@@ -60,6 +67,7 @@ const BasicPricing = () => {
                     },
                 }));
             }
+            // Update the price versions
             if (data?.price_versions) {
                 setPricingData((prev) => ({
                     ...prev,
@@ -97,7 +105,8 @@ const BasicPricing = () => {
                           ],
                 }));
             }
-            console.log("data", data);
+
+            // Update the floor premiums
             if (data?.floor_premiums && data?.floor_premiums.length > 0) {
                 console.log("Floor premiums have data 1", data?.floor_premiums);
                 const floorPremiumData = data?.floor_premiums.reduce(
@@ -120,6 +129,28 @@ const BasicPricing = () => {
                     floorPremiums: floorPremiumData,
                 }));
             }
+
+            //Update the additional premiums
+            if (
+                data?.additional_premiums &&
+                data?.additional_premiums.length > 0
+            ) {
+                const updatedPremiums = data?.additional_premiums.map(
+                    (item) => ({
+                        ...item,
+                        premiumCost:
+                            item.premiumCost === "0.00" ||
+                            item.premiumCost === 0
+                                ? 0
+                                : item.premiumCost,
+                    })
+                );
+
+                setPricingData((prev) => ({
+                    ...prev,
+                    additionalPremiums: updatedPremiums,
+                }));
+            }
         }
     }, [data]);
 
@@ -131,18 +162,21 @@ const BasicPricing = () => {
             setPricingData((prev) => ({
                 ...prev,
                 floorPremiums: [],
+                additionalPremiums: [],
             }));
+            
             console.log("Floors are set to empty");
             return;
-        }
+        } 
         if (
             data?.excel_id &&
             floors.length === 0 &&
-            pricingData.floorPremiums.length === 0
+            Object.keys(pricingData.floorPremiums).length === 0
         ) {
             console.log("Fetching floors because no existing data is found");
             checkExistingUnits(data.tower_phase_id, data.excel_id);
         }
+ 
     }, [data?.excel_id, data?.tower_phase_id]);
 
     //Event handler
@@ -267,6 +301,10 @@ const BasicPricing = () => {
         floorPremiumsPayload: formatPayload.formatMultipleFloorPremiums(
             pricingData.floorPremiums
         ),
+        additionalPremiumsPayload:
+            formatPayload.formatAdditionalPremiumsPayload(
+                pricingData.additionalPremiums
+            ),
         status: status,
     });
     /**
@@ -448,7 +486,7 @@ const BasicPricing = () => {
             <div className="flex flex-col gap-1 w-full border-t-1 border-custom-lightestgreen py-4  ">
                 <PriceListSettings />
                 <FloorPremiums propertyData={propertyData} />
-                <AdditionalPremiums />
+                <AdditionalPremiums propertyData={propertyData} />
                 <PriceVersions priceListMasterData={data} action={action} />
                 {/* <PaymentSchemes action={action} priceListMasterData={data} /> */}
                 <ReviewsandApprovalRouting />

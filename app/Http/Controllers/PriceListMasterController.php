@@ -34,12 +34,8 @@ class PriceListMasterController extends Controller
      */
     public function store(StorePriceListMasterRequest $request)
     {
-
         try {
-            //TODO: validate the request to make sure it's valid and match in the request
             $result = $this->service->store($request->validated());
-
-
             if ($result['success']) {
                 return response()->json([
                     'message' => $result['message'],
@@ -67,16 +63,14 @@ class PriceListMasterController extends Controller
 
 
     /*
-     * Update the specified resource 'status' in storage.
+     * Update the specified resource in storage.
      */
     public function update(UpdatePriceListMasterRequest $request)
     {
-        
         $validatedData = $request->validated();
-  
+
         try {
             $result  = $this->service->update($validatedData, $validatedData['tower_phase_id']);
-
             if ($result['success']) {
                 return response()->json([
                     'message' => $result['message'],

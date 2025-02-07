@@ -38,27 +38,40 @@ export const formatPayload = {
                 const floor = floorPremiums[floorNumber];
                 const formattedFloor = {
                     id: floor.id,
-                    floor: parseInt(floorNumber, 10), // Convert floor number to integer
-                    premiumCost:
+                    floor: parseInt(floorNumber, 10),
+                    premium_cost:
                         parseFloat(floor.premiumCost).toFixed(2) || "0.00", // Default to 0 if invalid
-                    luckyNumber:
+                    lucky_number:
                         typeof floor.luckyNumber === "boolean"
                             ? floor.luckyNumber
-                            : false, // Ensure boolean value
-                    excludedUnits: Array.isArray(floor.excludedUnits)
+                            : false,
+                    excluded_units: Array.isArray(floor.excludedUnits)
                         ? floor.excludedUnits
-                        : [], // Default to empty array if not an array
+                        : [],
                 };
                 acc.push(formattedFloor);
                 return acc;
             },
             []
         );
-
-        
         return formattedFloorPremiums;
     },
-
+    
+    formatAdditionalPremiumsPayload: (additionalPremiums) => {
+        const formattedAdditionalPremiums = additionalPremiums.map(
+            (premium) => {
+                const formattedPremium = {
+                    id: premium.id,
+                    view_name: premium.viewName,
+                    premium_cost: parseFloat(premium.premiumCost).toFixed(2),
+                    excluded_units: premium.excludedUnitIds,
+                };
+                return formattedPremium;
+            }
+        );
+        console.log("formattedAdditionalPremiums", formattedAdditionalPremiums);
+        return formattedAdditionalPremiums;
+    },
     // formatPaymentSchemePayload: (paymentScheme) => {
     //     const formattedPaymentScheme = {
     //         payment_scheme_name: paymentScheme.paymentSchemeName,

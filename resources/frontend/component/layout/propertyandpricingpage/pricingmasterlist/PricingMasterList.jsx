@@ -11,7 +11,7 @@ import { useNavigate } from "react-router-dom";
 import { usePriceListMaster } from "@/context/PropertyPricing/PriceListMasterContext";
 import TableSkeleton from "@/component/layout/propertyandpricingpage/component/TableSkeleton";
 import { usePaymentScheme } from "@/context/PropertyPricing/PaymentSchemeContext";
-import { toLowerCaseText } from '@/component/layout/propertyandpricingpage/utils/formatToLowerCase';
+import { toLowerCaseText } from "@/component/layout/propertyandpricingpage/utils/formatToLowerCase";
 
 const PricingMasterList = () => {
     //States
@@ -359,15 +359,17 @@ const PricingMasterList = () => {
                                                     "On-going Approval"
                                                         ? "Cancel"
                                                         : "Edit"}
-                                                    - {item?.price_list_master_id}
+                                                    -{" "}
+                                                    {item?.price_list_master_id}
                                                 </p>
                                             </div>
                                         </td>
                                         <td className="w-[150px] flex items-center justify-start">
                                             <div>
                                                 <p>
-                                                    {toLowerCaseText(item?.property_name)}
-
+                                                    {toLowerCaseText(
+                                                        item?.property_name
+                                                    )}
                                                 </p>
                                                 <p>
                                                     Tower{" "}
@@ -533,18 +535,19 @@ const PricingMasterList = () => {
 
                                         {/* Render payment schemes */}
                                         <td className="w-[150px] flex items-center justify-start rounded-r-lg text-sm">
-                                            <div>
-                                                <p>
+                                            <div className="flex ">
+                                                <ul className=" pl-4 list-none ">
                                                     {item?.price_versions?.map(
                                                         (
                                                             version,
                                                             versionIndex
                                                         ) => {
                                                             return (
-                                                                <span
+                                                                <li
                                                                     key={
                                                                         versionIndex
                                                                     }
+                                                                    className=""
                                                                 >
                                                                     {version?.payment_schemes?.map(
                                                                         (
@@ -552,32 +555,26 @@ const PricingMasterList = () => {
                                                                             schemeIndex
                                                                         ) => {
                                                                             return (
-                                                                                <span
+                                                                                <ul
                                                                                     key={
                                                                                         schemeIndex
                                                                                     }
+                                                                                    className="pl-4"
                                                                                 >
-                                                                                    {
-                                                                                        scheme?.payment_scheme_name
-                                                                                    }
-                                                                                    {schemeIndex <
-                                                                                    version
-                                                                                        ?.payment_schemes
-                                                                                        ?.length -
-                                                                                        1 ? (
-                                                                                        <br />
-                                                                                    ) : (
-                                                                                        ""
-                                                                                    )}
-                                                                                </span>
+                                                                                    <li>
+                                                                                        {
+                                                                                            scheme?.payment_scheme_name
+                                                                                        }
+                                                                                    </li>
+                                                                                </ul>
                                                                             );
                                                                         }
                                                                     )}
-                                                                </span>
+                                                                </li>
                                                             );
                                                         }
                                                     )}
-                                                </p>
+                                                </ul>
                                             </div>
                                         </td>
                                     </tr>

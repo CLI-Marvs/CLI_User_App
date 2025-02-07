@@ -7,7 +7,6 @@ import CircularProgress from "@mui/material/CircularProgress";
 import { useUnit } from "@/context/PropertyPricing/UnitContext";
 import { usePricing } from "@/component/layout/propertyandpricingpage/basicpricing/context/BasicPricingContext";
 import { showToast } from "@/util/toastUtil";
-import { property } from "lodash";
 
 const newFloorState = {
     floor: null,
@@ -20,27 +19,34 @@ const FloorPremiums = ({ propertyData }) => {
     const [newFloorPremiumData, setNewFloorPremiumData] =
         useState(newFloorState);
     const modalRef = useRef(null);
-
     const {
         floors,
-        isLoading,
+        isFloorCountLoading,
         floorPremiumsAccordionOpen,
         setFloorPremiumsAccordionOpen,
-        checkExistingUnits,
-        setFloors,
+        excelId,
     } = useUnit();
 
     const [selectedFloor, setSelectedFloor] = useState(null);
     const { pricingData, setPricingData } = usePricing();
     const [towerPhaseId, setTowerPhaseId] = useState(null);
-    // console.log("PricingData", pricingData);
+    const [localExcelId, setLocalExcelId] = useState(null);
+    console.log("pricj", pricingData);
     //Hooks
     useEffect(() => {
-        setTowerPhaseId(propertyData?.tower_phase_id);
-        if (floors && Object.keys(floors).length > 0) {
-            // Get the first (and only) key dynamically
+        setTowerPhaseId(
+            propertyData?.tower_phase_id ||
+                propertyData?.data?.tower_phases[0]?.id
+        );
+        setLocalExcelId(propertyData?.excel_id);
+        if (
+            floors &&
+            Object.keys(floors).length > 0 &&
+            (!pricingData.floorPremiums ||
+                Object.keys(pricingData.floorPremiums).length === 0) // Ensure it only runs if floorPremiums is empty
+        ) {
+            console.log("it runs here in 48")
             const floorNumbers = floors[Object.keys(floors)[0]];
-
             if (Array.isArray(floorNumbers) && floorNumbers.length > 0) {
                 const initialFloorPremiums = floorNumbers.reduce(
                     (acc, floor) => {
@@ -53,26 +59,13 @@ const FloorPremiums = ({ propertyData }) => {
                     },
                     {}
                 );
-                //  setFloorPremiums(initialFloorPremiums); // Ensure this updates your state
-
                 setPricingData((prev) => ({
                     ...prev,
                     floorPremiums: initialFloorPremiums,
                 }));
             }
         }
-
-        // if (floorPremiumsAccordionOpen) {
-        //     // console.log("it runs here")
-        //     checkExistingUnits(towerPhaseId, propertyData?.excel_id);
-        // }
     }, [floors, propertyData]);
-
-    useEffect(() => {
-        if (floorPremiumsAccordionOpen) {
-            setFloors([]);
-        }
-    }, [floorPremiumsAccordionOpen]);
 
     //Event handler
     //Handle to open modal to assign floor premiums
@@ -86,7 +79,6 @@ const FloorPremiums = ({ propertyData }) => {
     //  Handle to input floor premiums data(e.g premium cost)
     const handleOnChange = (floorNumber, e) => {
         const { name, type, checked, value } = e.target;
-
         if (
             !pricingData?.floorPremiums ||
             Object.keys(pricingData?.floorPremiums).length === 0
@@ -96,19 +88,16 @@ const FloorPremiums = ({ propertyData }) => {
         }
 
         const floorPremiums = pricingData.floorPremiums[floorNumber];
-
         if (!floorPremiums) {
             console.log(`No premium data for floor ${floorNumber}`);
             return;
         }
 
-        // Update the floorPremiums state
         const updatedFloorPremiums = {
             ...floorPremiums,
             [name]: type === "checkbox" ? checked : value,
         };
 
-        // Update the floorPremiums object (assuming you're using a state setter like setFloorPremiums)
         setPricingData((prevState) => ({
             ...prevState,
             floorPremiums: {
@@ -118,7 +107,7 @@ const FloorPremiums = ({ propertyData }) => {
         }));
     };
 
-    //Handling changes for adding  new floor
+    //Handle input change for adding  new floor
     function handleNewFloorChange(e) {
         const { name, value } = e.target;
         setNewFloorPremiumData((prevData) => ({
@@ -135,7 +124,6 @@ const FloorPremiums = ({ propertyData }) => {
     const handleAddNewFloor = () => {
         const { floor, premiumCost, excludedUnits } = newFloorPremiumData;
 
-        // Early return if required fields are missing
         if (!floor || !premiumCost) {
             showToast("Floor and Premium Cost are required", "error");
             return;
@@ -160,7 +148,6 @@ const FloorPremiums = ({ propertyData }) => {
             return;
         }
 
-        // Check if floor already exists
         const isFloorExist = Object.keys(pricingData.floorPremiums).includes(
             floor.toString()
         );
@@ -170,7 +157,6 @@ const FloorPremiums = ({ propertyData }) => {
             return;
         }
 
-        // Add new floor data
         setPricingData((prevState) => ({
             ...prevState,
             floorPremiums: {
@@ -186,12 +172,18 @@ const FloorPremiums = ({ propertyData }) => {
         showToast(`Floor ${floor} added successfully`, "success");
     };
 
-    //Utility function to format the premium cost
-    const formatPremiumCost = (premiumCost) => {
-        if (premiumCost === 0) {
-            return "0";
-        }
-        return premiumCost;
+    /*
+    Handle remove floor premium
+     */
+    const handleRemoveFloorPremium = (floorNumber) => {
+        console.log("handleRemoveFloorPremium", floorNumber);
+        console.log("pricingData", pricingData);
+        // setPricingData((prevPricingData) => ({
+        //     ...prevPricingData,
+        //     floorPremiums: prevPricingData.floorPremiums.filter(
+        //         (_, i) => i !== floorNumber
+        //     ),
+        // }));
     };
     return (
         <>
@@ -247,57 +239,72 @@ const FloorPremiums = ({ propertyData }) => {
             >
                 <div className="bg-white overflow-hidden">
                     <div className="w-full p-5 h-[370px]">
-                        <div className="flex justify-center w-full h-[31px] gap-3 mb-4">
-                            <div className="flex items-center border border-custom-grayF1 rounded-[5px] overflow-hidden w-[204px] text-sm  ">
-                                <span className="text-custom-gray81 bg-custom-grayFA  flex items-center w-[120%] font-semibold -mr-3 pl-3 py-1">
-                                    Floor
-                                </span>
-                                <input
-                                    onChange={handleNewFloorChange}
-                                    name="floor"
-                                    value={newFloorPremiumData.floor || ""}
-                                    className="outline-none  -mr-3 pl-3 py-1 bg-custom-grayFA   w-full "
-                                    onInput={(e) =>
-                                        (e.target.value =
-                                            e.target.value.replace(
-                                                /[^0-9]/g,
-                                                ""
-                                            ))
-                                    }
-                                />
+                        {localExcelId || excelId ? (
+                            <div className="flex justify-center w-full h-[31px] gap-3 mb-4">
+                                <div className="flex items-center border border-custom-grayF1 rounded-[5px] overflow-hidden w-[204px] text-sm  ">
+                                    <span className="text-custom-gray81 bg-custom-grayFA  flex items-center w-[120%] font-semibold -mr-3 pl-3 py-1">
+                                        Floor
+                                    </span>
+                                    <input
+                                        onChange={handleNewFloorChange}
+                                        name="floor"
+                                        value={newFloorPremiumData.floor || ""}
+                                        className="outline-none  -mr-3 pl-3 py-1 bg-custom-grayFA   w-full "
+                                        onInput={(e) =>
+                                            (e.target.value =
+                                                e.target.value.replace(
+                                                    /[^0-9]/g,
+                                                    ""
+                                                ))
+                                        }
+                                    />
+                                </div>
+                                <div className="flex items-center border border-custom-grayF1 rounded-[5px] overflow-hidden w-[204px] text-sm">
+                                    <span className="text-custom-gray81 bg-custom-grayFA font-semibold flex w-[250px] pl-3 py-1">
+                                        Cost (Sq.m)
+                                    </span>
+                                    <input
+                                        onChange={handleNewFloorChange}
+                                        name="premiumCost"
+                                        className="w-full px-4 focus:outline-none "
+                                        placeholder=""
+                                        value={
+                                            newFloorPremiumData.premiumCost ||
+                                            ""
+                                        }
+                                        onInput={(e) =>
+                                            (e.target.value =
+                                                e.target.value.replace(
+                                                    /[^0-9]/g,
+                                                    ""
+                                                ))
+                                        }
+                                    />
+                                </div>
+                                <div>
+                                    <button className="w-[60px] h-[31px] rounded-[7px] gradient-btn2 p-[4px]  text-custom-solidgreen hover:shadow-custom4 text-sm">
+                                        <div
+                                            className="flex justify-center items-center  bg-white montserrat-bold h-full w-full rounded-[4px] p-[4px]"
+                                            onClick={handleAddNewFloor}
+                                        >
+                                            {/*TODO: Hide if the floor premium is empty*/}
+                                            ADD
+                                        </div>
+                                    </button>
+                                </div>
                             </div>
-                            <div className="flex items-center border border-custom-grayF1 rounded-[5px] overflow-hidden w-[204px] text-sm">
-                                <span className="text-custom-gray81 bg-custom-grayFA font-semibold flex w-[250px] pl-3 py-1">
-                                    Cost (Sq.m)
-                                </span>
-                                <input
-                                    onChange={handleNewFloorChange}
-                                    name="premiumCost"
-                                    className="w-full px-4 focus:outline-none "
-                                    placeholder=""
-                                    value={
-                                        newFloorPremiumData.premiumCost || ""
-                                    }
-                                    onInput={(e) =>
-                                        (e.target.value =
-                                            e.target.value.replace(
-                                                /[^0-9]/g,
-                                                ""
-                                            ))
-                                    }
-                                />
+                        ) : (
+                            <div className="w-auto">
+                                <p className="montserrat-regular text-center text-red-500">
+                                    No units have been uploaded.
+                                    <span className="underline ml-2 text-blue-500">
+                                        {" "}
+                                        Upload
+                                    </span>
+                                </p>
                             </div>
-                            <div>
-                                <button className="w-[60px] h-[31px] rounded-[7px] gradient-btn2 p-[4px]  text-custom-solidgreen hover:shadow-custom4 text-sm">
-                                    <div
-                                        className="flex justify-center items-center  bg-white montserrat-bold h-full w-full rounded-[4px] p-[4px]"
-                                        onClick={handleAddNewFloor}
-                                    >
-                                        ADD
-                                    </div>
-                                </button>
-                            </div>
-                        </div>
+                        )}
+
                         <div className="flex justify-center w-full    h-[300px] overflow-y-auto">
                             <div className="w-[662px]">
                                 <table>
@@ -319,7 +326,7 @@ const FloorPremiums = ({ propertyData }) => {
                                         </tr>
                                     </thead>
                                     <tbody className="">
-                                        {isLoading ? (
+                                        {isFloorCountLoading ? (
                                             <tr className="ml-4">
                                                 <td
                                                     colSpan="5"
@@ -399,7 +406,14 @@ const FloorPremiums = ({ propertyData }) => {
                                                                 Assign
                                                             </td>
                                                             <td>
-                                                                <FaRegTrashAlt className="size-5 text-custom-gray81 hover:text-red-500 cursor-pointer" />
+                                                                <FaRegTrashAlt
+                                                                    onClick={() =>
+                                                                        handleRemoveFloorPremium(
+                                                                            floorNumber
+                                                                        )
+                                                                    }
+                                                                    className="size-5 text-custom-gray81 hover:text-red-500 cursor-pointer"
+                                                                />
                                                             </td>
                                                         </tr>
                                                     );

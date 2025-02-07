@@ -12,7 +12,6 @@ const UnitContext = createContext();
 export const UnitProvider = ({ children }) => {
     const [excelId, setExcelId] = useState(null);
     const [floors, setFloors] = useState([]);
-    const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
     const [towerPhaseId, setTowerPhaseId] = useState();
     const [floorPremiumsAccordionOpen, setFloorPremiumsAccordionOpen] =
@@ -22,12 +21,11 @@ export const UnitProvider = ({ children }) => {
     const [isCheckingUnits, setIsCheckingUnits] = useState(false);
     const [isFetchingUnits, setIsFetchingUnits] = useState(false);
     const [isUploadingUnits, setIsUploadingUnits] = useState(false);
-
     const fetchFloorCount = useCallback(
         async (towerPhaseId, excelId) => {
             if (towerPhaseId && excelId) {
                 try {
-                    setIsLoading(true);
+                    setIsFloorCountLoading(true);
                     const response = await unitService.countFloor(
                         towerPhaseId,
                         excelId
@@ -43,7 +41,7 @@ export const UnitProvider = ({ children }) => {
                     setError(err);
                     throw err;
                 } finally {
-                    setIsLoading(false);
+                    setIsFloorCountLoading(false);
                 }
             }
         },
@@ -63,7 +61,7 @@ export const UnitProvider = ({ children }) => {
             console.log("checkExistingUnits", towerPhaseId, excelId);
             try {
                 setTowerPhaseId(towerPhaseId);
-                setIsLoading(true);
+                setIsCheckingUnits(true);
                 const response = await unitService.getExistingUnits(
                     towerPhaseId,
                     excelId
@@ -77,7 +75,7 @@ export const UnitProvider = ({ children }) => {
             } catch (err) {
                 setError(err);
             } finally {
-                setIsLoading(false);
+                setIsCheckingUnits(false);
             }
         },
         [fetchFloorCount]
@@ -107,7 +105,7 @@ export const UnitProvider = ({ children }) => {
     const fetchUnitsInTowerPhase = useCallback(
         async (towerPhaseId, selectedFloor, excelId) => {
             try {
-                setIsLoading(true);
+                setIsFetchingUnits(true);
                 const response = await unitService.getUnitsInTowerPhase(
                     towerPhaseId,
                     selectedFloor,
@@ -119,7 +117,7 @@ export const UnitProvider = ({ children }) => {
                 setError(err);
                 return { success: false, error: err };
             } finally {
-                setIsLoading(false);
+                setIsFetchingUnits(false);
             }
         },
         [fetchFloorCount]
@@ -128,7 +126,6 @@ export const UnitProvider = ({ children }) => {
     const value = {
         excelId,
         floors,
-        isLoading,
         error,
         fetchFloorCount,
         checkExistingUnits,
@@ -140,6 +137,9 @@ export const UnitProvider = ({ children }) => {
         isUploadingUnits,
         setIsUploadingUnits,
         setFloors,
+        isCheckingUnits,
+        isFetchingUnits,
+        isFloorCountLoading,
     };
     return (
         <UnitContext.Provider value={value}>{children}</UnitContext.Provider>

@@ -33,7 +33,10 @@ const UploadUnitDetailsModal = ({
                 return acc;
             }, {});
 
-            const towerPhaseId = propertyData?.data?.tower_phases[0]?.id;
+            const towerPhaseId =
+                propertyData?.data?.tower_phases[0]?.id ||
+                propertyData?.tower_phase_id;
+
             const priceListMasterId =
                 priceListMaster && priceListMaster.length > 0
                     ? priceListMaster.find(
@@ -44,7 +47,8 @@ const UploadUnitDetailsModal = ({
             setTowerPhaseId(propertyData?.tower_phase_id || towerPhaseId);
             setPropertyMasterId(
                 propertyData?.property_commercial_detail?.property_master_id ||
-                    propertyData?.data?.property_commercial_detail?.property_master_id
+                    propertyData?.data?.property_commercial_detail
+                        ?.property_master_id
             );
             console.log("propertyData", propertyData);
             //If the mode is straight forward Add

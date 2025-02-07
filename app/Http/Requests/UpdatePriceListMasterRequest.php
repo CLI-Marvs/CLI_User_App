@@ -30,8 +30,6 @@ class UpdatePriceListMasterRequest extends FormRequest
             'priceListPayload.vatable_less_price' => 'integer',
             'priceListPayload.reservation_fee' => 'integer',
 
-            //Additional premium
-
             // Payment scheme payload
             'paymentSchemePayload' => 'array',
             'paymentSchemePayload' => 'array',
@@ -51,10 +49,16 @@ class UpdatePriceListMasterRequest extends FormRequest
             'floorPremiumsPayload' =>  'array',
             'floorPremiumsPayload.*.id' => 'integer',
             'floorPremiumsPayload.*.floor' => 'integer',
-            'floorPremiumsPayload.*.premiumCost' => 'nullable | numeric',
-            'floorPremiumsPayload.*.luckyNumber' => 'boolean',
-            'floorPremiumsPayload.*.excludedUnits' => 'array',
+            'floorPremiumsPayload.*.premium_cost' => 'nullable | numeric',
+            'floorPremiumsPayload.*.lucky_number' => 'nullable|boolean',
+            'floorPremiumsPayload.*.excluded_units' => 'array',
 
+            //Additional premium
+            'additionalPremiumsPayload' =>  'array',
+            'additionalPremiumsPayload.*.id' => 'integer',
+            'additionalPremiumsPayload.*.view_name' => 'string',
+            'additionalPremiumsPayload.*.premium_cost' => 'numeric',
+            'additionalPremiumsPayload.*.excluded_units' => 'array',
 
             'status' =>
             'required|string|max:255',

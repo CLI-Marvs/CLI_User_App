@@ -13,7 +13,8 @@ const FloorPremiumAssignModal = ({
     // const { setFloorPremiumFormData } = useFloorPremiumStateContext();
     const modalRef2 = useRef(null);
     const [excludedUnit, setExcludedUnit] = useState([]);
-    const { fetchUnitsInTowerPhase, units, isLoading, excelId } = useUnit();
+    const { fetchUnitsInTowerPhase, units, excelId, isFetchingUnits } =
+        useUnit();
     const { pricingData, setPricingData } = usePricing();
 
     //Hooks
@@ -176,8 +177,13 @@ const FloorPremiumAssignModal = ({
                             </div>
                         </div>
                     </div>
-                    <div className="flex flex-wrap gap-3">
-                        {units &&
+                    <div className="flex flex-wrap gap-3 ">
+                        {!!isFetchingUnits ? (
+                            <div className=" w-96  flex justify-center items-center">
+                                <CircularProgress className="spinnerSize" />
+                            </div>
+                        ) : (
+                            units &&
                             units.length > 0 &&
                             units.map((item, key) => {
                                 // Check if this unit's ID is in the excludedUnits for the current floor
@@ -201,7 +207,8 @@ const FloorPremiumAssignModal = ({
                                         </div>
                                     </div>
                                 );
-                            })}
+                            })
+                        )}
 
                         <div>
                             <button

@@ -38,9 +38,10 @@ class PriceListMasterRepository
     /**
      * Store price list master data
      */
+    //TODO: refactor this and move to service
     public function store(array $data)
     {
-        // dd($data);
+        //    dd($data);
         DB::beginTransaction();
         try {
             $priceListMaster = $this->model->where('tower_phase_id', $data['tower_phase_id'])->first();
@@ -92,13 +93,34 @@ class PriceListMasterRepository
                     // $floorPremiumId = $floorPremium['id'] ?? null;
                     $newFloorPremium = $priceListMaster->floorPremiums()->create([
                         'floor' => $floorPremium['floor'],
-                        'premium_cost' => $floorPremium['premiumCost'],
-                        'lucky_number' => $floorPremium['luckyNumber'],
-                        'excluded_unit' => json_encode($floorPremium['excludedUnits']),
+                        'premium_cost' => $floorPremium['premium_cost'],
+                        'lucky_number' => $floorPremium['lucky_number'],
+                        'excluded_unit' => json_encode($floorPremium['excluded_units']),
                         'tower_phase_id' => $data['tower_phase_id'],
                         'status' => 'Active'
                     ]);
                     $newFloorPremiumID[] = $newFloorPremium->id;
+                }
+            }
+
+            $newAdditionalPremiumId = [] ?? null;
+            if (!empty($data['additionalPremiumsPayload']) && is_array($data['additionalPremiumsPayload'])) {
+
+                foreach ($data['additionalPremiumsPayload'] as $additionalPremium) {
+                    // $floorPremiumId = $floorPremium['id'] ?? null;
+                    $premiumCost = isset($additionalPremium['premium_cost'])
+                        ? (float) number_format($additionalPremium['premium_cost'], 2, '.', '')
+                        : 0.00; //Decimal 2 places
+
+                    $newFloorPremium = $priceListMaster->additionalPremiums()->create([
+                        'additional_premium' => $additionalPremium['view_name'],
+                        'premium_cost' => $premiumCost,
+                        'excluded_unit' => json_encode($additionalPremium['excluded_units']),
+                        'status' => 'Active',
+                        'tower_phase_id' => $data['tower_phase_id'],
+                        'price_list_master_id' => $data['price_list_master_id'],
+                    ]);
+                    $newAdditionalPremiumId[] = $newFloorPremium->id;
                 }
             }
 
@@ -108,6 +130,7 @@ class PriceListMasterRepository
                 'pricebasic_details_id' => $priceBasicDetail->id,
                 'floor_premiums_id' => json_encode($newFloorPremiumID),
                 'price_versions_id' => json_encode($createdPriceVersionIds),
+                'additional_premiums_id' => json_encode($newAdditionalPremiumId)
             ]);
 
             DB::commit();
@@ -165,6 +188,9 @@ class PriceListMasterRepository
             'floorPremiums' => function ($query) {
                 $query->where('status', 'Active');
             },
+            'additionalPremiums' => function ($query) {
+                $query->where('status', 'Active');
+            }
         ])->select('price_list_masters.*')  // Select all fields from price list masters
             ->orderBy('created_at', 'desc')
             ->get();
@@ -189,9 +215,26 @@ class PriceListMasterRepository
             'property_commercial_detail' => $priceList->towerPhase->propertyMaster->propertyCommercialDetail->toArray(),
             'price_versions' => $this->transformPriceVersions($priceList->priceVersions),
             'floor_premiums' => $this->transformFloorPremiums($priceList->floorPremiums),
+            'additional_premiums' => $this->transformAdditionalPremium($priceList->additionalPremiums)
         ];
     }
 
+    /**
+     * Transform the additional premium data
+     */
+    protected function transformAdditionalPremium($additionalPremiums)
+    {
+        return $additionalPremiums->map(function ($additionalPremium) {
+            $excludedUnit = json_decode($additionalPremium->excluded_unit, true);
+            $excludedUnitIds = is_array($excludedUnit) ? $excludedUnit : [];
+            return [
+                'id' => $additionalPremium->id,
+                'viewName' => $additionalPremium->additional_premium,
+                'premiumCost' => $additionalPremium->premium_cost,
+                'excludedUnitIds' => $excludedUnitIds
+            ];
+        })->toArray();
+    }
     /**
      * Transform the floor premiums data
      */
