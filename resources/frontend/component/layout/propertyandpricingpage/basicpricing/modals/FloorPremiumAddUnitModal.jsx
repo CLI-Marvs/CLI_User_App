@@ -17,7 +17,7 @@ const formDataState = {
 
 const FloorPremiumAddUnitModal = ({
     modalRef,
-    units,
+    unitsByFloor,
     propertyData,
     towerPhaseId,
     selectedFloor,
@@ -30,14 +30,14 @@ const FloorPremiumAddUnitModal = ({
  
     //Hooks
     useEffect(() => {
-        if (units && units.length > 0) {
-            setExcelId(units[0]?.excel_id);
+        if (unitsByFloor && unitsByFloor.length > 0) {
+            setExcelId(unitsByFloor[0]?.excel_id);
             setFormData((prevData) => ({
                 ...prevData,
                 floor: selectedFloor,
             }));
         }
-    }, [units]);
+    }, [unitsByFloor]);
 
     //Event handler
     //Handle input field change

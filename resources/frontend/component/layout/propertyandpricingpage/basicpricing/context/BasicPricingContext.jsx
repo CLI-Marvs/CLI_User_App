@@ -35,6 +35,7 @@ const initialState = () => ({
     },
     floorPremiums: {},
     additionalPremiums: additionalPremiums,
+    selectedAdditionalPremiums: [],
     priceVersions: [
         {
             id: 0,

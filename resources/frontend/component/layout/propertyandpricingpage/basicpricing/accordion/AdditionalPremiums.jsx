@@ -8,7 +8,6 @@ import { useUnit } from "@/context/PropertyPricing/UnitContext";
 import { showToast } from "@/util/toastUtil";
 
 const AdditionalPremiums = ({ propertyData }) => {
-    console.log("propertyData", propertyData);
     //States
     const { excelId } = useUnit();
     const [accordionOpen, setAccordionOpen] = useState(false);
@@ -20,12 +19,7 @@ const AdditionalPremiums = ({ propertyData }) => {
     const modalRef = useRef(null);
     const [localExcelId, setLocalExcelId] = useState(null);
     const { setPricingData, pricingData } = usePricing();
-
-    console.log("localExcelId", propertyData?.excel_id);
-    console.log("pricingData", pricingData);
-    console.log("propertyData", propertyData);
-
-    // console.log("Additional Premiums", additionalPremiumsData);
+ 
 
     //Hooks
     useEffect(() => {
@@ -242,9 +236,7 @@ const AdditionalPremiums = ({ propertyData }) => {
                                             <th className="w-[150px] text-left">
                                                 Premium Cost
                                             </th>
-                                            <th className="rounded-tr-[10px] w-[150px]">
-                                                Unit Assignment
-                                            </th>
+                                            <th className="rounded-tr-[10px] w-[150px]"></th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -283,20 +275,6 @@ const AdditionalPremiums = ({ propertyData }) => {
                                                                     />
                                                                 </div>
                                                             </td>
-
-                                                            <td
-                                                                // onClick={() =>
-                                                                //     handleOpenModal(floorNumber)
-                                                                // }
-                                                                onClick={
-                                                                    handleOpenModal
-                                                                }
-                                                                className="text-blue-500 underline cursor-pointer "
-                                                            >
-                                                                <p className="mx-4">
-                                                                    Assign
-                                                                </p>
-                                                            </td>
                                                             <td>
                                                                 <FaRegTrashAlt
                                                                     className="size-5 text-custom-gray81 hover:text-red-500"
@@ -311,79 +289,30 @@ const AdditionalPremiums = ({ propertyData }) => {
                                                     );
                                                 }
                                             )}
-
-                                        {/* <tr className="h-[46px] bg-custom-grayFA text-sm">
-                                            <td className="text-custom-gray81 pl-3">
-                                                Mountain View
-                                            </td>
-                                            <td>
-                                                <div className="bg-white h-[29px] w-[120px] border border-[#D9D9D9] rounded-[5px] px-2">
-                                                    <p>1,000.00</p>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <FaRegTrashAlt className="size-5 text-custom-gray81 hover:text-red-500" />
-                                            </td>
-                                        </tr>
-                                        <tr className="h-[46px] bg-white text-sm">
-                                            <td className="text-custom-gray81 pl-3">
-                                                City View
-                                            </td>
-                                            <td>
-                                                <div className="bg-white h-[29px] w-[120px] border border-[#D9D9D9] rounded-[5px] px-2">
-                                                    <p>900.00</p>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <FaRegTrashAlt className="size-5 text-custom-gray81 hover:text-red-500" />
-                                            </td>
-                                        </tr>
-                                        <tr className="h-[46px] bg-custom-grayFA text-sm">
-                                            <td className="text-custom-gray81 pl-3">
-                                                Animity View
-                                            </td>
-                                            <td>
-                                                <div className="bg-white h-[29px] w-[120px] border border-[#D9D9D9] rounded-[5px] px-2">
-                                                    <p>800.00</p>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <FaRegTrashAlt className="size-5 text-custom-gray81 hover:text-red-500" />
-                                            </td>
-                                        </tr>
-                                        <tr className="h-[46px] bg-white text-sm">
-                                            <td className="text-custom-gray81 pl-3 pr-3">
-                                                <div className="h-[29px] w-[300px]">
-                                                    <input
-                                                        type="text"
-                                                        className="h-[29px] w-[282px] pl-2 pr-3 rounded-[5px] border border-[#D9D9D9]"
-                                                    />
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <div className="bg-white h-[29px] w-[120px] border border-[#D9D9D9] rounded-[5px] px-2">
-                                                    <p>700.00</p>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <FaRegTrashAlt className="size-5 text-custom-gray81 hover:text-red-500" />
-                                            </td>
-                                        </tr> */}
                                     </tbody>
                                 </table>
                             </div>
                         </div>
-                        {/* <div className='flex justify-center'>
-                                <button onClick={handleOpenModal} className='w-[137px] h-[37px] rounded-[7px] gradient-btn2 p-[4px]  text-custom-solidgreen hover:shadow-custom4 text-sm'>
-                                    <div className='flex justify-center items-center  bg-white montserrat-semibold h-full w-full rounded-[4px] p-[4px] text-sm'>
-                                       Assign to units
-                                    </div>
-                                </button>
-                        </div> */}
+                        <div className="flex justify-center">
+                            {excelId ||
+                                (localExcelId && (
+                                    <button
+                                        onClick={handleOpenModal}
+                                        className="w-[137px] h-[37px] rounded-[7px] gradient-btn2 p-[4px]  text-custom-solidgreen hover:shadow-custom4 text-sm"
+                                    >
+                                        <div className="flex justify-center items-center  bg-white montserrat-semibold h-full w-full rounded-[4px] p-[4px] text-sm">
+                                            Assign to units
+                                        </div>
+                                    </button>
+                                ))}
+                        </div>
                     </div>
                 </div>
                 <div>
-                    <AdditionalPremiumAssignModal modalRef={modalRef} />
+                    <AdditionalPremiumAssignModal
+                        propertyData={propertyData}
+                        modalRef={modalRef}
+                    />
                 </div>
             </div>
         </>

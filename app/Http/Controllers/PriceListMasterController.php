@@ -68,7 +68,6 @@ class PriceListMasterController extends Controller
     public function update(UpdatePriceListMasterRequest $request)
     {
         $validatedData = $request->validated();
-
         try {
             $result  = $this->service->update($validatedData, $validatedData['tower_phase_id']);
             if ($result['success']) {

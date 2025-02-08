@@ -16,11 +16,13 @@ export const UnitProvider = ({ children }) => {
     const [towerPhaseId, setTowerPhaseId] = useState();
     const [floorPremiumsAccordionOpen, setFloorPremiumsAccordionOpen] =
         useState(false);
-    const [units, setUnits] = useState([]);
+    const [unitsByFloor, setUnitByFloors] = useState([]);
+    const [units,setUnits] = useState([]);
     const [isFloorCountLoading, setIsFloorCountLoading] = useState(false);
     const [isCheckingUnits, setIsCheckingUnits] = useState(false);
     const [isFetchingUnits, setIsFetchingUnits] = useState(false);
     const [isUploadingUnits, setIsUploadingUnits] = useState(false);
+
     const fetchFloorCount = useCallback(
         async (towerPhaseId, excelId) => {
             if (towerPhaseId && excelId) {
@@ -66,7 +68,7 @@ export const UnitProvider = ({ children }) => {
                     towerPhaseId,
                     excelId
                 );
-
+                setUnits(response?.data?.data);
                 if (response?.data?.data[0]?.excel_id) {
                     const excelId = response?.data?.data[0]?.excel_id;
 
@@ -111,7 +113,7 @@ export const UnitProvider = ({ children }) => {
                     selectedFloor,
                     excelId
                 );
-                setUnits(response?.data?.data);
+                setUnitByFloors(response?.data?.data);
                 return response?.data?.data;
             } catch (err) {
                 setError(err);
@@ -133,13 +135,14 @@ export const UnitProvider = ({ children }) => {
         floorPremiumsAccordionOpen,
         setFloorPremiumsAccordionOpen,
         fetchUnitsInTowerPhase,
-        units,
+        unitsByFloor,
         isUploadingUnits,
         setIsUploadingUnits,
         setFloors,
         isCheckingUnits,
         isFetchingUnits,
         isFloorCountLoading,
+        units,
     };
     return (
         <UnitContext.Provider value={value}>{children}</UnitContext.Provider>

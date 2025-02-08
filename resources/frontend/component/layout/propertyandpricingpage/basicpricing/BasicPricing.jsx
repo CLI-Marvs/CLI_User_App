@@ -47,11 +47,10 @@ const BasicPricing = () => {
         floors,
         setFloors,
         setFloorPremiumsAccordionOpen,
-        excelId
+        excelId,
     } = useUnit();
 
     console.log("PricingData in BasicPricing", pricingData);
-    console.log("data in BasicPricing", data);
 
     //Hooks
     useEffect(() => {
@@ -151,6 +150,16 @@ const BasicPricing = () => {
                     additionalPremiums: updatedPremiums,
                 }));
             }
+
+            // if (
+            //     data?.additional_premiums &&
+            //     data?.additional_premiums.length === 0
+            // ) {
+            //     setPricingData((prev) => ({
+            //         ...prev,
+            //         additionalPremiums: additionalPremiums,
+            //     }));
+            // }
         }
     }, [data]);
 
@@ -164,10 +173,9 @@ const BasicPricing = () => {
                 floorPremiums: [],
                 additionalPremiums: [],
             }));
-            
-            console.log("Floors are set to empty");
             return;
-        } 
+        }
+
         if (
             data?.excel_id &&
             floors.length === 0 &&
@@ -176,8 +184,7 @@ const BasicPricing = () => {
             console.log("Fetching floors because no existing data is found");
             checkExistingUnits(data.tower_phase_id, data.excel_id);
         }
- 
-    }, [data?.excel_id, data?.tower_phase_id]);
+    }, [data?.excel_id, data?.tower_phase_id, floors.length]);
 
     //Event handler
     // Open the add property modal
@@ -305,6 +312,10 @@ const BasicPricing = () => {
             formatPayload.formatAdditionalPremiumsPayload(
                 pricingData.additionalPremiums
             ),
+        selectedAdditionalPremiumsPayload:
+            formatPayload.formatSelectedAdditionalPremiumsPayload(
+                pricingData.selectedAdditionalPremiums
+            ),
         status: status,
     });
     /**
@@ -323,7 +334,7 @@ const BasicPricing = () => {
                     await priceListMasterService.updatePriceListMasters(
                         payload
                     );
-                // console.log("response", response);
+                console.log("response", response);
                 if (response?.status === 201 || response?.status === 200) {
                     showToast(
                         response?.data?.message || "Data updated successfully",

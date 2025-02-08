@@ -50,16 +50,15 @@ const UploadUnitDetailsModal = ({
                     propertyData?.data?.property_commercial_detail
                         ?.property_master_id
             );
-            console.log("propertyData", propertyData);
             //If the mode is straight forward Add
-            console.log("priceListMasterId", priceListMasterId);
             setPriceListMasterId(
                 propertyData?.price_list_master_id || priceListMasterId
-            ); //If the mode is not edit
+            );
         }
-    }, [selectedExcelHeader, propertyData]); //Initialize formData once selectedExcelHeader is available
+    }, [selectedExcelHeader, propertyData]);
 
     //Event hander
+    // Handle change in column selection
     const handleColumnChange = (newColumnIndex, rowHeader) => {
         setFormData((prevFormData) => ({
             ...prevFormData,
@@ -68,11 +67,9 @@ const UploadUnitDetailsModal = ({
                 columnIndex: parseInt(newColumnIndex),
             },
         }));
-    }; // Handle change in column selection
+    };
 
-    /**
-     * Handle submit units from excel file
-     */
+    //Handle submit units from excel file
     const handleSubmit = async (e) => {
         e.preventDefault();
         const payload = {

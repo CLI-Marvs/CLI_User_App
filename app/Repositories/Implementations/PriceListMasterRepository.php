@@ -152,24 +152,7 @@ class PriceListMasterRepository
     }
 
 
-    // public function update(array $data)
-    // {
-    //     DB::beginTransaction();
-    //     try {
-    //         $priceListMaster = $this->findPriceListMaster($data['price_list_master_id'], $data['tower_phase_id']);
 
-    //         $newPriceVersionIds = $this->handlePriceVersions($priceListMaster, $data);
-    //         $newFloorPremiumIds = $this->handleFloorPremiums($priceListMaster, $data);
-
-    //         $this->updatePriceListMaster($priceListMaster, $data, $newPriceVersionIds, $newFloorPremiumIds);
-
-    //         DB::commit();
-    //         return $this->successResponse($priceListMaster);
-    //     } catch (\Exception $e) {
-    //         DB::rollBack();
-    //         return $this->errorResponse($e);
-    //     }
-    // }
 
     /**
      * Fetch price list masters with related models and fields.
@@ -288,151 +271,10 @@ class PriceListMasterRepository
     }
 
 
-    private function findPriceListMaster($priceListMasterId, $towerPhaseId)
-    {
-        $priceListMaster = $this->model->where('id', $priceListMasterId)->first();
-        if (!$priceListMaster) {
-            throw new \Exception("PriceListMaster not found for tower_phase_id: {$towerPhaseId}");
-        }
-        return $priceListMaster;
-    }
-
-    /**
-     * Method to handle price versions update
-     */
-    private function handlePriceVersions($priceListMaster, $data)
-    {
-        $currentPriceVersionIds = json_decode($priceListMaster->price_versions_id, true);
-        $newPriceVersionIds = [];
-
-        if (!empty($data['priceVersionsPayload']) && is_array($data['priceVersionsPayload'])) {
-            foreach ($data['priceVersionsPayload'] as $priceVersionData) {
-                $expiryDate = \DateTime::createFromFormat('m-d-Y H:i:s', $priceVersionData['expiry_date'])->format('Y-m-d H:i:s');
-                $versionId = $priceVersionData['version_id'] ?? null;
-
-                if ($versionId && in_array($versionId, $currentPriceVersionIds)) {
-                    $this->updatePriceVersion($versionId, $priceVersionData, $expiryDate);
-                    $newPriceVersionIds[] = $versionId;
-                } else {
-                    $newPriceVersionIds[] = $this->createPriceVersion($priceListMaster, $priceVersionData, $expiryDate, $data);
-                }
-            }
-            $this->deactivateRemovedPriceVersions($currentPriceVersionIds, $newPriceVersionIds);
-        }
-        return $newPriceVersionIds;
-    }
 
 
-    private function updatePriceVersion($versionId, $priceVersionData, $expiryDate)
-    {
-        $priceVersion = $this->priceVersionModel->find($versionId);
-        if ($priceVersion) {
-            $priceVersion->update([
-                'version_name' => $priceVersionData['name'],
-                'percent_increase' => $priceVersionData['percent_increase'],
-                'allowed_buyer' => $priceVersionData['no_of_allowed_buyers'],
-                'expiry_date' => $expiryDate,
-                'status' => $priceVersionData['status'],
-                'payment_scheme_id' => json_encode(array_column($priceVersionData['payment_scheme'], 'id')),
-            ]);
-        }
-    }
+ 
 
 
-    private function createPriceVersion($priceListMaster, $priceVersionData, $expiryDate, $data)
-    {
-        $newPriceVersion = $priceListMaster->priceVersions()->create([
-            'version_name' => $priceVersionData['name'],
-            'percent_increase' => $priceVersionData['percent_increase'],
-            'allowed_buyer' => $priceVersionData['no_of_allowed_buyers'],
-            'expiry_date' => $expiryDate,
-            'status' => $priceVersionData['status'],
-            'payment_scheme_id' => json_encode(array_column($priceVersionData['payment_scheme'], 'id')),
-            'tower_phase_name' => $data['tower_phase_id'],
-            'price_list_masters_id' => $data['price_list_master_id'],
-        ]);
-        return $newPriceVersion->id;
-    }
-
-    private function deactivateRemovedPriceVersions($currentIds, $newIds)
-    {
-        $removedIds = array_diff($currentIds, $newIds);
-        if (!empty($removedIds)) {
-            $this->priceVersionModel->whereIn('id', $removedIds)->update([
-                'status' => 'InActive',
-                'price_list_masters_id' => null,
-            ]);
-        }
-    }
-
-
-    private function handleFloorPremiums($priceListMaster, $data)
-    {
-        $currentFloorPremiumsId = json_decode($priceListMaster->floor_premiums_id, true);
-        $newFloorPremiumIds = [];
-
-        if (!empty($data['floorPremiumsPayload']) && is_array($data['floorPremiumsPayload'])) {
-            foreach ($data['floorPremiumsPayload'] as $floorPremium) {
-                if ($floorPremium['premiumCost'] == 0) continue;
-                $floorPremiumId = $floorPremium['id'] ?? null;
-
-                if ($floorPremiumId && in_array($floorPremiumId, $currentFloorPremiumsId)) {
-                    $this->updateFloorPremium($floorPremiumId, $floorPremium, $data);
-                    $newFloorPremiumIds[] = $floorPremiumId;
-                } else {
-                    $newFloorPremiumIds[] = $this->createFloorPremium($priceListMaster, $floorPremium, $data);
-                }
-            }
-        }
-        return $newFloorPremiumIds;
-    }
-
-    private function updateFloorPremium($id, $floorPremium, $data)
-    {
-        $existingFloorPremium = $this->floorPremiumModel->find($id);
-        if ($existingFloorPremium) {
-            $existingFloorPremium->update([
-                'floor' => $floorPremium['floor'],
-                'premium_cost' => $floorPremium['premiumCost'],
-                'lucky_number' => $floorPremium['luckyNumber'],
-                'excluded_unit' => json_encode($floorPremium['excludedUnits']),
-                'tower_phase_id' => $data['tower_phase_id'],
-                'status' => 'Active',
-            ]);
-        }
-    }
-
-    private function createFloorPremium($priceListMaster, $floorPremium, $data)
-    {
-        $newFloorPremium = $priceListMaster->floorPremiums()->create([
-            'floor' => $floorPremium['floor'],
-            'premium_cost' => $floorPremium['premiumCost'],
-            'lucky_number' => $floorPremium['luckyNumber'],
-            'excluded_unit' => json_encode($floorPremium['excludedUnits']),
-            'tower_phase_id' => $data['tower_phase_id'],
-            'status' => 'Active',
-        ]);
-        return $newFloorPremium->id;
-    }
-
-
-    private function updatePriceListMaster($priceListMaster, $data, $newPriceVersionIds, $newFloorPremiumIds)
-    {
-        $priceListMaster->update([
-            'status' => $data['status'],
-            'date_last_update' => now(),
-            'floor_premiums_id' => json_encode($newFloorPremiumIds),
-            'price_versions_id' => json_encode($newPriceVersionIds),
-        ]);
-    }
-
-    private function successResponse($priceListMaster)
-    {
-        return ['success' => true, 'message' => 'Price List Master updated successfully.', 'data' => $priceListMaster->fresh()];
-    }
-
-    private function errorResponse($e)
-    {
-        return ['success' => false, 'message' => 'Error updating Price List Master: ' . $e->getMessage(), 'error_type' => 'UPDATE_FAILURE', 'error_details' => $e->getTraceAsString()];
-    }
+  
 }

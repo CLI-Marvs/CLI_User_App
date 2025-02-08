@@ -32,6 +32,20 @@ export const formatPayload = {
         return formattedPriceVersions;
     },
 
+             
+    formatSelectedAdditionalPremiumsPayload:(selectedAdditionalPremiums = []) => {
+        const formattedSelectedAdditionalPremiums = selectedAdditionalPremiums.map(
+            (premium) => {
+                const formattedPremium = {
+                    unit_id: premium.unit_id,
+                    additional_premium_id: premium.additional_premium_id,
+                };
+                return formattedPremium;
+            }
+        );
+        console.log("formattedSelectedAdditionalPremiums", formattedSelectedAdditionalPremiums);
+        return formattedSelectedAdditionalPremiums;
+    },
     formatMultipleFloorPremiums: (floorPremiums = {}) => {
         const formattedFloorPremiums = Object.keys(floorPremiums).reduce(
             (acc, floorNumber) => {

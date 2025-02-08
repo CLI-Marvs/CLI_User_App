@@ -17,12 +17,10 @@ const PricingMasterList = () => {
     //States
     const { priceListMaster, isLoading, fetchPropertyListMasters } =
         usePriceListMaster();
-    const { paymentScheme, fetchPaymentSchemes } = usePaymentScheme();
-
+    const { fetchPaymentSchemes } = usePaymentScheme();
     const [startDate, setStartDate] = useState(new Date());
     const [toggled, setToggled] = useState(false);
     const [isFilterVisible, setIsFilterVisible] = useState(false);
-    const [paymentSchemes, setPaymentSchemes] = useState([]);
     const navigate = useNavigate();
     const propertyModalRef = useRef(null);
     const toggleFilterBox = () => {

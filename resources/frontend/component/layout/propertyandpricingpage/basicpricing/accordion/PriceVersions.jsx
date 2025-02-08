@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import {  FaRegCalendar } from "react-icons/fa";
+import { FaRegCalendar } from "react-icons/fa";
 import { IoIosArrowDown } from "react-icons/io";
 import { MdFormatListBulletedAdd } from "react-icons/md";
 import AddPaymentSchemeModal from "@/component/layout/propertyandpricingpage/basicpricing/modals/PaymentScheme/AddPaymentSchemeModal";
@@ -37,10 +37,10 @@ const PriceVersions = ({ priceListMasterData, action }) => {
                 "pricingData.priceVersions is not an array",
                 pricingData?.priceVersions
             );
-            return; // If it's not an array, return early to avoid further issues
+            return;
         }
 
-        const updatedPriceVersions = [...pricingData.priceVersions]; // Make a copy of the priceVersions array
+        const updatedPriceVersions = [...pricingData.priceVersions];
 
         // Check if formIndex is within bounds
         if (formIndex >= updatedPriceVersions.length || formIndex < 0) {
@@ -78,10 +78,9 @@ const PriceVersions = ({ priceListMasterData, action }) => {
         setPricingData((prev) => {
             // Ensure priceVersions is always an array
             const priceVersions = Array.isArray(prev.priceVersions)
-                ? [...prev.priceVersions] // Make sure priceVersions is always an array
-                : []; // Default to empty array if it's not
+                ? [...prev.priceVersions]  
+                : []; 
 
-            // Add a new price version
             priceVersions.push({
                 id: 0,
                 name: "",
@@ -90,23 +89,22 @@ const PriceVersions = ({ priceListMasterData, action }) => {
                 no_of_allowed_buyers: 0,
                 expiry_date: moment().isValid()
                     ? moment(new Date()).format("MM-DD-YYYY HH:mm:ss")
-                    : "", // Safe fallback for expiry_date
+                    : "", 
                 payment_scheme: [],
             });
 
             // Update the state
             return {
                 ...prev,
-                priceVersions: priceVersions, // Add the newly updated array
+                priceVersions: priceVersions, 
             };
         });
     };
 
     //TODO: 1. Assume the price version have 1 data, and the ACTION Is EDIT then the user can view the Remove button, and remove the version data.
-    
-    
+
     //Handle remove the fields
-    const handleRemoveFields = (index) => {
+    const handleRemovePriceVersions = (index) => {
         //TODO: KUNG Edit mode, then ang versions kay naa nay data, if iyang e remove, ma remove siya but ang status sa price versions kay ma in active na isya
         setPricingData((prev) => {
             // Copy the current priceVersions array
@@ -447,7 +445,7 @@ const PriceVersions = ({ priceListMasterData, action }) => {
                                                                         1 && (
                                                                         <IoIosCloseCircle
                                                                             onClick={() =>
-                                                                                handleRemoveFields(
+                                                                                handleRemovePriceVersions(
                                                                                     index
                                                                                 )
                                                                             }

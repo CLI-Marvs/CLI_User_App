@@ -31,7 +31,7 @@ const FloorPremiums = ({ propertyData }) => {
     const { pricingData, setPricingData } = usePricing();
     const [towerPhaseId, setTowerPhaseId] = useState(null);
     const [localExcelId, setLocalExcelId] = useState(null);
-    console.log("pricj", pricingData);
+
     //Hooks
     useEffect(() => {
         setTowerPhaseId(
@@ -43,9 +43,8 @@ const FloorPremiums = ({ propertyData }) => {
             floors &&
             Object.keys(floors).length > 0 &&
             (!pricingData.floorPremiums ||
-                Object.keys(pricingData.floorPremiums).length === 0) // Ensure it only runs if floorPremiums is empty
+                Object.keys(pricingData.floorPremiums).length === 0)
         ) {
-            console.log("it runs here in 48")
             const floorNumbers = floors[Object.keys(floors)[0]];
             if (Array.isArray(floorNumbers) && floorNumbers.length > 0) {
                 const initialFloorPremiums = floorNumbers.reduce(
@@ -177,14 +176,19 @@ const FloorPremiums = ({ propertyData }) => {
      */
     const handleRemoveFloorPremium = (floorNumber) => {
         console.log("handleRemoveFloorPremium", floorNumber);
-        console.log("pricingData", pricingData);
-        // setPricingData((prevPricingData) => ({
-        //     ...prevPricingData,
-        //     floorPremiums: prevPricingData.floorPremiums.filter(
-        //         (_, i) => i !== floorNumber
-        //     ),
-        // }));
+        console.log("pricingData", pricingData.floorPremiums);
+
+        setPricingData((prevPricingData) => {
+            const updatedFloorPremiums = { ...prevPricingData.floorPremiums };
+            delete updatedFloorPremiums[floorNumber]; // Remove the key from the object
+
+            return {
+                ...prevPricingData,
+                floorPremiums: updatedFloorPremiums,
+            };
+        });
     };
+
     return (
         <>
             <div

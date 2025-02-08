@@ -13,7 +13,7 @@ const FloorPremiumAssignModal = ({
     // const { setFloorPremiumFormData } = useFloorPremiumStateContext();
     const modalRef2 = useRef(null);
     const [excludedUnit, setExcludedUnit] = useState([]);
-    const { fetchUnitsInTowerPhase, units, excelId, isFetchingUnits } =
+    const { fetchUnitsInTowerPhase, unitsByFloor, excelId, isFetchingUnits } =
         useUnit();
     const { pricingData, setPricingData } = usePricing();
 
@@ -48,7 +48,7 @@ const FloorPremiumAssignModal = ({
      */
     const handleUnitSelect = (id) => {
         setExcludedUnit((prevSelectedUnits) => {
-            // Determine the new list of excluded units
+            // Determine the new list of excluded unitsByFloor
             const newSelectedUnits = prevSelectedUnits.includes(id)
                 ? prevSelectedUnits.filter((unitId) => unitId !== id)
                 : [...prevSelectedUnits, id];
@@ -60,7 +60,7 @@ const FloorPremiumAssignModal = ({
             ) {
                 const floorPremiums = pricingData.floorPremiums[selectedFloor];
 
-                // Handle existing and new excluded units
+                // Handle existing and new excluded unitsByFloor
                 let updatedExcludedUnits;
                 if (floorPremiums.excludedUnits?.includes(id)) {
                     // If the unit was originally from the database, remove it
@@ -74,7 +74,7 @@ const FloorPremiumAssignModal = ({
                         id,
                     ];
                 }
-                // Update the floorPremiums state using the merged excluded units
+                // Update the floorPremiums state using the merged excluded unitsByFloor
                 const updatedFloorPremiums = {
                     ...floorPremiums,
                     excludedUnits: updatedExcludedUnits,
@@ -88,7 +88,7 @@ const FloorPremiumAssignModal = ({
                 }));
             }
 
-            // Return the new list of selected units
+            // Return the new list of selected unitsByFloor
             return newSelectedUnits;
         });
     };
@@ -102,7 +102,7 @@ const FloorPremiumAssignModal = ({
             //      Object.keys(pricingData?.floorPremiums).length > 0
             //  ) {
             //      const floorPremiums = pricingData.floorPremiums[selectedFloor];
-            //      // Update the floorPremiums state using the new selected units
+            //      // Update the floorPremiums state using the new selected unitsByFloor
             //      const updatedFloorPremiums = {
             //          ...floorPremiums,
             //          excludedUnits: [],
@@ -156,14 +156,14 @@ const FloorPremiumAssignModal = ({
                     <div className="flex justify-center items-center h-[51px] w-[89px] bg-white rounded-[10px]">
                         <p className="text-custom-gray81 font-bold">0000000</p>
                     </div>
-                    <p>Excluded units from premium rate</p>
+                    <p>Excluded unitsByFloor from premium rate</p>
                     <div className="h-full border border-r-custom-lightestgreen"></div>
                     <div className="h-[63px] w-[95px] p-[6px] rounded-[15px] gradient-btn4">
                         <div className="flex  justify-center items-center bg-white h-full w-full text-custom-solidgreen rounded-[10px]">
                             <p className="font-bold">0000000</p>
                         </div>
                     </div>
-                    <p>Selected units for floor premium rate</p>
+                    <p>Selected unitsByFloor for floor premium rate</p>
                 </div>
                 <div className="h-auto flex gap-[20px]">
                     <div className="h-full flex justify-start items-start">
@@ -183,9 +183,9 @@ const FloorPremiumAssignModal = ({
                                 <CircularProgress className="spinnerSize" />
                             </div>
                         ) : (
-                            units &&
-                            units.length > 0 &&
-                            units.map((item, key) => {
+                            unitsByFloor &&
+                            unitsByFloor.length > 0 &&
+                            unitsByFloor.map((item, key) => {
                                 // Check if this unit's ID is in the excludedUnits for the current floor
                                 const isExcluded = pricingData?.floorPremiums?.[
                                     selectedFloor
@@ -226,7 +226,7 @@ const FloorPremiumAssignModal = ({
             <div>
                 <FloorPremiumAddUnitModal
                     modalRef={modalRef2}
-                    units={units}
+                    unitsByFloor={unitsByFloor}
                     propertyData={propertyData}
                     towerPhaseId={towerPhaseId}
                     selectedFloor={selectedFloor}
