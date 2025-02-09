@@ -2468,7 +2468,7 @@ const ReportPage = () => {
                         <div className="border border-t-1"></div>
                         <div className="flex flex-col">
                             <div className="flex justify-center">
-                             {/*    <PieChart width={1648} height={620}>
+                                <PieChart width={1648} height={620}>
                                     <Pie
                                         data={dataCategory}
                                         cx="50%"
@@ -2499,7 +2499,7 @@ const ReportPage = () => {
                                     <Tooltip
                                         content={<CustomTooltipPieChart />}
                                     />
-                                </PieChart> */}
+                                </PieChart>
                             </div>
                             <div className="flex w-full justify-center">
                                     <div className="flex w-[150px] py-4 justify-center"> {/* dummy div to align the chart */}
