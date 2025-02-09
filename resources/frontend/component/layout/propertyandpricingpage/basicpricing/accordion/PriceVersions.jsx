@@ -22,9 +22,7 @@ const PriceVersions = ({ priceListMasterData, action }) => {
     const [selectedPaymentSchemes, setSelectedPaymentSchemes] = useState([]);
     const [isDatePickerVisible, setIsDatePickerVisible] = useState(false);
     const [startDate, setStartDate] = useState(null);
-    // const { paymentScheme, fetchPaymentSchemes } = usePaymentScheme();
-    // const [selectedPaymentSchemes, setSelectedPaymentSchemes] = useState([]);
-    // console.log("pricingData", pricingData);
+ 
 
     //Event handler
     //Handle change in the input field for price version

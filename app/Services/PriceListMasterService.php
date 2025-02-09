@@ -271,31 +271,63 @@ class PriceListMasterService
                 foreach ($data['selectedAdditionalPremiumsPayload'] as $additionalPremium) {
                     $unitId = $additionalPremium['unit_id'] ?? null;
                     $additionalPremiumId = $additionalPremium['additional_premium_id'] ?? null;
-
-                    if (!$unitId || !$additionalPremiumId) {
+                    
+                    if (!$unitId || $additionalPremiumId === null) {
                         continue; // Skip if unit_id or additional_premium_id is missing
                     }
 
                     // Fetch the unit and ensure it exists
                     $unit = $this->unitModel->where('id', $unitId)->first();
                     if (!$unit) {
-                        continue; // Skip if unit not found
+                        // If the unit does not exist, insert a new one with the selected additional premium(s)
+                        $this->unitModel->insert([
+                            'id' => $unitId,
+                            'additional_premium_id' => json_encode($additionalPremiumId), // Store the selected premium(s)
+                        ]);
+
+                        return; // Exit since we already inserted
+                    }
+                    // Decode the stored additional_premium_id JSON array
+                    $unitIds = (!empty($unit->additional_premium_id) && is_string($unit->additional_premium_id))
+                    ? json_decode($unit->additional_premium_id, true)
+                    : [];
+
+                    if (!is_array($unitIds)) {
+                        $unitIds = []; // Default to empty array if json_decode fails
                     }
 
-                    // Decode JSON (assuming `additional_premiums` is stored as a JSON array)
-                    $unitIds = json_decode($unit->additional_premium_id, true) ?? [];
 
-                    // Avoid duplicate entries
-                    if (!in_array($additionalPremiumId, $unitIds)) {
-                        $unitIds= $additionalPremiumId;
+                    // Ensure `$additionalPremiumId` is always an array
+                    // if (!is_array($additionalPremiumId)) {
+                    //     $additionalPremiumId = [$additionalPremiumId]; // Convert single value to array
+                    // }
+
+                    // Check if the premium was **unchecked** (i.e., removed)
+                    // if (empty($additionalPremiumId)) {
+                    //     $unitIds = []; // If no premiums remain, clear the array
+                    // } else {
+                    //     // If the premium was unchecked, remove it
+                    //     $unitIds = array_values(array_intersect($unitIds, $additionalPremiumId));
+                    // }
+                    // $unitIds = array_values(array_intersect($unitIds, $additionalPremiumId));
+                    // Ensure $additionalPremiumId is always an array
+                    $additionalPremiumId = is_array($additionalPremiumId) ? $additionalPremiumId : [$additionalPremiumId];
+
+                    // Update the additional_premium_id list by replacing the old with the new
+                    // If user deselects everything, store an empty array `[]`
+                    if (empty($additionalPremiumId)) {
+                        $unitIds = []; // Store empty array in DB
+                    } else {
+                        $unitIds = $additionalPremiumId; // Update with new selection
                     }
 
-                    // Update database with new additional premiums
+                    // Update database with the modified additional premium list
                     $this->unitModel->where('id', $unitId)->update([
                         'additional_premium_id' => json_encode($unitIds)
                     ]);
                 }
             }
+
 
             $priceListMaster->update([
                 'status' => $data['status'],

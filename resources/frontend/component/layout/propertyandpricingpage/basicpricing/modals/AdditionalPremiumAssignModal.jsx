@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef, useEffect, useState, useMemo } from "react";
 import PremiumChecklistModal from "./PremiumChecklistModal";
 import { useUnit } from "@/context/PropertyPricing/UnitContext";
 import { usePricing } from "@/component/layout/propertyandpricingpage/basicpricing/context/BasicPricingContext";
@@ -11,8 +11,9 @@ const AdditionalPremiumAssignModal = ({ modalRef, propertyData }) => {
     const [localExcelId, setLocalExcelId] = useState(null);
     const [localTowerPhaseId, setLocalTowerPhaseId] = useState(null);
     const [selectedUnit, setSelectedUnit] = useState({});
-    const { pricingData } = usePricing();
-    console.log("units", units);
+    console.log("selectedUnit", selectedUnit);
+    const { pricingData, setPricingData } = usePricing();
+
     //Hooks
     useEffect(() => {
         setLocalExcelId(propertyData?.excel_id || excelId);
@@ -25,30 +26,47 @@ const AdditionalPremiumAssignModal = ({ modalRef, propertyData }) => {
         }
     }, [localExcelId, localTowerPhaseId]);
 
-    useEffect(() => {
-        if (units) {
-            const groupedByFloor = units.reduce((acc, item) => {
-                if (!acc[item.floor]) {
-                    acc[item.floor] = [];
-                }
-                acc[item.floor].push({
-                    id: item.id,
-                    unit: item.unit,
-                });
-                return acc;
-            }, {});
-            setFormattedUnits(groupedByFloor);
-        }
+    const groupedByFloor = useMemo(() => {
+        if (!units) return {};
+
+        return units.reduce((acc, item) => {
+            if (!acc[item.floor]) {
+                acc[item.floor] = [];
+            }
+            acc[item.floor].push({
+                id: item.id,
+                unit: item.unit,
+                additional_premium_id: item.additional_premium_id,
+            });
+            return acc;
+        }, {});
     }, [units]);
 
+    useEffect(() => {
+        setFormattedUnits(groupedByFloor);
+    }, [groupedByFloor]);
+
     //Event Handler
-    const handleOpenModal = (id, unit) => {
-        // console.log("id", id);
+    const handleOpenModal = (id, unit, additional_premium_id) => {
         if (modalRef2.current) {
             setSelectedUnit({
                 unit_id: id,
                 unit_name: unit,
+                additional_premium_id: additional_premium_id,
             });
+            setPricingData((prev) => ({
+                ...prev,
+                selectedAdditionalPremiums: selectedUnit
+                    ? [
+                          {
+                              unit: selectedUnit.unit_name, // Ensure `unit_name` exists
+                              unit_id: selectedUnit.unit_id, // Ensure `unit_id` exists
+                              additional_premium_id:
+                                  selectedUnit.additional_premium_id ?? [], // Ensure array format
+                          },
+                      ]
+                    : [], // If `selectedUnit` is null, fallback to an empty array
+            }));
             modalRef2.current.showModal();
         }
     };
@@ -117,40 +135,53 @@ const AdditionalPremiumAssignModal = ({ modalRef, propertyData }) => {
                                           {/* Unit Buttons */}
                                           <div className="flex flex-wrap gap-3">
                                               {units &&
-                                                  units.map(({ id, unit }) => {
-                                                      const isSelected =
-                                                          pricingData.selectedAdditionalPremiums?.some(
-                                                              (item) =>
-                                                                  item.unit_id ===
-                                                                  id
-                                                          );
-                                                      return (
-                                                          <button
-                                                              key={id}
-                                                              onClick={() =>
-                                                                  handleOpenModal(
-                                                                      id,
-                                                                      unit
-                                                                  )
-                                                              }
-                                                              className="h-[63px] w-[95px]   rounded-[15px] bg-white "
-                                                          >
-                                                              <div
-                                                                  className={`h-[63px] w-[95px] p-[6px] rounded-[15px] ${
-                                                                      isSelected
-                                                                          ? "gradient-btn4 "
-                                                                          : ""
-                                                                  }  `}
+                                                  units.map(
+                                                      ({
+                                                          id,
+                                                          unit,
+                                                          additional_premium_id,
+                                                      }) => {
+                                                          const isSelected =
+                                                              pricingData.selectedAdditionalPremiums?.some(
+                                                                  (item) =>
+                                                                      item.unit_id ===
+                                                                      id
+                                                              ) ||
+                                                              (additional_premium_id &&
+                                                                  additional_premium_id.length >
+                                                                      0);
+
+                                                          return (
+                                                              <button
+                                                                  key={id}
+                                                                  onClick={() =>
+                                                                      handleOpenModal(
+                                                                          id,
+                                                                          unit,
+                                                                          additional_premium_id
+                                                                      )
+                                                                  }
+                                                                  className="h-[63px] w-[95px]   rounded-[15px] bg-white "
                                                               >
-                                                                  <div className="flex  justify-center items-center bg-white h-full w-full text-custom-solidgreen rounded-[10px]">
-                                                                      <p className="font-bold">
-                                                                          {unit}
-                                                                      </p>
+                                                                  <div
+                                                                      className={`h-[63px] w-[95px] p-[6px] rounded-[15px] ${
+                                                                          isSelected
+                                                                              ? "gradient-btn4 "
+                                                                              : ""
+                                                                      }  `}
+                                                                  >
+                                                                      <div className="flex  justify-center items-center bg-white h-full w-full text-custom-solidgreen rounded-[10px]">
+                                                                          <p className="font-bold">
+                                                                              {
+                                                                                  unit
+                                                                              }
+                                                                          </p>
+                                                                      </div>
                                                                   </div>
-                                                              </div>
-                                                          </button>
-                                                      );
-                                                  })}
+                                                              </button>
+                                                          );
+                                                      }
+                                                  )}
                                           </div>
                                       </div>
                                   );

@@ -48,12 +48,13 @@ const BasicPricing = () => {
         setFloors,
         setFloorPremiumsAccordionOpen,
         excelId,
+        units,
     } = useUnit();
-
-    console.log("PricingData in BasicPricing", pricingData);
 
     //Hooks
     useEffect(() => {
+        console.log("PricingData in BasicPricing", pricingData);
+
         if (data) {
             setPropertyData(data);
             // Update the priceListSettings
@@ -186,6 +187,29 @@ const BasicPricing = () => {
         }
     }, [data?.excel_id, data?.tower_phase_id, floors.length]);
 
+    // useEffect(() => {
+    //     if (units) {
+    //         console.log("units", units);
+    //         console.log("data", data);
+
+    //         const filteredUnits = units?.filter(
+    //             (unit) =>
+    //                 unit.tower_phase_id === data.tower_phase_id ||
+    //                 unit.excel_id === data.excel_id ||
+    //                 unit.price_list_master_id === data.price_list_master_id
+    //         );
+    //         console.log("filteredUnits", filteredUnits);
+    //         // setPricingData((prev) => ({
+    //         //     ...prev,
+    //         //     selectedAdditionalPremiums:
+    //         //         units?.map((item) => ({
+    //         //             unit: item.unit_name, // Ensure `unit_name` exists
+    //         //             unit_id: item.unit_id, // Ensure `unit_id` exists
+    //         //             additional_premium_id: item.additional_premium_id ?? [], // Ensure array format
+    //         //         })) ?? [],
+    //         // }));
+    //     }
+    // }, [units]);
     //Event handler
     // Open the add property modal
     const handleOpenAddPropertyModal = () => {

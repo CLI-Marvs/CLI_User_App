@@ -1,6 +1,7 @@
 import { PriceListMasterProvider } from '@/context/PropertyPricing/PriceListMasterContext';
 import { PaymentSchemeProvider } from '@/context/PropertyPricing/PaymentSchemeContext';
 import { UnitProvider } from '@/context/PropertyPricing/UnitContext';
+import { PriceVersionProvider } from "@/context/PropertyPricing/PriceVersionContext";
 /**
  * This is the main provider for the property pricing context.
  * It wraps the PriceListMasterProvider and PaymentSchemeProvider.
@@ -10,7 +11,9 @@ export const PropertyPricingProvider = ({ children }) => {
         <PriceListMasterProvider>
             <PaymentSchemeProvider>
                 <UnitProvider>
-                    {children}
+                    <PriceVersionProvider>
+                        {children}
+                    </PriceVersionProvider>
                 </UnitProvider>
             </PaymentSchemeProvider>
         </PriceListMasterProvider>

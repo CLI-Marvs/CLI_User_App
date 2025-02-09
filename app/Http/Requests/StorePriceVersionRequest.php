@@ -22,7 +22,7 @@ class StorePriceVersionRequest  extends FormRequest
     public function rules(): array
     {
         return [
-            'tower_phase' => 'required|string|max:255',
+            'tower_phase_id' => 'required|string|max:255',
             'property_id' => 'required|integer',
             'price_version' => 'required|array',
             'price_version.*.name' => 'required|string|max:255',

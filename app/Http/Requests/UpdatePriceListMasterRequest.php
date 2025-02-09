@@ -64,7 +64,7 @@ class UpdatePriceListMasterRequest extends FormRequest
             'selectedAdditionalPremiumsPayload' =>  'array',
             'selectedAdditionalPremiumsPayload.*.unit_id' => 'integer',
             'selectedAdditionalPremiumsPayload.*.additional_premium_id' => 'array',
-
+            
 
             'status' =>
             'required|string|max:255',
