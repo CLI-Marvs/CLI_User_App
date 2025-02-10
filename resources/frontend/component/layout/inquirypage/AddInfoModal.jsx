@@ -48,7 +48,7 @@ const checkUserTypeChange = (newData, oldData) => {
 
 const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
     const [showAlert, setShowAlert] = useState(false);
-    const { getAllConcerns, propertyNamesList, user, getInquiryLogs, isUserTypeChange, setIsUserTypeChange } =
+    const { getAllConcerns, propertyNamesList, user, getInquiryLogs, isUserTypeChange, setIsUserTypeChange, getNavBarData } =
         useStateContext();
 
     const [message, setMessage] = useState(dataConcern.admin_remarks || "");
@@ -254,7 +254,7 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
             setIsUserTypeChange(false);
 
             onupdate({ ...dataToUpdate, dataConcern });
-            await Promise.all([getInquiryLogs(dataConcern.ticket_id), getAllConcerns()]);
+            await Promise.all([getInquiryLogs(dataConcern.ticket_id), getAllConcerns(), getNavBarData(dataConcern.ticket_id)]);
         } catch (error) {
             console.log("error", error);
         }
@@ -445,7 +445,11 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
                             <div className="relative w-full">
                                 <select
                                     name="communication_type"
-                                    value={dataToUpdate.communication_type || ""}
+                                    value={
+                                        dataToUpdate.communication_type?.toLowerCase() === "suggestion or recommendation"
+                                            ? "Suggestion or Recommendation"
+                                            : dataToUpdate.communication_type || ""
+                                    }
                                     onChange={handleChange}
                                     className="appearance-none w-full px-4 text-sm py-1 bg-white focus:outline-none border-0 mobile:text-xs"
                                 >
@@ -638,7 +642,7 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
                              * Disable button if no changes detected
                              * Visually indicate button is non-interactive when no changes exist
                              */}
-                            {user?.department === "Customer Relations - Services" && (
+                           {/*  {user?.department === "Customer Relations - Services" && ( */}
                                 <button
                                     disabled={!isUserTypeChange && !hasChanges}
                                     className="w-[133px] h-[39px] font-semibold text-sm text-white rounded-[10px] gradient-btn5"
@@ -653,7 +657,7 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
                                     Update
                                 </button>
 
-                            )}
+                           {/*  )} */}
                         </div>
                     </div>
                 </div>

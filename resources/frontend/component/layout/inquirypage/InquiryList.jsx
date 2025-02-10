@@ -108,7 +108,6 @@ const InquiryList = () => {
         setCurrentPage(selectedPage);
     };
 
-    console.log("statusFilter", statusFilter);
 
     const handleRefresh = () => {
         setResultSearchActive(false);
@@ -372,7 +371,6 @@ const InquiryList = () => {
 
 
     const handleSearch = () => {
-        console.log("selectedProprt", selectedProperty);
         setResultSearchActive(true);
         let summaryParts = []; // Array to hold each part of the summary
 
@@ -392,7 +390,7 @@ const InquiryList = () => {
                     : channels === "Social media"
                     ? "Social Media"
                     : channels;
-            summaryParts.push(`Channels: ${formattedChannels}`);
+            summaryParts.push(`Channel: ${formattedChannels}`);
         }
         if (departments) summaryParts.push(`Department: ${departments}`);
         if (ticket) summaryParts.push(`Ticket: ${ticket}`);
@@ -441,7 +439,7 @@ const InquiryList = () => {
         setDepartments("");
     };
 
-    console.log("searchSummary", searchSummary);
+   
     useEffect(() => {
       /*   console.log("categoryParam", categoryParam);
         console.log("statusParam", statusParam);
@@ -451,7 +449,6 @@ const InquiryList = () => {
         console.log("channelsParam", channelsParam);
  */
 
-        console.log("trigger here");
         if (
             propertyParam ||
             statusParam ||
@@ -466,7 +463,6 @@ const InquiryList = () => {
 
             let summaryParts = []; // Array to hold each part of the summary
 
-            console.log("statusParam", statusParam);
             if (categoryParam)
                 summaryParts.push(`Category: ${categoryParam}`);
             if (statusParam) {
@@ -485,7 +481,7 @@ const InquiryList = () => {
                         : channelsParam === "Social media"
                         ? "Social Media"
                         : channelsParam;
-                summaryParts.push(`Channels: ${formattedChannel}`);
+                summaryParts.push(`Channel: ${formattedChannel}`);
             }
             if (departmentParam)
                 summaryParts.push(`Department: ${departmentParam}`);
@@ -716,6 +712,9 @@ const InquiryList = () => {
                                                 <option value="Suggestion or Recommendation">
                                                     Suggestion or Recommendation
                                                 </option>
+                                                <option value="No Type">
+                                                    No Type
+                                                </option>
                                             </select>
                                         </div>
 
@@ -806,6 +805,9 @@ const InquiryList = () => {
                                                 <option value="Internal Endorsement">
                                                     Internal Endorsement
                                                 </option>
+                                                <option value="No Channel">
+                                                    No Channel
+                                                </option>
                                             </select>
                                         </div>
 
@@ -821,7 +823,7 @@ const InquiryList = () => {
                                         <div className="flex bg-red-900 justify-start w-full relative">
                                             <label
                                                 htmlFor=""
-                                                className="w-full border-b-2"
+                                                className="w-full border-b-2" 
                                             >
                                                 {""}
                                             </label>
@@ -1062,7 +1064,7 @@ const InquiryList = () => {
                         <div className="flex flex-col gap-1 p-2 mt-[15px] bg-white w-max rounded-[8px] shadow-custom7 text-sm">
                             <div className="flex flex-col">
                                 <div className="mb-5">
-                                    <strong>Search Result For &nbsp;</strong>
+                                    <strong>Search {data?.length > 1 ? 'results for' : 'result for'} &nbsp;</strong>
                                 </div>
                                 <div className="flex flex-col flex-wrap gap-2">
                                     {searchSummary.map((part, index) => {
@@ -1091,7 +1093,7 @@ const InquiryList = () => {
                                     dataCount && dataCount === 0 ? (
                                         <p>No Records Found</p>
                                     ) : (
-                                        <p>{dataCount} Results Found</p>
+                                        <p>{dataCount} {data?.length > 1 ? 'Results' : 'Result'} Found</p>
                                     )
                                 ) : (
                                     <p>

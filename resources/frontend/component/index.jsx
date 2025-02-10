@@ -21,5 +21,6 @@ if (rootElement) {
                 </PriceBasicDetailsFormDataProvider> */}
             </ContextProvider>
         </React.StrictMode>
+
     );
 }
