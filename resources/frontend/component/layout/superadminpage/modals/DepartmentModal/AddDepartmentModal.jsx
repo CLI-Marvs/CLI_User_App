@@ -8,6 +8,7 @@ import { departmentPermissionService } from '@/component/servicesApi/apiCalls/ro
 import useFeature from '@/context/RoleManagement/FeatureContext';
 import useDepartmentPermission from '@/context/RoleManagement/DepartmentPermissionContext';
 
+
 const AddDepartmentModal = ({ departmentModalRef, employeeDepartments }) => {
 
     //States
@@ -104,17 +105,20 @@ const AddDepartmentModal = ({ departmentModalRef, employeeDepartments }) => {
             className="modal w-[683px] rounded-[10px] shadow-custom5 backdrop:bg-black/50  "
             ref={departmentModalRef}
         >
-            <div className='relative p-[20px] mb-5 rounded-lg'>
-                <div className=''>
+            <div className="relative p-[20px] mb-5 rounded-lg">
+                <div className="">
                     <div>
-                        <button className="absolute top-3 right-3 w-10 h-10 items-center rounded-full bg-custombg3 text-custom-bluegreen hover:bg-custombg" onClick={handleCloseModal}>
+                        <button
+                            className="absolute top-3 right-3 w-10 h-10 items-center rounded-full bg-custombg3 text-custom-bluegreen hover:bg-custombg"
+                            onClick={handleCloseModal}
+                        >
                             ✕
                         </button>
                     </div>
                 </div>
-                <div className='flex flex-col gap-[36px] mt-[26px]'>
-                    <div className='w-full p-[10px] flex flex-col gap-[10px]'>
-                        <p className='text-sm font-semibold'>Department</p>
+                <div className="flex flex-col gap-[36px] mt-[26px]">
+                    <div className="w-full p-[10px] flex flex-col gap-[10px]">
+                        <p className="text-sm font-semibold">Department</p>
                         <div
                             className={`flex items-center border rounded-[5px] overflow-hidden border-custom-bluegreen`}
                         >
@@ -129,39 +133,44 @@ const AddDepartmentModal = ({ departmentModalRef, employeeDepartments }) => {
                                     value={formData.department_id}
                                     className="appearance-none text-sm w-full px-4 py-1 bg-white focus:outline-none border-0 mobile:text-xs"
                                 >
-                                    <option value="">
-                                        (Select)
-                                    </option>
-                                    {employeeDepartments && employeeDepartments.map((item) => (
-                                        <option value={item.id} key={item.id}>
-                                            {item.name}
-                                        </option>
-                                    ))}
+                                    <option value="">(Select)</option>
+                                    {employeeDepartments &&
+                                        employeeDepartments.map((item) => (
+                                            <option
+                                                value={item.id}
+                                                key={item.id}
+                                            >
+                                                {item.name}
+                                            </option>
+                                        ))}
                                 </select>
                                 <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3 text-custom-bluegreen pointer-events-none">
                                     <IoMdArrowDropdown />
                                 </span>
                             </div>
                         </div>
-                        <div className='py-2 w-[343pxpx]'>
-                            <label htmlFor="" className='text-red-500 text-sm'>
-                                Note: Department not visible is already in the list.
+                        <div className="py-2 w-[343pxpx]">
+                            <label htmlFor="" className="text-red-500 text-sm">
+                                Note: Department not visible is already in the
+                                list.
                             </label>
                         </div>
-
                     </div>
-                    <div className='w-full p-[10px] flex flex-col gap-[10px]'>
-                        <p className='text-sm font-semibold'>Permissions</p>
+                    <div className="w-full p-[10px] flex flex-col gap-[10px] overflow-visible  ">
+                        <p className="text-sm font-semibold">Permissions</p>
                         {/*Display the features */}
-                        {features && features.map((item, index) => (
-                            <Feature
-                                key={item.id}
-                                index={index}
-                                item={item}
-                                formData={formData}
-                                handleFeaturePermissionChange={handleFeaturePermissionChange}
-                            />
-                        ))}
+                        {features &&
+                            features.map((item, index) => (
+                                <Feature
+                                    key={item.id}
+                                    index={index}
+                                    item={item}
+                                    formData={formData}
+                                    handleFeaturePermissionChange={
+                                        handleFeaturePermissionChange
+                                    }
+                                />
+                            ))}
                     </div>
                 </div>
                 <div className="">
@@ -180,10 +189,11 @@ const AddDepartmentModal = ({ departmentModalRef, employeeDepartments }) => {
                             type="submit"
                             onClick={handleSubmit}
                             disabled={isButtonDisabled(formData) || isLoading}
-                            className={`gradient-btn5 w-[100px] h-[35px] rounded-[10px] text-sm text-white montserrat-semibold ${isLoading || isButtonDisabled(formData)
-                                ? "opacity-50 cursor-not-allowed"
-                                : ""
-                                }`}
+                            className={`gradient-btn5 w-[100px] h-[35px] rounded-[10px] text-sm text-white montserrat-semibold ${
+                                isLoading || isButtonDisabled(formData)
+                                    ? "opacity-50 cursor-not-allowed"
+                                    : ""
+                            }`}
                         >
                             {isLoading ? (
                                 <CircularProgress className="spinnerSize" />
@@ -195,7 +205,7 @@ const AddDepartmentModal = ({ departmentModalRef, employeeDepartments }) => {
                 </div>
             </div>
         </dialog>
-    )
+    );
 }
 
 export default AddDepartmentModal
