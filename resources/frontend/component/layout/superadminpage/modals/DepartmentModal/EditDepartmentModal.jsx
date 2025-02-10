@@ -1,23 +1,29 @@
-import React, { useEffect, useState, useMemo } from 'react'
-import { showToast } from "@/util/toastUtil"
+import React, { useEffect, useState, useMemo } from "react";
+import { showToast } from "@/util/toastUtil";
 import CircularProgress from "@mui/material/CircularProgress";
-import isEqual from 'lodash/isEqual';
-import { normalizeData } from '@/component/layout/superadminpage/modals/DepartmentModal/utils/normalizeData';
-import Feature from '@/component/layout/superadminpage/component/Feature';
-import useFeature from '@/context/RoleManagement/FeatureContext';
-import { departmentPermissionService } from '@/component/servicesApi/apiCalls/roleManagement';
-import useDepartmentPermission from '@/context/RoleManagement/DepartmentPermissionContext';
+import isEqual from "lodash/isEqual";
+import { normalizeData } from "@/component/layout/superadminpage/modals/DepartmentModal/utils/normalizeData";
+import Feature from "@/component/layout/superadminpage/component/Feature";
+import useFeature from "@/context/RoleManagement/FeatureContext";
+import { departmentPermissionService } from "@/component/servicesApi/apiCalls/roleManagement";
+import useDepartmentPermission from "@/context/RoleManagement/DepartmentPermissionContext";
+import Alert from "@/component/layout/mainComponent/Alert";
 
-const EditDepartmentModal = ({ editDepartmentModalRef, selectedDepartment }) => {
+const EditDepartmentModal = ({
+    editDepartmentModalRef,
+    selectedDepartment,
+}) => {
     //States
     const { features, fetchFeatures } = useFeature();
     const { fetchDepartmentPermissions } = useDepartmentPermission();
     const [isLoading, setIsLoading] = useState(false);
-    const [selectedDepartmentOldData, setSelectedDepartmentOldData] = useState(null); //Holds the old data of the selected department
+    const [selectedDepartmentOldData, setSelectedDepartmentOldData] =
+        useState(null); //Holds the old data of the selected department
     const [formData, setFormData] = useState({
         department_id: 0,
         features: [],
     });
+    const [showAlert, setShowAlert] = useState(false);
 
     //Hooks
     useEffect(() => {
@@ -29,8 +35,7 @@ const EditDepartmentModal = ({ editDepartmentModalRef, selectedDepartment }) => 
         }
         setSelectedDepartmentOldData(selectedDepartment);
         fetchFeatures();
-    }, [selectedDepartment])
-
+    }, [selectedDepartment]);
 
     //Event handler
     //Handle the permission change
@@ -51,7 +56,9 @@ const EditDepartmentModal = ({ editDepartmentModalRef, selectedDepartment }) => 
         });
 
         // If the feature doesn't exist in formData, add it with the correct structure
-        const featureExists = updatedFeatures.some((feature) => feature.id === featureId);
+        const featureExists = updatedFeatures.some(
+            (feature) => feature.id === featureId
+        );
         if (!featureExists) {
             updatedFeatures.push({
                 id: featureId,
@@ -71,14 +78,17 @@ const EditDepartmentModal = ({ editDepartmentModalRef, selectedDepartment }) => 
     };
 
     //Handle the submit/save button click
-    const handleSubmit = async () => {
+    const updateDepartmentPermission = async () => {
         const payload = {
             department_id: parseInt(formData.department_id),
-            features: formData.features
+            features: formData.features,
         };
         try {
             setIsLoading(true);
-            const response = await departmentPermissionService.editDepartmentsWithPermissions(payload);
+            const response =
+                await departmentPermissionService.editDepartmentsWithPermissions(
+                    payload
+                );
 
             if (response.data?.statusCode === 200) {
                 showToast("Data updated successfully!", "success");
@@ -86,7 +96,7 @@ const EditDepartmentModal = ({ editDepartmentModalRef, selectedDepartment }) => 
                     department_id: 0,
                     features: [],
                 });
-                await fetchDepartmentPermissions(true,false)
+                await fetchDepartmentPermissions(true, false);
 
                 if (editDepartmentModalRef.current) {
                     editDepartmentModalRef.current.close();
@@ -97,7 +107,7 @@ const EditDepartmentModal = ({ editDepartmentModalRef, selectedDepartment }) => 
         } finally {
             setIsLoading(false);
         }
-    }
+    };
 
     //Handle close the modal and cancel the modal
     const handleCloseModal = () => {
@@ -110,7 +120,7 @@ const EditDepartmentModal = ({ editDepartmentModalRef, selectedDepartment }) => 
         if (editDepartmentModalRef.current) {
             editDepartmentModalRef.current.close();
         }
-    }
+    };
 
     //Function to check if the old data is the same as the new data, if so, disable the button
     const isButtonDisabled = useMemo(() => {
@@ -119,9 +129,29 @@ const EditDepartmentModal = ({ editDepartmentModalRef, selectedDepartment }) => 
         }
         const oldDataNormalized = normalizeData(selectedDepartmentOldData);
         const newDataNormalized = normalizeData(formData);
-        // Compare old and new data  
+        // Compare old and new data
         return isEqual(oldDataNormalized, newDataNormalized);
     }, [selectedDepartmentOldData, formData]);
+
+    //Handle cancel the alert modal
+    const handleCancel = () => {
+        setShowAlert(false);
+    };
+
+    //Handle confirm the alert modal
+    const handleConfirm = () => {
+        updateDepartmentPermission();
+        setShowAlert(false);
+        setTimeout(() => {
+            editDepartmentModalRef.current.close();
+        }, 1000);
+    };
+
+    //Handle show the alert modal
+    const handleShowUpdateAlert = () => {
+        setShowAlert(true);
+        modalRef.current.showModal();
+    };
 
     return (
         <dialog
@@ -129,17 +159,20 @@ const EditDepartmentModal = ({ editDepartmentModalRef, selectedDepartment }) => 
             className="modal w-[683px] rounded-[10px] shadow-custom5 backdrop:bg-black/50  "
             ref={editDepartmentModalRef}
         >
-            <div className='relative p-[20px] mb-5 rounded-lg'>
-                <div className=''>
+            <div className="relative p-[20px] mb-5 rounded-lg">
+                <div className="">
                     <div>
-                        <button className="absolute top-3 right-3 w-10 h-10 items-center rounded-full bg-custombg3 text-custom-bluegreen hover:bg-custombg" onClick={handleCloseModal}>
+                        <button
+                            className="absolute top-3 right-3 w-10 h-10 items-center rounded-full bg-custombg3 text-custom-bluegreen hover:bg-custombg"
+                            onClick={handleCloseModal}
+                        >
                             ✕
                         </button>
                     </div>
                 </div>
-                <div className='flex flex-col gap-[36px] mt-[26px]'>
-                    <div className='w-full p-[10px] flex flex-col gap-[10px]'>
-                        <p className='text-sm font-semibold'>Department</p>
+                <div className="flex flex-col gap-[36px] mt-[26px]">
+                    <div className="w-full p-[10px] flex flex-col gap-[10px]">
+                        <p className="text-sm font-semibold">Department</p>
                         <div
                             className={`flex items-center border rounded-[5px] overflow-hidden border-custom-bluegreen`}
                         >
@@ -147,17 +180,18 @@ const EditDepartmentModal = ({ editDepartmentModalRef, selectedDepartment }) => 
                                 Department
                             </span>
                             <div className="relative w-full">
-                                <input type="input"
+                                <input
+                                    type="input"
                                     name="department"
                                     disabled
-                                    value={selectedDepartment?.name || ''}
-                                    className="appearance-none text-sm w-full px-4 py-1 focus:outline-none border-0 mobile:text-xs" />
-
+                                    value={selectedDepartment?.name || ""}
+                                    className="appearance-none text-sm w-full px-4 py-1 focus:outline-none border-0 mobile:text-xs"
+                                />
                             </div>
                         </div>
                     </div>
-                    <div className='w-full p-[10px] flex flex-col gap-[10px]'>
-                        <p className='text-sm font-semibold'>Permissions</p>
+                    <div className="w-full p-[10px] flex flex-col gap-[10px]">
+                        <p className="text-sm font-semibold">Permissions</p>
                         {/*Display the features */}
                         {features &&
                             features.map((item, index) => (
@@ -166,9 +200,17 @@ const EditDepartmentModal = ({ editDepartmentModalRef, selectedDepartment }) => 
                                     index={index}
                                     item={item}
                                     formData={formData}
-                                    handleFeaturePermissionChange={handleFeaturePermissionChange}
-                                    checkedExtractor={(item, permission, formData) =>
-                                        formData?.features?.find((feature) => feature.id === item.id)?.pivot?.[permission.value] || false
+                                    handleFeaturePermissionChange={
+                                        handleFeaturePermissionChange
+                                    }
+                                    checkedExtractor={(
+                                        item,
+                                        permission,
+                                        formData
+                                    ) =>
+                                        formData?.features?.find(
+                                            (feature) => feature.id === item.id
+                                        )?.pivot?.[permission.value] || false
                                     }
                                 />
                             ))}
@@ -188,19 +230,38 @@ const EditDepartmentModal = ({ editDepartmentModalRef, selectedDepartment }) => 
                         </button>
                         <button
                             type="submit"
-                            onClick={handleSubmit}
+                            onClick={handleShowUpdateAlert}
                             disabled={isButtonDisabled || isLoading}
-                            className={`gradient-btn5 w-[100px] h-[35px] rounded-[10px] text-sm text-white montserrat-semibold ${isButtonDisabled || isLoading ? "cursor-not-allowed opacity-50" : ""}`}
+                            className={`gradient-btn5 w-[100px] h-[35px] rounded-[10px] text-sm text-white montserrat-semibold ${
+                                isButtonDisabled || isLoading
+                                    ? "cursor-not-allowed opacity-50"
+                                    : ""
+                            }`}
                         >
-                            {isLoading ?
-                                <CircularProgress className="spinnerSize" /> : "Save"
-                            }
+                            {isLoading ? (
+                                <CircularProgress className="spinnerSize" />
+                            ) : (
+                                "Save"
+                            )}
                         </button>
                     </div>
                 </div>
             </div>
+            <div>
+                <div className="">
+                    <Alert
+                        title="Are you sure you want to update this data?"
+                        show={showAlert}
+                        onCancel={handleCancel}
+                        onConfirm={handleConfirm}
+                        //You can pass onConfirm and onCancel props to customize the text of the buttons. Example below;
+                        // confirmText="Update"
+                        // cancelText="Cancel"
+                    />
+                </div>
+            </div>
         </dialog>
-    )
-}
+    );
+};
 
-export default EditDepartmentModal
+export default EditDepartmentModal;
