@@ -321,7 +321,7 @@ const UserRightsAndPermissions = () => {
                                                                                             </p>
                                                                                             <input
                                                                                                 type="checkbox"
-                                                                                                className="h-[16px] w-[16px]"
+                                                                                                className="h-[16px] w-[16px] custom-checkbox-permission"
                                                                                                 checked={
                                                                                                     permissionValue
                                                                                                 }
@@ -548,7 +548,7 @@ const UserRightsAndPermissions = () => {
                                                                                             </p>
                                                                                             <input
                                                                                                 type="checkbox"
-                                                                                                className="h-[16px] w-[16px]"
+                                                                                                className="h-[16px] w-[16px] custom-checkbox-permission"
                                                                                                 checked={
                                                                                                     permissionValue
                                                                                                 }
