@@ -63,13 +63,13 @@ const PrivateRoute = ({ requiredPermission }) => {
     }
 
     //Check if logged in user is allowed to view the superadmin page
-    if (!ALLOWED_EMPLOYEES_CRS.includes(userLoggedInEmail)) {
+  /*   if (!ALLOWED_EMPLOYEES_CRS.includes(userLoggedInEmail)) {
         return (
             <div className="w-full h-full flex justify-center   text-custom-bluegreen text-lg mt-4">
                 You do not have permission to view this page.
             </div>
         );
-    }
+    } */
 
     // Check for required permissions
     if (requiredPermission && !hasPermission(requiredPermission)) {
