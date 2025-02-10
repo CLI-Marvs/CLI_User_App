@@ -402,3 +402,16 @@ textarea {
     left: 50%;
     transform: translate(-50%, -50%);
 }
+.custom-checkbox-permission:disabled {
+    background-color: #f1f1f1 !important; 
+    border-color: #175d5f !important; 
+    cursor: not-allowed !important;
+}
+.custom-checkbox-permission:disabled:checked {
+    background-color: #175d5f !important;  
+}
+
+/* Disabled checkmark */
+.custom-checkbox-permission:disabled:checked::after {
+    color: #175d5f !important;  
+}
