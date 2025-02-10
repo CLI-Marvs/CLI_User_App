@@ -1089,9 +1089,9 @@ class ConcernController extends Controller
            
         }
 
-        if (!empty($searchParams['startDate'])) {
-            $startDate = Carbon::parse($searchParams['startDate'])->setTimezone('Asia/Manila');
-            $query->whereDate('concerns.created_at', '=', $startDate);
+        if (!empty($searchParams['pickDate'])) {
+            $pickDate = Carbon::parse($searchParams['pickDate'])->setTimezone('Asia/Manila');
+            $query->whereDate('concerns.created_at', '=', $pickDate);
         }
 
         if (!empty($searchParams['selectedYear'])) {
@@ -1982,52 +1982,71 @@ class ConcernController extends Controller
 
 
     public function getMonthlyReports(Request $request)
-    {
+{
+    // Get the parameters from the request
+    $year = $request->year ?? Carbon::now()->year;
+    $department = $request->department;
+    $project = $request->property;
+    $month = $request->month;
+    $startDate = $request->startDate ? Carbon::parse($request->startDate)->setTimezone('Asia/Manila')->toDateString() : null;
+    $endDate = $request->endDate ? Carbon::parse($request->endDate)->setTimezone('Asia/Manila')->toDateString() : null;
 
-        $year = $request->year ?? Carbon::now()->year;
-        $department = $request->department;
-        $project = $request->property;
-        $month = $request->month;
-        /* $monthNumber = Carbon::parse($request->propertyMonth)->month; */
 
-        $query = Concerns::select(
-            DB::raw('EXTRACT(MONTH FROM created_at) as month'),
-            DB::raw('SUM(case when status = \'Resolved\' then 1 else 0 end) as Resolved'),
-            DB::raw('SUM(case when status = \'unresolved\' then 1 else 0 end) as Unresolved'),
-            DB::raw('SUM(case when status = \'Closed\' then 1 else 0 end) as Closed')
+    $query = Concerns::select(
+        DB::raw('EXTRACT(MONTH FROM created_at) as month'),
+        DB::raw('SUM(case when status = \'Resolved\' then 1 else 0 end) as Resolved'),
+        DB::raw('SUM(case when status = \'unresolved\' then 1 else 0 end) as Unresolved'),
+        DB::raw('SUM(case when status = \'Closed\' then 1 else 0 end) as Closed')
+    )
+    ->whereYear('created_at', $year);
 
-        )
-            /* ->whereMonth('created_at', $monthNumber) */
-            ->whereYear('created_at', $year);
-
-        if ($department && $department !== 'All') {
-            $query->whereRaw("resolve_from::jsonb @> ?", json_encode([['department' => $department]]));
-        }
-
-        if ($month && $month !== 'All') {
-            $query->whereMonth('created_at', $month);
-        }
-
-        if ($project && $project !== 'All') {
-            $query->where('property', $project);
-        }
-
-        $reports = $query->groupBy('month')
-            ->orderBy('month')
-            ->get()
-            ->keyBy('month');
-
-        $allMonths = collect(range(1, 12))->map(function ($month) use ($reports) {
-            return [
-                'month' => $month,
-                'resolved' => $reports->get($month)?->resolved ?? 0,
-                'unresolved' => $reports->get($month)?->unresolved ?? 0,
-                'closed' => $reports->get($month)?->closed ?? 0,
-            ];
-        });
-
-        return response()->json($allMonths);
+    // Apply department filter
+    if ($department && $department !== 'All') {
+        $query->whereRaw("resolve_from::jsonb @> ?", json_encode([['department' => $department]]));
     }
+
+    // Apply month filter
+    if ($month && $month !== 'All') {
+        $query->whereMonth('created_at', $month);
+    }
+
+    // Apply project filter
+    if ($project && $project !== 'All') {
+        $query->where('property', $project);
+    }
+
+    if ($startDate && $endDate) {
+        $query->whereBetween(DB::raw('DATE(created_at)'), [$startDate, $endDate]);
+    }
+    // If only start date is provided, filter from start date to present
+    elseif ($startDate) {
+        $query->whereDate('created_at', '>=', $startDate); // Using whereDate for exact date match
+    }
+    // If only end date is provided, filter from start to end date
+    elseif ($endDate) {
+        $query->whereDate('created_at', '<=', $endDate); // Using whereDate for exact date match
+    }
+
+    // Group by month and order by month
+    $reports = $query->groupBy('month')
+        ->orderBy('month')
+        ->get()
+        ->keyBy('month');
+
+    // Generate a full month report (even for months with no data)
+    $allMonths = collect(range(1, 12))->map(function ($month) use ($reports) {
+        return [
+            'month' => $month,
+            'resolved' => $reports->get($month)?->resolved ?? 0,
+            'unresolved' => $reports->get($month)?->unresolved ?? 0,
+            'closed' => $reports->get($month)?->closed ?? 0,
+        ];
+    });
+
+    // Return the response as JSON
+    return response()->json($allMonths);
+}
+
 
 
     public function getInquiriesPerProperty(Request $request)

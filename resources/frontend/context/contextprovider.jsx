@@ -17,6 +17,11 @@ const StateContext = createContext({
 });
 
 export const ContextProvider = ({ children }) => {
+
+    const today = new Date();
+    const tomorrow = new Date();
+    tomorrow.setDate(today.getDate() + 1);
+
     const [user, setUser] = useState({});
     const [token, _setToken] = useState(localStorage.getItem("authToken"));
     const [allEmployees, setAllEmployees] = useState([]);
@@ -49,6 +54,10 @@ export const ContextProvider = ({ children }) => {
     const [communicationTypeMonth, setCommunicationTypeMonth] = useState("");
     const [specificInquiry, setSpecificInquiry] = useState(null);
     const [dataSet, setDataSet] = useState([]);
+    const [startDate, setStartDate] = useState(null);
+    const [endDate, setEndDate] = useState(null);
+    const [startDateValue, setStartDateValue] = useState(null);
+    const [endDateValue, setEndDateValue] = useState(null);
 
     const [department, setDepartment] = useState("All");
     const [project, setProject] = useState("All");
@@ -275,6 +284,8 @@ export const ContextProvider = ({ children }) => {
                     property: project,
                     month: month,
                     year: year,
+                    startDate: startDate,
+                    endDate: endDate,
                 },
             });
             const result = response.data;
@@ -339,6 +350,8 @@ export const ContextProvider = ({ children }) => {
             const response = await apiService.get("inquiries-department", {
                 params: {
                     month: month,
+                    startDate: startDate,
+                    endDate: endDate,
                     property: project,
                     department: department,
                     year: year,
@@ -785,6 +798,8 @@ export const ContextProvider = ({ children }) => {
         department,
         propertyMonth,
         month,
+        startDate,
+        endDate,
         project,
         year,
         departmentStatusYear,
@@ -950,7 +965,15 @@ export const ContextProvider = ({ children }) => {
                 setYearValue,
                 yearValue,
                 setMonthValue,
-                monthValue
+                monthValue,
+                startDate,
+                setStartDate,
+                endDate,
+                setEndDate,
+                startDateValue,
+                setStartDateValue,
+                endDateValue,
+                setEndDateValue
             }}
         >
             {children}

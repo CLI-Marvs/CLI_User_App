@@ -84,7 +84,7 @@ const InquiryList = () => {
     const [hasAttachments, setHasAttachments] = useState(false);
     const { propertyNamesList } = useStateContext();
     const [assignedToMeActive, setAssignedToMeActive] = useState(false);
-    const [startDate, setStartDate] = useState(null);
+    const [pickDate, setPickDate] = useState(null);
     const [isFilterVisible, setIsFilterVisible] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
     const [lastActivity, setLastActivity] = useState(null);
@@ -120,7 +120,7 @@ const InquiryList = () => {
             setSpecificAssigneeCsr("");
             setAssignedToMeActive(false);
         }
-        setStartDate(null);
+        setPickDate(null);
 
         if (specificAssigneeCsr !== "" && daysFilter !== null) {
             setSpecificAssigneeCsr("");
@@ -150,7 +150,7 @@ const InquiryList = () => {
     };
 
     const handleDateChange = (date) => {
-        setStartDate(date);
+        setPickDate(date);
     };
 
     const handleClickOutside = (event) => {
@@ -389,8 +389,8 @@ const InquiryList = () => {
         }
         if (departments) summaryParts.push(`Department: ${departments}`);
         if (ticket) summaryParts.push(`Ticket: ${ticket}`);
-        if (startDate)
-            summaryParts.push(`Start Date: ${formatDate(startDate)}`);
+        if (pickDate)
+            summaryParts.push(`Start Date: ${formatDate(pickDate)}`);
         if (selectedProperty)
             summaryParts.push(`Property: ${selectedProperty}`);
         if (selectedMonth)
@@ -409,7 +409,7 @@ const InquiryList = () => {
             channels,
             departments,
             ticket,
-            startDate,
+            pickDate,
             selectedProperty,
             hasAttachments,
             selectedMonth,
@@ -481,8 +481,8 @@ const InquiryList = () => {
             if (departmentParam)
                 summaryParts.push(`Department: ${departmentParam}`);
             if (ticket) summaryParts.push(`Ticket: ${ticket}`);
-            if (startDate)
-                summaryParts.push(`Start Date: ${formatDate(startDate)}`);
+            if (pickDate)
+                summaryParts.push(`Start Date: ${formatDate(pickDate)}`);
             if (propertyParam)
                 summaryParts.push(`Property: ${propertyParam}`);
             if (yearParam) summaryParts.push(`Year: ${yearParam}`);
@@ -501,7 +501,7 @@ const InquiryList = () => {
             channels: channelsParam,
             departments: departmentParam,
             ticket,
-            startDate,
+            pickDate,
             selectedProperty: propertyParam,
             hasAttachments,
             selectedMonth: monthParam,
@@ -908,7 +908,7 @@ const InquiryList = () => {
                                             </label>
                                             <div className="relative">
                                                 <DatePicker
-                                                    selected={startDate}
+                                                    selected={pickDate}
                                                     onChange={handleDateChange}
                                                     className="border-b-1 outline-none w-[146px] text-sm px-[8px]"
                                                     calendarClassName="custom-calendar"

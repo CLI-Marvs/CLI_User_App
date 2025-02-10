@@ -17,6 +17,8 @@ import {
     LabelList,
     Label,
 } from "recharts";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 import apiService from "../../servicesApi/apiService";
 import debounce from "lodash/debounce";
 import { TiDownload } from "react-icons/ti";
@@ -82,7 +84,15 @@ const ReportPage = () => {
         setYearValue,
         yearValue,
         setMonthValue,
-        monthValue  
+        monthValue,
+        startDate,
+        setStartDate,
+        endDate,
+        setEndDate,
+        startDateValue,
+        setStartDateValue,
+        endDateValue,
+        setEndDateValue
     } = useStateContext();
 
     const colors = [
@@ -393,7 +403,7 @@ const ReportPage = () => {
 
     const currentYear = new Date().getFullYear();
 
-  
+
 
     const defaultData = [{ name: "No Data" }];
     const dataToDisplay = dataCategory.length > 0 ? dataCategory : defaultData;
@@ -494,6 +504,8 @@ const ReportPage = () => {
 
     //Get current year
 
+   
+
     const chartHeight = dataProperty.length * (barHeight + 80);
     const chartHeight2 = communicationTypeData.length * (barHeight + 100);
 
@@ -555,6 +567,8 @@ const ReportPage = () => {
         setProject(projectValue);
         setYear(yearValue);
         setMonth(monthValue);
+        setStartDate(startDateValue);
+        setEndDate(endDateValue);
     };
 
     useEffect(() => {
@@ -616,12 +630,12 @@ const ReportPage = () => {
         0
     );
 
-    
+
 
     return (
         <div className="h-screen bg-custom-grayFA p-4 flex flex-col gap-[21px]">
             <div className="flex flex-col gap-[10px] bg-[#F2F8FC] rounded-[10px] w-full py-[24px] px-[30px]">
-                <div className="flex gap-[10px]">
+                <div className=" flex gap-[10px]">
                     <div className="relative flex border border-custom-lightgreen rounded-[5px] overflow-hidden">
                         <span className="text-white bg-custom-lightgreen text-sm flex items-center w-[60px] px-[15px] -mr-3 pl-3 py-1 shrink-0">
                             Year
@@ -662,6 +676,40 @@ const ReportPage = () => {
                                     </option>
                                 ))}
                         </select>
+                        <span className="absolute inset-y-0 right-0 flex items-center text-white pr-3 pl-3 bg-custom-lightgreen pointer-events-none">
+                            <MdCalendarToday />
+                        </span>
+                    </div>
+                    <div className="relative flex border w-max border-custom-lightgreen rounded-[5px] shrink-0 z-10">
+                        <span className="text-white bg-custom-lightgreen text-sm flex items-center w-max px-[15px] pl-3 py-1 shrink-0">
+                            Date
+                        </span>
+                        <span className="border-l border-white text-white bg-custom-lightgreen text-sm flex items-center w-max px-[15px] pl-3 py-1 shrink-0">
+                            From
+                        </span>
+                        <div className="relative flex items-center bg-white">
+                            <DatePicker
+                                selected={startDateValue}
+                                onChange={(date) => setStartDateValue(date)}
+                                className="outline-none w-[126px] h-full text-sm px-2"
+                                calendarClassName="custom-calendar"
+                            />
+                        </div>
+                        <span className="absolute inset-y-0 right-0 flex items-center text-white pr-3 pl-3 bg-custom-lightgreen pointer-events-none">
+                            <MdCalendarToday />
+                        </span>
+                        <span className="text-white bg-custom-lightgreen text-sm flex items-center w-max px-[15px] pl-3 py-1 shrink-0">
+                            To
+                        </span>
+                        <div className="relative flex items-center bg-white">
+                            <DatePicker
+                                selected={endDateValue}
+                                onChange={(date) => setEndDateValue(date)}
+                                className="outline-none w-[156px] h-full text-sm px-2"
+                                calendarClassName="custom-calendar"
+                                minDate={startDateValue} 
+                            />
+                        </div>
                         <span className="absolute inset-y-0 right-0 flex items-center text-white pr-3 pl-3 bg-custom-lightgreen pointer-events-none">
                             <MdCalendarToday />
                         </span>
@@ -1936,7 +1984,7 @@ const ReportPage = () => {
                                                                         "All"
                                                                         ? monthValue
                                                                         : "",
-                                                                departments: departmentValue !== "All" ? departmentValue : "" 
+                                                                departments: departmentValue !== "All" ? departmentValue : ""
                                                             });
                                                             navigate(
                                                                 "/inquirymanagement/inquirylist"
@@ -1973,8 +2021,8 @@ const ReportPage = () => {
                                                                         "All"
                                                                         ? monthValue
                                                                         : "",
-                                                                departments: departmentValue !== "All" ? departmentValue : "" 
-                                                                
+                                                                departments: departmentValue !== "All" ? departmentValue : ""
+
                                                             });
                                                             navigate(
                                                                 "/inquirymanagement/inquirylist"
@@ -2011,8 +2059,8 @@ const ReportPage = () => {
                                                                         "All"
                                                                         ? monthValue
                                                                         : "",
-                                                                departments: departmentValue !== "All" ? departmentValue : "" 
-                                                                
+                                                                departments: departmentValue !== "All" ? departmentValue : ""
+
                                                             });
                                                             navigate(
                                                                 "/inquirymanagement/inquirylist"
@@ -2490,9 +2538,9 @@ const ReportPage = () => {
                                 </PieChart>
                             </div>
                             <div className="flex w-full justify-center">
-                                    <div className="flex w-[150px] py-4 justify-center"> {/* dummy div to align the chart */}
-                                        <p className="font-bold text-[20px]">Total: {totalValueCategory}</p>
-                                    </div>
+                                <div className="flex w-[150px] py-4 justify-center"> {/* dummy div to align the chart */}
+                                    <p className="font-bold text-[20px]">Total: {totalValueCategory}</p>
+                                </div>
                             </div>
                             <div className="flex justify-center w-full">
                                 <div className="flex w-[150px]"></div>{" "}
