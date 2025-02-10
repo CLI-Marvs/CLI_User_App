@@ -210,7 +210,6 @@ const UserRightsAndPermissions = () => {
                             onClick={handleAddDepartmentModal}
                             className=" h-[31px] w-[140px] py-[7px] px-[20px] gradient-btn5 text-white text-sm montserrat-medium rounded-[6px] flex items-center justify-center gap-x-2"
                         >
-                            Add
                             <span className="text-[18px]">+</span>
                         </button>
                     </div>
@@ -419,7 +418,6 @@ const UserRightsAndPermissions = () => {
                         onClick={handleAddUserModal}
                         className="h-[31px] w-[140px] py-[7px] px-[20px] gradient-btn5 text-white text-sm montserrat-medium rounded-[6px] flex justify-center items-center gap-x-2"
                     >
-                        Add
                         <span className="text-[18px]">+</span>
                     </button>
                 </div>
