@@ -267,9 +267,9 @@ const UserRightsAndPermissions = () => {
                                             key={index}
                                             className="flex items-center gap-x-4 mb-2"
                                         >
-                                            <td className="flex gap-[57px] mt-[6px] h-[64px] overflow-hidden px-[16px] py-[10px] bg-custom-lightestgreen text-custom-bluegreen text-sm">
+                                            <td className="flex gap-[57px] mt-[6px] h-[75px] overflow-hidden px-[16px] py-[10px] bg-custom-lightestgreen text-custom-bluegreen text-sm">
                                                 <div className="w-[200px] flex flex-col items-start justify-center gap-2">
-                                                    <div className="w-full h-[40px] flex items-center justify-center bg-white rounded-[5px]">
+                                                    <div className="w-full h-[50px] flex items-center justify-center bg-white rounded-[5px]">
                                                         <p className="montserrat-regular text-sm text-center">
                                                             {department.name}
                                                         </p>
@@ -493,7 +493,7 @@ const UserRightsAndPermissions = () => {
                                                 </div>
 
                                                 <div className="w-[200px] flex flex-col items-start justify-center gap-2">
-                                                    <div className="w-full h-[35px] flex items-center justify-center bg-white rounded-[5px] py-1">
+                                                    <div className="w-full h-[50px] flex items-center justify-center bg-white rounded-[5px] py-1">
                                                         <p className="montserrat-regular text-sm text-center">
                                                             {
                                                                 employee?.department
