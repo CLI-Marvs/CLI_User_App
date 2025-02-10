@@ -19,6 +19,7 @@ import {
 import useDepartmentPermission from "@/context/RoleManagement/DepartmentPermissionContext";
 import useEmployeePermission from "@/context/RoleManagement/EmployeePermissionContext";
 import useDepartment from "@/context/RoleManagement/DepartmentContext";
+import CustomToolTip from "@/component/layout/mainComponent/Tooltip/CustomToolTip";
 
 const UserRightsAndPermissions = () => {
     //States
@@ -345,52 +346,56 @@ const UserRightsAndPermissions = () => {
                                             </td>
 
                                             <td className="flex gap-x-3">
-                                                <button
-                                                    className="gradient-btn5 p-[1px] w-[80px] h-[31px] rounded-[10px]"
-                                                    onClick={() =>
-                                                        handleEditDepartmentModal(
-                                                            department
-                                                        )
-                                                    }
+                                                <CustomToolTip
+                                                    text="Edit"
+                                                    height="h-[32px]"
+                                                    position="left"
                                                 >
-                                                    <div className="w-full h-full rounded-[9px] bg-white flex justify-center items-center montserrat-semibold text-sm gap-x-2">
-                                                        <p className="text-base font-bold bg-gradient-to-r from-custom-bluegreen via-custom-solidgreen to-custom-solidgreen bg-clip-text text-transparent">
-                                                            Edit
-                                                        </p>
-                                                        <span>
-                                                            <HiPencil className="w-5 h-5 text-custom-bluegreen" />
-                                                        </span>
-                                                    </div>
-                                                </button>
-                                                <button
-                                                    onClick={() =>
-                                                        handleShowUpdateDepartmentAlert(
-                                                            department,
-                                                            "department"
-                                                        )
-                                                    }
-                                                    disabled={
-                                                        isDepartmentLoadingState[
-                                                            department.id
-                                                        ]
-                                                    }
-                                                    className={`${
-                                                        isDepartmentLoadingState[
-                                                            department.id
-                                                        ]
-                                                            ? "opacity-50 cursor-not-allowed"
-                                                            : ""
-                                                    }`}
-                                                    type="submit"
+                                                    <HiPencil
+                                                        onClick={() =>
+                                                            handleEditDepartmentModal(
+                                                                department
+                                                            )
+                                                        }
+                                                        className="w-5 h-5 text-custom-bluegreen cursor-pointer"
+                                                    />
+                                                </CustomToolTip>
+
+                                                <CustomToolTip
+                                                    text="Delete"
+                                                    height="h-[34px]"
+                                                    position="left"
                                                 >
-                                                    {isDepartmentLoadingState[
-                                                        department.id
-                                                    ] ? (
-                                                        <CircularProgress className="spinnerSize" />
-                                                    ) : (
-                                                        <MdDelete className="w-6 h-6 text-red-500" />
-                                                    )}
-                                                </button>
+                                                    <button
+                                                        onClick={() =>
+                                                            handleShowUpdateDepartmentAlert(
+                                                                department,
+                                                                "department"
+                                                            )
+                                                        }
+                                                        disabled={
+                                                            isDepartmentLoadingState[
+                                                                department.id
+                                                            ]
+                                                        }
+                                                        className={`${
+                                                            isDepartmentLoadingState[
+                                                                department.id
+                                                            ]
+                                                                ? "opacity-50 cursor-not-allowed"
+                                                                : ""
+                                                        }`}
+                                                        type="submit"
+                                                    >
+                                                        {isDepartmentLoadingState[
+                                                            department.id
+                                                        ] ? (
+                                                            <CircularProgress className="spinnerSize" />
+                                                        ) : (
+                                                            <MdDelete className="w-6 h-6 text-red-500" />
+                                                        )}
+                                                    </button>
+                                                </CustomToolTip>
                                             </td>
                                         </tr>
                                     )
@@ -410,8 +415,8 @@ const UserRightsAndPermissions = () => {
                 </div>
 
                 {/* Specific User */}
-                <div className="flex items-center gap-[37px] bg-white rounded-[5px] p-[10px] w-full h-[51px]">
-                    <div className="montserrat-regular text-sm">
+                <div className="flex items-center gap-[37px] rounded-[5px] p-[10px] w-full h-[51px]">
+                    <div className="montserrat-regular text-sm ">
                         Add Specific User
                     </div>
                     <button
@@ -572,52 +577,55 @@ const UserRightsAndPermissions = () => {
                                             </td>
 
                                             <td className="flex gap-x-3">
-                                                <button
-                                                    className="gradient-btn5 p-[1px] w-[80px] h-[31px] rounded-[10px]"
-                                                    onClick={() =>
-                                                        handleEditEmployeeModal(
-                                                            employee
-                                                        )
-                                                    }
+                                                <CustomToolTip
+                                                    text="Edit"
+                                                    height="h-[32px]"
+                                                    position="left"
                                                 >
-                                                    <div className="w-full h-full rounded-[9px] bg-white flex justify-center items-center montserrat-semibold text-sm gap-x-2">
-                                                        <p className="text-base font-bold bg-gradient-to-r from-custom-bluegreen via-custom-solidgreen to-custom-solidgreen bg-clip-text text-transparent">
-                                                            Edit
-                                                        </p>
-                                                        <span>
-                                                            <HiPencil className="w-5 h-5 text-custom-bluegreen" />
-                                                        </span>
-                                                    </div>
-                                                </button>
-                                                <button
-                                                    onClick={() =>
-                                                        handleShowUpdateEmployeeAlert(
-                                                            employee,
-                                                            "employee"
-                                                        )
-                                                    }
-                                                    disabled={
-                                                        isEmployeeLoadingState[
-                                                            employee.id
-                                                        ]
-                                                    }
-                                                    className={`${
-                                                        isEmployeeLoadingState[
-                                                            employee.id
-                                                        ]
-                                                            ? "opacity-50 cursor-not-allowed"
-                                                            : ""
-                                                    }`}
-                                                    type="submit"
+                                                    <HiPencil
+                                                        onClick={() =>
+                                                            handleEditEmployeeModal(
+                                                                employee
+                                                            )
+                                                        }
+                                                        className="w-5 h-5 text-custom-bluegreen cursor-pointer"
+                                                    />
+                                                </CustomToolTip>
+                                                <CustomToolTip
+                                                    text="Delete"
+                                                    height="h-[34px]"
+                                                    position="left"
                                                 >
-                                                    {isEmployeeLoadingState[
-                                                        employee.id
-                                                    ] ? (
-                                                        <CircularProgress className="spinnerSize" />
-                                                    ) : (
-                                                        <MdDelete className="w-6 h-6 text-red-500" />
-                                                    )}
-                                                </button>
+                                                    <button
+                                                        onClick={() =>
+                                                            handleShowUpdateEmployeeAlert(
+                                                                employee,
+                                                                "employee"
+                                                            )
+                                                        }
+                                                        disabled={
+                                                            isEmployeeLoadingState[
+                                                                employee.id
+                                                            ]
+                                                        }
+                                                        className={`${
+                                                            isEmployeeLoadingState[
+                                                                employee.id
+                                                            ]
+                                                                ? "opacity-50 cursor-not-allowed"
+                                                                : ""
+                                                        }`}
+                                                        type="submit"
+                                                    >
+                                                        {isEmployeeLoadingState[
+                                                            employee.id
+                                                        ] ? (
+                                                            <CircularProgress className="spinnerSize" />
+                                                        ) : (
+                                                            <MdDelete className="w-6 h-6 text-red-500" />
+                                                        )}
+                                                    </button>
+                                                </CustomToolTip>
                                             </td>
                                         </tr>
                                     )
