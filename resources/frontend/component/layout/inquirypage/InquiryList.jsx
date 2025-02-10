@@ -385,7 +385,7 @@ const InquiryList = () => {
                     : channels === "Social media"
                     ? "Social Media"
                     : channels;
-            summaryParts.push(`Channels: ${formattedChannels}`);
+            summaryParts.push(`Channel: ${formattedChannels}`);
         }
         if (departments) summaryParts.push(`Department: ${departments}`);
         if (ticket) summaryParts.push(`Ticket: ${ticket}`);
@@ -476,7 +476,7 @@ const InquiryList = () => {
                         : channelsParam === "Social media"
                         ? "Social Media"
                         : channelsParam;
-                summaryParts.push(`Channels: ${formattedChannel}`);
+                summaryParts.push(`Channel: ${formattedChannel}`);
             }
             if (departmentParam)
                 summaryParts.push(`Department: ${departmentParam}`);
@@ -1062,7 +1062,7 @@ const InquiryList = () => {
                         <div className="flex flex-col gap-1 p-2 mt-[15px] bg-white w-max rounded-[8px] shadow-custom7 text-sm">
                             <div className="flex flex-col">
                                 <div className="mb-5">
-                                    <strong>Search Result For &nbsp;</strong>
+                                    <strong>Search {data?.length > 1 ? 'results for' : 'result for'} &nbsp;</strong>
                                 </div>
                                 <div className="flex flex-col flex-wrap gap-2">
                                     {searchSummary.map((part, index) => {
@@ -1091,7 +1091,7 @@ const InquiryList = () => {
                                     dataCount && dataCount === 0 ? (
                                         <p>No Records Found</p>
                                     ) : (
-                                        <p>{dataCount} Results Found</p>
+                                        <p>{dataCount} {data?.length > 1 ? 'Results' : 'Result'} Found</p>
                                     )
                                 ) : (
                                     <p>{selectedOption}</p>

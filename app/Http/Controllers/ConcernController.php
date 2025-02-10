@@ -1881,7 +1881,6 @@ class ConcernController extends Controller
 
             $this->inquiryResolveLogs($request, 'resolve');
 
-
             MarkResolvedToCustomerJob::dispatch($request->ticket_id, $buyerEmail, $buyer_lastname, $message_id, $admin_name, $department, $modifiedTicketId, $selectedSurveyType);
 
             SendSurveyLinkEmailJob::dispatch($buyerEmail,  $request->buyer_name, $selectedSurveyType, 'resolve', $modifiedTicketId);
@@ -2585,6 +2584,7 @@ class ConcernController extends Controller
                     $concerns->email_subject = $buyer['email_subject'];
                     $concerns->ticket_id = $ticketId;
                     $concerns->buyer_email = $buyer['buyer_email'];
+                    $concerns->buyer_firstname = $buyer['buyer_name'];
                     $concerns->buyer_name = $buyer['buyer_name'];
                     $concerns->details_message = $buyer['details_message'];
                     $concerns->created_at = Carbon::parse(now())->setTimezone('Asia/Manila');
@@ -2626,6 +2626,7 @@ class ConcernController extends Controller
                         $messagesRef->buyer_email = $buyer['buyer_email'];
                         $messagesRef->attachment = json_encode($fileLinks);
                         $messagesRef->created_at = Carbon::parse(now())->setTimezone('Asia/Manila');
+                        $messagesRef->buyer_firstname = $existingTicket->buyer_name;
                         $messagesRef->buyer_name = $existingTicket->buyer_name;
                         $messagesRef->save();
                     }
@@ -2735,7 +2736,7 @@ class ConcernController extends Controller
     {
         try {
             $ticketId = $request->ticketId;
-            $concernData = Concerns::where('ticket_id', $ticketId)->select('buyer_firstname', 'buyer_middlename', 'buyer_lastname', 'suffix_name', 'details_concern', 'property', 'ticket_id')
+            $concernData = Concerns::where('ticket_id', $ticketId)->select('buyer_firstname', 'buyer_middlename', 'buyer_lastname', 'suffix_name', 'details_concern', 'property', 'ticket_id', 'email_subject')
                 ->first();
             return response()->json($concernData);
         } catch (\Exception $e) {

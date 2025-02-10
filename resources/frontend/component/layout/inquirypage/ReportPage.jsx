@@ -761,7 +761,7 @@ const ReportPage = () => {
                                 item.Resolved === 0 &&
                                 item.Unresolved === 0 &&
                                 item.Closed === 0
-                        ) && <p>- (No results found)</p>}
+                        ) && <p>- (No {dataSet.length > 1 ? 'results' : 'result'} found)</p>}
                 </div>
                 <div className="overflow-x-auto mt-[40px]">
                     <ResponsiveContainer width="100%" height={228}>
@@ -990,7 +990,7 @@ const ReportPage = () => {
                         {communicationTypeData &&
                             communicationTypeData.every(
                                 (item) => item.value === 0
-                            ) && <p>- (No results found)</p>}
+                            ) && <p>- (No {communicationTypeData.length > 1 ? 'results' : 'result'} found)</p>}
                     </div>
 
                     <div className="border border-t-1"></div>
@@ -1344,7 +1344,7 @@ const ReportPage = () => {
                         {inquriesPerChannelData &&
                             inquriesPerChannelData.every(
                                 (item) => item.value === 0
-                            ) && <p> - (No results found)</p>}
+                            ) && <p> - ({inquriesPerChannelData.length > 1 ? 'No results' : 'No result'} found)</p>}
                     </div>
                     <div className="border border-t-1"></div>
                     <div className="mt-4"></div>
@@ -1887,7 +1887,7 @@ const ReportPage = () => {
                                         item.resolved === 0 &&
                                         item.unresolved === 0 &&
                                         item.closed === 0
-                                ) && <p>- (No results found)</p>}
+                                ) && <p>- (No {dataProperty.length > 1 ? 'results' : 'result'} found)</p>}
                         </div>
 
                         <div className="border border-t-1"></div>
@@ -2212,7 +2212,7 @@ const ReportPage = () => {
                                         item.resolved === 0 &&
                                         item.unresolved === 0 &&
                                         item.closed === 0
-                                ) && <p>- (No results found)</p>}
+                                ) && <p>- (No {dataDepartment.length > 1 ? 'results' : 'result'} found)</p>}
                         </div>
                         <div className="border border-t-1"></div>
                         <div className="flex-grow overflow-x-auto px-[10px] mt-[5px] pb-[50px]">
@@ -2462,7 +2462,7 @@ const ReportPage = () => {
                             {dataCategory &&
                                 dataCategory.every(
                                     (item) => item.value === 0
-                                ) && <p>- (No results found)</p>}
+                                ) && <p>- (No {dataCategory.length > 1 ? 'results' : 'result'} found)</p>}
                         </div>
 
                         <div className="border border-t-1"></div>
