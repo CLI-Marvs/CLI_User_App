@@ -61,7 +61,7 @@ export default {
         'custom7': '0px 0px 5px rgba(0, 0, 0, 0.20)',
         'custom8': '0px 10px 20px rgba(0, 0, 0, 0.50)',
         'custom9': '0px 3px 3px rgba(0, 0, 0, 0.10), 0px -3px 3px rgba(0, 0, 0, 0.10), 3px 0px 3px rgba(0, 0, 0, 0.10), -3px 0px 3px rgba(0, 0, 0, 0.10)',
-       'custom10': '0px 12px 7px -2px rgba(0, 0, 0, 0.25)',
+       'custom10': '12px 12px 7px rgba(0, 0, 0, 0.25)',
 
         
       },
