@@ -35,7 +35,7 @@ const UserRightsAndPermissions = () => {
   const [showAlert, setShowAlert] = useState(false);
   const [isEmployeeLoadingState, setIsEmployeeLoadingState] = useState({});
   const [isDepartmentLoadingState, setIsDepartmentLoadingState] = useState({});
-
+const [boxErrors, setBoxErrors] = useState(false);
   //Hooks 
   useEffect(() => {
     if (!features) {
@@ -246,20 +246,20 @@ const UserRightsAndPermissions = () => {
                                 PERMISSIONS.map((permission) => {
                                   const permissionValue = departmentFeature.pivot[permission.value];
                                   return (
-                                    <div
-                                      className="flex flex-col gap-[2.75px] items-center"
-                                      key={permission.value}
-                                    >
-                                      <p className="montserrat-semibold text-[10px] leading-[12.19px]">
-                                        {permission.name}
-                                      </p>
-                                      <input
-                                        type="checkbox"
-                                        className="h-[16px] w-[16px]"
-                                        checked={permissionValue}
-                                        disabled
-                                      />
-                                    </div>
+                                      <div
+                                          className="flex flex-col gap-[2.75px] items-center"
+                                          key={permission.value}
+                                      >
+                                          <p className="montserrat-semibold text-[10px] leading-[12.19px]">
+                                              {permission.name}
+                                          </p>
+                                          <input
+                                              type="checkbox"
+                                              className="h-[16px] w-[16px] custom-checkbox-permission "
+                                              checked={permissionValue}
+                                              disabled
+                                          />
+                                      </div>
                                   );
                                 })
                               ) : (
@@ -402,25 +402,27 @@ const UserRightsAndPermissions = () => {
                             className="w-[200px] flex flex-col items-start justify-center gap-2"
                             key={featureIndex}
                           >
-                            <div className="w-full h-[44px] gap-[20px] flex items-center justify-center bg-white rounded-[5px]">
+                            <div className="w-full h-[44px] gap-[20px] flex items-center justify-center bg-white rounded-[5px] relative">
                               {departmentFeature ? (
                                 PERMISSIONS.map((permission) => {
                                   const permissionValue = departmentFeature.pivot[permission.value];
                                   return (
-                                    <div
-                                      className="flex flex-col gap-[2.75px] items-center"
-                                      key={permission.value}
-                                    >
-                                      <p className="montserrat-semibold text-[10px] leading-[12.19px]">
-                                        {permission.name}
-                                      </p>
-                                      <input
-                                        type="checkbox"
-                                        className="h-[16px] w-[16px]"
-                                        checked={permissionValue}
-                                        disabled
-                                      />
-                                    </div>
+                                      <div
+                                          className="flex flex-col gap-[2.75px] items-center"
+                                          key={permission.value}
+                                      >
+                                          <p className="montserrat-semibold text-[10px] leading-[12.19px]">
+                                              {permission.name}
+                                          </p>
+                                          <input
+                                              type="checkbox"
+                                             
+                                              className="h-[16px] w-[16px] custom-checkbox-permission "
+                                              checked={permissionValue}
+                                              disabled
+                                          />
+                                      
+                                      </div>
                                   );
                                 })
                               ) : (
