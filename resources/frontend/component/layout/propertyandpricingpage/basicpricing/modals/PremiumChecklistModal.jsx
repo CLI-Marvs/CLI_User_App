@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect ,memo} from "react";
 import { usePricing } from "@/component/layout/propertyandpricingpage/basicpricing/context/BasicPricingContext";
 
 const PremiumChecklistModal = ({ modalRef2, selectedUnit }) => {
@@ -31,62 +31,6 @@ const PremiumChecklistModal = ({ modalRef2, selectedUnit }) => {
 
     //Event handler
     //Handle checkbox change
-    // const handleCheckboxChange = (e, premium) => {
-    //     setSelectedAdditionalPremiums((prevState) => {
-    //         const existingUnit = prevState.find(
-    //             (item) => item.unit_id === selectedUnit?.unit_id
-    //         );
-
-    //         let updatedPremiums;
-
-    //         if (e.target.checked) {
-    //             if (existingUnit) {
-    //                 updatedPremiums = prevState.map((item) =>
-    //                     item.unit_id === selectedUnit?.unit_id
-    //                         ? {
-    //                               ...item,
-    //                               additional_premium_id:
-    //                                   item.additional_premium_id.includes(
-    //                                       premium.id
-    //                                   )
-    //                                       ? item.additional_premium_id
-    //                                       : [
-    //                                             ...item.additional_premium_id,
-    //                                             premium.id,
-    //                                         ],
-    //                           }
-    //                         : item
-    //                 );
-    //             } else {
-    //                 // If unit doesn't exist, create a new entry
-    //                 updatedPremiums = [
-    //                     ...prevState,
-    //                     {
-    //                         unit_id: selectedUnit?.unit_id,
-    //                         additional_premium_id: [premium.id],
-    //                     },
-    //                 ];
-    //             }
-    //         } else {
-    //             // Remove the premium ID when unchecked
-    //             updatedPremiums = prevState
-    //                 .map((item) =>
-    //                     item.unit_id === selectedUnit?.unit_id
-    //                         ? {
-    //                               ...item,
-    //                               additional_premium_id:
-    //                                   item.additional_premium_id.filter(
-    //                                       (id) => id !== premium.id
-    //                                   ),
-    //                           }
-    //                         : item
-    //                 )
-    //                 .filter((item) => item.additional_premium_id.length > 0);
-    //         }
-
-    //         return updatedPremiums;
-    //     });
-    // };
     const handleCheckboxChange = (e, premium) => {
         const isChecked = e.target.checked;
 
@@ -107,7 +51,7 @@ const PremiumChecklistModal = ({ modalRef2, selectedUnit }) => {
                                       ...new Set([
                                           ...item.additional_premium_id,
                                           premium.id,
-                                      ]), // Avoid duplicates
+                                      ]),  
                                   ],
                               }
                             : item
@@ -164,10 +108,10 @@ const PremiumChecklistModal = ({ modalRef2, selectedUnit }) => {
             };
         });
 
-        // Close the modal
-        //    if (modalRef2.current) {
-        //        modalRef2.current.close();
-        //    }
+      //  Close the modal
+           if (modalRef2.current) {
+               modalRef2.current.close();
+           }
     };
 
     //Handle close the modal

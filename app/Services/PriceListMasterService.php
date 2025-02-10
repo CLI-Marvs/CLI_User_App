@@ -99,6 +99,7 @@ class PriceListMasterService
             // }
             $currentPriceBasicDetailId = $priceListMaster->pricebasic_details_id;
             $priceBasicDetail = $this->updatePriceBasicDetails($currentPriceBasicDetailId, $data, $priceListMaster);
+            
             // Fetch the current price version IDs in the PriceListMaster table
             $currentPriceVersionIds = json_decode($priceListMaster->price_versions_id, true) ?? [];
 

@@ -54,19 +54,19 @@ const AdditionalPremiumAssignModal = ({ modalRef, propertyData }) => {
                 unit_name: unit,
                 additional_premium_id: additional_premium_id,
             });
-            setPricingData((prev) => ({
-                ...prev,
-                selectedAdditionalPremiums: selectedUnit
-                    ? [
-                          {
-                              unit: selectedUnit.unit_name, // Ensure `unit_name` exists
-                              unit_id: selectedUnit.unit_id, // Ensure `unit_id` exists
-                              additional_premium_id:
-                                  selectedUnit.additional_premium_id ?? [], // Ensure array format
-                          },
-                      ]
-                    : [], // If `selectedUnit` is null, fallback to an empty array
-            }));
+            // setPricingData((prev) => ({
+            //     ...prev,
+            //     selectedAdditionalPremiums: selectedUnit
+            //         ? [
+            //               {
+            //                   unit: selectedUnit.unit_name,
+            //                   unit_id: selectedUnit.unit_id,
+            //                   additional_premium_id:
+            //                       selectedUnit.additional_premium_id ?? [], 
+            //               },
+            //           ]
+            //         : [], 
+            // }));
             modalRef2.current.showModal();
         }
     };
