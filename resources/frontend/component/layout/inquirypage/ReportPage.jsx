@@ -644,8 +644,13 @@ const ReportPage = () => {
                             name="year"
                             value={yearValue}
                             className="appearance-none w-[100px] px-4 py-1 bg-white focus:outline-none border-0"
-                            onChange={(e) => setYearValue(e.target.value)}
+                            onChange={(e) => {
+                                setYearValue(e.target.value);
+                                setStartDateValue(null);
+                                setEndDateValue(null);
+                            }}
                         >
+                            <option value="All">All</option>
                             {fullYear.map((item, index) => (
                                 <option key={index} value={item.year}>
                                     {" "}
@@ -665,7 +670,11 @@ const ReportPage = () => {
                             name="month"
                             value={monthValue}
                             className="appearance-none w-full px-4 py-1 bg-white focus:outline-none border-0"
-                            onChange={(e) => setMonthValue(e.target.value)}
+                            onChange={(e) => {
+                                setMonthValue(e.target.value);
+                                setStartDateValue(null);
+                                setEndDateValue(null);
+                            }}
                         >
                             <option value="All">All</option>
                             {Object.entries(monthNames)
@@ -680,9 +689,11 @@ const ReportPage = () => {
                             <MdCalendarToday />
                         </span>
                     </div>
+                </div>
+                <div className="flex gap-[10px] flex-wrap">
                     <div className="relative flex border w-max border-custom-lightgreen rounded-[5px] shrink-0 z-10">
                         <span className="text-white bg-custom-lightgreen text-sm flex items-center w-max px-[15px] pl-3 py-1 shrink-0">
-                            Date
+                            Filter by duration
                         </span>
                         <span className="border-l border-white text-white bg-custom-lightgreen text-sm flex items-center w-max px-[15px] pl-3 py-1 shrink-0">
                             From
@@ -690,7 +701,15 @@ const ReportPage = () => {
                         <div className="relative flex items-center bg-white">
                             <DatePicker
                                 selected={startDateValue}
-                                onChange={(date) => setStartDateValue(date)}
+                                onChange={(date) => {
+                                    setStartDateValue(date);
+                                    setYearValue("All");
+                                    setMonthValue("All");
+                                }}
+                                onFocus={() => {
+                                    setYearValue("All");
+                                    setMonthValue("All");
+                                }}
                                 className="outline-none w-[126px] h-full text-sm px-2"
                                 calendarClassName="custom-calendar"
                             />
@@ -704,7 +723,15 @@ const ReportPage = () => {
                         <div className="relative flex items-center bg-white">
                             <DatePicker
                                 selected={endDateValue}
-                                onChange={(date) => setEndDateValue(date)}
+                                onChange={(date) => {
+                                    setEndDateValue(date);
+                                    setYearValue("All");
+                                    setMonthValue("All");
+                                }}
+                                onFocus={() => {
+                                    setYearValue("All");
+                                    setMonthValue("All");
+                                }}
                                 className="outline-none w-[156px] h-full text-sm px-2"
                                 calendarClassName="custom-calendar"
                                 minDate={startDateValue} 

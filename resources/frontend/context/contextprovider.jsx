@@ -17,11 +17,6 @@ const StateContext = createContext({
 });
 
 export const ContextProvider = ({ children }) => {
-
-    const today = new Date();
-    const tomorrow = new Date();
-    tomorrow.setDate(today.getDate() + 1);
-
     const [user, setUser] = useState({});
     const [token, _setToken] = useState(localStorage.getItem("authToken"));
     const [allEmployees, setAllEmployees] = useState([]);
@@ -54,10 +49,6 @@ export const ContextProvider = ({ children }) => {
     const [communicationTypeMonth, setCommunicationTypeMonth] = useState("");
     const [specificInquiry, setSpecificInquiry] = useState(null);
     const [dataSet, setDataSet] = useState([]);
-    const [startDate, setStartDate] = useState(null);
-    const [endDate, setEndDate] = useState(null);
-    const [startDateValue, setStartDateValue] = useState(null);
-    const [endDateValue, setEndDateValue] = useState(null);
 
     const [department, setDepartment] = useState("All");
     const [project, setProject] = useState("All");
@@ -107,14 +98,17 @@ export const ContextProvider = ({ children }) => {
     const [loading, setLoading] = useState(false);
     const [navBarData, setNavBarData] = useState([]);
     const [isUserTypeChange, setIsUserTypeChange] = useState(false);
+    const [countAllConcerns, setCountAllConcerns] = useState({});
     const [searchSummary, setSearchSummary] = useState("");
     const [resultSearchActive, setResultSearchActive] = useState(false);
     const [departmentValue, setDepartmentValue] = useState("All");
     const [projectValue, setProjectValue] = useState("All");
     const [yearValue, setYearValue] = useState(new Date().getFullYear());
     const [monthValue, setMonthValue] = useState("All");
-
-
+    const [startDateValue, setStartDateValue] = useState(null);
+    const [endDateValue, setEndDateValue] = useState(null);
+    const [startDate, setStartDate] = useState(null);
+    const [endDate, setEndDate] = useState(null);
 
     useEffect(() => {
         if (user && user.department && !isDepartmentInitialized) {
@@ -136,7 +130,6 @@ export const ContextProvider = ({ children }) => {
         }
     };
 
-    
     const getAllConcerns = async () => {
         if (token) {
             setLoading(true);
@@ -236,15 +229,19 @@ export const ContextProvider = ({ children }) => {
                     property: project,
                     month: month,
                     year: year,
+                    startDate: startDate,
+                    endDate: endDate,
                 },
             });
             const result = response.data;
-    
+
             // Aggregate data into a single "Other Concerns" entry for null or "Other Concerns"
             const aggregatedData = result.reduce((acc, item) => {
                 const name = item.details_concern || "Other Concerns"; // Replace null with "Other Concerns"
-                const existingIndex = acc.findIndex((entry) => entry.name === name);
-    
+                const existingIndex = acc.findIndex(
+                    (entry) => entry.name === name
+                );
+
                 if (existingIndex > -1) {
                     // If "Other Concerns" already exists, add to its value
                     acc[existingIndex].value += item.total;
@@ -255,10 +252,10 @@ export const ContextProvider = ({ children }) => {
                         value: item.total,
                     });
                 }
-    
+
                 return acc;
             }, []);
-    
+
             setDataCategory(aggregatedData);
         } catch (error) {
             console.log("Error retrieving data", error);
@@ -298,7 +295,7 @@ export const ContextProvider = ({ children }) => {
             );
 
             const formattedData = filteredResult.map((item) => ({
-                name: item.month.toString().padStart(2, "0"),
+                name: `${item.month.toString().padStart(2, "0")}/${item.year.toString().slice(-2)}`,
                 Resolved: item.resolved,
                 Unresolved: item.unresolved,
                 Closed: item.closed,
@@ -318,13 +315,17 @@ export const ContextProvider = ({ children }) => {
                     property: project,
                     department: department,
                     year: year,
+                    startDate: startDate,
+                    endDate: endDate,
                 },
             });
             const result = response.data;
             const formattedData = result.reduce((acc, item) => {
                 const propertyName = item.property ? item.property : "N/A";
-                const existingProperty = acc.find((entry) => entry.name === propertyName);
-                if(existingProperty) {
+                const existingProperty = acc.find(
+                    (entry) => entry.name === propertyName
+                );
+                if (existingProperty) {
                     existingProperty.resolved += item.resolved;
                     existingProperty.unresolved += item.unresolved;
                     existingProperty.closed += item.closed;
@@ -338,7 +339,7 @@ export const ContextProvider = ({ children }) => {
                 }
                 return acc;
             }, []);
-    
+
             setDataPropery(formattedData);
         } catch (error) {
             console.log("error retrieving", error);
@@ -350,58 +351,42 @@ export const ContextProvider = ({ children }) => {
             const response = await apiService.get("inquiries-department", {
                 params: {
                     month: month,
-                    startDate: startDate,
-                    endDate: endDate,
                     property: project,
                     department: department,
                     year: year,
-                },
+                    startDate: startDate,
+                    endDate: endDate,
+                },  
             });
     
-            const result = response.data;
+            const departments = response.data.departments;
+            const unassignedData = response.data.totalUnassigned;
     
-            // Initialize an object to accumulate the totals for CRS and other departments
-            const departmentTotals = {};
-    
-            // Process each item in the result
-            result.forEach((item) => {
-                // If the department is not CRS, add its counts normally
-                if (item.department !== "Customer Relations - Services") {
-                    departmentTotals[item.department] = departmentTotals[item.department] || {
-                        resolved: 0,
-                        unresolved: 0,
-                        closed: 0,
-                    };
-                    departmentTotals[item.department].resolved += item.resolved;
-                    departmentTotals[item.department].unresolved += item.unresolved;
-                    departmentTotals[item.department].closed += item.closed;
-                }
-    
-                // Add all departments' counts to CRS
-                departmentTotals["Customer Relations - Services"] = departmentTotals["Customer Relations - Services"] || {
-                    resolved: 0,
-                    unresolved: 0,
-                    closed: 0,
-                };
-                departmentTotals["Customer Relations - Services"].resolved += item.resolved;
-                departmentTotals["Customer Relations - Services"].unresolved += item.unresolved;
-                departmentTotals["Customer Relations - Services"].closed += item.closed;
-            });
-    
-            // Prepare formatted data including CRS and other departments
-            const formattedData = Object.keys(departmentTotals).map((department) => ({
-                name: department,
-                resolved: departmentTotals[department].resolved,
-                unresolved: departmentTotals[department].unresolved,
-                closed: departmentTotals[department].closed,
+            const formattedData = departments.map((item) => ({
+                name: item.department,
+                resolved: item.resolved,
+                unresolved: item.unresolved,
+                closed: item.closed,
             }));
     
-            setDataDepartment(formattedData);
+            let concatData = [...formattedData];
+    
+            // Only push "Unassigned" data if it was requested explicitly
+            if (unassignedData && (department === 'Unassigned' || department === 'All')) {
+                const formattedDataUnassigned = {
+                    name: "Unassigned",
+                    resolved: unassignedData.total_resolved,
+                    unresolved: unassignedData.total_unresolved,
+                    closed: unassignedData.total_closed,
+                };
+                concatData.push(formattedDataUnassigned);
+            }
+    
+            setDataDepartment(concatData);
         } catch (error) {
             console.log("error retrieving", error);
         }
     };
-    
     
 
     const getCommunicationTypePerProperty = async () => {
@@ -414,6 +399,8 @@ export const ContextProvider = ({ children }) => {
                         property: project,
                         department: department,
                         year: year,
+                        startDate: startDate,
+                        endDate: endDate,
                     },
                 }
             );
@@ -421,13 +408,13 @@ export const ContextProvider = ({ children }) => {
             const formattedData = result.reduce((acc, item) => {
                 const name = item.communication_type || "No type";
                 const existing = acc.find((entry) => entry.name === name);
-    
+
                 if (existing) {
                     existing.value += item.total;
                 } else {
                     acc.push({ name, value: item.total });
                 }
-    
+
                 return acc;
             }, []);
 
@@ -445,6 +432,8 @@ export const ContextProvider = ({ children }) => {
                     property: project,
                     department: department,
                     year: year,
+                    startDate: startDate,
+                    endDate: endDate,
                 },
             });
             const result = response.data;
@@ -556,6 +545,16 @@ export const ContextProvider = ({ children }) => {
             } catch (error) {
                 console.log("error retrieving", error);
             }
+        }
+    };
+
+
+    const getCountAllConcerns = async () => {
+        try {
+            const response = await apiService.get("get-count-all-concerns");
+            setCountAllConcerns(response.data);
+        } catch (error) {
+            console.log("error retrieving", error);
         }
     };
 
@@ -798,8 +797,6 @@ export const ContextProvider = ({ children }) => {
         department,
         propertyMonth,
         month,
-        startDate,
-        endDate,
         project,
         year,
         departmentStatusYear,
@@ -810,6 +807,7 @@ export const ContextProvider = ({ children }) => {
         inquiriesPerChannelMonth,
         inquiriesPerChanelYear,
     ]);
+
 
     return (
         <StateContext.Provider
@@ -850,6 +848,9 @@ export const ContextProvider = ({ children }) => {
                 month,
                 fullYear,
                 getFullYear,
+                getCountAllConcerns,
+                setCountAllConcerns,
+                countAllConcerns,
                 dataCategory,
                 fetchCategory,
                 propertyMonth,
@@ -966,14 +967,15 @@ export const ContextProvider = ({ children }) => {
                 yearValue,
                 setMonthValue,
                 monthValue,
-                startDate,
-                setStartDate,
-                endDate,
-                setEndDate,
                 startDateValue,
                 setStartDateValue,
                 endDateValue,
-                setEndDateValue
+                setEndDateValue,
+                startDate,
+                setStartDate,
+                endDate,
+                setEndDate
+
             }}
         >
             {children}

@@ -1982,7 +1982,7 @@ class ConcernController extends Controller
 
 
     public function getMonthlyReports(Request $request)
-{
+    {
     // Get the parameters from the request
     $year = $request->year ?? Carbon::now()->year;
     $department = $request->department;
@@ -1991,14 +1991,17 @@ class ConcernController extends Controller
     $startDate = $request->startDate ? Carbon::parse($request->startDate)->setTimezone('Asia/Manila')->toDateString() : null;
     $endDate = $request->endDate ? Carbon::parse($request->endDate)->setTimezone('Asia/Manila')->toDateString() : null;
 
-
     $query = Concerns::select(
         DB::raw('EXTRACT(MONTH FROM created_at) as month'),
+        DB::raw('EXTRACT(YEAR FROM created_at) as year'),
         DB::raw('SUM(case when status = \'Resolved\' then 1 else 0 end) as Resolved'),
         DB::raw('SUM(case when status = \'unresolved\' then 1 else 0 end) as Unresolved'),
         DB::raw('SUM(case when status = \'Closed\' then 1 else 0 end) as Closed')
-    )
-    ->whereYear('created_at', $year);
+    );
+
+    if($year && $year !== 'All') {
+        $query->whereYear('created_at', $year);
+    }
 
     // Apply department filter
     if ($department && $department !== 'All') {
@@ -2028,18 +2031,19 @@ class ConcernController extends Controller
     }
 
     // Group by month and order by month
-    $reports = $query->groupBy('month')
-        ->orderBy('month')
-        ->get()
-        ->keyBy('month');
+    $reports = $query->groupBy('month', 'year')
+    ->orderBy('year')
+    ->orderBy('month')
+    ->get();
 
-    // Generate a full month report (even for months with no data)
-    $allMonths = collect(range(1, 12))->map(function ($month) use ($reports) {
+    
+    $allMonths = $reports->map(function ($report) {
         return [
-            'month' => $month,
-            'resolved' => $reports->get($month)?->resolved ?? 0,
-            'unresolved' => $reports->get($month)?->unresolved ?? 0,
-            'closed' => $reports->get($month)?->closed ?? 0,
+            'month' => $report->month, // Directly use the month without formatting
+            'year' => $report->year,   // Directly use the year
+            'resolved' => $report->resolved ?? 0,
+            'unresolved' => $report->unresolved ?? 0,
+            'closed' => $report->closed ?? 0,
         ];
     });
 
@@ -2055,14 +2059,21 @@ class ConcernController extends Controller
         $month = $request->month;
         $project = $request->property;
         $year = $request->year ?? Carbon::now()->year;
+        $startDate = $request->startDate ? Carbon::parse($request->startDate)->setTimezone('Asia/Manila')->toDateString() : null;
+        $endDate = $request->endDate ? Carbon::parse($request->endDate)->setTimezone('Asia/Manila')->toDateString() : null;
+
+
         $query = Concerns::select(
             DB::raw('property'),
             /*   DB::raw('EXTRACT(MONTH FROM created_at) as month'), */
             DB::raw('SUM(case when status = \'Resolved\' then 1 else 0 end) as Resolved'),
             DB::raw('SUM(case when status = \'unresolved\' then 1 else 0 end) as Unresolved'),
             DB::raw('SUM(case when status = \'Closed\' then 1 else 0 end) as Closed')
-        )
-            ->whereYear('created_at', $year);
+        );
+
+        if($year && $year !== 'All') {
+            $query->whereYear('created_at', $year);
+        }
 
         if ($project && $project !== 'All') {
             if ($project === "N/A") {
@@ -2084,6 +2095,18 @@ class ConcernController extends Controller
             $query->whereRaw("resolve_from::jsonb @> ?", json_encode([['department' => $department]]));
         }
 
+        if ($startDate && $endDate) {
+            $query->whereBetween(DB::raw('DATE(created_at)'), [$startDate, $endDate]);
+        }
+        // If only start date is provided, filter from start date to present
+        elseif ($startDate) {
+            $query->whereDate('created_at', '>=', $startDate); // Using whereDate for exact date match
+        }
+        // If only end date is provided, filter from start to end date
+        elseif ($endDate) {
+            $query->whereDate('created_at', '<=', $endDate); // Using whereDate for exact date match
+        }
+
         $concerns = $query->groupBy('property')->get();
         return response()->json($concerns);
     }
@@ -2094,6 +2117,8 @@ class ConcernController extends Controller
         $month = $request->month;
         $project = $request->property;
         $year = $request->year ?? Carbon::now()->year;
+        $startDate = $request->startDate ? Carbon::parse($request->startDate)->setTimezone('Asia/Manila')->toDateString() : null;
+        $endDate = $request->endDate ? Carbon::parse($request->endDate)->setTimezone('Asia/Manila')->toDateString() : null;
 
         $query = Concerns::select(
             DB::raw("COALESCE(
@@ -2105,8 +2130,11 @@ class ConcernController extends Controller
             DB::raw('COUNT(DISTINCT CASE WHEN status = \'unresolved\' THEN id ELSE NULL END) as unresolved'),
             DB::raw('COUNT(DISTINCT CASE WHEN status = \'Closed\' THEN id ELSE NULL END) as closed')
         )
-            ->whereYear('created_at', $year)
             ->whereNotNull('status');
+
+        if($year && $year !== 'All') {
+            $query->whereYear('created_at', $year);
+        }
 
         if ($project && $project !== 'All') {
             $query->where('property', $project);
@@ -2118,6 +2146,18 @@ class ConcernController extends Controller
 
         if ($department && $department !== 'All') {
             $query->whereRaw("assign_to::jsonb @> ?", [json_encode([['department' => $department]])]);
+        }
+
+        if ($startDate && $endDate) {
+            $query->whereBetween(DB::raw('DATE(created_at)'), [$startDate, $endDate]);
+        }
+        // If only start date is provided, filter from start date to present
+        elseif ($startDate) {
+            $query->whereDate('created_at', '>=', $startDate); // Using whereDate for exact date match
+        }
+        // If only end date is provided, filter from start to end date
+        elseif ($endDate) {
+            $query->whereDate('created_at', '<=', $endDate); // Using whereDate for exact date match
         }
 
         $concerns = $query
@@ -2138,11 +2178,15 @@ class ConcernController extends Controller
         $month = $request->month;
         $project = $request->property;
         $year = $request->year ?? Carbon::now()->year;
+        $startDate = $request->startDate ? Carbon::parse($request->startDate)->setTimezone('Asia/Manila')->toDateString() : null;
+        $endDate = $request->endDate ? Carbon::parse($request->endDate)->setTimezone('Asia/Manila')->toDateString() : null;
 
 
-        $query = Concerns::select('channels', DB::raw('COUNT(*) as total'))
+        $query = Concerns::select('channels', DB::raw('COUNT(*) as total'));
 
-            ->whereYear('created_at', $year);
+        if($year && $year !== 'All') {
+            $query->whereYear('created_at', $year);
+        }
 
         if ($department && $department !== "All") {
             $query->whereRaw("resolve_from::jsonb @> ?", json_encode([['department' => $department]]));
@@ -2154,6 +2198,18 @@ class ConcernController extends Controller
 
         if ($project && $project !== 'All') {
             $query->where('property', $project);
+        }
+
+        if ($startDate && $endDate) {
+            $query->whereBetween(DB::raw('DATE(created_at)'), [$startDate, $endDate]);
+        }
+        // If only start date is provided, filter from start date to present
+        elseif ($startDate) {
+            $query->whereDate('created_at', '>=', $startDate); // Using whereDate for exact date match
+        }
+        // If only end date is provided, filter from start to end date
+        elseif ($endDate) {
+            $query->whereDate('created_at', '<=', $endDate); // Using whereDate for exact date match
         }
 
         $query->orderByRaw("
@@ -2192,14 +2248,17 @@ class ConcernController extends Controller
         $department = $request->department;
         $month = $request->month;
         $project = $request->property;
+        $startDate = $request->startDate ? Carbon::parse($request->startDate)->setTimezone('Asia/Manila')->toDateString() : null;
+        $endDate = $request->endDate ? Carbon::parse($request->endDate)->setTimezone('Asia/Manila')->toDateString() : null;
 
 
         // Query to count each <communication_t></communication_t>ype grouped by property
-        $query = Concerns::select('communication_type', DB::raw('COUNT(*) as total'))
+        $query = Concerns::select('communication_type', DB::raw('COUNT(*) as total'));
 
-            ->whereYear('created_at', $year);
+        if($year && $year !== 'All') {
+            $query->whereYear('created_at', $year);
+        }
             
-
         if ($department && $department !== "All") {
             $query->whereRaw("resolve_from::jsonb @> ?", json_encode([['department' => $department]]));
         }
@@ -2210,6 +2269,18 @@ class ConcernController extends Controller
 
         if ($project && $project !== 'All') {
             $query->where('property', $project);
+        }
+
+        if ($startDate && $endDate) {
+            $query->whereBetween(DB::raw('DATE(created_at)'), [$startDate, $endDate]);
+        }
+        // If only start date is provided, filter from start date to present
+        elseif ($startDate) {
+            $query->whereDate('created_at', '>=', $startDate); // Using whereDate for exact date match
+        }
+        // If only end date is provided, filter from start to end date
+        elseif ($endDate) {
+            $query->whereDate('created_at', '<=', $endDate); // Using whereDate for exact date match
         }
 
         $query->orderByRaw("
@@ -2258,14 +2329,19 @@ class ConcernController extends Controller
             $department = $request->department;
             $month = $request->month;
             $year = $request->year ?? Carbon::now()->year;
+            $startDate = $request->startDate ? Carbon::parse($request->startDate)->setTimezone('Asia/Manila')->toDateString() : null;
+            $endDate = $request->endDate ? Carbon::parse($request->endDate)->setTimezone('Asia/Manila')->toDateString() : null;
+
         } catch (\Exception $e) {
             return response()->json(['error' => 'Invalid month format'], 400);
         }
 
         $department = $request->department;
-        $query = Concerns::select('details_concern', DB::raw('COUNT(*) as total'))
+        $query = Concerns::select('details_concern', DB::raw('COUNT(*) as total'));
 
-            ->whereYear('created_at', $year);
+        if($year && $year !== 'All') {
+            $query->whereYear('created_at', $year);
+        }
 
         if ($department && $department !== "All") {
             $query->whereRaw("resolve_from::jsonb @> ?", json_encode([['department' => $department]]));
@@ -2277,6 +2353,18 @@ class ConcernController extends Controller
 
         if ($month && $month !== 'All') {
             $query->whereMonth('created_at', $month);
+        }
+
+        if ($startDate && $endDate) {
+            $query->whereBetween(DB::raw('DATE(created_at)'), [$startDate, $endDate]);
+        }
+        // If only start date is provided, filter from start date to present
+        elseif ($startDate) {
+            $query->whereDate('created_at', '>=', $startDate); // Using whereDate for exact date match
+        }
+        // If only end date is provided, filter from start to end date
+        elseif ($endDate) {
+            $query->whereDate('created_at', '<=', $endDate); // Using whereDate for exact date match
         }
 
         $concerns = $query->groupBy('details_concern')->get();
