@@ -11,7 +11,6 @@ const AdditionalPremiumAssignModal = ({ modalRef, propertyData }) => {
     const [localExcelId, setLocalExcelId] = useState(null);
     const [localTowerPhaseId, setLocalTowerPhaseId] = useState(null);
     const [selectedUnit, setSelectedUnit] = useState({});
-    console.log("selectedUnit", selectedUnit);
     const { pricingData, setPricingData } = usePricing();
 
     //Hooks
@@ -47,26 +46,52 @@ const AdditionalPremiumAssignModal = ({ modalRef, propertyData }) => {
     }, [groupedByFloor]);
 
     //Event Handler
+    // const handleOpenModal = (id, unit, additional_premium_id) => {
+    //     if (modalRef2.current) {
+    //         const existingUnit = pricingData.selectedAdditionalPremiums.find(
+    //             (item) => item.unit_id === id
+    //         );
+    //         console.log("existingUnit", existingUnit);
+    //         console.log("additional_premium_id", additional_premium_id);
+
+    //         setSelectedUnit({
+    //             unit_id: id,
+    //             unit_name: unit,
+    //             additional_premium_id: existingUnit
+    //                 ? [
+    //                       ...new Set([
+    //                           ...existingUnit.additional_premium_id,
+    //                           ...additional_premium_id,
+    //                       ]),
+    //                   ]
+    //                 : additional_premium_id,
+    //         });
+
+    //         modalRef2.current.showModal();
+    //     }
+    // };
     const handleOpenModal = (id, unit, additional_premium_id) => {
         if (modalRef2.current) {
-            setSelectedUnit({
-                unit_id: id,
-                unit_name: unit,
-                additional_premium_id: additional_premium_id,
+            setSelectedUnit((prevUnit) => {
+                const existingUnit =
+                    pricingData.selectedAdditionalPremiums.find(
+                        (item) => item.unit_id === id
+                    );
+
+                return {
+                    unit_id: id,
+                    unit_name: unit,
+                    additional_premium_id: existingUnit
+                        ? [
+                              ...new Set([
+                                  ...(existingUnit.additional_premium_id || []),
+                                  ...(additional_premium_id || []),
+                              ]),
+                          ]
+                        : additional_premium_id || [], // Ensure fallback to an empty array
+                };
             });
-            // setPricingData((prev) => ({
-            //     ...prev,
-            //     selectedAdditionalPremiums: selectedUnit
-            //         ? [
-            //               {
-            //                   unit: selectedUnit.unit_name,
-            //                   unit_id: selectedUnit.unit_id,
-            //                   additional_premium_id:
-            //                       selectedUnit.additional_premium_id ?? [], 
-            //               },
-            //           ]
-            //         : [], 
-            // }));
+
             modalRef2.current.showModal();
         }
     };
@@ -141,15 +166,26 @@ const AdditionalPremiumAssignModal = ({ modalRef, propertyData }) => {
                                                           unit,
                                                           additional_premium_id,
                                                       }) => {
-                                                          const isSelected =
-                                                              pricingData.selectedAdditionalPremiums?.some(
-                                                                  (item) =>
-                                                                      item.unit_id ===
-                                                                      id
-                                                              ) ||
-                                                              (additional_premium_id &&
-                                                                  additional_premium_id.length >
-                                                                      0);
+                                                            const isSelected =
+                                                                pricingData.selectedAdditionalPremiums?.some(
+                                                                    (item) =>
+                                                                        item.unit_id ===
+                                                                        id
+                                                                ) ||
+                                                                (additional_premium_id &&
+                                                                    additional_premium_id.length >
+                                                                        0);
+                                                          
+                                                          //   const isSelected =
+                                                          //       pricingData.selectedAdditionalPremiums?.some(
+                                                          //           (item) =>
+                                                          //               item.unit_id ===
+                                                          //                   id &&
+                                                          //               item
+                                                          //                   .additional_premium_id
+                                                          //                   .length >
+                                                          //                   0
+                                                          //       );
 
                                                           return (
                                                               <button

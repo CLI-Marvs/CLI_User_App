@@ -1,4 +1,4 @@
-import React, { useState, useEffect ,memo} from "react";
+import React, { useState, useEffect, memo } from "react";
 import { usePricing } from "@/component/layout/propertyandpricingpage/basicpricing/context/BasicPricingContext";
 
 const PremiumChecklistModal = ({ modalRef2, selectedUnit }) => {
@@ -15,6 +15,8 @@ const PremiumChecklistModal = ({ modalRef2, selectedUnit }) => {
     //Hooks
     useEffect(() => {
         if (selectedUnit) {
+            console.log("selectedUnit", selectedUnit);
+
             setInitialAdditionalPremiums(
                 selectedUnit.additional_premium_id ?? []
             );
@@ -31,87 +33,203 @@ const PremiumChecklistModal = ({ modalRef2, selectedUnit }) => {
 
     //Event handler
     //Handle checkbox change
+    // const handleCheckboxChange = (e, premium) => {
+    //     const isChecked = e.target.checked;
+
+    //     setSelectedAdditionalPremiums((prevState) => {
+    //         // Find if the unit already exists in the selection
+    //         const existingUnit = prevState.find(
+    //             (item) => item.unit_id === selectedUnit?.unit_id
+    //         );
+
+    //         if (isChecked) {
+    //             // Add premium ID if checked
+    //             if (existingUnit) {
+    //                 return prevState.map((item) =>
+    //                     item.unit_id === selectedUnit?.unit_id
+    //                         ? {
+    //                               ...item,
+    //                               additional_premium_id: [
+    //                                   ...new Set([
+    //                                       ...item.additional_premium_id,
+    //                                       premium.id,
+    //                                   ]),
+    //                               ],
+    //                           }
+    //                         : item
+    //                 );
+    //             } else {
+    //                 return [
+    //                     ...prevState,
+    //                     {
+    //                         unit_id: selectedUnit?.unit_id,
+    //                         additional_premium_id: [premium.id],
+    //                     },
+    //                 ];
+    //             }
+    //         } else {
+    //             return prevState.map((item) =>
+    //                 item.unit_id === selectedUnit?.unit_id
+    //                     ? {
+    //                           ...item,
+    //                           additional_premium_id:
+    //                               item.additional_premium_id.filter(
+    //                                   (id) => id !== premium.id
+    //                               ),
+    //                       }
+    //                     : item
+    //             );
+    //             // Remove premium ID if unchecked
+    //             // if (existingUnit) {
+    //             //     return prevState
+    //             //         .map((item) =>
+    //             //             item.unit_id === selectedUnit?.unit_id
+    //             //                 ? {
+    //             //                       ...item,
+    //             //                       additional_premium_id:
+    //             //                           item.additional_premium_id.filter(
+    //             //                               (id) => id !== premium.id
+    //             //                           ),
+    //             //                   }
+    //             //                 : item
+    //             //         )
+    //             //         .filter(
+    //             //             (item) => item.additional_premium_id.length > 0
+    //             //         ); // Remove empty units
+    //             // } else {
+    //             //     return prevState;
+    //             // }
+    //         }
+    //     });
+    // };
     const handleCheckboxChange = (e, premium) => {
         const isChecked = e.target.checked;
 
         setSelectedAdditionalPremiums((prevState) => {
-            // Find if the unit already exists in the selection
-            const existingUnit = prevState.find(
-                (item) => item.unit_id === selectedUnit?.unit_id
+            return prevState.map((item) =>
+                item.unit_id === selectedUnit?.unit_id
+                    ? {
+                          ...item,
+                          additional_premium_id: isChecked
+                              ? [
+                                    ...new Set([
+                                        ...item.additional_premium_id,
+                                        premium.id,
+                                    ]),
+                                ]
+                              : item.additional_premium_id.filter(
+                                    (id) => id !== premium.id
+                                ),
+                      }
+                    : item
             );
-
-            if (isChecked) {
-                // Add premium ID if checked
-                if (existingUnit) {
-                    return prevState.map((item) =>
-                        item.unit_id === selectedUnit?.unit_id
-                            ? {
-                                  ...item,
-                                  additional_premium_id: [
-                                      ...new Set([
-                                          ...item.additional_premium_id,
-                                          premium.id,
-                                      ]),  
-                                  ],
-                              }
-                            : item
-                    );
-                } else {
-                    return [
-                        ...prevState,
-                        {
-                            unit_id: selectedUnit?.unit_id,
-                            additional_premium_id: [premium.id],
-                        },
-                    ];
-                }
-            } else {
-                // Remove premium ID if unchecked
-                if (existingUnit) {
-                    return prevState
-                        .map((item) =>
-                            item.unit_id === selectedUnit?.unit_id
-                                ? {
-                                      ...item,
-                                      additional_premium_id:
-                                          item.additional_premium_id.filter(
-                                              (id) => id !== premium.id
-                                          ),
-                                  }
-                                : item
-                        )
-                        .filter(
-                            (item) => item.additional_premium_id.length > 0
-                        ); // Remove empty units
-                } else {
-                    return prevState;
-                }
-            }
         });
     };
 
     //Handle Apply premiums button
+    // const handleApplyPremiums = () => {
+    //     setPricingData((prevState) => {
+    //         const updatedPremiums = selectedAdditionalPremiums.map((item) => ({
+    //             ...item,
+    //             additional_premium_id:
+    //                 item.additional_premium_id.length > 0
+    //                     ? item.additional_premium_id
+    //                     : [],
+    //         }));
+
+    //         // return {
+    //         //     ...prevState,
+    //         //     selectedAdditionalPremiums: updatedPremiums,
+    //         // };
+    //         return {
+    //             ...prevState,
+    //             selectedAdditionalPremiums: prevState.selectedAdditionalPremiums
+    //                 .filter(
+    //                     (prevItem) =>
+    //                         !updatedPremiums.some(
+    //                             (item) => item.unit_id === prevItem.unit_id
+    //                         )
+    //                 ) // Keep other units intact
+    //                 .concat(updatedPremiums), // Merge updated ones
+    //         };
+    //     });
+
+    //     //  Close the modal
+    //     if (modalRef2.current) {
+    //         modalRef2.current.close();
+    //     }
+    // };
+    // const handleApplyPremiums = () => {
+    //     setPricingData((prevState) => {
+    //         const existingPremiums = prevState.selectedAdditionalPremiums || [];
+
+    //         // Merge new selections with existing ones
+    //         const updatedPremiums = [...existingPremiums];
+
+    //         selectedAdditionalPremiums.forEach((newItem) => {
+    //             const existingIndex = updatedPremiums.findIndex(
+    //                 (item) => item.unit_id === newItem.unit_id
+    //             );
+
+    //             if (existingIndex !== -1) {
+    //                 // Update the existing unit's premiums
+    //                 updatedPremiums[existingIndex] = {
+    //                     ...updatedPremiums[existingIndex],
+    //                     additional_premium_id: newItem.additional_premium_id,
+    //                 };
+    //             } else {
+    //                 // Add a new unit if it doesn't exist
+    //                 updatedPremiums.push(newItem);
+    //             }
+    //         });
+
+    //         return {
+    //             ...prevState,
+    //             selectedAdditionalPremiums: updatedPremiums.filter(
+    //                 (item) => item.additional_premium_id.length > 0
+    //             ), // Remove units with empty additional premiums
+    //         };
+    //     });
+
+    //     // Close the modal
+    //     if (modalRef2.current) {
+    //         modalRef2.current.close();
+    //     }
+    // };
     const handleApplyPremiums = () => {
         setPricingData((prevState) => {
-            const updatedPremiums = selectedAdditionalPremiums.map((item) => ({
-                ...item,
-                additional_premium_id:
-                    item.additional_premium_id.length > 0
-                        ? item.additional_premium_id
-                        : [],
-            }));
+            const existingPremiums = prevState.selectedAdditionalPremiums || [];
+
+            // Merge new selections with existing ones
+            const updatedPremiums = [...existingPremiums];
+
+            selectedAdditionalPremiums.forEach((newItem) => {
+                const existingIndex = updatedPremiums.findIndex(
+                    (item) => item.unit_id === newItem.unit_id
+                );
+
+                if (existingIndex !== -1) {
+                    // Update the existing unit's premiums (keep empty array if removed)
+                    updatedPremiums[existingIndex] = {
+                        ...updatedPremiums[existingIndex],
+                        additional_premium_id: newItem.additional_premium_id,
+                    };
+                } else {
+                    // Add a new unit if it doesn't exist
+                    updatedPremiums.push(newItem);
+                }
+            });
 
             return {
                 ...prevState,
-                selectedAdditionalPremiums:
-                    updatedPremiums.length > 0 ? updatedPremiums : [],
+                selectedAdditionalPremiums: updatedPremiums, // No filtering out empty arrays
             };
         });
 
-      //  Close the modal
-           if (modalRef2.current) {
-               modalRef2.current.close();
-           }
+        // Close the modal
+        if (modalRef2.current) {
+            modalRef2.current.close();
+        }
     };
 
     //Handle close the modal
