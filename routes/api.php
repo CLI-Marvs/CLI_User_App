@@ -100,28 +100,37 @@ Route::get('/get-matches', [SapController::class, 'runAutoPosting']);
 
 
 Route::middleware('auth:sanctum')->group(function () {
-  Route::get('/customer/inquiries', [TransactionController::class, 'getCustomerInquiries']);
-  Route::get('/customer/data', [TransactionController::class, 'getCustomerData']);
-  Route::get('/customer/details', [TransactionController::class, 'getCustomerDetailsByEmail']);
-  Route::get('/get-transaction-bank', [SapController::class, 'getTransactionByBankName']);
-  Route::post('/upload-notepad', [SapController::class, 'uploadNotepad']);
-  Route::get('/get-concern', [ConcernController::class, 'getAllConcerns']);
-  Route::post('/add-concern', [ConcernController::class, 'addConcernPublic']);
-  Route::post('/add-concern-prev', [ConcernController::class, 'addConcernFromPreviousInquiry']);
-  Route::get('/get-message/{ticketId}', [ConcernController::class, 'getMessage']);
-  Route::post('/send-message', [ConcernController::class, 'sendMessage']);
-  Route::get('/get-logs/{ticketId}', [ConcernController::class, 'getInquiryLogs']);
-  Route::get('/get-messageId/{ticketId}', [ConcernController::class, 'getMessageId']);
-  Route::get('/employee-list', [ConcernController::class, 'getAllEmployeeList']);
-  Route::get('/notifications', [ConcernController::class, 'listOfNotifications']);
-  Route::get('/unread-count', [ConcernController::class, 'countUnreadNotifications']);
-  Route::post('/pin-concern/{id}', [ConcernController::class, 'pinConcern']);
-  Route::get('/navbar-data', [ConcernController::class, 'getNavBarData']);
-  Route::post('/isread/{concernId}', [ConcernController::class, 'readNotifByUser']);
-  Route::get('/specific-assignee', [ConcernController::class, 'getSpecificInquiry']);
-  Route::post('/remove-assignee', [ConcernController::class, 'removeAssignee']);
-  /* Download the file attachment */
-  Route::post('/download-file', [ConcernController::class, 'downloadFileFromGCS']);
+    Route::get('/get-transaction-bank', [SapController::class, 'getTransactionByBankName']);
+    Route::post('/upload-notepad', [SapController::class, 'uploadNotepad']);
+    Route::get('/get-concern', [ConcernController::class, 'getAllConcerns']);
+    Route::get('/get-count-all-concerns', [ConcernController::class, 'getCountAllConcerns']);
+    Route::post('/add-concern', [ConcernController::class, 'addConcernPublic']);
+    Route::post('/add-concern-prev', [ConcernController::class, 'addConcernFromPreviousInquiry']);
+    Route::get('/get-message/{ticketId}', [ConcernController::class, 'getMessage']);
+    Route::post('/send-message', [ConcernController::class, 'sendMessage']);
+    Route::get('/get-logs/{ticketId}', [ConcernController::class, 'getInquiryLogs']);
+    Route::get('/get-messageId/{ticketId}', [ConcernController::class, 'getMessageId']);
+    Route::get('/employee-list', [ConcernController::class, 'getAllEmployeeList']);
+    Route::get('/notifications', [ConcernController::class, 'listOfNotifications']);
+    Route::get('/unread-count', [ConcernController::class, 'countUnreadNotifications']);
+    Route::post('/pin-concern/{id}', [ConcernController::class, 'pinConcern']);
+    Route::get('/navbar-data', [ConcernController::class, 'getNavBarData']);
+    Route::post('/isread/{concernId}', [ConcernController::class, 'readNotifByUser']);
+    Route::get('/specific-assignee', [ConcernController::class, 'getSpecificInquiry']);
+    Route::post('/remove-assignee', [ConcernController::class, 'removeAssignee']);
+    Route::get('/property-name', [PropertyMasterController::class, 'getPropertyName']);
+    /* Download the file attachment */
+    Route::post('/download-file', [ConcernController::class, 'downloadFileFromGCS']);
+    /* Pricing Master List */
+    Route::get('/get-pricing-master-lists', [PriceListMasterController::class, 'getAllPricingMasterLists']);
+    /*Basic Pricing */
+    Route::post('/basic-pricing', [PriceBasicDetailController::class, 'storeBasicPricing']);
+    /*Payment Scheme */
+    Route::post('/payment-schemes', [PaymentSchemeController::class, 'storePaymentScheme']);
+    Route::get('/get-payment-schemes', [PaymentSchemeController::class, 'getAllPaymentSchemes']);
+    /* Property Master */
+    Route::post('/property-details', [PropertyMasterController::class, 'storePropertyDetail']);
+    Route::get('/get-property-master/{id}', [PropertyMasterController::class, 'getPropertyMaster']);
 
   /*Basic Pricing */
   Route::post('/basic-pricing', [PriceBasicDetailController::class, 'storeBasicPricing']);

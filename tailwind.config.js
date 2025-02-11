@@ -163,10 +163,10 @@ export default {
         'gradient-custom': 'linear-gradient(to right, #348017, #067ACS)',
       },
     },
-    screens: {
-      largeScreen: '1900px',
-      mediumScrren: '1500px'
-    }
+    // screens: {
+    //   largeScreen: '1900px',
+    //   mediumScrren: '1500px'
+    // }
   },
   plugins: [],
 }

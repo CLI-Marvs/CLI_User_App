@@ -922,6 +922,35 @@ class ConcernController extends Controller
         }
     }
 
+    public function getCountAllConcerns(Request $request)
+{
+    try {
+
+        $totalCount = Concerns::count();
+
+       
+        $resolvedCount = Concerns::where('status', 'Resolved')->count();
+        $closedCount = Concerns::where('status', 'Closed')->count();
+        $unresolvedCount = Concerns::where('status', 'unresolved')->count();
+
+        
+        $response = [
+            'counts' => [
+                'all' => $totalCount,
+                'resolved' => $resolvedCount,
+                'closed' => $closedCount,
+                'unresolved' => $unresolvedCount,
+            ],
+        ];
+
+        \Log::info($response);
+        
+        return response()->json($response);
+    } catch (\Exception $e) {
+        return response()->json(['message' => 'Error occurred.', 'error' => $e->getMessage()], 500);
+    }
+}
+
 
     private function getLatestMessage()
     {
@@ -1049,10 +1078,9 @@ class ConcernController extends Controller
         if (!empty($searchParams['category'] ?? null) && $searchParams['category'] !== 'Other Concerns') {
             $query->where('details_concern', 'ILIKE', '%' . $searchParams['category'] . '%');
         } else {
-            $query->where(function($query) use ($searchParams) {
+            $query->where(function ($query) use ($searchParams) {
                 $query->where('details_concern', 'ILIKE', '%' . ($searchParams['category'] ?? '') . '%')
-                ->orWhereNull('details_concern');
-                      
+                    ->orWhereNull('details_concern');
             });
         }
         if (!empty($searchParams['email'])) {
@@ -1068,25 +1096,24 @@ class ConcernController extends Controller
         if (!empty($searchParams['type'])) {
             if ($searchParams['type'] === 'No Type') {
                 $query->whereNull('communication_type');
-            }else {
+            } else {
                 $query->where('communication_type', 'ILIKE', '%' . $searchParams['type'] . '%');
             }
         }
         if (!empty($searchParams['selectedProperty'] ?? null) && $searchParams['selectedProperty'] !== 'N/A') {
             $query->where('property', 'ILIKE', '%' . $searchParams['selectedProperty'] . '%');
         } else {
-            $query->where(function($query) use ($searchParams) {
+            $query->where(function ($query) use ($searchParams) {
                 $query->where('property', 'ILIKE', '%' . ($searchParams['selectedProperty'] ?? '') . '%')
-                      ->orWhereNull('property');
+                    ->orWhereNull('property');
             });
         }
         if (!empty($searchParams['channels'])) {
             if ($searchParams['channels'] === 'No Channel') {
                 $query->whereNull('channels');
-            }else {
+            } else {
                 $query->where('channels', $searchParams['channels']);
             }
-           
         }
 
         if (!empty($searchParams['startDate'])) {
@@ -1103,14 +1130,18 @@ class ConcernController extends Controller
         }
 
         if (!empty($searchParams['departments'])) {
-            $departments = $searchParams['departments'];
+            if ($searchParams['departments'] !== "Unassigned") {
+                $departments = $searchParams['departments'];
 
-            if (!is_array($departments)) {
-                $departments = explode(',', $departments); 
-            }
+                if (!is_array($departments)) {
+                    $departments = explode(',', $departments);
+                }
 
-            foreach ($departments as $department) {
-                $query->whereJsonContains('assign_to', [['department' => $department]]);
+                foreach ($departments as $department) {
+                    $query->whereJsonContains('assign_to', [['department' => $department]]);
+                }
+            } else {
+                $query->whereNull('assign_to');
             }
         }
 
@@ -2049,12 +2080,11 @@ class ConcernController extends Controller
             if ($project === "N/A") {
                 $query->where(function ($subQuery) {
                     $subQuery->where('property', 'N/A')
-                             ->orWhereNull('property');
+                        ->orWhereNull('property');
                 });
             } else {
                 $query->where('property', $project);
             }
-            
         }
 
         if ($month && $month !== 'All') {
@@ -2069,6 +2099,8 @@ class ConcernController extends Controller
         return response()->json($concerns);
     }
 
+
+
     public function getInquiriesPerDepartment(Request $request)
     {
         $department = $request->department;
@@ -2077,14 +2109,10 @@ class ConcernController extends Controller
         $year = $request->year ?? Carbon::now()->year;
 
         $query = Concerns::select(
-            DB::raw("COALESCE(
-                (SELECT jsonb_array_elements(assign_to::jsonb)->>'department' 
-                 LIMIT 1), 
-                'Customer Relations - Services'
-            ) as department"),
-            DB::raw('COUNT(DISTINCT CASE WHEN status = \'Resolved\' THEN id ELSE NULL END) as resolved'),
+            DB::raw("jsonb_array_elements(resolve_from::jsonb)->>'department' as department"),
             DB::raw('COUNT(DISTINCT CASE WHEN status = \'unresolved\' THEN id ELSE NULL END) as unresolved'),
-            DB::raw('COUNT(DISTINCT CASE WHEN status = \'Closed\' THEN id ELSE NULL END) as closed')
+            DB::raw('COUNT(DISTINCT CASE WHEN status = \'Closed\' THEN id ELSE NULL END) as closed'),
+            DB::raw('COUNT(DISTINCT CASE WHEN status = \'Resolved\' THEN id ELSE NULL END) as resolved')
         )
             ->whereYear('created_at', $year)
             ->whereNotNull('status');
@@ -2098,16 +2126,55 @@ class ConcernController extends Controller
         }
 
         if ($department && $department !== 'All') {
-            $query->whereRaw("assign_to::jsonb @> ?", [json_encode([['department' => $department]])]);
+            if ($department === 'Unassigned') {
+                $query->whereRaw("resolve_from::jsonb @> ?", [json_encode([['department' => null]])]);
+            } else {
+                $query->whereRaw("
+                    EXISTS (
+                        SELECT 1 FROM jsonb_array_elements(resolve_from::jsonb) AS elem
+                        WHERE elem->>'department' = ?
+                    )
+                ", [$department]);
+            }
+        }
+        
+        
+
+        // Query for total unresolved, closed, resolved, and unassigned concerns
+        $totalUnassigned = Concerns::selectRaw("
+        COUNT(DISTINCT CASE WHEN status = 'unresolved' AND assign_to IS NULL THEN id ELSE NULL END) as total_unresolved,
+        COUNT(DISTINCT CASE WHEN status = 'Closed' AND assign_to IS NULL THEN id ELSE NULL END) as total_closed,
+        COUNT(DISTINCT CASE WHEN status = 'Resolved' AND assign_to IS NULL THEN id ELSE NULL END) as total_resolved,
+        COUNT(DISTINCT CASE WHEN assign_to IS NULL THEN id ELSE NULL END) as total_unassigned,
+        COUNT(DISTINCT id) as total_all
+    ")
+            ->whereYear('created_at', $year)
+            ->whereNotNull('status');
+
+        if ($project && $project !== 'All') {
+            $totalUnassigned->where('property', $project);
         }
 
+        if ($month && $month !== 'All') {
+            $totalUnassigned->whereMonth('created_at', $month);
+        }
+
+        $totalCounts = $totalUnassigned->first();
+
         $concerns = $query
-            ->groupBy('department')
-            ->orderBy('department') // Optional: For consistent ordering
+            ->groupBy(DB::raw("jsonb_array_elements(resolve_from::jsonb)->>'department'"))
+            ->orderBy('department')
             ->get();
 
-        return response()->json($concerns);
+        return response()->json([
+            'departments' => $concerns,
+            'totalUnassigned' => $totalCounts,
+        ]);
     }
+
+
+
+
 
 
     /**
@@ -2179,7 +2246,7 @@ class ConcernController extends Controller
         $query = Concerns::select('communication_type', DB::raw('COUNT(*) as total'))
 
             ->whereYear('created_at', $year);
-            
+
 
         if ($department && $department !== "All") {
             $query->whereRaw("resolve_from::jsonb @> ?", json_encode([['department' => $department]]));

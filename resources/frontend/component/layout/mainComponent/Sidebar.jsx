@@ -66,7 +66,7 @@ const Sidebar = () => {
 
     useEffect(() => {
         switch (location.pathname) {
-            case "/superadmin/userrightsandpermissions":
+            case "/super-admin/user-rights-and-permissions":
                 setInquiryOpen(false);
                 setIsInvoiceOpen(false);
                 setSuperAdminOpen(true);
@@ -439,7 +439,7 @@ const Sidebar = () => {
                     `}
                                 onClick={handleSuperAdminDropdownClick}
                             >
-                                Admin Setting
+                                Admin Settings
                                 <ListItemSuffix>
                                     <IoIosArrowDown
                                         className={`text-custom-solidgreen  transition-transform duration-200 ease-in-out ${
