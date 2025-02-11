@@ -316,29 +316,28 @@ textarea {
 
 
 .customer-scrollbar {
-  overflow-x: hidden; /* Hide the scrollbar initially */
+  overflow-y: hidden; /* Hide the scrollbar initially */
 }
 
 .customer-scrollbar:hover {
-  overflow-x: auto; /* Show the scrollbar on hover */
+  overflow-y: auto;
 }
-
 .customer-scrollbar::-webkit-scrollbar {
   height: 3px;
   cursor: pointer;
-  width: 6px; /* Adjust the width for thinness */
+  width: 6px; 
 }
 
 .customer-scrollbar::-webkit-scrollbar-thumb {
-  background-color: #348017; /* Color of the scrollbar thumb */
+  background-color: #D4D4D4; /* Color of the scrollbar thumb */
   border-radius: 10px; /* Rounded corners for the scrollbar thumb */
 }
 
 .customer-scrollbar::-webkit-scrollbar-thumb:hover {
-  background-color: #348017; /* Darker color on hover */
+  background-color: #D4D4D4; /* Darker color on hover */
 }
 
 .customer-scrollbar::-webkit-scrollbar-track {
-  background-color: #f1f1f1; /* Background of the scrollbar track */
+  
   border-radius: 5px;
 }

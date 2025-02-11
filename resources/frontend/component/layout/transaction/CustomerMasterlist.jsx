@@ -25,11 +25,8 @@ const CustomerMasterlist = () => {
     };
 
     const handlePageClick = (data) => {
-        console.log("data", data);
         setCurrentPageCustomer(data.selected);
     };
-
-    console.log("currentPage", currentPageCustomer);
 
     const fetchDataCustomer = async () => {
         const response = await data.getCustomerData(currentPageCustomer);
