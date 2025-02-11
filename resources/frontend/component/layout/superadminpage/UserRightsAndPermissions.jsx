@@ -27,6 +27,7 @@ import useEmployeePermission from "@/context/RoleManagement/EmployeePermissionCo
 import useDepartment from "@/context/RoleManagement/DepartmentContext";
 import CustomToolTip from "@/component/layout/mainComponent/Tooltip/CustomToolTip";
 import { debounce } from "lodash";
+import highlightText from "@/util/hightlightText";
 
 const UserRightsAndPermissions = () => {
     //States
@@ -58,7 +59,6 @@ const UserRightsAndPermissions = () => {
         useState("");
 
     //Hooks
-
     //Debounced function to optimize search input performance
     const debouncedSearch = useCallback(
         debounce((value) => {
@@ -69,27 +69,32 @@ const UserRightsAndPermissions = () => {
 
     //Memoized filtered departments list based on search input
     const filteredDepartments = useMemo(() => {
-        return departmentsWithPermissions.filter((department) =>
-            department.name
-                .toLowerCase()
-                .includes(searchByDepartmentOrByEmployee.toLowerCase())
-        );
+        if (departmentsWithPermissions) {
+            return departmentsWithPermissions.filter((department) =>
+                department.name
+                    .toLowerCase()
+                    .includes(searchByDepartmentOrByEmployee.toLowerCase())
+            );
+        }
     }, [searchByDepartmentOrByEmployee, departmentsWithPermissions]);
 
     //Memoized filtered employees/user list based on search input
     const filteredEmployees = useMemo(() => {
-        return (
-            employeesWithPermissions?.filter((employee) => {
-                const firstName = employee?.firstname?.toLowerCase() || "";
-                const lastName = employee?.lastname?.toLowerCase() || "";
-                const searchTerm = searchByDepartmentOrByEmployee.toLowerCase();
+        if (employeesWithPermissions) {
+            return (
+                employeesWithPermissions?.filter((employee) => {
+                    const firstName = employee?.firstname?.toLowerCase() || "";
+                    const lastName = employee?.lastname?.toLowerCase() || "";
+                    const searchTerm =
+                        searchByDepartmentOrByEmployee.toLowerCase();
 
-                return (
-                    firstName.includes(searchTerm) ||
-                    lastName.includes(searchTerm)
-                );
-            }) || []
-        );
+                    return (
+                        firstName.includes(searchTerm) ||
+                        lastName.includes(searchTerm)
+                    );
+                }) || []
+            );
+        }
     }, [searchByDepartmentOrByEmployee, employeesWithPermissions]);
 
     useEffect(() => {
@@ -345,7 +350,10 @@ const UserRightsAndPermissions = () => {
                                             <div className="w-[200px] flex flex-col items-start justify-center gap-2">
                                                 <div className="w-full h-[50px] flex items-center justify-center bg-white rounded-[5px]">
                                                     <p className="montserrat-regular text-sm text-center">
-                                                        {department.name}
+                                                        {highlightText(
+                                                            department.name,
+                                                            searchByDepartmentOrByEmployee
+                                                        )}
                                                     </p>
                                                 </div>
                                             </div>
@@ -557,8 +565,14 @@ const UserRightsAndPermissions = () => {
                                             <div className="w-[200px] flex flex-col items-start justify-center gap-2">
                                                 <div className="w-full h-[31px] flex items-center justify-center bg-white rounded-[5px]">
                                                     <p className="montserrat-regular text-custom-lightgreen text-sm text-center">
-                                                        {employee?.firstname}{" "}
-                                                        {employee?.lastname}
+                                                        {highlightText(
+                                                            employee?.firstname,
+                                                            searchByDepartmentOrByEmployee
+                                                        )}{" "}
+                                                        {highlightText(
+                                                            employee?.lastname,
+                                                            searchByDepartmentOrByEmployee
+                                                        )}
                                                     </p>
                                                 </div>
                                             </div>
