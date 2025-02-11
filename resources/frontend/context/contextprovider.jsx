@@ -101,6 +101,7 @@ export const ContextProvider = ({ children }) => {
     const [loading, setLoading] = useState(false);
     const [navBarData, setNavBarData] = useState([]);
     const [isUserTypeChange, setIsUserTypeChange] = useState(false);
+    const [countAllConcerns, setCountAllConcerns] = useState({});
     const [userAccessData, setUserAccessData] = useState([]); //Holds the user and department access data
     const [permissions, setPermissions] = useState({});
     const [searchSummary, setSearchSummary] = useState("");
@@ -110,13 +111,10 @@ export const ContextProvider = ({ children }) => {
     const [yearValue, setYearValue] = useState(new Date().getFullYear());
     const [monthValue, setMonthValue] = useState("All");
 
-
-
     const [customerData, setCustomerData] = useState([]);
     const [customerDetails, setCustomerDetails] = useState([]);
     const [messageData, setMessageData] = useState([]);
     const [isTotalPages, setIsTotalPages] = useState(false);
-
 
     useEffect(() => {
         if (user && user.department && !isDepartmentInitialized) {
@@ -165,7 +163,7 @@ export const ContextProvider = ({ children }) => {
     const hasPermission = (permissionName) => {
         return permissions[permissionName]?.can_read || false;
     };
- 
+
     const getAllConcerns = async () => {
         if (token) {
             setLoading(true);
@@ -384,23 +382,26 @@ export const ContextProvider = ({ children }) => {
                     property: project,
                     department: department,
                     year: year,
-                },  
+                },
             });
-    
+
             const departments = response.data.departments;
             const unassignedData = response.data.totalUnassigned;
-    
+
             const formattedData = departments.map((item) => ({
                 name: item.department,
                 resolved: item.resolved,
                 unresolved: item.unresolved,
                 closed: item.closed,
             }));
-    
+
             let concatData = [...formattedData];
-    
+
             // Only push "Unassigned" data if it was requested explicitly
-            if (unassignedData && (department === 'Unassigned' || department === 'All')) {
+            if (
+                unassignedData &&
+                (department === "Unassigned" || department === "All")
+            ) {
                 const formattedDataUnassigned = {
                     name: "Unassigned",
                     resolved: unassignedData.total_resolved,
@@ -409,13 +410,12 @@ export const ContextProvider = ({ children }) => {
                 };
                 concatData.push(formattedDataUnassigned);
             }
-    
+
             setDataDepartment(concatData);
         } catch (error) {
             console.log("error retrieving", error);
         }
     };
-    
 
     const getCommunicationTypePerProperty = async () => {
         try {
@@ -572,7 +572,6 @@ export const ContextProvider = ({ children }) => {
         }
     };
 
-
     const getCountAllConcerns = async () => {
         try {
             const response = await apiService.get("get-count-all-concerns");
@@ -639,7 +638,7 @@ export const ContextProvider = ({ children }) => {
     //             setIsLoading(false);
     //         }
     //     }
-    // }, []);  
+    // }, []);
 
     // const getPaymentSchemes = useCallback(async () => {
     //     if (token) {
@@ -651,7 +650,7 @@ export const ContextProvider = ({ children }) => {
     //             console.error("Error fetching data:", error);
     //         }
     //     }
-    // }, []); 
+    // }, []);
     // const getPropertyFloors = useCallback(async (towerPhaseId) => {
 
     //     if (!propertyFloors[towerPhaseId] && towerPhaseId && token) {
@@ -876,7 +875,6 @@ export const ContextProvider = ({ children }) => {
         inquiriesPerChannelMonth,
         inquiriesPerChanelYear,
     ]);
-
 
     return (
         <StateContext.Provider
