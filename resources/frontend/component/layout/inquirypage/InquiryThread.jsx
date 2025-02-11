@@ -681,6 +681,9 @@ const InquiryThread = () => {
                                                 <option value="Suggestion or Recommendation">
                                                     Suggestion or Recommendation
                                                 </option>
+                                                <option value="No Type">
+                                                    No Type
+                                                </option>
                                             </select>
                                         </div>
 
@@ -760,13 +763,16 @@ const InquiryThread = () => {
                                                     Website
                                                 </option>
                                                 <option value="Social media">
-                                                    Social media
+                                                    Social Media
                                                 </option>
                                                 <option value="Branch Tablet">
                                                     Branch Tablet
                                                 </option>
                                                 <option value="Internal Endorsement">
                                                     Internal Endorsement
+                                                </option>
+                                                <option value="No Channel">
+                                                    No Channel
                                                 </option>
                                             </select>
                                         </div>
@@ -807,6 +813,9 @@ const InquiryThread = () => {
                                                         {department}
                                                     </option>
                                                 ))}
+                                                <option value="Unassigned">
+                                                    Unassigned
+                                                </option>
                                             </select>
                                         </div>
                                         <span className="absolute inset-y-0 right-0 flex items-center  pl-3 pointer-events-none">

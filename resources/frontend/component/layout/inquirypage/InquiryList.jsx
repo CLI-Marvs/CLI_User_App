@@ -764,7 +764,7 @@ const InquiryList = () => {
                                     <div className="flex relative">
                                         <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
                                             {" "}
-                                            Channels
+                                            Channel
                                         </label>
                                         <div className="flex bg-red-900 justify-start w-full relative">
                                             <label
@@ -782,7 +782,7 @@ const InquiryList = () => {
                                             >
                                                 <option value="">
                                                     {" "}
-                                                    Select Channels
+                                                    Select Channel
                                                 </option>
                                                 <option value="Email">
                                                     Email
@@ -797,7 +797,7 @@ const InquiryList = () => {
                                                     Website
                                                 </option>
                                                 <option value="Social media">
-                                                    Social media
+                                                    Social Media
                                                 </option>
                                                 <option value="Branch Tablet">
                                                     Branch Table
@@ -873,6 +873,10 @@ const InquiryList = () => {
                                                             </option>
                                                         )
                                                     )}
+                                                <option value="Unassigned">
+                                                {" "}
+                                                Unassigned
+                                                </option>
                                             </select>
                                         </div>
                                         <span className="absolute inset-y-0 right-0 flex items-center  pl-3 pointer-events-none">

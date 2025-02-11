@@ -69,9 +69,9 @@ class AuthController extends Controller
         try {
             $googleUser = Socialite::driver("google")->user();
 
-            if (!$request->has('code')) {
+          /*   if (!$request->has('code')) {
                 return redirect('/')->with('error', 'Authentication failed. Missing code parameter.');
-            }
+            } */
 
             if (strpos($googleUser->email, '@cebulandmasters.com') === false) {
                 return redirect('/?error=' . urlencode('Authentication failed. You need to use your CLI email.'));
