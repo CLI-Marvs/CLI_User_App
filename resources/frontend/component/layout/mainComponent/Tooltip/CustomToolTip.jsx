@@ -11,14 +11,14 @@ const CustomToolTip = ({
 
     return (
         <div
-            className="relative inline-block overflow-visible z-10"
+            className="relative inline-block overflow-visible z-10 group"
             onMouseEnter={() => setVisible(true)}
             onMouseLeave={() => setVisible(false)}
         >
             {children}
             {visible && (
                 <div
-                    className={`z-50  absolute ${width} ${height} bg-gray-800 text-white text-sm p-2 rounded shadow-lg transition-opacity duration-200 opacity-60 montserrat-regular px-4
+                    className={`z-50  absolute ${width} ${height} bg-gray-800 text-white text-sm p-2 rounded shadow-lg transition-opacity duration-200 opacity-60   group-hover:opacity-60 pointer-events-none montserrat-regular px-4  flex items-center
             ${
                 position === "top"
                     ? "bottom-full mb-2 left-1/2 -translate-x-1/2  "
