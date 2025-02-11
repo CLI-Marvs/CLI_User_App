@@ -1,4 +1,10 @@
-import React, { useRef, useEffect, useState } from "react";
+import React, {
+    useRef,
+    useEffect,
+    useState,
+    useCallback,
+    useMemo,
+} from "react";
 import AddDepartmentModal from "./modals/DepartmentModal/AddDepartmentModal";
 import AddUserModals from "./modals/UserModal/AddUserModals";
 import EditDepartmentModal from "./modals/DepartmentModal/EditDepartmentModal";
@@ -20,6 +26,8 @@ import useDepartmentPermission from "@/context/RoleManagement/DepartmentPermissi
 import useEmployeePermission from "@/context/RoleManagement/EmployeePermissionContext";
 import useDepartment from "@/context/RoleManagement/DepartmentContext";
 import CustomToolTip from "@/component/layout/mainComponent/Tooltip/CustomToolTip";
+import { debounce } from "lodash";
+import highlightText from "@/util/hightlightText";
 
 const UserRightsAndPermissions = () => {
     //States
@@ -47,8 +55,48 @@ const UserRightsAndPermissions = () => {
     const [isDepartmentLoadingState, setIsDepartmentLoadingState] = useState(
         {}
     );
+    const [searchByDepartmentOrByEmployee, setSearchByDepartmentOrByEmployee] =
+        useState("");
 
     //Hooks
+    //Debounced function to optimize search input performance
+    const debouncedSearch = useCallback(
+        debounce((value) => {
+            setSearchByDepartmentOrByEmployee(value);
+        }, 300),
+        []
+    );
+
+    //Memoized filtered departments list based on search input
+    const filteredDepartments = useMemo(() => {
+        if (departmentsWithPermissions) {
+            return departmentsWithPermissions.filter((department) =>
+                department.name
+                    .toLowerCase()
+                    .includes(searchByDepartmentOrByEmployee.toLowerCase())
+            );
+        }
+    }, [searchByDepartmentOrByEmployee, departmentsWithPermissions]);
+
+    //Memoized filtered employees/user list based on search input
+    const filteredEmployees = useMemo(() => {
+        if (employeesWithPermissions) {
+            return (
+                employeesWithPermissions?.filter((employee) => {
+                    const firstName = employee?.firstname?.toLowerCase() || "";
+                    const lastName = employee?.lastname?.toLowerCase() || "";
+                    const searchTerm =
+                        searchByDepartmentOrByEmployee.toLowerCase();
+
+                    return (
+                        firstName.includes(searchTerm) ||
+                        lastName.includes(searchTerm)
+                    );
+                }) || []
+            );
+        }
+    }, [searchByDepartmentOrByEmployee, employeesWithPermissions]);
+
     useEffect(() => {
         if (!features) {
             fetchFeatures();
@@ -74,6 +122,11 @@ const UserRightsAndPermissions = () => {
     ]);
 
     //Event Handler
+    //Handle the change event of the search input
+    const handleSearchOnChange = (value) => {
+        debouncedSearch(value);
+    };
+
     //Handle the click event of the add department button
     const handleAddDepartmentModal = () => {
         if (departmentModalRef.current) {
@@ -202,6 +255,32 @@ const UserRightsAndPermissions = () => {
         <div className="h-screen max-w-full bg-custom-grayFA p-[20px]">
             {/* Specific Department */}
             <div className="flex flex-col gap-[30px]">
+                <div className="relative flex justify-start gap-3 ">
+                    <div className="relative w-[582px] ">
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            strokeWidth="1.5"
+                            stroke="currentColor"
+                            className="size-4 absolute left-3 top-4 text-gray-500"
+                        >
+                            <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
+                            />
+                        </svg>
+                        <input
+                            type="text"
+                            onChange={(e) =>
+                                handleSearchOnChange(e.target.value)
+                            }
+                            className="h-[47px] w-full rounded-lg pl-9 pr-6 text-sm bg-custom-grayF1"
+                            placeholder="Search"
+                        />
+                    </div>
+                </div>
                 <div className="bg-white rounded-[5px] p-[10px] w-full h-[51px]">
                     <div className="flex flex-row  gap-[37px] items-center">
                         <div className="montserrat-regular text-sm">
@@ -260,171 +339,170 @@ const UserRightsAndPermissions = () => {
                                         <Skeleton height={40} width="80%" />
                                     </th>
                                 </tr>
-                            ) : departmentsWithPermissions &&
-                              departmentsWithPermissions.length > 0 ? (
-                                departmentsWithPermissions.map(
-                                    (department, index) => (
-                                        <tr
-                                            key={index}
-                                            className="flex items-center gap-x-4 mb-2"
-                                        >
-                                            <td className="relative flex gap-[57px] mt-[6px] h-[64px] overflow-visible px-[16px] py-[10px] bg-custom-lightestgreen text-custom-bluegreen text-sm">
-                                                <div className="w-[200px] flex flex-col items-start justify-center gap-2">
-                                                    <div className="w-full h-[50px] flex items-center justify-center bg-white rounded-[5px]">
-                                                        <p className="montserrat-regular text-sm text-center">
-                                                            {department.name}
-                                                        </p>
-                                                    </div>
+                            ) : filteredDepartments &&
+                              filteredDepartments.length > 0 ? (
+                                filteredDepartments.map((department, index) => (
+                                    <tr
+                                        key={index}
+                                        className="flex items-center gap-x-4 mb-2"
+                                    >
+                                        <td className="flex gap-[57px] mt-[6px] h-[75px] overflow-visible px-[16px] py-[10px] bg-custom-lightestgreen text-custom-bluegreen text-sm">
+                                            <div className="w-[200px] flex flex-col items-start justify-center gap-2">
+                                                <div className="w-full h-[50px] flex items-center justify-center bg-white rounded-[5px]">
+                                                    <p className="montserrat-regular text-sm text-center">
+                                                        {highlightText(
+                                                            department.name,
+                                                            searchByDepartmentOrByEmployee
+                                                        )}
+                                                    </p>
                                                 </div>
-                                                {features &&
-                                                    features.map(
-                                                        (
-                                                            feature,
-                                                            featureIndex
-                                                        ) => {
-                                                            const departmentFeature =
-                                                                department.features.find(
-                                                                    (f) =>
-                                                                        f.id ===
-                                                                        feature.id
-                                                                );
+                                            </div>
+                                            {features &&
+                                                features.map(
+                                                    (feature, featureIndex) => {
+                                                        const departmentFeature =
+                                                            department.features.find(
+                                                                (f) =>
+                                                                    f.id ===
+                                                                    feature.id
+                                                            );
 
-                                                            return (
-                                                                <div
-                                                                    key={
-                                                                        featureIndex
-                                                                    }
-                                                                    className="w-[200px] flex flex-col items-start justify-center gap-2"
-                                                                >
-                                                                    <div className="w-full h-[44px] gap-[20px] flex items-center justify-center bg-white rounded-[5px]">
-                                                                        {departmentFeature ? (
-                                                                            PERMISSIONS.map(
-                                                                                (
-                                                                                    permission
-                                                                                ) => {
-                                                                                    const permissionValue =
-                                                                                        departmentFeature
-                                                                                            .pivot[
-                                                                                            permission
-                                                                                                .value
-                                                                                        ];
-                                                                                    return (
-                                                                                        <div
-                                                                                            className="flex flex-col gap-[2.75px] items-center"
-                                                                                            key={
-                                                                                                permission.value
+                                                        return (
+                                                            <div
+                                                                key={
+                                                                    featureIndex
+                                                                }
+                                                                className="w-[200px] flex flex-col items-start justify-center gap-2"
+                                                            >
+                                                                <div className="w-full h-[44px] gap-[20px] flex items-center justify-center bg-white rounded-[5px]">
+                                                                    {departmentFeature ? (
+                                                                        PERMISSIONS.map(
+                                                                            (
+                                                                                permission
+                                                                            ) => {
+                                                                                const permissionValue =
+                                                                                    departmentFeature
+                                                                                        .pivot[
+                                                                                        permission
+                                                                                            .value
+                                                                                    ];
+                                                                                return (
+                                                                                    <div
+                                                                                        className="flex flex-col gap-[2.75px] items-center"
+                                                                                        key={
+                                                                                            permission.value
+                                                                                        }
+                                                                                    >
+                                                                                        <CustomToolTip
+                                                                                            text={
+                                                                                                permission.name ===
+                                                                                                "R"
+                                                                                                    ? "Read"
+                                                                                                    : "" ||
+                                                                                                      permission.name ===
+                                                                                                          "W"
+                                                                                                    ? "Write"
+                                                                                                    : "" ||
+                                                                                                      permission.name ===
+                                                                                                          "D"
+                                                                                                    ? "Delete"
+                                                                                                    : "" ||
+                                                                                                      permission.name ===
+                                                                                                          "E"
+                                                                                                    ? "Execute"
+                                                                                                    : "" ||
+                                                                                                      permission.name ===
+                                                                                                          "S"
+                                                                                                    ? "Save"
+                                                                                                    : ""
                                                                                             }
                                                                                         >
-                                                                                            <CustomToolTip
-                                                                                                text={
-                                                                                                    permission.name ===
-                                                                                                    "R"
-                                                                                                        ? "Read"
-                                                                                                        : "" ||
-                                                                                                          permission.name ===
-                                                                                                              "W"
-                                                                                                        ? "Write"
-                                                                                                        : "" ||
-                                                                                                          permission.name ===
-                                                                                                              "D"
-                                                                                                        ? "Delete"
-                                                                                                        : "" ||
-                                                                                                          permission.name ===
-                                                                                                              "E"
-                                                                                                        ? "Execute"
-                                                                                                        : "" ||
-                                                                                                          permission.name ===
-                                                                                                              "S"
-                                                                                                        ? "Save"
-                                                                                                        : ""
+                                                                                            <p className="montserrat-semibold text-[10px] leading-[12.19px]">
+                                                                                                {
+                                                                                                    permission.name
                                                                                                 }
-                                                                                            >
-                                                                                                <p className="montserrat-semibold text-[10px] leading-[12.19px]">
-                                                                                                    {
-                                                                                                        permission.name
-                                                                                                    }
-                                                                                                </p>
-                                                                                            </CustomToolTip>
-                                                                                            <input
-                                                                                                type="checkbox"
-                                                                                                className="h-[16px] w-[16px] custom-checkbox-permission"
-                                                                                                checked={
-                                                                                                    permissionValue
-                                                                                                }
-                                                                                                disabled
-                                                                                            />
-                                                                                        </div>
-                                                                                    );
-                                                                                }
-                                                                            )
-                                                                        ) : (
-                                                                            <p className="text-center text-custom-gray">
-                                                                                No
-                                                                                Permissions
-                                                                            </p>
-                                                                        )}
-                                                                    </div>
+                                                                                            </p>
+                                                                                        </CustomToolTip>
+
+                                                                                        <input
+                                                                                            type="checkbox"
+                                                                                            className="h-[16px] w-[16px] custom-checkbox-permission"
+                                                                                            checked={
+                                                                                                permissionValue
+                                                                                            }
+                                                                                            disabled
+                                                                                        />
+                                                                                    </div>
+                                                                                );
+                                                                            }
+                                                                        )
+                                                                    ) : (
+                                                                        <p className="text-center text-custom-gray">
+                                                                            No
+                                                                            Permissions
+                                                                        </p>
+                                                                    )}
                                                                 </div>
-                                                            );
-                                                        }
-                                                    )}
-                                            </td>
+                                                            </div>
+                                                        );
+                                                    }
+                                                )}
+                                        </td>
 
-                                            <td className="flex gap-x-3">
-                                                <CustomToolTip
-                                                    text="Edit"
-                                                    height="h-[32px]"
-                                                    position="left"
-                                                >
-                                                    <HiPencil
-                                                        onClick={() =>
-                                                            handleEditDepartmentModal(
-                                                                department
-                                                            )
-                                                        }
-                                                        className="w-5 h-5 text-custom-bluegreen cursor-pointer"
-                                                    />
-                                                </CustomToolTip>
+                                        <td className="flex gap-x-3">
+                                            <CustomToolTip
+                                                text="Edit"
+                                                height="h-[32px]"
+                                                position="left"
+                                            >
+                                                <HiPencil
+                                                    onClick={() =>
+                                                        handleEditDepartmentModal(
+                                                            department
+                                                        )
+                                                    }
+                                                    className="w-5 h-5 text-custom-bluegreen cursor-pointer"
+                                                />
+                                            </CustomToolTip>
 
-                                                <CustomToolTip
-                                                    text="Delete"
-                                                    height="h-[34px]"
-                                                    position="left"
-                                                >
-                                                    <button
-                                                        onClick={() =>
-                                                            handleShowUpdateDepartmentAlert(
-                                                                department,
-                                                                "department"
-                                                            )
-                                                        }
-                                                        disabled={
-                                                            isDepartmentLoadingState[
-                                                                department.id
-                                                            ]
-                                                        }
-                                                        className={`${
-                                                            isDepartmentLoadingState[
-                                                                department.id
-                                                            ]
-                                                                ? "opacity-50 cursor-not-allowed"
-                                                                : ""
-                                                        }`}
-                                                        type="submit"
-                                                    >
-                                                        {isDepartmentLoadingState[
+                                            <CustomToolTip
+                                                text="Delete"
+                                                height="h-[34px]"
+                                                position="left"
+                                            >
+                                                <button
+                                                    onClick={() =>
+                                                        handleShowUpdateDepartmentAlert(
+                                                            department,
+                                                            "department"
+                                                        )
+                                                    }
+                                                    disabled={
+                                                        isDepartmentLoadingState[
                                                             department.id
-                                                        ] ? (
-                                                            <CircularProgress className="spinnerSize" />
-                                                        ) : (
-                                                            <MdDelete className="w-6 h-6 text-red-500" />
-                                                        )}
-                                                    </button>
-                                                </CustomToolTip>
-                                            </td>
-                                        </tr>
-                                    )
-                                )
+                                                        ]
+                                                    }
+                                                    className={`${
+                                                        isDepartmentLoadingState[
+                                                            department.id
+                                                        ]
+                                                            ? "opacity-50 cursor-not-allowed"
+                                                            : ""
+                                                    }`}
+                                                    type="submit"
+                                                >
+                                                    {isDepartmentLoadingState[
+                                                        department.id
+                                                    ] ? (
+                                                        <CircularProgress className="spinnerSize" />
+                                                    ) : (
+                                                        <MdDelete className="w-6 h-6 text-red-500" />
+                                                    )}
+                                                </button>
+                                            </CustomToolTip>
+                                        </td>
+                                    </tr>
+                                ))
                             ) : (
                                 <tr>
                                     <td
@@ -502,184 +580,182 @@ const UserRightsAndPermissions = () => {
                                         </div>
                                     </td>
                                 </tr>
-                            ) : employeesWithPermissions &&
-                              employeesWithPermissions.length > 0 ? (
-                                employeesWithPermissions.map(
-                                    (employee, index) => (
-                                        <tr
-                                            key={index}
-                                            className="flex items-center gap-x-4"
-                                        >
-                                            <td className="relative flex gap-[57px] mt-[6px] h-[64px] overflow-visible px-[16px] py-[10px] bg-custom-lightestgreen text-custom-bluegreen text-sm">
-                                                <div className="w-[200px] flex flex-col items-start justify-center gap-2">
-                                                    <div className="w-full h-[31px] flex items-center justify-center bg-white rounded-[5px]">
-                                                        <p className="montserrat-regular text-custom-lightgreen text-sm text-center">
-                                                            {
-                                                                employee?.firstname
-                                                            }{" "}
-                                                            {employee?.lastname}
-                                                        </p>
-                                                    </div>
+                            ) : filteredEmployees &&
+                              filteredEmployees.length > 0 ? (
+                                filteredEmployees.map((employee, index) => (
+                                    <tr
+                                        key={index}
+                                        className="flex items-center gap-x-4"
+                                    >
+                                        <td className="flex gap-[57px] mt-[6px] h-[64px] overflow-visible px-[16px] py-[10px] bg-custom-lightestgreen text-custom-bluegreen text-sm">
+                                            <div className="w-[200px] flex flex-col items-start justify-center gap-2">
+                                                <div className="w-full h-[31px] flex items-center justify-center bg-white rounded-[5px]">
+                                                    <p className="montserrat-regular text-custom-lightgreen text-sm text-center">
+                                                        {highlightText(
+                                                            employee?.firstname,
+                                                            searchByDepartmentOrByEmployee
+                                                        )}{" "}
+                                                        {highlightText(
+                                                            employee?.lastname,
+                                                            searchByDepartmentOrByEmployee
+                                                        )}
+                                                    </p>
                                                 </div>
+                                            </div>
 
-                                                <div className="w-[200px] flex flex-col items-start justify-center gap-2">
-                                                    <div className="w-full h-[50px] flex items-center justify-center bg-white rounded-[5px] py-1">
-                                                        <p className="montserrat-regular text-sm text-center">
-                                                            {
-                                                                employee?.department
-                                                            }
-                                                        </p>
-                                                    </div>
+                                            <div className="w-[200px] flex flex-col items-start justify-center gap-2">
+                                                <div className="w-full h-[50px] flex items-center justify-center bg-white rounded-[5px] py-1">
+                                                    <p className="montserrat-regular text-sm text-center">
+                                                        {employee?.department}
+                                                    </p>
                                                 </div>
-                                                {features &&
-                                                    features.length > 0 &&
-                                                    features.map(
-                                                        (
-                                                            feature,
-                                                            featureIndex
-                                                        ) => {
-                                                            const departmentFeature =
-                                                                employee.features.find(
-                                                                    (f) =>
-                                                                        f.id ===
-                                                                        feature.id
-                                                                );
+                                            </div>
+                                            {features &&
+                                                features.length > 0 &&
+                                                features.map(
+                                                    (feature, featureIndex) => {
+                                                        const departmentFeature =
+                                                            employee.features.find(
+                                                                (f) =>
+                                                                    f.id ===
+                                                                    feature.id
+                                                            );
 
-                                                            return (
-                                                                <div
-                                                                    className="w-[200px] flex flex-col items-start justify-center gap-2"
-                                                                    key={
-                                                                        featureIndex
-                                                                    }
-                                                                >
-                                                                    <div className="w-full h-[44px] gap-[20px] flex items-center justify-center bg-white rounded-[5px]">
-                                                                        {departmentFeature ? (
-                                                                            PERMISSIONS.map(
-                                                                                (
-                                                                                    permission
-                                                                                ) => {
-                                                                                    const permissionValue =
-                                                                                        departmentFeature
-                                                                                            .pivot[
-                                                                                            permission
-                                                                                                .value
-                                                                                        ];
-                                                                                    return (
-                                                                                        <div
-                                                                                            className="flex flex-col gap-[2.75px] items-center"
-                                                                                            key={
-                                                                                                permission.value
+                                                        return (
+                                                            <div
+                                                                className="w-[200px] flex flex-col items-start justify-center gap-2"
+                                                                key={
+                                                                    featureIndex
+                                                                }
+                                                            >
+                                                                <div className="w-full h-[44px] gap-[20px] flex items-center justify-center bg-white rounded-[5px]">
+                                                                    {departmentFeature ? (
+                                                                        PERMISSIONS.map(
+                                                                            (
+                                                                                permission
+                                                                            ) => {
+                                                                                const permissionValue =
+                                                                                    departmentFeature
+                                                                                        .pivot[
+                                                                                        permission
+                                                                                            .value
+                                                                                    ];
+                                                                                return (
+                                                                                    <div
+                                                                                        className="flex flex-col gap-[2.75px] items-center"
+                                                                                        key={
+                                                                                            permission.value
+                                                                                        }
+                                                                                    >
+                                                                                        <CustomToolTip
+                                                                                            text={
+                                                                                                permission.name ===
+                                                                                                "R"
+                                                                                                    ? "Read"
+                                                                                                    : "" ||
+                                                                                                      permission.name ===
+                                                                                                          "W"
+                                                                                                    ? "Write"
+                                                                                                    : "" ||
+                                                                                                      permission.name ===
+                                                                                                          "D"
+                                                                                                    ? "Delete"
+                                                                                                    : "" ||
+                                                                                                      permission.name ===
+                                                                                                          "E"
+                                                                                                    ? "Execute"
+                                                                                                    : "" ||
+                                                                                                      permission.name ===
+                                                                                                          "S"
+                                                                                                    ? "Save"
+                                                                                                    : ""
                                                                                             }
                                                                                         >
-                                                                                            <CustomToolTip
-                                                                                                text={
-                                                                                                    permission.name ===
-                                                                                                    "R"
-                                                                                                        ? "Read"
-                                                                                                        : "" ||
-                                                                                                          permission.name ===
-                                                                                                              "W"
-                                                                                                        ? "Write"
-                                                                                                        : "" ||
-                                                                                                          permission.name ===
-                                                                                                              "D"
-                                                                                                        ? "Delete"
-                                                                                                        : "" ||
-                                                                                                          permission.name ===
-                                                                                                              "E"
-                                                                                                        ? "Execute"
-                                                                                                        : "" ||
-                                                                                                          permission.name ===
-                                                                                                              "S"
-                                                                                                        ? "Save"
-                                                                                                        : ""
+                                                                                            <p className="montserrat-semibold text-[10px] leading-[12.19px]">
+                                                                                                {
+                                                                                                    permission.name
                                                                                                 }
-                                                                                            >
-                                                                                                <p className="montserrat-semibold text-[10px] leading-[12.19px]">
-                                                                                                    {
-                                                                                                        permission.name
-                                                                                                    }
-                                                                                                </p>
-                                                                                            </CustomToolTip>
-                                                                                            <input
-                                                                                                type="checkbox"
-                                                                                                className="h-[16px] w-[16px] custom-checkbox-permission"
-                                                                                                checked={
-                                                                                                    permissionValue
-                                                                                                }
-                                                                                                disabled
-                                                                                            />
-                                                                                        </div>
-                                                                                    );
-                                                                                }
-                                                                            )
-                                                                        ) : (
-                                                                            <p className="text-center text-custom-gray">
-                                                                                No
-                                                                                Permissions
-                                                                            </p>
-                                                                        )}
-                                                                    </div>
-                                                                </div>
-                                                            );
-                                                        }
-                                                    )}
-                                            </td>
+                                                                                            </p>
+                                                                                        </CustomToolTip>
 
-                                            <td className="flex gap-x-3">
-                                                <CustomToolTip
-                                                    text="Edit"
-                                                    height="h-[32px]"
-                                                    position="left"
-                                                >
-                                                    <HiPencil
-                                                        onClick={() =>
-                                                            handleEditEmployeeModal(
-                                                                employee
-                                                            )
-                                                        }
-                                                        className="w-5 h-5 text-custom-bluegreen cursor-pointer"
-                                                    />
-                                                </CustomToolTip>
-                                                <CustomToolTip
-                                                    text="Delete"
-                                                    height="h-[34px]"
-                                                    position="left"
-                                                >
-                                                    <button
-                                                        onClick={() =>
-                                                            handleShowUpdateEmployeeAlert(
-                                                                employee,
-                                                                "employee"
-                                                            )
-                                                        }
-                                                        disabled={
-                                                            isEmployeeLoadingState[
-                                                                employee.id
-                                                            ]
-                                                        }
-                                                        className={`${
-                                                            isEmployeeLoadingState[
-                                                                employee.id
-                                                            ]
-                                                                ? "opacity-50 cursor-not-allowed"
-                                                                : ""
-                                                        }`}
-                                                        type="submit"
-                                                    >
-                                                        {isEmployeeLoadingState[
+                                                                                        <input
+                                                                                            type="checkbox"
+                                                                                            className="h-[16px] w-[16px] custom-checkbox-permission"
+                                                                                            checked={
+                                                                                                permissionValue
+                                                                                            }
+                                                                                            disabled
+                                                                                        />
+                                                                                    </div>
+                                                                                );
+                                                                            }
+                                                                        )
+                                                                    ) : (
+                                                                        <p className="text-center text-custom-gray">
+                                                                            No
+                                                                            Permissions
+                                                                        </p>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+                                                        );
+                                                    }
+                                                )}
+                                        </td>
+
+                                        <td className="flex gap-x-3">
+                                            <CustomToolTip
+                                                text="Edit"
+                                                height="h-[32px]"
+                                                position="left"
+                                            >
+                                                <HiPencil
+                                                    onClick={() =>
+                                                        handleEditEmployeeModal(
+                                                            employee
+                                                        )
+                                                    }
+                                                    className="w-5 h-5 text-custom-bluegreen cursor-pointer"
+                                                />
+                                            </CustomToolTip>
+                                            <CustomToolTip
+                                                text="Delete"
+                                                height="h-[34px]"
+                                                position="left"
+                                            >
+                                                <button
+                                                    onClick={() =>
+                                                        handleShowUpdateEmployeeAlert(
+                                                            employee,
+                                                            "employee"
+                                                        )
+                                                    }
+                                                    disabled={
+                                                        isEmployeeLoadingState[
                                                             employee.id
-                                                        ] ? (
-                                                            <CircularProgress className="spinnerSize" />
-                                                        ) : (
-                                                            <MdDelete className="w-6 h-6 text-red-500" />
-                                                        )}
-                                                    </button>
-                                                </CustomToolTip>
-                                            </td>
-                                        </tr>
-                                    )
-                                )
+                                                        ]
+                                                    }
+                                                    className={`${
+                                                        isEmployeeLoadingState[
+                                                            employee.id
+                                                        ]
+                                                            ? "opacity-50 cursor-not-allowed"
+                                                            : ""
+                                                    }`}
+                                                    type="submit"
+                                                >
+                                                    {isEmployeeLoadingState[
+                                                        employee.id
+                                                    ] ? (
+                                                        <CircularProgress className="spinnerSize" />
+                                                    ) : (
+                                                        <MdDelete className="w-6 h-6 text-red-500" />
+                                                    )}
+                                                </button>
+                                            </CustomToolTip>
+                                        </td>
+                                    </tr>
+                                ))
                             ) : (
                                 <tr>
                                     <td

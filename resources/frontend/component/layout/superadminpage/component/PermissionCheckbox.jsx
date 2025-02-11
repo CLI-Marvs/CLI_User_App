@@ -18,7 +18,7 @@ const PermissionCheckbox = ({
           )?.[permission.value] || false;
 
     return (
-        <div className="flex flex-col gap-[2.75px] items-center overflow-visible ">
+        <div className="flex flex-col gap-[2.75px] items-center">
             <CustomToolTip
                 text={
                     permission.name === "R"
@@ -34,7 +34,7 @@ const PermissionCheckbox = ({
                         : ""
                 }
             >
-                <p className="montserrat-semibold text-[10px] leading-[12.19px]">
+                <p className="montserrat-semibold text-[10px] leading-[12.19px] cursor-pointer group">
                     {permission.name}
                 </p>
             </CustomToolTip>

@@ -1,16 +1,14 @@
-import React, { useEffect, useState } from 'react'
-import { IoMdArrowDropdown } from 'react-icons/io'
-import { showToast } from "@/util/toastUtil"
+import React, { useEffect, useState } from "react";
+import { IoMdArrowDropdown } from "react-icons/io";
+import { showToast } from "@/util/toastUtil";
 import CircularProgress from "@mui/material/CircularProgress";
-import { isButtonDisabled } from '@/component/layout/superadminpage/modals/DepartmentModal/utils/isButtonDisabled';
-import Feature from '@/component/layout/superadminpage/component/Feature';
-import { departmentPermissionService } from '@/component/servicesApi/apiCalls/roleManagement';
-import useFeature from '@/context/RoleManagement/FeatureContext';
-import useDepartmentPermission from '@/context/RoleManagement/DepartmentPermissionContext';
-
+import { isButtonDisabled } from "@/component/layout/superadminpage/modals/DepartmentModal/utils/isButtonDisabled";
+import Feature from "@/component/layout/superadminpage/component/Feature";
+import { departmentPermissionService } from "@/component/servicesApi/apiCalls/roleManagement";
+import useFeature from "@/context/RoleManagement/FeatureContext";
+import useDepartmentPermission from "@/context/RoleManagement/DepartmentPermissionContext";
 
 const AddDepartmentModal = ({ departmentModalRef, employeeDepartments }) => {
-
     //States
     const { fetchDepartmentPermissions } = useDepartmentPermission();
     const { features } = useFeature();
@@ -24,7 +22,7 @@ const AddDepartmentModal = ({ departmentModalRef, employeeDepartments }) => {
     //Handle the change event of select tag for employee department
     const handleSelectDepartmentChange = (e) => {
         setFormData({ ...formData, department_id: parseInt(e.target.value) });
-    }
+    };
 
     //Handle the permission change
     const handleFeaturePermissionChange = (item, permission, value) => {
@@ -32,36 +30,45 @@ const AddDepartmentModal = ({ departmentModalRef, employeeDepartments }) => {
 
         // Update the formData with the new permissions
         setFormData((prevState) => {
-            const updatedFeatures = prevState.features.map((feature) => {
-                if (feature.featureId === item.id) {
-                    return { ...feature, [permission.value]: value };
-                }
-                return feature;
-            }).filter((feature) => {
-                // Keep the feature if it has any of the permissions (R or W), otherwise remove it
-                return feature.can_read || feature.can_write;
-            });
+            const updatedFeatures = prevState.features
+                .map((feature) => {
+                    if (feature.featureId === item.id) {
+                        return { ...feature, [permission.value]: value };
+                    }
+                    return feature;
+                })
+                .filter((feature) => {
+                    // Keep the feature if it has any of the permissions (R or W), otherwise remove it
+                    return feature.can_read || feature.can_write;
+                });
 
             // Add to the features array if the feature doesn't exist and the permission value is true
-            if (!updatedFeatures.find((feature) => feature.featureId === featureId) && value === true) {
+            if (
+                !updatedFeatures.find(
+                    (feature) => feature.featureId === featureId
+                ) &&
+                value === true
+            ) {
                 updatedFeatures.push({ featureId, [permission.value]: value });
             }
             return { ...prevState, features: updatedFeatures };
         });
     };
 
-
     //Handle the submit/save button click
     const handleSubmit = async (e) => {
         e.preventDefault();
         const payload = {
             department_id: formData.department_id,
-            features: formData.features
+            features: formData.features,
         };
-        (false);
+        false;
         try {
             setIsLoading(true);
-            const response = await departmentPermissionService.storeDepartmentsWithPermissions(payload);
+            const response =
+                await departmentPermissionService.storeDepartmentsWithPermissions(
+                    payload
+                );
 
             if (response.data?.statusCode === 200) {
                 showToast("Data added successfully!", "success");
@@ -78,14 +85,14 @@ const AddDepartmentModal = ({ departmentModalRef, employeeDepartments }) => {
             await fetchDepartmentPermissions(true, false);
         } catch (error) {
             if (error.response) {
-                const errorMessage = error.response.data?.error || "An error occurred.";
+                const errorMessage =
+                    error.response.data?.error || "An error occurred.";
                 showToast(errorMessage, "error");
             }
         } finally {
             setIsLoading(false);
         }
-    }
-
+    };
 
     //Handle close the modal/cancel and reset all state
     const handleCloseModal = () => {
@@ -96,8 +103,7 @@ const AddDepartmentModal = ({ departmentModalRef, employeeDepartments }) => {
             });
             departmentModalRef.current.close();
         }
-    }
-
+    };
 
     return (
         <dialog
@@ -156,7 +162,7 @@ const AddDepartmentModal = ({ departmentModalRef, employeeDepartments }) => {
                             </label>
                         </div>
                     </div>
-                    <div className="w-full p-[10px] flex flex-col gap-[10px] overflow-visible  ">
+                    <div className="w-full p-[10px] flex flex-col gap-[10px] overflow-visible ">
                         <p className="text-sm font-semibold">Permissions</p>
                         {/*Display the features */}
                         {features &&
@@ -206,6 +212,6 @@ const AddDepartmentModal = ({ departmentModalRef, employeeDepartments }) => {
             </div>
         </dialog>
     );
-}
+};
 
-export default AddDepartmentModal
+export default AddDepartmentModal;

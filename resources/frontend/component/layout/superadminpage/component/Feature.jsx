@@ -11,14 +11,14 @@ const Feature = ({
 }) => {
     return (
         <div
-            className={`flex items-center border rounded-[5px] overflow-hidden border-custom-bluegreen h-[56px]`}
+            className={`flex items-center border rounded-[5px]  border-custom-bluegreen h-[56px] overflow-visible `}
         >
             <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex items-center w-[275px] h-full px-[15px]">
                 {item.name}
             </span>
-            <div className="relative h-full w-full flex justify-center items-center overflow-visible">
+            <div className="relative h-full w-full flex justify-center items-center group">
                 <div className="w-[342px] h-[44px]">
-                    <div className="w-full h-[44px] gap-[63px] flex items-center justify-center rounded-[5px] ">
+                    <div className="w-full h-[44px] gap-[63px] flex items-center justify-center rounded-[5px]">
                         {PERMISSIONS &&
                             PERMISSIONS.map((permission) => (
                                 <PermissionCheckbox
