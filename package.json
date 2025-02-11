@@ -34,7 +34,7 @@
         "react-phone-input-2": "^2.15.1",
         "react-router-dom": "^6.26.0",
         "react-toastify": "^10.0.6",
-        "recharts": "^3.0.0-alpha.2",
+        "recharts": "^2.15.1",
         "xlsx": "^0.18.5"
     }
 }

@@ -103,6 +103,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/get-transaction-bank', [SapController::class, 'getTransactionByBankName']);
     Route::post('/upload-notepad', [SapController::class, 'uploadNotepad']);
     Route::get('/get-concern', [ConcernController::class, 'getAllConcerns']);
+    Route::get('/get-count-all-concerns', [ConcernController::class, 'getCountAllConcerns']);
     Route::post('/add-concern', [ConcernController::class, 'addConcernPublic']);
     Route::post('/add-concern-prev', [ConcernController::class, 'addConcernFromPreviousInquiry']);
     Route::get('/get-message/{ticketId}', [ConcernController::class, 'getMessage']);
@@ -117,8 +118,19 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/isread/{concernId}', [ConcernController::class, 'readNotifByUser']);
     Route::get('/specific-assignee', [ConcernController::class, 'getSpecificInquiry']);
     Route::post('/remove-assignee', [ConcernController::class, 'removeAssignee']);
+    Route::get('/property-name', [PropertyMasterController::class, 'getPropertyName']);
     /* Download the file attachment */
     Route::post('/download-file', [ConcernController::class, 'downloadFileFromGCS']);
+    /* Pricing Master List */
+    Route::get('/get-pricing-master-lists', [PriceListMasterController::class, 'getAllPricingMasterLists']);
+    /*Basic Pricing */
+    Route::post('/basic-pricing', [PriceBasicDetailController::class, 'storeBasicPricing']);
+    /*Payment Scheme */
+    Route::post('/payment-schemes', [PaymentSchemeController::class, 'storePaymentScheme']);
+    Route::get('/get-payment-schemes', [PaymentSchemeController::class, 'getAllPaymentSchemes']);
+    /* Property Master */
+    Route::post('/property-details', [PropertyMasterController::class, 'storePropertyDetail']);
+    Route::get('/get-property-master/{id}', [PropertyMasterController::class, 'getPropertyMaster']);
 
     /*Basic Pricing */
     Route::post('/basic-pricing', [PriceBasicDetailController::class, 'storeBasicPricing']);
