@@ -2604,7 +2604,6 @@ class ConcernController extends Controller
         if (!empty($buyerData)) {
             foreach ($buyerData as $buyer) {
                 if ($buyer) {
-                  \Log::info('buyer data', $buyer);
                    $data = [
                     'lastname' => $buyer['buyer_name'],
                     'messageId' => $buyer['message_id'],
@@ -2647,8 +2646,6 @@ class ConcernController extends Controller
         if (!empty($buyerDataErratum)) {
             foreach ($buyerDataErratum as $buyer) {
                 if ($buyer) {
-                    \Log::info('buyer data', $buyer);
-
                     $data = [
                         'lastname' => $buyer['buyer_name'],
                         'messageId' => $buyer['message_id'],

@@ -45,10 +45,10 @@ class DirectEmailResponse extends Mailable
     {
 
         return new Headers(
-            messageId: "<{$this->messageId}>",
-            references: ["<{$this->messageId}>"],
+            messageId: $this->messageId,
+            references: $this->messageId,
             text: [
-                'In-Reply-To' => "<{$this->messageId}>",
+                'In-Reply-To' => $this->messageId,
                 'X-Custom-Header' => 'Custom Value',
             ]
         );
