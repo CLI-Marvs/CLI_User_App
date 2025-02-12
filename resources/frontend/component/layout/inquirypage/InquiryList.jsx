@@ -115,7 +115,8 @@ const InquiryList = () => {
             setDaysFilter(null);
             setActiveDayButton(null);
         } else if (statusFilter) {
-            setStatusFilter("All");
+            setSelectedOption("All");
+            setStatusFilter(null);
         } else if (searchFilter) {
             setSearchFilter({});
         } else if (specificAssigneeCsr) {
