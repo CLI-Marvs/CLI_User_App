@@ -571,6 +571,15 @@ const ReportPage = () => {
         setEndDate(endDateValue);
     };
 
+    const handleResetFilter = () => {
+        setDepartmentValue("All");
+        setProjectValue("All");
+        setYearValue(new Date().getFullYear());
+        setMonthValue("All");
+        setStartDateValue(null);
+        setEndDateValue(null);
+    };
+
     useEffect(() => {
         fetchCategory();
         getInquiriesPerDepartment();
@@ -806,12 +815,18 @@ const ReportPage = () => {
                         </div>
                     </div>
                 </div>
-                <div>
+                <div className="flex gap-[10px] items-center">
                     <button
                         onClick={handleSearchFilter}
                         className="hover:shadow-custom4 h-[35px] w-[88px] gradient-btn rounded-[10px] text-white text-sm"
                     >
                         Search
+                    </button>
+                    <button
+                        onClick={handleResetFilter}
+                        className="hover:shadow-custom4 h-[35px] w-[88px] gradient-btn rounded-[10px] text-white text-sm"
+                    >
+                        Reset
                     </button>
                 </div>
             </div>
