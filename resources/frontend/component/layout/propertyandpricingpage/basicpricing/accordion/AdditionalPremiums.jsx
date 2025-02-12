@@ -9,7 +9,6 @@ import { showToast } from "@/util/toastUtil";
 const AdditionalPremiums = ({ propertyData , isOpen, toggleAccordion }) => {
     //States
     const { excelId } = useUnit();
-    // const [isOpen, setisOpen] = useState(false);
     const [newAdditionalPremium, setNewAdditionalPremium] = useState({
         viewName: "",
         premiumCost: 0,
@@ -18,7 +17,7 @@ const AdditionalPremiums = ({ propertyData , isOpen, toggleAccordion }) => {
     const modalRef = useRef(null);
     const [localExcelId, setLocalExcelId] = useState(null);
     const { setPricingData, pricingData } = usePricing();
-    console.log("pricingData", pricingData);
+ 
 
     //Hooks
     useEffect(() => {

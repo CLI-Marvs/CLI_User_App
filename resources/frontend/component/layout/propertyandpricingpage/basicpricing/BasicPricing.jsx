@@ -60,7 +60,8 @@ const BasicPricing = () => {
         priceVersions: false,
         reviewAndApprovalSetting: false,
     });
- 
+    console.log("PricingData in BasicPricing", pricingData);
+
     //Hooks
     /**
      * Hook to update pricing data based on incoming 'data' prop.
@@ -69,8 +70,6 @@ const BasicPricing = () => {
      * It also provides default values for priceVersions if none are available in the incoming data.  Uses moment.js for date formatting.
      */
     useEffect(() => {
-        console.log("PricingData in BasicPricing", pricingData);
-
         if (data) {
             setPropertyData(data);
             // Update the priceListSettings
@@ -541,8 +540,6 @@ const BasicPricing = () => {
                     fileSelected={fileSelected}
                 />
             </div>
-            {/* ------------------------- */}
-
             <div className="flex flex-col gap-1 w-full border-t-1 border-custom-lightestgreen py-4  ">
                 <PriceListSettings
                     isOpen={accordionStates.priceListSettings}
@@ -555,16 +552,23 @@ const BasicPricing = () => {
                 />
                 <AdditionalPremiums
                     isOpen={accordionStates.additionalPremiums}
-                    toggleAccordion={() => toggleAccordion("additionalPremiums")}
-                    propertyData={propertyData} />
+                    toggleAccordion={() =>
+                        toggleAccordion("additionalPremiums")
+                    }
+                    propertyData={propertyData}
+                />
                 <PriceVersions
                     isOpen={accordionStates.priceVersions}
                     toggleAccordion={() => toggleAccordion("priceVersions")}
-                    priceListMasterData={data} action={action} />
-           
+                    priceListMasterData={data}
+                    action={action}
+                />
+
                 <ReviewsandApprovalRouting
                     isOpen={accordionStates.reviewAndApprovalSetting}
-                    toggleAccordion={() => toggleAccordion("reviewAndApprovalSetting")}
+                    toggleAccordion={() =>
+                        toggleAccordion("reviewAndApprovalSetting")
+                    }
                 />
             </div>
             {/* <div>

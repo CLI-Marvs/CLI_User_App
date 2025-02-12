@@ -330,7 +330,6 @@ const PricingMasterList = () => {
                                                             : "text-[#5B9BD5]"
                                                     }`}
                                                 >
-                                                    {/* TODO: Dont show Edit if the status is Approved */}
                                                     {item?.status}
                                                 </p>
                                                 <span>
@@ -356,8 +355,11 @@ const PricingMasterList = () => {
                                                     {item?.status ===
                                                     "On-going Approval"
                                                         ? "Cancel"
+                                                        : item?.status ===
+                                                          "Approved"
+                                                        ? null
                                                         : "Edit"}
-                                                    -{" "}
+                                                    {" -"}
                                                     {item?.price_list_master_id}
                                                 </p>
                                             </div>
@@ -482,7 +484,6 @@ const PricingMasterList = () => {
                                                                         versionIndex
                                                                     }
                                                                 >
-                                                                    {/*TODO: dont show the - and 0 if there is no value */}
                                                                     {
                                                                         version?.version_name
                                                                     }{" "}

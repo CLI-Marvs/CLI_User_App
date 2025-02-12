@@ -12,7 +12,12 @@ import { MdDelete } from "react-icons/md";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
-const PriceVersions = ({ priceListMasterData, action, isOpen, toggleAccordion }) => {
+const PriceVersions = ({
+    priceListMasterData,
+    action,
+    isOpen,
+    toggleAccordion,
+}) => {
     //States
     // const [isOpen, setAccordionOpen] = useState(false);
     const addPaymentSchemeModalRef = useRef(null);
@@ -22,7 +27,6 @@ const PriceVersions = ({ priceListMasterData, action, isOpen, toggleAccordion })
     const [selectedPaymentSchemes, setSelectedPaymentSchemes] = useState([]);
     const [isDatePickerVisible, setIsDatePickerVisible] = useState(false);
     const [startDate, setStartDate] = useState(null);
- 
 
     //Event handler
     //Handle change in the input field for price version
@@ -76,8 +80,8 @@ const PriceVersions = ({ priceListMasterData, action, isOpen, toggleAccordion })
         setPricingData((prev) => {
             // Ensure priceVersions is always an array
             const priceVersions = Array.isArray(prev.priceVersions)
-                ? [...prev.priceVersions]  
-                : []; 
+                ? [...prev.priceVersions]
+                : [];
 
             priceVersions.push({
                 id: 0,
@@ -87,14 +91,14 @@ const PriceVersions = ({ priceListMasterData, action, isOpen, toggleAccordion })
                 no_of_allowed_buyers: 0,
                 expiry_date: moment().isValid()
                     ? moment(new Date()).format("MM-DD-YYYY HH:mm:ss")
-                    : "", 
+                    : "",
                 payment_scheme: [],
             });
 
             // Update the state
             return {
                 ...prev,
-                priceVersions: priceVersions, 
+                priceVersions: priceVersions,
             };
         });
     };
@@ -120,21 +124,25 @@ const PriceVersions = ({ priceListMasterData, action, isOpen, toggleAccordion })
     };
 
     /**
-     * Handle remove selected payment scheme
-     * Copy the existing priceVersions object
-     * Delete the specific key from the object
-     * Set again the payment_scheme array to null
-     * @param {*} index
+     * Handles the removal of a payment scheme from a specific price version within the pricing data.
+     * This function updates the state by creating new objects and arrays to ensure proper re-renders in React.
+     * It specifically targets the payment_scheme property of the price version at the given index and sets it to an empty array.
+     * This effectively removes the payment scheme while preserving other data within the price version.
+     *
+     * @param {number} index The index of the price version from which to remove the payment scheme.
      */
     const handleRemovePaymentScheme = (index) => {
-        const updatedPriceVersions = { ...pricingData.priceVersions };
+        setPricingData((prevPricingData) => {
+            const updatedPriceVersions = prevPricingData.priceVersions.map(
+                (version, i) => {
+                    if (i === index) {
+                        return { ...version, payment_scheme: [] };
+                    }
+                    return version;
+                }
+            );
 
-        delete updatedPriceVersions[index].payment_scheme;
-        updatedPriceVersions[index].payment_scheme = [];
-
-        setPricingData({
-            ...pricingData,
-            priceVersions: updatedPriceVersions,
+            return { ...prevPricingData, priceVersions: updatedPriceVersions };
         });
     };
 
@@ -298,10 +306,10 @@ const PriceVersions = ({ priceListMasterData, action, isOpen, toggleAccordion })
                                                                 />
                                                             </td>
                                                             <td className="px-[10px]">
-                                                                {/* TODO: add padding when typing data */}
+                                                                {/* TODO:Create an reusable component for this input to use other field*/}
                                                                 <input
                                                                     type="number"
-                                                                    className=" w-[100px] border 
+                                                                    className="pl-3  w-[100px] border 
                                                         border-custom-grayF1 rounded-[5px] h-[31px]"
                                                                     name="no_of_allowed_buyers"
                                                                     value={
