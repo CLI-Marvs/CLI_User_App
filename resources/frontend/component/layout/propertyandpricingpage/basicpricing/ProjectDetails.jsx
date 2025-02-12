@@ -1,24 +1,7 @@
-import React, { useEffect, useRef, useState } from "react";
+import React from "react";
 import { toLowerCaseText } from "@/component/layout/propertyandpricingpage/utils/formatToLowerCase";
 
 const ProjectDetails = ({ propertyData }) => {
-    //State
-    // Destructure the necessary data from propertyData
-    // const { towerPhase, propertyCommercialDetail } =
-    //     propertyData.propertyData || {};
-    // console.log("propertyData", propertyData);
-    // // const { property_name: propertyName, id } =   || {};
-    // const { type } = propertyCommercialDetail || {};
-    // const { tower_phase_name, id: towerPhaseId } = towerPhase || {};
-    // const { propertyId, setPropertyId, setTowerPhaseId } = useStateContext();
-    //Hooks
-    // useEffect(() => {
-    //     if (towerPhaseId) {
-    //         setPropertyId(id);
-    //         setTowerPhaseId(towerPhaseId);
-    //     }
-    // }, [towerPhaseId]);
-
     return (
         <>
             <div className="min-w-full h-[180px] bg-custom-lightestgreen p-[20px] rounded-[10px] ">
@@ -31,14 +14,12 @@ const ProjectDetails = ({ propertyData }) => {
                         </div>
                         <div className="h-[26px] w-auto px-[15px] py-[5px] bg-white rounded-[5px]">
                             <p className="text-custom-gray81 text-xs">
-                                {/*TODO: MAke this not all capitalized */}
                                 {toLowerCaseText(
                                     propertyData?.data?.property_name ||
                                         propertyData?.property_name
                                 )}
                             </p>
                         </div>
-                        {/* ID {id} */}
                     </div>
                     <div className="flex gap-1">
                         <div>
