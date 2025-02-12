@@ -22,11 +22,13 @@ class DirectEmailResponse extends Mailable
     protected $data;
     protected $messageId;
     protected $lastname;
+    protected $buyer_email;
 
     public function __construct($data)
     {
         $this->messageId = $data['messageId'];
         $this->lastname = $data['lastname'];
+        $this->buyer_email = $data['buyer_email'];
     }
 
     /**
@@ -42,18 +44,14 @@ class DirectEmailResponse extends Mailable
     public function headers(): Headers
     {
 
-        $headers = new Headers();
-
-        if ($this->messageId) {
-            $headers->messageId = $this->messageId;
-            $headers->references = [$this->messageId];
-            $headers->text = [
+        return new Headers(
+            messageId: $this->messageId,
+            references: $this->buyer_email,
+            text: [
                 'In-Reply-To' => $this->messageId,
                 'X-Custom-Header' => 'Custom Value',
-            ];
-        }
-
-        return $headers;
+            ],
+        );
     }
     /**
      * Get the message content definition.

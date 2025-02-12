@@ -125,12 +125,16 @@
     <p>Dear Mr./Ms. {{ $lastname }},</p>
 
     <p>
-        We noticed that you sent a direct email inquiry. For us to assist you better, <br>
-        kindly course your inquiry through our customer platform AskCLI <a href="https://ask.cebulandmasters.com"></a>. <br>
+        We noticed that you sent a direct email inquiry. For us to assist you better, kindly course your inquiry through our customer platform AskCLI <a href="https://ask.cebulandmasters.com">ask.cebulandmasters.com</a>. <br>
         This will help us gather the necessary information to address your concerns more efficiently.
         <br>
+        <br>
+        <br>
+        <br>
         Thank you. 
-        
+        <br>
+        <br>
+        <br>
         CLI
     </p>
     <br>

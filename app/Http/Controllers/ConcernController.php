@@ -2604,9 +2604,11 @@ class ConcernController extends Controller
         if (!empty($buyerData)) {
             foreach ($buyerData as $buyer) {
                 if ($buyer) {
+                  \Log::info('buyer data', $buyer);
                    $data = [
                     'lastname' => $buyer['buyer_name'],
                     'messageId' => $buyer['message_id'],
+                    'buyer_email' => $buyer['buyer_email'],
                    ];
 
                    Mail::to($buyer['buyer_email'])->send(new DirectEmailResponse($data));
@@ -2645,6 +2647,7 @@ class ConcernController extends Controller
         if (!empty($buyerDataErratum)) {
             foreach ($buyerDataErratum as $buyer) {
                 if ($buyer) {
+                    \Log::info('buyer data', $buyer);
 
                     $data = [
                         'lastname' => $buyer['buyer_name'],
