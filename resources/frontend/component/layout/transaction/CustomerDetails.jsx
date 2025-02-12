@@ -10,11 +10,16 @@ import { data } from "@/component/servicesApi/apiCalls/transactions/customer";
 import Skeleton from "react-loading-skeleton";
 import PropertyCardTransaction from "@/component/layout/transaction/PropertyCardTransaction";
 import FiltersProperty from "@/component/layout/transaction/FiltersProperty";
+import DatePicker from "react-datepicker";
+import { MdCalendarToday } from "react-icons/md";
+
 
 const CustomerDetails = () => {
     const transactModalRef = useRef(null);
     const { customerDetails, setCustomerDetails } = useStateContext();
     const [startDate, setStartDate] = useState(new Date());
+    const [startDateHistory, setStartDateHistory] = useState(new Date());
+
 
     const { id } = useParams();
     const decodedEmail = atob(id);
@@ -36,6 +41,10 @@ const CustomerDetails = () => {
     useEffect(() => {
         fetchCustomerDetails();
     }, []);
+
+    const handleDateHistoryChange = (date) => {
+        setStartDateHistory(date);
+    };
 
     const handleDateChange = (date) => {
         setStartDate(date);
