@@ -9,6 +9,7 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Mail\Mailables\Headers;
+use Illuminate\Mail\Mailables\Address;
 
 
 class DirectEmailResponse extends Mailable
@@ -31,12 +32,12 @@ class DirectEmailResponse extends Mailable
     /**
      * Get the message envelope.
      */
-   /*  public function envelope(): Envelope
+    public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Direct Email Response',
+            from: new Address('ask@cebulandmasters.com', 'Cebu Landmasters Inc.'),
         );
-    } */
+    }
 
     public function headers(): Headers
     {
