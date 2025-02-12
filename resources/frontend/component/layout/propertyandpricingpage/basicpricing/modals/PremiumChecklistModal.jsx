@@ -9,14 +9,18 @@ const PremiumChecklistModal = ({ modalRef2, selectedUnit }) => {
     const [initialAdditionalPremiums, setInitialAdditionalPremiums] = useState(
         []
     );
-    //    console.log("selectedAdditionalPremiums", selectedAdditionalPremiums);
+    const [hasSelectedAdditionalPremiums, setHasSelectedAdditionalPremiums] =
+        useState(true);
+    console.log("selectedAdditionalPremiums", selectedAdditionalPremiums);
     console.log("pricingData", pricingData);
 
     //Hooks
     useEffect(() => {
         if (selectedUnit) {
             console.log("selectedUnit", selectedUnit);
-
+            const hasPremiums =
+                selectedUnit.additional_premium_id &&
+                selectedUnit.additional_premium_id.length > 0;
             setInitialAdditionalPremiums(
                 selectedUnit.additional_premium_id ?? []
             );
@@ -26,9 +30,21 @@ const PremiumChecklistModal = ({ modalRef2, selectedUnit }) => {
                     unit_id: selectedUnit.unit_id,
                     additional_premium_id:
                         selectedUnit.additional_premium_id ?? [],
+                    fromDatabase: hasPremiums, // Add the flag
                 },
             ]);
         }
+        // if (selectedUnit?.additional_premium_id?.length === 0) {
+        //     setSelectedAdditionalPremiums([
+        //         {
+        //             unit: selectedUnit.unit_name,
+        //             unit_id: selectedUnit.unit_id,
+        //             additional_premium_id:
+        //                 selectedUnit.additional_premium_id ?? [],
+        //             fromDatabase: false, // Add the flag
+        //         },
+        //     ]);
+        // }
     }, [selectedUnit]);
 
     //Event handler
@@ -124,6 +140,7 @@ const PremiumChecklistModal = ({ modalRef2, selectedUnit }) => {
                     : item
             );
         });
+        setHasSelectedAdditionalPremiums(true);
     };
 
     //Handle Apply premiums button
@@ -279,7 +296,7 @@ const PremiumChecklistModal = ({ modalRef2, selectedUnit }) => {
                         </button>
                     </div>
                 </div>
-                <div className="flex justify-start gap-[10px] mb-[10px] items-center">
+                <div className="flex justify-start gap-[10px] mb-[10px] items-center mt-1">
                     <p className="font-semibold text-sm text-custom-gray81">
                         Add premum to unit
                     </p>

@@ -88,7 +88,7 @@ const AdditionalPremiumAssignModal = ({ modalRef, propertyData }) => {
                                   ...(additional_premium_id || []),
                               ]),
                           ]
-                        : additional_premium_id || [], // Ensure fallback to an empty array
+                        : additional_premium_id || [],
                 };
             });
 

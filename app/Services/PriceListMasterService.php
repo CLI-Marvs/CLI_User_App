@@ -317,7 +317,7 @@ class PriceListMasterService
                     // Update the additional_premium_id list by replacing the old with the new
                     // If user deselects everything, store an empty array `[]`
                     if (empty($additionalPremiumId)) {
-                        $unitIds = [null]; // Store empty array in DB
+                        $unitIds =null; // Store empty array in DB
                     } else {
                         $unitIds = $additionalPremiumId; // Update with new selection
                     }
