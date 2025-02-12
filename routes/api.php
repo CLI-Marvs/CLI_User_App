@@ -100,6 +100,9 @@ Route::get('/get-matches', [SapController::class, 'runAutoPosting']);
 
 
 Route::middleware('auth:sanctum')->group(function () {
+  Route::get('/customer/inquiries', [TransactionController::class, 'getCustomerInquiries']);
+  Route::get('/customer/data', [TransactionController::class, 'getCustomerData']);
+  Route::get('/customer/details', [TransactionController::class, 'getCustomerDetailsByEmail']);
     Route::get('/get-transaction-bank', [SapController::class, 'getTransactionByBankName']);
     Route::post('/upload-notepad', [SapController::class, 'uploadNotepad']);
     Route::get('/get-concern', [ConcernController::class, 'getAllConcerns']);
