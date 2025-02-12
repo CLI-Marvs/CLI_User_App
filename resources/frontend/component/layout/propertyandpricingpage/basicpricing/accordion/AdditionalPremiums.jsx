@@ -6,7 +6,7 @@ import { usePricing } from "@/component/layout/propertyandpricingpage/basicprici
 import { useUnit } from "@/context/PropertyPricing/UnitContext";
 import { showToast } from "@/util/toastUtil";
 
-const AdditionalPremiums = ({ propertyData , isOpen, toggleAccordion }) => {
+const AdditionalPremiums = ({ propertyData, isOpen, toggleAccordion }) => {
     //States
     const { excelId } = useUnit();
     const [newAdditionalPremium, setNewAdditionalPremium] = useState({
@@ -17,7 +17,6 @@ const AdditionalPremiums = ({ propertyData , isOpen, toggleAccordion }) => {
     const modalRef = useRef(null);
     const [localExcelId, setLocalExcelId] = useState(null);
     const { setPricingData, pricingData } = usePricing();
- 
 
     //Hooks
     useEffect(() => {
@@ -237,6 +236,16 @@ const AdditionalPremiums = ({ propertyData , isOpen, toggleAccordion }) => {
                                         </tr>
                                     </thead>
                                     <tbody>
+                                        {/*
+                                            TODO: 
+                                            Default view values are;
+                                            Sea View,
+                                            Mountain View,
+                                            City View,
+                                            Amenity View
+
+                                            So if mag add ko og laen view it must append of the end of tha Amenity View, dapat dili siya ma shuffle
+                                        */}
                                         {pricingData &&
                                             pricingData.additionalPremiums
                                                 .length > 0 &&
