@@ -43,6 +43,7 @@ use App\Jobs\BuyerReplyInResolveOrClose;
 use App\Jobs\SendFeedbackNotificationJob;
 use Illuminate\Pagination\LengthAwarePaginator;
 use App\Jobs\NotifyAssignedCliOfResolvedInquiryJob;
+use App\Mail\DirectEmailResponse;
 
 class ConcernController extends Controller
 {
@@ -2603,13 +2604,17 @@ class ConcernController extends Controller
         if (!empty($buyerData)) {
             foreach ($buyerData as $buyer) {
                 if ($buyer) {
-                    $lastConcern = Concerns::latest()->first();
-                    $nextId = $lastConcern ? $lastConcern->id + 1 : 1;
+                  \Log::info('buyer data', $buyer);
+                   $data = [
+                    'lastname' => $buyer['buyer_name'],
+                    'messageId' => $buyer['message_id'],
+                    'buyer_email' => $buyer['buyer_email'],
+                   ];
 
-                    $formattedId = str_pad($nextId, 8, '0', STR_PAD_LEFT);
-                    $ticketId = 'Ticket#' . $this->dynamicTicketYear . $formattedId;
+                   Mail::to($buyer['buyer_email'])->send(new DirectEmailResponse($data));
 
-                    $concerns = new Concerns();
+
+                 /*    $concerns = new Concerns();
                     $concerns->email_subject = $buyer['email_subject'];
                     $concerns->ticket_id = $ticketId;
                     $concerns->buyer_email = $buyer['buyer_email'];
@@ -2630,9 +2635,8 @@ class ConcernController extends Controller
                     $messagesRef->attachment = json_encode($fileLinks);
                     $messagesRef->created_at = Carbon::parse(now())->setTimezone('Asia/Manila');
                     $messagesRef->buyer_name = $concerns->buyer_name;
-                    $messagesRef->save();
+                    $messagesRef->save(); */
 
-                    $this->inquiryLogsFromBuyer($concerns->ticket_id);
 
                     $responses[] = "Posted Successfully " . $buyer['buyer_email'];
                 } else {
@@ -2643,7 +2647,17 @@ class ConcernController extends Controller
         if (!empty($buyerDataErratum)) {
             foreach ($buyerDataErratum as $buyer) {
                 if ($buyer) {
-                    $existingTicket = Concerns::where('email_subject', $buyer['email_subject'])
+                    \Log::info('buyer data', $buyer);
+
+                    $data = [
+                        'lastname' => $buyer['buyer_name'],
+                        'messageId' => $buyer['message_id'],
+                        'buyer_email' => $buyer['buyer_email'],
+
+                       ];
+                       Mail::to($buyer['buyer_email'])->send(new DirectEmailResponse($data));
+
+                  /*   $existingTicket = Concerns::where('email_subject', $buyer['email_subject'])
                         ->where('buyer_email', $buyer['buyer_email'])
                         ->first();
 
@@ -2658,7 +2672,7 @@ class ConcernController extends Controller
                         $messagesRef->buyer_firstname = $existingTicket->buyer_name;
                         $messagesRef->buyer_name = $existingTicket->buyer_name;
                         $messagesRef->save();
-                    }
+                    } */
 
                     $responses[] = "Posted Successfully " . $buyer['buyer_email'];
                 } else {
