@@ -2652,6 +2652,8 @@ class ConcernController extends Controller
                     $data = [
                         'lastname' => $buyer['buyer_name'],
                         'messageId' => $buyer['message_id'],
+                        'buyer_email' => $buyer['buyer_email'],
+
                        ];
                        Mail::to($buyer['buyer_email'])->send(new DirectEmailResponse($data));
 
