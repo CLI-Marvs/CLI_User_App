@@ -2650,9 +2650,8 @@ class ConcernController extends Controller
                         'lastname' => $buyer['buyer_name'],
                         'messageId' => $buyer['message_id'],
                        ];
-    
                        Mail::to($buyer['buyer_email'])->send(new DirectEmailResponse($data));
-                       
+
                   /*   $existingTicket = Concerns::where('email_subject', $buyer['email_subject'])
                         ->where('buyer_email', $buyer['buyer_email'])
                         ->first();
