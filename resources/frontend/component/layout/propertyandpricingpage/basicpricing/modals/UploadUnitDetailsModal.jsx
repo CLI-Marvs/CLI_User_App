@@ -19,7 +19,13 @@ const UploadUnitDetailsModal = ({
     const [towerPhaseId, setTowerPhaseId] = useState();
     const [propertyMasterId, setPropertyMasterId] = useState();
     const [priceListMasterId, setPriceListMasterId] = useState();
-    const { uploadUnits, isUploadingUnits } = useUnit();
+    const {
+        uploadUnits,
+        isUploadingUnits,
+        fetchFloorCount,
+        setFloors,
+        setFloorPremiumsAccordionOpen,
+    } = useUnit();
     const { priceListMaster } = usePriceListMaster();
 
     //Hooks
@@ -79,17 +85,18 @@ const UploadUnitDetailsModal = ({
             property_masters_id: propertyMasterId,
             price_list_master_id: priceListMasterId,
         };
-        console.log("payload", payload);
 
         try {
             const response = await uploadUnits(payload);
-            console.log("response 66", response);
             if (response?.success === true) {
-                // const excelId = response?.data?.data?.excel_id;
-                //TODO: fetch the unit lloor
-                // Fetch floors immediately after successful upload to reflect the floor premium
-
+                setFloors([]);
+                const floors = await fetchFloorCount(
+                    towerPhaseId,
+                    response?.excelId
+                );
+                setFloors(floors);
                 showToast("Unit uploaded successfully", "success");
+                setFloorPremiumsAccordionOpen(true);
                 if (uploadUnitModalRef.current) {
                     uploadUnitModalRef.current.close();
                 }

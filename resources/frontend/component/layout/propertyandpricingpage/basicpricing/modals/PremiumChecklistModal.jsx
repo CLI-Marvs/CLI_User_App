@@ -1,4 +1,4 @@
-import React, { useState, useEffect, memo } from "react";
+import React, { useState, useEffect } from "react";
 import { usePricing } from "@/component/layout/propertyandpricingpage/basicpricing/context/BasicPricingContext";
 
 const PremiumChecklistModal = ({ modalRef2, selectedUnit }) => {
@@ -9,15 +9,10 @@ const PremiumChecklistModal = ({ modalRef2, selectedUnit }) => {
     const [initialAdditionalPremiums, setInitialAdditionalPremiums] = useState(
         []
     );
-    const [hasSelectedAdditionalPremiums, setHasSelectedAdditionalPremiums] =
-        useState(true);
-    console.log("selectedAdditionalPremiums", selectedAdditionalPremiums);
-    console.log("pricingData", pricingData);
 
     //Hooks
     useEffect(() => {
         if (selectedUnit) {
-            console.log("selectedUnit", selectedUnit);
             const hasPremiums =
                 selectedUnit.additional_premium_id &&
                 selectedUnit.additional_premium_id.length > 0;
@@ -30,94 +25,19 @@ const PremiumChecklistModal = ({ modalRef2, selectedUnit }) => {
                     unit_id: selectedUnit.unit_id,
                     additional_premium_id:
                         selectedUnit.additional_premium_id ?? [],
-                    fromDatabase: hasPremiums, // Add the flag
+                    fromDatabase: hasPremiums,
                 },
             ]);
         }
-        // if (selectedUnit?.additional_premium_id?.length === 0) {
-        //     setSelectedAdditionalPremiums([
-        //         {
-        //             unit: selectedUnit.unit_name,
-        //             unit_id: selectedUnit.unit_id,
-        //             additional_premium_id:
-        //                 selectedUnit.additional_premium_id ?? [],
-        //             fromDatabase: false, // Add the flag
-        //         },
-        //     ]);
-        // }
     }, [selectedUnit]);
 
     //Event handler
-    //Handle checkbox change
-    // const handleCheckboxChange = (e, premium) => {
-    //     const isChecked = e.target.checked;
-
-    //     setSelectedAdditionalPremiums((prevState) => {
-    //         // Find if the unit already exists in the selection
-    //         const existingUnit = prevState.find(
-    //             (item) => item.unit_id === selectedUnit?.unit_id
-    //         );
-
-    //         if (isChecked) {
-    //             // Add premium ID if checked
-    //             if (existingUnit) {
-    //                 return prevState.map((item) =>
-    //                     item.unit_id === selectedUnit?.unit_id
-    //                         ? {
-    //                               ...item,
-    //                               additional_premium_id: [
-    //                                   ...new Set([
-    //                                       ...item.additional_premium_id,
-    //                                       premium.id,
-    //                                   ]),
-    //                               ],
-    //                           }
-    //                         : item
-    //                 );
-    //             } else {
-    //                 return [
-    //                     ...prevState,
-    //                     {
-    //                         unit_id: selectedUnit?.unit_id,
-    //                         additional_premium_id: [premium.id],
-    //                     },
-    //                 ];
-    //             }
-    //         } else {
-    //             return prevState.map((item) =>
-    //                 item.unit_id === selectedUnit?.unit_id
-    //                     ? {
-    //                           ...item,
-    //                           additional_premium_id:
-    //                               item.additional_premium_id.filter(
-    //                                   (id) => id !== premium.id
-    //                               ),
-    //                       }
-    //                     : item
-    //             );
-    //             // Remove premium ID if unchecked
-    //             // if (existingUnit) {
-    //             //     return prevState
-    //             //         .map((item) =>
-    //             //             item.unit_id === selectedUnit?.unit_id
-    //             //                 ? {
-    //             //                       ...item,
-    //             //                       additional_premium_id:
-    //             //                           item.additional_premium_id.filter(
-    //             //                               (id) => id !== premium.id
-    //             //                           ),
-    //             //                   }
-    //             //                 : item
-    //             //         )
-    //             //         .filter(
-    //             //             (item) => item.additional_premium_id.length > 0
-    //             //         ); // Remove empty units
-    //             // } else {
-    //             //     return prevState;
-    //             // }
-    //         }
-    //     });
-    // };
+    /**
+     * Updates the selected additional premiums when a checkbox is toggled.
+     * If checked, the premium ID is added to the unit's `additional_premium_id` array.
+     * If unchecked, the premium ID is removed from the array.
+     * Ensures that each unit maintains a unique set of additional premiums.
+     */
     const handleCheckboxChange = (e, premium) => {
         const isChecked = e.target.checked;
 
@@ -140,84 +60,20 @@ const PremiumChecklistModal = ({ modalRef2, selectedUnit }) => {
                     : item
             );
         });
-        setHasSelectedAdditionalPremiums(true);
     };
 
-    //Handle Apply premiums button
-    // const handleApplyPremiums = () => {
-    //     setPricingData((prevState) => {
-    //         const updatedPremiums = selectedAdditionalPremiums.map((item) => ({
-    //             ...item,
-    //             additional_premium_id:
-    //                 item.additional_premium_id.length > 0
-    //                     ? item.additional_premium_id
-    //                     : [],
-    //         }));
-
-    //         // return {
-    //         //     ...prevState,
-    //         //     selectedAdditionalPremiums: updatedPremiums,
-    //         // };
-    //         return {
-    //             ...prevState,
-    //             selectedAdditionalPremiums: prevState.selectedAdditionalPremiums
-    //                 .filter(
-    //                     (prevItem) =>
-    //                         !updatedPremiums.some(
-    //                             (item) => item.unit_id === prevItem.unit_id
-    //                         )
-    //                 ) // Keep other units intact
-    //                 .concat(updatedPremiums), // Merge updated ones
-    //         };
-    //     });
-
-    //     //  Close the modal
-    //     if (modalRef2.current) {
-    //         modalRef2.current.close();
-    //     }
-    // };
-    // const handleApplyPremiums = () => {
-    //     setPricingData((prevState) => {
-    //         const existingPremiums = prevState.selectedAdditionalPremiums || [];
-
-    //         // Merge new selections with existing ones
-    //         const updatedPremiums = [...existingPremiums];
-
-    //         selectedAdditionalPremiums.forEach((newItem) => {
-    //             const existingIndex = updatedPremiums.findIndex(
-    //                 (item) => item.unit_id === newItem.unit_id
-    //             );
-
-    //             if (existingIndex !== -1) {
-    //                 // Update the existing unit's premiums
-    //                 updatedPremiums[existingIndex] = {
-    //                     ...updatedPremiums[existingIndex],
-    //                     additional_premium_id: newItem.additional_premium_id,
-    //                 };
-    //             } else {
-    //                 // Add a new unit if it doesn't exist
-    //                 updatedPremiums.push(newItem);
-    //             }
-    //         });
-
-    //         return {
-    //             ...prevState,
-    //             selectedAdditionalPremiums: updatedPremiums.filter(
-    //                 (item) => item.additional_premium_id.length > 0
-    //             ), // Remove units with empty additional premiums
-    //         };
-    //     });
-
-    //     // Close the modal
-    //     if (modalRef2.current) {
-    //         modalRef2.current.close();
-    //     }
-    // };
+    /**
+     * Updates the selected additional premiums in `pricingData`.
+     * Merges the newly selected premiums with existing ones.
+     * If a unit already exists, its `additional_premium_id` is updated.
+     * If a unit is newly selected, it is added to the list.
+     * Removes units with an empty `additional_premium_id` unless they came from the database.
+     * Closes the modal after applying the changes.
+     */
     const handleApplyPremiums = () => {
         setPricingData((prevState) => {
             const existingPremiums = prevState.selectedAdditionalPremiums || [];
 
-            // Merge new selections with existing ones
             const updatedPremiums = [...existingPremiums];
 
             selectedAdditionalPremiums.forEach((newItem) => {
@@ -226,24 +82,25 @@ const PremiumChecklistModal = ({ modalRef2, selectedUnit }) => {
                 );
 
                 if (existingIndex !== -1) {
-                    // Update the existing unit's premiums (keep empty array if removed)
                     updatedPremiums[existingIndex] = {
                         ...updatedPremiums[existingIndex],
                         additional_premium_id: newItem.additional_premium_id,
                     };
                 } else {
-                    // Add a new unit if it doesn't exist
                     updatedPremiums.push(newItem);
                 }
             });
 
+            const filteredPremiums = updatedPremiums.filter(
+                (item) =>
+                    item.additional_premium_id.length > 0 ||
+                    item.fromDatabase === true
+            );
             return {
                 ...prevState,
-                selectedAdditionalPremiums: updatedPremiums, // No filtering out empty arrays
+                selectedAdditionalPremiums: filteredPremiums,
             };
         });
-
-        // Close the modal
         if (modalRef2.current) {
             modalRef2.current.close();
         }
@@ -259,7 +116,6 @@ const PremiumChecklistModal = ({ modalRef2, selectedUnit }) => {
 
     /**
      * Checks if the selected additional premiums have changed from their initial values.
-     *
      * This function compares the selected unit's additional premiums with their initial values.
      * It returns true if the selected premiums are different from the original, and false otherwise.
      */
@@ -325,20 +181,6 @@ const PremiumChecklistModal = ({ modalRef2, selectedUnit }) => {
                                                     premium.id
                                                 )
                                         )}
-                                        // checked={
-                                        //     (selectedUnit?.additional_premium_id?.includes(
-                                        //         premium.id
-                                        //     ) ??
-                                        //         false) ||
-                                        //     selectedAdditionalPremiums.some(
-                                        //         (item) =>
-                                        //             item.unit_id ===
-                                        //                 selectedUnit?.unit_id &&
-                                        //             item.additional_premium_id.includes(
-                                        //                 premium.id
-                                        //             )
-                                        //     )
-                                        // }
                                         type="checkbox"
                                         className="h-[16px] w-[16px] ml-[16px] rounded-[2px] appearance-none border border-gray-400 checked:bg-transparent flex items-center justify-center checked:before:bg-black checked:before:w-[12px] checked:before:h-[12px] checked:before:block checked:before:content-['']"
                                     />
@@ -348,49 +190,10 @@ const PremiumChecklistModal = ({ modalRef2, selectedUnit }) => {
                                 </div>
                             );
                         })}
-
-                    {/* <div className="h-[56px] w-full bg-custom-grayFA rounded-[10px] p-[10px] flex items-center gap-[15px]">
-                        <input
-                            type="checkbox"
-                            className="h-[16px] w-[16px] ml-[16px] rounded-[2px] appearance-none border border-gray-400 checked:bg-transparent flex items-center justify-center checked:before:bg-black checked:before:w-[12px] checked:before:h-[12px] checked:before:block checked:before:content-['']"
-                        />
-                        <p>Mountain View</p>
-                    </div>
-                    <div className="h-[56px] w-full bg-custom-grayFA rounded-[10px] p-[10px] flex items-center gap-[15px]">
-                        <input
-                            type="checkbox"
-                            className="h-[16px] w-[16px] ml-[16px] rounded-[2px] appearance-none border border-gray-400 checked:bg-transparent flex items-center justify-center checked:before:bg-black checked:before:w-[12px] checked:before:h-[12px] checked:before:block checked:before:content-['']"
-                        />
-                        <p>City View</p>
-                    </div>
-                    <div className="h-[56px] w-full bg-custom-grayFA rounded-[10px] p-[10px] flex items-center gap-[15px]">
-                        <input
-                            type="checkbox"
-                            className="h-[16px] w-[16px] ml-[16px] rounded-[2px] appearance-none border border-gray-400 checked:bg-transparent flex items-center justify-center checked:before:bg-black checked:before:w-[12px] checked:before:h-[12px] checked:before:block checked:before:content-['']"
-                        />
-                        <p>Lucky Unit Number</p>
-                    </div>
-                    <div className="h-[56px] w-full bg-custom-grayFA rounded-[10px] p-[10px] flex items-center gap-[15px]">
-                        <input
-                            type="checkbox"
-                            className="h-[16px] w-[16px] ml-[16px] rounded-[2px] appearance-none border border-gray-400 checked:bg-transparent flex items-center justify-center checked:before:bg-black checked:before:w-[12px] checked:before:h-[12px] checked:before:block checked:before:content-['']"
-                        />
-                        <p>Corner unit with extra window</p>
-                    </div> */}
                 </div>
                 <div className="flex justify-start mt-4 mb-8">
                     <button
                         disabled={!hasChanges()}
-                        // className={`w-[151px] h-[37px] text-white montserrat-semibold text-sm gradient-btn5 rounded-[10px] hover:shadow-custom4 ${
-                        //     selectedAdditionalPremiums.length === 0 ||
-                        //     !selectedAdditionalPremiums.some(
-                        //         (item) =>
-                        //             item.unit_id === selectedUnit?.unit_id &&
-                        //             item.additional_premium_id.length > 0
-                        //     )
-                        //         ? "opacity-50 cursor-not-allowed"
-                        //         : ""
-                        // }`}
                         className={`w-[151px] h-[37px] text-white montserrat-semibold text-sm gradient-btn5 rounded-[10px] hover:shadow-custom4 ${
                             !hasChanges() ? "opacity-50 cursor-not-allowed" : ""
                         }`}

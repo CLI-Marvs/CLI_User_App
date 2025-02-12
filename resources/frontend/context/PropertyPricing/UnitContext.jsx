@@ -17,41 +17,45 @@ export const UnitProvider = ({ children }) => {
     const [floorPremiumsAccordionOpen, setFloorPremiumsAccordionOpen] =
         useState(false);
     const [unitsByFloor, setUnitByFloors] = useState([]);
-    const [units,setUnits] = useState([]);
+    const [units, setUnits] = useState([]);
     const [isFloorCountLoading, setIsFloorCountLoading] = useState(false);
     const [isCheckingUnits, setIsCheckingUnits] = useState(false);
     const [isFetchingUnits, setIsFetchingUnits] = useState(false);
     const [isUploadingUnits, setIsUploadingUnits] = useState(false);
 
-    const fetchFloorCount = useCallback(
-        async (towerPhaseId, excelId) => {
-            if (towerPhaseId && excelId) {
-                try {
-                    setIsFloorCountLoading(true);
-                    const response = await unitService.countFloor(
-                        towerPhaseId,
-                        excelId
-                    );
-                    console.log("response fetchFloorCount", response);
+    const fetchFloorCount = useCallback(async (towerPhaseId, excelId) => {
+        if (towerPhaseId && excelId) {
+            try {
+                setIsFloorCountLoading(true);
+                const response = await unitService.countFloor(
+                    towerPhaseId,
+                    excelId
+                );
+                console.log("response fetchFloorCount", response);
+
+                if (response?.data?.data) {
                     const sortedProperties = Object.entries(response.data.data)
                         .map(([id, name]) => ({ id, name }))
                         .sort((a, b) => a.name.localeCompare(b.name));
 
-                    setFloors(response.data.data);
+                    setFloors(response.data.data); // Update floors state
                     return response.data.data;
-                } catch (err) {
-                    setError(err);
-                    throw err;
-                } finally {
-                    setIsFloorCountLoading(false);
                 }
+            } catch (err) {
+                setError(err);
+                throw err;
+            } finally {
+                setIsFloorCountLoading(false);
             }
-        },
-        [towerPhaseId, excelId]
-    );
+        }
+    }, []);
 
     const checkExistingUnits = useCallback(
-        async (towerPhaseId, excelId) => {
+        async (towerPhaseId, excelId, forceFetch = false) => {
+            if (units.length > 0 && !forceFetch) {
+                return; // Prevent redundant API calls
+            }
+
             if (excelId === null || excelId === undefined) {
                 console.log(
                     "Skipping API call because excelId is null or undefined"
@@ -91,7 +95,6 @@ export const UnitProvider = ({ children }) => {
                 if (response?.status === 201) {
                     const newExcelId = response?.data?.data?.excel_id;
                     setExcelId(newExcelId);
-                    await fetchFloorCount(payload.tower_phase_id, newExcelId);
                     return { success: true, excelId: newExcelId };
                 }
             } catch (err) {

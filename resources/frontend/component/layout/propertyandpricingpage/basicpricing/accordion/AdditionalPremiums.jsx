@@ -1,16 +1,15 @@
 import React, { useState, useRef, useEffect } from "react";
 import { IoIosArrowDown } from "react-icons/io";
 import { FaRegTrashAlt } from "react-icons/fa";
-import { IoMdArrowDropdown } from "react-icons/io";
 import AdditionalPremiumAssignModal from "../modals/AdditionalPremiumAssignModal";
 import { usePricing } from "@/component/layout/propertyandpricingpage/basicpricing/context/BasicPricingContext";
 import { useUnit } from "@/context/PropertyPricing/UnitContext";
 import { showToast } from "@/util/toastUtil";
 
-const AdditionalPremiums = ({ propertyData }) => {
+const AdditionalPremiums = ({ propertyData , isOpen, toggleAccordion }) => {
     //States
     const { excelId } = useUnit();
-    const [accordionOpen, setAccordionOpen] = useState(false);
+    // const [isOpen, setisOpen] = useState(false);
     const [newAdditionalPremium, setNewAdditionalPremium] = useState({
         viewName: "",
         premiumCost: 0,
@@ -19,7 +18,7 @@ const AdditionalPremiums = ({ propertyData }) => {
     const modalRef = useRef(null);
     const [localExcelId, setLocalExcelId] = useState(null);
     const { setPricingData, pricingData } = usePricing();
- 
+    console.log("pricingData", pricingData);
 
     //Hooks
     useEffect(() => {
@@ -39,7 +38,7 @@ const AdditionalPremiums = ({ propertyData }) => {
                               ...item,
                               [name]:
                                   name === "premiumCost"
-                                      ? parseFloat(value) || 0
+                                      ? parseFloat(value) || ""
                                       : value,
                           }
                         : item
@@ -71,7 +70,6 @@ const AdditionalPremiums = ({ propertyData }) => {
             (item) => item.viewName === viewName
         );
 
-        console.log("isPremiumExist", isPremiumExist);
         if (isPremiumExist) {
             showToast(`Premium ${viewName} already exists.`, "error");
             return;
@@ -116,23 +114,23 @@ const AdditionalPremiums = ({ propertyData }) => {
             <div
                 className={` transition-all duration-2000 ease-in-out
       ${
-          accordionOpen
+          isOpen
               ? "h-[74px] mx-5 bg-white shadow-custom5 rounded-[10px]"
               : "h-[72px] gradient-btn3 rounded-[10px] p-[1px]"
       } `}
             >
                 <button
-                    onClick={() => setAccordionOpen(!accordionOpen)}
+                    onClick={() => toggleAccordion("additionalPremiums")}
                     className={`
             ${
-                accordionOpen
+                isOpen
                     ? "flex justify-between items-center h-full w-full bg-white rounded-[9px] px-[15px]"
                     : "flex justify-between items-center h-full w-full bg-custom-grayFA rounded-[9px] px-[15px]"
             } `}
                 >
                     <span
                         className={` text-custom-solidgreen ${
-                            accordionOpen
+                            isOpen
                                 ? "text-[20px] montserrat-semibold"
                                 : "text-[18px] montserrat-regular"
                         }`}
@@ -141,7 +139,7 @@ const AdditionalPremiums = ({ propertyData }) => {
                     </span>
                     <span
                         className={`flex justify-center items-center h-[40px] w-[40px] rounded-full  transform transition-transform duration-300 ease-in-out ${
-                            accordionOpen
+                            isOpen
                                 ? "rotate-180 bg-[#F3F7F2] text-custom-solidgreen"
                                 : "rotate-0 gradient-btn2 text-white"
                         }`}
@@ -153,7 +151,7 @@ const AdditionalPremiums = ({ propertyData }) => {
             <div
                 className={`mx-5 rounded-[10px] shadow-custom5 grid overflow-hidden transition-all duration-300 ease-in-out
             ${
-                accordionOpen
+                isOpen
                     ? "mt-2 mb-4 grid-rows-[1fr] opacity-100"
                     : "grid-rows-[0fr] opacity-0"
             }
@@ -294,17 +292,16 @@ const AdditionalPremiums = ({ propertyData }) => {
                             </div>
                         </div>
                         <div className="flex justify-center">
-                            {excelId ||
-                                (localExcelId && (
-                                    <button
-                                        onClick={handleOpenModal}
-                                        className="w-[137px] h-[37px] rounded-[7px] gradient-btn2 p-[4px]  text-custom-solidgreen hover:shadow-custom4 text-sm"
-                                    >
-                                        <div className="flex justify-center items-center  bg-white montserrat-semibold h-full w-full rounded-[4px] p-[4px] text-sm">
-                                            Assign to units
-                                        </div>
-                                    </button>
-                                ))}
+                            {(excelId ? true : localExcelId) && (
+                                <button
+                                    onClick={handleOpenModal}
+                                    className="w-[137px] h-[37px] rounded-[7px] gradient-btn2 p-[4px] text-custom-solidgreen hover:shadow-custom4 text-sm"
+                                >
+                                    <div className="flex justify-center items-center bg-white montserrat-semibold h-full w-full rounded-[4px] p-[4px] text-sm">
+                                        Assign to units
+                                    </div>
+                                </button>
+                            )}
                         </div>
                     </div>
                 </div>

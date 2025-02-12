@@ -12,9 +12,9 @@ import { MdDelete } from "react-icons/md";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
-const PriceVersions = ({ priceListMasterData, action }) => {
+const PriceVersions = ({ priceListMasterData, action, isOpen, toggleAccordion }) => {
     //States
-    const [accordionOpen, setAccordionOpen] = useState(false);
+    // const [isOpen, setAccordionOpen] = useState(false);
     const addPaymentSchemeModalRef = useRef(null);
     const editPaymentSchemeModalRef = useRef(null);
     const { pricingData, updatePricingSection, setPricingData } = usePricing();
@@ -176,23 +176,23 @@ const PriceVersions = ({ priceListMasterData, action }) => {
             <div
                 className={`transition-all duration-2000 ease-in-out relative
       ${
-          accordionOpen
+          isOpen
               ? "h-[74px] mx-5 bg-white shadow-custom5 rounded-[10px]"
               : "h-[72px]  gradient-btn3 rounded-[10px] p-[1px]"
       } `}
             >
                 <button
-                    onClick={() => setAccordionOpen(!accordionOpen)}
+                    onClick={() => toggleAccordion("priceVersions")}
                     className={`
             ${
-                accordionOpen
+                isOpen
                     ? "flex justify-between items-center h-full w-full bg-white rounded-[9px] px-[15px]"
                     : "flex justify-between items-center h-full w-full bg-custom-grayFA rounded-[9px] px-[15px]"
             } `}
                 >
                     <span
                         className={` text-custom-solidgreen ${
-                            accordionOpen
+                            isOpen
                                 ? "text-[20px] montserrat-semibold"
                                 : "text-[18px] montserrat-regular"
                         }`}
@@ -201,7 +201,7 @@ const PriceVersions = ({ priceListMasterData, action }) => {
                     </span>
                     <span
                         className={`flex justify-center items-center h-[40px] w-[40px] rounded-full  transform transition-transform duration-300 ease-in-out ${
-                            accordionOpen
+                            isOpen
                                 ? "rotate-180 bg-[#F3F7F2] text-custom-solidgreen"
                                 : "rotate-0 gradient-btn2 text-white"
                         }`}
@@ -213,7 +213,7 @@ const PriceVersions = ({ priceListMasterData, action }) => {
             <div
                 className={`mx-5 rounded-[10px] shadow-custom5 grid overflow-hidden transition-all duration-300 ease-in-out
             ${
-                accordionOpen
+                isOpen
                     ? "mt-2 mb-4 grid-rows-[1fr] opacity-100"
                     : "grid-rows-[0fr] opacity-0"
             }

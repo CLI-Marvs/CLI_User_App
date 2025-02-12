@@ -14,7 +14,7 @@ const newFloorState = {
     excludedUnits: [],
 };
 
-const FloorPremiums = ({ propertyData }) => {
+const FloorPremiums = ({ propertyData, isOpen, toggleAccordion }) => {
     //States
     const [newFloorPremiumData, setNewFloorPremiumData] =
         useState(newFloorState);
@@ -22,9 +22,9 @@ const FloorPremiums = ({ propertyData }) => {
     const {
         floors,
         isFloorCountLoading,
-        floorPremiumsAccordionOpen,
         setFloorPremiumsAccordionOpen,
         excelId,
+        floorPremiumsAccordionOpen,
     } = useUnit();
 
     const [selectedFloor, setSelectedFloor] = useState(null);
@@ -33,17 +33,24 @@ const FloorPremiums = ({ propertyData }) => {
     const [localExcelId, setLocalExcelId] = useState(null);
 
     //Hooks
+    /*
+     * Initializes tower phase ID, local Excel ID, and floor premiums when floors or property data change.
+     *If floor premiums are not set, it generates initial floor premiums based on the available floor numbers
+     *
+     */
     useEffect(() => {
+        if (!floors || Object.keys(floors).length === 0) return;
+        floors;
+
         setTowerPhaseId(
             propertyData?.tower_phase_id ||
                 propertyData?.data?.tower_phases[0]?.id
         );
         setLocalExcelId(propertyData?.excel_id);
+
         if (
-            floors &&
-            Object.keys(floors).length > 0 &&
-            (!pricingData.floorPremiums ||
-                Object.keys(pricingData.floorPremiums).length === 0)
+            !pricingData.floorPremiums ||
+            Object.keys(pricingData.floorPremiums).length === 0
         ) {
             const floorNumbers = floors[Object.keys(floors)[0]];
             if (Array.isArray(floorNumbers) && floorNumbers.length > 0) {
@@ -58,6 +65,7 @@ const FloorPremiums = ({ propertyData }) => {
                     },
                     {}
                 );
+
                 setPricingData((prev) => ({
                     ...prev,
                     floorPremiums: initialFloorPremiums,
@@ -194,27 +202,23 @@ const FloorPremiums = ({ propertyData }) => {
             <div
                 className={`transition-all duration-2000 ease-in-out
       ${
-          floorPremiumsAccordionOpen
+          isOpen
               ? "h-[74px] mx-5 bg-white shadow-custom5 rounded-[10px]"
               : "h-[72px] gradient-btn3 rounded-[10px] p-[1px]"
       } `}
             >
                 <button
-                    onClick={() =>
-                        setFloorPremiumsAccordionOpen(
-                            !floorPremiumsAccordionOpen
-                        )
-                    }
+                    onClick={() => toggleAccordion("floorPremiums")}
                     className={`
             ${
-                floorPremiumsAccordionOpen
+                isOpen
                     ? "flex justify-between items-center h-full w-full bg-white rounded-[9px] px-[15px]"
                     : "flex justify-between items-center h-full w-full bg-custom-grayFA rounded-[9px] px-[15px]"
             } `}
                 >
                     <span
                         className={` text-custom-solidgreen ${
-                            floorPremiumsAccordionOpen
+                            isOpen
                                 ? "text-[20px] montserrat-semibold"
                                 : "text-[18px] montserrat-regular"
                         }`}
@@ -223,7 +227,7 @@ const FloorPremiums = ({ propertyData }) => {
                     </span>
                     <span
                         className={`flex justify-center items-center h-[40px] w-[40px] rounded-full  transform transition-transform duration-300 ease-in-out ${
-                            floorPremiumsAccordionOpen
+                            isOpen
                                 ? "rotate-180 bg-[#F3F7F2] text-custom-solidgreen"
                                 : "rotate-0 gradient-btn2 text-white"
                         }`}
@@ -235,7 +239,7 @@ const FloorPremiums = ({ propertyData }) => {
             <div
                 className={`mx-5 rounded-[10px] shadow-custom5 grid overflow-hidden transition-all duration-300 ease-in-out
             ${
-                floorPremiumsAccordionOpen
+                isOpen
                     ? "mt-2 mb-4 grid-rows-[1fr] opacity-100"
                     : "grid-rows-[0fr] opacity-0"
             }
@@ -243,7 +247,17 @@ const FloorPremiums = ({ propertyData }) => {
             >
                 <div className="bg-white overflow-hidden">
                     <div className="w-full p-5 h-[370px]">
-                        {localExcelId || excelId ? (
+                        {!(excelId || localExcelId) ? (
+                            <div className="w-auto">
+                                <p className="montserrat-regular text-center text-red-500">
+                                    No units have been uploaded.
+                                    <span className="underline ml-2 text-blue-500">
+                                        {" "}
+                                        Upload{" "}
+                                    </span>
+                                </p>
+                            </div>
+                        ) : (
                             <div className="flex justify-center w-full h-[31px] gap-3 mb-4">
                                 <div className="flex items-center border border-custom-grayF1 rounded-[5px] overflow-hidden w-[204px] text-sm  ">
                                     <span className="text-custom-gray81 bg-custom-grayFA  flex items-center w-[120%] font-semibold -mr-3 pl-3 py-1">
@@ -296,16 +310,6 @@ const FloorPremiums = ({ propertyData }) => {
                                         </div>
                                     </button>
                                 </div>
-                            </div>
-                        ) : (
-                            <div className="w-auto">
-                                <p className="montserrat-regular text-center text-red-500">
-                                    No units have been uploaded.
-                                    <span className="underline ml-2 text-blue-500">
-                                        {" "}
-                                        Upload
-                                    </span>
-                                </p>
                             </div>
                         )}
 

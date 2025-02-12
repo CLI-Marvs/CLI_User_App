@@ -1,51 +1,52 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { IoIosArrowDown } from "react-icons/io";
-import { IoMdArrowDropdown } from "react-icons/io";
-import { LiaPercentSolid } from "react-icons/lia";
 import { usePricing } from "@/component/layout/propertyandpricingpage/basicpricing/context/BasicPricingContext";
 
-
-const PriceListSettings = ({ }) => {
+const PriceListSettings = ({ isOpen, toggleAccordion }) => {
     //State
-    const [accordionOpen, setAccordionOpen] = useState(false);
+
     const { pricingData, updatePricingSection } = usePricing();
- 
+
     //Event Handler
     const handleInputChange = (e) => {
         const { name, value } = e.target;
-        updatePricingSection('priceListSettings', { [name]: value });
+        updatePricingSection("priceListSettings", { [name]: value });
     };
 
     return (
         <>
             <div
                 className={`transition-all duration-2000 ease-in-out
-    ${accordionOpen
-                        ? "h-[74px] mx-5 bg-white shadow-custom5 rounded-[10px]"
-                        : "h-[72px] gradient-btn3 rounded-[10px] p-[1px]"
-                    } `}
+    ${
+        isOpen
+            ? "h-[74px] mx-5 bg-white shadow-custom5 rounded-[10px]"
+            : "h-[72px] gradient-btn3 rounded-[10px] p-[1px]"
+    } `}
             >
                 <button
-                    onClick={() => setAccordionOpen(!accordionOpen)}
+                    onClick={() => toggleAccordion("priceListSettings")}
                     className={`
-          ${accordionOpen
-                            ? "flex justify-between items-center h-full w-full bg-white rounded-[9px] px-[15px]"
-                            : "flex justify-between items-center h-full w-full bg-custom-grayFA rounded-[9px] px-[15px]"
-                        } `}
+          ${
+              isOpen
+                  ? "flex justify-between items-center h-full w-full bg-white rounded-[9px] px-[15px]"
+                  : "flex justify-between items-center h-full w-full bg-custom-grayFA rounded-[9px] px-[15px]"
+          } `}
                 >
                     <span
-                        className={` text-custom-solidgreen ${accordionOpen
-                            ? "text-[20px] montserrat-semibold"
-                            : "text-[18px] montserrat-regular"
-                            }`}
+                        className={` text-custom-solidgreen ${
+                            isOpen
+                                ? "text-[20px] montserrat-semibold"
+                                : "text-[18px] montserrat-regular"
+                        }`}
                     >
                         Price List Settings
                     </span>
                     <span
-                        className={`flex justify-center items-center h-[40px] w-[40px] rounded-full  transform transition-transform duration-300 ease-in-out ${accordionOpen
-                            ? "rotate-180 bg-[#F3F7F2] text-custom-solidgreen"
-                            : "rotate-0 gradient-btn2 text-white"
-                            }`}
+                        className={`flex justify-center items-center h-[40px] w-[40px] rounded-full  transform transition-transform duration-300 ease-in-out ${
+                            isOpen
+                                ? "rotate-180 bg-[#F3F7F2] text-custom-solidgreen"
+                                : "rotate-0 gradient-btn2 text-white"
+                        }`}
                     >
                         <IoIosArrowDown className=" text-[18px]" />
                     </span>
@@ -53,10 +54,11 @@ const PriceListSettings = ({ }) => {
             </div>
             <div
                 className={`mx-5 rounded-[10px] shadow-custom5 grid overflow-hidden transition-all duration-300 ease-in-out
-          ${accordionOpen
-                        ? "mt-2 mb-4 grid-rows-[1fr] opacity-100"
-                        : "grid-rows-[0fr] opacity-0"
-                    }
+          ${
+              isOpen
+                  ? "mt-2 mb-4 grid-rows-[1fr] opacity-100"
+                  : "grid-rows-[0fr] opacity-0"
+          }
           `}
             >
                 <div className="overflow-hidden bg-white">
@@ -70,9 +72,11 @@ const PriceListSettings = ({ }) => {
                                     name="base_price"
                                     type="number"
                                     onChange={handleInputChange}
-                                    value={pricingData?.priceListSettings?.base_price}
+                                    value={
+                                        pricingData?.priceListSettings
+                                            ?.base_price
+                                    }
                                     className="w-full px-4 focus:outline-none "
-
                                 />
                                 {/* TODO: add percent % suffix here */}
                             </div>
@@ -83,12 +87,12 @@ const PriceListSettings = ({ }) => {
                                 <input
                                     onChange={handleInputChange}
                                     value={
-                                        pricingData?.priceListSettings?.transfer_charge
+                                        pricingData?.priceListSettings
+                                            ?.transfer_charge
                                     }
                                     name="transfer_charge"
                                     type="number"
                                     className="w-full px-4 focus:outline-none"
-
                                 />
                             </div>
                         </div>
@@ -102,7 +106,8 @@ const PriceListSettings = ({ }) => {
                                     type="number"
                                     onChange={handleInputChange}
                                     value={
-                                        pricingData?.priceListSettings?.effective_balcony_base
+                                        pricingData?.priceListSettings
+                                            ?.effective_balcony_base
                                     }
                                     className="w-full px-4 focus:outline-none"
                                 />
@@ -133,7 +138,8 @@ const PriceListSettings = ({ }) => {
                                     type="number"
                                     onChange={handleInputChange}
                                     value={
-                                        pricingData?.priceListSettings?.vatable_less_price
+                                        pricingData?.priceListSettings
+                                            ?.vatable_less_price
                                     }
                                     className="w-full px-4 focus:outline-none"
                                 />
@@ -147,7 +153,8 @@ const PriceListSettings = ({ }) => {
                                     type="number"
                                     onChange={handleInputChange}
                                     value={
-                                        pricingData?.priceListSettings?.reservation_fee
+                                        pricingData?.priceListSettings
+                                            ?.reservation_fee
                                     }
                                     className="w-full px-4 focus:outline-none"
                                     placeholder=""

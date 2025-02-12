@@ -66,10 +66,8 @@ const FloorPremiumAddUnitModal = ({
                 excel_id: excelId,
                 property_masters_id: propertyData?.price_list_master_id,
             };
-            console.log("payload", payload);
             setIsLoading(true);
             const response = await unitService.storeUnitDetails(payload);
-            console.log("response", response);
             if (response?.status === 201) {
                 showToast(
                     response?.data?.message || "Data added successfully!",

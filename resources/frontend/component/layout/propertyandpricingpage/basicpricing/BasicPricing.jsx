@@ -23,6 +23,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 
 const BasicPricing = () => {
     //State
+
     const navigate = useNavigate();
     const { user } = useStateContext();
     const modalRef = useRef(null);
@@ -34,6 +35,7 @@ const BasicPricing = () => {
     const [fileName, setFileName] = useState("");
     const [fileSelected, setFileSelected] = useState({});
     const [selectedExcelHeader, setSelectedExcelHeader] = useState([]);
+    const [lastFetchedExcelId, setLastFetchedExcelId] = useState(null);
     const {
         pricingData,
         resetPricingData,
@@ -49,9 +51,23 @@ const BasicPricing = () => {
         setFloorPremiumsAccordionOpen,
         excelId,
         units,
+        floorPremiumsAccordionOpen,
     } = useUnit();
-
+    const [accordionStates, setAccordionStates] = useState({
+        priceListSettings: false,
+        floorPremium: false,
+        additionalPremiums: false,
+        priceVersions: false,
+        reviewAndApprovalSetting: false,
+    });
+ 
     //Hooks
+    /**
+     * Hook to update pricing data based on incoming 'data' prop.
+     * It sets propertyData, updates priceListSettings, priceVersions, floorPremiums, and additionalPremiums within the pricingData state.
+     * It handles data transformations, particularly for floorPremiums (reducing to an object keyed by floor) and additionalPremiums (converting premiumCost to a number).
+     * It also provides default values for priceVersions if none are available in the incoming data.  Uses moment.js for date formatting.
+     */
     useEffect(() => {
         console.log("PricingData in BasicPricing", pricingData);
 
@@ -151,66 +167,75 @@ const BasicPricing = () => {
                     additionalPremiums: updatedPremiums,
                 }));
             }
-
-            // if (
-            //     data?.additional_premiums &&
-            //     data?.additional_premiums.length === 0
-            // ) {
-            //     setPricingData((prev) => ({
-            //         ...prev,
-            //         additionalPremiums: additionalPremiums,
-            //     }));
-            // }
         }
     }, [data]);
 
-    // Separate useEffect for checkExistingUnits
+    /**
+     * Hook to handle fetching and clearing of floor and pricing data based on the excel_id.
+     * It clears existing data if excel_id is null and fetches new data if the excel_id is valid and different from the last fetched ID.
+     * It also handles setting the additionalPremiums if it's currently empty.
+     */
     useEffect(() => {
         if (!data?.excel_id) {
-            console.log("Excel ID is null, skipping fetch", data?.excel_id);
-            setFloors([]);
-            setPricingData((prev) => ({
-                ...prev,
-                floorPremiums: [],
-                additionalPremiums: [],
-            }));
+            console.log(
+                "Excel ID is null, clearing previous data",
+                data?.excel_id
+            );
+
+            if (
+                floors.length > 0 ||
+                Object.keys(pricingData.floorPremiums).length > 0
+            ) {
+                setFloors([]);
+                setPricingData((prev) => ({
+                    ...prev,
+                    floorPremiums: [],
+                    additionalPremiums: [],
+                }));
+            }
             return;
         }
 
         if (
             data?.excel_id &&
-            floors.length === 0 &&
-            Object.keys(pricingData.floorPremiums).length === 0
+            data?.excel_id !== lastFetchedExcelId && // ✅ Avoid re-fetching for same excelId
+            (floors.length === 0 ||
+                Object.keys(pricingData.floorPremiums).length === 0)
         ) {
-            console.log("Fetching floors because no existing data is found");
+            console.log(
+                "Fetching floors because no existing data is found for",
+                data?.excel_id
+            );
             checkExistingUnits(data.tower_phase_id, data.excel_id);
+            setLastFetchedExcelId(data?.excel_id); // ✅ Track last fetched ID
         }
-    }, [data?.excel_id, data?.tower_phase_id, floors.length]);
+        if (pricingData.additionalPremiums.length === 0) {
+            setPricingData((prev) => ({
+                ...prev,
+                additionalPremiums: additionalPremiums,
+            }));
+        }
+    }, [data?.excel_id, data?.tower_phase_id]);
 
-    // useEffect(() => {
-    //     if (units) {
-    //         console.log("units", units);
-    //         console.log("data", data);
+    // Hooks to reset all accordions when leaving the page
+    useEffect(() => {
+        return () => {
+            setAccordionStates({
+                priceListSettings: false,
+                additionalPremiums: false,
+            });
+        };
+    }, [location]);
 
-    //         const filteredUnits = units?.filter(
-    //             (unit) =>
-    //                 unit.tower_phase_id === data.tower_phase_id ||
-    //                 unit.excel_id === data.excel_id ||
-    //                 unit.price_list_master_id === data.price_list_master_id
-    //         );
-    //         console.log("filteredUnits", filteredUnits);
-    //         // setPricingData((prev) => ({
-    //         //     ...prev,
-    //         //     selectedAdditionalPremiums:
-    //         //         units?.map((item) => ({
-    //         //             unit: item.unit_name, // Ensure `unit_name` exists
-    //         //             unit_id: item.unit_id, // Ensure `unit_id` exists
-    //         //             additional_premium_id: item.additional_premium_id ?? [], // Ensure array format
-    //         //         })) ?? [],
-    //         // }));
-    //     }
-    // }, [units]);
     //Event handler
+    // Function to toggle a specific accordion
+    const toggleAccordion = (name) => {
+        setAccordionStates((prev) => ({
+            ...prev,
+            [name]: !prev[name],
+        }));
+    };
+
     // Open the add property modal
     const handleOpenAddPropertyModal = () => {
         if (modalRef.current) {
@@ -519,12 +544,28 @@ const BasicPricing = () => {
             {/* ------------------------- */}
 
             <div className="flex flex-col gap-1 w-full border-t-1 border-custom-lightestgreen py-4  ">
-                <PriceListSettings />
-                <FloorPremiums propertyData={propertyData} />
-                <AdditionalPremiums propertyData={propertyData} />
-                <PriceVersions priceListMasterData={data} action={action} />
-                {/* <PaymentSchemes action={action} priceListMasterData={data} /> */}
-                <ReviewsandApprovalRouting />
+                <PriceListSettings
+                    isOpen={accordionStates.priceListSettings}
+                    toggleAccordion={() => toggleAccordion("priceListSettings")}
+                />
+                <FloorPremiums
+                    isOpen={accordionStates.floorPremium}
+                    toggleAccordion={() => toggleAccordion("floorPremium")}
+                    propertyData={propertyData}
+                />
+                <AdditionalPremiums
+                    isOpen={accordionStates.additionalPremiums}
+                    toggleAccordion={() => toggleAccordion("additionalPremiums")}
+                    propertyData={propertyData} />
+                <PriceVersions
+                    isOpen={accordionStates.priceVersions}
+                    toggleAccordion={() => toggleAccordion("priceVersions")}
+                    priceListMasterData={data} action={action} />
+           
+                <ReviewsandApprovalRouting
+                    isOpen={accordionStates.reviewAndApprovalSetting}
+                    toggleAccordion={() => toggleAccordion("reviewAndApprovalSetting")}
+                />
             </div>
             {/* <div>
                 <AddPropertyModal modalRef={modalRef} />
