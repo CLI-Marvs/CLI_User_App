@@ -14,7 +14,7 @@ import DatePicker from "react-datepicker";
 import { MdCalendarToday } from "react-icons/md";
 
 
-const CustomerDetails = () => {
+const CustomerDetails = () => {         
     const transactModalRef = useRef(null);
     const { customerDetails, setCustomerDetails } = useStateContext();
     const [startDate, setStartDate] = useState(new Date());
