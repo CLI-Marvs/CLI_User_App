@@ -24,18 +24,16 @@ const FiltersProperty = () => {
         setStartDateHistory(date);
     };
 
-  
     const handleSubmit = () => {
         let newWords = "";
-    
+
         console.log("reverseWord", reverseWord.length);
-        for(let i = reverseWord.length - 1; i >= 0; i--)
-        {
+        for (let i = reverseWord.length - 1; i >= 0; i--) {
             console.log("trigger");
             console.log("reverseWord[i]", reverseWord[i]);
-            newWords+= reverseWord[i];
-        };
-      /*   console.log("newWord", newWords); */
+            newWords += reverseWord[i];
+        }
+        /*   console.log("newWord", newWords); */
         setNewWord(newWords);
     };
     return (
@@ -52,18 +50,17 @@ const FiltersProperty = () => {
                     <div className="flex items-center bg-[#3A3A3A] rounded-l-[8px] py-2 px-3">
                         <span className="text-white text-sm">Date</span>
                     </div>
-                    <div className="bg-white border-b-[1px] border-t-[1px] border-[#3A3A3A] h-full flex  items-center justify-center">
+                    <div className="relative bg-white border-b-[1px] border-t-[1px] border-[#3A3A3A] h-full flex  items-center justify-center ">
                         <DatePicker
                             selected={startDateHistory}
                             onChange={handleDateHistoryChange}
                             className="outline-none text-center text-xs 2xl:text-base w-full"
                             calendarClassName="custom-calendar"
                         />
+                        <span className="absolute right-0 text-white p-2 bg-black pointer-events-none rounded-r-[5px] 2xl:rounded-r-[8px] flex items-center">
+                            <MdCalendarToday />
+                        </span>
                     </div>
-
-                    <span className="text-white p-2 bg-black pointer-events-none rounded-r-[5px] 2xl:rounded-r-[8px] flex items-center">
-                        <MdCalendarToday />
-                    </span>
                 </div>
                 <div className="flex rounded-l-[8px] rounded-r-[8px] h-[35px]">
                     <div className="flex items-center bg-[#3A3A3A] rounded-l-[8px] py-2 px-3 w-1/2">
@@ -99,9 +96,7 @@ const FiltersProperty = () => {
 
                 <div className="flex rounded-l-[8px] rounded-r-[8px] h-[35px]">
                     <div className="flex items-center bg-[#3A3A3A] rounded-l-[8px] py-2 px-3 w-1/2">
-                        <span className="text-white text-sm">
-                            Inquiry Type
-                        </span>
+                        <span className="text-white text-sm">Inquiry Type</span>
                     </div>
 
                     <div className="bg-white border-b-[1px] border-t-[1px] border-[#3A3A3A] h-full flex items-center justify-center">
@@ -128,12 +123,11 @@ const FiltersProperty = () => {
                         />
                     </div>
                 </div>
-
-               
-               
-               
             </div>
-            <input type="text" onChange={(e) => setReverseWord(e.target.value)} />
+            <input
+                type="text"
+                onChange={(e) => setReverseWord(e.target.value)}
+            />
             <button onClick={handleSubmit}>submit</button>
             <span>{newWord}</span>
         </div>

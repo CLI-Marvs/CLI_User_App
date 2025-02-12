@@ -13,13 +13,9 @@ import FiltersProperty from "@/component/layout/transaction/FiltersProperty";
 import DatePicker from "react-datepicker";
 import { MdCalendarToday } from "react-icons/md";
 
-
-const CustomerDetails = () => {         
+const CustomerDetails = () => {
     const transactModalRef = useRef(null);
     const { customerDetails, setCustomerDetails } = useStateContext();
-    const [startDate, setStartDate] = useState(new Date());
-    const [startDateHistory, setStartDateHistory] = useState(new Date());
-
 
     const { id } = useParams();
     const decodedEmail = atob(id);
@@ -42,33 +38,12 @@ const CustomerDetails = () => {
         fetchCustomerDetails();
     }, []);
 
-    const handleDateHistoryChange = (date) => {
-        setStartDateHistory(date);
-    };
-
-    const handleDateChange = (date) => {
-        setStartDate(date);
-    };
-
     const handleTransactModalOpen = (data) => {
         setTicketId(data);
         if (transactModalRef.current) {
             transactModalRef.current.showModal();
         }
     };
-
-
-    const categories = [
-        "Reservation Documents",
-        "Payment Issues",
-        "SOA/ Buyer's Ledger",
-        "Turn Over Status",
-        "Unit Status",
-        "Loan Application",
-        "Title and Other Registration Documents",
-        "Commissions",
-        "Other Concerns",
-    ];
 
     const data1 = [
         {
@@ -115,8 +90,6 @@ const CustomerDetails = () => {
             value: "January 10, 2012",
         },
     ];
-
- 
 
     const years = Array.from({ length: 2025 - 2012 + 1 }, (_, i) => 2012 + i);
 
@@ -238,52 +211,6 @@ const CustomerDetails = () => {
                                 </span>
                                 <div className="flex-1 border-b-[1px] border-black ml-2"></div>
                             </div>
-
-                        {/*     <div className="flex justify-center mb-3">
-                                <div className="flex justify-between outline-none text-xs w-full">
-                                    <span className="text-white bg-black p-2 flex text-center items-center text-xs 2xl:text-base rounded-l-[5px] 2xl:rounded-l-[8px] h-full">
-                                        Year
-                                    </span>
-                                    <div className="bg-white flex border-b-[1px] border-t-[1px] border-[#3A3A3A] h-full items-center justify-center w-full">
-                                        <select className="appearance-none px-4 py-1 bg-white focus:outline-none border-0 h-full text-xs 2xl:text-base">
-                                            {years.map((item, index) => (
-                                                <option
-                                                    className="text-center"
-                                                    key={index}
-                                                    value={item}
-                                                >
-                                                    {" "}
-                                                    {item}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </div>
-
-                                    <span className="text-white p-2 2xl:p-5 h-full bg-black pointer-events-none rounded-r-[5px] 2xl:rounded-r-[8px]">
-                                        <MdCalendarToday />
-                                    </span>
-                                </div>
-                            </div> */}
-                             <div className="flex justify-center mb-3">
-                                    <div className="flex justify-between outline-none text-xs w-full">
-                                        <span className="text-white bg-black p-2 flex text-center items-center text-xs 2xl:text-base rounded-l-[5px] 2xl:rounded-l-[8px] h-full">
-                                            Year
-                                        </span>
-                                        <div className="bg-white border-b-[1px] border-t-[1px] border-[#3A3A3A] h-full w-full flex flex-1 items-center justify-center">
-                                            <DatePicker
-                                                selected={startDateHistory}
-                                                onChange={handleDateHistoryChange}
-                                                className="outline-none text-center text-xs 2xl:text-base w-full"
-                                                calendarClassName="custom-calendar"
-                                                sx={{ width: '100%' }} 
-                                            />
-                                        </div>
-
-                                        <span className="text-white p-2 2xl:p-5 h-full bg-black pointer-events-none rounded-r-[5px] 2xl:rounded-r-[8px]">
-                                            <MdCalendarToday />
-                                        </span>
-                                    </div>
-                                </div>
 
                             <div className="flex flex-col gap-2.5 mt-2.5">
                                 {[...Array(12)].map((_, index) => (
