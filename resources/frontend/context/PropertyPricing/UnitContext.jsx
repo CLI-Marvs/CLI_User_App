@@ -3,7 +3,6 @@ import React, {
     useContext,
     useState,
     useCallback,
-    useEffect,
 } from "react";
 import { unitService } from "@/component/servicesApi/apiCalls/propertyPricing/unit/unitService";
 
@@ -23,6 +22,14 @@ export const UnitProvider = ({ children }) => {
     const [isFetchingUnits, setIsFetchingUnits] = useState(false);
     const [isUploadingUnits, setIsUploadingUnits] = useState(false);
 
+    /**
+     * Fetches the count of floors for a given tower phase and excel ID.
+     * It calls the unitService.countFloor method to retrieve the data.
+     * The function sorts the retrieved floor data alphabetically by name.
+     * It updates the floors state with the fetched and sorted data.
+     * Handles loading and error states during the API call.
+     * Returns the floor data if successful.
+     */
     const fetchFloorCount = useCallback(async (towerPhaseId, excelId) => {
         if (towerPhaseId && excelId) {
             try {
@@ -50,43 +57,72 @@ export const UnitProvider = ({ children }) => {
         }
     }, []);
 
+    /**
+     * Checks for existing units based on tower phase and excel ID.
+     * It uses cached data if available and avoids redundant API calls.
+     * Handles cases where excelId is null or undefined by clearing relevant data.
+     * Prevents duplicate API calls using a flag (isCheckingUnits).
+     * Calls the unitService.getExistingUnits method to fetch unit data.
+     * Updates the units state with the retrieved data.
+     * Fetches floor count using fetchFloorCount if units data is available and contains an excel_id.
+     * Sets the current towerPhaseId.
+     * Handles loading and error states during the API call.
+     */
     const checkExistingUnits = useCallback(
         async (towerPhaseId, excelId, forceFetch = false) => {
+            // Prevent unnecessary API calls
             if (units.length > 0 && !forceFetch) {
-                return; // Prevent redundant API calls
-            }
-
-            if (excelId === null || excelId === undefined) {
-                console.log(
-                    "Skipping API call because excelId is null or undefined"
-                );
-                setFloors([]);
+                console.log("Using cached units data");
                 return;
             }
 
-            console.log("checkExistingUnits", towerPhaseId, excelId);
+            // Handle null/undefined excelId
+            if (!excelId) {
+                console.log("No excelId provided, clearing data");
+                setFloors([]);
+                setUnits([]);
+                return;
+            }
+
+            // Use a flag to prevent duplicate calls
+            if (isCheckingUnits) {
+                console.log("Already checking units, skipping duplicate call");
+                return;
+            }
+
             try {
                 setTowerPhaseId(towerPhaseId);
                 setIsCheckingUnits(true);
+
                 const response = await unitService.getExistingUnits(
                     towerPhaseId,
                     excelId
                 );
-                setUnits(response?.data?.data);
-                if (response?.data?.data[0]?.excel_id) {
-                    const excelId = response?.data?.data[0]?.excel_id;
 
-                    await fetchFloorCount(towerPhaseId, excelId);
+                const unitsData = response?.data?.data || [];
+                setUnits(unitsData);
+
+                // Only fetch floor count if we have valid units data
+                if (unitsData[0]?.excel_id) {
+                    await fetchFloorCount(towerPhaseId, unitsData[0].excel_id);
                 }
             } catch (err) {
                 setError(err);
+                console.error("Error in checkExistingUnits:", err);
             } finally {
                 setIsCheckingUnits(false);
             }
         },
-        [fetchFloorCount]
+        [fetchFloorCount, units.length, isCheckingUnits]
     );
 
+    /**
+     * Uploads unit data using the provided payload.
+     * Calls the unitService.storeUnit method to send the data.
+     * Sets the new excel ID if the upload is successful (status 201).
+     * Returns an object indicating success or failure, including the new excelId or error details.
+     * Handles loading and error states during the upload process.
+     */
     const uploadUnits = useCallback(
         async (payload) => {
             try {
@@ -107,6 +143,13 @@ export const UnitProvider = ({ children }) => {
         [fetchFloorCount]
     );
 
+    /**
+     * Fetches units within a specific tower phase, selected floor, and excel ID.
+     * Calls the unitService.getUnitsInTowerPhase method to retrieve the data.
+     * Updates the unitByFloors state with the fetched unit data.
+     * Returns the fetched unit data.
+     * Handles loading and error states during the API call.
+     */
     const fetchUnitsInTowerPhase = useCallback(
         async (towerPhaseId, selectedFloor, excelId) => {
             try {

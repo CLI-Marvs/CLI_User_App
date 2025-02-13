@@ -3,11 +3,10 @@ import ProjectDetails from "./ProjectDetails";
 import PriceListSettings from "./accordion/PriceListSettings";
 import AdditionalPremiums from "./accordion/AdditionalPremiums";
 import PriceVersions from "./accordion/PriceVersions";
-import PaymentSchemes from "./accordion/PaymentSchemes";
 import moment from "moment";
 import ReviewsandApprovalRouting from "./accordion/ReviewsandApprovalRouting";
 import FloorPremiums from "./accordion/FloorPremiums";
-import { Form, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import UploadUnitDetailsModal from "./modals/UploadUnitDetailsModal";
 import { useStateContext } from "../../../../context/contextprovider";
 import { priceListMasterService } from "@/component/servicesApi/apiCalls/propertyPricing/priceListMaster/priceListMasterService";
@@ -23,7 +22,6 @@ import CircularProgress from "@mui/material/CircularProgress";
 
 const BasicPricing = () => {
     //State
-
     const navigate = useNavigate();
     const { user } = useStateContext();
     const modalRef = useRef(null);
@@ -49,9 +47,6 @@ const BasicPricing = () => {
         floors,
         setFloors,
         setFloorPremiumsAccordionOpen,
-        excelId,
-        units,
-        floorPremiumsAccordionOpen,
     } = useUnit();
     const [accordionStates, setAccordionStates] = useState({
         priceListSettings: false,
@@ -197,7 +192,7 @@ const BasicPricing = () => {
 
         if (
             data?.excel_id &&
-            data?.excel_id !== lastFetchedExcelId && // ✅ Avoid re-fetching for same excelId
+            data?.excel_id !== lastFetchedExcelId &&
             (floors.length === 0 ||
                 Object.keys(pricingData.floorPremiums).length === 0)
         ) {
@@ -216,7 +211,7 @@ const BasicPricing = () => {
         }
     }, [data?.excel_id, data?.tower_phase_id]);
 
-    // Hooks to reset all accordions when leaving the page
+    // Hooks to reset all accordions when leaving the page 'BasicPricing'
     useEffect(() => {
         return () => {
             setAccordionStates({

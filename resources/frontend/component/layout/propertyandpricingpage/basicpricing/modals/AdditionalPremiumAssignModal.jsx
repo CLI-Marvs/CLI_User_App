@@ -27,9 +27,15 @@ const AdditionalPremiumAssignModal = ({ modalRef, propertyData }) => {
     }, [propertyData]);
 
     useEffect(() => {
-        if (localExcelId && localTowerPhaseId) {
-            checkExistingUnits(localTowerPhaseId, localExcelId);
-        }
+        // Combine conditions to avoid unnecessary checks
+        if (!localExcelId || !localTowerPhaseId) return;
+        console.log("localExcelId", localExcelId);
+        // Memoize the function call if checkExistingUnits is passed as a prop
+        const fetchData = async () => {
+            await checkExistingUnits(localTowerPhaseId, localExcelId);
+        };
+
+        fetchData();
     }, [localExcelId, localTowerPhaseId]);
 
     /**

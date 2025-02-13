@@ -177,6 +177,7 @@ const FloorPremiums = ({ propertyData, isOpen, toggleAccordion }) => {
         }));
 
         showToast(`Floor ${floor} added successfully`, "success");
+        setNewFloorPremiumData(newFloorState);
     };
 
     /*
@@ -202,7 +203,7 @@ const FloorPremiums = ({ propertyData, isOpen, toggleAccordion }) => {
             <div
                 className={`transition-all duration-2000 ease-in-out
       ${
-          isOpen
+          isOpen || floorPremiumsAccordionOpen
               ? "h-[74px] mx-5 bg-white shadow-custom5 rounded-[10px]"
               : "h-[72px] gradient-btn3 rounded-[10px] p-[1px]"
       } `}
@@ -211,14 +212,14 @@ const FloorPremiums = ({ propertyData, isOpen, toggleAccordion }) => {
                     onClick={() => toggleAccordion("floorPremiums")}
                     className={`
             ${
-                isOpen
+                isOpen || floorPremiumsAccordionOpen
                     ? "flex justify-between items-center h-full w-full bg-white rounded-[9px] px-[15px]"
                     : "flex justify-between items-center h-full w-full bg-custom-grayFA rounded-[9px] px-[15px]"
             } `}
                 >
                     <span
                         className={` text-custom-solidgreen ${
-                            isOpen
+                            isOpen || floorPremiumsAccordionOpen
                                 ? "text-[20px] montserrat-semibold"
                                 : "text-[18px] montserrat-regular"
                         }`}
@@ -227,7 +228,7 @@ const FloorPremiums = ({ propertyData, isOpen, toggleAccordion }) => {
                     </span>
                     <span
                         className={`flex justify-center items-center h-[40px] w-[40px] rounded-full  transform transition-transform duration-300 ease-in-out ${
-                            isOpen
+                            isOpen || floorPremiumsAccordionOpen
                                 ? "rotate-180 bg-[#F3F7F2] text-custom-solidgreen"
                                 : "rotate-0 gradient-btn2 text-white"
                         }`}
@@ -239,7 +240,7 @@ const FloorPremiums = ({ propertyData, isOpen, toggleAccordion }) => {
             <div
                 className={`mx-5 rounded-[10px] shadow-custom5 grid overflow-hidden transition-all duration-300 ease-in-out
             ${
-                isOpen
+                isOpen || floorPremiumsAccordionOpen
                     ? "mt-2 mb-4 grid-rows-[1fr] opacity-100"
                     : "grid-rows-[0fr] opacity-0"
             }
@@ -247,17 +248,7 @@ const FloorPremiums = ({ propertyData, isOpen, toggleAccordion }) => {
             >
                 <div className="bg-white overflow-hidden">
                     <div className="w-full p-5 h-[370px]">
-                        {!(excelId || localExcelId) ? (
-                            <div className="w-auto">
-                                <p className="montserrat-regular text-center text-red-500">
-                                    No units have been uploaded.
-                                    <span className="underline ml-2 text-blue-500">
-                                        {" "}
-                                        Upload{" "}
-                                    </span>
-                                </p>
-                            </div>
-                        ) : (
+                        {excelId || localExcelId ? (
                             <div className="flex justify-center w-full h-[31px] gap-3 mb-4">
                                 <div className="flex items-center border border-custom-grayF1 rounded-[5px] overflow-hidden w-[204px] text-sm  ">
                                     <span className="text-custom-gray81 bg-custom-grayFA  flex items-center w-[120%] font-semibold -mr-3 pl-3 py-1">
@@ -310,6 +301,16 @@ const FloorPremiums = ({ propertyData, isOpen, toggleAccordion }) => {
                                         </div>
                                     </button>
                                 </div>
+                            </div>
+                        ) : (
+                            <div className="w-auto">
+                                <p className="montserrat-regular text-center text-red-500">
+                                    No units have been uploaded.
+                                    <span className="underline ml-2 text-blue-500">
+                                        {" "}
+                                        Upload{" "}
+                                    </span>
+                                </p>
                             </div>
                         )}
 

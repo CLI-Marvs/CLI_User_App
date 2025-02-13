@@ -89,45 +89,6 @@ const AddPropertyModal = ({ propertyModalRef }) => {
         } finally {
             setIsLoading(false);
         }
-        // if (
-        //     formData.propertyName === "" ||
-        //     formData.towerPhase === "" ||
-        //     formData.type === ""
-        // ) {
-
-        //     alert("Please fill all the fields");
-        //     return;
-        // }
-        // try {
-        //     setLoading(true);
-
-        //     form.append("propertyName", formData.propertyName);
-        //     form.append("towerPhase", formData.towerPhase);
-        //     form.append("type", formData.type);
-        //     form.append("status", status);
-
-        //     const response = await apiService.post("property-details", form, {
-        //         headers: {
-        //             "Content-Type": "application/json",
-        //         },
-        //     });
-        //     const propertyId = response?.data?.propertyData?.propertyMaster?.id;
-        //     const passData = response?.data;
-        //     alert(response.data.message);
-
-        //     if (propertyModalRef.current) {
-        //         propertyModalRef.current.close();
-        //     }
-        //     setFormData(formDataState);
-        //     setFloorPremiumsAccordionOpen(false);
-        //     navigate(`/propertyandpricing/basicpricing/${propertyId}`, {
-        //         state: { passPropertyDetails: passData },
-        //     });
-        // } catch (error) {
-        //     console.log("Error sending property details", error);
-        // } finally {
-        //     setLoading(false);
-        // }
     };
 
     //Handle close the modal and reset all state

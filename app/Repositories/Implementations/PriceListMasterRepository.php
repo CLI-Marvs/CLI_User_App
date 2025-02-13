@@ -2,6 +2,7 @@
 
 namespace App\Repositories\Implementations;
 
+use Exception;
 use App\Models\FloorPremium;
 use App\Models\PriceVersion;
 use App\Models\PaymentScheme;
@@ -90,10 +91,20 @@ class PriceListMasterRepository
             if (!empty($data['floorPremiumsPayload']) && is_array($data['floorPremiumsPayload'])) {
 
                 foreach ($data['floorPremiumsPayload'] as $floorPremium) {
-                    // $floorPremiumId = $floorPremium['id'] ?? null;
+                    $premiumCost = $floorPremium['premium_cost'] ?? null;
+                    // Validate if premium_cost is a valid number with max two decimal places
+                    if (
+                        !is_numeric($premiumCost) || preg_match('/^\d+(\.\d{1,2})?$/', $premiumCost) !== 1
+                    ) {
+                        throw new Exception("Invalid premium cost format. It should be a numeric value with up to 2 decimal places.");
+                    }
+                    $premiumCost = number_format((float) $premiumCost, 2, '.', '');
+                    if ($premiumCost > 99999999.99) {
+                        throw new Exception("Premium cost exceeds the maximum allowed value of 99,999,999.99.");
+                    }
                     $newFloorPremium = $priceListMaster->floorPremiums()->create([
                         'floor' => $floorPremium['floor'],
-                        'premium_cost' => $floorPremium['premium_cost'],
+                        'premium_cost' => $premiumCost,
                         'lucky_number' => $floorPremium['lucky_number'],
                         'excluded_unit' => json_encode($floorPremium['excluded_units']),
                         'tower_phase_id' => $data['tower_phase_id'],
@@ -108,10 +119,20 @@ class PriceListMasterRepository
 
                 foreach ($data['additionalPremiumsPayload'] as $additionalPremium) {
                     // $floorPremiumId = $floorPremium['id'] ?? null;
-                    $premiumCost = isset($additionalPremium['premium_cost'])
-                        ? (float) number_format($additionalPremium['premium_cost'], 2, '.', '')
-                        : 0.00; //Decimal 2 places
-
+                    // $premiumCost = isset($additionalPremium['premium_cost'])
+                    //     ? (float) number_format($additionalPremium['premium_cost'], 2, '.', '')
+                    //     : 0.00; //Decimal 2 places
+                    $premiumCost = $additionalPremium['premium_cost'] ?? null;
+                    // Validate if premium_cost is a valid number with max two decimal places
+                    if (
+                        !is_numeric($premiumCost) || preg_match('/^\d+(\.\d{1,2})?$/', $premiumCost) !== 1
+                    ) {
+                        throw new Exception("Invalid premium cost format. It should be a numeric value with up to 2 decimal places.");
+                    }
+                    $premiumCost = number_format((float) $premiumCost, 2, '.', '');
+                    if ($premiumCost > 99999999.99) {
+                        throw new Exception("Premium cost exceeds the maximum allowed value of 99,999,999.99.");
+                    }
                     $newFloorPremium = $priceListMaster->additionalPremiums()->create([
                         'additional_premium' => $additionalPremium['view_name'],
                         'premium_cost' => $premiumCost,
@@ -269,12 +290,4 @@ class PriceListMasterRepository
             ];
         });
     }
-
-
-
-
- 
-
-
-  
 }

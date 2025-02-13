@@ -90,6 +90,7 @@ const UploadUnitDetailsModal = ({
             const response = await uploadUnits(payload);
             if (response?.success === true) {
                 setFloors([]);
+                console.log("it runs here 93")
                 const floors = await fetchFloorCount(
                     towerPhaseId,
                     response?.excelId
