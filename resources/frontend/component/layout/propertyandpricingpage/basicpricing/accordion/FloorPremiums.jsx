@@ -26,7 +26,7 @@ const FloorPremiums = ({ propertyData, isOpen, toggleAccordion }) => {
         excelId,
         floorPremiumsAccordionOpen,
     } = useUnit();
-
+    
     const [selectedFloor, setSelectedFloor] = useState(null);
     const { pricingData, setPricingData } = usePricing();
     const [towerPhaseId, setTowerPhaseId] = useState(null);

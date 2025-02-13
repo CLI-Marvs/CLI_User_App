@@ -10,12 +10,13 @@ use App\Traits\HasExpiryDate;
 use App\Models\PriceListMaster;
 use App\Models\AdditionalPremium;
 use Illuminate\Support\Facades\DB;
+use App\Traits\HandlesMonetaryValues;
 use App\Repositories\Implementations\PriceListMasterRepository;
 
 
 class PriceListMasterService
 {
-    use HasExpiryDate;
+    use HasExpiryDate, HandlesMonetaryValues;
     protected $repository;
     protected $model;
     protected $priceVersionModel;
@@ -180,7 +181,7 @@ class PriceListMasterService
                         if (
                             $existingFloorPremium
                         ) {
-                            $premiumCost = isset($floorPremium['premium_cost']) ? (float) number_format($floorPremium['premium_cost'], 2, '.', '') : 0.00;
+                            $premiumCost = $this->validatePremiumCost($floorPremium['premium_cost']);
 
                             $existingFloorPremium->update([
                                 'floor' => $floorPremium['floor'],
@@ -225,9 +226,8 @@ class PriceListMasterService
             if (!empty($data['additionalPremiumsPayload']) && is_array($data['additionalPremiumsPayload'])) {
                 foreach ($data['additionalPremiumsPayload'] as $additionalPremium) {
                     $additionalPremiumId = $additionalPremium['id'] ?? null;
-                    $premiumCost = isset($additionalPremium['premium_cost'])
-                        ? (float) number_format($additionalPremium['premium_cost'], 2, '.', '')
-                        : 0.00; // Ensure decimal format
+                    $premiumCost = $this->validatePremiumCost($floorPremium['premium_cost']);
+
 
                     if ($additionalPremiumId && in_array($additionalPremiumId, $additionalPremiumIds)) {
                         // UPDATE existing additional premium
