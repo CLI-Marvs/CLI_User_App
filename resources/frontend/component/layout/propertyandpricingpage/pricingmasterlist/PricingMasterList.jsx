@@ -12,12 +12,14 @@ import { usePriceListMaster } from "@/context/PropertyPricing/PriceListMasterCon
 import TableSkeleton from "@/component/layout/propertyandpricingpage/component/TableSkeleton";
 import { usePaymentScheme } from "@/context/PropertyPricing/PaymentSchemeContext";
 import { toLowerCaseText } from "@/component/layout/propertyandpricingpage/utils/formatToLowerCase";
+import { useProperty } from "@/context/PropertyPricing/PropertyContext";
 
 const PricingMasterList = () => {
     //States
     const { priceListMaster, isLoading, fetchPropertyListMasters } =
         usePriceListMaster();
     const { fetchPaymentSchemes } = usePaymentScheme();
+    const { propertyNamesList, fetchPropertyNamesWithIds } = useProperty();
     const [startDate, setStartDate] = useState(new Date());
     const [toggled, setToggled] = useState(false);
     const [isFilterVisible, setIsFilterVisible] = useState(false);
@@ -35,7 +37,7 @@ const PricingMasterList = () => {
             fetchPropertyListMasters(true);
         }
     }, [fetchPropertyListMasters, priceListMaster]);
-
+ 
     //Event handler
     /**
      * Handle to navigate to basic pricing component, only if the Status !== On-going Approval

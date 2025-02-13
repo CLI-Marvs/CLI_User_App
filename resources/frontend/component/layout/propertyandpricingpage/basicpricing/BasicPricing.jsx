@@ -47,6 +47,7 @@ const BasicPricing = () => {
         floors,
         setFloors,
         setFloorPremiumsAccordionOpen,
+        setExcelFromPriceList,
     } = useUnit();
     const [accordionStates, setAccordionStates] = useState({
         priceListSettings: false,
@@ -55,7 +56,7 @@ const BasicPricing = () => {
         priceVersions: false,
         reviewAndApprovalSetting: false,
     });
-    console.log("PricingData in BasicPricing", pricingData);
+ 
 
     //Hooks
     /**
@@ -67,6 +68,7 @@ const BasicPricing = () => {
     useEffect(() => {
         if (data) {
             setPropertyData(data);
+            setExcelFromPriceList(data?.excel_id);
             // Update the priceListSettings
             if (data?.pricebasic_details) {
                 setPricingData((prev) => ({

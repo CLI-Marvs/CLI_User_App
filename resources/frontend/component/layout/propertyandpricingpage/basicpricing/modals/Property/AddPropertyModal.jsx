@@ -7,7 +7,8 @@ import { useStateContext } from "@/context/contextprovider";
 import { showToast } from "@/util/toastUtil";
 import { propertyMasterService } from "@/component/servicesApi/apiCalls/propertyPricing/property/propertyMasterService";
 import { usePriceListMaster } from "@/context/PropertyPricing/PriceListMasterContext";
-import { usePropertyNamesWithIds } from "@/component/layout/propertyandpricingpage/hooks/usePropertyNamesWithIds";
+import { useProperty } from "@/context/PropertyPricing/PropertyContext";
+
 
 const formDataState = {
     propertyName: "",
@@ -27,14 +28,10 @@ const AddPropertyModal = ({ propertyModalRef }) => {
     const [formData, setFormData] = useState(formDataState);
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
-    const { propertyNamesList, fetchPropertyNamesWithIds } =
-        usePropertyNamesWithIds();
+    const { propertyNamesList } =
+        useProperty();
     const { fetchPropertyListMasters } = usePriceListMaster();
-
-    //Hooks
-    useEffect(() => {
-        fetchPropertyNamesWithIds();
-    }, []);
+ 
 
     //Event Handler
     const handleInputChange = (e) => {

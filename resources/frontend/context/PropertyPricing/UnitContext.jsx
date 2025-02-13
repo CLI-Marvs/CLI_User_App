@@ -10,6 +10,7 @@ const UnitContext = createContext();
 
 export const UnitProvider = ({ children }) => {
     const [excelId, setExcelId] = useState(null);
+    const [excelFromPriceList, setExcelFromPriceList] = useState(null);
     const [floors, setFloors] = useState([]);
     const [error, setError] = useState(null);
     const [towerPhaseId, setTowerPhaseId] = useState();
@@ -41,11 +42,7 @@ export const UnitProvider = ({ children }) => {
                 console.log("response fetchFloorCount", response);
 
                 if (response?.data?.data) {
-                    const sortedProperties = Object.entries(response.data.data)
-                        .map(([id, name]) => ({ id, name }))
-                        .sort((a, b) => a.name.localeCompare(b.name));
-
-                    setFloors(response.data.data); // Update floors state
+                    setFloors(response.data.data);  
                     return response.data.data;
                 }
             } catch (err) {
@@ -189,6 +186,8 @@ export const UnitProvider = ({ children }) => {
         isFetchingUnits,
         isFloorCountLoading,
         units,
+        excelFromPriceList,
+        setExcelFromPriceList,
     };
     return (
         <UnitContext.Provider value={value}>{children}</UnitContext.Provider>

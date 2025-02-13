@@ -90,15 +90,6 @@ class PropertyMasterController extends Controller
 
 
     /**
-     * Get all property names
-     */
-    public function getPropertyNames()
-    {
-        $propertyNames = $this->service->getPropertyNames();
-        return response()->json($propertyNames);
-    }
-
-    /**
      * Get all property names with ID
      */
     public function getPropertyNamesWithIds()

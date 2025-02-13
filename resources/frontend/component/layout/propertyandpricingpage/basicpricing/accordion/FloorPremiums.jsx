@@ -22,8 +22,8 @@ const FloorPremiums = ({ propertyData, isOpen, toggleAccordion }) => {
     const {
         floors,
         isFloorCountLoading,
-        setFloorPremiumsAccordionOpen,
         excelId,
+        excelFromPriceList,
         floorPremiumsAccordionOpen,
     } = useUnit();
     
@@ -31,6 +31,7 @@ const FloorPremiums = ({ propertyData, isOpen, toggleAccordion }) => {
     const { pricingData, setPricingData } = usePricing();
     const [towerPhaseId, setTowerPhaseId] = useState(null);
     const [localExcelId, setLocalExcelId] = useState(null);
+ 
 
     //Hooks
     /*
@@ -248,7 +249,7 @@ const FloorPremiums = ({ propertyData, isOpen, toggleAccordion }) => {
             >
                 <div className="bg-white overflow-hidden">
                     <div className="w-full p-5 h-[370px]">
-                        {excelId || localExcelId ? (
+                        {excelId || localExcelId || excelFromPriceList ? (
                             <div className="flex justify-center w-full h-[31px] gap-3 mb-4">
                                 <div className="flex items-center border border-custom-grayF1 rounded-[5px] overflow-hidden w-[204px] text-sm  ">
                                     <span className="text-custom-gray81 bg-custom-grayFA  flex items-center w-[120%] font-semibold -mr-3 pl-3 py-1">

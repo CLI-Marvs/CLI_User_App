@@ -68,7 +68,7 @@ class PropertyMasterRepository
                             ->latest('id')
                             ->limit(1);
                     },
-                    
+
                 ])
                 ->select('id', 'property_name')
                 ->find($propertyMaster->id);
@@ -86,23 +86,6 @@ class PropertyMasterRepository
                 'message' => 'Failed to add property: ' . $e->getMessage(),
             ];
         }
-    }
-
-
-    /**
-     * Get specific master data
-     */
-    public function getPropertyMaster($id)
-    {
-        return $this->model->find($id);
-    }
-
-    /**
-     * Get all property names
-     */
-    public function getPropertyNames()
-    {
-        return $this->model->pluck('property_name')->toArray();
     }
 
     /**

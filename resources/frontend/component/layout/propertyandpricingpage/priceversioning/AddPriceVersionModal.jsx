@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { FaRegCalendar } from "react-icons/fa";
 import { IoMdArrowDropdown } from "react-icons/io";
 import { MdFormatListBulletedAdd } from "react-icons/md";
-import { usePropertyNamesWithIds } from "@/component/layout/propertyandpricingpage/hooks/usePropertyNamesWithIds";
+import { useProperty } from "@/context/PropertyPricing/PropertyContext";
 import moment from "moment";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -20,8 +20,8 @@ const formDataState = {
 
 const AddPriceVersionModal = ({ modalRef }) => {
     //States
-    const { fetchPropertyNamesWithIds, propertyNamesList } =
-        usePropertyNamesWithIds();
+    const {  propertyNamesList } =
+        useProperty();
     const [formData, setFormData] = useState([formDataState]);
     const [isLoading, setIsLoading] = useState(false);
     const dateRef = useRef(null);
@@ -29,12 +29,7 @@ const AddPriceVersionModal = ({ modalRef }) => {
     const [selectedProperty, setSelectedProperty] = useState("");
     const [selectedTowerPhase, setSelectedTowerPhase] = useState("");
     const { getPriceVersions } = usePriceVersion();
-    // console.log("usePriceVersion", usePriceVersion);
-    //Hooks 
-    useEffect(() => {
-        fetchPropertyNamesWithIds();
-    }, []);
-
+ 
     //Event Handler
     //Handle change in the input field for price versio
     const handlePriceVersionInputChange = (event, index) => {
