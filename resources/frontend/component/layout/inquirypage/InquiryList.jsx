@@ -13,6 +13,9 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import { useSearchParams, useLocation } from "react-router-dom";
 import Spinner from "../../../util/Spinner";
+import Skeletons from "../mainComponent/Skeletons";
+import { CircularProgress } from '@mui/material'
+
 const InquiryList = () => {
     const location = useLocation();
 
@@ -128,7 +131,8 @@ const InquiryList = () => {
             setDaysFilter(null);
             setActiveDayButton(null);
         } else if (statusFilter) {
-            setStatusFilter("All");
+            setSelectedOption("All");
+            setStatusFilter(null);
         } else if (searchFilter) {
             setSearchFilter({});
         } else if (specificAssigneeCsr) {
@@ -1112,9 +1116,9 @@ const InquiryList = () => {
                                     )
                                 ) : (
                                     <p>
-                                        {selectedOption} 
+                                        {selectedOption}
                                         {" "}
-                                        ({dataCount})
+                                        ({dataCount == 0 ?  <CircularProgress size={14} /> : dataCount})
                                     
                                     </p>
                                 )}
@@ -1123,14 +1127,14 @@ const InquiryList = () => {
                             {/* Dropdown Menu */}
                             {isOpen && (
                                 <div className="absolute top-full mt-2 w-48 bg-white border border-gray-200 shadow-lg rounded-md">
-                                    <ul className="py-2">
+                                    <ul className="py-2 ">
                                         <li
-                                            className={`px-4 py-2`}
+                                            className={`px-4 py-2 hover:bg-gray-100 cursor-pointer`}
                                             onClick={() =>
                                                 handleOptionClick("All")
                                             }
                                         >
-                                            All ({countAllConcerns?.counts?.all ?? ""})
+                                            All ({countAllConcerns?.counts?.all ?? <CircularProgress size={14} />})
                                         </li>
                                         <li
                                             className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
@@ -1138,7 +1142,7 @@ const InquiryList = () => {
                                                 handleOptionClick("Resolved")
                                             }
                                         >
-                                            Resolved ({countAllConcerns?.counts?.resolved ?? ""})
+                                            Resolved ({countAllConcerns?.counts?.resolved ?? <CircularProgress size={14} />})
                                         </li>
                                         <li
                                             className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
@@ -1146,7 +1150,7 @@ const InquiryList = () => {
                                                 handleOptionClick("Closed")
                                             }
                                         >
-                                            Closed ({countAllConcerns?.counts?.closed ?? ""})
+                                            Closed ({countAllConcerns?.counts?.closed ?? <CircularProgress size={14} />})
                                         </li>
                                         <li
                                             className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
@@ -1154,7 +1158,7 @@ const InquiryList = () => {
                                                 handleOptionClick("Unresolved")
                                             }
                                         >
-                                            Unresolved ({countAllConcerns?.counts?.unresolved ?? ""})
+                                            Unresolved ({countAllConcerns?.counts?.unresolved ?? <CircularProgress size={14} />})
                                         </li>
                                     </ul>
                                 </div>
