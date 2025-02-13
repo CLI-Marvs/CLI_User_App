@@ -2609,6 +2609,7 @@ class ConcernController extends Controller
                         'lastname' => $buyer['buyer_name'],
                         'messageId' => $buyer['message_id'],
                         'buyer_email' => $buyer['buyer_email'],
+                        'email_subject' => $buyer['email_subject'],
                     ];
 
                     \Log::info([
@@ -2655,6 +2656,7 @@ class ConcernController extends Controller
                         'lastname' => $buyer['buyer_name'],
                         'messageId' => $buyer['message_id'],
                         'buyer_email' => $buyer['buyer_email'],
+                        'email_subject' => $buyer['email_subject'],
 
                     ];
 
