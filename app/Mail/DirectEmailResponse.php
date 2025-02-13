@@ -46,16 +46,27 @@ class DirectEmailResponse extends Mailable
 
     public function headers(): Headers
     {
-
-        return new Headers(
-            messageId: $this->messageId,
-            references: [$this->messageId],
-            text: [
-                'In-Reply-To' => $this->messageId,
-                'X-Custom-Header' => 'Custom Value',
-            ]
-        );
+        if (str_contains($this->messageId, '@icloud.com') || str_contains($this->messageId, '@yahoo.com')) {
+            return new Headers(
+                messageId: "<" . $this->messageId . ">",
+                references: ["<" . $this->messageId . ">"],
+                text: [
+                    'In-Reply-To' => "<" . $this->messageId . ">",
+                    'X-Custom-Header' => 'Custom Value',
+                ]
+            );
+        } else {
+            return new Headers(
+                messageId: $this->messageId,
+                references: [$this->messageId],
+                text: [
+                    'In-Reply-To' => $this->messageId,
+                    'X-Custom-Header' => 'Custom Value',
+                ]
+            );
+        }
     }
+    
     /**
      * Get the message content definition.
      */
