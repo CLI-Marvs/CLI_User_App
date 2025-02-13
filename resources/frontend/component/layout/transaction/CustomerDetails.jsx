@@ -97,7 +97,7 @@ const CustomerDetails = () => {
         <>
             <div className="w-auto h-auto p-[20px]">
                 <div className="flex mb-[21px] gap-[2px] items-center">
-                    <Link to="/transaction/customer">
+                    <Link to="/sales/customer">
                         <img
                             src={Backbtn}
                             alt="back button"

@@ -3,7 +3,6 @@ import SearchTransactions from "@/component/layout/transaction/SearchBar";
 import { useNavigate } from "react-router-dom";
 import { useStateContext } from "@/context/contextprovider";
 import { data } from "@/component/servicesApi/apiCalls/transactions/customer";
-import { set } from "lodash";
 import ReactPaginate from "react-paginate";
 import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md";
 
@@ -21,7 +20,7 @@ const CustomerMasterlist = () => {
     const navigateToDetails = (e, item) => {
         e.preventDefault();
         const emailAsNumber = btoa(item.buyer_email);
-        navigate(`/transaction/details/${emailAsNumber}`);
+        navigate(`/sales/details/${emailAsNumber}`);
     };
 
     const handlePageClick = (data) => {

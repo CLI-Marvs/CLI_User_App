@@ -193,15 +193,7 @@ const App = () => {
                                 {
                                     path: "records",
                                     element: <BankStatementView />,
-                                },
-                                {
-                                    path: "customer",
-                                    element: <CustomerMasterListView />,
-                                },
-                                {
-                                    path: "details/:id",
-                                    element: <CustomerDetailsView />,
-                                },
+                                },      
                             ],
                         },
                         {
@@ -273,7 +265,7 @@ const App = () => {
                                 },
                             ],
                         },
-                        {
+                       /*  {
                             path: "salesmanagement",
                             element: <SalesManagementLayout />,
                             children: [
@@ -284,6 +276,20 @@ const App = () => {
                                 {
                                     path: "reservationpage",
                                     element: <ReservationPageView />,
+                                },
+                            ],
+                        }, */
+
+                        {
+                            path: "sales",
+                            children: [
+                                {
+                                    path: "customer",
+                                    element: <CustomerMasterListView />,
+                                },
+                                {
+                                    path: "details/:id",    
+                                    element: <CustomerDetailsView />,
                                 },
                             ],
                         },

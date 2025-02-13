@@ -17,25 +17,12 @@ const categories = [
 
 const FiltersProperty = () => {
     const [startDateHistory, setStartDateHistory] = useState(new Date());
-    const [reverseWord, setReverseWord] = useState("");
-    const [newWord, setNewWord] = useState("");
 
     const handleDateHistoryChange = (date) => {
         setStartDateHistory(date);
     };
 
-    const handleSubmit = () => {
-        let newWords = "";
 
-        console.log("reverseWord", reverseWord.length);
-        for (let i = reverseWord.length - 1; i >= 0; i--) {
-            console.log("trigger");
-            console.log("reverseWord[i]", reverseWord[i]);
-            newWords += reverseWord[i];
-        }
-        /*   console.log("newWord", newWords); */
-        setNewWord(newWords);
-    };
     return (
         <div className="bg-white py-4 px-5 mt-[27px] space-y-2 rounded-[10px]">
             <div className="flex items-center">
@@ -124,12 +111,6 @@ const FiltersProperty = () => {
                     </div>
                 </div>
             </div>
-            <input
-                type="text"
-                onChange={(e) => setReverseWord(e.target.value)}
-            />
-            <button onClick={handleSubmit}>submit</button>
-            <span>{newWord}</span>
         </div>
     );
 };
