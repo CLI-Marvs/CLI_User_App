@@ -23,27 +23,35 @@ export const formatPayload = {
                 percent_increase: parseInt(priceVersion.percent_increase) || 0,
                 no_of_allowed_buyers:
                     parseInt(priceVersion.no_of_allowed_buyers) || 0,
-                expiry_date: priceVersion.expiry_date,
+                expiry_date:
+                    priceVersion.expiry_date === "N/A" ||
+                    !priceVersion.expiry_date
+                        ? null
+                        : priceVersion.expiry_date,
+
                 payment_scheme: priceVersion.payment_scheme,
             };
             return formattedPriceVersion;
         });
-
+        console.log("formattedPriceVersions", formattedPriceVersions);
         return formattedPriceVersions;
     },
 
-             
-    formatSelectedAdditionalPremiumsPayload:(selectedAdditionalPremiums = []) => {
-        const formattedSelectedAdditionalPremiums = selectedAdditionalPremiums.map(
-            (premium) => {
+    formatSelectedAdditionalPremiumsPayload: (
+        selectedAdditionalPremiums = []
+    ) => {
+        const formattedSelectedAdditionalPremiums =
+            selectedAdditionalPremiums.map((premium) => {
                 const formattedPremium = {
                     unit_id: premium.unit_id,
                     additional_premium_id: premium.additional_premium_id,
                 };
                 return formattedPremium;
-            }
+            });
+        console.log(
+            "formattedSelectedAdditionalPremiums",
+            formattedSelectedAdditionalPremiums
         );
-        console.log("formattedSelectedAdditionalPremiums", formattedSelectedAdditionalPremiums);
         return formattedSelectedAdditionalPremiums;
     },
     formatMultipleFloorPremiums: (floorPremiums = {}) => {
@@ -70,7 +78,7 @@ export const formatPayload = {
         );
         return formattedFloorPremiums;
     },
-    
+
     formatAdditionalPremiumsPayload: (additionalPremiums) => {
         const formattedAdditionalPremiums = additionalPremiums.map(
             (premium) => {

@@ -6,14 +6,17 @@ use Exception;
 use App\Models\FloorPremium;
 use App\Models\PriceVersion;
 use App\Models\PaymentScheme;
+use App\Traits\HasExpiryDate;
 use App\Models\PriceListMaster;
 use App\Models\PriceBasicDetail;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Traits\HandlesMonetaryValues;
 
 
 class PriceListMasterRepository
 {
+    use HasExpiryDate, HandlesMonetaryValues;
     protected $model;
     protected $priceVersionModel;
     protected $floorPremiumModel;
@@ -66,14 +69,12 @@ class PriceListMasterRepository
 
                     if (!empty($priceVersionData['name']) || $priceVersionData['percent_increase'] > 0 || $priceVersionData['no_of_allowed_buyers'] > 0) {
 
-                        $expiryDate = \DateTime::createFromFormat('m-d-Y H:i:s', $priceVersionData['expiry_date']);
-
                         // Create a Price version
                         $priceVersion = $priceListMaster->priceVersions()->create([
                             'version_name' => $priceVersionData['name'],
                             'percent_increase' => $priceVersionData['percent_increase'],
                             'allowed_buyer' => $priceVersionData['no_of_allowed_buyers'],
-                            'expiry_date' => $expiryDate->format('Y-m-d H:i:s'),
+                            'expiry_date' => $this->formatExpiryDate($priceVersionData['expiry_date']),
                             'status' => $priceVersionData['status'],
                             'payment_scheme_id' => json_encode(array_column($priceVersionData['payment_scheme'], 'id')),
                             'tower_phase_name' => $data['tower_phase_id'],
@@ -91,17 +92,8 @@ class PriceListMasterRepository
             if (!empty($data['floorPremiumsPayload']) && is_array($data['floorPremiumsPayload'])) {
 
                 foreach ($data['floorPremiumsPayload'] as $floorPremium) {
-                    $premiumCost = $floorPremium['premium_cost'] ?? null;
-                    // Validate if premium_cost is a valid number with max two decimal places
-                    if (
-                        !is_numeric($premiumCost) || preg_match('/^\d+(\.\d{1,2})?$/', $premiumCost) !== 1
-                    ) {
-                        throw new Exception("Invalid premium cost format. It should be a numeric value with up to 2 decimal places.");
-                    }
-                    $premiumCost = number_format((float) $premiumCost, 2, '.', '');
-                    if ($premiumCost > 99999999.99) {
-                        throw new Exception("Premium cost exceeds the maximum allowed value of 99,999,999.99.");
-                    }
+                    $premiumCost = $this->validatePremiumCost($floorPremium['premium_cost']);
+
                     $newFloorPremium = $priceListMaster->floorPremiums()->create([
                         'floor' => $floorPremium['floor'],
                         'premium_cost' => $premiumCost,
@@ -118,21 +110,8 @@ class PriceListMasterRepository
             if (!empty($data['additionalPremiumsPayload']) && is_array($data['additionalPremiumsPayload'])) {
 
                 foreach ($data['additionalPremiumsPayload'] as $additionalPremium) {
-                    // $floorPremiumId = $floorPremium['id'] ?? null;
-                    // $premiumCost = isset($additionalPremium['premium_cost'])
-                    //     ? (float) number_format($additionalPremium['premium_cost'], 2, '.', '')
-                    //     : 0.00; //Decimal 2 places
-                    $premiumCost = $additionalPremium['premium_cost'] ?? null;
-                    // Validate if premium_cost is a valid number with max two decimal places
-                    if (
-                        !is_numeric($premiumCost) || preg_match('/^\d+(\.\d{1,2})?$/', $premiumCost) !== 1
-                    ) {
-                        throw new Exception("Invalid premium cost format. It should be a numeric value with up to 2 decimal places.");
-                    }
-                    $premiumCost = number_format((float) $premiumCost, 2, '.', '');
-                    if ($premiumCost > 99999999.99) {
-                        throw new Exception("Premium cost exceeds the maximum allowed value of 99,999,999.99.");
-                    }
+                    $premiumCost = $this->validatePremiumCost($additionalPremium['premium_cost']);
+
                     $newFloorPremium = $priceListMaster->additionalPremiums()->create([
                         'additional_premium' => $additionalPremium['view_name'],
                         'premium_cost' => $premiumCost,

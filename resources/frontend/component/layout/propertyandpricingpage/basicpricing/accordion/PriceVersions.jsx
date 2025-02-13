@@ -26,7 +26,7 @@ const PriceVersions = ({
     const [versionIndex, setVersionIndex] = useState(0);
     const [selectedPaymentSchemes, setSelectedPaymentSchemes] = useState([]);
     const [isDatePickerVisible, setIsDatePickerVisible] = useState(false);
-    const [startDate, setStartDate] = useState(null);
+    const [expiryDate, setExpiryDate] = useState(null);
 
     //Event handler
     //Handle change in the input field for price version
@@ -89,9 +89,7 @@ const PriceVersions = ({
                 percent_increase: 0,
                 status: "Active",
                 no_of_allowed_buyers: 0,
-                expiry_date: moment().isValid()
-                    ? moment(new Date()).format("MM-DD-YYYY HH:mm:ss")
-                    : "",
+                expiry_date: "N/A",
                 payment_scheme: [],
             });
 
@@ -156,27 +154,24 @@ const PriceVersions = ({
 
     //Handle date change
     const handleDateChange = (date, formIndex) => {
-        // You can set the date field based on your specific naming convention for form fields
+        setPricingData((prevState) => {
+            const updatedPriceVersions = prevState.priceVersions.map(
+                (item, i) =>
+                    i === formIndex
+                        ? {
+                              ...item,
+                              expiry_date: date
+                                  ? moment(date).format("MM-DD-YYYY HH:mm:ss")
+                                  : "N/A",
+                          }
+                        : item
+            );
 
-        const updatedPriceVersions = Object.fromEntries(
-            Object.keys(pricingData?.priceVersions || {}).map(
-                (versionKey, index) =>
-                    index === formIndex
-                        ? [
-                              versionKey, // retain the original key
-                              {
-                                  ...pricingData.priceVersions[versionKey],
-                                  expiry_date: moment(date).format(
-                                      "MM-DD-YYYY HH:mm:ss"
-                                  ),
-                              },
-                          ]
-                        : [versionKey, pricingData.priceVersions[versionKey]]
-            )
-        );
-
-        // Update pricing section after updating
-        updatePricingSection("priceVersions", updatedPriceVersions);
+            return {
+                ...prevState,
+                priceVersions: updatedPriceVersions,
+            };
+        });
     };
 
     return (
@@ -329,8 +324,15 @@ const PriceVersions = ({
                                                                 <div className=" flex gap-x-1   items-center">
                                                                     <DatePicker
                                                                         selected={
-                                                                            form.expiry_date
+                                                                            form.expiry_date !==
+                                                                            "N/A"
+                                                                                ? moment(
+                                                                                      form.expiry_date,
+                                                                                      "MM-DD-YYYY HH:mm:ss"
+                                                                                  ).toDate()
+                                                                                : null
                                                                         }
+                                                                        // minDate={moment().toDate()}
                                                                         onChange={(
                                                                             date
                                                                         ) =>
@@ -342,7 +344,7 @@ const PriceVersions = ({
                                                                         className="w-[100px] border border-custom-grayF1 rounded-[5px] h-[31px] pl-2"
                                                                         name="expiry_date"
                                                                         calendarClassName="custom-calendar"
-                                                                        placeholderText="N/A"
+                                                                        placeholderText="N/A" // Display "N/A" when no date is selected
                                                                     />
 
                                                                     <FaRegCalendar className="size-5 text-custom-gray81 hover:text-red-500" />

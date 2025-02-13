@@ -118,31 +118,15 @@ const AddPropertyModal = ({ propertyModalRef }) => {
                         </button>
                     </div>
                 </div>
-                <div className="w-full flex justify-center items-center h-12 bg-red-100 mb-4 rounded-lg">
-                    <p className="flex text-[#C42E2E] ">
-                        {/* TODO: make this dynamic */}
-                        Error message here
-                    </p>
-                </div>
+                {/* TODO: make this dynamic */}
+                {/* <div className="w-full flex justify-center items-center h-12 bg-red-100 mb-4 rounded-lg">
+                    <p className="flex text-[#C42E2E] ">Error message here</p>
+                </div> */}
                 <div className="pt-5 flex justify-start items-center mb-5">
                     <p className="montserrat-bold">Add Property Details</p>
                 </div>
                 <form>
                     <div className="flex flex-col gap-2">
-                        {/* <div className="flex items-center border border-custom-gray81 rounded-md overflow-hidden">
-                            <span className="text-custom-gray81 bg-custombg3 flex w-3/4 pl-3 py-1 montserrat-semibold text-sm">
-                                Property Name
-                            </span>
-                            <input
-                                name="propertyName"
-                                type="text"
-                                onChange={handleInputChange}
-                                value={formData.propertyName}
-                                className="w-full px-4 focus:outline-none"
-                                placeholder=""
-                            />
-                        </div> */}
-
                         {/*Property Name 
                         TODO: fix the placing of the select box
                         */}

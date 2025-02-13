@@ -6,6 +6,7 @@ namespace App\Services;
 use App\Models\Unit;
 use App\Models\FloorPremium;
 use App\Models\PriceVersion;
+use App\Traits\HasExpiryDate;
 use App\Models\PriceListMaster;
 use App\Models\AdditionalPremium;
 use Illuminate\Support\Facades\DB;
@@ -14,6 +15,7 @@ use App\Repositories\Implementations\PriceListMasterRepository;
 
 class PriceListMasterService
 {
+    use HasExpiryDate;
     protected $repository;
     protected $model;
     protected $priceVersionModel;
@@ -63,7 +65,7 @@ class PriceListMasterService
     //TODO: refactor this and apply SOC
     public function update(array $data)
     {
-        //dd($data);
+
         DB::beginTransaction();
         try {
             $priceListMaster = $this->model->where('id', $data['price_list_master_id'])->first();
@@ -99,7 +101,7 @@ class PriceListMasterService
             // }
             $currentPriceBasicDetailId = $priceListMaster->pricebasic_details_id;
             $priceBasicDetail = $this->updatePriceBasicDetails($currentPriceBasicDetailId, $data, $priceListMaster);
-            
+
             // Fetch the current price version IDs in the PriceListMaster table
             $currentPriceVersionIds = json_decode($priceListMaster->price_versions_id, true) ?? [];
 
@@ -108,9 +110,9 @@ class PriceListMasterService
 
                 foreach ($data['priceVersionsPayload'] as $priceVersionData) {
                     // Ensure expiry_date is formatted properly
-                    $expiryDate = !empty($priceVersionData['expiry_date'])
-                        ? \DateTime::createFromFormat('m-d-Y H:i:s', $priceVersionData['expiry_date'])->format('Y-m-d H:i:s')
-                        : null;
+                    // $expiryDate = !empty($priceVersionData['expiry_date'])
+                    //     ? \DateTime::createFromFormat('m-d-Y H:i:s', $priceVersionData['expiry_date'])->format('Y-m-d H:i:s')
+                    //     : null;
 
                     $versionId = $priceVersionData['version_id'] ?? null;
 
@@ -130,7 +132,7 @@ class PriceListMasterService
                                 'version_name' => $priceVersionData['name'],
                                 'percent_increase' => $priceVersionData['percent_increase'],
                                 'allowed_buyer' => $priceVersionData['no_of_allowed_buyers'],
-                                'expiry_date' => $expiryDate,
+                                'expiry_date' => $this->formatExpiryDate($priceVersionData['expiry_date']),
                                 'status' => $priceVersionData['status'],
                                 'payment_scheme_id' => json_encode(array_column($priceVersionData['payment_scheme'], 'id')),
                             ]);
@@ -142,7 +144,8 @@ class PriceListMasterService
                             'version_name' => $priceVersionData['name'],
                             'percent_increase' => $priceVersionData['percent_increase'],
                             'allowed_buyer' => $priceVersionData['no_of_allowed_buyers'],
-                            'expiry_date' => $expiryDate,
+                            'expiry_date' =>
+                            $this->formatExpiryDate($priceVersionData['expiry_date']),
                             'status' => $priceVersionData['status'],
                             'payment_scheme_id' => json_encode(array_column($priceVersionData['payment_scheme'], 'id')),
                             'tower_phase_name' => $data['tower_phase_id'],
@@ -272,7 +275,7 @@ class PriceListMasterService
                 foreach ($data['selectedAdditionalPremiumsPayload'] as $additionalPremium) {
                     $unitId = $additionalPremium['unit_id'] ?? null;
                     $additionalPremiumId = $additionalPremium['additional_premium_id'] ?? null;
-                    
+
                     if (!$unitId || $additionalPremiumId === null) {
                         continue; // Skip if unit_id or additional_premium_id is missing
                     }
@@ -290,8 +293,8 @@ class PriceListMasterService
                     }
                     // Decode the stored additional_premium_id JSON array
                     $unitIds = (!empty($unit->additional_premium_id) && is_string($unit->additional_premium_id))
-                    ? json_decode($unit->additional_premium_id, true)
-                    : [];
+                        ? json_decode($unit->additional_premium_id, true)
+                        : [];
 
                     if (!is_array($unitIds)) {
                         $unitIds = []; // Default to empty array if json_decode fails
@@ -317,7 +320,7 @@ class PriceListMasterService
                     // Update the additional_premium_id list by replacing the old with the new
                     // If user deselects everything, store an empty array `[]`
                     if (empty($additionalPremiumId)) {
-                        $unitIds =null; // Store empty array in DB
+                        $unitIds = null; // Store empty array in DB
                     } else {
                         $unitIds = $additionalPremiumId; // Update with new selection
                     }

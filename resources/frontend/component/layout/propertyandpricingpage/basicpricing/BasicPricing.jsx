@@ -89,13 +89,12 @@ const BasicPricing = () => {
                               status: version.status,
                               no_of_allowed_buyers:
                                   version.no_of_allowed_buyers || 0,
-                              expiry_date: version.expiry_date
-                                  ? moment(version.expiry_date).format(
-                                        "MM-DD-YYYY HH:mm:ss"
-                                    )
-                                  : moment(new Date()).format(
-                                        "MM-DD-YYYY HH:mm:ss"
-                                    ),
+                              expiry_date:
+                                  version.expiry_date === null
+                                      ? "N/A"
+                                      : moment(version.expiry_date).format(
+                                            "MM-DD-YYYY HH:mm:ss"
+                                        ),
                               payment_scheme: version.payment_schemes || [],
                           }))
                         : [
@@ -105,11 +104,7 @@ const BasicPricing = () => {
                                   percent_increase: "",
                                   no_of_allowed_buyers: "",
                                   status: "Active",
-                                  expiry_date: moment().isValid()
-                                      ? moment(new Date()).format(
-                                            "MM-DD-YYYY HH:mm:ss"
-                                        )
-                                      : "",
+                                  expiry_date: "N/A",
                                   payment_scheme: [],
                               },
                           ],
@@ -197,7 +192,7 @@ const BasicPricing = () => {
                 Object.keys(pricingData.floorPremiums).length === 0)
         ) {
             console.log(
-                "Fetching floors because no existing data is found for",
+                "Fetching floors because no existing data is found for 1",
                 data?.excel_id
             );
             checkExistingUnits(data.tower_phase_id, data.excel_id);
@@ -209,9 +204,8 @@ const BasicPricing = () => {
                 additionalPremiums: additionalPremiums,
             }));
         }
-    }, [data?.excel_id, data?.tower_phase_id]);
+    }, [data?.excel_id, data?.tower_phase_id, additionalPremiums]);
 
-    // Hooks to reset all accordions when leaving the page 'BasicPricing'
     useEffect(() => {
         return () => {
             setAccordionStates({
@@ -361,6 +355,7 @@ const BasicPricing = () => {
             ),
         status: status,
     });
+
     /**
      * Handles in submitting all data in creating price master list
      */
@@ -409,6 +404,7 @@ const BasicPricing = () => {
                         "An error occurred during submission. Please try again.",
                         "error"
                     );
+                    console.log("error 408", error);
                 }
             } finally {
                 setIsLoading((prev) => ({ ...prev, [status]: false }));
