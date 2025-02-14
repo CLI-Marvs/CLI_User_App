@@ -90,6 +90,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/get-transaction-bank', [SapController::class, 'getTransactionByBankName']);
     Route::post('/upload-notepad', [SapController::class, 'uploadNotepad']);
     Route::get('/get-concern', [ConcernController::class, 'getAllConcerns']);
+    Route::get('/get-count-all-concerns', [ConcernController::class, 'getCountAllConcerns']);
     Route::post('/add-concern', [ConcernController::class, 'addConcernPublic']);
     Route::post('/add-concern-prev', [ConcernController::class, 'addConcernFromPreviousInquiry']);
     Route::get('/get-message/{ticketId}', [ConcernController::class, 'getMessage']);

@@ -13,6 +13,9 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import { useSearchParams, useLocation } from "react-router-dom";
 import Spinner from "../../../util/Spinner";
+import Skeletons from "../mainComponent/Skeletons";
+import { CircularProgress } from '@mui/material'
+
 const InquiryList = () => {
     const location = useLocation();
 
@@ -48,6 +51,8 @@ const InquiryList = () => {
         department,
         loading,
         allEmployees,
+        countAllConcerns,
+        getCountAllConcerns,
         selectedOption,
         setSelectedOption,
         activeDayButton,
@@ -118,7 +123,8 @@ const InquiryList = () => {
             setDaysFilter(null);
             setActiveDayButton(null);
         } else if (statusFilter) {
-            setStatusFilter("All");
+            setSelectedOption("All");
+            setStatusFilter(null);
         } else if (searchFilter) {
             setSearchFilter({});
         } else if (specificAssigneeCsr) {
@@ -163,7 +169,7 @@ const InquiryList = () => {
             setIsFilterVisible(false);
         }
     };
-
+ 
     const handleOptionClick = (option) => {
         setResultSearchActive(false);
         setSelectedOption(option);
@@ -178,18 +184,21 @@ const InquiryList = () => {
             setSpecificAssigneeCsr("");
             setAssignedToMeActive(false);
         } else if (option === "Resolved") {
+            
             setStatusFilter("Resolved");
             setCurrentPage(0);
             setSearchFilter("");
             setSpecificAssigneeCsr("");
             setAssignedToMeActive(false);
         } else if (option === "Closed") {
+            
             setStatusFilter("Closed");
             setCurrentPage(0);
             setSearchFilter("");
             setSpecificAssigneeCsr("");
             setAssignedToMeActive(false);
         } else if (option === "Unresolved") {
+           
             setStatusFilter("unresolved");
             setCurrentPage(0);
             setSearchFilter("");
@@ -544,6 +553,7 @@ const InquiryList = () => {
 
     useEffect(() => {
         updateLastActivity();
+        getCountAllConcerns();
         getAllConcerns();
     }, [
         searchFilter,
@@ -775,7 +785,7 @@ const InquiryList = () => {
                                     <div className="flex relative">
                                         <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
                                             {" "}
-                                            Channels
+                                            Channel
                                         </label>
                                         <div className="flex bg-red-900 justify-start w-full relative">
                                             <label
@@ -793,7 +803,7 @@ const InquiryList = () => {
                                             >
                                                 <option value="">
                                                     {" "}
-                                                    Select Channels
+                                                    Select Channel
                                                 </option>
                                                 <option value="Email">
                                                     Email
@@ -808,7 +818,7 @@ const InquiryList = () => {
                                                     Website
                                                 </option>
                                                 <option value="Social media">
-                                                    Social media
+                                                    Social Media
                                                 </option>
                                                 <option value="Branch Tablet">
                                                     Branch Table
@@ -884,6 +894,10 @@ const InquiryList = () => {
                                                             </option>
                                                         )
                                                     )}
+                                                <option value="Unassigned">
+                                                {" "}
+                                                Unassigned
+                                                </option>
                                             </select>
                                         </div>
                                         <span className="absolute inset-y-0 right-0 flex items-center  pl-3 pointer-events-none">
@@ -1156,21 +1170,26 @@ const InquiryList = () => {
                                         <p>{dataCount} {data?.length > 1 ? 'Results' : 'Result'} Found</p>
                                     )
                                 ) : (
-                                    <p>{selectedOption}</p>
+                                    <p>
+                                        {selectedOption}
+                                        {" "}
+                                        ({dataCount == 0 ?  <CircularProgress size={14} /> : dataCount})
+                                    
+                                    </p>
                                 )}
                             </button>
 
                             {/* Dropdown Menu */}
                             {isOpen && (
                                 <div className="absolute top-full mt-2 w-48 bg-white border border-gray-200 shadow-lg rounded-md">
-                                    <ul className="py-2">
+                                    <ul className="py-2 ">
                                         <li
-                                            className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                                            className={`px-4 py-2 hover:bg-gray-100 cursor-pointer`}
                                             onClick={() =>
                                                 handleOptionClick("All")
                                             }
                                         >
-                                            All
+                                            All ({countAllConcerns?.counts?.all ?? <CircularProgress size={14} />})
                                         </li>
                                         <li
                                             className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
@@ -1178,7 +1197,7 @@ const InquiryList = () => {
                                                 handleOptionClick("Resolved")
                                             }
                                         >
-                                            Resolved
+                                            Resolved ({countAllConcerns?.counts?.resolved ?? <CircularProgress size={14} />})
                                         </li>
                                         <li
                                             className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
@@ -1186,7 +1205,7 @@ const InquiryList = () => {
                                                 handleOptionClick("Closed")
                                             }
                                         >
-                                            Closed
+                                            Closed ({countAllConcerns?.counts?.closed ?? <CircularProgress size={14} />})
                                         </li>
                                         <li
                                             className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
@@ -1194,7 +1213,7 @@ const InquiryList = () => {
                                                 handleOptionClick("Unresolved")
                                             }
                                         >
-                                            Unresolved
+                                            Unresolved ({countAllConcerns?.counts?.unresolved ?? <CircularProgress size={14} />})
                                         </li>
                                     </ul>
                                 </div>

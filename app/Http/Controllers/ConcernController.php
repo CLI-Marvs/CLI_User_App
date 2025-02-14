@@ -43,6 +43,7 @@ use App\Jobs\BuyerReplyInResolveOrClose;
 use App\Jobs\SendFeedbackNotificationJob;
 use Illuminate\Pagination\LengthAwarePaginator;
 use App\Jobs\NotifyAssignedCliOfResolvedInquiryJob;
+use App\Mail\DirectEmailResponse;
 
 class ConcernController extends Controller
 {
@@ -922,6 +923,35 @@ class ConcernController extends Controller
         }
     }
 
+    public function getCountAllConcerns(Request $request)
+    {
+        try {
+
+            $totalCount = Concerns::count();
+
+
+            $resolvedCount = Concerns::where('status', 'Resolved')->count();
+            $closedCount = Concerns::where('status', 'Closed')->count();
+            $unresolvedCount = Concerns::where('status', 'unresolved')->count();
+
+
+            $response = [
+                'counts' => [
+                    'all' => $totalCount,
+                    'resolved' => $resolvedCount,
+                    'closed' => $closedCount,
+                    'unresolved' => $unresolvedCount,
+                ],
+            ];
+
+            \Log::info($response);
+
+            return response()->json($response);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Error occurred.', 'error' => $e->getMessage()], 500);
+        }
+    }
+
 
     private function getLatestMessage()
     {
@@ -1049,10 +1079,9 @@ class ConcernController extends Controller
         if (!empty($searchParams['category'] ?? null) && $searchParams['category'] !== 'Other Concerns') {
             $query->where('details_concern', 'ILIKE', '%' . $searchParams['category'] . '%');
         } else {
-            $query->where(function($query) use ($searchParams) {
+            $query->where(function ($query) use ($searchParams) {
                 $query->where('details_concern', 'ILIKE', '%' . ($searchParams['category'] ?? '') . '%')
-                ->orWhereNull('details_concern');
-                      
+                    ->orWhereNull('details_concern');
             });
         }
         if (!empty($searchParams['email'])) {
@@ -1068,25 +1097,24 @@ class ConcernController extends Controller
         if (!empty($searchParams['type'])) {
             if ($searchParams['type'] === 'No Type') {
                 $query->whereNull('communication_type');
-            }else {
+            } else {
                 $query->where('communication_type', 'ILIKE', '%' . $searchParams['type'] . '%');
             }
         }
         if (!empty($searchParams['selectedProperty'] ?? null) && $searchParams['selectedProperty'] !== 'N/A') {
             $query->where('property', 'ILIKE', '%' . $searchParams['selectedProperty'] . '%');
         } else {
-            $query->where(function($query) use ($searchParams) {
+            $query->where(function ($query) use ($searchParams) {
                 $query->where('property', 'ILIKE', '%' . ($searchParams['selectedProperty'] ?? '') . '%')
-                      ->orWhereNull('property');
+                    ->orWhereNull('property');
             });
         }
         if (!empty($searchParams['channels'])) {
             if ($searchParams['channels'] === 'No Channel') {
                 $query->whereNull('channels');
-            }else {
+            } else {
                 $query->where('channels', $searchParams['channels']);
             }
-           
         }
 
         if (!empty($searchParams['startDate']) || !empty($searchParams['endDate'])) {
@@ -1115,14 +1143,18 @@ class ConcernController extends Controller
         }
 
         if (!empty($searchParams['departments'])) {
-            $departments = $searchParams['departments'];
+            if ($searchParams['departments'] !== "Unassigned") {
+                $departments = $searchParams['departments'];
 
-            if (!is_array($departments)) {
-                $departments = explode(',', $departments); 
-            }
+                if (!is_array($departments)) {
+                    $departments = explode(',', $departments);
+                }
 
-            foreach ($departments as $department) {
-                $query->whereJsonContains('assign_to', [['department' => $department]]);
+                foreach ($departments as $department) {
+                    $query->whereJsonContains('assign_to', [['department' => $department]]);
+                }
+            } else {
+                $query->whereNull('assign_to');
             }
         }
 
@@ -2091,12 +2123,11 @@ class ConcernController extends Controller
             if ($project === "N/A") {
                 $query->where(function ($subQuery) {
                     $subQuery->where('property', 'N/A')
-                             ->orWhereNull('property');
+                        ->orWhereNull('property');
                 });
             } else {
                 $query->where('property', $project);
             }
-            
         }
 
         if ($month && $month !== 'All') {
@@ -2123,6 +2154,8 @@ class ConcernController extends Controller
         return response()->json($concerns);
     }
 
+
+
     public function getInquiriesPerDepartment(Request $request)
     {
         $department = $request->department;
@@ -2133,18 +2166,14 @@ class ConcernController extends Controller
         $endDate = $request->endDate ? Carbon::parse($request->endDate)->setTimezone('Asia/Manila')->toDateString() : null;
 
         $query = Concerns::select(
-            DB::raw("COALESCE(
-                (SELECT jsonb_array_elements(assign_to::jsonb)->>'department' 
-                 LIMIT 1), 
-                'Customer Relations - Services'
-            ) as department"),
-            DB::raw('COUNT(DISTINCT CASE WHEN status = \'Resolved\' THEN id ELSE NULL END) as resolved'),
+            DB::raw("jsonb_array_elements(resolve_from::jsonb)->>'department' as department"),
             DB::raw('COUNT(DISTINCT CASE WHEN status = \'unresolved\' THEN id ELSE NULL END) as unresolved'),
-            DB::raw('COUNT(DISTINCT CASE WHEN status = \'Closed\' THEN id ELSE NULL END) as closed')
+            DB::raw('COUNT(DISTINCT CASE WHEN status = \'Closed\' THEN id ELSE NULL END) as closed'),
+            DB::raw('COUNT(DISTINCT CASE WHEN status = \'Resolved\' THEN id ELSE NULL END) as resolved')
         )
             ->whereNotNull('status');
 
-        if($year && $year !== 'All') {
+        if($year !== 'All') {
             $query->whereYear('created_at', $year);
         }
 
@@ -2157,7 +2186,16 @@ class ConcernController extends Controller
         }
 
         if ($department && $department !== 'All') {
-            $query->whereRaw("assign_to::jsonb @> ?", [json_encode([['department' => $department]])]);
+            if ($department === 'Unassigned') {
+                $query->whereRaw("resolve_from::jsonb @> ?", [json_encode([['department' => null]])]);
+            } else {
+                $query->whereRaw("
+                    EXISTS (
+                        SELECT 1 FROM jsonb_array_elements(resolve_from::jsonb) AS elem
+                        WHERE elem->>'department' = ?
+                    )
+                ", [$department]);
+            }
         }
 
         if ($startDate && $endDate) {
@@ -2172,13 +2210,46 @@ class ConcernController extends Controller
             $query->whereDate('created_at', '<=', $endDate); // Using whereDate for exact date match
         }
 
+
+
+        // Query for total unresolved, closed, resolved, and unassigned concerns
+        $totalUnassigned = Concerns::selectRaw("
+        COUNT(DISTINCT CASE WHEN status = 'unresolved' AND assign_to IS NULL THEN id ELSE NULL END) as total_unresolved,
+        COUNT(DISTINCT CASE WHEN status = 'Closed' AND assign_to IS NULL THEN id ELSE NULL END) as total_closed,
+        COUNT(DISTINCT CASE WHEN status = 'Resolved' AND assign_to IS NULL THEN id ELSE NULL END) as total_resolved,
+        COUNT(DISTINCT CASE WHEN assign_to IS NULL THEN id ELSE NULL END) as total_unassigned,
+        COUNT(DISTINCT id) as total_all
+    ") 
+            ->whereNotNull('status');
+
+        if ($project && $project !== 'All') {
+            $totalUnassigned->where('property', $project);
+        }
+
+        if ($month && $month !== 'All') {
+            $totalUnassigned->whereMonth('created_at', $month);
+        }
+
+        if($year !== 'All') {
+            $totalUnassigned->whereYear('created_at', $year);
+        }
+
+        $totalCounts = $totalUnassigned->first();
+
         $concerns = $query
-            ->groupBy('department')
-            ->orderBy('department') // Optional: For consistent ordering
+            ->groupBy(DB::raw("jsonb_array_elements(resolve_from::jsonb)->>'department'"))
+            ->orderBy('department')
             ->get();
 
-        return response()->json($concerns);
+        return response()->json([
+            'departments' => $concerns,
+            'totalUnassigned' => $totalCounts,
+        ]);
     }
+
+
+
+
 
 
     /**
@@ -2655,13 +2726,22 @@ class ConcernController extends Controller
         if (!empty($buyerData)) {
             foreach ($buyerData as $buyer) {
                 if ($buyer) {
-                    $lastConcern = Concerns::latest()->first();
-                    $nextId = $lastConcern ? $lastConcern->id + 1 : 1;
+                    
+                    $data = [
+                        'lastname' => $buyer['buyer_name'],
+                        'messageId' => $buyer['message_id'],
+                        'buyer_email' => $buyer['buyer_email'],
+                        'email_subject' => $buyer['email_subject'],
+                    ];
 
-                    $formattedId = str_pad($nextId, 8, '0', STR_PAD_LEFT);
-                    $ticketId = 'Ticket#' . $this->dynamicTicketYear . $formattedId;
+                    \Log::info([
+                        'data from buyer' => $data,
+                    ]);
 
-                    $concerns = new Concerns();
+                    Mail::to($buyer['buyer_email'])->send(new DirectEmailResponse($data));
+
+
+                    /*    $concerns = new Concerns();
                     $concerns->email_subject = $buyer['email_subject'];
                     $concerns->ticket_id = $ticketId;
                     $concerns->buyer_email = $buyer['buyer_email'];
@@ -2682,9 +2762,8 @@ class ConcernController extends Controller
                     $messagesRef->attachment = json_encode($fileLinks);
                     $messagesRef->created_at = Carbon::parse(now())->setTimezone('Asia/Manila');
                     $messagesRef->buyer_name = $concerns->buyer_name;
-                    $messagesRef->save();
+                    $messagesRef->save(); */
 
-                    $this->inquiryLogsFromBuyer($concerns->ticket_id);
 
                     $responses[] = "Posted Successfully " . $buyer['buyer_email'];
                 } else {
@@ -2695,7 +2774,20 @@ class ConcernController extends Controller
         if (!empty($buyerDataErratum)) {
             foreach ($buyerDataErratum as $buyer) {
                 if ($buyer) {
-                    $existingTicket = Concerns::where('email_subject', $buyer['email_subject'])
+                    $data = [
+                        'lastname' => $buyer['buyer_name'],
+                        'messageId' => $buyer['message_id'],
+                        'buyer_email' => $buyer['buyer_email'],
+                        'email_subject' => $buyer['email_subject'],
+
+                    ];
+
+                    \Log::info([
+                        'data from buyer' => $data,
+                    ]);
+                    Mail::to($buyer['buyer_email'])->send(new DirectEmailResponse($data));
+
+                    /*   $existingTicket = Concerns::where('email_subject', $buyer['email_subject'])
                         ->where('buyer_email', $buyer['buyer_email'])
                         ->first();
 
@@ -2710,7 +2802,7 @@ class ConcernController extends Controller
                         $messagesRef->buyer_firstname = $existingTicket->buyer_name;
                         $messagesRef->buyer_name = $existingTicket->buyer_name;
                         $messagesRef->save();
-                    }
+                    } */
 
                     $responses[] = "Posted Successfully " . $buyer['buyer_email'];
                 } else {

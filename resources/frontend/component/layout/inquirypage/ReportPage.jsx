@@ -450,16 +450,20 @@ const ReportPage = () => {
         0
     );
 
-    const formatPercentage = (value) =>
-        ((value / totalValuePieChart) * 100).toFixed(2) + "%";
-
+    const formatPercentage = (value) => {
+        const total = totalValuePieChart || 1; // Prevent division by zero
+        return ((value / total) * 100).toFixed(2) + "%";
+    };
+    
     const renderCustomLabel = ({ x, y, value, index, payload, cx }) => {
+        if (!value || !payload?.name) return null; // Prevent errors if data is missing
+    
         const percentage = formatPercentage(value);
         const name = payload.name;
-
+    
         // Adjust text alignment based on label's position relative to pie center
         const textAnchor = x > cx ? "start" : "end";
-
+    
         return (
             <text
                 x={x}
@@ -641,7 +645,6 @@ const ReportPage = () => {
 
         setSearchSummary(summaryParts);
 
-        console.log(searchSummary);
 
     }, []);
 
@@ -653,9 +656,14 @@ const ReportPage = () => {
         getCommunicationTypePerProperty();
         getInquiriesPerChannel();
         getFullYear();
-        setYear(yearValue);
     }, []);
 
+  /*   useEffect(() => {
+        if (yearValue) {
+            setYear(yearValue);
+        }
+    }, [yearValue]); 
+ */
     /*  useEffect(() => {
          setMonth(getCurrentMonth());
          setPropertyMonth(getCurrentMonth());
@@ -670,7 +678,7 @@ const ReportPage = () => {
      }, []); */
 
     // console.log("department", department);
-    communicationTypeData;
+    /* communicationTypeData; */
 
     const totalValue = dataCategory.reduce(
         (total, category) => total + category.value,
@@ -873,6 +881,7 @@ const ReportPage = () => {
                                         {user?.department}
                                     </option>
                                 )}
+                                <option value="Unassigned">Unassigned</option>
                             </select>
                             <span className="absolute inset-y-0 right-0 flex items-center text-white pr-3 pl-3 bg-custom-lightgreen pointer-events-none">
                                 <IoMdArrowDropdown />
