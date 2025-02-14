@@ -23,12 +23,14 @@ class DirectEmailResponse extends Mailable
     protected $messageId;
     protected $lastname;
     protected $buyer_email;
+    protected $email_subject;
 
     public function __construct($data)
     {
         $this->messageId = $data['messageId'];
         $this->lastname = $data['lastname'];
         $this->buyer_email = $data['buyer_email'];
+        $this->email_subject = $data['email_subject'];
     }
 
     /**
@@ -38,21 +40,33 @@ class DirectEmailResponse extends Mailable
     {
         return new Envelope(
             from: new Address('ask@cebulandmasters.com', 'Cebu Landmasters Inc.'),
+            subject: $this->email_subject,
         );
     }
 
     public function headers(): Headers
     {
-
-        return new Headers(
-            messageId: $this->messageId,
-            references: [$this->messageId],
-            text: [
-                'In-Reply-To' => $this->messageId,
-                'X-Custom-Header' => 'Custom Value',
-            ]
-        );
+        if (str_contains($this->messageId, '@icloud.com') || str_contains($this->messageId, '@yahoo.com')) {
+            return new Headers(
+                messageId: "<" . $this->messageId . ">",
+                references: [$this->messageId],
+                text: [
+                    'In-Reply-To' => $this->messageId,
+                    'X-Custom-Header' => 'Custom Value',
+                ]
+            );
+        } else {
+            return new Headers(
+                messageId: $this->messageId,
+                references: [$this->messageId],
+                text: [
+                    'In-Reply-To' => $this->messageId,
+                    'X-Custom-Header' => 'Custom Value',
+                ]
+            );
+        }
     }
+    
     /**
      * Get the message content definition.
      */
