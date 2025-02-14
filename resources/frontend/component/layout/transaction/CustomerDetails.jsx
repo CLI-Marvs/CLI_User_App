@@ -12,10 +12,59 @@ import PropertyCardTransaction from "@/component/layout/transaction/PropertyCard
 import FiltersProperty from "@/component/layout/transaction/FiltersProperty";
 import DatePicker from "react-datepicker";
 import { MdCalendarToday } from "react-icons/md";
+import sortDown from "../../../../../public/Images/sort_down.png";
+import FilterWrapper from "../salespage/customermasterlist/FilterWrapper";
+
+const data1 = [
+    {
+        title: "Title:",
+        value: "Ms.",
+    },
+    {
+        title: "Contract Number:",
+        value: "1000000001",
+    },
+    {
+        title: "Business Partner:",
+        value: "1000000001",
+    },
+    {
+        title: "Partner Category:",
+        value: "Person",
+    },
+    {
+        title: "Nationality",
+        value: "PH",
+    },
+];
+
+const data2 = [
+    {
+        title: "Marital Status:",
+        value: "Single",
+    },
+    {
+        title: "Occupation:",
+        value: "Medical Practioner",
+    },
+    {
+        title: "Date of Birth:",
+        value: "Febuary 27, 2001",
+    },
+    {
+        title: "Employeer:",
+        value: "Jace Garv",
+    },
+    {
+        title: "Created On:",
+        value: "January 10, 2012",
+    },
+];
 
 const CustomerDetails = () => {
     const transactModalRef = useRef(null);
     const { customerDetails, setCustomerDetails } = useStateContext();
+    const [showTransactionFilter, setShowTransactionFilter] = useState(false);
 
     const { id } = useParams();
     const decodedEmail = atob(id);
@@ -45,57 +94,15 @@ const CustomerDetails = () => {
         }
     };
 
-    const data1 = [
-        {
-            title: "Title:",
-            value: "Ms.",
-        },
-        {
-            title: "Contract Number:",
-            value: "1000000001",
-        },
-        {
-            title: "Business Partner:",
-            value: "1000000001",
-        },
-        {
-            title: "Partner Category:",
-            value: "Person",
-        },
-        {
-            title: "Nationality",
-            value: "PH",
-        },
-    ];
-
-    const data2 = [
-        {
-            title: "Marital Status:",
-            value: "Single",
-        },
-        {
-            title: "Occupation:",
-            value: "Medical Practioner",
-        },
-        {
-            title: "Date of Birth:",
-            value: "Febuary 27, 2001",
-        },
-        {
-            title: "Employeer:",
-            value: "Jace Garv",
-        },
-        {
-            title: "Created On:",
-            value: "January 10, 2012",
-        },
-    ];
-
+    const showFiltersFunc = () => {
+        setShowTransactionFilter((prev) => !prev);
+    };
     const years = Array.from({ length: 2025 - 2012 + 1 }, (_, i) => 2012 + i);
 
+    console.log("showTransactionFilter", showTransactionFilter);
     return (
         <>
-            <div className="w-auto h-auto p-[20px]">
+            <div className="p-[20px]">
                 <div className="flex mb-[21px] gap-[2px] items-center">
                     <Link to="/sales/customer">
                         <img
@@ -202,61 +209,50 @@ const CustomerDetails = () => {
                     </div>
 
                     <PropertyCardTransaction />
-                    <FiltersProperty />
-                    <div className="flex gap-5 mt-5">
-                        <div className="py-4 px-5 bg-custom-grayFA rounded-xl w-1/2">
-                            <div className="flex items-center">
-                                <span className="font-semibold text-base">
-                                    Transaction History
-                                </span>
-                                <div className="flex-1 border-b-[1px] border-black ml-2"></div>
-                            </div>
-
-                            <div className="flex flex-col gap-2.5 mt-2.5">
-                                {[...Array(12)].map((_, index) => (
-                                    <div
-                                        className="shadow-md bg-white rounded-[5px] p-2.5 cursor-pointer"
-                                        key={index}
-                                    >
-                                        <span className="text-xs underline text-[#1A73E8]">
-                                            December 15, 2024
+                    {/*     <FiltersProperty /> */}
+                    <div className="flex gap-5 mt-5 h-[622px] overflow-hidden">
+                        <div
+                            className={`py-4 px-5 rounded-xl w-1/2 bg-custom-grayFA relative transition-all duration-500 ease-in-out`}
+                        >
+                            {showTransactionFilter ? (
+                                <>
+                                    <FilterWrapper
+                                        showFiltersFunc={showFiltersFunc}
+                                    />
+                                </>
+                            ) : (
+                                <>
+                                    <div className="flex items-center space-x-1">
+                                        <span className="font-semibold text-base">
+                                            Transaction History
                                         </span>
+                                        <div className="flex-1 border-b-[1px] border-black ml-2"></div>
+                                        <div
+                                            className="flex items-center bg-[#3A3A3A] rounded-full p-1.5 cursor-pointer"
+                                            onClick={showFiltersFunc}
+                                        >
+                                            <img src={sortDown} alt="" />
+                                        </div>
                                     </div>
-                                ))}
-                            </div>
+                                    {Array.from({ length: 5 }, (_, index) => (
+                                        <div
+                                            className="flex flex-col gap-2.5 mt-2.5 rounded-[5px] bg-white border-[3px] border-[#F1F1F1] p-2.5"
+                                            key={index}
+                                        >
+                                            <div className="flex justify-between text-black font-semibold text-sm">
+                                                <span>Equity</span>
+                                                <span>Transaction#22301</span>
+                                            </div>
+                                            <div className="flex justify-between text-custom-gray81 text-sm">
+                                                <span>Php 15,500.00</span>
+                                                <span>02/13/2025</span>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </>
+                            )}
                         </div>
-                        <div className="flex flex-col py-4 px-5 bg-[#FAFAFA] w-1/2 rounded-xl gap-2.5 h-[507px]">
-                            <div className="flex gap-2.5 items-center">
-                                <span className="font-semibold text-base">
-                                    Documents
-                                </span>
-                                <div className="flex justify-center w-full">
-                                    <div className="border-b-[1px] border-black w-full"></div>
-                                </div>
-                            </div>
-
-                            <div className="flex bg-[#FFFFFF] w-full shadow-sm p-2.5 rounded-xl">
-                                <span className="text-xs 2xl:text-base text-custom-solidgreen font-normal">
-                                    Valid ID
-                                </span>
-                            </div>
-                            <div className="flex bg-[#FFFFFF] w-full shadow-sm p-2.5 rounded-xl">
-                                <span className="text-xs 2xl:text-base text-custom-solidgreen font-normal">
-                                    Birth Certificate
-                                </span>
-                            </div>
-                            <div className="flex bg-[#FFFFFF] w-full shadow-sm p-2.5 rounded-xl">
-                                <span className="text-xs 2xl:text-base text-custom-solidgreen font-normal">
-                                    Spouse - Birth Certificate
-                                </span>
-                            </div>
-                            <div className="flex bg-[#FFFFFF] w-full shadow-sm p-2.5 rounded-xl">
-                                <span className="text-xs 2xl:text-base text-custom-solidgreen font-normal">
-                                    Marriage Certificate
-                                </span>
-                            </div>
-                        </div>
-                        <div className="py-4 px-5 bg-custom-grayFA rounded-xl w-1/2">
+                        <div className="py-4 px-5 bg-custom-grayFA rounded-xl w-1/2 transaction-scrollbar">
                             <div className="flex gap-2.5 items-center">
                                 <span className="font-semibold text-base">
                                     Inquiries
@@ -309,6 +305,37 @@ const CustomerDetails = () => {
                                         </div>
                                     </>
                                 )}
+                            </div>
+                        </div>
+                        <div className="flex flex-col py-4 px-5 bg-[#FAFAFA] w-1/2 rounded-xl gap-2.5">
+                            <div className="flex gap-2.5 items-center">
+                                <span className="font-semibold text-base">
+                                    Documents
+                                </span>
+                                <div className="flex justify-center w-full">
+                                    <div className="border-b-[1px] border-black w-full"></div>
+                                </div>
+                            </div>
+
+                            <div className="flex bg-[#FFFFFF] w-full shadow-sm p-2.5 rounded-xl">
+                                <span className="text-xs 2xl:text-base text-custom-solidgreen font-normal">
+                                    Valid ID
+                                </span>
+                            </div>
+                            <div className="flex bg-[#FFFFFF] w-full shadow-sm p-2.5 rounded-xl">
+                                <span className="text-xs 2xl:text-base text-custom-solidgreen font-normal">
+                                    Birth Certificate
+                                </span>
+                            </div>
+                            <div className="flex bg-[#FFFFFF] w-full shadow-sm p-2.5 rounded-xl">
+                                <span className="text-xs 2xl:text-base text-custom-solidgreen font-normal">
+                                    Spouse - Birth Certificate
+                                </span>
+                            </div>
+                            <div className="flex bg-[#FFFFFF] w-full shadow-sm p-2.5 rounded-xl">
+                                <span className="text-xs 2xl:text-base text-custom-solidgreen font-normal">
+                                    Marriage Certificate
+                                </span>
                             </div>
                         </div>
                     </div>
