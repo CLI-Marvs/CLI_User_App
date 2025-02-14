@@ -28,6 +28,7 @@ import { MdCalendarToday } from "react-icons/md";
 import { useLocation, Link, useNavigate } from "react-router-dom";
 import { get, set } from "lodash";
 import { toast } from "react-toastify";
+import { format } from "date-fns";
 
 const barHeight = 20;
 
@@ -94,6 +95,10 @@ const ReportPage = () => {
         endDateValue,
         setEndDateValue
     } = useStateContext();
+
+
+
+    const [searchSummary, setSearchSummary] = useState([]);
 
     const colors = [
         "#348017",
@@ -246,6 +251,12 @@ const ReportPage = () => {
         10: "October",
         11: "November",
         12: "December",
+    };
+
+    const formatMonth = (monthValue) => {
+        const date = new Date(0);
+        date.setMonth(monthValue - 1);
+        return date.toLocaleString("default", { month: "long" });
     };
 
     const CustomTooltip1 = ({ active, payload, label }) => {
@@ -504,7 +515,7 @@ const ReportPage = () => {
 
     //Get current year
 
-   
+
 
     const chartHeight = dataProperty.length * (barHeight + 80);
     const chartHeight2 = communicationTypeData.length * (barHeight + 100);
@@ -562,7 +573,40 @@ const ReportPage = () => {
         }
     };
 
+
+
+
     const handleSearchFilter = () => {
+
+        console.log(startDateValue, endDateValue);
+        console.log();
+        const summaryParts = [];
+
+
+        if (yearValue !== "All") summaryParts.push(`Year: ${yearValue}`);
+        if (monthValue !== "All") summaryParts.push(`Month: ${formatMonth(monthValue)}`);
+
+        if (startDateValue && endDateValue) {
+            summaryParts.push(`Start Date: ${format(startDateValue, "MMM dd, yyyy")}`);
+            summaryParts.push(`End Date: ${format(endDateValue, "MMM dd, yyyy")}`);
+        } else if (startDateValue) {
+            summaryParts.push(`Start Date: ${format(startDateValue, "MMM dd, yyyy")}`);
+        } else if (endDateValue) {
+            summaryParts.push(`End Date: ${format(endDateValue, "MMM dd, yyyy")}`);
+        }
+
+        if (projectValue !== "All") summaryParts.push(`Project: ${projectValue}`);
+        if (departmentValue !== "All") summaryParts.push(`Department: ${departmentValue}`);
+
+        if(!startDateValue && !endDateValue && (yearValue == "All" && monthValue == "All" && projectValue == "All" && departmentValue == "All")) {
+            summaryParts.push(`Year: All`);
+            summaryParts.push(`Month: All`);
+            summaryParts.push(`Project: All`);
+            summaryParts.push(`Department: All`);
+        }
+        
+
+        setSearchSummary(summaryParts);
         setDepartment(departmentValue);
         setProject(projectValue);
         setYear(yearValue);
@@ -572,6 +616,7 @@ const ReportPage = () => {
     };
 
     const handleResetFilter = () => {
+
         setDepartmentValue("All");
         setProjectValue("All");
         setYearValue(new Date().getFullYear());
@@ -579,6 +624,26 @@ const ReportPage = () => {
         setStartDateValue(null);
         setEndDateValue(null);
     };
+
+    useEffect(() => {
+
+        setYear(new Date().getFullYear());
+        setMonthValue("All");
+        setDepartmentValue("All");
+        setProjectValue("All");
+        setStartDateValue(null);
+        setEndDateValue(null);
+
+
+        const summaryParts = [];
+
+        summaryParts.push(`Year: 2025`);
+
+        setSearchSummary(summaryParts);
+
+        console.log(searchSummary);
+
+    }, []);
 
     useEffect(() => {
         fetchCategory();
@@ -743,7 +808,7 @@ const ReportPage = () => {
                                 }}
                                 className="outline-none w-[156px] h-full text-sm px-2"
                                 calendarClassName="custom-calendar"
-                                minDate={startDateValue} 
+                                minDate={startDateValue}
                             />
                         </div>
                         <span className="absolute inset-y-0 right-0 flex items-center text-white pr-3 pl-3 bg-custom-lightgreen pointer-events-none">
@@ -830,6 +895,24 @@ const ReportPage = () => {
                     </button>
                 </div>
             </div>
+            <div className="flex flex-col gap-1 p-2 mt-[15px] bg-white w-max rounded-[8px] shadow-custom7 text-sm">
+                <div className="flex flex-col">
+                    <div className="mb-5">
+                        <strong>Search {data?.length > 1 ? 'results for' : 'result for'} &nbsp;</strong>
+                    </div>
+                    <div className="flex flex-col flex-wrap gap-2">
+                        {searchSummary.map((part, index) => {
+                            const [label, value] = part.split(": ");
+                            return (
+                                <div key={index}>
+                                    <strong>{label}:</strong>{" "}
+                                    {value}
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            </div>
             <div className="bg-[#F2F8FC] p-4 rounded-[10px]">
                 <div className=" mb-2 flex gap-[8px] text-lg montserrat-bold">
                     <p className="">Resolved vs. Closed vs. Unresolved</p>
@@ -842,71 +925,55 @@ const ReportPage = () => {
                         ) && <p>- (No {dataSet.length > 1 ? 'results' : 'result'} found)</p>}
                 </div>
                 <div className="overflow-x-auto mt-[40px]">
-                    <ResponsiveContainer width="100%" height={228}>
-                        <BarChart
-                            data={dataSet}
-                            margin={{
-                                top: 20,
-                                right: 30,
-                                left: -25,
-                                bottom: 5,
-                            }}
-                        >
-                            <CartesianGrid
-                                strokeDasharray="3 3"
-                                vertical={false}
-                            />
-                            <XAxis
-                                dataKey="name"
-                                tick={{
-                                    fill: "#175D5F", // Change the tick color
-                                    fontSize: 10, // Set font size
-                                    fontWeight: 600, // Set font weight
-                                }}
-                            />
-                            <YAxis
-                                tickCount={8} // Divides the Y-axis into increments of 10
-                                interval={0} // Ensures all ticks are displayed
-                                domain={[0, "dataMax + 10"]} // Adjusts the range dynamically
-                                tickFormatter={(value) => `${value}`} // Optional: Customize tick format
-                                tick={{
-                                    fill: "#348017", // Change the tick color
-                                    fontSize: 12, // Set font size
-                                    fontWeight: 400, // Set font weight
-                                }}
-                            />
-                            <Tooltip content={<CustomTooltip1 />} />
+                    <div className="min-w-[600px]"> {/* Ensures horizontal scrolling when needed */}
+                    <ResponsiveContainer
+                        width={dataSet.length > 13 ? dataSet.length * 200 : "100%"}
+                        height={228}
+                    >
 
-                            <Bar
-                                dataKey="Resolved"
-                                fill="#348017"
-                                barSize={15}
-                                radius={[3, 3, 0, 0]}
+                            <BarChart
+                                data={dataSet}
+                                margin={{
+                                    top: 20,
+                                    right: 30,
+                                    left: -25,
+                                    bottom: 5,
+                                }}
                             >
-                                <LabelList dataKey="Resolved" position="top" />
-                            </Bar>
-                            <Bar
-                                dataKey="Closed"
-                                fill="#D6E4D1"
-                                barSize={15}
-                                radius={[3, 3, 0, 0]}
-                            >
-                                <LabelList dataKey="Closed" position="top" />
-                            </Bar>
-                            <Bar
-                                dataKey="Unresolved"
-                                fill="#EF4444"
-                                barSize={15}
-                                radius={[3, 3, 0, 0]}
-                            >
-                                <LabelList
-                                    dataKey="Unresolved"
-                                    position="top"
+                                <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                                <XAxis
+                                    dataKey="name"
+                                    tick={{
+                                        fill: "#175D5F",
+                                        fontSize: 10,
+                                        fontWeight: 600,
+                                    }}
                                 />
-                            </Bar>
-                        </BarChart>
-                    </ResponsiveContainer>
+                                <YAxis
+                                    tickCount={8}
+                                    interval={0}
+                                    domain={[0, "dataMax + 10"]}
+                                    tick={{
+                                        fill: "#348017",
+                                        fontSize: 12,
+                                        fontWeight: 400,
+                                    }}
+                                />
+                                <Tooltip content={<CustomTooltip1 />} />
+                                <Bar dataKey="Resolved" fill="#348017" barSize={15} radius={[3, 3, 0, 0]}>
+                                    <LabelList dataKey="Resolved" position="top" />
+                                </Bar>
+                                <Bar dataKey="Closed" fill="#D6E4D1" barSize={15} radius={[3, 3, 0, 0]}>
+                                    <LabelList dataKey="Closed" position="top" />
+                                </Bar>
+                                <Bar dataKey="Unresolved" fill="#EF4444" barSize={15} radius={[3, 3, 0, 0]}>
+                                    <LabelList dataKey="Unresolved" position="top" />
+                                </Bar>
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </div>
                 </div>
+
                 <div className="w-full flex-col flex items-start justify-start h-max pl-[15px]">
                     <p className="text-[18px] montserrat-bold">
                         Resolved: {totalResolved}
@@ -932,19 +999,12 @@ const ReportPage = () => {
                                     e.preventDefault();
                                     setSearchFilter({
                                         status: "Resolved",
-                                        selectedYear: yearValue,
-                                        selectedMonth:
-                                            monthValue !== "All"
-                                                ? monthValue
-                                                : "",
-                                        departments:
-                                            departmentValue !== "All"
-                                                ? departmentValue
-                                                : "",
-                                        selectedProperty:
-                                            projectValue !== "All"
-                                                ? projectValue
-                                                : "",
+                                        selectedYear: yearValue !== "All" ? yearValue : "",
+                                        selectedMonth: monthValue !== "All" ? monthValue : "",
+                                        departments: departmentValue !== "All" ? departmentValue : "",
+                                        selectedProperty: projectValue !== "All" ? projectValue : "",
+                                        startDate: startDateValue,
+                                        endDate: endDateValue,
                                     });
                                     navigate("/inquirymanagement/inquirylist");
                                 }}
@@ -985,19 +1045,12 @@ const ReportPage = () => {
                                     e.preventDefault();
                                     setSearchFilter({
                                         status: "Closed",
-                                        selectedYear: yearValue,
-                                        selectedMonth:
-                                            monthValue !== "All"
-                                                ? monthValue
-                                                : "",
-                                        departments:
-                                            departmentValue !== "All"
-                                                ? departmentValue
-                                                : "",
-                                        selectedProperty:
-                                            projectValue !== "All"
-                                                ? projectValue
-                                                : "",
+                                        selectedYear: yearValue !== "All" ? yearValue : "",
+                                        selectedMonth: monthValue !== "All" ? monthValue : "",
+                                        departments: departmentValue !== "All" ? departmentValue : "",
+                                        selectedProperty: projectValue !== "All" ? projectValue : "",
+                                        startDate: startDateValue,
+                                        endDate: endDateValue,
                                     });
                                     navigate("/inquirymanagement/inquirylist");
                                 }}
@@ -1038,19 +1091,12 @@ const ReportPage = () => {
                                     e.preventDefault();
                                     setSearchFilter({
                                         status: "unresolved",
-                                        selectedYear: yearValue,
-                                        selectedMonth:
-                                            monthValue !== "All"
-                                                ? monthValue
-                                                : "",
-                                        departments:
-                                            departmentValue !== "All"
-                                                ? departmentValue
-                                                : "",
-                                        selectedProperty:
-                                            projectValue !== "All"
-                                                ? projectValue
-                                                : "",
+                                        selectedYear: yearValue !== "All" ? yearValue : "",
+                                        selectedMonth: monthValue !== "All" ? monthValue : "",
+                                        departments: departmentValue !== "All" ? departmentValue : "",
+                                        selectedProperty: projectValue !== "All" ? projectValue : "",
+                                        startDate: startDateValue,
+                                        endDate: endDateValue,
                                     });
                                     navigate("/inquirymanagement/inquirylist");
                                 }}
@@ -2542,11 +2588,10 @@ const ReportPage = () => {
                                     (item) => item.value === 0
                                 ) && <p>- (No {dataCategory.length > 1 ? 'results' : 'result'} found)</p>}
                         </div>
-
                         <div className="border border-t-1"></div>
                         <div className="flex flex-col">
                             <div className="flex justify-center">
-                                <PieChart width={1648} height={620}>
+                                <PieChart width={1648} height={730}>
                                     <Pie
                                         data={dataCategory}
                                         cx="50%"

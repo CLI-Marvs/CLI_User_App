@@ -1089,9 +1089,21 @@ class ConcernController extends Controller
            
         }
 
-        if (!empty($searchParams['pickDate'])) {
-            $pickDate = Carbon::parse($searchParams['pickDate'])->setTimezone('Asia/Manila');
-            $query->whereDate('concerns.created_at', '=', $pickDate);
+        if (!empty($searchParams['startDate']) || !empty($searchParams['endDate'])) {
+            $startDate = Carbon::parse($searchParams['startDate'])->setTimezone('Asia/Manila');
+            $endDate = Carbon::parse($searchParams['endDate'])->setTimezone('Asia/Manila');
+            if ($startDate && $endDate) {
+                $query->whereBetween(DB::raw('DATE(created_at)'), [$startDate, $endDate]);
+            }
+           
+            elseif ($startDate) {
+                $query->whereDate('created_at', '>=', $startDate); 
+            }
+            
+            elseif ($endDate) {
+                $query->whereDate('created_at', '<=', $endDate); 
+            }
+            
         }
 
         if (!empty($searchParams['selectedYear'])) {

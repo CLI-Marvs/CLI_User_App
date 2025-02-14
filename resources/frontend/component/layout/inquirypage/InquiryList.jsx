@@ -56,14 +56,10 @@ const InquiryList = () => {
         setSearchSummary,
         resultSearchActive,
         setResultSearchActive,
-        fromDate,
-        setFromDate,
-        toDate,
-        setToDate,
-        fromDateValue,
-        toDateValue,
-        setFromDateValue,
-        setToDateValue
+        startDate,
+        setStartDate,
+        endDate,
+        setEndDate,
         /*  setHasAttachments,
         hasAttachments */
     } = useStateContext();
@@ -74,6 +70,8 @@ const InquiryList = () => {
     const channelsParam = searchFilter?.channels;
     const categoryParam = searchFilter?.category;
     const departmentParam = searchFilter?.departments;
+    const startDateParam = searchFilter?.startDate;
+    const endDateParam = searchFilter?.endDate;
     const monthParam = searchFilter?.selectedMonth;
     const yearParam = searchFilter?.selectedYear;
 
@@ -92,7 +90,6 @@ const InquiryList = () => {
     const [hasAttachments, setHasAttachments] = useState(false);
     const { propertyNamesList } = useStateContext();
     const [assignedToMeActive, setAssignedToMeActive] = useState(false);
-    const [pickDate, setPickDate] = useState(null);
     const [isFilterVisible, setIsFilterVisible] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
     const [lastActivity, setLastActivity] = useState(null);
@@ -128,7 +125,8 @@ const InquiryList = () => {
             setSpecificAssigneeCsr("");
             setAssignedToMeActive(false);
         }
-        setPickDate(null);
+        setStartDate(null);
+        setEndDate(null);
 
         if (specificAssigneeCsr !== "" && daysFilter !== null) {
             setSpecificAssigneeCsr("");
@@ -155,10 +153,6 @@ const InquiryList = () => {
 
     const toggleFilterBox = () => {
         setIsFilterVisible((prev) => !prev);
-    };
-
-    const handleDateChange = (date) => {
-        setPickDate(date);
     };
 
     const handleClickOutside = (event) => {
@@ -397,8 +391,14 @@ const InquiryList = () => {
         }
         if (departments) summaryParts.push(`Department: ${departments}`);
         if (ticket) summaryParts.push(`Ticket: ${ticket}`);
-        if (pickDate)
-            summaryParts.push(`Start Date: ${formatDate(pickDate)}`);
+        if (startDate && endDate) {
+            summaryParts.push(`Start Date: ${formatDate(startDate)}`);
+            summaryParts.push(`End Date: ${formatDate(endDate)}`);
+        } else if (startDate) {
+            summaryParts.push(`Start Date: ${formatDate(startDate)}`);
+        } else if (endDate) {
+            summaryParts.push(`End Date: ${formatDate(endDate)}`);
+        }
         if (selectedProperty)
             summaryParts.push(`Property: ${selectedProperty}`);
         if (selectedMonth)
@@ -417,7 +417,8 @@ const InquiryList = () => {
             channels,
             departments,
             ticket,
-            pickDate,
+            startDate,
+            endDate,
             selectedProperty,
             hasAttachments,
             selectedMonth,
@@ -440,6 +441,8 @@ const InquiryList = () => {
         setSelectedYear("");
         setSelectedMonth("");
         setDepartments("");
+        setStartDate(null);
+        setEndDate(null);
     };
 
 
@@ -489,8 +492,14 @@ const InquiryList = () => {
             if (departmentParam)
                 summaryParts.push(`Department: ${departmentParam}`);
             if (ticket) summaryParts.push(`Ticket: ${ticket}`);
-            if (pickDate)
-                summaryParts.push(`Start Date: ${formatDate(pickDate)}`);
+            if (startDateParam && endDateParam) {
+                summaryParts.push(`Start Date: ${formatDate(startDateParam)}`);
+                summaryParts.push(`End Date: ${formatDate(endDateParam)}`);
+            } else if (startDateParam) {
+                summaryParts.push(`Start Date: ${formatDate(startDateParam)}`);
+            } else if (endDateParam) {
+                summaryParts.push(`End Date: ${formatDate(endDateParam)}`);
+            }
             if (propertyParam)
                 summaryParts.push(`Property: ${propertyParam}`);
             if (yearParam) summaryParts.push(`Year: ${yearParam}`);
@@ -959,10 +968,19 @@ const InquiryList = () => {
                                                     </label>
                                                     <div className="relative">
                                                         <DatePicker
-                                                            selected={pickDate}
-                                                            onChange={handleDateChange}
+                                                            selected={startDate}
+                                                            onChange={(date) => {
+                                                                setStartDate(date);
+                                                                setSelectedYear("");
+                                                                setSelectedMonth("");
+                                                            }}
+                                                            onFocus={() => {
+                                                                setSelectedYear("");
+                                                                setSelectedMonth("");
+                                                            }}
                                                             className="border-b-1 outline-none w-[180px] text-sm px-[8px]"
                                                             calendarClassName="custom-calendar"
+                                                            
                                                         />
 
                                                         <img
@@ -978,10 +996,19 @@ const InquiryList = () => {
                                                     </label>
                                                     <div className="relative">
                                                         <DatePicker
-                                                            selected={pickDate}
-                                                            onChange={handleDateChange}
+                                                            selected={endDate}
+                                                            onChange={(date) => {
+                                                                setEndDate(date);
+                                                                setSelectedYear("");
+                                                                setSelectedMonth("");
+                                                            }}
+                                                            onFocus={() => {
+                                                                setSelectedYear("");
+                                                                setSelectedMonth("");
+                                                            }}
                                                             className="border-b-1 outline-none w-full text-sm px-[8px]"
                                                             calendarClassName="custom-calendar"
+                                                            minDate={startDate}
                                                         />
 
                                                         <img
@@ -1003,11 +1030,11 @@ const InquiryList = () => {
                                                 <select
                                                     className="w-full border-b-1 outline-none appearance-none text-sm absolute px-[8px]"
                                                     value={selectedYear}
-                                                    onChange={(e) =>
-                                                        setSelectedYear(
-                                                            e.target.value
-                                                        )
-                                                    }
+                                                    onChange={(e) => {
+                                                        setSelectedYear(e.target.value);
+                                                        setStartDate(null);
+                                                        setEndDate(null);
+                                                    }}
                                                 >
                                                     <option value="">
                                                         {" "}
@@ -1040,11 +1067,11 @@ const InquiryList = () => {
                                             </label>
                                             <select
                                                 className="w-[220px] border-b-1 outline-none appearance-none text-sm px-[8px]"
-                                                onChange={(e) =>
-                                                    setSelectedMonth(
-                                                        e.target.value
-                                                    )
-                                                }
+                                                onChange={(e) => {
+                                                    setSelectedMonth(e.target.value);
+                                                    setStartDate(null);
+                                                    setEndDate(null);
+                                                }}
                                                 value={selectedMonth}
                                             >
                                                 <option value="">
