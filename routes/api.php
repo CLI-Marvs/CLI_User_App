@@ -143,6 +143,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
     /*Property Data*/
     Route::prefix('properties')->group(function () {
+        // Get property names  
+        Route::get('names', [PropertyMasterController::class, 'getPropertyNames']);
         // Get property names with ids
         Route::get('names/with-ids', [PropertyMasterController::class, 'getPropertyNamesWithIds']);
         // Store property details

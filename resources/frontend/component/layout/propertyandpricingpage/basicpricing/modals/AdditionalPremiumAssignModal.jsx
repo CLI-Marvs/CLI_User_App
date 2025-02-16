@@ -15,28 +15,41 @@ const AdditionalPremiumAssignModal = ({ modalRef, propertyData }) => {
         isCheckingUnits,
     } = useUnit();
     const [formattedUnits, setFormattedUnits] = useState([]);
-    const [localExcelId, setLocalExcelId] = useState(null);
-    const [localTowerPhaseId, setLocalTowerPhaseId] = useState(null);
     const [selectedUnit, setSelectedUnit] = useState({});
     const { pricingData } = usePricing();
 
     //Hooks
     useEffect(() => {
-        setLocalExcelId(propertyData?.excel_id || excelId);
-        setLocalTowerPhaseId(propertyData?.tower_phase_id || towerPhaseId);
-    }, [propertyData]);
+        const newExcelId = propertyData?.excel_id || excelId;
+        const newTowerPhaseId = propertyData?.tower_phase_id || towerPhaseId;
 
-    useEffect(() => {
-        // Combine conditions to avoid unnecessary checks
-        if (!localExcelId || !localTowerPhaseId) return;
-        console.log("localExcelId", localExcelId);
-        // Memoize the function call if checkExistingUnits is passed as a prop
+        if (!newExcelId || !newTowerPhaseId) return;
+
+        console.log("Fetching units for:", newExcelId, newTowerPhaseId);
+
         const fetchData = async () => {
-            await checkExistingUnits(localTowerPhaseId, localExcelId);
+            await checkExistingUnits(newTowerPhaseId, newExcelId);
         };
 
         fetchData();
-    }, [localExcelId, localTowerPhaseId]);
+    }, [propertyData, excelId, towerPhaseId, checkExistingUnits]);
+    // useEffect(() => {
+    //     setLocalExcelId(propertyData?.excel_id || excelId);
+    //     console.log("propertyData", propertyData);
+    //     setLocalTowerPhaseId(propertyData?.tower_phase_id || towerPhaseId);
+    // }, [propertyData]);
+
+    // useEffect(() => {
+    //     // Combine conditions to avoid unnecessary checks
+    //     if (!localExcelId || !localTowerPhaseId) return;
+    //     console.log("localExcelId", localExcelId);
+    //     // Memoize the function call if checkExistingUnits is passed as a prop
+    //     const fetchData = async () => {
+    //         await checkExistingUnits(localTowerPhaseId, localExcelId);
+    //     };
+
+    //     fetchData();
+    // }, [localExcelId, localTowerPhaseId, checkExistingUnits]);
 
     /**
      * Groups units by floor using `useMemo` for optimization.

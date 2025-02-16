@@ -1,19 +1,14 @@
-import React, {
-    createContext,
-    useContext,
-    useState,
-    useCallback,
-} from "react";
+import React, { createContext, useContext, useState, useCallback } from "react";
 import { unitService } from "@/component/servicesApi/apiCalls/propertyPricing/unit/unitService";
 
 const UnitContext = createContext();
 
 export const UnitProvider = ({ children }) => {
     const [excelId, setExcelId] = useState(null);
-    const [excelFromPriceList, setExcelFromPriceList] = useState(null);
     const [floors, setFloors] = useState([]);
     const [error, setError] = useState(null);
-    const [towerPhaseId, setTowerPhaseId] = useState();
+    const [towerPhaseId, setTowerPhaseId] = useState(null);
+    const [excelIdFromPriceList, setExcelIdFromPriceList] = useState(null);
     const [floorPremiumsAccordionOpen, setFloorPremiumsAccordionOpen] =
         useState(false);
     const [unitsByFloor, setUnitByFloors] = useState([]);
@@ -22,6 +17,7 @@ export const UnitProvider = ({ children }) => {
     const [isCheckingUnits, setIsCheckingUnits] = useState(false);
     const [isFetchingUnits, setIsFetchingUnits] = useState(false);
     const [isUploadingUnits, setIsUploadingUnits] = useState(false);
+    const [lastFetchedExcelId, setLastFetchedExcelId] = useState(null);
 
     /**
      * Fetches the count of floors for a given tower phase and excel ID.
@@ -42,7 +38,7 @@ export const UnitProvider = ({ children }) => {
                 console.log("response fetchFloorCount", response);
 
                 if (response?.data?.data) {
-                    setFloors(response.data.data);  
+                    setFloors(response.data.data);
                     return response.data.data;
                 }
             } catch (err) {
@@ -67,40 +63,42 @@ export const UnitProvider = ({ children }) => {
      */
     const checkExistingUnits = useCallback(
         async (towerPhaseId, excelId, forceFetch = false) => {
-            // Prevent unnecessary API calls
-            if (units.length > 0 && !forceFetch) {
-                console.log("Using cached units data");
-                return;
-            }
-
-            // Handle null/undefined excelId
-            if (!excelId) {
-                console.log("No excelId provided, clearing data");
+            if (!towerPhaseId || !excelId) {
+                console.log("Invalid towerPhaseId or excelId, clearing data");
                 setFloors([]);
                 setUnits([]);
                 return;
             }
 
-            // Use a flag to prevent duplicate calls
+            // Prevent unnecessary API calls if data exists but allow forced fetch
+            if (
+                !forceFetch &&
+                lastFetchedExcelId === excelId &&
+                units.length > 0
+            ) {
+                console.log("Using cached units data for excelId:", excelId);
+                return;
+            }
+
             if (isCheckingUnits) {
                 console.log("Already checking units, skipping duplicate call");
                 return;
             }
 
             try {
-                setTowerPhaseId(towerPhaseId);
                 setIsCheckingUnits(true);
+                console.log("Fetching units for:", towerPhaseId, excelId);
 
                 const response = await unitService.getExistingUnits(
                     towerPhaseId,
                     excelId
                 );
-
                 const unitsData = response?.data?.data || [];
                 setUnits(unitsData);
+                setLastFetchedExcelId(excelId);  
 
-                // Only fetch floor count if we have valid units data
-                if (unitsData[0]?.excel_id) {
+                // Fetch floor count only if units exist
+                if (unitsData.length > 0 && unitsData[0]?.excel_id) {
                     await fetchFloorCount(towerPhaseId, unitsData[0].excel_id);
                 }
             } catch (err) {
@@ -110,7 +108,7 @@ export const UnitProvider = ({ children }) => {
                 setIsCheckingUnits(false);
             }
         },
-        [fetchFloorCount, units.length, isCheckingUnits]
+        [fetchFloorCount, units, isCheckingUnits, lastFetchedExcelId]
     );
 
     /**
@@ -186,8 +184,12 @@ export const UnitProvider = ({ children }) => {
         isFetchingUnits,
         isFloorCountLoading,
         units,
-        excelFromPriceList,
-        setExcelFromPriceList,
+        lastFetchedExcelId,
+        setLastFetchedExcelId,
+        towerPhaseId,
+        setTowerPhaseId,
+        excelIdFromPriceList,
+        setExcelIdFromPriceList,
     };
     return (
         <UnitContext.Provider value={value}>{children}</UnitContext.Provider>

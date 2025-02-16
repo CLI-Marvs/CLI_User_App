@@ -33,7 +33,6 @@ const BasicPricing = () => {
     const [fileName, setFileName] = useState("");
     const [fileSelected, setFileSelected] = useState({});
     const [selectedExcelHeader, setSelectedExcelHeader] = useState([]);
-    const [lastFetchedExcelId, setLastFetchedExcelId] = useState(null);
     const {
         pricingData,
         resetPricingData,
@@ -47,7 +46,11 @@ const BasicPricing = () => {
         floors,
         setFloors,
         setFloorPremiumsAccordionOpen,
-        setExcelFromPriceList,
+        excelId,
+        lastFetchedExcelId,
+        setLastFetchedExcelId,
+        setTowerPhaseId,
+        setExcelIdFromPriceList,
     } = useUnit();
     const [accordionStates, setAccordionStates] = useState({
         priceListSettings: false,
@@ -56,7 +59,10 @@ const BasicPricing = () => {
         priceVersions: false,
         reviewAndApprovalSetting: false,
     });
- 
+    const [
+        isReviewAndApprovalAccordionOpen,
+        setIsReviewAndApprovalAccordionOpen,
+    ] = useState(false);
 
     //Hooks
     /**
@@ -68,7 +74,10 @@ const BasicPricing = () => {
     useEffect(() => {
         if (data) {
             setPropertyData(data);
-            setExcelFromPriceList(data?.excel_id);
+            setTowerPhaseId(
+                data?.tower_phase_id || data?.data?.tower_phases[0]?.id
+            );
+            setExcelIdFromPriceList(data?.excel_id);
             // Update the priceListSettings
             if (data?.pricebasic_details) {
                 setPricingData((prev) => ({
@@ -115,7 +124,7 @@ const BasicPricing = () => {
 
             // Update the floor premiums
             if (data?.floor_premiums && data?.floor_premiums.length > 0) {
-                console.log("Floor premiums have data 1", data?.floor_premiums);
+                // console.log("Floor premiums have data 1", data?.floor_premiums);
                 const floorPremiumData = data?.floor_premiums.reduce(
                     (acc, premium) => {
                         acc[premium.floor] = {
@@ -172,47 +181,62 @@ const BasicPricing = () => {
                 "Excel ID is null, clearing previous data",
                 data?.excel_id
             );
-
-            if (
-                floors.length > 0 ||
-                Object.keys(pricingData.floorPremiums).length > 0
-            ) {
-                setFloors([]);
-                setPricingData((prev) => ({
-                    ...prev,
-                    floorPremiums: [],
-                    additionalPremiums: [],
-                }));
-            }
-            return;
+            setFloors([]);
+            setPricingData((prev) => ({
+                ...prev,
+                floorPremiums: [],
+                additionalPremiums: [],
+            }));
+            // if (
+            //     floors.length > 0 ||
+            //     Object.keys(pricingData.floorPremiums).length > 0
+            // ) {
+            //     setFloors([]);
+            //     setPricingData((prev) => ({
+            //         ...prev,
+            //         floorPremiums: [],
+            //         additionalPremiums: [],
+            //     }));
+            // }
+            // return;
         }
 
         if (
+            excelId &&
             data?.excel_id &&
-            data?.excel_id !== lastFetchedExcelId &&
-            (floors.length === 0 ||
-                Object.keys(pricingData.floorPremiums).length === 0)
+            data?.excel_id !== lastFetchedExcelId
         ) {
             console.log(
-                "Fetching floors because no existing data is found for 1",
+                "Fetching floors due to excel_id change",
                 data?.excel_id
             );
+
             checkExistingUnits(data.tower_phase_id, data.excel_id);
-            setLastFetchedExcelId(data?.excel_id); // ✅ Track last fetched ID
+            setLastFetchedExcelId(data?.excel_id);
         }
-        if (pricingData.additionalPremiums.length === 0) {
+
+        if (excelId || pricingData.additionalPremiums.length === 0) {
             setPricingData((prev) => ({
                 ...prev,
                 additionalPremiums: additionalPremiums,
             }));
+            console.log("pricingdata", pricingData);
         }
-    }, [data?.excel_id, data?.tower_phase_id, additionalPremiums]);
+    }, [
+        data?.excel_id,
+        data?.tower_phase_id,
+        additionalPremiums,
+        lastFetchedExcelId,
+    ]);
 
     useEffect(() => {
         return () => {
             setAccordionStates({
                 priceListSettings: false,
+                floorPremium: false,
                 additionalPremiums: false,
+                priceVersions: false,
+                reviewAndApprovalSetting: false,
             });
         };
     }, [location]);
@@ -224,6 +248,17 @@ const BasicPricing = () => {
             ...prev,
             [name]: !prev[name],
         }));
+
+        // Handle review setting state
+        if (name === "reviewAndApprovalSetting") {
+            // If opening the review accordion, set to true
+            if (!accordionStates.reviewAndApprovalSetting) {
+                setIsReviewAndApprovalAccordionOpen(true);
+            } else {
+                // If closing the review accordion, set to false
+                setIsReviewAndApprovalAccordionOpen(false);
+            }
+        }
     };
 
     // Open the add property modal
@@ -558,15 +593,16 @@ const BasicPricing = () => {
                 />
 
                 <ReviewsandApprovalRouting
+                    propertyData={propertyData}
+                    isReviewAndApprovalAccordionOpen={
+                        isReviewAndApprovalAccordionOpen
+                    }
                     isOpen={accordionStates.reviewAndApprovalSetting}
                     toggleAccordion={() =>
                         toggleAccordion("reviewAndApprovalSetting")
                     }
                 />
             </div>
-            {/* <div>
-                <AddPropertyModal modalRef={modalRef} />
-            </div> */}
         </div>
     );
 };

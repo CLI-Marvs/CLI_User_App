@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef } from "react";
 import { IoIosArrowDown } from "react-icons/io";
 import { FaRegTrashAlt } from "react-icons/fa";
 import AdditionalPremiumAssignModal from "../modals/AdditionalPremiumAssignModal";
@@ -8,20 +8,14 @@ import { showToast } from "@/util/toastUtil";
 
 const AdditionalPremiums = ({ propertyData, isOpen, toggleAccordion }) => {
     //States
-    const { excelId } = useUnit();
+    const { excelId, excelIdFromPriceList, lastFetchedExcelId,towerPhaseId } = useUnit();
     const [newAdditionalPremium, setNewAdditionalPremium] = useState({
         viewName: "",
         premiumCost: 0,
         excludedUnitIds: [],
     });
     const modalRef = useRef(null);
-    const [localExcelId, setLocalExcelId] = useState(null);
     const { setPricingData, pricingData } = usePricing();
-
-    //Hooks
-    useEffect(() => {
-        setLocalExcelId(propertyData?.excel_id);
-    }, [propertyData]);
 
     //Event Handler
     //Handle input on change
@@ -157,8 +151,8 @@ const AdditionalPremiums = ({ propertyData, isOpen, toggleAccordion }) => {
             >
                 <div className=" overflow-hidden">
                     <div className="w-full p-5">
-                        {(localExcelId !== null &&
-                            localExcelId !== undefined) ||
+                        {(excelIdFromPriceList !== null &&
+                            excelIdFromPriceList !== undefined) ||
                         (excelId !== null && excelId !== undefined) ? (
                             <div className="flex justify-center w-full h-[31px] gap-3 mb-4">
                                 <div className="flex items-center border border-custom-grayF1 rounded-[5px] overflow-hidden w-[375px] text-sm">
@@ -300,7 +294,7 @@ const AdditionalPremiums = ({ propertyData, isOpen, toggleAccordion }) => {
                             </div>
                         </div>
                         <div className="flex justify-center">
-                            {(excelId ? true : localExcelId) && (
+                            {(excelId ? true : excelIdFromPriceList) && (
                                 <button
                                     onClick={handleOpenModal}
                                     className="w-[137px] h-[37px] rounded-[7px] gradient-btn2 p-[4px] text-custom-solidgreen hover:shadow-custom4 text-sm"

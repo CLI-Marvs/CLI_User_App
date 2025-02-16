@@ -1,12 +1,67 @@
-import React, { useState } from 'react'
+import React, { useState, useRef, useEffect } from "react";
 import { IoIosArrowDown } from "react-icons/io";
 import { IoMdArrowDropdown } from "react-icons/io";
+import { usePricing } from "@/component/layout/propertyandpricingpage/basicpricing/context/BasicPricingContext";
+import { useUnit } from "@/context/PropertyPricing/UnitContext";
 
+const staticHeaders = [
+    "Floor",
+    "Room",
+    "Unit",
+    "Type",
+    "Indoor Area",
+    "Balcony Area",
+    "Total Area",
+];
 
-const ReviewsandApprovalRouting = ({isOpen, toggleAccordion}) => {
+const ReviewsandApprovalRouting = ({
+    isOpen,
+    toggleAccordion,
+    propertyData,
+    isReviewAndApprovalAccordionOpen,
+}) => {
     //States
-   
+    const { pricingData } = usePricing();
+    const { units } = useUnit();
+    const [priceVersions, setPriceVersions] = useState([]);
+    const [priceVersionsName, setPriceVersionsName] = useState([]);
+    const headers = [...staticHeaders, ...priceVersionsName];
+    // const unitsData = [
+    //     {
+    //         floor: 2,
+    //         room: 1,
+    //         unit: "T102.001",
+    //         type: "Studio",
+    //         indoorArea: 24,
+    //         balconyArea: 3.25,
+    //         totalArea: 23.25,
+    //     },
+    // ];
+    // console.log("unitsData", units);
+    //Hooks
+    /**
+     * This hooks, map the price_versions from propertyData to priceVersionsName and priceVersions
+     */
+    useEffect(() => {
+        if (
+            propertyData?.price_versions &&
+            Array.isArray(propertyData.price_versions)
+        ) {
+            const versionNames = propertyData.price_versions
+                .map((item) => item.version_name)
+                .filter(Boolean);
 
+            setPriceVersionsName(versionNames);
+            setPriceVersions(propertyData.price_versions);
+        } else {
+            console.error(
+                "propertyData?.price_versions is not an array:",
+                propertyData?.price_versions
+            );
+        }
+    }, [propertyData]);
+
+    useEffect(() => {}, [isReviewAndApprovalAccordionOpen]);
     return (
         <>
             <div
@@ -53,25 +108,154 @@ const ReviewsandApprovalRouting = ({isOpen, toggleAccordion}) => {
                     ? "mt-2 mb-4 grid-rows-[1fr] opacity-100"
                     : "grid-rows-[0fr] opacity-0"
             }
-            `}
+            overflow-auto`}
             >
-                <div className=" overflow-hidden">
-                    <div className="p-[20px] space-y-[10px]">
+                <div className="  ">
+                    <div className="p-[20px] space-y-[10px] ">
                         <div>
                             <p className="underline text-blue-500 text-sm cursor-pointer">
                                 Download Excel
                             </p>
                         </div>
-                        <div>
-                            //TODO: Reviewed by and approved by, add plus sign,
-                            when click, another select tag to show, so that can
-                            select another employee
-                            <iframe
-                                src=""
-                                frameBorder="0"
-                                className="w-[814px] h-[400px] overflow-auto"
-                            ></iframe>
+                        <div className="  h-[400px] overflow-auto">
+                            <div className="">
+                                <h1 className="montserrat-semibold">
+                                    VERTICAL INVENTORY PRICING TEMPLATE
+                                </h1>
+                                <div className="min-w-[500px]  ">
+                                    <div className="flex w-full max-w-[450px]">
+                                        <h6 className="w-1/3">PROJECT</h6>
+                                        <div className="border border-black px-6 flex-1 ml-10">
+                                            <p>{propertyData?.property_name}</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex w-full max-w-[450px]">
+                                        <h6 className="w-1/3">BUILDING</h6>
+                                        <div className="border border-black px-6 flex-1  ml-10">
+                                            <p>
+                                                {propertyData?.tower_phase_name}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div className="flex w-full max-w-[450px]">
+                                        <h6 className="w-1/3">VERSION</h6>
+                                        <div className="border border-black px-6 flex-1  ml-10">
+                                            <p>V1</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex w-full max-w-[450px]">
+                                        <h6 className="w-1/3">
+                                            NUMBER OF UNITS
+                                        </h6>
+                                        <div className="border border-black px-6 flex-1  ml-10">
+                                            <p>123</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex w-full max-w-[450px]">
+                                        <h6 className="w-1/3">
+                                            PRICE LIST TYPE
+                                        </h6>
+                                        <div className="border border-black px-6 flex-1  ml-10">
+                                            <p>As Approved</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex w-full max-w-[450px]">
+                                        <h6 className="w-1/3">VERSION DATE</h6>
+                                        <div className="border border-black px-6 flex-1  ml-10">
+                                            <p>02/14/2025</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="mt-4 w-80">
+                                <table className="bg-blue-900 w-full montserrat-regular">
+                                    <thead>
+                                        <tr>
+                                            <th
+                                                colSpan="7"
+                                                className="bg-[#31498a] w-full py-3 montserrat-bold text-white border-black border"
+                                            >
+                                                Unit
+                                            </th>
+                                            <th
+                                                colSpan="6"
+                                                className="bg-[#31498a] w-full py-3 montserrat-bold text-white border-black border px-2"
+                                            >
+                                                Version
+                                            </th>
+                                        </tr>
+                                        <tr className="bg-[#aebee3] border-black border">
+                                            {headers &&
+                                                headers.map((title, index) => (
+                                                    <th
+                                                        key={title}
+                                                        className={`${
+                                                            title === "Type"
+                                                                ? "px-9"
+                                                                : "px-4"
+                                                        } py-4  border-black border montserrat-semibold ${
+                                                            index === 0
+                                                                ? "min-w-[20px]"
+                                                                : ""
+                                                        }`}
+                                                    >
+                                                        {title}
+                                                    </th>
+                                                ))}
+                                        </tr>
+                                    </thead>
+                                    <tbody className="bg-white">
+                                        {units &&
+                                            units.map((unit, index) => (
+                                                <tr key={index}>
+                                                    {/* Map  Unit Data */}
+                                                    <td className="px-2 border-black border">
+                                                        {unit.floor}
+                                                    </td>
+                                                    <td className="px-2 border-black border">
+                                                        {unit.room_number}
+                                                    </td>
+                                                    <td className="px-2 border-black border">
+                                                        {unit.unit}
+                                                    </td>
+                                                    <td className="px-2 border-black border">
+                                                        {unit.type}
+                                                    </td>
+                                                    <td className="px-2 border-black border">
+                                                        {unit.indoor_area}
+                                                    </td>
+                                                    <td className="px-2 border-black border">
+                                                        {unit.balcony_area}
+                                                    </td>
+                                                    <td className="px-2 border-black border">
+                                                        {unit.total_area}
+                                                    </td>
+
+                                                    {/* Map Dynamic Price Versions */}
+                                                    {priceVersions.map(
+                                                        (
+                                                            version,
+                                                            versionIndex
+                                                        ) => (
+                                                            <td
+                                                                key={
+                                                                    versionIndex
+                                                                }
+                                                                className="px-2 border-black border"
+                                                            >
+                                                                {version.no_of_allowed_buyers ||
+                                                                    "-"}
+                                                            </td>
+                                                        )
+                                                    )}
+                                                </tr>
+                                            ))}
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
+
                         <div className="flex flex-col gap-[10px] w-[429px]">
                             <div className="flex  items-center border border-custom-grayF1 rounded-md overflow-hidden w-[375px] text-sm">
                                 <span className="text-custom-gray81 bg-custom-grayFA flex w-[80%] h-[31px] pl-3 py-1">
@@ -121,6 +305,7 @@ const ReviewsandApprovalRouting = ({isOpen, toggleAccordion}) => {
                                 </div>
                             </div>
                         </div>
+
                         <div className="flex gap-1 justify-center">
                             <button className="h-[37px] w-[176px] rounded-[10px] text-white montserrat-semibold text-sm gradient-btn5 hover:shadow-custom4">
                                 Submit for Approval
@@ -136,6 +321,6 @@ const ReviewsandApprovalRouting = ({isOpen, toggleAccordion}) => {
             </div>
         </>
     );
-}
+};
 
-export default ReviewsandApprovalRouting
+export default ReviewsandApprovalRouting;

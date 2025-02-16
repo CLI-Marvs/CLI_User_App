@@ -18,7 +18,6 @@ class PropertyMasterRepository
     /* 
      Store property data
     */
-
     public function store(array $data)
     {
         DB::beginTransaction();
@@ -88,6 +87,24 @@ class PropertyMasterRepository
         }
     }
 
+    /**
+     * Get specific master data
+     */
+    public function getPropertyMaster($id)
+    {
+        return $this->model->find($id);
+    }
+
+
+    /**
+     * Get all property names
+     */
+    public function getPropertyNames()
+    {
+        return $this->model->pluck('property_name')->toArray();
+    }
+
+    
     /**
      * Get all property names with ID
      */

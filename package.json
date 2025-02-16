@@ -20,7 +20,13 @@
         "@emotion/react": "^11.13.3",
         "@emotion/styled": "^11.13.0",
         "@material-tailwind/react": "^2.1.9",
+        "@mescius/spread-sheets": "^18.0.3",
+        "@mescius/spread-sheets-charts": "^18.0.3",
+        "@mescius/spread-sheets-io": "^18.0.3",
+        "@mescius/spread-sheets-react": "^18.0.3",
+        "@mescius/spread-sheets-shapes": "^18.0.3",
         "@mui/material": "^6.0.0",
+        "file-saver": "^2.0.5",
         "js-cookie": "^3.0.5",
         "lodash": "^4.17.21",
         "moment": "^2.30.1",
@@ -33,8 +39,10 @@
         "react-paginate": "^8.2.0",
         "react-phone-input-2": "^2.15.1",
         "react-router-dom": "^6.26.0",
+        "react-spreadsheet": "^0.9.5",
         "react-toastify": "^10.0.6",
         "recharts": "^2.15.1",
+        "scheduler": "^0.25.0",
         "xlsx": "^0.18.5"
     }
 }

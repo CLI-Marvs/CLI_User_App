@@ -14,7 +14,7 @@ const newFloorState = {
     excludedUnits: [],
 };
 
-const FloorPremiums = ({ propertyData, isOpen, toggleAccordion }) => {
+const FloorPremiums = ({ isOpen, toggleAccordion, propertyData }) => {
     //States
     const [newFloorPremiumData, setNewFloorPremiumData] =
         useState(newFloorState);
@@ -23,15 +23,11 @@ const FloorPremiums = ({ propertyData, isOpen, toggleAccordion }) => {
         floors,
         isFloorCountLoading,
         excelId,
-        excelFromPriceList,
+        excelIdFromPriceList,
         floorPremiumsAccordionOpen,
     } = useUnit();
-    
     const [selectedFloor, setSelectedFloor] = useState(null);
     const { pricingData, setPricingData } = usePricing();
-    const [towerPhaseId, setTowerPhaseId] = useState(null);
-    const [localExcelId, setLocalExcelId] = useState(null);
- 
 
     //Hooks
     /*
@@ -43,13 +39,8 @@ const FloorPremiums = ({ propertyData, isOpen, toggleAccordion }) => {
         if (!floors || Object.keys(floors).length === 0) return;
         floors;
 
-        setTowerPhaseId(
-            propertyData?.tower_phase_id ||
-                propertyData?.data?.tower_phases[0]?.id
-        );
-        setLocalExcelId(propertyData?.excel_id);
-
         if (
+            excelId ||
             !pricingData.floorPremiums ||
             Object.keys(pricingData.floorPremiums).length === 0
         ) {
@@ -73,7 +64,7 @@ const FloorPremiums = ({ propertyData, isOpen, toggleAccordion }) => {
                 }));
             }
         }
-    }, [floors, propertyData]);
+    }, [floors]);
 
     //Event handler
     //Handle to open modal to assign floor premiums
@@ -249,7 +240,7 @@ const FloorPremiums = ({ propertyData, isOpen, toggleAccordion }) => {
             >
                 <div className="bg-white overflow-hidden">
                     <div className="w-full p-5 h-[370px]">
-                        {excelId || localExcelId || excelFromPriceList ? (
+                        {excelId || excelIdFromPriceList ? (
                             <div className="flex justify-center w-full h-[31px] gap-3 mb-4">
                                 <div className="flex items-center border border-custom-grayF1 rounded-[5px] overflow-hidden w-[204px] text-sm  ">
                                     <span className="text-custom-gray81 bg-custom-grayFA  flex items-center w-[120%] font-semibold -mr-3 pl-3 py-1">
@@ -448,10 +439,9 @@ const FloorPremiums = ({ propertyData, isOpen, toggleAccordion }) => {
             </div>
             <div>
                 <FloorPremiumAssignModal
+                    propertyData={propertyData}
                     modalRef={modalRef}
                     selectedFloor={selectedFloor}
-                    towerPhaseId={towerPhaseId}
-                    propertyData={propertyData}
                 />
             </div>
         </>

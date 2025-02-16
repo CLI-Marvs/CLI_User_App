@@ -50,7 +50,7 @@ export const unitService = {
     getUnitsInTowerPhase: async (towerPhaseId, selectedFloor, excelId) => {
         try {
             console.log(
-                "towerPhaseId 48",
+                "getUnitsInTowerPhase",
                 towerPhaseId,
                 selectedFloor,
                 excelId

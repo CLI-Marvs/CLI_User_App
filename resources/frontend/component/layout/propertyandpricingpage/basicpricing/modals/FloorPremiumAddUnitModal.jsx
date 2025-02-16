@@ -24,14 +24,18 @@ const FloorPremiumAddUnitModal = ({
 }) => {
     //States
     const [formData, setFormData] = useState(formDataState);
-    const [excelId, setExcelId] = useState(null);
-    const { fetchUnitsInTowerPhase } = useUnit();
+    const {
+        fetchUnitsInTowerPhase,
+        checkExistingUnits,
+        excelId,
+        excelIdFromPriceList,
+    } = useUnit();
     const [isLoading, setIsLoading] = useState(false);
  
     //Hooks
     useEffect(() => {
         if (unitsByFloor && unitsByFloor.length > 0) {
-            setExcelId(unitsByFloor[0]?.excel_id);
+            // setExcelId(unitsByFloor[0]?.excel_id);
             setFormData((prevData) => ({
                 ...prevData,
                 floor: selectedFloor,
@@ -63,8 +67,8 @@ const FloorPremiumAddUnitModal = ({
                 garden_area: parseFloat(formData.gardenArea).toFixed(2),
                 total_area: parseFloat(formData.totalArea).toFixed(2),
                 tower_phase_id: towerPhaseId,
-                excel_id: excelId,
-                property_masters_id: propertyData?.price_list_master_id,
+                excel_id: excelId || excelIdFromPriceList,
+                price_list_master_id: propertyData?.price_list_master_id,
             };
             setIsLoading(true);
             const response = await unitService.storeUnitDetails(payload);
@@ -77,8 +81,13 @@ const FloorPremiumAddUnitModal = ({
                 await fetchUnitsInTowerPhase(
                     selectedFloor,
                     towerPhaseId,
-                    excelId
+                    excelId || excelIdFromPriceList
                 );
+                await checkExistingUnits(
+                    towerPhaseId,
+                    excelId || excelIdFromPriceList
+                );
+
                 if (modalRef.current) {
                     modalRef.current.close();
                 }

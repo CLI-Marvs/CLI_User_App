@@ -145,7 +145,7 @@ class PriceListMasterRepository
             // Return failure status and error message
             return [
                 'success' => false,
-                'message' => 'Error creating Price List Master: ' . $e->getMessage(),
+                'message' => 'Error creating price price list master. ' . $e->getMessage(),
                 'error_details' => $e->getTraceAsString() // Include stack trace for debugging
             ];
         }

@@ -3,18 +3,19 @@ import FloorPremiumAddUnitModal from "./FloorPremiumAddUnitModal";
 import CircularProgress from "@mui/material/CircularProgress";
 import { useUnit } from "@/context/PropertyPricing/UnitContext";
 import { usePricing } from "@/component/layout/propertyandpricingpage/basicpricing/context/BasicPricingContext";
-const FloorPremiumAssignModal = ({
-    modalRef,
-    selectedFloor,
-    towerPhaseId,
-    propertyData,
-}) => {
+const FloorPremiumAssignModal = ({ modalRef, selectedFloor, propertyData }) => {
     //State
-    // const { setFloorPremiumFormData } = useFloorPremiumStateContext();
+
     const modalRef2 = useRef(null);
     const [excludedUnit, setExcludedUnit] = useState([]);
-    const { fetchUnitsInTowerPhase, unitsByFloor, excelId, isFetchingUnits } =
-        useUnit();
+    const {
+        fetchUnitsInTowerPhase,
+        unitsByFloor,
+        isFetchingUnits,
+        excelIdFromPriceList,
+        towerPhaseId,
+        excelId,
+    } = useUnit();
     const { pricingData, setPricingData } = usePricing();
 
     //Hooks
@@ -24,13 +25,10 @@ const FloorPremiumAssignModal = ({
                 "selectedFloor towerPhaseId excelID25",
                 selectedFloor,
                 towerPhaseId,
-                propertyData?.excel_id || excelId
+                excelIdFromPriceList
             );
-            fetchUnitsInTowerPhase(
-                selectedFloor,
-                towerPhaseId,
-                propertyData?.excel_id || excelId
-            );
+            const excel_id = excelIdFromPriceList || excelId;
+            fetchUnitsInTowerPhase(selectedFloor, towerPhaseId, excel_id);
         }
     }, [selectedFloor]);
 
@@ -226,8 +224,8 @@ const FloorPremiumAssignModal = ({
             <div>
                 <FloorPremiumAddUnitModal
                     modalRef={modalRef2}
-                    unitsByFloor={unitsByFloor}
                     propertyData={propertyData}
+                    unitsByFloor={unitsByFloor}
                     towerPhaseId={towerPhaseId}
                     selectedFloor={selectedFloor}
                 />
