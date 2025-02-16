@@ -2049,7 +2049,7 @@ class ConcernController extends Controller
 
     // Apply department filter
     if ($department && $department !== 'All') {
-        $query->whereRaw("resolve_from::jsonb @> ?", json_encode([['department' => $department]]));
+        $query->whereRaw("assign_to::jsonb @> ?", json_encode([['department' => $department]]));
     }
 
     // Apply month filter
@@ -2135,7 +2135,7 @@ class ConcernController extends Controller
         }
 
         if ($department && $department !== "All") {
-            $query->whereRaw("resolve_from::jsonb @> ?", json_encode([['department' => $department]]));
+            $query->whereRaw("assign_to::jsonb @> ?", json_encode([['department' => $department]]));
         }
 
         if ($startDate && $endDate) {
@@ -2166,32 +2166,32 @@ class ConcernController extends Controller
         $endDate = $request->endDate ? Carbon::parse($request->endDate)->setTimezone('Asia/Manila')->toDateString() : null;
 
         $query = Concerns::select(
-            DB::raw("jsonb_array_elements(resolve_from::jsonb)->>'department' as department"),
+            DB::raw("jsonb_array_elements(assign_to::jsonb)->>'department' as department"),
             DB::raw('COUNT(DISTINCT CASE WHEN status = \'unresolved\' THEN id ELSE NULL END) as unresolved'),
             DB::raw('COUNT(DISTINCT CASE WHEN status = \'Closed\' THEN id ELSE NULL END) as closed'),
             DB::raw('COUNT(DISTINCT CASE WHEN status = \'Resolved\' THEN id ELSE NULL END) as resolved')
         )
             ->whereNotNull('status');
 
-        if($year !== 'All') {
-            $query->whereYear('created_at', $year);
-        }
-
+            if($year !== 'All') {
+                $query->whereYear('created_at', $year);
+            }
+            
+            if ($month !== 'All') {
+                $query->whereMonth('created_at', $month);
+            }
         if ($project && $project !== 'All') {
             $query->where('property', $project);
         }
 
-        if ($month && $month !== 'All') {
-            $query->whereMonth('created_at', $month);
-        }
 
         if ($department && $department !== 'All') {
             if ($department === 'Unassigned') {
-                $query->whereRaw("resolve_from::jsonb @> ?", [json_encode([['department' => null]])]);
+                $query->whereRaw("assign_to::jsonb @> ?", [json_encode([['department' => null]])]);
             } else {
                 $query->whereRaw("
                     EXISTS (
-                        SELECT 1 FROM jsonb_array_elements(resolve_from::jsonb) AS elem
+                        SELECT 1 FROM jsonb_array_elements(assign_to::jsonb) AS elem
                         WHERE elem->>'department' = ?
                     )
                 ", [$department]);
@@ -2225,19 +2225,17 @@ class ConcernController extends Controller
         if ($project && $project !== 'All') {
             $totalUnassigned->where('property', $project);
         }
-
-        if ($month && $month !== 'All') {
-            $totalUnassigned->whereMonth('created_at', $month);
-        }
-
-        if($year !== 'All') {
+        if ($year !== 'All') {
             $totalUnassigned->whereYear('created_at', $year);
         }
-
+        
+        if ($month !== 'All') {
+            $totalUnassigned->whereMonth('created_at', $month);
+        }
         $totalCounts = $totalUnassigned->first();
 
         $concerns = $query
-            ->groupBy(DB::raw("jsonb_array_elements(resolve_from::jsonb)->>'department'"))
+            ->groupBy(DB::raw("jsonb_array_elements(assign_to::jsonb)->>'department'"))
             ->orderBy('department')
             ->get();
 
@@ -2272,7 +2270,7 @@ class ConcernController extends Controller
         }
 
         if ($department && $department !== "All") {
-            $query->whereRaw("resolve_from::jsonb @> ?", json_encode([['department' => $department]]));
+            $query->whereRaw("assign_to::jsonb @> ?", json_encode([['department' => $department]]));
         }
 
         if ($month && $month !== 'All') {
@@ -2343,7 +2341,7 @@ class ConcernController extends Controller
         }
             
         if ($department && $department !== "All") {
-            $query->whereRaw("resolve_from::jsonb @> ?", json_encode([['department' => $department]]));
+            $query->whereRaw("assign_to::jsonb @> ?", json_encode([['department' => $department]]));
         }
 
         if ($month && $month !== 'All') {
@@ -2427,7 +2425,7 @@ class ConcernController extends Controller
         }
 
         if ($department && $department !== "All") {
-            $query->whereRaw("resolve_from::jsonb @> ?", json_encode([['department' => $department]]));
+            $query->whereRaw("assign_to::jsonb @> ?", json_encode([['department' => $department]]));
         }
 
         if ($project && $project !== 'All') {

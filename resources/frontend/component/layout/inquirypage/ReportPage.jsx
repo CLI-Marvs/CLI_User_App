@@ -454,16 +454,16 @@ const ReportPage = () => {
         const total = totalValuePieChart || 1; // Prevent division by zero
         return ((value / total) * 100).toFixed(2) + "%";
     };
-    
+
     const renderCustomLabel = ({ x, y, value, index, payload, cx }) => {
         if (!value || !payload?.name) return null; // Prevent errors if data is missing
-    
+
         const percentage = formatPercentage(value);
         const name = payload.name;
-    
+
         // Adjust text alignment based on label's position relative to pie center
         const textAnchor = x > cx ? "start" : "end";
-    
+
         return (
             <text
                 x={x}
@@ -582,13 +582,27 @@ const ReportPage = () => {
 
     const handleSearchFilter = () => {
 
-        console.log(startDateValue, endDateValue);
-        console.log();
         const summaryParts = [];
 
 
-        if (yearValue !== "All") summaryParts.push(`Year: ${yearValue}`);
-        if (monthValue !== "All") summaryParts.push(`Month: ${formatMonth(monthValue)}`);
+        if (yearValue !== "All"){
+            summaryParts.push(`Year: ${yearValue}`)
+        } else{
+            if(startDateValue || endDateValue){
+                
+            }else{
+                summaryParts.push(`Year: All`)
+            }
+        }
+        if (monthValue !== "All"){
+            summaryParts.push(`Month: ${formatMonth(monthValue)}`)
+        }else{
+            if(startDateValue || endDateValue){
+                    
+            }else{
+                summaryParts.push(`Month: All`)
+            }
+        }
 
         if (startDateValue && endDateValue) {
             summaryParts.push(`Start Date: ${format(startDateValue, "MMM dd, yyyy")}`);
@@ -599,16 +613,16 @@ const ReportPage = () => {
             summaryParts.push(`End Date: ${format(endDateValue, "MMM dd, yyyy")}`);
         }
 
-        if (projectValue !== "All") summaryParts.push(`Project: ${projectValue}`);
-        if (departmentValue !== "All") summaryParts.push(`Department: ${departmentValue}`);
+        if (projectValue !== "All" && projectValue !== "") summaryParts.push(`Project: ${projectValue}`);
+        if (departmentValue !== "All" && departmentValue !== "") summaryParts.push(`Department: ${departmentValue}`);
 
-        if(!startDateValue && !endDateValue && (yearValue == "All" && monthValue == "All" && projectValue == "All" && departmentValue == "All")) {
+     
+        if (!startDateValue && !endDateValue && (yearValue == "All" && monthValue == "All" && projectValue == "All" && departmentValue == "All")) {
             summaryParts.push(`Year: All`);
-            summaryParts.push(`Month: All`);
             summaryParts.push(`Project: All`);
             summaryParts.push(`Department: All`);
         }
-        
+
 
         setSearchSummary(summaryParts);
         setDepartment(departmentValue);
@@ -621,8 +635,8 @@ const ReportPage = () => {
 
     const handleResetFilter = () => {
 
-        setDepartmentValue("All");
-        setProjectValue("All");
+        setDepartmentValue("");
+        setProjectValue("");
         setYearValue(new Date().getFullYear());
         setMonthValue("All");
         setStartDateValue(null);
@@ -633,8 +647,8 @@ const ReportPage = () => {
 
         setYear(new Date().getFullYear());
         setMonthValue("All");
-        setDepartmentValue("All");
-        setProjectValue("All");
+        setDepartmentValue("");
+        setProjectValue("");
         setStartDateValue(null);
         setEndDateValue(null);
 
@@ -642,6 +656,7 @@ const ReportPage = () => {
         const summaryParts = [];
 
         summaryParts.push(`Year: 2025`);
+        summaryParts.push(`Month: All`);
 
         setSearchSummary(summaryParts);
 
@@ -658,12 +673,12 @@ const ReportPage = () => {
         getFullYear();
     }, []);
 
-  /*   useEffect(() => {
-        if (yearValue) {
-            setYear(yearValue);
-        }
-    }, [yearValue]); 
- */
+    /*   useEffect(() => {
+          if (yearValue) {
+              setYear(yearValue);
+          }
+      }, [yearValue]); 
+   */
     /*  useEffect(() => {
          setMonth(getCurrentMonth());
          setPropertyMonth(getCurrentMonth());
@@ -834,18 +849,15 @@ const ReportPage = () => {
                                 name="concern"
                                 className="appearance-none w-full px-4 py-1 bg-white focus:outline-none border-0"
                                 value={projectValue}
-                                onChange={(e) =>
-                                    setProjectValue(e.target.value)
-                                }
+                                onChange={(e) => setProjectValue(e.target.value || "All")}
                             >
+                                <option value="">Select Project</option> {/* Empty default option */}
                                 <option value="All">All</option>
-                                {formattedPropertyNames.map((item, index) => {
-                                    return (
-                                        <option key={index} value={item}>
-                                            {item}
-                                        </option>
-                                    );
-                                })}
+                                {formattedPropertyNames.map((item, index) => (
+                                    <option key={index} value={item}>
+                                        {item}
+                                    </option>
+                                ))}
                             </select>
                             <span className="absolute inset-y-0 right-0 flex items-center text-white pr-3 pl-3 bg-custom-lightgreen pointer-events-none">
                                 <IoMdArrowDropdown />
@@ -861,14 +873,12 @@ const ReportPage = () => {
                                 name="concern"
                                 className="appearance-none w-full px-4 py-1 bg-white focus:outline-none border-0"
                                 value={departmentValue}
-                                onChange={(e) =>
-                                    setDepartmentValue(e.target.value)
-                                }
+                                onChange={(e) => setDepartmentValue(e.target.value || "All")}
                             >
+                                <option value="">Select Department</option> {/* Empty default option */}
                                 <option value="All">All</option>
-                                {user?.department ===
-                                    "Customer Relations - Services" ? (
-                                    allDepartment
+                                {user?.department === "Customer Relations - Services"
+                                    ? allDepartment
                                         .filter((item) => item !== "All")
                                         .sort()
                                         .map((item, index) => (
@@ -876,11 +886,9 @@ const ReportPage = () => {
                                                 {item}
                                             </option>
                                         ))
-                                ) : (
-                                    <option value={user?.department}>
-                                        {user?.department}
-                                    </option>
-                                )}
+                                    : user?.department && (
+                                        <option value={user?.department}>{user?.department}</option>
+                                    )}
                                 <option value="Unassigned">Unassigned</option>
                             </select>
                             <span className="absolute inset-y-0 right-0 flex items-center text-white pr-3 pl-3 bg-custom-lightgreen pointer-events-none">
@@ -935,10 +943,10 @@ const ReportPage = () => {
                 </div>
                 <div className="overflow-x-auto mt-[40px]">
                     <div className="min-w-[600px]"> {/* Ensures horizontal scrolling when needed */}
-                    <ResponsiveContainer
-                        width={dataSet.length > 13 ? dataSet.length * 200 : "100%"}
-                        height={228}
-                    >
+                        <ResponsiveContainer
+                            width={dataSet.length > 13 ? dataSet.length * 200 : "100%"}
+                            height={228}
+                        >
 
                             <BarChart
                                 data={dataSet}
