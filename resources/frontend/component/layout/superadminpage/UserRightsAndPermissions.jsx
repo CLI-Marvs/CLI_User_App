@@ -284,7 +284,7 @@ const UserRightsAndPermissions = () => {
                         />
                     </div>
                 </div>
-                <div className="bg-white rounded-[5px] p-[10px] w-full h-[51px]">
+                <div className="rounded-[5px] p-[10px] w-full h-[51px]">
                     <div className="flex flex-row  gap-[37px] items-center">
                         <div className="montserrat-regular text-sm">
                             Add Specific Department
