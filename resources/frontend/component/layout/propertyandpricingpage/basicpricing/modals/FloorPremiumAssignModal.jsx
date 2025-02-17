@@ -154,7 +154,7 @@ const FloorPremiumAssignModal = ({ modalRef, selectedFloor, propertyData }) => {
                     <div className="flex justify-center items-center h-[51px] w-[89px] bg-white rounded-[10px]">
                         <p className="text-custom-gray81 font-bold">0000000</p>
                     </div>
-                    <p>Excluded unitsByFloor from premium rate</p>
+                    <p>Excluded units from premium rate</p>
                     <div className="h-full border border-r-custom-lightestgreen"></div>
                     <div className="h-[63px] w-[95px] p-[6px] rounded-[15px] gradient-btn4">
                         <div className="flex  justify-center items-center bg-white h-full w-full text-custom-solidgreen rounded-[10px]">

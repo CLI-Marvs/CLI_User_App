@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { IoIosArrowDown } from "react-icons/io";
 import { IoMdArrowDropdown } from "react-icons/io";
 import { usePricing } from "@/component/layout/propertyandpricingpage/basicpricing/context/BasicPricingContext";
@@ -24,20 +24,10 @@ const ReviewsandApprovalRouting = ({
     const { pricingData } = usePricing();
     const { units } = useUnit();
     const [priceVersions, setPriceVersions] = useState([]);
+
     const [priceVersionsName, setPriceVersionsName] = useState([]);
     const headers = [...staticHeaders, ...priceVersionsName];
-    // const unitsData = [
-    //     {
-    //         floor: 2,
-    //         room: 1,
-    //         unit: "T102.001",
-    //         type: "Studio",
-    //         indoorArea: 24,
-    //         balconyArea: 3.25,
-    //         totalArea: 23.25,
-    //     },
-    // ];
-    // console.log("unitsData", units);
+
     //Hooks
     /**
      * This hooks, map the price_versions from propertyData to priceVersionsName and priceVersions
@@ -204,12 +194,28 @@ const ReviewsandApprovalRouting = ({
                                                     </th>
                                                 ))}
                                         </tr>
+                                        <tr className="bg-[#aebee3] border-black border">
+                                            <th colSpan="7"></th>
+                                            {priceVersions &&
+                                                priceVersions.map((version) => (
+                                                    <th
+                                                        key={version}
+                                                        className=" montserrat-regular text-sm text-center pl-4 "
+                                                    >
+                                                        {
+                                                            version.no_of_allowed_buyers
+                                                        }{" "}
+                                                        %
+                                                    </th>
+                                                ))}
+                                        </tr>
                                     </thead>
                                     <tbody className="bg-white">
                                         {units &&
                                             units.map((unit, index) => (
                                                 <tr key={index}>
                                                     {/* Map  Unit Data */}
+
                                                     <td className="px-2 border-black border">
                                                         {unit.floor}
                                                     </td>
@@ -242,7 +248,7 @@ const ReviewsandApprovalRouting = ({
                                                                 key={
                                                                     versionIndex
                                                                 }
-                                                                className="px-2 border-black border"
+                                                                className="px-2 border-black border text-center"
                                                             >
                                                                 {version.no_of_allowed_buyers ||
                                                                     "-"}

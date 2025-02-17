@@ -386,4 +386,10 @@ class PriceListMasterService
         }
         return $priceBasicDetail;
     }
+
+    //Update the price list master status
+    public function updateStatus($id)
+    {
+        return $this->repository->updateStatus($id);
+    }
 }

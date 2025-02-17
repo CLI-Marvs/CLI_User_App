@@ -70,7 +70,7 @@ class PriceListMasterController extends Controller
         $validatedData = $request->validated();
         try {
             $result  = $this->service->update($validatedData, $validatedData['tower_phase_id']);
-            
+
             if ($result['success']) {
                 return response()->json([
                     'message' => $result['message'],
@@ -85,6 +85,33 @@ class PriceListMasterController extends Controller
             return response()->json(
                 [
                     'Error updating price list master' => $e->getMessage()
+                ],
+                500
+            );
+        }
+    }
+
+    /**
+     * Update the price list master status 
+     */
+    public function updateStatus($id)
+    {
+        try {
+            $result = $this->service->updateStatus($id);
+            if ($result['success']) {
+                return response()->json([
+                    'message' => $result['message'],
+                    'data' => $result['data'],
+                ], 200);
+            }
+
+            return response()->json([
+                'message' => $result['message']
+            ], 400);
+        } catch (\Exception $e) {
+            return response()->json(
+                [
+                    'Error updating price list master status' => $e->getMessage()
                 ],
                 500
             );

@@ -10,7 +10,7 @@ import { showToast } from "@/util/toastUtil";
 
 const newFloorState = {
     floor: null,
-    premiumCost: null,
+    premiumCost: 0,
     excludedUnits: [],
 };
 
@@ -18,6 +18,7 @@ const FloorPremiums = ({ isOpen, toggleAccordion, propertyData }) => {
     //States
     const [newFloorPremiumData, setNewFloorPremiumData] =
         useState(newFloorState);
+  
     const modalRef = useRef(null);
     const {
         floors,
@@ -269,16 +270,10 @@ const FloorPremiums = ({ isOpen, toggleAccordion, propertyData }) => {
                                         name="premiumCost"
                                         className="w-full px-4 focus:outline-none "
                                         placeholder=""
+                                        type="number"
                                         value={
                                             newFloorPremiumData.premiumCost ||
                                             ""
-                                        }
-                                        onInput={(e) =>
-                                            (e.target.value =
-                                                e.target.value.replace(
-                                                    /[^0-9]/g,
-                                                    ""
-                                                ))
                                         }
                                     />
                                 </div>

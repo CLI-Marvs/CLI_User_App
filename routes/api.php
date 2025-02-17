@@ -100,9 +100,9 @@ Route::get('/get-matches', [SapController::class, 'runAutoPosting']);
 
 
 Route::middleware('auth:sanctum')->group(function () {
-  Route::get('/customer/inquiries', [TransactionController::class, 'getCustomerInquiries']);
-  Route::get('/customer/data', [TransactionController::class, 'getCustomerData']);
-  Route::get('/customer/details', [TransactionController::class, 'getCustomerDetailsByEmail']);
+    Route::get('/customer/inquiries', [TransactionController::class, 'getCustomerInquiries']);
+    Route::get('/customer/data', [TransactionController::class, 'getCustomerData']);
+    Route::get('/customer/details', [TransactionController::class, 'getCustomerDetailsByEmail']);
     Route::get('/get-transaction-bank', [SapController::class, 'getTransactionByBankName']);
     Route::post('/upload-notepad', [SapController::class, 'uploadNotepad']);
     Route::get('/get-concern', [ConcernController::class, 'getAllConcerns']);
@@ -167,8 +167,10 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/', [PriceListMasterController::class, 'index']);
         //Store a price list masters
         Route::post('/', [PriceListMasterController::class, 'store']);
-        //Update a price list masters
+        //Update a price list masters (e.g. Price versions, Floor premium, price list setting, additional premium)
         Route::put('/update', [PriceListMasterController::class, 'update']);
+        //Update the price list master status (e.g. Status = "On-going approval" set to Status="Cancel)
+        Route::patch('/{id}/status', [PriceListMasterController::class, 'updateStatus']);
     });
 
     /* Units */

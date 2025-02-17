@@ -40,6 +40,36 @@ class PriceListMasterRepository
     }
 
     /**
+     * Update the price list master status to inactive
+     */
+
+    //Update the price list master status
+    public function updateStatus($id)
+    {
+
+        $priceListMaster = $this->model->find($id);
+        if (!$priceListMaster) {
+            return [
+                'success' => false,
+                'message' => 'Price List Master not found.'
+            ];
+        }
+
+
+        $priceListMaster->update([
+            'status' => 'InActive'
+        ]);
+
+        return [
+            'success' => true,
+            'message' => 'Price List Master status updated successfully.',
+            'data' => $priceListMaster->fresh()
+            
+        ];
+    }
+
+
+    /**
      * Store price list master data
      */
     //TODO: refactor this and move to service
@@ -176,6 +206,7 @@ class PriceListMasterRepository
             }
         ])->select('price_list_masters.*')  // Select all fields from price list masters
             ->orderBy('created_at', 'desc')
+            ->where('status', '!=', 'InActive')
             ->get();
     }
 

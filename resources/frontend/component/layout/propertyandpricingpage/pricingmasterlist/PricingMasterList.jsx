@@ -13,13 +13,14 @@ import TableSkeleton from "@/component/layout/propertyandpricingpage/component/T
 import { usePaymentScheme } from "@/context/PropertyPricing/PaymentSchemeContext";
 import { toLowerCaseText } from "@/component/layout/propertyandpricingpage/utils/formatToLowerCase";
 import { useProperty } from "@/context/PropertyPricing/PropertyContext";
+import { showToast } from "@/util/toastUtil";
+import { priceListMasterService } from "@/component/servicesApi/apiCalls/propertyPricing/priceListMaster/priceListMasterService";
 
 const PricingMasterList = () => {
     //States
     const { priceListMaster, isLoading, fetchPropertyListMasters } =
         usePriceListMaster();
     const { fetchPaymentSchemes } = usePaymentScheme();
-    const { propertyNamesList, fetchPropertyNamesWithIds } = useProperty();
     const [startDate, setStartDate] = useState(new Date());
     const [toggled, setToggled] = useState(false);
     const [isFilterVisible, setIsFilterVisible] = useState(false);
@@ -37,7 +38,7 @@ const PricingMasterList = () => {
             fetchPropertyListMasters(true);
         }
     }, [fetchPropertyListMasters, priceListMaster]);
- 
+
     //Event handler
     /**
      * Handle to navigate to basic pricing component, only if the Status !== On-going Approval
@@ -61,7 +62,15 @@ const PricingMasterList = () => {
                 console.log("Property not found");
             }
         } else {
-            console.log("On-going Approval, action cancelled");
+            const response =
+                await priceListMasterService.updatePriceListMasterStatus(
+                    id
+                    // Replace with the actual status you want to set
+                );
+            if (response.status === 200) {
+                showToast(response?.data?.message, "success");
+                await fetchPropertyListMasters(true, true);
+            }
         }
     };
 

@@ -31,7 +31,7 @@ const FloorPremiumAddUnitModal = ({
         excelIdFromPriceList,
     } = useUnit();
     const [isLoading, setIsLoading] = useState(false);
- 
+
     //Hooks
     useEffect(() => {
         if (unitsByFloor && unitsByFloor.length > 0) {
@@ -78,15 +78,17 @@ const FloorPremiumAddUnitModal = ({
                     "success"
                 );
                 setFormData(formDataState);
-                await fetchUnitsInTowerPhase(
-                    selectedFloor,
-                    towerPhaseId,
-                    excelId || excelIdFromPriceList
-                );
-                await checkExistingUnits(
-                    towerPhaseId,
-                    excelId || excelIdFromPriceList
-                );
+                await Promise.all([
+                    fetchUnitsInTowerPhase(
+                        selectedFloor,
+                        towerPhaseId,
+                        excelId || excelIdFromPriceList
+                    ),
+                    checkExistingUnits(
+                        towerPhaseId,
+                        excelId || excelIdFromPriceList
+                    ),
+                ]);
 
                 if (modalRef.current) {
                     modalRef.current.close();
