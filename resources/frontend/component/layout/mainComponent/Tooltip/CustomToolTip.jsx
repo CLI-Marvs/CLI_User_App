@@ -18,7 +18,7 @@ const CustomToolTip = ({
             {children}
             {visible && (
                 <div
-                    className={`z-50 absolute ${width} ${height} bg-gray-800 text-white text-sm p-2 rounded shadow-lg transition-opacity duration-200 opacity-0 group-hover:opacity-100 pointer-events-auto montserrat-regular px-4 flex items-center
+                    className={`z-50 absolute ${width} ${height} bg-gray-800 text-white text-sm p-2 rounded shadow-lg transition-opacity duration-200 opacity-0 group-hover:opacity-60 pointer-events-auto montserrat-regular px-4 flex items-center
                 ${
                     position === "top"
                         ? "bottom-full mb-3 left-1/2 -translate-x-1/2 before:absolute before:content-[''] before:w-0 before:h-0 before:border-l-8 before:border-r-8 before:border-t-8 before:border-transparent before:border-t-gray-800 before:bottom-[-6px] before:left-1/2 before:-translate-x-1/2"
