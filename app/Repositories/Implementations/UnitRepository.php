@@ -82,7 +82,7 @@ class UnitRepository
             throw new \InvalidArgumentException("excelId is required and cannot be empty.");
         }
 
-        return $this->model->where('tower_phase_id', $towerPhaseId)
+        return  $this->model->where('tower_phase_id', $towerPhaseId)
             ->where('excel_id', $excelId)
             ->where('status', 'Active')
             ->get();

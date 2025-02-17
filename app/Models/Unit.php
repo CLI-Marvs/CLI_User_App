@@ -37,4 +37,9 @@ class Unit extends Model
     {
         return $this->belongsTo(TowerPhase::class);
     }
+
+    public function countAllUnits()
+    {
+        return $this->whereNotNull('unit')->count();
+    }
 }

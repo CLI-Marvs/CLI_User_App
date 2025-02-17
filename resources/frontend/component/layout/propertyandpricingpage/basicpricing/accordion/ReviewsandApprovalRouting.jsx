@@ -3,6 +3,7 @@ import { IoIosArrowDown } from "react-icons/io";
 import { IoMdArrowDropdown } from "react-icons/io";
 import { usePricing } from "@/component/layout/propertyandpricingpage/basicpricing/context/BasicPricingContext";
 import { useUnit } from "@/context/PropertyPricing/UnitContext";
+import * as XLSX from "xlsx";
 
 const staticHeaders = [
     "Floor",
@@ -21,7 +22,10 @@ const ReviewsandApprovalRouting = ({
     isReviewAndApprovalAccordionOpen,
 }) => {
     //States
+
     const { pricingData } = usePricing();
+    const [exportPricingData, setExportPricingData] = useState([]);
+    //   console.log("exportPricingData", exportPricingData);
     const { units } = useUnit();
     const [priceVersions, setPriceVersions] = useState([]);
 
@@ -33,25 +37,144 @@ const ReviewsandApprovalRouting = ({
      * This hooks, map the price_versions from propertyData to priceVersionsName and priceVersions
      */
     useEffect(() => {
-        if (
-            propertyData?.price_versions &&
-            Array.isArray(propertyData.price_versions)
-        ) {
+        if (propertyData?.price_versions) {
             const versionNames = propertyData.price_versions
                 .map((item) => item.version_name)
                 .filter(Boolean);
 
             setPriceVersionsName(versionNames);
             setPriceVersions(propertyData.price_versions);
-        } else {
-            console.error(
-                "propertyData?.price_versions is not an array:",
-                propertyData?.price_versions
-            );
         }
-    }, [propertyData]);
 
-    useEffect(() => {}, [isReviewAndApprovalAccordionOpen]);
+        setExportPricingData((prev) => ({
+            ...prev,
+            ...pricingData,
+            units: units,
+        }));
+    }, [propertyData, units]);
+
+    // useEffect(() => {}, [isReviewAndApprovalAccordionOpen]);
+
+    //Event handlers
+    const handleDownloadExcel = async () => {
+        const ws = XLSX.utils.aoa_to_sheet([
+            // Project Details (Row 1-6)
+            ["PROJECT", propertyData?.property_name],
+            ["BUILDING", propertyData?.tower_phase_name],
+            ["VERSION", "V1"],
+            [
+                "NUMBER OF UNITS",
+                {
+                    v: units.length || 0,
+                    s: { alignment: { horizontal: "left" } },
+                },
+            ],
+            ["PRICE LIST TYPE", "As Approved"],
+            ["VERSION DATE", "02/14/2025"],
+
+            // Empty row for separation
+            [],
+
+            // Row 8: "Units" Header spanning A8 to G8 + "Version" Column in H8
+            [
+                {
+                    v: "Units",
+                    s: {
+                        fill: {
+                            patternType: "solid",
+                            fgColor: { rgb: "31498A" },
+                            alignment: {
+                                horizontal: "middle",
+                                vertical: "center",
+                            },
+                            font: {
+                                bold: true,
+                                color: { rgb: "31498A" },
+                            },
+                        },
+                    },
+                },
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+                { v: "Version", s: { fill: { fgColor: { rgb: "31498A" } } } },
+            ],
+
+            // Row 9: Column Titles
+            [
+                { v: "Floor", s: { fill: { fgColor: { rgb: "31498A" } } } },
+                { v: "Room No.", s: { fill: { fgColor: { rgb: "31498A" } } } },
+                { v: "Unit", s: { fill: { fgColor: { rgb: "31498A" } } } },
+                { v: "Type", s: { fill: { fgColor: { rgb: "31498A" } } } },
+                {
+                    v: "Indoor Area",
+                    s: { fill: { fgColor: { rgb: "31498A" } } },
+                },
+                {
+                    v: "Balcony Area",
+                    s: { fill: { fgColor: { rgb: "31498A" } } },
+                },
+                {
+                    v: "Total Area",
+                    s: { fill: { fgColor: { rgb: "31498A" } } },
+                },
+                ...priceVersions.map((version) => ({
+                    v: version.no_of_allowed_buyers,
+                    s: { fill: { fgColor: { rgb: "31498A" } } },
+                })),
+            ],
+
+            // Data rows for each unit (Row 10 onwards)
+            ...units.map((unit) => [
+                unit.floor,
+                unit.room_number,
+                unit.unit,
+                unit.type,
+                unit.indoor_area,
+                unit.balcony_area,
+                unit.total_area,
+                ...priceVersions.map(
+                    (version) => version.no_of_allowed_buyers || "-"
+                ),
+            ]),
+        ]);
+
+        // Add merge information for "Units" header in Row 8 (A8 to G8)
+        ws["!merges"] = [
+            {
+                s: { c: 0, r: 7 }, // Start at column A (index 0) and row 8 (index 7)
+                e: { c: 6, r: 7 }, // End at column G (index 6) and row 8 (index 7)
+            },
+        ];
+
+        // Set column widths for better readability
+        const wscols = [
+            { wch: 20 }, // Set width for column A (PROJECT, BUILDING, etc.)
+            { wch: 20 }, // Set width for column B (values like property name, version, etc.)
+            { wch: 10 }, // Empty column for spacing (after Version header, etc.)
+            { wch: 10 },
+            { wch: 15 },
+            { wch: 15 },
+            { wch: 15 },
+            ...priceVersions.map(() => ({ wch: 5 })), // Adjust based on priceVersions length
+        ];
+
+        ws["!cols"] = wscols;
+        // Adjust row height for Row 8
+        ws["!rows"] = [];
+        ws["!rows"][7] = { hpx: 30 }; // Row 8 height to 30px
+
+        // Create Excel workbook
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Pricing Data");
+
+        // Write Excel file and trigger download
+        XLSX.writeFile(wb, "pricing_data.xlsx");
+    };
+
     return (
         <>
             <div
@@ -103,7 +226,10 @@ const ReviewsandApprovalRouting = ({
                 <div className="  ">
                     <div className="p-[20px] space-y-[10px] ">
                         <div>
-                            <p className="underline text-blue-500 text-sm cursor-pointer">
+                            <p
+                                className="underline text-blue-500 text-sm cursor-pointer"
+                                onClick={handleDownloadExcel}
+                            >
                                 Download Excel
                             </p>
                         </div>
@@ -138,7 +264,9 @@ const ReviewsandApprovalRouting = ({
                                             NUMBER OF UNITS
                                         </h6>
                                         <div className="border border-black px-6 flex-1  ml-10">
-                                            <p>123</p>
+                                            <p>
+                                                {(units && units.length) || 0}
+                                            </p>
                                         </div>
                                     </div>
                                     <div className="flex w-full max-w-[450px]">
@@ -177,22 +305,25 @@ const ReviewsandApprovalRouting = ({
                                         </tr>
                                         <tr className="bg-[#aebee3] border-black border">
                                             {headers &&
-                                                headers.map((title, index) => (
-                                                    <th
-                                                        key={title}
-                                                        className={`${
-                                                            title === "Type"
-                                                                ? "px-9"
-                                                                : "px-4"
-                                                        } py-4  border-black border montserrat-semibold ${
-                                                            index === 0
-                                                                ? "min-w-[20px]"
-                                                                : ""
-                                                        }`}
-                                                    >
-                                                        {title}
-                                                    </th>
-                                                ))}
+                                                headers.map(
+                                                    (title, headerIndex) => (
+                                                        <th
+                                                            key={headerIndex}
+                                                            className={`${
+                                                                title === "Type"
+                                                                    ? "px-9"
+                                                                    : "px-4"
+                                                            } py-4  border-black border montserrat-semibold ${
+                                                                headerIndex ===
+                                                                0
+                                                                    ? "min-w-[20px]"
+                                                                    : ""
+                                                            }`}
+                                                        >
+                                                            {title}
+                                                        </th>
+                                                    )
+                                                )}
                                         </tr>
                                         <tr className="bg-[#aebee3] border-black border">
                                             <th colSpan="7"></th>
@@ -212,8 +343,8 @@ const ReviewsandApprovalRouting = ({
                                     </thead>
                                     <tbody className="bg-white">
                                         {units &&
-                                            units.map((unit, index) => (
-                                                <tr key={index}>
+                                            units.map((unit, unitIndex) => (
+                                                <tr key={unitIndex}>
                                                     {/* Map  Unit Data */}
 
                                                     <td className="px-2 border-black border">

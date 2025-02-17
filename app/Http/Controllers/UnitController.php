@@ -98,9 +98,10 @@ class UnitController extends Controller
     /** 
      * Get existing units for a specific tower phase
      */
-    public function getExistingUnits(int $towerPhaseId,string $excelId)
+    public function getExistingUnits(int $towerPhaseId, string $excelId)
     {
         $existingUnits = $this->service->getExistingUnits($towerPhaseId, $excelId);
+
         return response()->json([
             'data' => $existingUnits,
         ]);
@@ -114,7 +115,7 @@ class UnitController extends Controller
      */
     public function getUnits($selectedFloor, $towerPhaseId, $excelId)
     {
-       // dd($selectedFloor, $towerPhaseId, $excelId);
+        // dd($selectedFloor, $towerPhaseId, $excelId);
 
         try {
             // Query the database for units matching the specified towerPhaseId and selectedFloor

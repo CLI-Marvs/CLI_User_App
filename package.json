@@ -26,6 +26,7 @@
         "@mescius/spread-sheets-react": "^18.0.3",
         "@mescius/spread-sheets-shapes": "^18.0.3",
         "@mui/material": "^6.0.0",
+        "exceljs": "^4.4.0",
         "file-saver": "^2.0.5",
         "js-cookie": "^3.0.5",
         "lodash": "^4.17.21",
