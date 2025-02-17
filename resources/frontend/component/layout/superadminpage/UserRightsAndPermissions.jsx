@@ -85,12 +85,15 @@ const UserRightsAndPermissions = () => {
                 employeesWithPermissions?.filter((employee) => {
                     const firstName = employee?.firstname?.toLowerCase() || "";
                     const lastName = employee?.lastname?.toLowerCase() || "";
+                    const employeeDepartment =
+                        employee?.department.toLowerCase() || "";
                     const searchTerm =
                         searchByDepartmentOrByEmployee.toLowerCase();
 
                     return (
                         firstName.includes(searchTerm) ||
-                        lastName.includes(searchTerm)
+                        lastName.includes(searchTerm) ||
+                        employeeDepartment.includes(searchTerm)
                     );
                 }) || []
             );
@@ -281,7 +284,7 @@ const UserRightsAndPermissions = () => {
                         />
                     </div>
                 </div>
-                <div className="bg-white rounded-[5px] p-[10px] w-full h-[51px]">
+                <div className="rounded-[5px] p-[10px] w-full h-[51px]">
                     <div className="flex flex-row  gap-[37px] items-center">
                         <div className="montserrat-regular text-sm">
                             Add Specific Department
@@ -606,7 +609,10 @@ const UserRightsAndPermissions = () => {
                                             <div className="w-[200px] flex flex-col items-start justify-center gap-2">
                                                 <div className="w-full h-[50px] flex items-center justify-center bg-white rounded-[5px] py-1">
                                                     <p className="montserrat-regular text-sm text-center">
-                                                        {employee?.department}
+                                                        {highlightText(
+                                                            employee?.department,
+                                                            searchByDepartmentOrByEmployee
+                                                        )}
                                                     </p>
                                                 </div>
                                             </div>

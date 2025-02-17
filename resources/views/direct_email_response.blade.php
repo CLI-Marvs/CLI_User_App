@@ -129,10 +129,7 @@
         This will help us gather the necessary information to address your concerns more efficiently.
         <br>
         <br>
-        <br>
-        <br>
         Thank you. 
-        <br>
         <br>
         <br>
         CLI

@@ -924,33 +924,33 @@ class ConcernController extends Controller
     }
 
     public function getCountAllConcerns(Request $request)
-{
-    try {
+    {
+        try {
 
-        $totalCount = Concerns::count();
+            $totalCount = Concerns::count();
 
-       
-        $resolvedCount = Concerns::where('status', 'Resolved')->count();
-        $closedCount = Concerns::where('status', 'Closed')->count();
-        $unresolvedCount = Concerns::where('status', 'unresolved')->count();
 
-        
-        $response = [
-            'counts' => [
-                'all' => $totalCount,
-                'resolved' => $resolvedCount,
-                'closed' => $closedCount,
-                'unresolved' => $unresolvedCount,
-            ],
-        ];
+            $resolvedCount = Concerns::where('status', 'Resolved')->count();
+            $closedCount = Concerns::where('status', 'Closed')->count();
+            $unresolvedCount = Concerns::where('status', 'unresolved')->count();
 
-        \Log::info($response);
-        
-        return response()->json($response);
-    } catch (\Exception $e) {
-        return response()->json(['message' => 'Error occurred.', 'error' => $e->getMessage()], 500);
+
+            $response = [
+                'counts' => [
+                    'all' => $totalCount,
+                    'resolved' => $resolvedCount,
+                    'closed' => $closedCount,
+                    'unresolved' => $unresolvedCount,
+                ],
+            ];
+
+            \Log::info($response);
+
+            return response()->json($response);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Error occurred.', 'error' => $e->getMessage()], 500);
+        }
     }
-}
 
 
     private function getLatestMessage()
@@ -2138,8 +2138,8 @@ class ConcernController extends Controller
                 ", [$department]);
             }
         }
-        
-        
+
+
 
         // Query for total unresolved, closed, resolved, and unassigned concerns
         $totalUnassigned = Concerns::selectRaw("
@@ -2604,16 +2604,22 @@ class ConcernController extends Controller
         if (!empty($buyerData)) {
             foreach ($buyerData as $buyer) {
                 if ($buyer) {
-                   $data = [
-                    'lastname' => $buyer['buyer_name'],
-                    'messageId' => $buyer['message_id'],
-                    'buyer_email' => $buyer['buyer_email'],
-                   ];
+                    
+                    $data = [
+                        'lastname' => $buyer['buyer_name'],
+                        'messageId' => $buyer['message_id'],
+                        'buyer_email' => $buyer['buyer_email'],
+                        'email_subject' => $buyer['email_subject'],
+                    ];
 
-                   Mail::to($buyer['buyer_email'])->send(new DirectEmailResponse($data));
+                    \Log::info([
+                        'data from buyer' => $data,
+                    ]);
+
+                    Mail::to($buyer['buyer_email'])->send(new DirectEmailResponse($data));
 
 
-                 /*    $concerns = new Concerns();
+                    /*    $concerns = new Concerns();
                     $concerns->email_subject = $buyer['email_subject'];
                     $concerns->ticket_id = $ticketId;
                     $concerns->buyer_email = $buyer['buyer_email'];
@@ -2650,11 +2656,16 @@ class ConcernController extends Controller
                         'lastname' => $buyer['buyer_name'],
                         'messageId' => $buyer['message_id'],
                         'buyer_email' => $buyer['buyer_email'],
+                        'email_subject' => $buyer['email_subject'],
 
-                       ];
-                       Mail::to($buyer['buyer_email'])->send(new DirectEmailResponse($data));
+                    ];
 
-                  /*   $existingTicket = Concerns::where('email_subject', $buyer['email_subject'])
+                    \Log::info([
+                        'data from buyer' => $data,
+                    ]);
+                    Mail::to($buyer['buyer_email'])->send(new DirectEmailResponse($data));
+
+                    /*   $existingTicket = Concerns::where('email_subject', $buyer['email_subject'])
                         ->where('buyer_email', $buyer['buyer_email'])
                         ->first();
 
