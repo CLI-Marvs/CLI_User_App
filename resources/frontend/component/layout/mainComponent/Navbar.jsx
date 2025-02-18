@@ -132,8 +132,44 @@ const Navbar = () => {
                 );
             }
 
-            if (value.toLowerCase() === "transactionmanagement") {
+            if (value.toLowerCase() === "transaction") {
                 breadcrumbLabel = "Transaction Management";
+                // Non-linkable
+                return (
+                    <span
+                        key={routeTo}
+                        className="text-custom-solidgreen cursor-default"
+                    >
+                        {breadcrumbLabel}
+                    </span>
+                );
+            }
+            if (value.toLowerCase() === "sales") {
+                breadcrumbLabel = "Sales Management";
+                // Non-linkable
+                return (
+                    <span
+                        key={routeTo}
+                        className="text-custom-solidgreen cursor-default"
+                    >
+                        {breadcrumbLabel}
+                    </span>
+                );
+            }
+            if (breadcrumbLabel === "Customer") {
+                breadcrumbLabel = "Customer Masterlist";
+                // Non-linkable
+                return (
+                    <span
+                        key={routeTo}
+                        className="text-custom-solidgreen cursor-default"
+                    >
+                        {breadcrumbLabel}
+                    </span>
+                );
+            }
+            if (breadcrumbLabel === "Details") {
+                breadcrumbLabel = "Customer Details";
                 // Non-linkable
                 return (
                     <span
@@ -160,6 +196,9 @@ const Navbar = () => {
                 breadcrumbLabel = "Inquiries";
             }
 
+            if (value.toLowerCase() === "sales/customer") {
+                breadcrumbLabel = "Customer Masterlist";
+            }
             if (value.toLowerCase() === "transactionrecords") {
                 breadcrumbLabel = "Transaction Records";
             }
@@ -177,9 +216,10 @@ const Navbar = () => {
                 );
             }
 
-            if (routeTo.startsWith("/transaction/details/")) {
+            if (routeTo.startsWith("/sales/details/")) {
                 return null; // Skip rendering this breadcrumb
             }
+
 
             if (breadcrumbLabel.startsWith("Ticket#")) {
                 const ticketId = breadcrumbLabel;
@@ -188,7 +228,6 @@ const Navbar = () => {
 
                 const concernData = navBarData[ticketId] || [];
 
-                console.log("concernData", concernData);
                 if (concernData.length === 0) {
                     // Render skeleton while loading
                     return (
