@@ -11,17 +11,19 @@ import { useNavigate } from "react-router-dom";
 import { usePriceListMaster } from "@/context/PropertyPricing/PriceListMasterContext";
 import TableSkeleton from "@/component/layout/propertyandpricingpage/component/TableSkeleton";
 import { usePaymentScheme } from "@/context/PropertyPricing/PaymentSchemeContext";
+import { toLowerCaseText } from "@/component/layout/propertyandpricingpage/utils/formatToLowerCase";
+import { useProperty } from "@/context/PropertyPricing/PropertyContext";
+import { showToast } from "@/util/toastUtil";
+import { priceListMasterService } from "@/component/servicesApi/apiCalls/propertyPricing/priceListMaster/priceListMasterService";
 
 const PricingMasterList = () => {
     //States
     const { priceListMaster, isLoading, fetchPropertyListMasters } =
         usePriceListMaster();
-    const { paymentScheme, fetchPaymentSchemes } = usePaymentScheme();
-
+    const { fetchPaymentSchemes } = usePaymentScheme();
     const [startDate, setStartDate] = useState(new Date());
     const [toggled, setToggled] = useState(false);
     const [isFilterVisible, setIsFilterVisible] = useState(false);
-    const [paymentSchemes, setPaymentSchemes] = useState([]);
     const navigate = useNavigate();
     const propertyModalRef = useRef(null);
     const toggleFilterBox = () => {
@@ -60,7 +62,15 @@ const PricingMasterList = () => {
                 console.log("Property not found");
             }
         } else {
-            console.log("On-going Approval, action cancelled");
+            const response =
+                await priceListMasterService.updatePriceListMasterStatus(
+                    id
+                    // Replace with the actual status you want to set
+                );
+            if (response.status === 200) {
+                showToast(response?.data?.message, "success");
+                await fetchPropertyListMasters(true, true);
+            }
         }
     };
 
@@ -331,7 +341,6 @@ const PricingMasterList = () => {
                                                             : "text-[#5B9BD5]"
                                                     }`}
                                                 >
-                                                    {/* TODO: Dont show Edit if the status is Approved */}
                                                     {item?.status}
                                                 </p>
                                                 <span>
@@ -357,14 +366,20 @@ const PricingMasterList = () => {
                                                     {item?.status ===
                                                     "On-going Approval"
                                                         ? "Cancel"
+                                                        : item?.status ===
+                                                          "Approved"
+                                                        ? null
                                                         : "Edit"}
-                                                    - {item?.price_list_master_id}
                                                 </p>
                                             </div>
                                         </td>
                                         <td className="w-[150px] flex items-center justify-start">
                                             <div>
-                                                <p>{item?.property_name}</p>
+                                                <p>
+                                                    {toLowerCaseText(
+                                                        item?.property_name
+                                                    )}
+                                                </p>
                                                 <p>
                                                     Tower{" "}
                                                     {item?.tower_phase_name}
@@ -478,7 +493,6 @@ const PricingMasterList = () => {
                                                                         versionIndex
                                                                     }
                                                                 >
-                                                                    {/*TODO: dont show the - and 0 if there is no value */}
                                                                     {
                                                                         version?.version_name
                                                                     }{" "}
@@ -529,18 +543,19 @@ const PricingMasterList = () => {
 
                                         {/* Render payment schemes */}
                                         <td className="w-[150px] flex items-center justify-start rounded-r-lg text-sm">
-                                            <div>
-                                                <p>
+                                            <div className="flex ">
+                                                <ul className=" pl-4 list-none ">
                                                     {item?.price_versions?.map(
                                                         (
                                                             version,
                                                             versionIndex
                                                         ) => {
                                                             return (
-                                                                <span
+                                                                <li
                                                                     key={
                                                                         versionIndex
                                                                     }
+                                                                    className=""
                                                                 >
                                                                     {version?.payment_schemes?.map(
                                                                         (
@@ -548,32 +563,26 @@ const PricingMasterList = () => {
                                                                             schemeIndex
                                                                         ) => {
                                                                             return (
-                                                                                <span
+                                                                                <ul
                                                                                     key={
                                                                                         schemeIndex
                                                                                     }
+                                                                                    className="pl-4"
                                                                                 >
-                                                                                    {
-                                                                                        scheme?.payment_scheme_name
-                                                                                    }
-                                                                                    {schemeIndex <
-                                                                                    version
-                                                                                        ?.payment_schemes
-                                                                                        ?.length -
-                                                                                        1 ? (
-                                                                                        <br />
-                                                                                    ) : (
-                                                                                        ""
-                                                                                    )}
-                                                                                </span>
+                                                                                    <li>
+                                                                                        {
+                                                                                            scheme?.payment_scheme_name
+                                                                                        }
+                                                                                    </li>
+                                                                                </ul>
                                                                             );
                                                                         }
                                                                     )}
-                                                                </span>
+                                                                </li>
                                                             );
                                                         }
                                                     )}
-                                                </p>
+                                                </ul>
                                             </div>
                                         </td>
                                     </tr>

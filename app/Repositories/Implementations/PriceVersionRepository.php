@@ -50,7 +50,7 @@ class PriceVersionRepository
      */
     public function store(array $data)
     {
-
+        
         DB::beginTransaction();
         try {
             $priceVersions = [];
@@ -59,7 +59,7 @@ class PriceVersionRepository
                 $expiryDate = \DateTime::createFromFormat('m-d-Y H:i:s', $version['expiry_date']);
                 $priceVersion = $this->model->create([
                     'property_masters_id' => $data['property_id'],
-                    'tower_phase_name' => $data['tower_phase'],
+                    'tower_phase_name' => $data['tower_phase_id'],
                     'version_name' => $version['name'],
                     'percent_increase' => $version['percent_increase'],
                     'allowed_buyer' => $version['no_of_allowed_buyers'],

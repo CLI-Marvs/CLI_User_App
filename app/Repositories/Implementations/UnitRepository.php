@@ -30,6 +30,7 @@ class UnitRepository
         $headers = $data['headers'];
         $propertyId = $data['property_masters_id'];
         $towerPhaseId = $data['tower_phase_id'];
+        $priceListMasterId = $data['price_list_master_id'];
         DB::beginTransaction();
         try {
             if ($file && $headers) {
@@ -37,10 +38,10 @@ class UnitRepository
                     // Extract the rowHeader values directly from the decoded array
                     $actualHeaders = array_column($headers, 'rowHeader');
 
-                   
-                    $import = new ExcelImport($actualHeaders, $propertyId, $towerPhaseId, 'Active', 'units');
+
+                    $import = new ExcelImport($actualHeaders, $propertyId, $towerPhaseId, 'Active', 'units', $priceListMasterId);
                     Excel::import($import, $file);
-              
+
                     DB::commit();
 
                     $excelId = $import->getExcelId();
@@ -70,5 +71,56 @@ class UnitRepository
                 'message' => 'Failed to insert unit: ' . $e->getMessage()
             ], 500);
         }
+    }
+
+    /**
+     * Get existing units for a specific tower phase
+     */
+    public function getExistingUnits($towerPhaseId, $excelId)
+    {
+        if (empty($excelId)) {
+            throw new \InvalidArgumentException("excelId is required and cannot be empty.");
+        }
+
+        return  $this->model->where('tower_phase_id', $towerPhaseId)
+            ->where('excel_id', $excelId)
+            ->where('status', 'Active')
+            ->get();
+    }
+
+
+    /**
+     * Get all units for a specific tower phase and selected floor
+     */
+    public function getUnits($towerPhaseId, $selectedFloor, $excelId)
+    {
+        $units = $this->model->where('tower_phase_id', $towerPhaseId)
+            ->where('floor', $selectedFloor)
+            ->where('excel_id', $excelId)
+            ->where('status', 'Active')
+            ->get();
+
+        if ($units->isEmpty()) {
+            return [
+                'message' => "No active units found for the given tower phase and floor."
+            ];
+        }
+
+        return $units;
+    }
+
+    /**
+     * Store unit details from the system
+     */
+    public function storeUnitDetails(array $data)
+    {
+        $units = $this->model->create(array_merge(
+            $data,
+            ['status' => 'Active']
+        ));
+        return [
+            'message' => 'Unit details stored successfully',
+            'data' => $units->fresh()
+        ];
     }
 }

@@ -7,6 +7,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StorePriceVersionRequest;
 use App\Services\PriceVersionService;
 
+use function Ramsey\Uuid\v1;
+
 class PriceVersionController extends Controller
 {
     protected $service;
@@ -19,8 +21,10 @@ class PriceVersionController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index() {
+    public function index()
+    {
         $priceVersions = $this->service->index();
+        dd($priceVersions);
         return response()->json([
             'price_versions' => $priceVersions,
         ]);
@@ -29,9 +33,10 @@ class PriceVersionController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StorePriceVersionRequest $request) {
+    public function store(StorePriceVersionRequest $request)
+    {
         $validatedData = $request->validated();
- 
+        
         try {
             $priceVersion = $this->service->store($validatedData);
             return response()->json([

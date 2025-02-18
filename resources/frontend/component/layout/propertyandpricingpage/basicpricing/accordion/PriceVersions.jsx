@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import {  FaRegCalendar } from "react-icons/fa";
+import { FaRegCalendar } from "react-icons/fa";
 import { IoIosArrowDown } from "react-icons/io";
 import { MdFormatListBulletedAdd } from "react-icons/md";
 import AddPaymentSchemeModal from "@/component/layout/propertyandpricingpage/basicpricing/modals/PaymentScheme/AddPaymentSchemeModal";
@@ -12,19 +12,21 @@ import { MdDelete } from "react-icons/md";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
-const PriceVersions = ({ priceListMasterData, action }) => {
+const PriceVersions = ({
+    priceListMasterData,
+    action,
+    isOpen,
+    toggleAccordion,
+}) => {
     //States
-    const [accordionOpen, setAccordionOpen] = useState(false);
+    // const [isOpen, setAccordionOpen] = useState(false);
     const addPaymentSchemeModalRef = useRef(null);
     const editPaymentSchemeModalRef = useRef(null);
     const { pricingData, updatePricingSection, setPricingData } = usePricing();
     const [versionIndex, setVersionIndex] = useState(0);
     const [selectedPaymentSchemes, setSelectedPaymentSchemes] = useState([]);
     const [isDatePickerVisible, setIsDatePickerVisible] = useState(false);
-    const [startDate, setStartDate] = useState(null);
-    // const { paymentScheme, fetchPaymentSchemes } = usePaymentScheme();
-    // const [selectedPaymentSchemes, setSelectedPaymentSchemes] = useState([]);
-    // console.log("pricingData", pricingData);
+    const [expiryDate, setExpiryDate] = useState(null);
 
     //Event handler
     //Handle change in the input field for price version
@@ -37,10 +39,10 @@ const PriceVersions = ({ priceListMasterData, action }) => {
                 "pricingData.priceVersions is not an array",
                 pricingData?.priceVersions
             );
-            return; // If it's not an array, return early to avoid further issues
+            return;
         }
 
-        const updatedPriceVersions = [...pricingData.priceVersions]; // Make a copy of the priceVersions array
+        const updatedPriceVersions = [...pricingData.priceVersions];
 
         // Check if formIndex is within bounds
         if (formIndex >= updatedPriceVersions.length || formIndex < 0) {
@@ -78,35 +80,31 @@ const PriceVersions = ({ priceListMasterData, action }) => {
         setPricingData((prev) => {
             // Ensure priceVersions is always an array
             const priceVersions = Array.isArray(prev.priceVersions)
-                ? [...prev.priceVersions] // Make sure priceVersions is always an array
-                : []; // Default to empty array if it's not
+                ? [...prev.priceVersions]
+                : [];
 
-            // Add a new price version
             priceVersions.push({
                 id: 0,
                 name: "",
                 percent_increase: 0,
                 status: "Active",
                 no_of_allowed_buyers: 0,
-                expiry_date: moment().isValid()
-                    ? moment(new Date()).format("MM-DD-YYYY HH:mm:ss")
-                    : "", // Safe fallback for expiry_date
+                expiry_date: "N/A",
                 payment_scheme: [],
             });
 
             // Update the state
             return {
                 ...prev,
-                priceVersions: priceVersions, // Add the newly updated array
+                priceVersions: priceVersions,
             };
         });
     };
 
     //TODO: 1. Assume the price version have 1 data, and the ACTION Is EDIT then the user can view the Remove button, and remove the version data.
-    
-    
+
     //Handle remove the fields
-    const handleRemoveFields = (index) => {
+    const handleRemovePriceVersions = (index) => {
         //TODO: KUNG Edit mode, then ang versions kay naa nay data, if iyang e remove, ma remove siya but ang status sa price versions kay ma in active na isya
         setPricingData((prev) => {
             // Copy the current priceVersions array
@@ -124,21 +122,25 @@ const PriceVersions = ({ priceListMasterData, action }) => {
     };
 
     /**
-     * Handle remove selected payment scheme
-     * Copy the existing priceVersions object
-     * Delete the specific key from the object
-     * Set again the payment_scheme array to null
-     * @param {*} index
+     * Handles the removal of a payment scheme from a specific price version within the pricing data.
+     * This function updates the state by creating new objects and arrays to ensure proper re-renders in React.
+     * It specifically targets the payment_scheme property of the price version at the given index and sets it to an empty array.
+     * This effectively removes the payment scheme while preserving other data within the price version.
+     *
+     * @param {number} index The index of the price version from which to remove the payment scheme.
      */
     const handleRemovePaymentScheme = (index) => {
-        const updatedPriceVersions = { ...pricingData.priceVersions };
+        setPricingData((prevPricingData) => {
+            const updatedPriceVersions = prevPricingData.priceVersions.map(
+                (version, i) => {
+                    if (i === index) {
+                        return { ...version, payment_scheme: [] };
+                    }
+                    return version;
+                }
+            );
 
-        delete updatedPriceVersions[index].payment_scheme;
-        updatedPriceVersions[index].payment_scheme = [];
-
-        setPricingData({
-            ...pricingData,
-            priceVersions: updatedPriceVersions,
+            return { ...prevPricingData, priceVersions: updatedPriceVersions };
         });
     };
 
@@ -152,27 +154,24 @@ const PriceVersions = ({ priceListMasterData, action }) => {
 
     //Handle date change
     const handleDateChange = (date, formIndex) => {
-        // You can set the date field based on your specific naming convention for form fields
+        setPricingData((prevState) => {
+            const updatedPriceVersions = prevState.priceVersions.map(
+                (item, i) =>
+                    i === formIndex
+                        ? {
+                              ...item,
+                              expiry_date: date
+                                  ? moment(date).format("MM-DD-YYYY HH:mm:ss")
+                                  : "N/A",
+                          }
+                        : item
+            );
 
-        const updatedPriceVersions = Object.fromEntries(
-            Object.keys(pricingData?.priceVersions || {}).map(
-                (versionKey, index) =>
-                    index === formIndex
-                        ? [
-                              versionKey, // retain the original key
-                              {
-                                  ...pricingData.priceVersions[versionKey],
-                                  expiry_date: moment(date).format(
-                                      "MM-DD-YYYY HH:mm:ss"
-                                  ),
-                              },
-                          ]
-                        : [versionKey, pricingData.priceVersions[versionKey]]
-            )
-        );
-
-        // Update pricing section after updating
-        updatePricingSection("priceVersions", updatedPriceVersions);
+            return {
+                ...prevState,
+                priceVersions: updatedPriceVersions,
+            };
+        });
     };
 
     return (
@@ -180,23 +179,23 @@ const PriceVersions = ({ priceListMasterData, action }) => {
             <div
                 className={`transition-all duration-2000 ease-in-out relative
       ${
-          accordionOpen
+          isOpen
               ? "h-[74px] mx-5 bg-white shadow-custom5 rounded-[10px]"
               : "h-[72px]  gradient-btn3 rounded-[10px] p-[1px]"
       } `}
             >
                 <button
-                    onClick={() => setAccordionOpen(!accordionOpen)}
+                    onClick={() => toggleAccordion("priceVersions")}
                     className={`
             ${
-                accordionOpen
+                isOpen
                     ? "flex justify-between items-center h-full w-full bg-white rounded-[9px] px-[15px]"
                     : "flex justify-between items-center h-full w-full bg-custom-grayFA rounded-[9px] px-[15px]"
             } `}
                 >
                     <span
                         className={` text-custom-solidgreen ${
-                            accordionOpen
+                            isOpen
                                 ? "text-[20px] montserrat-semibold"
                                 : "text-[18px] montserrat-regular"
                         }`}
@@ -205,7 +204,7 @@ const PriceVersions = ({ priceListMasterData, action }) => {
                     </span>
                     <span
                         className={`flex justify-center items-center h-[40px] w-[40px] rounded-full  transform transition-transform duration-300 ease-in-out ${
-                            accordionOpen
+                            isOpen
                                 ? "rotate-180 bg-[#F3F7F2] text-custom-solidgreen"
                                 : "rotate-0 gradient-btn2 text-white"
                         }`}
@@ -217,7 +216,7 @@ const PriceVersions = ({ priceListMasterData, action }) => {
             <div
                 className={`mx-5 rounded-[10px] shadow-custom5 grid overflow-hidden transition-all duration-300 ease-in-out
             ${
-                accordionOpen
+                isOpen
                     ? "mt-2 mb-4 grid-rows-[1fr] opacity-100"
                     : "grid-rows-[0fr] opacity-0"
             }
@@ -302,10 +301,10 @@ const PriceVersions = ({ priceListMasterData, action }) => {
                                                                 />
                                                             </td>
                                                             <td className="px-[10px]">
-                                                                {/* TODO: add padding when typing data */}
+                                                                {/* TODO:Create an reusable component for this input to use other field*/}
                                                                 <input
                                                                     type="number"
-                                                                    className=" w-[100px] border 
+                                                                    className="pl-3  w-[100px] border 
                                                         border-custom-grayF1 rounded-[5px] h-[31px]"
                                                                     name="no_of_allowed_buyers"
                                                                     value={
@@ -325,8 +324,15 @@ const PriceVersions = ({ priceListMasterData, action }) => {
                                                                 <div className=" flex gap-x-1   items-center">
                                                                     <DatePicker
                                                                         selected={
-                                                                            form.expiry_date
+                                                                            form.expiry_date !==
+                                                                            "N/A"
+                                                                                ? moment(
+                                                                                      form.expiry_date,
+                                                                                      "MM-DD-YYYY HH:mm:ss"
+                                                                                  ).toDate()
+                                                                                : null
                                                                         }
+                                                                        // minDate={moment().toDate()}
                                                                         onChange={(
                                                                             date
                                                                         ) =>
@@ -338,7 +344,7 @@ const PriceVersions = ({ priceListMasterData, action }) => {
                                                                         className="w-[100px] border border-custom-grayF1 rounded-[5px] h-[31px] pl-2"
                                                                         name="expiry_date"
                                                                         calendarClassName="custom-calendar"
-                                                                        placeholderText="N/A"
+                                                                        placeholderText="N/A" // Display "N/A" when no date is selected
                                                                     />
 
                                                                     <FaRegCalendar className="size-5 text-custom-gray81 hover:text-red-500" />
@@ -447,7 +453,7 @@ const PriceVersions = ({ priceListMasterData, action }) => {
                                                                         1 && (
                                                                         <IoIosCloseCircle
                                                                             onClick={() =>
-                                                                                handleRemoveFields(
+                                                                                handleRemovePriceVersions(
                                                                                     index
                                                                                 )
                                                                             }

@@ -1,8 +1,8 @@
 import React, { useState } from "react";
-import { paymentSchemeService } from '@/component/servicesApi/apiCalls/propertyPricing/paymentScheme/paymentSchemeService';
+import { paymentSchemeService } from "@/component/servicesApi/apiCalls/propertyPricing/paymentScheme/paymentSchemeService";
 import { showToast } from "@/util/toastUtil";
 import CircularProgress from "@mui/material/CircularProgress";
-import { isButtonDisabled } from '@/component/layout/propertyandpricingpage/paymentscheme/utils/isButtonDisabled';
+import { isButtonDisabled } from "@/component/layout/propertyandpricingpage/paymentscheme/utils/isButtonDisabled";
 import { usePaymentScheme } from "@/context/PropertyPricing/PaymentSchemeContext";
 
 const formDataState = {
@@ -20,7 +20,7 @@ const AddPaymentSchemeModal = ({ modalRef }) => {
     const [formData, setFormData] = useState(formDataState);
     const [isLoading, setIsLoading] = useState({});
     const { fetchPaymentSchemes } = usePaymentScheme();
-    
+
     //Event Handler
     //Handle change in the input field
     const handleChange = (e) => {
@@ -46,7 +46,9 @@ const AddPaymentSchemeModal = ({ modalRef }) => {
         };
         try {
             setIsLoading((prev) => ({ ...prev, [status]: true }));
-            const response = await paymentSchemeService.storePaymentScheme(payload);
+            const response = await paymentSchemeService.storePaymentScheme(
+                payload
+            );
             if (response.status === 201) {
                 showToast("Data added successfully!", "success");
                 setFormData(formDataState);
@@ -62,7 +64,6 @@ const AddPaymentSchemeModal = ({ modalRef }) => {
         }
     };
 
-
     //Handle close the modal and reset all state
     const handleClose = () => {
         if (modalRef.current) {
@@ -71,7 +72,6 @@ const AddPaymentSchemeModal = ({ modalRef }) => {
             modalRef.current.close();
         }
     };
-
 
     return (
         <dialog
@@ -84,19 +84,18 @@ const AddPaymentSchemeModal = ({ modalRef }) => {
                         method="dialog"
                         className="pt-2 flex justify-end -mr-[50px]"
                     >
-                        <button className="flex justify-center w-10 h-10 items-center rounded-full text-custom-bluegreen hover:bg-custombg3 "
+                        <button
+                            className="flex justify-center w-10 h-10 items-center rounded-full text-custom-bluegreen hover:bg-custombg3 "
                             onClick={handleClose}
                         >
                             ✕
                         </button>
                     </div>
                 </div>
-                <div className="w-full flex justify-center items-center h-12 bg-red-100 mb-4 rounded-lg">
-                    <p className="flex text-[#C42E2E] ">
-                        {/* TODO: make this dynamic */}
-                        Error message here
-                    </p>
-                </div>
+                {/* TODO: make this dynamic */}
+                {/* <div className="w-full flex justify-center items-center h-12 bg-red-100 mb-4 rounded-lg">
+                    <p className="flex text-[#C42E2E] ">Error message here</p>
+                </div> */}
                 <div className="pt-5 flex justify-start items-center mb-5">
                     <p className="montserrat-bold">Add Payment Scheme</p>
                 </div>
@@ -124,7 +123,8 @@ const AddPaymentSchemeModal = ({ modalRef }) => {
                             </p>
                             <span className="bg-white text-sm2 text-custom-gray81 font-normal py-3 border border-custom-grayF1 pl-2 pr-12 ml-auto rounded-r-[4px]">
                                 {" "}
-                                {formData.description?.length || 0}/350 characters
+                                {formData.description?.length || 0}/350
+                                characters
                             </span>
                         </div>
                         <div className="flex gap-3 ">
@@ -150,10 +150,11 @@ const AddPaymentSchemeModal = ({ modalRef }) => {
                             onChange={handleChange}
                             className="w-[200px] px-4 focus:outline-none"
                             onInput={(e) =>
-                            (e.target.value = e.target.value.replace(
-                                /[^0-9]/g,
-                                ""
-                            ))}
+                                (e.target.value = e.target.value.replace(
+                                    /[^0-9]/g,
+                                    ""
+                                ))
+                            }
                         />
                     </div>
                     <div className="flex items-center border border-custom-grayF1 rounded-md overflow-hidden">
@@ -166,10 +167,11 @@ const AddPaymentSchemeModal = ({ modalRef }) => {
                             onChange={handleChange}
                             className="w-[200px] px-4 focus:outline-none"
                             onInput={(e) =>
-                            (e.target.value = e.target.value.replace(
-                                /[^0-9]/g,
-                                ""
-                            ))}
+                                (e.target.value = e.target.value.replace(
+                                    /[^0-9]/g,
+                                    ""
+                                ))
+                            }
                         />
                     </div>
                     <div className="flex items-center border border-custom-grayF1 rounded-md overflow-hidden">
@@ -182,10 +184,11 @@ const AddPaymentSchemeModal = ({ modalRef }) => {
                             onChange={handleChange}
                             className="w-[200px] px-4 focus:outline-none"
                             onInput={(e) =>
-                            (e.target.value = e.target.value.replace(
-                                /[^0-9]/g,
-                                ""
-                            ))}
+                                (e.target.value = e.target.value.replace(
+                                    /[^0-9]/g,
+                                    ""
+                                ))
+                            }
                         />
                     </div>
                     <div className="flex items-center border border-custom-grayF1 rounded-md overflow-hidden">
@@ -198,10 +201,11 @@ const AddPaymentSchemeModal = ({ modalRef }) => {
                             onChange={handleChange}
                             className="w-[200px] px-4 focus:outline-none"
                             onInput={(e) =>
-                            (e.target.value = e.target.value.replace(
-                                /[^0-9]/g,
-                                ""
-                            ))}
+                                (e.target.value = e.target.value.replace(
+                                    /[^0-9]/g,
+                                    ""
+                                ))
+                            }
                         />
                     </div>
                     <div className="flex items-center border border-custom-grayF1 rounded-md overflow-hidden">
@@ -214,10 +218,11 @@ const AddPaymentSchemeModal = ({ modalRef }) => {
                             onChange={handleChange}
                             className="w-[200px] px-4 focus:outline-none"
                             onInput={(e) =>
-                            (e.target.value = e.target.value.replace(
-                                /[^0-9]/g,
-                                ""
-                            ))}
+                                (e.target.value = e.target.value.replace(
+                                    /[^0-9]/g,
+                                    ""
+                                ))
+                            }
                         />
                     </div>
                     {/* <div className="flex items-center border border-custom-grayF1 rounded-md overflow-hidden">
@@ -252,17 +257,23 @@ const AddPaymentSchemeModal = ({ modalRef }) => {
                     </div> */}
                     <div className="flex justify-center gap-[10px] my-3">
                         <button
-                            className={`w-[173px] h-[37px] text-white montserrat-semibold text-sm gradient-btn2 rounded-[10px] hover:shadow-custom4  ${isButtonDisabled(formData) || isLoading['On-going Approval'] ? "cursor-not-allowed opacity-50" : ""
-                                }`}
-                            disabled={isButtonDisabled(formData) || isLoading['On-going Approval']}
+                            className={`w-[173px] h-[37px] text-white montserrat-semibold text-sm gradient-btn2 rounded-[10px] hover:shadow-custom4  ${
+                                isButtonDisabled(formData) ||
+                                isLoading["On-going Approval"]
+                                    ? "cursor-not-allowed opacity-50"
+                                    : ""
+                            }`}
+                            disabled={
+                                isButtonDisabled(formData) ||
+                                isLoading["On-going Approval"]
+                            }
                             type="submit"
                             onClick={(e) =>
                                 handleSubmit(e, "On-going Approval")
                             }
                         >
                             <div className="flex justify-center items-center h-full w-full rounded-[8px]">
-
-                                {isLoading['On-going Approval'] ? (
+                                {isLoading["On-going Approval"] ? (
                                     <CircularProgress className="spinnerSize" />
                                 ) : (
                                     <> Submit for Approval </>
@@ -272,16 +283,20 @@ const AddPaymentSchemeModal = ({ modalRef }) => {
 
                         <button
                             className={`h-[37px] w-[117px] rounded-[10px] text-custom-solidgreen montserrat-semibold text-sm gradient-btn2 hover:shadow-custom4 p-[3px] 
-                                ${isButtonDisabled(formData) || isLoading['Draft'] ? "cursor-not-allowed opacity-50" : ""
-                                }`
+                                ${
+                                    isButtonDisabled(formData) ||
+                                    isLoading["Draft"]
+                                        ? "cursor-not-allowed opacity-50"
+                                        : ""
+                                }`}
+                            disabled={
+                                isButtonDisabled(formData) || isLoading["Draft"]
                             }
-                            disabled={isButtonDisabled(formData) || isLoading['Draft']}
                             type="submit"
                             onClick={(e) => handleSubmit(e, "Draft")}
                         >
                             <div className="flex justify-center items-center h-full w-full rounded-[8px] bg-white">
-
-                                {isLoading['Draft'] ? (
+                                {isLoading["Draft"] ? (
                                     <CircularProgress className="spinnerSize" />
                                 ) : (
                                     <>Save as Draft</>

@@ -5,9 +5,10 @@ import { useNavigate } from "react-router-dom";
 import CircularProgress from "@mui/material/CircularProgress";
 import { useStateContext } from "@/context/contextprovider";
 import { showToast } from "@/util/toastUtil";
-import { propertyMasterService } from '@/component/servicesApi/apiCalls/propertyPricing/property/propertyMasterService';
-import { usePriceListMaster } from '@/context/PropertyPricing/PriceListMasterContext';
-import { usePropertyNamesWithIds } from "@/component/layout/propertyandpricingpage/hooks/usePropertyNamesWithIds";
+import { propertyMasterService } from "@/component/servicesApi/apiCalls/propertyPricing/property/propertyMasterService";
+import { usePriceListMaster } from "@/context/PropertyPricing/PriceListMasterContext";
+import { useProperty } from "@/context/PropertyPricing/PropertyContext";
+
 
 const formDataState = {
     propertyName: "",
@@ -23,21 +24,16 @@ const formDataState = {
 
 const AddPropertyModal = ({ propertyModalRef }) => {
     //State
-    const { setFloorPremiumsAccordionOpen, user } = useStateContext();
+    const { user } = useStateContext();
     const [formData, setFormData] = useState(formDataState);
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
-    const { propertyNamesList, fetchPropertyNamesWithIds } = usePropertyNamesWithIds();
+    const { propertyNamesList } =
+        useProperty();
     const { fetchPropertyListMasters } = usePriceListMaster();
-
-    //Hooks
-    useEffect(() => {
-        fetchPropertyNamesWithIds();
-    }, []);
-
-    //Event Handler
  
 
+    //Event Handler
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setFormData((prevData) => ({
@@ -65,16 +61,18 @@ const AddPropertyModal = ({ propertyModalRef }) => {
 
         try {
             setIsLoading(true);
-            const response = await propertyMasterService.storePropertyMaster(payload);
+            const response = await propertyMasterService.storePropertyMaster(
+                payload
+            );
+            console.log("response 67 AddPropertyModal", response);
             const towerPhaseId = response?.data?.data?.tower_phases[0]?.id;
             const propertyData = response?.data;
-
 
             if (response.status === 201) {
                 showToast("Data added successfully!", "success");
                 setFormData(formDataState);
-                await fetchPropertyListMasters(true,false); 
-                
+                await fetchPropertyListMasters(true, false);
+
                 if (propertyModalRef.current) {
                     propertyModalRef.current.close();
                 }
@@ -82,54 +80,12 @@ const AddPropertyModal = ({ propertyModalRef }) => {
                 navigate(`/property-pricing/basic-pricing/${towerPhaseId}`, {
                     state: { data: propertyData },
                 });
-
             }
         } catch (error) {
             console.log("Error saving property master data:", error);
         } finally {
             setIsLoading(false);
         }
-        // if (
-        //     formData.propertyName === "" ||
-        //     formData.towerPhase === "" ||
-        //     formData.type === ""
-        // ) {
-
-        //     alert("Please fill all the fields");
-        //     return;
-        // }
-        // try {
-        //     setLoading(true);
-
-
-        //     form.append("propertyName", formData.propertyName);
-        //     form.append("towerPhase", formData.towerPhase);
-        //     form.append("type", formData.type);
-        //     form.append("status", status);
-
-
-        //     const response = await apiService.post("property-details", form, {
-        //         headers: {
-        //             "Content-Type": "application/json",
-        //         },
-        //     });
-        //     const propertyId = response?.data?.propertyData?.propertyMaster?.id;
-        //     const passData = response?.data;
-        //     alert(response.data.message);
-
-        //     if (propertyModalRef.current) {
-        //         propertyModalRef.current.close();
-        //     }
-        //     setFormData(formDataState);
-        //     setFloorPremiumsAccordionOpen(false);
-        //     navigate(`/propertyandpricing/basicpricing/${propertyId}`, {
-        //         state: { passPropertyDetails: passData },
-        //     });  
-        // } catch (error) {
-        //     console.log("Error sending property details", error);
-        // } finally {
-        //     setLoading(false);
-        // }
     };
 
     //Handle close the modal and reset all state
@@ -153,36 +109,21 @@ const AddPropertyModal = ({ propertyModalRef }) => {
                     >
                         <button
                             onClick={handleClose}
-                            className="flex justify-center w-10 h-10 items-center rounded-full  text-custom-bluegreen hover:bg-custombg">
+                            className="flex justify-center w-10 h-10 items-center rounded-full  text-custom-bluegreen hover:bg-custombg"
+                        >
                             ✕
                         </button>
                     </div>
                 </div>
-                <div className="w-full flex justify-center items-center h-12 bg-red-100 mb-4 rounded-lg">
-                    <p className="flex text-[#C42E2E] ">
-                        {/* TODO: make this dynamic */}
-                        Error message here
-                    </p>
-                </div>
+                {/* TODO: make this dynamic */}
+                {/* <div className="w-full flex justify-center items-center h-12 bg-red-100 mb-4 rounded-lg">
+                    <p className="flex text-[#C42E2E] ">Error message here</p>
+                </div> */}
                 <div className="pt-5 flex justify-start items-center mb-5">
                     <p className="montserrat-bold">Add Property Details</p>
                 </div>
                 <form>
                     <div className="flex flex-col gap-2">
-                        {/* <div className="flex items-center border border-custom-gray81 rounded-md overflow-hidden">
-                            <span className="text-custom-gray81 bg-custombg3 flex w-3/4 pl-3 py-1 montserrat-semibold text-sm">
-                                Property Name
-                            </span>
-                            <input
-                                name="propertyName"
-                                type="text"
-                                onChange={handleInputChange}
-                                value={formData.propertyName}
-                                className="w-full px-4 focus:outline-none"
-                                placeholder=""
-                            />
-                        </div> */}
-
                         {/*Property Name 
                         TODO: fix the placing of the select box
                         */}
@@ -199,7 +140,10 @@ const AddPropertyModal = ({ propertyModalRef }) => {
                                 >
                                     <option value="">Select Property</option>
                                     {propertyNamesList.map((property) => (
-                                        <option key={property.id} value={property.id}>
+                                        <option
+                                            key={property.id}
+                                            value={property.id}
+                                        >
                                             {property.name}
                                         </option>
                                     ))}
@@ -223,7 +167,9 @@ const AddPropertyModal = ({ propertyModalRef }) => {
                                 >
                                     <option value="">Select Type</option>
                                     <option value="Vertical">Vertical</option>
-                                    <option value="Horizontal">Horizontal</option>
+                                    <option value="Horizontal">
+                                        Horizontal
+                                    </option>
                                 </select>
                                 <span className="absolute inset-y-0 right-0 text-custom-gray81 flex items-center pr-3 pl-3 bg-custom-grayFA pointer-events-none">
                                     <IoMdArrowDropdown />
@@ -254,7 +200,8 @@ const AddPropertyModal = ({ propertyModalRef }) => {
                                 </p>
                                 <span className="bg-white text-sm2 text-gray-400 font-normal py-3 border-l   pl-2 pr-12 mobile:pr-1 mobile:text-xs ml-auto rounded-tr-[4px]">
                                     {" "}
-                                    {formData.tower_description?.length || 0}/350 characters
+                                    {formData.tower_description?.length || 0}
+                                    /350 characters
                                 </span>
                             </div>
                             <div className="flex gap-3 ">
@@ -320,7 +267,6 @@ const AddPropertyModal = ({ propertyModalRef }) => {
                             />
                         </div>
 
-
                         {/* Country */}
                         <div className="flex items-center border border-custom-gray81 rounded-md overflow-hidden">
                             <span className="text-custom-gray81 bg-custombg3 flex w-3/4 pl-3 py-1 montserrat-semibold  text-sm">
@@ -344,7 +290,8 @@ const AddPropertyModal = ({ propertyModalRef }) => {
                                 </p>
                                 <span className="bg-white text-sm2 text-gray-400 font-normal py-3 border-l   pl-2 pr-12 mobile:pr-1 mobile:text-xs ml-auto rounded-tr-[4px]">
                                     {" "}
-                                    {formData.google_map_link?.length}/350 characters
+                                    {formData.google_map_link?.length}/350
+                                    characters
                                 </span>
                             </div>
                             <div className="flex gap-3 ">
@@ -364,10 +311,15 @@ const AddPropertyModal = ({ propertyModalRef }) => {
                         {/* Button */}
                         <div className="flex justify-center my-3">
                             <button
-                                className={`w-[173px] h-[37px] text-white montserrat-semibold text-sm gradient-btn rounded-[10px] hover:shadow-custom4 ${isLoading || isButtonDisabled(formData) ? "cursor-not-allowed opacity-50" : ""
-                                    }`}
+                                className={`w-[173px] h-[37px] text-white montserrat-semibold text-sm gradient-btn rounded-[10px] hover:shadow-custom4 ${
+                                    isLoading || isButtonDisabled(formData)
+                                        ? "cursor-not-allowed opacity-50"
+                                        : ""
+                                }`}
                                 onClick={(e) => handleSubmit(e, "Draft")}
-                                disabled={isButtonDisabled(formData) || isLoading}
+                                disabled={
+                                    isButtonDisabled(formData) || isLoading
+                                }
                             >
                                 {isLoading ? (
                                     <CircularProgress className="spinnerSize" />
@@ -378,8 +330,6 @@ const AddPropertyModal = ({ propertyModalRef }) => {
                         </div>
                     </div>
                 </form>
-
-
             </div>
         </dialog>
     );

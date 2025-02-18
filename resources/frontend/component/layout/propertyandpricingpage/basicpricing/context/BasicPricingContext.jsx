@@ -2,6 +2,28 @@ import { createContext, useContext, useState } from "react";
 import moment from "moment";
 const BasicPricingContext = createContext();
 
+const additionalPremiums = [
+    {
+        viewName: "Sea View",
+        premiumCost: 0,
+        excludedUnitIds: [],
+    },
+    {
+        viewName: "Mountain View",
+        premiumCost: 0,
+        excludedUnitIds: [],
+    },
+    {
+        viewName: "City View",
+        premiumCost: 0,
+        excludedUnitIds: [],
+    },
+    {
+        viewName: "Amenity View",
+        premiumCost: 0,
+        excludedUnitIds: [],
+    },
+];
 const initialState = () => ({
     priceListSettings: {
         base_price: "",
@@ -12,7 +34,8 @@ const initialState = () => ({
         reservation_fee: "",
     },
     floorPremiums: {},
-    additionalPremiums: {},
+    additionalPremiums: additionalPremiums,
+    selectedAdditionalPremiums: [],
     priceVersions: [
         {
             id: 0,
@@ -20,11 +43,7 @@ const initialState = () => ({
             percent_increase: "",
             no_of_allowed_buyers: "",
             status: "Active",
-            expiry_date: moment().isValid()
-                ? moment(new Date()).format("MM-DD-YYYY HH:mm:ss")
-                : "", // Safe fallback for expiry_date
-            // expiry_date:"N/A",
-            // expiry_date: null,
+            expiry_date: "N/A",
             payment_scheme: [],
         },
     ],
@@ -52,6 +71,7 @@ export default function BasicPricingProvider({ children }) {
                 updatePricingSection,
                 resetPricingData,
                 setPricingData,
+                additionalPremiums,
             }}
         >
             {children}

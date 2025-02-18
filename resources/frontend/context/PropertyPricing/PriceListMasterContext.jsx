@@ -1,5 +1,11 @@
-import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
-import { priceListMasterService } from '@/component/servicesApi/apiCalls/propertyPricing/priceListMaster/priceListMasterService';
+import React, {
+    createContext,
+    useContext,
+    useState,
+    useCallback,
+    useEffect,
+} from "react";
+import { priceListMasterService } from "@/component/servicesApi/apiCalls/propertyPricing/priceListMaster/priceListMasterService";
 
 const PropertyMasterContext = createContext();
 
@@ -9,33 +15,35 @@ export const PriceListMasterProvider = ({ children }) => {
     const [error, setError] = useState(null);
 
     // This function does the actual database fetch
-    const fetchPropertyListMasters = useCallback(async (forceFetch = false, setLoading = true) => {
+    const fetchPropertyListMasters = useCallback(
+        async (forceFetch = false, silentFetch = false) => {
+            if (priceListMaster && !forceFetch) {
+                return priceListMaster;
+            }
 
-        if (priceListMaster && !forceFetch) {
-            return priceListMaster;
-        }
+            try {
+                if (!silentFetch) setIsLoading(true);
+                const response =
+                    await priceListMasterService.getPriceListMasters();
+                setPriceListMaster(response.data);
+                setError(null);
+                return response.data;
+            } catch (error) {
+                setError(error.message);
+                console.error("Error fetching property master list:", error);
+            } finally {
+                if (!silentFetch) setIsLoading(false);
+            }
+        },
+        [priceListMaster]
+    );
 
-         
-        try {
-            if (setLoading) setIsLoading(true);
-            const response = await priceListMasterService.getPriceListMasters();
-            setPriceListMaster(response.data);
-            setError(null);
-            return response.data;
-        } catch (error) {
-            setError(error.message);
-            console.error("Error fetching property master list:", error);
-        } finally {
-            if (setLoading) setIsLoading(false);
-        }
-    }, [priceListMaster]);
-
-  
     const value = {
         priceListMaster,
         isLoading,
         error,
-        fetchPropertyListMasters
+        fetchPropertyListMasters,
+        setPriceListMaster,
     };
 
     return (
@@ -48,7 +56,9 @@ export const PriceListMasterProvider = ({ children }) => {
 export const usePriceListMaster = () => {
     const context = useContext(PropertyMasterContext);
     if (!context) {
-        throw new Error('usePriceListMaster must be used within a PropertyMasterProvider');
+        throw new Error(
+            "usePriceListMaster must be used within a PropertyMasterProvider"
+        );
     }
     return context;
 };

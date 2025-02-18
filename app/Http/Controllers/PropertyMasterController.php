@@ -87,8 +87,7 @@ class PropertyMasterController extends Controller
     {
         //
     }
-
-
+    
     /**
      * Get all property names
      */
@@ -97,6 +96,7 @@ class PropertyMasterController extends Controller
         $propertyNames = $this->service->getPropertyNames();
         return response()->json($propertyNames);
     }
+
 
     /**
      * Get all property names with ID

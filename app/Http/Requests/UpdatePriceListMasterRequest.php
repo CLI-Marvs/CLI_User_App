@@ -30,9 +30,6 @@ class UpdatePriceListMasterRequest extends FormRequest
             'priceListPayload.vatable_less_price' => 'integer',
             'priceListPayload.reservation_fee' => 'integer',
 
-            //Floor premium
-            //Additional premium
-
             // Payment scheme payload
             'paymentSchemePayload' => 'array',
             'paymentSchemePayload' => 'array',
@@ -40,13 +37,34 @@ class UpdatePriceListMasterRequest extends FormRequest
 
             //Price versions
             'priceVersionsPayload' => 'array',
-            'priceVersionsPayload.*.name' => 'string',
+            'priceVersionsPayload.*.name' => 'string | nullable',
             'priceVersionsPayload.*.status' => 'string',
             'priceVersionsPayload.*.percent_increase' => 'integer',
             'priceVersionsPayload.*.no_of_allowed_buyers' => 'integer',
             'priceVersionsPayload.*.expiry_date' => 'nullable | date_format:m-d-Y H:i:s',
             'priceVersionsPayload.*.payment_scheme' => 'array',
             'priceVersionsPayload.*.version_id' => 'integer',
+
+            //Floor premium
+            'floorPremiumsPayload' =>  'array',
+            'floorPremiumsPayload.*.id' => 'integer',
+            'floorPremiumsPayload.*.floor' => 'integer',
+            'floorPremiumsPayload.*.premium_cost' => 'nullable | numeric',
+            'floorPremiumsPayload.*.lucky_number' => 'nullable|boolean',
+            'floorPremiumsPayload.*.excluded_units' => 'array',
+
+            //Additional premium
+            'additionalPremiumsPayload' =>  'array',
+            'additionalPremiumsPayload.*.id' => 'integer',
+            'additionalPremiumsPayload.*.view_name' => 'string',
+            'additionalPremiumsPayload.*.premium_cost' => 'numeric',
+            'additionalPremiumsPayload.*.excluded_units' => 'array',
+
+            //Selected additional premium payload
+            'selectedAdditionalPremiumsPayload' =>  'array',
+            'selectedAdditionalPremiumsPayload.*.unit_id' => 'integer',
+            'selectedAdditionalPremiumsPayload.*.additional_premium_id' => 'array',
+            
 
             'status' =>
             'required|string|max:255',
@@ -55,7 +73,7 @@ class UpdatePriceListMasterRequest extends FormRequest
             'tower_phase_id' =>
             'required|integer',
             'price_list_master_id' =>
-                'required|integer',
+            'required|integer',
         ];
     }
 }

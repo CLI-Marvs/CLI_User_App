@@ -30,10 +30,8 @@ class UnitController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-
     public function store(StoreUnitRequest $request)
     {
-
         $validatedData = $request->validated();
         try {
             $result = $this->service->store($validatedData);
@@ -44,86 +42,47 @@ class UnitController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'error' => 'Validation failed',
-                'messages' => $e->errors(),
+                'messages' => $e->getMessage(),
             ], 422);
         }
     }
 
 
-    /**
-     * Upload the units from excel file
-     */
-    public function uploadUnits(Request $request)
-    {
-        // Get from request body
-        $file = $request->file('file');
-        $headers = $request->input('headers');
-        $propertyId = $request->input('propertyId');
-        $towerPhaseId = $request->input('towerPhaseId');
-        if ($file && $headers) {
-            try {
-                // Validate the file input
-                $request->validate([
-                    'file' => 'required|mimes:xlsx,xls,csv|max:5120',
-                ]);
-
-                // Extract the rowHeader values
-                $decodedHeaders = array_map(function ($header) {
-                    return json_decode($header, true); // Decode each JSON string into an array
-                }, $headers);
-                $actualHeaders = array_column($decodedHeaders, 'rowHeader');
-
-                $import = new ExcelImport($actualHeaders, $propertyId, $towerPhaseId);
-                Excel::import($import, $file);
-
-                return response()->json([
-                    'message' => 'File uploaded successfully and data returned.',
-                ], 200);
-            } catch (\Exception $e) {
-                return response()->json([
-                    'message' => 'Error uploading file.',
-                    'error' => $e->getMessage(),
-                ], 500);
-            }
-        }
-    }
-
-
     //Upload the excel file to google cloud
-    public function uploadToGCS($files)
-    {
-        $fileLinks = []; // Ensure $files is an array, even if a single file is passed
-        if (!is_array($files)) {
-            $files = [$files];
-        }
+    // public function uploadToGCS($files)
+    // {
+    //     $fileLinks = []; // Ensure $files is an array, even if a single file is passed
+    //     if (!is_array($files)) {
+    //         $files = [$files];
+    //     }
 
-        if ($files) {
-            $keyJson = config('services.gcs.key_json');  //Access from services.php
-            $keyArray = json_decode($keyJson, true); // Decode the JSON string to an array
-            $storage = new StorageClient([
-                'keyFile' => $keyArray
-            ]);
-            $bucket = $storage->bucket('super-app-storage');
-            foreach ($files as $file) {
-                $fileName = uniqid() . '.' . $file->getClientOriginalExtension();
-                $filePath = 'units/' . $fileName;
+    //     if ($files) {
+    //         $keyJson = config('services.gcs.key_json');  //Access from services.php
+    //         $keyArray = json_decode($keyJson, true); // Decode the JSON string to an array
+    //         $storage = new StorageClient([
+    //             'keyFile' => $keyArray
+    //         ]);
+    //         $bucket = $storage->bucket('super-app-storage');
+    //         foreach ($files as $file) {
+    //             $fileName = uniqid() . '.' . $file->getClientOriginalExtension();
+    //             $filePath = 'units/' . $fileName;
 
-                $bucket->upload(
-                    fopen($file->getPathname(), 'r'),
-                    ['name' => $filePath]
-                );
+    //             $bucket->upload(
+    //                 fopen($file->getPathname(), 'r'),
+    //                 ['name' => $filePath]
+    //             );
 
-                $fileLink = $bucket->object($filePath)->signedUrl(new \DateTime('+10 years'));
+    //             $fileLink = $bucket->object($filePath)->signedUrl(new \DateTime('+10 years'));
 
-                $fileLinks[] = $fileLink;
-            }
-        }
-        return $fileLinks;
-    }
+    //             $fileLinks[] = $fileLink;
+    //         }
+    //     }
+    //     return $fileLinks;
+    // }
 
     /**
      * Returns the count of distinct floors for a given tower phase.
-     *
+     * 
      * @param int $towerPhaseId The ID of the tower phase.
      * @return \Illuminate\Http\JsonResponse A JSON response containing the count of distinct floors and the floors themselves.
      */
@@ -136,25 +95,35 @@ class UnitController extends Controller
         ]);
     }
 
+    /** 
+     * Get existing units for a specific tower phase
+     */
+    public function getExistingUnits(int $towerPhaseId, string $excelId)
+    {
+        $existingUnits = $this->service->getExistingUnits($towerPhaseId, $excelId);
+
+        return response()->json([
+            'data' => $existingUnits,
+        ]);
+    }
+
     /**
      * Retrieve units for a specific tower phase and floor.
      *
      * @param Request $request The incoming HTTP request
      * @return \Illuminate\Http\JsonResponse JSON response containing units or error message
      */
-    public function getUnits(Request $request)
+    public function getUnits($selectedFloor, $towerPhaseId, $excelId)
     {
-        // Extract towerPhaseId and selectedFloor from the request body
-        $towerPhaseId = $request->input('towerPhaseId');
-        $selectedFloor = $request->input('selectedFloor');
+        // dd($selectedFloor, $towerPhaseId, $excelId);
 
         try {
             // Query the database for units matching the specified towerPhaseId and selectedFloor
-            $units = Unit::where('tower_phase_id', $towerPhaseId)
-                ->where('floor', $selectedFloor)
-                ->get();
-            // Return the found units as a JSON response
-            return response()->json($units);
+            $units =  $this->service->getUnits($towerPhaseId, $selectedFloor, $excelId);
+
+            return response()->json([
+                'data' => $units
+            ]);
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Error getting the units.',
@@ -164,26 +133,19 @@ class UnitController extends Controller
     }
 
     //Add new units
-    public function addUnits(Request $request)
+    public function storeUnit(StoreUnitRequest $request)
     {
-        // $towerPhaseId = $request->input('towerPhaseId');
-        // $selectedFloor = $request->input('selectedFloor');
-        // $units = $request->input('units');
-        // try {
-        //     // Loop through the units array and create a new Unit model for each item
-        //     foreach ($units as $unit) {
-        //         $unitModel = new Unit();
-        //         $unitModel->tower_phase_id = $towerPhaseId;
-        //         $unitModel->floor = $selectedFloor;
-        //         $unitModel->unit = $unit;
-        //         $unitModel->save();
-
-        //     }
-        // } catch (\Exception $e) {
-        //     return response()->json([
-        //         'message' => 'Error getting the units.',
-        //         'error' => $e->getMessage(),
-        //     ], 500);
-        // }
+        try {
+            $validatedData = $request->validated();
+            $result = $this->service->storeUnitDetails($validatedData);
+            return response()->json([
+                'message' => $result['message'],
+            ], 201);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Validation failed',
+                'messages' => $e->getMessage(),
+            ], 422);
+        }
     }
 }

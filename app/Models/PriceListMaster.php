@@ -44,9 +44,13 @@ class PriceListMaster extends Model
 
     public function floorPremiums(): HasMany
     {
-        return $this->hasMany(FloorPremium::class);
+        return $this->hasMany(FloorPremium::class, 'pricelist_master_id', 'id');
     }
 
+    public function additionalPremiums(): HasMany
+    {
+        return $this->hasMany(AdditionalPremium::class, 'price_list_master_id', 'id');
+    }
 
     /**
      * Set date_last_update to the value of updated_at automatically

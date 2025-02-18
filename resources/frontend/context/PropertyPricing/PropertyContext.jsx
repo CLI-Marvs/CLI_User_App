@@ -1,16 +1,24 @@
+import React, {
+    createContext,
+    useContext,
+    useState,
+    useEffect,
+} from "react";
 import { propertyMasterService } from "@/component/servicesApi/apiCalls/propertyPricing/property/propertyMasterService";
-import React, { useEffect, useState } from "react";
 
-export const usePropertyNamesWithIds = () => {
+const PropertyContext = createContext();
+
+export const PropertyProvider = ({ children }) => {
     const [propertyNamesList, setPropertyNamesList] = useState([]);
-    const [isLoading, setIsLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
 
+    // This function does the actual database fetch
     const fetchPropertyNamesWithIds = async () => {
         try {
             const response =
                 await propertyMasterService.getPropertyNamesWithIds();
-            
+ 
             // Convert object to array of objects and sort
             const sortedProperties = Object.entries(response.data)
                 .map(([id, name]) => ({ id, name }))
@@ -22,12 +30,29 @@ export const usePropertyNamesWithIds = () => {
             setIsLoading(false);
         }
     };
+
     useEffect(() => {
         fetchPropertyNamesWithIds();
     }, []);
 
-    return {
-        fetchPropertyNamesWithIds,
+    const value = {
         propertyNamesList,
+        isLoading,
+        error,
+        fetchPropertyNamesWithIds,
     };
+
+    return (
+        <PropertyContext.Provider value={value}>
+            {children}
+        </PropertyContext.Provider>
+    );
+};
+
+export const useProperty = () => {
+    const context = useContext(PropertyContext);
+    if (!context) {
+        throw new Error("useProperty must be used within a PropertyProvider");
+    }
+    return context;
 };

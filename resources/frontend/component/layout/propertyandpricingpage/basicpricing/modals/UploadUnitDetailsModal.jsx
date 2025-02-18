@@ -1,8 +1,10 @@
 import React, { useRef, useEffect, useState } from "react";
 import { IoMdArrowDropdown } from "react-icons/io";
-import { unitService } from "@/component/servicesApi/apiCalls/propertyPricing/unit/unitService";
 import CircularProgress from "@mui/material/CircularProgress";
-import { useCountFloors } from "@/component/layout/propertyandpricingpage/basicpricing/hooks/useCountFloors";
+import { useUnit } from "@/context/PropertyPricing/UnitContext";
+import { showToast } from "@/util/toastUtil";
+import { usePriceListMaster } from "@/context/PropertyPricing/PriceListMasterContext";
+
 const UploadUnitDetailsModal = ({
     uploadUnitModalRef,
     fileName,
@@ -13,11 +15,18 @@ const UploadUnitDetailsModal = ({
 }) => {
     //State
     const [formData, setFormData] = useState({});
-    const [loading, setLoading] = useState(false);
     const newFileInputRef = useRef();
     const [towerPhaseId, setTowerPhaseId] = useState();
     const [propertyMasterId, setPropertyMasterId] = useState();
-    const { fetchFloorCount } = useCountFloors();
+    const [priceListMasterId, setPriceListMasterId] = useState();
+    const {
+        uploadUnits,
+        isUploadingUnits,
+        fetchFloorCount,
+        setFloors,
+        setFloorPremiumsAccordionOpen,
+    } = useUnit();
+    const { priceListMaster } = usePriceListMaster();
 
     //Hooks
     useEffect(() => {
@@ -29,15 +38,33 @@ const UploadUnitDetailsModal = ({
                 };
                 return acc;
             }, {});
+
+            const towerPhaseId =
+                propertyData?.data?.tower_phases[0]?.id ||
+                propertyData?.tower_phase_id;
+            console.log("priceListMaster", priceListMaster);
+            const priceListMasterId =
+                priceListMaster && priceListMaster.length > 0
+                    ? priceListMaster.find(
+                          (master) => master.tower_phase_id === towerPhaseId
+                      )?.price_list_master_id
+                    : null;
             setFormData(initialFormData);
-            setTowerPhaseId(propertyData?.tower_phase_id);
+            setTowerPhaseId(propertyData?.tower_phase_id || towerPhaseId);
             setPropertyMasterId(
-                propertyData?.property_commercial_detail?.property_master_id
+                propertyData?.property_commercial_detail?.property_master_id ||
+                    propertyData?.data?.property_commercial_detail
+                        ?.property_master_id
+            );
+            //If the mode is straight forward Add
+            setPriceListMasterId(
+                propertyData?.price_list_master_id || priceListMasterId
             );
         }
-    }, [selectedExcelHeader, propertyData]); //Initialize formData once selectedExcelHeader is available
+    }, [selectedExcelHeader, propertyData]);
 
     //Event hander
+    // Handle change in column selection
     const handleColumnChange = (newColumnIndex, rowHeader) => {
         setFormData((prevFormData) => ({
             ...prevFormData,
@@ -46,11 +73,9 @@ const UploadUnitDetailsModal = ({
                 columnIndex: parseInt(newColumnIndex),
             },
         }));
-    }; // Handle change in column selection
+    };
 
-    /**
-     * Handle submit units from excel file
-     */
+    //Handle submit units from excel file
     const handleSubmit = async (e) => {
         e.preventDefault();
         const payload = {
@@ -58,29 +83,27 @@ const UploadUnitDetailsModal = ({
             file: fileSelected,
             tower_phase_id: towerPhaseId,
             property_masters_id: propertyMasterId,
+            price_list_master_id: priceListMasterId,
         };
-        console.log("payload", payload);
-
+        console.log("payload",payload)
         try {
-            setLoading(true);
-            const response = await unitService.storeUnit(payload);
-            console.log("response", response);
-            if (response?.status === 201) {
-                const excelId = response?.data?.data?.excel_id;
-
-                //TODO: fetch the unit lloor
-                // Fetch floors immediately after successful upload to reflect the floor premium
-                const floorsResponse = fetchFloorCount(towerPhaseId, excelId);
-                console.log("floorsResponse", floorsResponse);
-                alert(response.data.message);
-                // if (uploadUnitModalRef.current) {
-                //     uploadUnitModalRef.current.close();
-                // }
+            const response = await uploadUnits(payload);
+            if (response?.success === true) {
+                setFloors([]);
+                console.log("it runs here 93");
+                const floors = await fetchFloorCount(
+                    towerPhaseId,
+                    response?.excelId
+                );
+                setFloors(floors);
+                showToast("Unit uploaded successfully", "success");
+                setFloorPremiumsAccordionOpen(true);
+                if (uploadUnitModalRef.current) {
+                    uploadUnitModalRef.current.close();
+                }
             }
         } catch (error) {
             console.log("error uploading excel", error);
-        } finally {
-            setLoading(false);
         }
     };
 
@@ -118,8 +141,7 @@ const UploadUnitDetailsModal = ({
                 <div className="flex justify-between items-center bg-custom-grayFA h-[54px] px-[15px] mb-3">
                     <div>
                         <p className="underline text-blue-500 cursor-pointer">
-                            {fileName} -TowerId- {towerPhaseId}- PropertyId-{" "}
-                            {propertyMasterId}
+                            {fileName}
                         </p>
                     </div>
                     <div>
@@ -334,12 +356,12 @@ const UploadUnitDetailsModal = ({
                     {selectedExcelHeader && selectedExcelHeader.length > 0 ? (
                         <button
                             className={`w-[177px] h-[37px] text-white montserrat-semibold text-sm gradient-btn2 rounded-[10px] hover:shadow-custom4  ${
-                                loading ? "cursor-not-allowed" : ""
+                                isUploadingUnits ? "cursor-not-allowed" : ""
                             }`}
                             type="submit"
                             onClick={handleSubmit}
                         >
-                            {loading ? (
+                            {isUploadingUnits ? (
                                 <CircularProgress className="spinnerSize" />
                             ) : (
                                 <>Confirm and Upload</>

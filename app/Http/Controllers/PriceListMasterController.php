@@ -3,8 +3,11 @@
 namespace App\Http\Controllers;
 
 
+use Log;
+use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Services\PriceListMasterService;
+use Illuminate\Validation\ValidationException;
 use App\Http\Requests\StorePriceListMasterRequest;
 use App\Http\Requests\UpdatePriceListMasterRequest;
 
@@ -23,6 +26,7 @@ class PriceListMasterController extends Controller
     public function index()
     {
         $priceListMasters = $this->service->index();
+
         return response()->json(
             $priceListMasters
         );
@@ -33,12 +37,8 @@ class PriceListMasterController extends Controller
      */
     public function store(StorePriceListMasterRequest $request)
     {
-
         try {
-            //TODO: validate the request to make sure it's valid and match in the request
             $result = $this->service->store($request->validated());
-
-
             if ($result['success']) {
                 return response()->json([
                     'message' => $result['message'],
@@ -66,13 +66,11 @@ class PriceListMasterController extends Controller
 
 
     /*
-     * Update the specified resource 'status' in storage.
+     * Update the specified resource in storage.
      */
     public function update(UpdatePriceListMasterRequest $request)
     {
-        
         $validatedData = $request->validated();
-  
         try {
             $result  = $this->service->update($validatedData, $validatedData['tower_phase_id']);
 
@@ -90,6 +88,49 @@ class PriceListMasterController extends Controller
             return response()->json(
                 [
                     'Error updating price list master' => $e->getMessage()
+                ],
+                500
+            );
+        }
+    }
+
+    /**
+     * Update the price list master status 
+     */
+    public function updateStatus($id)
+    {
+        try {
+            $result = $this->service->updateStatus($id);
+            if ($result['success']) {
+                return response()->json([
+                    'message' => $result['message'],
+                    'data' => $result['data'],
+                ], 200);
+            }
+
+            return response()->json([
+                'message' => $result['message']
+            ], 400);
+        } catch (\Exception $e) {
+            return response()->json(
+                [
+                    'Error updating price list master status' => $e->getMessage()
+                ],
+                500
+            );
+        }
+    }
+
+    /**Export the price list master data to excel */
+    public function exportExcel(Request $request)
+    {
+
+        try {
+            return $this->service->exportExcel($request->all());
+        } catch (\Exception $e) {
+            return response()->json(
+                [
+                    'Error updating price list master status' => $e->getMessage()
                 ],
                 500
             );

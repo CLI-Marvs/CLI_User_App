@@ -15,6 +15,10 @@ class Unit extends Model
     use HasFactory;
     protected $guarded = array();
     protected $table = 'units';
+    protected $casts = [
+        'additional_premium_id' => 'array',
+    ];
+
     public function additionalPremiums()
     {
         return $this->hasMany(AdditionalPremium::class);
@@ -32,5 +36,10 @@ class Unit extends Model
     public function towerPhase()
     {
         return $this->belongsTo(TowerPhase::class);
+    }
+
+    public function countAllUnits()
+    {
+        return $this->whereNotNull('unit')->count();
     }
 }

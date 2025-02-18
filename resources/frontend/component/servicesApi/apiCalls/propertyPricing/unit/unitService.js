@@ -28,4 +28,51 @@ export const unitService = {
             throw error;
         }
     },
+
+    //Function to check existing units for a tower phase
+    getExistingUnits: async (towerPhaseId, excelId) => {
+        if (excelId === null || excelId === undefined) {
+            console.warn("Skipping API request: excelId is null or undefined");
+            return { data: { data: [] } }; // Return empty data to prevent errors
+        }
+        try {
+            const response = await apiService.get(
+                `units/check/${towerPhaseId}/${excelId}`
+            );
+            return response;
+        } catch (error) {
+            console.error("Error checking existing units:", error);
+            throw error;
+        }
+    },
+
+    //Function to get all units in a tower phase and selected floor
+    getUnitsInTowerPhase: async (towerPhaseId, selectedFloor, excelId) => {
+        try {
+            console.log(
+                "getUnitsInTowerPhase",
+                towerPhaseId,
+                selectedFloor,
+                excelId
+            );
+            const response = await apiService.get(
+                `units/tower/${towerPhaseId}/floor/${selectedFloor}/units/${excelId}`
+            );
+            return response;
+        } catch (error) {
+            console.error("Error getting units in tower phase:", error);
+            throw error;
+        }
+    },
+
+    //Function to store unit details from the system
+    storeUnitDetails: async (payload) => {
+        try {
+            const response = await apiService.post("units/store-unit", payload);
+            return response;
+        } catch (error) {
+            console.error("Error storing unit details:", error);
+            throw error;
+        }
+    },
 };
