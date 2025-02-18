@@ -338,31 +338,31 @@ const CustomerDetails = () => {
                                     <>
                                         <div className="flex items-center gap-2 cursor-pointer bg-custom-grayFA rounded-xl shadow-md py-3 px-3 w-full">
                                             <Skeleton
-                                                width="100%"
+                                                width={150}
                                                 height={20}
                                             />
                                             <Skeleton
-                                                width="100%"
-                                                height={20}
-                                            />
-                                        </div>
-                                        <div className="flex items-center gap-2 cursor-pointer bg-custom-grayFA rounded-xl shadow-md py-3 px-3 w-full">
-                                            <Skeleton
-                                                width="100%"
-                                                height={20}
-                                            />
-                                            <Skeleton
-                                                width="100%"
+                                                width={150}
                                                 height={20}
                                             />
                                         </div>
                                         <div className="flex items-center gap-2 cursor-pointer bg-custom-grayFA rounded-xl shadow-md py-3 px-3 w-full">
                                             <Skeleton
-                                                width="100%"
+                                                width={150}
                                                 height={20}
                                             />
                                             <Skeleton
-                                                width="100%"
+                                                width={150}
+                                                height={20}
+                                            />
+                                        </div>
+                                        <div className="flex items-center gap-2 cursor-pointer bg-custom-grayFA rounded-xl shadow-md py-3 px-3 w-full">
+                                            <Skeleton
+                                                width={150}
+                                                height={20}
+                                            />
+                                            <Skeleton
+                                                width={150}
                                                 height={20}
                                             />
                                         </div>
