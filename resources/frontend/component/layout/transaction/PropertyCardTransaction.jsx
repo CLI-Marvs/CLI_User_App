@@ -177,7 +177,7 @@ const PropertyCardTransaction = () => {
                         />
 
                         <div
-                            className={`absolute flex items-center bottom-0 bg-gradient-to-b from-[#7272723B] to-[#3A3A3A3B] w-full px-5 backdrop-blur-[3px]  ${
+                            className={`absolute flex items-center bottom-0 bg-gradient-to-b from-[#7272723B] to-[#3A3A3A3B] w-full px-5 backdrop-blur-[3px] transition-all duration-500 ease-in-out  ${
                                 showUnits === item.id
                                     ? "rounded-xl min-h-[235px] h-[10px]"
                                     : "rounded-b-xl min-h-[87px] h-[87px]"

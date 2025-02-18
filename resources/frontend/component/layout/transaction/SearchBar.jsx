@@ -55,7 +55,7 @@ const SearchBar = () => {
         "Business Partner": ["Test"],
     };
     return (
-        <div className="bg-custom-grayF1 rounded-[10px] p-[12px] w-[604px] h-[47px] cursor-pointer relative">
+        <div className="bg-custom-grayF1 rounded-[10px] p-[12px] w-[604px] h-[47px] cursor-pointer relative z-50">
             <div className="" ref={dropdownRef}>
                 <div
                     className="flex justify-between"

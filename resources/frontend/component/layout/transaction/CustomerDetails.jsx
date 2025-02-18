@@ -14,62 +14,68 @@ import DatePicker from "react-datepicker";
 import { MdCalendarToday } from "react-icons/md";
 import sortDown from "../../../../../public/Images/sort_down.png";
 import FilterWrapper from "../salespage/customermasterlist/FilterWrapper";
+import { HiPencil } from "react-icons/hi";
 
 const data1 = [
     {
-        title: "Title:",
-        value: "Ms.",
+        title: "First Name:",
+        value: "Kent Jeffery",
     },
     {
-        title: "Contract Number:",
-        value: "1000000001",
+        title: "Last Name:",
+        value: "Armelia",
     },
     {
-        title: "Business Partner:",
-        value: "1000000001",
+        title: "Country:",
+        value: "Philippines",
     },
     {
-        title: "Partner Category:",
-        value: "Person",
+        title: "City:",
+        value: "Cebu",
     },
     {
-        title: "Nationality",
-        value: "PH",
+        title: "Email:",
+        value: "kentj@gmail.com",
     },
 ];
 
 const data2 = [
     {
-        title: "Marital Status:",
-        value: "Single",
+        title: "Phone Number:",
+        value: "09661845223",
     },
     {
-        title: "Occupation:",
-        value: "Medical Practioner",
+        title: "Birthday:",
+        value: "April 30, 1998",
     },
     {
-        title: "Date of Birth:",
-        value: "Febuary 27, 2001",
+        title: "Citizenship:",
+        value: "Filipino",
     },
     {
-        title: "Employeer:",
-        value: "Jace Garv",
+        title: "Gender:",
+        value: "Male",
     },
     {
-        title: "Created On:",
-        value: "January 10, 2012",
+        title: "Zip Code:",
+        value: "6000",
     },
 ];
 
 const CustomerDetails = () => {
     const transactModalRef = useRef(null);
     const { customerDetails, setCustomerDetails } = useStateContext();
-    const [showTransactionFilter, setShowTransactionFilter] = useState(false);
 
     const { id } = useParams();
     const decodedEmail = atob(id);
-
     const [ticketId, setTicketId] = useState("");
+
+    const [filters, setFilters] = useState({
+        transaction: false,
+        inquiries: false,
+        documents: false,
+    });
+
     const fetchCustomerDetails = async () => {
         const response = await data.getCustomerByDetails(decodedEmail);
 
@@ -94,12 +100,20 @@ const CustomerDetails = () => {
         }
     };
 
-    const showFiltersFunc = () => {
-        setShowTransactionFilter((prev) => !prev);
+    const toggleFilter = (section) => {
+        setFilters((prev) => ({
+            ...prev,
+            [section]: !prev[section],
+        }));
     };
-    const years = Array.from({ length: 2025 - 2012 + 1 }, (_, i) => 2012 + i);
 
-    console.log("showTransactionFilter", showTransactionFilter);
+    const closeFilters = (section) => {
+        setFilters((prev) => ({
+            ...prev,
+            [section]: false,
+        }));
+    };
+
     return (
         <>
             <div className="p-[20px]">
@@ -135,12 +149,15 @@ const CustomerDetails = () => {
                         </div>
 
                         <div className="px-5 flex gap-10 w-full text-xs font-semibold rounded-xl mt-2">
-                            <div className="flex flex-col w-2/3">
-                                <span className="text-lg largeScreen:text-xl">
-                                    User Info
-                                </span>
+                            <div className="flex flex-col">
+                                <div className="flex gap-2.5">
+                                    <span className="text-lg largeScreen:text-xl">
+                                        User Info
+                                    </span>
+                                    <HiPencil className="h-6 w-6 cursor-pointer" />
+                                </div>
                                 <div className="flex gap-5 mt-2.5">
-                                    <div className="w-1/2 flex flex-col gap-2 mb-2.5">
+                                    <div className="flex flex-col gap-2 mb-2.5">
                                         {data1.map((item, index) => (
                                             <div
                                                 key={index}
@@ -155,7 +172,7 @@ const CustomerDetails = () => {
                                             </div>
                                         ))}
                                     </div>
-                                    <div className="w-1/2 flex flex-col gap-2 mr-3">
+                                    <div className="flex flex-col gap-2 mr-3">
                                         {data2.map((item, index) => (
                                             <div
                                                 key={index}
@@ -172,36 +189,44 @@ const CustomerDetails = () => {
                                     </div>
                                 </div>
                             </div>
-                            <div className="w-auto">
-                                <hr className=" border-1 border-[#3A3A3A]  h-[150px] w-0" />
-                            </div>
 
-                            <div className="flex flex-col w-2/3">
-                                <span className="text-lg">Source of Funds</span>
+                            <div className="flex flex-col">
+                                <div className="flex gap-2.5">
+                                    <span className="text-lg largeScreen:text-xl">
+                                        Spouse Info
+                                    </span>
+                                    <HiPencil className="h-6 w-6 cursor-pointer" />
+                                </div>
                                 <div className="flex gap-5 mt-2.5">
-                                    <div className="flex flex-col gap-2">
-                                        <span className="text-base text-custom-solidgreen">
-                                            Source
-                                        </span>
-                                        <span className="text-sm text-custom-gray81">
-                                            Employed
-                                        </span>
+                                    <div className="flex flex-col gap-2 mb-2.5">
+                                        {data1.map((item, index) => (
+                                            <div
+                                                key={index}
+                                                className="flex items-center gap-2"
+                                            >
+                                                <span className="">
+                                                    {item.title}
+                                                </span>
+                                                <span className=" text-[#818181]">
+                                                    {item.value}
+                                                </span>
+                                            </div>
+                                        ))}
                                     </div>
-                                    <div className="flex flex-col gap-2">
-                                        <span className="text-base text-custom-solidgreen">
-                                            Details
-                                        </span>
-                                        <span className="text-sm text-custom-gray81">
-                                            Accenture Middle Manager
-                                        </span>
-                                    </div>
-                                    <div className="flex flex-col gap-2">
-                                        <span className="text-base text-custom-solidgreen">
-                                            Monthly Income
-                                        </span>
-                                        <span className="text-sm text-custom-gray81">
-                                            ₱80,000 - ₱99,999
-                                        </span>
+                                    <div className="flex flex-col gap-2 mr-3">
+                                        {data2.map((item, index) => (
+                                            <div
+                                                key={index}
+                                                className="flex items-center gap-2"
+                                            >
+                                                <span className="">
+                                                    {item.title}
+                                                </span>
+                                                <span className=" text-[#818181] break-all">
+                                                    {item.value}
+                                                </span>
+                                            </div>
+                                        ))}
                                     </div>
                                 </div>
                             </div>
@@ -210,55 +235,75 @@ const CustomerDetails = () => {
 
                     <PropertyCardTransaction />
                     {/*     <FiltersProperty /> */}
-                    <div className="flex gap-5 mt-5 h-[622px] overflow-hidden">
+
+                    <div className="flex gap-5 mt-5 h-[622px]">
                         <div
-                            className={`py-4 px-5 rounded-xl w-1/2 bg-custom-grayFA relative transition-all duration-500 ease-in-out`}
+                            className={`rounded-xl w-1/2 py-4 px-5 bg-custom-grayFA relative ${
+                                filters.transaction ? "" : "overflow-hidden"
+                            }`}
                         >
-                            {showTransactionFilter ? (
-                                <>
-                                    <FilterWrapper
-                                        showFiltersFunc={showFiltersFunc}
-                                    />
-                                </>
-                            ) : (
-                                <>
-                                    <div className="flex items-center space-x-1">
-                                        <span className="font-semibold text-base">
-                                            Transaction History
-                                        </span>
-                                        <div className="flex-1 border-b-[1px] border-black ml-2"></div>
-                                        <div
-                                            className="flex items-center bg-[#3A3A3A] rounded-full p-1.5 cursor-pointer"
-                                            onClick={showFiltersFunc}
-                                        >
-                                            <img src={sortDown} alt="" />
-                                        </div>
+                            <div className="flex items-center space-x-1">
+                                <span className="font-semibold text-base">
+                                    Transaction History
+                                </span>
+                                <div className="flex-1 border-b-[1px] border-black ml-2"></div>
+                                <div
+                                    className="flex items-center bg-[#3A3A3A] rounded-full p-1.5 cursor-pointer"
+                                    onClick={() => toggleFilter("transaction")}
+                                >
+                                    <img src={sortDown} alt="" />
+                                </div>
+                            </div>
+
+                            {Array.from({ length: 5 }, (_, index) => (
+                                <div
+                                    className="flex flex-col gap-2.5 mt-2.5 rounded-[5px] bg-white border-[3px] border-[#F1F1F1] p-2.5"
+                                    key={index}
+                                >
+                                    <div className="flex justify-between text-black font-semibold text-sm">
+                                        <span>Equity</span>
+                                        <span>Transaction#22301</span>
                                     </div>
-                                    {Array.from({ length: 5 }, (_, index) => (
-                                        <div
-                                            className="flex flex-col gap-2.5 mt-2.5 rounded-[5px] bg-white border-[3px] border-[#F1F1F1] p-2.5"
-                                            key={index}
-                                        >
-                                            <div className="flex justify-between text-black font-semibold text-sm">
-                                                <span>Equity</span>
-                                                <span>Transaction#22301</span>
-                                            </div>
-                                            <div className="flex justify-between text-custom-gray81 text-sm">
-                                                <span>Php 15,500.00</span>
-                                                <span>02/13/2025</span>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </>
-                            )}
+                                    <div className="flex justify-between text-custom-gray81 text-sm">
+                                        <span>Php 15,500.00</span>
+                                        <span>02/13/2025</span>
+                                    </div>
+                                </div>
+                            ))}
+
+                            <div
+                                className={`absolute left-0 w-full h-[577px] rounded-xl py-4 px-5 bg-black transition-all duration-500 ease-in-out ${
+                                    filters.transaction
+                                        ? "top-0 translate-y-0"
+                                        : "bottom-0 translate-y-full"
+                                }`}
+                            >
+                                {filters.transaction && (
+                                    <FilterWrapper
+                                        closeFilters={() =>
+                                            closeFilters("transaction")
+                                        }
+                                        types={["Transaction"]}
+                                    />
+                                )}
+                            </div>
                         </div>
-                        <div className="py-4 px-5 bg-custom-grayFA rounded-xl w-1/2 transaction-scrollbar">
+
+                        <div
+                            className={`rounded-xl w-1/2 py-4 px-5 bg-custom-grayFA relative ${
+                                filters.inquiries ? "" : "overflow-hidden"
+                            }`}
+                        >
                             <div className="flex gap-2.5 items-center">
                                 <span className="font-semibold text-base">
                                     Inquiries
                                 </span>
-                                <div className="flex justify-center w-full">
-                                    <div className="border-b-[1px] border-black w-full"></div>
+                                <div className="flex-1 border-b-[1px] border-black ml-2"></div>
+                                <div
+                                    className="flex items-center bg-[#3A3A3A] rounded-full p-1.5 cursor-pointer"
+                                    onClick={() => toggleFilter("inquiries")}
+                                >
+                                    <img src={sortDown} alt="" />
                                 </div>
                             </div>
 
@@ -291,29 +336,71 @@ const CustomerDetails = () => {
                                     })
                                 ) : (
                                     <>
-                                        <div className="flex items-center gap-2 cursor-pointer bg-custom-grayFA rounded-xl shadow-md py-3 px-3">
-                                            <Skeleton width={200} height={20} />
-                                            <Skeleton width={150} height={20} />
+                                        <div className="flex items-center gap-2 cursor-pointer bg-custom-grayFA rounded-xl shadow-md py-3 px-3 w-full">
+                                            <Skeleton
+                                                width="100%"
+                                                height={20}
+                                            />
+                                            <Skeleton
+                                                width="100%"
+                                                height={20}
+                                            />
                                         </div>
-                                        <div className="flex items-center gap-2 cursor-pointer bg-custom-grayFA rounded-xl shadow-md py-3 px-3">
-                                            <Skeleton width={200} height={20} />
-                                            <Skeleton width={150} height={20} />
+                                        <div className="flex items-center gap-2 cursor-pointer bg-custom-grayFA rounded-xl shadow-md py-3 px-3 w-full">
+                                            <Skeleton
+                                                width="100%"
+                                                height={20}
+                                            />
+                                            <Skeleton
+                                                width="100%"
+                                                height={20}
+                                            />
                                         </div>
-                                        <div className="flex items-center gap-2 cursor-pointer bg-custom-grayFA rounded-xl shadow-md py-3 px-3">
-                                            <Skeleton width={200} height={20} />
-                                            <Skeleton width={150} height={20} />
+                                        <div className="flex items-center gap-2 cursor-pointer bg-custom-grayFA rounded-xl shadow-md py-3 px-3 w-full">
+                                            <Skeleton
+                                                width="100%"
+                                                height={20}
+                                            />
+                                            <Skeleton
+                                                width="100%"
+                                                height={20}
+                                            />
                                         </div>
                                     </>
                                 )}
                             </div>
+
+                            <div
+                                className={`absolute left-0 w-full h-[577px] rounded-xl py-4 px-5 bg-black transition-all duration-500 ease-in-out ${
+                                    filters.inquiries
+                                        ? "top-0 translate-y-0"
+                                        : "bottom-0 translate-y-full"
+                                }`}
+                            >
+                                {filters.inquiries && (
+                                    <FilterWrapper
+                                        closeFilters={() =>
+                                            closeFilters("inquiries")
+                                        }
+                                    />
+                                )}
+                            </div>
                         </div>
-                        <div className="flex flex-col py-4 px-5 bg-[#FAFAFA] w-1/2 rounded-xl gap-2.5">
+                        <div
+                            className={`flex flex-col py-4 px-5 bg-[#FAFAFA] w-1/2 rounded-xl gap-2.5 relative ${
+                                filters.documents ? "" : "overflow-hidden"
+                            }`}
+                        >
                             <div className="flex gap-2.5 items-center">
                                 <span className="font-semibold text-base">
                                     Documents
                                 </span>
-                                <div className="flex justify-center w-full">
-                                    <div className="border-b-[1px] border-black w-full"></div>
+                                <div className="flex-1 border-b-[1px] border-black ml-2"></div>
+                                <div
+                                    className="flex items-center bg-[#3A3A3A] rounded-full p-1.5 cursor-pointer"
+                                    onClick={() => toggleFilter("documents")}
+                                >
+                                    <img src={sortDown} alt="" />
                                 </div>
                             </div>
 
@@ -336,6 +423,22 @@ const CustomerDetails = () => {
                                 <span className="text-xs 2xl:text-base text-custom-solidgreen font-normal">
                                     Marriage Certificate
                                 </span>
+                            </div>
+
+                            <div
+                                className={`absolute left-0 w-full h-[577px] rounded-xl py-4 px-5 bg-black transition-all duration-500 ease-in-out ${
+                                    filters.documents
+                                        ? "top-0 translate-y-0"
+                                        : "bottom-0 translate-y-full"
+                                } z-10`}
+                            >
+                                {filters.documents && (
+                                    <FilterWrapper
+                                        closeFilters={() =>
+                                            closeFilters("documents")
+                                        }
+                                    />
+                                )}
                             </div>
                         </div>
                     </div>
