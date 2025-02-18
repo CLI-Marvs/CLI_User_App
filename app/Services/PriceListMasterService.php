@@ -392,4 +392,10 @@ class PriceListMasterService
     {
         return $this->repository->updateStatus($id);
     }
+
+    //Download the price list excel
+    public function exportExcel($data)
+    {
+        return $this->repository->exportExcel($data);
+    }
 }

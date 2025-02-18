@@ -417,7 +417,7 @@ const BasicPricing = () => {
                     );
 
                     // Reset data and navigate to master list page
-                    await fetchPropertyListMasters(true);
+                    await fetchPropertyListMasters(true,true);
                     setTimeout(() => {
                         navigate("/property-pricing/master-lists");
                     }, 1000);
@@ -462,7 +462,7 @@ const BasicPricing = () => {
                     );
                     // Reset data and navigate to master list page
                     resetPricingData();
-                    await fetchPropertyListMasters(true);
+                    await fetchPropertyListMasters(true,true);
 
                     setTimeout(() => {
                         navigate("/property-pricing/master-lists");

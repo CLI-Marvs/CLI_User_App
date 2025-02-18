@@ -171,6 +171,11 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/update', [PriceListMasterController::class, 'update']);
         //Update the price list master status (e.g. Status = "On-going approval" set to Status="Cancel)
         Route::patch('/{id}/status', [PriceListMasterController::class, 'updateStatus']);
+        //Export the excel
+        Route::post(
+            '/export-excel',
+            [PriceListMasterController::class, 'exportExcel']
+        );
     });
 
     /* Units */

@@ -3,11 +3,13 @@
 namespace App\Http\Controllers;
 
 
+use Log;
+use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Services\PriceListMasterService;
+use Illuminate\Validation\ValidationException;
 use App\Http\Requests\StorePriceListMasterRequest;
 use App\Http\Requests\UpdatePriceListMasterRequest;
-use Illuminate\Validation\ValidationException;
 
 class PriceListMasterController extends Controller
 {
@@ -24,6 +26,7 @@ class PriceListMasterController extends Controller
     public function index()
     {
         $priceListMasters = $this->service->index();
+
         return response()->json(
             $priceListMasters
         );
@@ -108,6 +111,22 @@ class PriceListMasterController extends Controller
             return response()->json([
                 'message' => $result['message']
             ], 400);
+        } catch (\Exception $e) {
+            return response()->json(
+                [
+                    'Error updating price list master status' => $e->getMessage()
+                ],
+                500
+            );
+        }
+    }
+
+    /**Export the price list master data to excel */
+    public function exportExcel(Request $request)
+    {
+
+        try {
+            return $this->service->exportExcel($request->all());
         } catch (\Exception $e) {
             return response()->json(
                 [

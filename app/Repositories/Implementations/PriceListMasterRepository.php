@@ -5,6 +5,7 @@ namespace App\Repositories\Implementations;
 use Exception;
 use App\Models\FloorPremium;
 use App\Models\PriceVersion;
+use Maatwebsite\Excel\Excel;
 use App\Models\PaymentScheme;
 use App\Traits\HasExpiryDate;
 use App\Models\PriceListMaster;
@@ -12,6 +13,8 @@ use App\Models\PriceBasicDetail;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Traits\HandlesMonetaryValues;
+use App\Exports\PriceListMasterExportData;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 
 class PriceListMasterRepository
@@ -20,11 +23,15 @@ class PriceListMasterRepository
     protected $model;
     protected $priceVersionModel;
     protected $floorPremiumModel;
-    public function __construct(PriceListMaster $model, PriceVersion $priceVersionModel, FloorPremium $floorPremiumModel)
+    protected  $excel;
+
+
+    public function __construct(PriceListMaster $model, PriceVersion $priceVersionModel, FloorPremium $floorPremiumModel, Excel $excel)
     {
         $this->model = $model;
         $this->priceVersionModel = $priceVersionModel;
         $this->floorPremiumModel = $floorPremiumModel;
+        $this->excel = $excel;
     }
 
 
@@ -64,7 +71,7 @@ class PriceListMasterRepository
             'success' => true,
             'message' => 'Price List Master status updated successfully.',
             'data' => $priceListMaster->fresh()
-            
+
         ];
     }
 
@@ -187,7 +194,7 @@ class PriceListMasterRepository
     /**
      * Fetch price list masters with related models and fields.
      */
-    public function getPriceListMastersWithRelations()
+    protected function getPriceListMastersWithRelations()
     {
         return $this->model->with([
             'towerPhase.propertyMaster',  // Nested relationship to get property details
@@ -299,5 +306,16 @@ class PriceListMasterRepository
                 'payment_schemes' => $paymentSchemes,
             ];
         });
+    }
+
+
+    //Download the price list master excel
+    public function exportExcel($data): BinaryFileResponse
+    {
+        // dd($building, $propertyName, $priceVersions, $units);
+        // dd($data);
+
+        $export = new PriceListMasterExportData($data['payload']['building'], $data['payload']['project_name'], $data['payload']['priceVersions'], $data['payload']['units']);
+        return $this->excel->download($export, 'price_list_master.xlsx');
     }
 }

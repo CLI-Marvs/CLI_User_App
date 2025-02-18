@@ -370,8 +370,6 @@ const PricingMasterList = () => {
                                                           "Approved"
                                                         ? null
                                                         : "Edit"}
-                                                    {" -"}
-                                                    {item?.price_list_master_id}
                                                 </p>
                                             </div>
                                         </td>

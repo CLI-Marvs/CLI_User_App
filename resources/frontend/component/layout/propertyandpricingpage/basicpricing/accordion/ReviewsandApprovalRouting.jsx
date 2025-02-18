@@ -4,6 +4,8 @@ import { IoMdArrowDropdown } from "react-icons/io";
 import { usePricing } from "@/component/layout/propertyandpricingpage/basicpricing/context/BasicPricingContext";
 import { useUnit } from "@/context/PropertyPricing/UnitContext";
 import * as XLSX from "xlsx";
+import { priceListMasterService } from "@/component/servicesApi/apiCalls/propertyPricing/priceListMaster/priceListMasterService";
+import CircularProgress from "@mui/material/CircularProgress";
 
 const staticHeaders = [
     "Floor",
@@ -24,6 +26,7 @@ const ReviewsandApprovalRouting = ({
     //States
 
     const { pricingData } = usePricing();
+    const [isExcelDownloading, setIsExcelDownloading] = useState(false);
     const [exportPricingData, setExportPricingData] = useState([]);
     //   console.log("exportPricingData", exportPricingData);
     const { units } = useUnit();
@@ -53,128 +56,40 @@ const ReviewsandApprovalRouting = ({
         }));
     }, [propertyData, units]);
 
-    // useEffect(() => {}, [isReviewAndApprovalAccordionOpen]);
-
     //Event handlers
     const handleDownloadExcel = async () => {
-        const ws = XLSX.utils.aoa_to_sheet([
-            // Project Details (Row 1-6)
-            ["PROJECT", propertyData?.property_name],
-            ["BUILDING", propertyData?.tower_phase_name],
-            ["VERSION", "V1"],
-            [
-                "NUMBER OF UNITS",
-                {
-                    v: units.length || 0,
-                    s: { alignment: { horizontal: "left" } },
-                },
-            ],
-            ["PRICE LIST TYPE", "As Approved"],
-            ["VERSION DATE", "02/14/2025"],
+        try {
+            const payload = {
+                project_name: propertyData?.property_name,
+                building: propertyData?.tower_phase_name,
+                units: units,
+                priceVersions: priceVersions,
+            };
 
-            // Empty row for separation
-            [],
+            setIsExcelDownloading(true);
+            const response =
+                await priceListMasterService.exportPriceListMasterDataToExcel(
+                    payload
+                );
 
-            // Row 8: "Units" Header spanning A8 to G8 + "Version" Column in H8
-            [
-                {
-                    v: "Units",
-                    s: {
-                        fill: {
-                            patternType: "solid",
-                            fgColor: { rgb: "31498A" },
-                            alignment: {
-                                horizontal: "middle",
-                                vertical: "center",
-                            },
-                            font: {
-                                bold: true,
-                                color: { rgb: "31498A" },
-                            },
-                        },
-                    },
-                },
-                "",
-                "",
-                "",
-                "",
-                "",
-                "",
-                { v: "Version", s: { fill: { fgColor: { rgb: "31498A" } } } },
-            ],
+            const blob = new Blob([response.data], {
+                type: response.headers["content-type"],
+            });
+            const url = window.URL.createObjectURL(blob);
 
-            // Row 9: Column Titles
-            [
-                { v: "Floor", s: { fill: { fgColor: { rgb: "31498A" } } } },
-                { v: "Room No.", s: { fill: { fgColor: { rgb: "31498A" } } } },
-                { v: "Unit", s: { fill: { fgColor: { rgb: "31498A" } } } },
-                { v: "Type", s: { fill: { fgColor: { rgb: "31498A" } } } },
-                {
-                    v: "Indoor Area",
-                    s: { fill: { fgColor: { rgb: "31498A" } } },
-                },
-                {
-                    v: "Balcony Area",
-                    s: { fill: { fgColor: { rgb: "31498A" } } },
-                },
-                {
-                    v: "Total Area",
-                    s: { fill: { fgColor: { rgb: "31498A" } } },
-                },
-                ...priceVersions.map((version) => ({
-                    v: version.no_of_allowed_buyers,
-                    s: { fill: { fgColor: { rgb: "31498A" } } },
-                })),
-            ],
+            // Create a link element and trigger a download
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = " price_list_master.xlsx";
+            link.click();
 
-            // Data rows for each unit (Row 10 onwards)
-            ...units.map((unit) => [
-                unit.floor,
-                unit.room_number,
-                unit.unit,
-                unit.type,
-                unit.indoor_area,
-                unit.balcony_area,
-                unit.total_area,
-                ...priceVersions.map(
-                    (version) => version.no_of_allowed_buyers || "-"
-                ),
-            ]),
-        ]);
-
-        // Add merge information for "Units" header in Row 8 (A8 to G8)
-        ws["!merges"] = [
-            {
-                s: { c: 0, r: 7 }, // Start at column A (index 0) and row 8 (index 7)
-                e: { c: 6, r: 7 }, // End at column G (index 6) and row 8 (index 7)
-            },
-        ];
-
-        // Set column widths for better readability
-        const wscols = [
-            { wch: 20 }, // Set width for column A (PROJECT, BUILDING, etc.)
-            { wch: 20 }, // Set width for column B (values like property name, version, etc.)
-            { wch: 10 }, // Empty column for spacing (after Version header, etc.)
-            { wch: 10 },
-            { wch: 15 },
-            { wch: 15 },
-            { wch: 15 },
-            ...priceVersions.map(() => ({ wch: 5 })), // Adjust based on priceVersions length
-        ];
-
-        ws["!cols"] = wscols;
-        // Adjust row height for Row 8
-        ws["!rows"] = [];
-        ws["!rows"][7] = { hpx: 30 }; // Row 8 height to 30px
-
-        // Create Excel workbook
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Pricing Data");
-
-        // Write Excel file and trigger download
-        XLSX.writeFile(wb, "pricing_data.xlsx");
+            window.URL.revokeObjectURL(url);
+        } catch (error) {
+            console.log("Error in downloading file", error);
+        } finally {
+            setIsExcelDownloading(false);
+        }
     };
-
     return (
         <>
             <div
@@ -225,13 +140,17 @@ const ReviewsandApprovalRouting = ({
             >
                 <div className="  ">
                     <div className="p-[20px] space-y-[10px] ">
-                        <div>
-                            <p
-                                className="underline text-blue-500 text-sm cursor-pointer"
-                                onClick={handleDownloadExcel}
-                            >
-                                Download Excel
-                            </p>
+                        <div className="w-28">
+                            {isExcelDownloading ? (
+                                <CircularProgress className="spinnerSize h-6 w-6" />
+                            ) : (
+                                <p
+                                    className="underline text-blue-500 text-sm cursor-pointer"
+                                    onClick={handleDownloadExcel}
+                                >
+                                    Download Excel
+                                </p>
+                            )}
                         </div>
                         <div className="  h-[400px] overflow-auto">
                             <div className="">
@@ -253,12 +172,7 @@ const ReviewsandApprovalRouting = ({
                                             </p>
                                         </div>
                                     </div>
-                                    <div className="flex w-full max-w-[450px]">
-                                        <h6 className="w-1/3">VERSION</h6>
-                                        <div className="border border-black px-6 flex-1  ml-10">
-                                            <p>V1</p>
-                                        </div>
-                                    </div>
+
                                     <div className="flex w-full max-w-[450px]">
                                         <h6 className="w-1/3">
                                             NUMBER OF UNITS
@@ -267,20 +181,6 @@ const ReviewsandApprovalRouting = ({
                                             <p>
                                                 {(units && units.length) || 0}
                                             </p>
-                                        </div>
-                                    </div>
-                                    <div className="flex w-full max-w-[450px]">
-                                        <h6 className="w-1/3">
-                                            PRICE LIST TYPE
-                                        </h6>
-                                        <div className="border border-black px-6 flex-1  ml-10">
-                                            <p>As Approved</p>
-                                        </div>
-                                    </div>
-                                    <div className="flex w-full max-w-[450px]">
-                                        <h6 className="w-1/3">VERSION DATE</h6>
-                                        <div className="border border-black px-6 flex-1  ml-10">
-                                            <p>02/14/2025</p>
                                         </div>
                                     </div>
                                 </div>

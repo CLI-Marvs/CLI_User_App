@@ -5,6 +5,7 @@ export const priceListMasterService = {
     getPriceListMasters: async () => {
         try {
             const response = await apiService.get("price-list-masters/");
+            console.log("response getPriceListMasters", response);
             return response;
         } catch (error) {
             console.error("Error getting price list masters:", error);
@@ -52,6 +53,27 @@ export const priceListMasterService = {
             return response;
         } catch (error) {
             console.error("Error updating price list master status:", error);
+            throw error;
+        }
+    },
+
+    //Function to download the price list masters excel file
+    exportPriceListMasterDataToExcel: async (payload) => {
+        try {
+            const response = await apiService.post(
+                "price-list-masters/export-excel",
+                { payload }, // Send payload as is
+                {
+                    // Headers should be in a separate config object
+                    headers: {
+                        Accept: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    },
+                    responseType: "blob", // Add this to handle Excel file response
+                }
+            );
+            return response;
+        } catch (error) {
+            console.error("Error downloading price list masters:", error);
             throw error;
         }
     },

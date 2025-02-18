@@ -42,7 +42,7 @@ const UploadUnitDetailsModal = ({
             const towerPhaseId =
                 propertyData?.data?.tower_phases[0]?.id ||
                 propertyData?.tower_phase_id;
-
+            console.log("priceListMaster", priceListMaster);
             const priceListMasterId =
                 priceListMaster && priceListMaster.length > 0
                     ? priceListMaster.find(
@@ -85,12 +85,12 @@ const UploadUnitDetailsModal = ({
             property_masters_id: propertyMasterId,
             price_list_master_id: priceListMasterId,
         };
-
+        console.log("payload",payload)
         try {
             const response = await uploadUnits(payload);
             if (response?.success === true) {
                 setFloors([]);
-                console.log("it runs here 93")
+                console.log("it runs here 93");
                 const floors = await fetchFloorCount(
                     towerPhaseId,
                     response?.excelId
@@ -141,8 +141,7 @@ const UploadUnitDetailsModal = ({
                 <div className="flex justify-between items-center bg-custom-grayFA h-[54px] px-[15px] mb-3">
                     <div>
                         <p className="underline text-blue-500 cursor-pointer">
-                            {fileName} -TowerId- {towerPhaseId}- PropertyId-{" "}
-                            {propertyMasterId}
+                            {fileName}
                         </p>
                     </div>
                     <div>
