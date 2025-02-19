@@ -226,7 +226,7 @@ class PriceListMasterService
             if (!empty($data['additionalPremiumsPayload']) && is_array($data['additionalPremiumsPayload'])) {
                 foreach ($data['additionalPremiumsPayload'] as $additionalPremium) {
                     $additionalPremiumId = $additionalPremium['id'] ?? null;
-                    $premiumCost = $this->validatePremiumCost($floorPremium['premium_cost']);
+                    $premiumCost = $this->validatePremiumCost($additionalPremium['premium_cost']);
 
 
                     if ($additionalPremiumId && in_array($additionalPremiumId, $additionalPremiumIds)) {
