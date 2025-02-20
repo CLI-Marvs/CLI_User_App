@@ -25,13 +25,15 @@ class PriceListMasterExportData implements FromArray, WithHeadings, WithStyles, 
     protected $priceVersions;
     protected $building;
     protected $propertyName;
+    protected $priceBasicDetails;
 
-    public function __construct($building, $propertyName, $priceVersions, $units)
+    public function __construct($building, $propertyName, $priceVersions, $units, $priceBasicDetails)
     {
         $this->building = $building;
         $this->propertyName = $propertyName;
         $this->units = $units;
         $this->priceVersions = $priceVersions;
+        $this->priceBasicDetails = $priceBasicDetails;
         // dd($this->priceVersions);
     }
 
@@ -46,44 +48,63 @@ class PriceListMasterExportData implements FromArray, WithHeadings, WithStyles, 
     {
         // Get base column headers
         $unitHeaders = ["Floor", "Room No.", "Unit", "Type", "Indoor Area", "Balcony Area", "Total Area"];
+        // Check if versions exist
+        $hasVersions = !empty($this->priceVersions);
+
+        // Check if pricing should be shown (similar to frontend logic)
+        $hasPricing = isset($this->priceBasicDetails) &&
+            isset($this->priceBasicDetails['base_price']) &&
+            $this->priceBasicDetails['base_price'] !== 0;
+
 
         // Calculate total columns
         $totalColumns = count($unitHeaders) + count($this->priceVersions);
 
-        // Create header row with Units and Version
+        // Calculate total columns based on what's present
+        $totalColumns = count($unitHeaders);
+        if ($hasVersions) {
+            $totalColumns += count($this->priceVersions);
+        }
+        if ($hasPricing) {
+            $totalColumns += 1; // Add one column for pricing
+        }
+        // Create header rows
         $headerRow = array_fill(0, $totalColumns, "");
         $headerRow[0] = "UNIT";
-        $headerRow[count($unitHeaders)] = "VERSION";
-        $headerRow[count($unitHeaders) + 1] = "PRICING";
 
-        // Create version row (V1, V2, etc.)
-        $versionRow = array_fill(0, $totalColumns, "");
+        $currentCol = count($unitHeaders);
+        if ($hasVersions) {
+            $headerRow[$currentCol] = "VERSION";
+            $currentCol += count($this->priceVersions);
+        }
+        if ($hasPricing) {
+            $headerRow[$currentCol] = "PRICING";
+        }
+
+        // Create subheader row
+        $subHeaderRow = array_fill(0, $totalColumns, "");
         foreach ($unitHeaders as $index => $header) {
-            $versionRow[$index] = $header;
-        }
-        // Add version names (V1, V2, etc.)
-        foreach ($this->priceVersions as $index => $version) {
-            // Display the full version name
-            $versionRow[count($unitHeaders) + $index] = $version['name'];
+            $subHeaderRow[$index] = $header;
         }
 
-        $noOfBuyersRow = array_fill(0, $totalColumns, "");
-        foreach ($this->priceVersions as $index => $version) {
-            $noOfBuyersRow[count($unitHeaders) + $index] = $version['no_of_allowed_buyers'] ?? "-";
+        // Add version names if they exist
+        if ($hasVersions) {
+            $versionStartCol = count($unitHeaders);
+            foreach ($this->priceVersions as $index => $version) {
+                $subHeaderRow[$versionStartCol + $index] = $version['name'];
+            }
         }
-
+        // Build the data array
         $data = [
             ['VERTICAL INVENTORY PRICING TEMPLATE'],
             ["PROJECT", $this->propertyName],
             ["BUILDING", $this->building],
             ["NUMBER OF UNITS", count($this->units)],
-            $headerRow,    // A5: UNIT / VERSION headers
-            $versionRow,   // A6: Floor, Room No., etc. + V1, V2...
-            $noOfBuyersRow, // A7: Blank for units, no_of_allowed_buyers under versions
+            [], // Empty row
+            $headerRow,
+            $subHeaderRow,
         ];
-
-
-        // Start adding unit data from row 11
+        // Add unit data
         foreach ($this->units as $unit) {
             $row = [
                 $unit['floor'],
@@ -95,14 +116,77 @@ class PriceListMasterExportData implements FromArray, WithHeadings, WithStyles, 
                 $unit['total_area'],
             ];
 
-            foreach ($this->priceVersions as $version) {
-                $row[] = ($version['no_of_allowed_buyers'] ?? "-") . ($version['no_of_allowed_buyers'] ? "%" : "");
+            // Add version data if it exists
+            if ($hasVersions) {
+                foreach ($this->priceVersions as $version) {
+                    $row[] = ($version['no_of_allowed_buyers'] ?? "-") .
+                        ($version['no_of_allowed_buyers'] ? "%" : "");
+                }
+            }
+
+            // Add pricing data if it exists
+            if ($hasPricing) {
+                $row[] = ""; // Add empty cell for pricing column
             }
 
             $data[] = $row;
         }
 
         return $data;
+
+        // // Create header row with Units and Version
+        // $headerRow = array_fill(0, $totalColumns, "");
+        // $headerRow[0] = "UNIT";
+        // $headerRow[count($unitHeaders)] = "VERSION";
+        // $headerRow[count($unitHeaders) + 1] = "PRICING";
+
+        // // Create version row (V1, V2, etc.)
+        // $versionRow = array_fill(0, $totalColumns, "");
+        // foreach ($unitHeaders as $index => $header) {
+        //     $versionRow[$index] = $header;
+        // }
+        // // Add version names (V1, V2, etc.)
+        // foreach ($this->priceVersions as $index => $version) {
+        //     // Display the full version name
+        //     $versionRow[count($unitHeaders) + $index] = $version['name'];
+        // }
+
+        // $noOfBuyersRow = array_fill(0, $totalColumns, "");
+        // foreach ($this->priceVersions as $index => $version) {
+        //     $noOfBuyersRow[count($unitHeaders) + $index] = $version['no_of_allowed_buyers'] ?? "-";
+        // }
+
+        // $data = [
+        //     ['VERTICAL INVENTORY PRICING TEMPLATE'],
+        //     ["PROJECT", $this->propertyName],
+        //     ["BUILDING", $this->building],
+        //     ["NUMBER OF UNITS", count($this->units)],
+        //     $headerRow,    // A5: UNIT / VERSION headers
+        //     $versionRow,   // A6: Floor, Room No., etc. + V1, V2...
+        //     $noOfBuyersRow, // A7: Blank for units, no_of_allowed_buyers under versions
+        // ];
+
+
+        // // Start adding unit data from row 11
+        // foreach ($this->units as $unit) {
+        //     $row = [
+        //         $unit['floor'],
+        //         $unit['room_number'],
+        //         $unit['unit'],
+        //         $unit['type'],
+        //         $unit['indoor_area'],
+        //         $unit['balcony_area'],
+        //         $unit['total_area'],
+        //     ];
+
+        //     foreach ($this->priceVersions as $version) {
+        //         $row[] = ($version['no_of_allowed_buyers'] ?? "-") . ($version['no_of_allowed_buyers'] ? "%" : "");
+        //     }
+
+        //     $data[] = $row;
+        // }
+
+        // return $data;
     }
 
 
@@ -123,78 +207,165 @@ class PriceListMasterExportData implements FromArray, WithHeadings, WithStyles, 
      * @param Worksheet $sheet The spreadsheet worksheet object.
      * @return array An array of styles keyed by cell range.
      */
+    // public function styles(Worksheet $sheet)
+    // {
+    //     // Calculate column letters
+    //     $lastBaseCol = chr(65 + 6); // 'G' for 7 base columns
+    //     $versionStartCol = chr(65 + 7); // 'H' for version section start
+    //     $lastCol = chr(65 + 6 + count($this->priceVersions));
+    //     $pricingCol = 7
+    //         + count($this->priceVersions); // 7 base columns + 1 for VERSION column
+    //     $pricingColLetter = chr(65 + $pricingCol);
+    //     $prevColLetter = chr(65 + $pricingCol - 1);
+    //     $nextColLetter = chr(65 + $pricingCol + 1);
+
+
+    //     $styles = [
+    //         // Style header (Row 1-6)
+    //         'A1' => [
+    //             'font' => ['size' => 12, 'bold' => true],
+    //         ],
+    //         'A1:B6' => [
+    //             'font' => ['size' => 12],
+    //             'alignment' => ['horizontal' => Alignment::HORIZONTAL_LEFT, 'vertical' => Alignment::VERTICAL_CENTER],
+    //         ],
+    //         // Style Units and Version Headers (Row 5)
+    //         "A5:{$lastCol}5" => [
+    //             'font' => ['bold' => true, 'size' => 12, 'color' => ['rgb' => 'FFFFFF']],
+    //             'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '31498A']],
+    //             'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER],
+    //         ],
+    //         // Style base headers and version numbers (Row 9)
+    //         "A6:{$lastBaseCol}7" => [
+    //             'font' => ['bold' => true],
+    //             'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'AEBEE3']],
+    //             'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
+    //         ],
+    //         // Style version columns (V1, V2) separately
+    //         "{$versionStartCol}6:{$lastCol}6" => [
+    //             'font' => ['bold' => true],
+    //             'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'AEBEE3']],
+    //             'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
+    //         ],
+    //         "A7:{$lastCol}7" => [
+    //             'fill' => [
+    //                 'fillType' => Fill::FILL_SOLID,
+    //                 'startColor' => ['rgb' => 'AEBEE3']
+    //             ],
+    //             'alignment' => [
+    //                 'horizontal' => Alignment::HORIZONTAL_CENTER,
+    //                 'vertical' => Alignment::VERTICAL_CENTER
+    //             ],
+    //         ],
+    //         // Left-align unit-related data (Floor, Room No., Unit, etc.)
+    //         "A8:{$lastBaseCol}1000" => [
+    //             'alignment' => [
+    //                 'horizontal' => Alignment::HORIZONTAL_CENTER,
+    //                 'vertical' => Alignment::VERTICAL_CENTER
+    //             ],
+    //         ],
+    //         // Center-align version data (V1, V2, etc.)
+    //         "{$versionStartCol}8:{$lastCol}1000" => [
+    //             'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER],
+    //         ],
+    //         // Style pricing header and adjacent cells
+    //         "{$prevColLetter}5:{$nextColLetter}5" => [
+    //             'font' => ['bold' => true, 'size' => 12, 'color' => ['rgb' => 'FFFFFF']],
+    //             'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '31498A']],
+    //             'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER],
+    //         ],
+    //     ];
+
+    //     return $styles;
+    // }
     public function styles(Worksheet $sheet)
     {
-        // Calculate column letters
-        $lastBaseCol = chr(65 + 6); // 'G' for 7 base columns
-        $versionStartCol = chr(65 + 7); // 'H' for version section start
-        $lastCol = chr(65 + 6 + count($this->priceVersions));
-        $pricingCol = 7
-            + count($this->priceVersions); // 7 base columns + 1 for VERSION column
-        $pricingColLetter = chr(65 + $pricingCol);
-        $prevColLetter = chr(65 + $pricingCol - 1);
-        $nextColLetter = chr(65 + $pricingCol + 1);
+        // Calculate dynamic column positions
+        $lastBaseCol = chr(65 + 6); // G for base columns
+        $currentCol = 8; // Start after base columns
 
+        $hasVersions = !empty($this->priceVersions);
+        $hasPricing = isset($this->priceBasicDetails['base_price']) &&
+            $this->priceBasicDetails['base_price'] !== 0;
+
+        // Calculate version columns if they exist
+        $versionStartCol = $hasVersions ? chr(65 + $currentCol) : null;
+        if ($hasVersions) {
+            $currentCol += count($this->priceVersions);
+        }
+
+        // Calculate pricing column if it exists
+        $pricingCol = $hasPricing ? chr(65 + $currentCol) : null;
+
+        // Calculate last column
+        $lastCol = chr(65 + $currentCol - 1);
 
         $styles = [
-            // Style header (Row 1-6)
+            // Base styles for header
             'A1' => [
                 'font' => ['size' => 12, 'bold' => true],
             ],
-            'A1:B6' => [
+            'A1:B5' => [
                 'font' => ['size' => 12],
-                'alignment' => ['horizontal' => Alignment::HORIZONTAL_LEFT, 'vertical' => Alignment::VERTICAL_CENTER],
+                'alignment' => [
+                    'horizontal' => Alignment::HORIZONTAL_LEFT,
+                    'vertical' => Alignment::VERTICAL_CENTER
+                ],
             ],
-            // Style Units and Version Headers (Row 5)
+
+            // Main headers styling
             "A5:{$lastCol}5" => [
                 'font' => ['bold' => true, 'size' => 12, 'color' => ['rgb' => 'FFFFFF']],
                 'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '31498A']],
-                'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER],
-            ],
-            // Style base headers and version numbers (Row 9)
-            "A6:{$lastBaseCol}7" => [
-                'font' => ['bold' => true],
-                'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'AEBEE3']],
-                'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
-            ],
-            // Style version columns (V1, V2) separately
-            "{$versionStartCol}6:{$lastCol}6" => [
-                'font' => ['bold' => true],
-                'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'AEBEE3']],
-                'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
-            ],
-            "A7:{$lastCol}7" => [
-                'fill' => [
-                    'fillType' => Fill::FILL_SOLID,
-                    'startColor' => ['rgb' => 'AEBEE3']
-                ],
                 'alignment' => [
                     'horizontal' => Alignment::HORIZONTAL_CENTER,
                     'vertical' => Alignment::VERTICAL_CENTER
                 ],
             ],
-            // Left-align unit-related data (Floor, Room No., Unit, etc.)
-            "A8:{$lastBaseCol}1000" => [
-                'alignment' => [
-                    'horizontal' => Alignment::HORIZONTAL_CENTER,
-                    'vertical' => Alignment::VERTICAL_CENTER
-                ],
-            ],
-            // Center-align version data (V1, V2, etc.)
-            "{$versionStartCol}8:{$lastCol}1000" => [
-                'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER],
-            ],
-            // Style pricing header and adjacent cells
-            "{$prevColLetter}5:{$nextColLetter}5" => [
-                'font' => ['bold' => true, 'size' => 12, 'color' => ['rgb' => 'FFFFFF']],
-                'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '31498A']],
-                'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER],
+
+            // Base column headers styling
+            "A6:{$lastBaseCol}6" => [
+                'font' => ['bold' => true],
+                'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'AEBEE3']],
+                'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
             ],
         ];
 
+        // Add version column styles if they exist
+        if ($hasVersions && $versionStartCol) {
+            $styles["{$versionStartCol}7:{$lastCol}7"] = [
+                'font' => ['bold' => true],
+                
+                'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
+                'vertical' => Alignment::VERTICAL_CENTER
+            ];
+        }
+
+        // Add data alignment styles
+        $styles["A8:{$lastBaseCol}1000"] = [
+            'alignment' => [
+                'horizontal' => Alignment::HORIZONTAL_CENTER,
+                'vertical' => Alignment::VERTICAL_CENTER
+            ],
+        ];
+        $styles["A7:{$lastBaseCol}1000"] = [
+            'alignment' => [
+                'horizontal' => Alignment::HORIZONTAL_CENTER,
+                'vertical' => Alignment::VERTICAL_CENTER
+            ],
+        ];
+
+        if ($hasVersions || $hasPricing) {
+            $styles["{$lastBaseCol}8:{$lastCol}1000"] = [
+                'alignment' => [
+                    'horizontal' => Alignment::HORIZONTAL_CENTER,
+                    'vertical' => Alignment::VERTICAL_CENTER
+                ],
+            ];
+        }
+
         return $styles;
     }
-
     /**
      * Registers events for spreadsheet styling and modifications after sheet creation.
      *
