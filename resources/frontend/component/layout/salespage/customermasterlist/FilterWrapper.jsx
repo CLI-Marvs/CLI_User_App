@@ -24,18 +24,34 @@ const INQUIRY_TYPES = [
 
 const STATUS = ["Unresolved", "Resolved", "Closed"];
 
+const DynamicButton = () => {
+    return (
+        <div className="flex flex-col space-y-4">
+            <div className="flex bg-gradient-to-r from-[#175D5F] to-[#348017] rounded-[20px] justify-center items-center shadow-lg w-[175px] px-3 py-3 h-[34px]">
+                <button className="text-white">Show Results</button>
+            </div>
+            <div className="flex items-center justify-center border-1 border-[#348017] rounded-[20px] w-[175px] px-3 py-3 h-[34px] shadow-lg">
+                <button className="text-custom-solidgreen">Clear Filter</button>
+            </div>
+        </div>
+    );
+};
+
 const FilterWrapper = ({ closeFilters, types }) => {
     const { propertyNamesList } = useStateContext();
-    const [selectedProperty, setSelectedProperty] = useState([]);
-    const [transactionType, setTransactionType] = useState([]);
     const [transactionDateFrom, setTransactionDateFrom] = useState(null);
     const [transactionDateTo, setTransactionDateTo] = useState(null);
-    const [paymentChannel, setPaymentChannel] = useState([]);
-    const [status, setStatus] = useState([]);
-    const [inquiryType, setInquiryType] = useState([]);
-
     const datepickerRefFrom = useRef(null);
     const datepickerRefTo = useRef(null);
+    const [selectedFilter, setSelectedFilter] = useState({
+        transactionType: [],
+        transactionProperty: [],
+        paymentChannel: [],
+        inquiryType: [],
+        propertyInquiry: [],
+        status: [],
+        propertyDocuments: [],
+    });
 
     const [filterDropdown, setFilterDropdown] = useState({
         duration: false,
@@ -53,44 +69,13 @@ const FilterWrapper = ({ closeFilters, types }) => {
         }));
     };
 
-    const toggleProperty = (item) => {
-        setSelectedProperty((prevSelected) =>
-            prevSelected.includes(item)
-                ? prevSelected.filter((i) => i !== item)
-                : [...prevSelected, item]
-        );
-    };
-
-    const toggleTransactionType = (item) => {
-        setTransactionType((prev) =>
-            prev.includes(item)
-                ? prev.filter((i) => i !== item)
-                : [...prev, item]
-        );
-    };
-
-    const toggleInquiryType = (item) => {
-        setInquiryType((prev) => 
-            prev.includes(item)
-            ? prev.filter((i) => i !== item)
-            : [...prev, item]
-        );
-    };
-
-    const tooglePaymentChannel = (index) => {
-        setPaymentChannel((prev) =>
-            prev.includes(index)
-                ? prev.filter((i) => i !== index)
-                : [...prev, index]
-        );
-    };
-
-    const toggleStatus = (index) => {
-        setStatus((prev) =>
-            prev.includes(index)
-                ? prev.filter((i) => i !== index)
-                : [...prev, index]
-        );
+    const toggleFilters = (dropDowntype, item) => {
+        setSelectedFilter((prev) => ({
+            ...prev,
+            [dropDowntype]: prev[dropDowntype].includes(item)
+                ? prev[dropDowntype].filter((i) => i !== item)
+                : [...prev[dropDowntype], item],
+        }));
     };
 
     const formatFunc = (name) => {
@@ -134,7 +119,6 @@ const FilterWrapper = ({ closeFilters, types }) => {
             : []),
     ];
 
-    console.log("transactionType", transactionType);
     return (
         <>
             {types === "transaction" && (
@@ -274,10 +258,15 @@ const FilterWrapper = ({ closeFilters, types }) => {
                                         <span className="text-base text-black">
                                             Transaction Type
                                         </span>
-                                        {transactionType.length > 0 && (
+                                        {selectedFilter.transactionType.length >
+                                            0 && (
                                             <div className="bg-black rounded-full h-5 w-5 text-xs flex items-center text-center justify-center">
                                                 <span className="text-white">
-                                                    {transactionType.length}
+                                                    {
+                                                        selectedFilter
+                                                            .transactionType
+                                                            .length
+                                                    }
                                                 </span>
                                             </div>
                                         )}
@@ -311,25 +300,26 @@ const FilterWrapper = ({ closeFilters, types }) => {
                                                         <div
                                                             className="flex justify-between"
                                                             key={index}
+                                                            onClick={() =>
+                                                                toggleFilters(
+                                                                    "transactionType",
+                                                                    item
+                                                                )
+                                                            }
                                                         >
                                                             <span className="text-black">
                                                                 {item}
                                                             </span>
                                                             <div
                                                                 className={`w-4 h-4 flex items-center justify-center rounded-full border-2 mr-3 ${
-                                                                    transactionType.includes(
+                                                                    selectedFilter.transactionType.includes(
                                                                         item
                                                                     )
                                                                         ? "bg-custom-lightgreen border-none"
                                                                         : "border-black"
                                                                 }`}
-                                                                onClick={() =>
-                                                                    toggleTransactionType(
-                                                                        item
-                                                                    )
-                                                                }
                                                             >
-                                                                {transactionType.includes(
+                                                                {selectedFilter.transactionType.includes(
                                                                     item
                                                                 ) && (
                                                                     <IoIosCheckmark className="text-white bg-transparent" />
@@ -359,14 +349,19 @@ const FilterWrapper = ({ closeFilters, types }) => {
                                         toggleFilterDropdown("property")
                                     }
                                 >
-                                   <div className="flex gap-1 items-center">
+                                    <div className="flex gap-1 items-center">
                                         <span className="text-base text-black">
-                                           Property
+                                            Property
                                         </span>
-                                        {selectedProperty.length > 0 && (
+                                        {selectedFilter.transactionProperty
+                                            .length > 0 && (
                                             <div className="bg-black rounded-full h-5 w-5 text-xs flex items-center text-center justify-center">
                                                 <span className="text-white">
-                                                    {selectedProperty.length}
+                                                    {
+                                                        selectedFilter
+                                                            .transactionProperty
+                                                            .length
+                                                    }
                                                 </span>
                                             </div>
                                         )}
@@ -400,25 +395,26 @@ const FilterWrapper = ({ closeFilters, types }) => {
                                                         <div
                                                             className="flex justify-between"
                                                             key={index}
+                                                            onClick={() =>
+                                                                toggleFilters(
+                                                                    "transactionProperty",
+                                                                    item
+                                                                )
+                                                            }
                                                         >
                                                             <span className="text-black">
                                                                 {item}
                                                             </span>
                                                             <div
                                                                 className={`w-4 h-4 flex items-center justify-center rounded-full border-2 mr-3 ${
-                                                                    selectedProperty.includes(
+                                                                    selectedFilter.transactionProperty.includes(
                                                                         item
                                                                     )
                                                                         ? "bg-custom-lightgreen border-none"
                                                                         : "border-black"
                                                                 }`}
-                                                                onClick={() =>
-                                                                    toggleProperty(
-                                                                        item
-                                                                    )
-                                                                }
                                                             >
-                                                                {selectedProperty.includes(
+                                                                {selectedFilter.transactionProperty.includes(
                                                                     item
                                                                 ) && (
                                                                     <IoIosCheckmark className="text-white bg-transparent" />
@@ -448,14 +444,19 @@ const FilterWrapper = ({ closeFilters, types }) => {
                                         toggleFilterDropdown("paymentChannel")
                                     }
                                 >
-                                     <div className="flex gap-1 items-center">
+                                    <div className="flex gap-1 items-center">
                                         <span className="text-base text-black">
-                                           Payment Channel
+                                            Payment Channel
                                         </span>
-                                        {paymentChannel.length > 0 && (
+                                        {selectedFilter.paymentChannel.length >
+                                            0 && (
                                             <div className="bg-black rounded-full h-5 w-5 text-xs flex items-center text-center justify-center">
                                                 <span className="text-white">
-                                                    {paymentChannel.length}
+                                                    {
+                                                        selectedFilter
+                                                            .paymentChannel
+                                                            .length
+                                                    }
                                                 </span>
                                             </div>
                                         )}
@@ -489,26 +490,27 @@ const FilterWrapper = ({ closeFilters, types }) => {
                                                         <div
                                                             className="flex justify-between"
                                                             key={index}
+                                                            onClick={() =>
+                                                                toggleFilters(
+                                                                    "paymentChannel",
+                                                                    item
+                                                                )
+                                                            }
                                                         >
                                                             <span className="text-black">
                                                                 {item}
                                                             </span>
                                                             <div
                                                                 className={`w-4 h-4 flex items-center justify-center rounded-full border-2 mr-3 ${
-                                                                    paymentChannel.includes(
-                                                                        index
+                                                                    selectedFilter.paymentChannel.includes(
+                                                                        item
                                                                     )
                                                                         ? "bg-custom-lightgreen border-none"
                                                                         : "border-black"
                                                                 }`}
-                                                                onClick={() =>
-                                                                    tooglePaymentChannel(
-                                                                        index
-                                                                    )
-                                                                }
                                                             >
-                                                                {paymentChannel.includes(
-                                                                    index
+                                                                {selectedFilter.paymentChannel.includes(
+                                                                    item
                                                                 ) && (
                                                                     <IoIosCheckmark className="text-white bg-transparent" />
                                                                 )}
@@ -521,6 +523,12 @@ const FilterWrapper = ({ closeFilters, types }) => {
                                     )}
                                 </div>
                             </div>
+                        </div>
+                    </div>
+
+                    <div className="flex justify-center">
+                        <div className="absolute bottom-3">
+                            <DynamicButton />
                         </div>
                     </div>
                 </>
@@ -660,12 +668,16 @@ const FilterWrapper = ({ closeFilters, types }) => {
                                 >
                                     <div className="flex gap-1 items-center">
                                         <span className="text-base text-black">
-                                           Inquiry Type
+                                            Inquiry Type
                                         </span>
-                                        {inquiryType.length > 0 && (
+                                        {selectedFilter.inquiryType.length >
+                                            0 && (
                                             <div className="bg-black rounded-full h-5 w-5 text-xs flex items-center text-center justify-center">
                                                 <span className="text-white">
-                                                    {inquiryType.length}
+                                                    {
+                                                        selectedFilter
+                                                            .inquiryType.length
+                                                    }
                                                 </span>
                                             </div>
                                         )}
@@ -699,25 +711,26 @@ const FilterWrapper = ({ closeFilters, types }) => {
                                                         <div
                                                             className="flex justify-between"
                                                             key={index}
+                                                            onClick={() =>
+                                                                toggleFilters(
+                                                                    "inquiryType",
+                                                                    item
+                                                                )
+                                                            }
                                                         >
                                                             <span className="text-black">
                                                                 {item}
                                                             </span>
                                                             <div
                                                                 className={`w-4 h-4 flex items-center justify-center rounded-full border-2 mr-3 ${
-                                                                    inquiryType.includes(
+                                                                    selectedFilter.inquiryType.includes(
                                                                         item
                                                                     )
                                                                         ? "bg-custom-lightgreen border-none"
                                                                         : "border-black"
                                                                 }`}
-                                                                onClick={() =>
-                                                                    toggleInquiryType(
-                                                                        item
-                                                                    )
-                                                                }
                                                             >
-                                                                {inquiryType.includes(
+                                                                {selectedFilter.inquiryType.includes(
                                                                     item
                                                                 ) && (
                                                                     <IoIosCheckmark className="text-white bg-transparent" />
@@ -747,9 +760,23 @@ const FilterWrapper = ({ closeFilters, types }) => {
                                         toggleFilterDropdown("property")
                                     }
                                 >
-                                    <span className="text-base text-black">
-                                        Property
-                                    </span>
+                                    <div className="flex gap-1 items-center">
+                                        <span className="text-base text-black">
+                                            Property
+                                        </span>
+                                        {selectedFilter.propertyInquiry.length >
+                                            0 && (
+                                            <div className="bg-black rounded-full h-5 w-5 text-xs flex items-center text-center justify-center">
+                                                <span className="text-white">
+                                                    {
+                                                        selectedFilter
+                                                            .propertyInquiry
+                                                            .length
+                                                    }
+                                                </span>
+                                            </div>
+                                        )}
+                                    </div>
                                     <img
                                         src={arrowCutomer}
                                         alt=""
@@ -779,25 +806,26 @@ const FilterWrapper = ({ closeFilters, types }) => {
                                                         <div
                                                             className="flex justify-between"
                                                             key={index}
+                                                            onClick={() =>
+                                                                toggleFilters(
+                                                                    "propertyInquiry",
+                                                                    item
+                                                                )
+                                                            }
                                                         >
                                                             <span className="text-black">
                                                                 {item}
                                                             </span>
                                                             <div
                                                                 className={`w-4 h-4 flex items-center justify-center rounded-full border-2 mr-3 ${
-                                                                    selectedProperty.includes(
+                                                                    selectedFilter.propertyInquiry.includes(
                                                                         item
                                                                     )
                                                                         ? "bg-custom-lightgreen border-none"
                                                                         : "border-black"
                                                                 }`}
-                                                                onClick={() =>
-                                                                    toggleProperty(
-                                                                        item
-                                                                    )
-                                                                }
                                                             >
-                                                                {selectedProperty.includes(
+                                                                {selectedFilter.propertyInquiry.includes(
                                                                     item
                                                                 ) && (
                                                                     <IoIosCheckmark className="text-white bg-transparent" />
@@ -827,14 +855,26 @@ const FilterWrapper = ({ closeFilters, types }) => {
                                         toggleFilterDropdown("status")
                                     }
                                 >
-                                    <span className="text-base text-black">
-                                        Status
-                                    </span>
+                                    <div className="flex gap-1 items-center">
+                                        <span className="text-base text-black">
+                                            Status
+                                        </span>
+                                        {selectedFilter.status.length > 0 && (
+                                            <div className="bg-black rounded-full h-5 w-5 text-xs flex items-center text-center justify-center">
+                                                <span className="text-white">
+                                                    {
+                                                        selectedFilter.status
+                                                            .length
+                                                    }
+                                                </span>
+                                            </div>
+                                        )}
+                                    </div>
                                     <img
                                         src={arrowCutomer}
                                         alt=""
                                         className={`size-3 transition-transform duration-500 ${
-                                            filterDropdown.paymentChannel
+                                            filterDropdown.status
                                                 ? "rotate-180"
                                                 : ""
                                         }`}
@@ -858,26 +898,28 @@ const FilterWrapper = ({ closeFilters, types }) => {
                                                     <div
                                                         className="flex justify-between"
                                                         key={index}
+                                                        onClick={() =>
+                                                            toggleFilters(
+                                                                "status",
+                                                                item
+                                                            )
+                                                        }
                                                     >
                                                         <span className="text-black">
                                                             {item}
                                                         </span>
                                                         <div
                                                             className={`w-4 h-4 flex items-center justify-center rounded-full border-2 mr-3 ${
-                                                                status.includes(
-                                                                    index
+                                                                selectedFilter.status.includes(
+                                                                    item
                                                                 )
                                                                     ? "bg-custom-lightgreen border-none"
                                                                     : "border-black"
                                                             }`}
-                                                            onClick={() =>
-                                                                toggleStatus(
-                                                                    index
-                                                                )
-                                                            }
                                                         >
-                                                            {status.includes(
-                                                                index
+                                                            {selectedFilter.status.includes(
+                                                                "status",
+                                                                item
                                                             ) && (
                                                                 <IoIosCheckmark className="text-white bg-transparent" />
                                                             )}
@@ -889,6 +931,12 @@ const FilterWrapper = ({ closeFilters, types }) => {
                                     )}
                                 </div>
                             </div>
+                        </div>
+                    </div>
+
+                    <div className="flex justify-center">
+                        <div className="absolute bottom-3">
+                            <DynamicButton />
                         </div>
                     </div>
                 </>
@@ -920,9 +968,23 @@ const FilterWrapper = ({ closeFilters, types }) => {
                                 className="flex justify-between items-center px-[15px]"
                                 onClick={() => toggleFilterDropdown("property")}
                             >
-                                <span className="text-base text-black">
-                                    Property
-                                </span>
+                                <div className="flex gap-1 items-center">
+                                    <span className="text-base text-black">
+                                        Property
+                                    </span>
+                                    {selectedFilter.propertyDocuments.length >
+                                        0 && (
+                                        <div className="bg-black rounded-full h-5 w-5 text-xs flex items-center text-center justify-center">
+                                            <span className="text-white">
+                                                {
+                                                    selectedFilter
+                                                        .propertyDocuments
+                                                        .length
+                                                }
+                                            </span>
+                                        </div>
+                                    )}
+                                </div>
                                 <img
                                     src={arrowCutomer}
                                     alt=""
@@ -952,25 +1014,26 @@ const FilterWrapper = ({ closeFilters, types }) => {
                                                     <div
                                                         className="flex justify-between"
                                                         key={index}
+                                                        onClick={() =>
+                                                            toggleFilters(
+                                                                "propertyDocuments",
+                                                                item
+                                                            )
+                                                        }
                                                     >
                                                         <span className="text-black">
                                                             {item}
                                                         </span>
                                                         <div
                                                             className={`w-4 h-4 flex items-center justify-center rounded-full border-2 mr-3 ${
-                                                                selectedProperty.includes(
+                                                                selectedFilter.propertyDocuments.includes(
                                                                     item
                                                                 )
                                                                     ? "bg-custom-lightgreen border-none"
                                                                     : "border-black"
                                                             }`}
-                                                            onClick={() =>
-                                                                toggleProperty(
-                                                                    item
-                                                                )
-                                                            }
                                                         >
-                                                            {selectedProperty.includes(
+                                                            {selectedFilter.propertyDocuments.includes(
                                                                 item
                                                             ) && (
                                                                 <IoIosCheckmark className="text-white bg-transparent" />
@@ -983,6 +1046,12 @@ const FilterWrapper = ({ closeFilters, types }) => {
                                     </div>
                                 )}
                             </div>
+                        </div>
+                    </div>
+
+                    <div className="flex justify-center">
+                        <div className="absolute bottom-3">
+                            <DynamicButton />
                         </div>
                     </div>
                 </>
