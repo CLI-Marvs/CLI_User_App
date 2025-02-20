@@ -8,7 +8,7 @@ import { showToast } from "@/util/toastUtil";
 import { propertyMasterService } from "@/component/servicesApi/apiCalls/propertyPricing/property/propertyMasterService";
 import { usePriceListMaster } from "@/context/PropertyPricing/PriceListMasterContext";
 import { useProperty } from "@/context/PropertyPricing/PropertyContext";
-
+import { useUnit } from "@/context/PropertyPricing/UnitContext";
 
 const formDataState = {
     propertyName: "",
@@ -28,10 +28,9 @@ const AddPropertyModal = ({ propertyModalRef }) => {
     const [formData, setFormData] = useState(formDataState);
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
-    const { propertyNamesList } =
-        useProperty();
+    const { propertyNamesList } = useProperty();
     const { fetchPropertyListMasters } = usePriceListMaster();
- 
+    const { setExcelId, setExcelIdFromPriceList } = useUnit();
 
     //Event Handler
     const handleInputChange = (e) => {
@@ -76,7 +75,8 @@ const AddPropertyModal = ({ propertyModalRef }) => {
                 if (propertyModalRef.current) {
                     propertyModalRef.current.close();
                 }
-
+                setExcelId(null);
+                setExcelIdFromPriceList(null);
                 navigate(`/property-pricing/basic-pricing/${towerPhaseId}`, {
                     state: { data: propertyData },
                 });

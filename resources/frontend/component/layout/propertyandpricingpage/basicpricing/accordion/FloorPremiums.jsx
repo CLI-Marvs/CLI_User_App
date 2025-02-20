@@ -7,6 +7,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 import { useUnit } from "@/context/PropertyPricing/UnitContext";
 import { usePricing } from "@/component/layout/propertyandpricingpage/basicpricing/context/BasicPricingContext";
 import { showToast } from "@/util/toastUtil";
+import { property } from "lodash";
 
 const newFloorState = {
     floor: null,
@@ -18,7 +19,7 @@ const FloorPremiums = ({ isOpen, toggleAccordion, propertyData }) => {
     //States
     const [newFloorPremiumData, setNewFloorPremiumData] =
         useState(newFloorState);
-  
+
     const modalRef = useRef(null);
     const {
         floors,
@@ -38,13 +39,21 @@ const FloorPremiums = ({ isOpen, toggleAccordion, propertyData }) => {
      */
     useEffect(() => {
         if (!floors || Object.keys(floors).length === 0) return;
-        floors;
-
         if (
-            excelId ||
-            !pricingData.floorPremiums ||
-            Object.keys(pricingData.floorPremiums).length === 0
+            (excelIdFromPriceList || excelId) &&
+            pricingData.floorPremiums &&
+            Object.keys(pricingData.floorPremiums).length > 0
         ) {
+            return;
+        }
+
+        if (propertyData?.excelId || excelId) {
+            console.log(
+                "excelIdFromPriceList",
+                excelIdFromPriceList,
+                propertyData?.excelId
+            );
+
             const floorNumbers = floors[Object.keys(floors)[0]];
             if (Array.isArray(floorNumbers) && floorNumbers.length > 0) {
                 const initialFloorPremiums = floorNumbers.reduce(
@@ -65,7 +74,7 @@ const FloorPremiums = ({ isOpen, toggleAccordion, propertyData }) => {
                 }));
             }
         }
-    }, [floors]);
+    }, [floors, excelIdFromPriceList, excelId]);
 
     //Event handler
     //Handle to open modal to assign floor premiums

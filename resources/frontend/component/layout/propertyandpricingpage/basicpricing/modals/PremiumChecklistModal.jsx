@@ -9,7 +9,7 @@ const PremiumChecklistModal = ({ modalRef2, selectedUnit }) => {
     const [initialAdditionalPremiums, setInitialAdditionalPremiums] = useState(
         []
     );
-
+    
     //Hooks
     useEffect(() => {
         if (selectedUnit) {

@@ -32,7 +32,7 @@ class PriceListMasterExportData implements FromArray, WithHeadings, WithStyles, 
         $this->propertyName = $propertyName;
         $this->units = $units;
         $this->priceVersions = $priceVersions;
-        //  dd($this->priceVersions);
+        // dd($this->priceVersions);
     }
 
     /**
@@ -54,6 +54,7 @@ class PriceListMasterExportData implements FromArray, WithHeadings, WithStyles, 
         $headerRow = array_fill(0, $totalColumns, "");
         $headerRow[0] = "UNIT";
         $headerRow[count($unitHeaders)] = "VERSION";
+        $headerRow[count($unitHeaders) + 1] = "PRICING";
 
         // Create version row (V1, V2, etc.)
         $versionRow = array_fill(0, $totalColumns, "");
@@ -63,7 +64,7 @@ class PriceListMasterExportData implements FromArray, WithHeadings, WithStyles, 
         // Add version names (V1, V2, etc.)
         foreach ($this->priceVersions as $index => $version) {
             // Display the full version name
-            $versionRow[count($unitHeaders) + $index] = $version['version_name'];
+            $versionRow[count($unitHeaders) + $index] = $version['name'];
         }
 
         $noOfBuyersRow = array_fill(0, $totalColumns, "");
@@ -128,8 +129,14 @@ class PriceListMasterExportData implements FromArray, WithHeadings, WithStyles, 
         $lastBaseCol = chr(65 + 6); // 'G' for 7 base columns
         $versionStartCol = chr(65 + 7); // 'H' for version section start
         $lastCol = chr(65 + 6 + count($this->priceVersions));
+        $pricingCol = 7
+            + count($this->priceVersions); // 7 base columns + 1 for VERSION column
+        $pricingColLetter = chr(65 + $pricingCol);
+        $prevColLetter = chr(65 + $pricingCol - 1);
+        $nextColLetter = chr(65 + $pricingCol + 1);
 
-        return [
+
+        $styles = [
             // Style header (Row 1-6)
             'A1' => [
                 'font' => ['size' => 12, 'bold' => true],
@@ -138,7 +145,7 @@ class PriceListMasterExportData implements FromArray, WithHeadings, WithStyles, 
                 'font' => ['size' => 12],
                 'alignment' => ['horizontal' => Alignment::HORIZONTAL_LEFT, 'vertical' => Alignment::VERTICAL_CENTER],
             ],
-            // Style Units and Version Headers (Row 8)
+            // Style Units and Version Headers (Row 5)
             "A5:{$lastCol}5" => [
                 'font' => ['bold' => true, 'size' => 12, 'color' => ['rgb' => 'FFFFFF']],
                 'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '31498A']],
@@ -173,25 +180,31 @@ class PriceListMasterExportData implements FromArray, WithHeadings, WithStyles, 
                     'vertical' => Alignment::VERTICAL_CENTER
                 ],
             ],
-
             // Center-align version data (V1, V2, etc.)
             "{$versionStartCol}8:{$lastCol}1000" => [
                 'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER],
             ],
-
+            // Style pricing header and adjacent cells
+            "{$prevColLetter}5:{$nextColLetter}5" => [
+                'font' => ['bold' => true, 'size' => 12, 'color' => ['rgb' => 'FFFFFF']],
+                'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '31498A']],
+                'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER],
+            ],
         ];
+
+        return $styles;
     }
 
     /**
- * Registers events for spreadsheet styling and modifications after sheet creation.
- *
- * This function defines an event listener for the `AfterSheet` event.  Within the
- * listener, it performs actions like merging cells for headers and setting row
- * heights.  It dynamically adjusts merge ranges based on the number of price
- * versions.
- *
- * @return array An array of event listeners.
- */
+     * Registers events for spreadsheet styling and modifications after sheet creation.
+     *
+     * This function defines an event listener for the `AfterSheet` event.  Within the
+     * listener, it performs actions like merging cells for headers and setting row
+     * heights.  It dynamically adjusts merge ranges based on the number of price
+     * versions.
+     *
+     * @return array An array of event listeners.
+     */
     public function registerEvents(): array
     {
         return [

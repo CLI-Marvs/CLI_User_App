@@ -42,7 +42,7 @@ const UploadUnitDetailsModal = ({
             const towerPhaseId =
                 propertyData?.data?.tower_phases[0]?.id ||
                 propertyData?.tower_phase_id;
-            console.log("priceListMaster", priceListMaster);
+            
             const priceListMasterId =
                 priceListMaster && priceListMaster.length > 0
                     ? priceListMaster.find(

@@ -20,6 +20,29 @@ import { usePriceListMaster } from "@/context/PropertyPricing/PriceListMasterCon
 import { useUnit } from "@/context/PropertyPricing/UnitContext";
 import CircularProgress from "@mui/material/CircularProgress";
 
+const additionalPremiums = [
+    {
+        viewName: "Sea View",
+        premiumCost: 0,
+        excludedUnitIds: [],
+    },
+    {
+        viewName: "Mountain View",
+        premiumCost: 0,
+        excludedUnitIds: [],
+    },
+    {
+        viewName: "City View",
+        premiumCost: 0,
+        excludedUnitIds: [],
+    },
+    {
+        viewName: "Amenity View",
+        premiumCost: 0,
+        excludedUnitIds: [],
+    },
+];
+
 const BasicPricing = () => {
     //State
     const navigate = useNavigate();
@@ -33,17 +56,13 @@ const BasicPricing = () => {
     const [fileName, setFileName] = useState("");
     const [fileSelected, setFileSelected] = useState({});
     const [selectedExcelHeader, setSelectedExcelHeader] = useState([]);
-    const {
-        pricingData,
-        resetPricingData,
-        setPricingData,
-        additionalPremiums,
-    } = usePricing();
+    const { pricingData, resetPricingData, setPricingData } = usePricing();
     const { fetchPropertyListMasters } = usePriceListMaster();
     const [isLoading, setIsLoading] = useState({});
     const {
         checkExistingUnits,
         floors,
+        units,
         setFloors,
         setFloorPremiumsAccordionOpen,
         excelId,
@@ -51,6 +70,7 @@ const BasicPricing = () => {
         setLastFetchedExcelId,
         setTowerPhaseId,
         setExcelIdFromPriceList,
+        excelIdFromPriceList,
     } = useUnit();
     const [accordionStates, setAccordionStates] = useState({
         priceListSettings: false,
@@ -176,31 +196,30 @@ const BasicPricing = () => {
      * It also handles setting the additionalPremiums if it's currently empty.
      */
     useEffect(() => {
-        if (!data?.excel_id) {
-            console.log(
-                "Excel ID is null, clearing previous data",
-                data?.excel_id
-            );
-            setFloors([]);
-            setPricingData((prev) => ({
-                ...prev,
-                floorPremiums: [],
-                additionalPremiums: [],
-            }));
-            // if (
-            //     floors.length > 0 ||
-            //     Object.keys(pricingData.floorPremiums).length > 0
-            // ) {
-            //     setFloors([]);
-            //     setPricingData((prev) => ({
-            //         ...prev,
-            //         floorPremiums: [],
-            //         additionalPremiums: [],
-            //     }));
-            // }
-            // return;
-        }
-
+        // if (!data?.excel_id) {
+        //     console.log(
+        //         "Excel ID is null, clearing previous data",
+        //         data?.excel_id
+        //     );
+        //     setFloors([]);
+        //     setPricingData((prev) => ({
+        //         ...prev,
+        //         floorPremiums: [],
+        //         additionalPremiums: [],
+        //     }));
+        //     // if (
+        //     //     floors.length > 0 ||
+        //     //     Object.keys(pricingData.floorPremiums).length > 0
+        //     // ) {
+        //     //     setFloors([]);
+        //     //     setPricingData((prev) => ({
+        //     //         ...prev,
+        //     //         floorPremiums: [],
+        //     //         additionalPremiums: [],
+        //     //     }));
+        //     // }
+        //     // return;
+        // }
         if (
             excelId &&
             data?.excel_id &&
@@ -213,16 +232,47 @@ const BasicPricing = () => {
 
             checkExistingUnits(data.tower_phase_id, data.excel_id);
             setLastFetchedExcelId(data?.excel_id);
+            console.log("217", units);
         }
 
-        if (excelId || pricingData.additionalPremiums.length === 0) {
+        // if ((excelId || data?.excel_id) && pricingData.additionalPremiums.length === 0) {
+        //     console.log("221", excelId, data?.excel_id);
+        //     // setPricingData((prev) => ({
+        //     //     ...prev,
+        //     //     additionalPremiums: prev.additionalPremiums.length
+        //     //         ? prev.additionalPremiums // Keep existing if not empty
+        //     //         : additionalPremiums.map((item) => ({
+        //     //               ...item,
+        //     //               id: generateBigIntId(),
+        //     //           })),
+        //     // }));
+        //     // console.log("it runs here 231")
+        //     console.log("255", additionalPremiums);
+        //     // setPricingData((prev) => ({
+        //     //     ...prev,
+        //     //     additionalPremiums: additionalPremiums.map((item) => ({
+        //     //         ...item,
+        //     //         id: generateBigIntId(),
+        //     //     })),
+        //     // }));
+        // }
+        if (excelId || data?.excel_id) {
+            console.log("excelid", excelId);
             setPricingData((prev) => ({
                 ...prev,
-                additionalPremiums: additionalPremiums,
+                additionalPremiums: prev.additionalPremiums.length
+                    ? prev.additionalPremiums // Keep existing if not empty
+                    : additionalPremiums.map((item) => ({
+                          ...item,
+                          id: generateBigIntId(),
+                      })),
             }));
-            console.log("pricingdata", pricingData);
+            console.log("pricingData", pricingData);
         }
+
+        console.log("pricingData", pricingData);
     }, [
+        excelId,
         data?.excel_id,
         data?.tower_phase_id,
         additionalPremiums,
@@ -242,6 +292,14 @@ const BasicPricing = () => {
     }, [location]);
 
     //Event handler
+    //Function to generate random Id
+    const generateBigIntId = () => {
+        return (
+            BigInt(Date.now()) * BigInt(1000) +
+            BigInt(Math.floor(Math.random() * 1000))
+        ).toString();
+    };
+
     // Function to toggle a specific accordion
     const toggleAccordion = (name) => {
         setAccordionStates((prev) => ({
@@ -416,8 +474,14 @@ const BasicPricing = () => {
                         "success"
                     );
 
-                    // Reset data and navigate to master list page
-                    await fetchPropertyListMasters(true,true);
+                    // Refresh the 'units' data to reflect the selected unit and additional premium
+                    await checkExistingUnits(
+                        data.tower_phase_id,
+                        excelId || data?.excelId,
+                        true
+                    );
+                    //To update the data of price list master
+                    await fetchPropertyListMasters(true, true);
                     setTimeout(() => {
                         navigate("/property-pricing/master-lists");
                     }, 1000);
@@ -462,7 +526,13 @@ const BasicPricing = () => {
                     );
                     // Reset data and navigate to master list page
                     resetPricingData();
-                    await fetchPropertyListMasters(true,true);
+                    // Refresh the 'units' data to reflect the selected unit and additional premium
+                    await checkExistingUnits(
+                        data.tower_phase_id,
+                        excelId || data?.excelId,
+                        true
+                    );
+                    await fetchPropertyListMasters(true, true);
 
                     setTimeout(() => {
                         navigate("/property-pricing/master-lists");

@@ -169,13 +169,14 @@ class PriceListMasterService
 
 
             //Fetch the current Floor Premiums ID in the Price List Master table
-            $floorPremiumsId = json_decode($priceListMaster->floor_premiums_id, true);
+            $floorPremiumIdsFromDatabase = json_decode($priceListMaster->floor_premiums_id, true);
             $newFloorPremiumID = [] ?? null; // Keep track of floor premium in the payload
+             
             if (!empty($data['floorPremiumsPayload']) && is_array($data['floorPremiumsPayload'])) {
                 foreach ($data['floorPremiumsPayload'] as $floorPremium) {
                     $floorPremiumId = $floorPremium['id'] ?? null;
 
-                    if ($floorPremiumId && in_array($floorPremiumId, $floorPremiumsId)) {
+                    if ($floorPremiumId && in_array($floorPremiumId, $floorPremiumIdsFromDatabase)) {
                         // UPDATE existing floor premium
                         $existingFloorPremium  = $this->floorPremiumModel->find($floorPremiumId);
                         if (
@@ -206,7 +207,7 @@ class PriceListMasterService
                     }
                 }
 
-                $floorPremiumsIds = is_array($floorPremiumsId) ? $floorPremiumsId : [];
+                $floorPremiumsIds = is_array($floorPremiumIdsFromDatabase) ? $floorPremiumIdsFromDatabase : [];
                 $newFloorPremiumIds = is_array($newFloorPremiumID) ? $newFloorPremiumID : [];
                 $removeFloorPremiumIds = array_diff($floorPremiumsIds, $newFloorPremiumIds);
 
@@ -219,17 +220,17 @@ class PriceListMasterService
             }
 
             // Fetch the current additional premium IDs
-            $additionalPremiumIds = json_decode($priceListMaster->additional_premiums_id, true);
-            $additionalPremiumIds = is_array($additionalPremiumIds) ? $additionalPremiumIds : []; // Ensure it's an array
+            $additionalPremiumIdsFromDatabase = json_decode($priceListMaster->additional_premiums_id, true);
+            $additionalPremiumIdsFromDatabase = is_array($additionalPremiumIdsFromDatabase) ? $additionalPremiumIdsFromDatabase : []; // Ensure it's an array
             $newAdditionalPremiumIds = []; // Initialize the array to track new additional premium IDs.
-
+            
             if (!empty($data['additionalPremiumsPayload']) && is_array($data['additionalPremiumsPayload'])) {
                 foreach ($data['additionalPremiumsPayload'] as $additionalPremium) {
                     $additionalPremiumId = $additionalPremium['id'] ?? null;
                     $premiumCost = $this->validatePremiumCost($additionalPremium['premium_cost']);
 
 
-                    if ($additionalPremiumId && in_array($additionalPremiumId, $additionalPremiumIds)) {
+                    if ($additionalPremiumId && in_array($additionalPremiumId, $additionalPremiumIdsFromDatabase)) {
                         // UPDATE existing additional premium
                         $existingAdditionalPremium = $this->additionalPremiumModel->find($additionalPremiumId);
 
@@ -247,6 +248,7 @@ class PriceListMasterService
                     } else {
                         // CREATE new additional premium
                         $newAdditionalPremium = $priceListMaster->additionalPremiums()->create([
+                            'id' => $additionalPremiumId,
                             'additional_premium' => $additionalPremium['view_name'],
                             'premium_cost' => $premiumCost,
                             'excluded_unit' => json_encode($additionalPremium['excluded_units']),
@@ -260,7 +262,7 @@ class PriceListMasterService
                 }
 
                 // Find and deactivate removed additional premiums
-                $removedAdditionalPremiumIds = array_diff($additionalPremiumIds, $newAdditionalPremiumIds);
+                $removedAdditionalPremiumIds = array_diff($additionalPremiumIdsFromDatabase, $newAdditionalPremiumIds);
 
                 if (!empty($removedAdditionalPremiumIds)) {
                     $this->additionalPremiumModel->whereIn('id', $removedAdditionalPremiumIds)->update([
@@ -273,7 +275,7 @@ class PriceListMasterService
             //Update the units table to store the additional premium IDs
             if (!empty($data['selectedAdditionalPremiumsPayload']) && is_array($data['selectedAdditionalPremiumsPayload'])) {
                 foreach ($data['selectedAdditionalPremiumsPayload'] as $additionalPremium) {
-                    $unitId = $additionalPremium['unit_id'] ?? null;
+                    $unitId =(int) $additionalPremium['unit_id'] ?? null;
                     $additionalPremiumId = $additionalPremium['additional_premium_id'] ?? null;
 
                     if (!$unitId || $additionalPremiumId === null) {
@@ -289,7 +291,7 @@ class PriceListMasterService
                             'additional_premium_id' => json_encode($additionalPremiumId), // Store the selected premium(s)
                         ]);
 
-                        return; // Exit since we already inserted
+                        return; // Exit since  already inserted
                     }
                     // Decode the stored additional_premium_id JSON array
                     $unitIds = (!empty($unit->additional_premium_id) && is_string($unit->additional_premium_id))

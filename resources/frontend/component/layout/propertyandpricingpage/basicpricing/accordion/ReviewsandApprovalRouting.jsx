@@ -28,16 +28,18 @@ const ReviewsandApprovalRouting = ({
     const { pricingData } = usePricing();
     const [isExcelDownloading, setIsExcelDownloading] = useState(false);
     const [exportPricingData, setExportPricingData] = useState([]);
-    //   console.log("exportPricingData", exportPricingData);
-    const { units } = useUnit();
+    const { units, excelId, excelIdFromPriceList } = useUnit();
     const [priceVersions, setPriceVersions] = useState([]);
-
-    const [priceVersionsName, setPriceVersionsName] = useState([]);
-    const headers = [...staticHeaders, ...priceVersionsName];
+    const [subHeaders, setSubHeaders] = useState([]);
+    const headers = [
+        ...staticHeaders, // ["Floor", "Room", "Unit", "Type", ...]
+        ...(subHeaders?.versionHeaders || []), // ["V1", "V2", ...]
+        ...(subHeaders?.pricingHeaders || []), // ["Transfer Charge", "Vatable Less Price", ...]
+    ];
 
     //Hooks
     /**
-     * This hooks, map the price_versions from propertyData to priceVersionsName and priceVersions
+     * This hooks, map the price_versions from propertyData to subHeaders and priceVersions
      */
     useEffect(() => {
         if (propertyData?.price_versions) {
@@ -45,7 +47,44 @@ const ReviewsandApprovalRouting = ({
                 .map((item) => item.version_name)
                 .filter(Boolean);
 
-            setPriceVersionsName(versionNames);
+            const priceDetails = propertyData.pricebasic_details;
+            const excludedPriceListKeys = [
+                "id",
+                "created_at",
+                "updated_at",
+                "base_price",
+                "effective_balcony_base",
+                "vat",
+                "vatable_less_price",
+                "pricelist_master_id",
+            ];
+
+            // Extract property names that have non-zero values & are NOT in the excluded list
+            const pricingKeys = Object.keys(priceDetails)
+                .filter(
+                    (key) =>
+                        !excludedPriceListKeys.includes(key) &&
+                        priceDetails[key] &&
+                        priceDetails[key] !== 0
+                )
+                .map((key) => key.replace(/_/g, " "))
+                .map((key) => {
+                    // Capitalize each word
+                    return key
+                        .split(" ")
+                        .map(
+                            (word) =>
+                                word.charAt(0).toUpperCase() + word.slice(1)
+                        )
+                        .join(" ");
+                });
+
+            const pricingHeaders = ["List price w/ VAT", ...pricingKeys];
+            setSubHeaders({
+                versionHeaders: versionNames, // ["V1", "V2", ...]
+                pricingHeaders: pricingHeaders, // ["Transfer Charge", "Vatable Less Price", ...]
+            });
+
             setPriceVersions(propertyData.price_versions);
         }
 
@@ -62,9 +101,11 @@ const ReviewsandApprovalRouting = ({
             const payload = {
                 project_name: propertyData?.property_name,
                 building: propertyData?.tower_phase_name,
-                units: units,
-                priceVersions: priceVersions,
+                // units: units,
+                // priceVersions: priceVersions,
+                exportPricingData: exportPricingData,
             };
+            console.log("payload", payload);
 
             setIsExcelDownloading(true);
             const response =
@@ -80,7 +121,7 @@ const ReviewsandApprovalRouting = ({
             // Create a link element and trigger a download
             const link = document.createElement("a");
             link.href = url;
-            link.download = " price_list_master.xlsx";
+            link.download = "price_list_master.xlsx";
             link.click();
 
             window.URL.revokeObjectURL(url);
@@ -186,111 +227,198 @@ const ReviewsandApprovalRouting = ({
                                 </div>
                             </div>
 
-                            <div className="mt-4 w-80">
-                                <table className="bg-blue-900 w-full montserrat-regular">
-                                    <thead>
-                                        <tr>
-                                            <th
-                                                colSpan="7"
-                                                className="bg-[#31498a] w-full py-3 montserrat-bold text-white border-black border"
-                                            >
-                                                Unit
-                                            </th>
-                                            <th
-                                                colSpan="6"
-                                                className="bg-[#31498a] w-full py-3 montserrat-bold text-white border-black border px-2"
-                                            >
-                                                Version
-                                            </th>
-                                        </tr>
-                                        <tr className="bg-[#aebee3] border-black border">
-                                            {headers &&
-                                                headers.map(
+                            {(excelId ? true : excelIdFromPriceList) && (
+                                <div className="mt-4 w-80 ">
+                                    <table className="bg-blue-900 w-full montserrat-regular">
+                                        <thead>
+                                            {/* First Row: Main Headers */}
+                                            <tr>
+                                                <th
+                                                    colSpan={
+                                                        staticHeaders.length
+                                                    }
+                                                    className="bg-[#31498a] w-full py-3 montserrat-semibold text-white border-black border"
+                                                >
+                                                    Unit
+                                                </th>
+                                                <th
+                                                    colSpan={
+                                                        subHeaders
+                                                            ?.versionHeaders
+                                                            ?.length || 0
+                                                    }
+                                                    className="bg-[#31498a] w-full py-3 montserrat-semibold text-white border-black border px-2"
+                                                >
+                                                    Version
+                                                </th>
+                                                <th
+                                                    colSpan={
+                                                        subHeaders
+                                                            ?.pricingHeaders
+                                                            ?.length || 0
+                                                    }
+                                                    className="bg-[#31498a] w-full py-3 montserrat-semibold text-white border-black border px-2"
+                                                >
+                                                    Pricing
+                                                </th>
+                                            </tr>
+
+                                            {/* Second Row: Column Titles */}
+                                            <tr className="bg-[#aebee3] border-black border">
+                                                {headers.map(
                                                     (title, headerIndex) => (
                                                         <th
                                                             key={headerIndex}
                                                             className={`${
                                                                 title === "Type"
                                                                     ? "px-9"
+                                                                    : title ===
+                                                                      "List price w/ VAT"
+                                                                    ? "px-10"
                                                                     : "px-4"
-                                                            } py-4  border-black border montserrat-semibold ${
-                                                                headerIndex ===
-                                                                0
-                                                                    ? "min-w-[20px]"
-                                                                    : ""
-                                                            }`}
+                                                            } py-4 border-black border montserrat-medium`}
                                                         >
                                                             {title}
                                                         </th>
                                                     )
                                                 )}
-                                        </tr>
-                                        <tr className="bg-[#aebee3] border-black border">
-                                            <th colSpan="7"></th>
-                                            {priceVersions &&
-                                                priceVersions.map((version) => (
-                                                    <th
-                                                        key={version}
-                                                        className=" montserrat-regular text-sm text-center pl-4 "
-                                                    >
-                                                        {
-                                                            version.no_of_allowed_buyers
-                                                        }{" "}
-                                                        %
-                                                    </th>
+                                            </tr>
+
+                                            {/* Third Row: Version & Pricing Headers */}
+                                            <tr className="bg-[#aebee3] border-black border">
+                                                <th
+                                                    colSpan={
+                                                        staticHeaders.length
+                                                    }
+                                                ></th>
+                                                {/* Version Names (V1, V2, etc.) */}
+                                                {subHeaders?.versionHeaders?.map(
+                                                    (version, index) => (
+                                                        <th
+                                                            key={index}
+                                                            className="montserrat-regular text-sm text-center"
+                                                        >
+                                                            {version}
+                                                        </th>
+                                                    )
+                                                )}
+                                                {/* Pricing Fields (Transfer Charge, Vatable Less Price, etc.) */}
+                                                {subHeaders?.pricingHeaders?.map(
+                                                    (priceKey, index) => (
+                                                        <th
+                                                            key={index}
+                                                            className="montserrat-regular text-sm text-center pl-4"
+                                                        ></th>
+                                                    )
+                                                )}
+                                            </tr>
+                                        </thead>
+
+                                        <tbody className="bg-white">
+                                            {units &&
+                                                units.map((unit, unitIndex) => (
+                                                    <tr key={unitIndex}>
+                                                        {/* Map  Unit Data */}
+
+                                                        <td className="px-2 border-black border">
+                                                            {unit.floor}
+                                                        </td>
+                                                        <td className="px-2 border-black border">
+                                                            {unit.room_number}
+                                                        </td>
+                                                        <td className="px-2 border-black border">
+                                                            {unit.unit}
+                                                        </td>
+                                                        <td className="px-2 border-black border">
+                                                            {unit.type}
+                                                        </td>
+                                                        <td className="px-2 border-black border">
+                                                            {unit.indoor_area}
+                                                        </td>
+                                                        <td className="px-2 border-black border">
+                                                            {unit.balcony_area}
+                                                        </td>
+                                                        <td className="px-2 border-black border">
+                                                            {unit.total_area}
+                                                        </td>
+
+                                                        {/* Map Dynamic Price Versions */}
+                                                        {priceVersions.map(
+                                                            (
+                                                                version,
+                                                                versionIndex
+                                                            ) => (
+                                                                <td
+                                                                    key={
+                                                                        versionIndex
+                                                                    }
+                                                                    className="px-2 border-black border text-center"
+                                                                >
+                                                                    {version.no_of_allowed_buyers ||
+                                                                        "-"}
+                                                                </td>
+                                                            )
+                                                        )}
+
+                                                        {/* Map  Pricing Data */}
+                                                        {/* {
+                                                                    pricingData?.pricebasic_details.map((priceListItem) => {
+                                                                        return (
+                                                                            <td
+                                                                                key={
+                                                                                    versionIndex
+                                                                                }
+                                                                                className="px-2 border-black border text-center"
+                                                                            >
+                                                                                {priceListItem[priceKey] || "-"}
+                                                                            </td>
+                                                                        );
+                                                                    })
+                                                                } */}
+                                                        {pricingData &&
+                                                            Object.keys(
+                                                                pricingData?.priceListSettings
+                                                            ).length > 0 &&
+                                                            Object.keys(
+                                                                pricingData?.priceListSettings
+                                                            )
+                                                                .filter((key) =>
+                                                                    [
+                                                                        "transfer_charge",
+                                                                        "reservation_fee",
+                                                                        "vatable_less_price",
+                                                                    ].includes(
+                                                                        key
+                                                                    )
+                                                                )
+                                                                .map(
+                                                                    (
+                                                                        priceListItem
+                                                                    ) => {
+                                                                        return (
+                                                                            <td
+                                                                                key={
+                                                                                    priceListItem
+                                                                                } // ✅ Use key directly (not `priceListItem.id`)
+                                                                                className="px-2 border-black border text-center"
+                                                                            >
+                                                                                {
+                                                                                    pricingData
+                                                                                        .priceListSettings[
+                                                                                        priceListItem
+                                                                                    ]
+                                                                                }{" "}
+                                                                                {/* ✅ Get the value */}
+                                                                            </td>
+                                                                        );
+                                                                    }
+                                                                )}
+                                                    </tr>
                                                 ))}
-                                        </tr>
-                                    </thead>
-                                    <tbody className="bg-white">
-                                        {units &&
-                                            units.map((unit, unitIndex) => (
-                                                <tr key={unitIndex}>
-                                                    {/* Map  Unit Data */}
-
-                                                    <td className="px-2 border-black border">
-                                                        {unit.floor}
-                                                    </td>
-                                                    <td className="px-2 border-black border">
-                                                        {unit.room_number}
-                                                    </td>
-                                                    <td className="px-2 border-black border">
-                                                        {unit.unit}
-                                                    </td>
-                                                    <td className="px-2 border-black border">
-                                                        {unit.type}
-                                                    </td>
-                                                    <td className="px-2 border-black border">
-                                                        {unit.indoor_area}
-                                                    </td>
-                                                    <td className="px-2 border-black border">
-                                                        {unit.balcony_area}
-                                                    </td>
-                                                    <td className="px-2 border-black border">
-                                                        {unit.total_area}
-                                                    </td>
-
-                                                    {/* Map Dynamic Price Versions */}
-                                                    {priceVersions.map(
-                                                        (
-                                                            version,
-                                                            versionIndex
-                                                        ) => (
-                                                            <td
-                                                                key={
-                                                                    versionIndex
-                                                                }
-                                                                className="px-2 border-black border text-center"
-                                                            >
-                                                                {version.no_of_allowed_buyers ||
-                                                                    "-"}
-                                                            </td>
-                                                        )
-                                                    )}
-                                                </tr>
-                                            ))}
-                                    </tbody>
-                                </table>
-                            </div>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            )}
                         </div>
 
                         <div className="flex flex-col gap-[10px] w-[429px]">

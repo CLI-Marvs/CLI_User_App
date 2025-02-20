@@ -7,9 +7,9 @@ const EditPaymentSchemeModal = ({
     versionIndex,
 }) => {
     const [selectedPaymentSchemes, setSelectedPaymentSchemes] = useState([]);
-    const { updatePricingSection, pricingData , setPricingData} = usePricing();
+    const { pricingData, setPricingData } = usePricing();
     const { paymentScheme } = usePaymentScheme();
- 
+
     //Hooks
     /**
      * This effect is triggered when the versionIndex changes
@@ -41,31 +41,6 @@ const EditPaymentSchemeModal = ({
 
     //Confirm the payment scheme selected
     const handleConfirm = () => {
-        console.log("add payment scheme");
-        // const updatedPriceVersions = Object.entries(
-        //     pricingData?.priceVersions || {}
-        // ).map(([key, version], index) =>
-        //     index === versionIndex
-        //         ? {
-        //               ...version,
-        //               payment_scheme: selectedPaymentSchemes,
-        //           }
-        //         : version
-        // );
-        // console.log("updatedPriceVersions", updatedPriceVersions);
-        // // Convert back to object format after updating
-        // const updatedPriceVersionsObject = Object.fromEntries(
-        //     Object.keys(pricingData?.priceVersions || {}).map((key, index) => [
-        //         key,
-        //         updatedPriceVersions[index],
-        //     ])
-        // );
-
-        // updatePricingSection("priceVersions", updatedPriceVersionsObject);
-        // if (editPaymentSchemeModalRef.current) {
-        //     editPaymentSchemeModalRef.current.close();
-        // }
-
         // In the else block (for adding a version)
         const updatedPriceVersions = pricingData?.priceVersions?.map(
             (version, index) =>
@@ -80,7 +55,6 @@ const EditPaymentSchemeModal = ({
         console.log("updatedPriceVersions", updatedPriceVersions);
         console.log(Array.isArray(updatedPriceVersions)); // Should always be true
 
-        //   updatePricingSection("priceVersions", updatedPriceVersions); // Again, just work with the array
         setPricingData((prev) => ({
             ...prev,
             priceVersions: updatedPriceVersions,
@@ -115,23 +89,23 @@ const EditPaymentSchemeModal = ({
 
     //Handle to cancel the modal
     const handleCancel = () => {
-         if (
-             versionIndex !== undefined &&
-             paymentScheme !== undefined &&
-             pricingData !== undefined
-         ) {
-             const currentPaymentSchemeIds =
-                 pricingData?.priceVersions?.[versionIndex]?.payment_scheme ||
-                 [];
-             const selectedPaymentSchemes =
-                 paymentScheme &&
-                 paymentScheme.filter((scheme) =>
-                     currentPaymentSchemeIds.some(
-                         (item) => item.id === scheme.id
-                     )
-                 );
-             setSelectedPaymentSchemes(selectedPaymentSchemes);
-         }
+        if (
+            versionIndex !== undefined &&
+            paymentScheme !== undefined &&
+            pricingData !== undefined
+        ) {
+            const currentPaymentSchemeIds =
+                pricingData?.priceVersions?.[versionIndex]?.payment_scheme ||
+                [];
+            const selectedPaymentSchemes =
+                paymentScheme &&
+                paymentScheme.filter((scheme) =>
+                    currentPaymentSchemeIds.some(
+                        (item) => item.id === scheme.id
+                    )
+                );
+            setSelectedPaymentSchemes(selectedPaymentSchemes);
+        }
         editPaymentSchemeModalRef.current.close();
     };
 
@@ -160,7 +134,7 @@ const EditPaymentSchemeModal = ({
                                 }
                             />
                             <p className="montserrat-semibold text-[21px]">
-                                {item?.payment_scheme_name} ID: {item?.id}
+                                {item?.payment_scheme_name}
                             </p>
                         </div>
                         <div className="flex flex-col gap-1 text-sm pr-4">

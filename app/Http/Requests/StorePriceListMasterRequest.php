@@ -54,6 +54,7 @@ class StorePriceListMasterRequest extends FormRequest
 
             //Additional premium
             'additionalPremiumsPayload' =>  'array',
+            'additionalPremiumsPayload.*.id' => 'integer',
             'additionalPremiumsPayload.*.view_name' => 'string',
             'additionalPremiumsPayload.*.premium_cost' => 'numeric',
             'additionalPremiumsPayload.*.excluded_units' => 'array',
@@ -61,7 +62,8 @@ class StorePriceListMasterRequest extends FormRequest
             //Selected additional premium payload
             'selectedAdditionalPremiumsPayload' =>  'array',
             'selectedAdditionalPremiumsPayload.*.id' => 'integer',
-            'selectedAdditionalPremiumsPayload.*.additional_premium_id' => 'integer',
+            'selectedAdditionalPremiumsPayload.*.unit_id' => 'integer',
+            'selectedAdditionalPremiumsPayload.*.additional_premium_id' => 'array',
 
             'status' =>
             'required|string|max:255',

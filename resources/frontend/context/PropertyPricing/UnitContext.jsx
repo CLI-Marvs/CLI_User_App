@@ -93,6 +93,7 @@ export const UnitProvider = ({ children }) => {
                     towerPhaseId,
                     excelId
                 );
+                console.log("response", response);
                 const unitsData = response?.data?.data || [];
                 setUnits(unitsData);
                 setLastFetchedExcelId(excelId);  
@@ -190,6 +191,7 @@ export const UnitProvider = ({ children }) => {
         setTowerPhaseId,
         excelIdFromPriceList,
         setExcelIdFromPriceList,
+        setExcelId,
     };
     return (
         <UnitContext.Provider value={value}>{children}</UnitContext.Provider>

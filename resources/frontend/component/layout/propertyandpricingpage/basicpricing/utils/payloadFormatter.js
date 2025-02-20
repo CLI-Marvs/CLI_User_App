@@ -83,7 +83,7 @@ export const formatPayload = {
         const formattedAdditionalPremiums = additionalPremiums.map(
             (premium) => {
                 const formattedPremium = {
-                    id: premium.id,
+                    id: parseInt(premium.id),
                     view_name: premium.viewName,
                     premium_cost: parseFloat(premium.premiumCost).toFixed(2),
                     excluded_units: premium.excludedUnitIds,
