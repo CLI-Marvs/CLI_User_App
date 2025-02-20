@@ -53,14 +53,14 @@ const CustomerMasterlist = () => {
                                 ].map((header, index) => (
                                     <th
                                         key={index}
-                                        className="border-r-[1px] border-[#B9B7B7] px-[10px] py-[16px] text-[10px] shadow-custom12"
+                                        className="border-r-[1px] border-[#B9B7B7] px-[10px] py-[16px] text-sm shadow-custom12 font-semibold text-start"
                                     >
                                         {header}
                                     </th>
                                 ))}
                             </tr>
                         </thead>
-                        <tbody className="montserrat-regular">
+                        <tbody>
                             {customerData &&
                                 customerData.map((item, index) => {
                                     return (
@@ -72,58 +72,182 @@ const CustomerMasterlist = () => {
                                             }
                                         >
                                             <td
-                                                className={`px-[10px] cursor-pointer w-[208px] text-xs border-r-[1px] border-opacity-50 border-[#B9B7B7] relative`}
+                                                className={`px-3 py-3 cursor-pointer w-[208px] text-xs border-r-[1px] border-opacity-50 border-[#B9B7B7] relative montserrat-regular`}
                                             >
                                                 <div className="absolute flex flex-col top-2">
                                                     <span className="">
                                                         Ms. Helen E. Bautista
                                                     </span>
                                                     <span className="">
-                                                        BPN: 1000010232
+                                                        1000010232
                                                     </span>
                                                 </div>
                                             </td>
 
-                                            <td className="cursor-pointer text-xs border-r-[1px] border-opacity-50 border-[#B9B7B7] w-[533px] relative">
-                                            <div className="w-full flex justify-between px-3">
+                                            <td className="cursor-pointer text-xs border-r-[1px] border-opacity-50 border-[#B9B7B7] w-[533px]  px-3 py-3 space-y-3">
+                                                <div className="w-full flex px-1 justify-between border-l-4 border-custom-blue">
                                                     <div className="flex flex-col">
-                                                        <span>Test1</span>
-                                                        <span>Test2</span>
+                                                        <span className="montserrat-regular text-[13px]">
+                                                            Asia Premier
+                                                            Residences -
+                                                            100000269
+                                                        </span>
+                                                        <span className="montserrat-regular text-xs text-[#B9B7B7]">
+                                                            T.107
+                                                        </span>
                                                     </div>
-                                                    <span>Test3</span>
+                                                    <span className="montserrat-semibold text-xs text-custom-blue">
+                                                        Equity Payments
+                                                    </span>
                                                 </div>
-                                                <div className="w-full flex justify-between px-3">
+                                                <div className="w-full flex px-1 justify-between border-l-4 border-custom-solidgreen">
                                                     <div className="flex flex-col">
-                                                        <span>Test1</span>
-                                                        <span>Test2</span>
+                                                        <span className="montserrat-regular text-[13px]">
+                                                            Casa Mira South -
+                                                            100000733
+                                                        </span>
+                                                        <span className="montserrat-regular text-xs text-[#B9B7B7]">
+                                                            T.118
+                                                        </span>
                                                     </div>
-                                                    <span>Test3</span>
+                                                    <span className="montserrat-semibold text-xs text-custom-solidgreen">
+                                                        Reserved
+                                                    </span>
                                                 </div>
-                                                <div className="w-full flex justify-between px-3">
+                                                <div className="w-full flex px-1 justify-between border-l-4 border-[#E7DB56]">
                                                     <div className="flex flex-col">
-                                                        <span>Test1</span>
-                                                        <span>Test2</span>
+                                                        <span className="montserrat-regular text-[13px]">
+                                                            38 Park Avenue -
+                                                            100000667
+                                                        </span>
+                                                        <span className="montserrat-regular text-xs text-[#B9B7B7]">
+                                                            T.118
+                                                        </span>
                                                     </div>
-                                                    <span>Test3</span>
-                                                </div>
-                                                <div className="w-full flex justify-between px-3">
-                                                    <div className="flex flex-col">
-                                                        <span>Test1</span>
-                                                        <span>Test2</span>
-                                                    </div>
-                                                    <span>Test3</span>
+                                                    <span className="montserrat-semibold text-xs text-[#E7DB56]">
+                                                        For Turn-over
+                                                    </span>
                                                 </div>
                                             </td>
 
                                             <td
-                                                className={`py-[16px] px-[10px] cursor-pointer text-xs border-r-[1px] border-opacity-50 border-[#B9B7B7] w-[533px]`}
+                                                className={`cursor-pointer text-xs border-r-[1px] border-opacity-50 border-[#B9B7B7] w-[533px]  px-3 py-3 space-y-3`}
                                             >
-                                                {/* {item.ticket_id} */}
+                                                <div className="flex justify-between">
+                                                    <div className="flex flex-col">
+                                                        <span className="montserrat-regular text-[13px] text-[#3A3A3A]">
+                                                            38 Park Avenue
+                                                            (Payment Issue)
+                                                        </span>
+                                                        <span className="montserrat-regular text-xs text-[#B9B7B7]">
+                                                            02/13/2025
+                                                        </span>
+                                                    </div>
+                                                    <span className="montserrat-regular text-xs text-custom-lightgreen">
+                                                        Payment Issue received
+                                                        by Management
+                                                    </span>
+                                                </div>
+                                                <div className="flex justify-between">
+                                                    <div className="flex flex-col">
+                                                        <span className="montserrat-regular text-[13px] text-[#3A3A3A]">
+                                                            38 Park Avenue
+                                                            (Payment Issue)
+                                                        </span>
+                                                        <span className="montserrat-regular text-xs text-[#B9B7B7]">
+                                                            02/13/2025
+                                                        </span>
+                                                    </div>
+                                                    <span className="montserrat-regular text-xs text-custom-lightgreen">
+                                                        Payment Issue received
+                                                        by Management
+                                                    </span>
+                                                </div>
                                             </td>
                                             <td
-                                                className={`py-[16px] px-[10px] cursor-pointer text-xs w-[670px]`}
+                                                className={`px-3 py-3 space-y-3 cursor-pointer text-xs border-r-[1px] border-opacity-50 border-[#B9B7B7] w-auto`}
                                             >
-                                                {/* {item.ticket_id} */}
+                                                <div className="flex gap-5 items-center">
+                                                    <div className="flex flex-col">
+                                                        <span className="montserrat-semibold text-[13px] text-[#3A3A3A]">
+                                                            Php 20,000.00
+                                                        </span>
+                                                        <span className="montserrat-regular text-xs text-[#B9B7B7]">
+                                                            01/31/2025
+                                                        </span>
+                                                    </div>
+                                                    <div className="flex items-center  justify-center text-center">
+                                                        <span className="rounded-[10px] px-2 py-1 w-auto h-[auto] bg-custom-lightgreen text-white montserrat-regular">
+                                                            Credit Card
+                                                        </span>
+                                                    </div>
+                                                    <span className="montserrat-regular text-xs text-custom-blue">
+                                                        Equity and Transfer
+                                                        Charges
+                                                    </span>
+                                                    <span className="montserrat-regular text-[13px] text-[#3A3A3A]">
+                                                        Casa Mira South
+                                                        (100000733)
+                                                    </span>
+                                                    <span className="montserrat-regular text-xs text-custom-lightgreen">
+                                                        Casa Mira South
+                                                        (100000733)
+                                                    </span>
+                                                </div>
+                                                <div className="flex gap-5 items-center">
+                                                    <div className="flex flex-col">
+                                                        <span className="montserrat-semibold text-[13px] text-[#3A3A3A]">
+                                                            Php 20,000.00
+                                                        </span>
+                                                        <span className="montserrat-regular text-xs text-[#B9B7B7]">
+                                                            01/31/2025
+                                                        </span>
+                                                    </div>
+                                                    <div className="flex items-center  justify-center text-center">
+                                                        <span className="rounded-[10px] px-2 py-1 w-auto h-[auto] bg-custom-lightgreen text-white montserrat-regular">
+                                                            Credit Card
+                                                        </span>
+                                                    </div>
+                                                    <span className="montserrat-regular text-xs text-custom-blue">
+                                                        Equity and Transfer
+                                                        Charges
+                                                    </span>
+                                                    <span className="montserrat-regular text-[13px] text-[#3A3A3A]">
+                                                        Casa Mira South
+                                                        (100000733)
+                                                    </span>
+                                                    <span className="montserrat-regular text-xs text-custom-lightgreen">
+                                                        Casa Mira South
+                                                        (100000733)
+                                                    </span>
+                                                </div>
+                                                <div className="flex gap-5 items-center">
+                                                    <div className="flex flex-col">
+                                                        <span className="montserrat-semibold text-[13px] text-[#3A3A3A]">
+                                                            Php 20,000.00
+                                                        </span>
+                                                        <span className="montserrat-regular text-xs text-[#B9B7B7]">
+                                                            01/31/2025
+                                                        </span>
+                                                    </div>
+                                                    <div className="flex items-center  justify-center text-center">
+                                                        <span className="rounded-[10px] px-2 py-1 w-auto h-[auto] bg-custom-lightgreen text-white montserrat-regular">
+                                                            Credit Card
+                                                        </span>
+                                                    </div>
+                                                    <span className="montserrat-regular text-xs text-custom-blue">
+                                                        Equity and Transfer
+                                                        Charges
+                                                    </span>
+                                                    <span className="montserrat-regular text-[13px] text-[#3A3A3A]">
+                                                        Casa Mira South
+                                                        (100000733)
+                                                    </span>
+                                                    <span className="montserrat-regular text-xs text-custom-lightgreen">
+                                                        Casa Mira South
+                                                        (100000733)
+                                                    </span>
+                                                </div>
                                             </td>
                                         </tr>
                                     );

@@ -13,8 +13,15 @@ import FiltersProperty from "@/component/layout/transaction/FiltersProperty";
 import DatePicker from "react-datepicker";
 import { MdCalendarToday } from "react-icons/md";
 import sortDown from "../../../../../public/Images/sort_down.png";
-import FilterWrapper from "../salespage/customermasterlist/FilterWrapper";
+import upload from "../../../../../public/Images/upload.png";
+
+import download from "../../../../../public/Images/download.png";
+
+import view from "../../../../../public/Images/eye.png";
+
+import FilterWrapper from "@/component/layout/salespage/customermasterlist/FilterWrapper";
 import { HiPencil } from "react-icons/hi";
+import BuyerModal from "@/component/layout/salespage/customermasterlist/BuyerModal";
 
 const data1 = [
     {
@@ -64,6 +71,8 @@ const data2 = [
 
 const CustomerDetails = () => {
     const transactModalRef = useRef(null);
+    const buyerModalRef = useRef(null);
+
     const { customerDetails, setCustomerDetails } = useStateContext();
 
     const { id } = useParams();
@@ -87,7 +96,7 @@ const CustomerDetails = () => {
 
     const indexData = customerDetails[decodedEmail] || {};
 
-    const { buyer_name, ticket_id } = indexData[0] || {};
+    const { buyer_name } = indexData[0] || {};
 
     useEffect(() => {
         fetchCustomerDetails();
@@ -97,6 +106,12 @@ const CustomerDetails = () => {
         setTicketId(data);
         if (transactModalRef.current) {
             transactModalRef.current.showModal();
+        }
+    };
+
+    const handleBuyerModal = () => {
+        if (buyerModalRef.current) {
+            buyerModalRef.current.showModal();
         }
     };
 
@@ -112,6 +127,10 @@ const CustomerDetails = () => {
             ...prev,
             [section]: false,
         }));
+    };
+
+    const capitalizeFirstLetter = (word) => {
+        return word.charAt(0).toUpperCase() + word.slice(1);
     };
 
     return (
@@ -154,7 +173,7 @@ const CustomerDetails = () => {
                                     <span className="text-lg largeScreen:text-xl">
                                         User Info
                                     </span>
-                                    <HiPencil className="h-6 w-6 cursor-pointer" />
+                                    <HiPencil className="h-6 w-6 cursor-pointer" onClick={handleBuyerModal} />
                                 </div>
                                 <div className="flex gap-5 mt-2.5">
                                     <div className="flex flex-col gap-2 mb-2.5">
@@ -195,7 +214,6 @@ const CustomerDetails = () => {
                                     <span className="text-lg largeScreen:text-xl">
                                         Spouse Info
                                     </span>
-                                    <HiPencil className="h-6 w-6 cursor-pointer" />
                                 </div>
                                 <div className="flex gap-5 mt-2.5">
                                     <div className="flex flex-col gap-2 mb-2.5">
@@ -272,9 +290,9 @@ const CustomerDetails = () => {
                             ))}
 
                             <div
-                                className={`absolute left-0 w-full h-[577px] rounded-xl py-4 px-5 bg-black transition-all duration-500 ease-in-out ${
+                                className={`absolute left-0 w-full h-full rounded-xl py-4 px-5 bg-custombg3 transition-all duration-500 ease-in-out ${
                                     filters.transaction
-                                        ? "top-0 translate-y-0"
+                                        ? "top-0 translate-y-0 transaction-scrollbar"
                                         : "bottom-0 translate-y-full"
                                 }`}
                             >
@@ -283,16 +301,14 @@ const CustomerDetails = () => {
                                         closeFilters={() =>
                                             closeFilters("transaction")
                                         }
-                                        types={["Transaction"]}
+                                        types={"transaction"}
                                     />
                                 )}
                             </div>
                         </div>
 
                         <div
-                            className={`rounded-xl w-1/2 py-4 px-5 bg-custom-grayFA relative ${
-                                filters.inquiries ? "" : "overflow-hidden"
-                            }`}
+                            className={`rounded-xl w-1/2 py-4 px-5 bg-custom-grayFA relative overflow-hidden`}
                         >
                             <div className="flex gap-2.5 items-center">
                                 <span className="font-semibold text-base">
@@ -307,26 +323,48 @@ const CustomerDetails = () => {
                                 </div>
                             </div>
 
-                            <div className="flex flex-col w-full gap-2 mb-2.5">
+                            <div className="flex flex-col w-full gap-2 mb-2.5 transaction-scrollbar h-[622px]">
                                 {indexData.length > 0 ? (
                                     indexData.map((item, index) => {
+                                        const dynamicColorTest =
+                                            item.status === "unresolved"
+                                                ? "text-[#FF3B30]"
+                                                : item.status === "Resolved"
+                                                ? "text-custom-solidgreen"
+                                                : "test-black";
+                                        const dynamicBgColor =
+                                            item.status === "unresolved"
+                                                ? "bg-[#FF3B30]"
+                                                : item.status === "Resolved"
+                                                ? "bg-custom-solidgreen"
+                                                : "bg-[#818181]";
                                         return (
                                             <div
+                                                className="flex flex-col gap-2.5 mt-2.5 rounded-[5px] bg-white border-[3px] border-[#F1F1F1] p-2.5"
                                                 key={index}
-                                                className="gap-2 cursor-pointer bg-custom-grayFA rounded-xl shadow-md py-3 px-3"
                                             >
-                                                <span
-                                                    className="text-custom-solidgreen text-xs 2xl:text-base underline font-normal"
-                                                    onClick={() =>
-                                                        handleTransactModalOpen(
-                                                            item.ticket_id
-                                                        )
-                                                    }
-                                                >
-                                                    {item.details_concern}
-                                                </span>
+                                                <div className="flex justify-between items-center">
+                                                    <span
+                                                        className={`text-sm 2xl:text-base ${dynamicColorTest}`}
+                                                        onClick={() =>
+                                                            handleTransactModalOpen(
+                                                                item.ticket_id
+                                                            )
+                                                        }
+                                                    >
+                                                        {item.details_concern}
+                                                    </span>
+                                                    <span
+                                                        className={`w-[86px] h-[20px] py-2 px-2 rounded-[10px] montserrat text-xs text-white flex items-center justify-center ${dynamicBgColor}`}
+                                                    >
+                                                        {capitalizeFirstLetter(
+                                                            item.status
+                                                        )}
+                                                    </span>
+                                                </div>
+
                                                 <span className=" text-[#818181] text-xs 2xl:text-base">
-                                                    - {item.property}
+                                                    {item.property}
                                                     {item.unit_number
                                                         ? `,${item.unit_number}`
                                                         : ""}
@@ -337,43 +375,25 @@ const CustomerDetails = () => {
                                 ) : (
                                     <>
                                         <div className="flex items-center gap-2 cursor-pointer bg-custom-grayFA rounded-xl shadow-md py-3 px-3 w-full">
-                                            <Skeleton
-                                                width={150}
-                                                height={20}
-                                            />
-                                            <Skeleton
-                                                width={150}
-                                                height={20}
-                                            />
+                                            <Skeleton width={150} height={20} />
+                                            <Skeleton width={150} height={20} />
                                         </div>
                                         <div className="flex items-center gap-2 cursor-pointer bg-custom-grayFA rounded-xl shadow-md py-3 px-3 w-full">
-                                            <Skeleton
-                                                width={150}
-                                                height={20}
-                                            />
-                                            <Skeleton
-                                                width={150}
-                                                height={20}
-                                            />
+                                            <Skeleton width={150} height={20} />
+                                            <Skeleton width={150} height={20} />
                                         </div>
                                         <div className="flex items-center gap-2 cursor-pointer bg-custom-grayFA rounded-xl shadow-md py-3 px-3 w-full">
-                                            <Skeleton
-                                                width={150}
-                                                height={20}
-                                            />
-                                            <Skeleton
-                                                width={150}
-                                                height={20}
-                                            />
+                                            <Skeleton width={150} height={20} />
+                                            <Skeleton width={150} height={20} />
                                         </div>
                                     </>
                                 )}
                             </div>
 
                             <div
-                                className={`absolute left-0 w-full h-[577px] rounded-xl py-4 px-5 bg-black transition-all duration-500 ease-in-out ${
+                                className={`absolute left-0 w-full h-full rounded-xl py-4 px-5 bg-custombg3 transition-all duration-500 ease-in-out ${
                                     filters.inquiries
-                                        ? "top-0 translate-y-0"
+                                        ? "top-0 translate-y-0 transaction-scrollbar"
                                         : "bottom-0 translate-y-full"
                                 }`}
                             >
@@ -382,14 +402,15 @@ const CustomerDetails = () => {
                                         closeFilters={() =>
                                             closeFilters("inquiries")
                                         }
+                                        types={"inquiries"}
+
                                     />
                                 )}
                             </div>
                         </div>
+
                         <div
-                            className={`flex flex-col py-4 px-5 bg-[#FAFAFA] w-1/2 rounded-xl gap-2.5 relative ${
-                                filters.documents ? "" : "overflow-hidden"
-                            }`}
+                            className={`flex flex-col py-4 px-5 bg-[#FAFAFA] w-1/2 rounded-xl gap-2.5 relative overflow-hidden`}
                         >
                             <div className="flex gap-2.5 items-center">
                                 <span className="font-semibold text-base">
@@ -404,39 +425,33 @@ const CustomerDetails = () => {
                                 </div>
                             </div>
 
-                            <div className="flex bg-[#FFFFFF] w-full shadow-sm p-2.5 rounded-xl">
-                                <span className="text-xs 2xl:text-base text-custom-solidgreen font-normal">
-                                    Valid ID
-                                </span>
-                            </div>
-                            <div className="flex bg-[#FFFFFF] w-full shadow-sm p-2.5 rounded-xl">
-                                <span className="text-xs 2xl:text-base text-custom-solidgreen font-normal">
-                                    Birth Certificate
-                                </span>
-                            </div>
-                            <div className="flex bg-[#FFFFFF] w-full shadow-sm p-2.5 rounded-xl">
-                                <span className="text-xs 2xl:text-base text-custom-solidgreen font-normal">
-                                    Spouse - Birth Certificate
-                                </span>
-                            </div>
-                            <div className="flex bg-[#FFFFFF] w-full shadow-sm p-2.5 rounded-xl">
-                                <span className="text-xs 2xl:text-base text-custom-solidgreen font-normal">
-                                    Marriage Certificate
-                                </span>
+                            <div className="transaction-scrollbar h-[622px]">
+                                <div className="flex justify-between gap-2.5 mt-2.5 rounded-[5px] bg-white border-[3px] border-[#F1F1F1] p-2.5">
+                                    <span className="text-xs 2xl:text-base text-custom-solidgreen font-normal">
+                                        Valid ID
+                                    </span>
+                                    <div className="flex gap-2.5 justify-end">
+                                        <img src={view} alt="" />
+                                        <img src={download} alt="" />
+                                        <img src={upload} alt="" />
+                                    </div>
+                                </div>
                             </div>
 
                             <div
-                                className={`absolute left-0 w-full h-[577px] rounded-xl py-4 px-5 bg-black transition-all duration-500 ease-in-out ${
+                                className={`absolute left-0 w-full h-full rounded-xl py-4 px-5 bg-custombg3 transition-all duration-500 ease-in-out ${
                                     filters.documents
                                         ? "top-0 translate-y-0"
                                         : "bottom-0 translate-y-full"
-                                } z-10`}
+                                }`}
                             >
                                 {filters.documents && (
                                     <FilterWrapper
                                         closeFilters={() =>
                                             closeFilters("documents")
                                         }
+                                        types={"documents"}
+
                                     />
                                 )}
                             </div>
@@ -448,6 +463,7 @@ const CustomerDetails = () => {
                     ticketId={ticketId}
                     setTicketId={setTicketId}
                 />
+                <BuyerModal buyerRef={buyerModalRef}/>
             </div>
         </>
     );
