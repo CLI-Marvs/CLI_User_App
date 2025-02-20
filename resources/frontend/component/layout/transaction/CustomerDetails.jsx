@@ -173,7 +173,10 @@ const CustomerDetails = () => {
                                     <span className="text-lg largeScreen:text-xl">
                                         User Info
                                     </span>
-                                    <HiPencil className="h-6 w-6 cursor-pointer" onClick={handleBuyerModal} />
+                                    <HiPencil
+                                        className="h-6 w-6 cursor-pointer"
+                                        onClick={handleBuyerModal}
+                                    />
                                 </div>
                                 <div className="flex gap-5 mt-2.5">
                                     <div className="flex flex-col gap-2 mb-2.5">
@@ -279,7 +282,9 @@ const CustomerDetails = () => {
                                     key={index}
                                 >
                                     <div className="flex justify-between text-black font-semibold text-sm">
-                                        <span>Equity</span>
+                                        <span className="text-sm text-custom-solidgreen font-semibold">
+                                            Equity and Transfer Charges 
+                                        </span>
                                         <span>Transaction#22301</span>
                                     </div>
                                     <div className="flex justify-between text-custom-gray81 text-sm">
@@ -403,7 +408,6 @@ const CustomerDetails = () => {
                                             closeFilters("inquiries")
                                         }
                                         types={"inquiries"}
-
                                     />
                                 )}
                             </div>
@@ -430,7 +434,7 @@ const CustomerDetails = () => {
                                     <span className="text-xs 2xl:text-base text-custom-solidgreen font-normal">
                                         Valid ID
                                     </span>
-                                    <div className="flex gap-2.5 justify-end">
+                                    <div className="flex gap-2.5 justify-end items-center cursor-pointer">
                                         <img src={view} alt="" />
                                         <img src={download} alt="" />
                                         <img src={upload} alt="" />
@@ -451,7 +455,6 @@ const CustomerDetails = () => {
                                             closeFilters("documents")
                                         }
                                         types={"documents"}
-
                                     />
                                 )}
                             </div>
@@ -463,7 +466,7 @@ const CustomerDetails = () => {
                     ticketId={ticketId}
                     setTicketId={setTicketId}
                 />
-                <BuyerModal buyerRef={buyerModalRef}/>
+                <BuyerModal buyerRef={buyerModalRef} />
             </div>
         </>
     );
