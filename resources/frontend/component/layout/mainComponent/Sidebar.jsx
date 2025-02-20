@@ -125,7 +125,7 @@ const Sidebar = () => {
                     <Link to="/notification">
                         <ListItem
                             className={`flex text-sm items-center w-[185px] h-[36px] pl-[12px] pr-[60px] gap-2 rounded-[10px] ${
-                                activeItem === "notification" &&
+                                activeItem === "notification" ||
                                 location.pathname.startsWith("/notification")
                                     ? "bg-custom-lightestgreen text-custom-solidgreen font-semibold shadow-custom4"
                                     : " hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "

@@ -15,7 +15,8 @@ const CallBackView = () => {
        
         if (token) {
             setToken(token);
-            navigate("/inquirymanagement/inquirylist", { replace: true });
+            /* navigate("/inquirymanagement/inquirylist", { replace: true }); */
+            navigate("/notification", { replace: true });
         }
         if (userAccessDataEncoded) {
             try {
