@@ -36,6 +36,10 @@ const ReviewsandApprovalRouting = ({
         ...(subHeaders?.versionHeaders || []), // ["V1", "V2", ...]
         ...(subHeaders?.pricingHeaders || []), // ["Transfer Charge", "Vatable Less Price", ...]
     ];
+    // Check if we have pricing headers
+    const hasPricingHeaders = subHeaders?.pricingHeaders?.length > 0;
+    // Check if we have version headers
+    const hasVersionHeaders = subHeaders?.versionHeaders?.length > 0;
 
     //Hooks
     /**
@@ -43,47 +47,58 @@ const ReviewsandApprovalRouting = ({
      */
     useEffect(() => {
         if (propertyData?.price_versions) {
+            console.log("propertyData", propertyData);
             const versionNames = propertyData.price_versions
                 .map((item) => item.version_name)
                 .filter(Boolean);
 
             const priceDetails = propertyData.pricebasic_details;
-            const excludedPriceListKeys = [
-                "id",
-                "created_at",
-                "updated_at",
-                "base_price",
-                "effective_balcony_base",
-                "vat",
-                "vatable_less_price",
-                "pricelist_master_id",
-            ];
 
-            // Extract property names that have non-zero values & are NOT in the excluded list
-            const pricingKeys = Object.keys(priceDetails)
-                .filter(
-                    (key) =>
-                        !excludedPriceListKeys.includes(key) &&
-                        priceDetails[key] &&
-                        priceDetails[key] !== 0
-                )
-                .map((key) => key.replace(/_/g, " "))
-                .map((key) => {
-                    // Capitalize each word
-                    return key
-                        .split(" ")
-                        .map(
-                            (word) =>
-                                word.charAt(0).toUpperCase() + word.slice(1)
-                        )
-                        .join(" ");
+            // Only set pricing headers if base_price is not 0
+            if (priceDetails.base_price !== 0) {
+                const excludedPriceListKeys = [
+                    "id",
+                    "created_at",
+                    "updated_at",
+                    "base_price",
+                    "effective_balcony_base",
+                    "vat",
+                    "vatable_less_price",
+                    "pricelist_master_id",
+                ];
+
+                // Extract property names that have non-zero values & are NOT in the excluded list
+                const pricingKeys = Object.keys(priceDetails)
+                    .filter(
+                        (key) =>
+                            !excludedPriceListKeys.includes(key) &&
+                            priceDetails[key] &&
+                            priceDetails[key] !== 0
+                    )
+                    .map((key) => key.replace(/_/g, " "))
+                    .map((key) => {
+                        // Capitalize each word
+                        return key
+                            .split(" ")
+                            .map(
+                                (word) =>
+                                    word.charAt(0).toUpperCase() + word.slice(1)
+                            )
+                            .join(" ");
+                    });
+
+                const pricingHeaders = ["List price w/ VAT", ...pricingKeys];
+                setSubHeaders({
+                    versionHeaders: versionNames,
+                    pricingHeaders: pricingHeaders,
                 });
-
-            const pricingHeaders = ["List price w/ VAT", ...pricingKeys];
-            setSubHeaders({
-                versionHeaders: versionNames, // ["V1", "V2", ...]
-                pricingHeaders: pricingHeaders, // ["Transfer Charge", "Vatable Less Price", ...]
-            });
+            } else {
+                // If base_price is 0, only set version headers without pricing headers
+                setSubHeaders({
+                    versionHeaders: versionNames,
+                    pricingHeaders: [], // Empty array for no pricing headers
+                });
+            }
 
             setPriceVersions(propertyData.price_versions);
         }
@@ -198,7 +213,7 @@ const ReviewsandApprovalRouting = ({
                                 <h1 className="montserrat-semibold">
                                     VERTICAL INVENTORY PRICING TEMPLATE
                                 </h1>
-                                <div className="min-w-[500px]  ">
+                                <div className="min-w-[500px]">
                                     <div className="flex w-full max-w-[450px]">
                                         <h6 className="w-1/3">PROJECT</h6>
                                         <div className="border border-black px-6 flex-1 ml-10">
@@ -241,26 +256,31 @@ const ReviewsandApprovalRouting = ({
                                                 >
                                                     Unit
                                                 </th>
-                                                <th
-                                                    colSpan={
-                                                        subHeaders
-                                                            ?.versionHeaders
-                                                            ?.length || 0
-                                                    }
-                                                    className="bg-[#31498a] w-full py-3 montserrat-semibold text-white border-black border px-2"
-                                                >
-                                                    Version
-                                                </th>
-                                                <th
-                                                    colSpan={
-                                                        subHeaders
-                                                            ?.pricingHeaders
-                                                            ?.length || 0
-                                                    }
-                                                    className="bg-[#31498a] w-full py-3 montserrat-semibold text-white border-black border px-2"
-                                                >
-                                                    Pricing
-                                                </th>
+                                                {/* Only show Version column if there are version headers */}
+                                                {hasVersionHeaders && (
+                                                    <th
+                                                        colSpan={
+                                                            subHeaders
+                                                                .versionHeaders
+                                                                .length
+                                                        }
+                                                        className="bg-[#31498a] w-full py-3 montserrat-semibold text-white border-black border px-2"
+                                                    >
+                                                        Version
+                                                    </th>
+                                                )}
+                                                {hasPricingHeaders && (
+                                                    <th
+                                                        colSpan={
+                                                            subHeaders
+                                                                .pricingHeaders
+                                                                .length
+                                                        }
+                                                        className="bg-[#31498a] w-full py-3 montserrat-semibold text-white border-black border px-2"
+                                                    >
+                                                        Pricing
+                                                    </th>
+                                                )}
                                             </tr>
 
                                             {/* Second Row: Column Titles */}
@@ -284,34 +304,40 @@ const ReviewsandApprovalRouting = ({
                                                 )}
                                             </tr>
 
-                                            {/* Third Row: Version & Pricing Headers */}
-                                            <tr className="bg-[#aebee3] border-black border">
-                                                <th
-                                                    colSpan={
-                                                        staticHeaders.length
-                                                    }
-                                                ></th>
-                                                {/* Version Names (V1, V2, etc.) */}
-                                                {subHeaders?.versionHeaders?.map(
-                                                    (version, index) => (
-                                                        <th
-                                                            key={index}
-                                                            className="montserrat-regular text-sm text-center"
-                                                        >
-                                                            {version}
-                                                        </th>
-                                                    )
-                                                )}
-                                                {/* Pricing Fields (Transfer Charge, Vatable Less Price, etc.) */}
-                                                {subHeaders?.pricingHeaders?.map(
-                                                    (priceKey, index) => (
-                                                        <th
-                                                            key={index}
-                                                            className="montserrat-regular text-sm text-center pl-4"
-                                                        ></th>
-                                                    )
-                                                )}
-                                            </tr>
+                                            {/* Third Row: Only render if there are version headers */}
+                                            {hasVersionHeaders && (
+                                                <tr className="bg-[#aebee3] border-black border">
+                                                    <th
+                                                        colSpan={
+                                                            staticHeaders.length
+                                                        }
+                                                    ></th>
+                                                    {/* Version Names */}
+                                                    {subHeaders.versionHeaders.map(
+                                                        (version, index) => (
+                                                            <th
+                                                                key={index}
+                                                                className="montserrat-regular text-sm text-center"
+                                                            >
+                                                                {version}
+                                                            </th>
+                                                        )
+                                                    )}
+                                                    {/* Pricing Fields - only render if there are pricing headers */}
+                                                    {hasPricingHeaders &&
+                                                        subHeaders.pricingHeaders.map(
+                                                            (
+                                                                priceKey,
+                                                                index
+                                                            ) => (
+                                                                <th
+                                                                    key={index}
+                                                                    className="montserrat-regular text-sm text-center pl-4"
+                                                                ></th>
+                                                            )
+                                                        )}
+                                                </tr>
+                                            )}
                                         </thead>
 
                                         <tbody className="bg-white">
@@ -360,25 +386,14 @@ const ReviewsandApprovalRouting = ({
                                                             )
                                                         )}
 
-                                                        {/* Map  Pricing Data */}
-                                                        {/* {
-                                                                    pricingData?.pricebasic_details.map((priceListItem) => {
-                                                                        return (
-                                                                            <td
-                                                                                key={
-                                                                                    versionIndex
-                                                                                }
-                                                                                className="px-2 border-black border text-center"
-                                                                            >
-                                                                                {priceListItem[priceKey] || "-"}
-                                                                            </td>
-                                                                        );
-                                                                    })
-                                                                } */}
                                                         {pricingData &&
                                                             Object.keys(
                                                                 pricingData?.priceListSettings
                                                             ).length > 0 &&
+                                                            pricingData
+                                                                ?.priceListSettings
+                                                                ?.base_price !==
+                                                                0 &&
                                                             Object.keys(
                                                                 pricingData?.priceListSettings
                                                             )

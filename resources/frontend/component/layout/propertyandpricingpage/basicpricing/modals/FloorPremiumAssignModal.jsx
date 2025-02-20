@@ -8,6 +8,7 @@ const FloorPremiumAssignModal = ({ modalRef, selectedFloor, propertyData }) => {
 
     const modalRef2 = useRef(null);
     const [excludedUnit, setExcludedUnit] = useState([]);
+    // console.log("excludedUnit", excludedUnit[selectedFloor]);
     const {
         fetchUnitsInTowerPhase,
         unitsByFloor,

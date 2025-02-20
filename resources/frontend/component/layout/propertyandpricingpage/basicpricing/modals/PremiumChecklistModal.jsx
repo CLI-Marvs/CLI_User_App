@@ -185,7 +185,7 @@ const PremiumChecklistModal = ({ modalRef2, selectedUnit }) => {
                                         className="h-[16px] w-[16px] ml-[16px] rounded-[2px] appearance-none border border-gray-400 checked:bg-transparent flex items-center justify-center checked:before:bg-black checked:before:w-[12px] checked:before:h-[12px] checked:before:block checked:before:content-['']"
                                     />
                                     <p>
-                                        {premium.viewName} - {premium.id}
+                                        {premium.viewName}  
                                     </p>
                                 </div>
                             );
