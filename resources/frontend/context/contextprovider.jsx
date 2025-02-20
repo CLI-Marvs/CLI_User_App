@@ -101,6 +101,7 @@ export const ContextProvider = ({ children }) => {
     const [countAllConcerns, setCountAllConcerns] = useState({});
     const [searchSummary, setSearchSummary] = useState("");
     const [resultSearchActive, setResultSearchActive] = useState(false);
+    const [daysActive, setDaysActive] = useState(false);
     const [departmentValue, setDepartmentValue] = useState("All");
     const [projectValue, setProjectValue] = useState("All");
     const [yearValue, setYearValue] = useState(new Date().getFullYear());
@@ -943,6 +944,8 @@ export const ContextProvider = ({ children }) => {
                 setSearchSummary,
                 resultSearchActive,
                 setResultSearchActive,
+                daysActive,
+                setDaysActive,
                 setDepartmentValue,
                 departmentValue,
                 setProjectValue,
@@ -951,6 +954,7 @@ export const ContextProvider = ({ children }) => {
                 yearValue,
                 setMonthValue,
                 monthValue,
+               
             }}
         >
             {children}

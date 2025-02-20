@@ -60,7 +60,10 @@ const InquiryList = () => {
         searchSummary,
         setSearchSummary,
         resultSearchActive,
-        setResultSearchActive
+        setResultSearchActive,
+        daysActive,
+        setDaysActive,
+       
         /*  setHasAttachments,
         hasAttachments */
     } = useStateContext();
@@ -227,8 +230,10 @@ const InquiryList = () => {
     // };
 
     const handleDayClick = (day) => {
+        setDaysActive(true);
         setActiveDayButton((prev) => {
             if (prev === day) {
+                setDaysActive(!daysActive);
                 setDaysFilter("");
                 return null;
             }
@@ -250,6 +255,7 @@ const InquiryList = () => {
 
     const handleAssignedToMeClick = () => {
         setAssignedToMeActive(!assignedToMeActive);
+        setDaysActive(!daysActive);
         if (assignedToMeActive) {
             setSpecificAssigneeCsr("");
             setCurrentPage(0);
@@ -1097,7 +1103,7 @@ const InquiryList = () => {
                                 onClick={toggleDropdown}
                             >
                                 {isOpen ? <IoIosArrowUp /> : <IoIosArrowDown />}{" "}
-                                {resultSearchActive ? (
+                                {resultSearchActive || daysActive || assignedToMeActive ? (
                                     dataCount && dataCount === 0 ? (
                                         <p>No Records Found</p>
                                     ) : (
