@@ -130,6 +130,7 @@ const ReportPage = () => {
             Requests: "#348017",
             Inquiries: "#1A73E8",
             "Suggestion or Recommendations": "#E4EA3B",
+            "No Type": "#9CA3AF",
         };
         return colors[name] || "#CCCCCC";
     };
@@ -143,6 +144,7 @@ const ReportPage = () => {
             "Social Media": "#175D5F",
             "Branch Tablet": "#404B52",
             "Internal Endorsement": "#F3D48F",
+            "No Channel": "#9CA3AF",
         };
         return colors[name] || "#CCCCCC"; // Default to gray if no match
     };
@@ -337,6 +339,7 @@ const ReportPage = () => {
                 "Social Media": "#175d5f", // Dark green
                 "Branch Tablet": "#404B52", // Dark gray
                 "Internal Endorsement": "#F3D48F", // Gray
+                "No Channel": "#9CA3AF", // Gray
             };
 
             const dataType = label; // Or use payload[0].name if `label` is not directly available
@@ -378,6 +381,7 @@ const ReportPage = () => {
                 Requests: "#348017",
                 Inquiries: "#1A73E8",
                 "Suggestion or Recommendations": "#E4EA3B",
+                "No Type": "#9CA3AF",
             };
 
             const dataType = label; // Or use payload[0].name if `label` is not directly available

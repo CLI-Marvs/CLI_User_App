@@ -406,7 +406,7 @@ export const ContextProvider = ({ children }) => {
             );
             const result = response.data;
             const formattedData = result.reduce((acc, item) => {
-                const name = item.communication_type || "No type";
+                const name = item.communication_type || "No Type";
                 const existing = acc.find((entry) => entry.name === name);
 
                 if (existing) {
