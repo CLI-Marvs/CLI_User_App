@@ -122,7 +122,7 @@ const FilterWrapper = ({ closeFilters, types }) => {
     return (
         <>
             {types === "transaction" && (
-                <>
+                <div className="h-full flex flex-col">
                     <div
                         className="flex h-5 w-full justify-end"
                         onClick={closeFilters}
@@ -431,7 +431,7 @@ const FilterWrapper = ({ closeFilters, types }) => {
                         </div>
                     </div>
 
-                    <div className="flex flex-col justify-center items-center space-y-3 mt-3">
+                    <div className="flex flex-col justify-center items-center space-y-3 my-3">
                         <div
                             className={`bg-white w-full rounded-lg py-[8px] ${
                                 filterDropdown.paymentChannel ? "space-y-6" : ""
@@ -526,15 +526,15 @@ const FilterWrapper = ({ closeFilters, types }) => {
                         </div>
                     </div>
 
-                    <div className="flex justify-center">
-                        <div className="absolute bottom-3">
+                    <div className="flex flex-col h-full">
+                        <div className="mt-auto mb-3 flex justify-center">
                             <DynamicButton />
                         </div>
                     </div>
-                </>
+                </div>
             )}
             {types === "inquiries" && (
-                <>
+                <div className="h-full flex flex-col">
                     <div
                         className="flex h-5 w-full justify-end"
                         onClick={closeFilters}
@@ -842,7 +842,7 @@ const FilterWrapper = ({ closeFilters, types }) => {
                         </div>
                     </div>
 
-                    <div className="flex flex-col justify-center items-center space-y-3 mt-3">
+                    <div className="flex flex-col justify-center items-center space-y-3 my-3">
                         <div
                             className={`bg-white w-full rounded-lg py-[8px] ${
                                 filterDropdown.paymentChannel ? "space-y-6" : ""
@@ -934,15 +934,15 @@ const FilterWrapper = ({ closeFilters, types }) => {
                         </div>
                     </div>
 
-                    <div className="flex justify-center">
-                        <div className="absolute bottom-3">
+                    <div className="flex flex-col h-full">
+                        <div className="mt-auto mb-3 flex justify-center items-end">
                             <DynamicButton />
                         </div>
                     </div>
-                </>
+                </div>
             )}
             {types === "documents" && (
-                <>
+                <div className="h-full flex flex-col">
                     <div
                         className="flex h-5 w-full justify-end"
                         onClick={closeFilters}
@@ -1049,12 +1049,12 @@ const FilterWrapper = ({ closeFilters, types }) => {
                         </div>
                     </div>
 
-                    <div className="flex justify-center">
-                        <div className="absolute bottom-3">
+                    <div className="flex flex-col h-full">
+                        <div className="mt-auto mb-3 flex justify-center items-end">
                             <DynamicButton />
                         </div>
                     </div>
-                </>
+                </div>
             )}
         </>
     );
