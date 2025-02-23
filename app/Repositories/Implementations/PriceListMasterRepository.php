@@ -381,9 +381,9 @@ class PriceListMasterRepository
     public function exportExcel($data): BinaryFileResponse
     {
         // dd($building, $propertyName, $priceVersions, $units);
-        // dd($data);
+        
 
-        $export = new PriceListMasterExportData($data['payload']['building'], $data['payload']['project_name'], $data['payload']['exportPricingData']['priceVersions'], $data['payload']['exportPricingData']['units'],$data['payload']['exportPricingData']['priceListSettings']);
+        $export = new PriceListMasterExportData($data['payload']['building'], $data['payload']['project_name'], $data['payload']['exportPricingData']['priceVersions'], $data['payload']['exportPricingData']['units'], $data['payload']['exportPricingData']['priceListSettings']);
         return $this->excel->download($export, 'price_list_master.xlsx');
     }
 }
