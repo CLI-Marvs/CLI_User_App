@@ -86,7 +86,8 @@ const FloorPremiumAddUnitModal = ({
                     ),
                     checkExistingUnits(
                         towerPhaseId,
-                        excelId || excelIdFromPriceList
+                        excelId || excelIdFromPriceList,
+                        true
                     ),
                 ]);
 

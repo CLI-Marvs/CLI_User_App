@@ -51,6 +51,9 @@ const ReviewsandApprovalRouting = ({
             const versionNames = propertyData.price_versions
                 .map((item) => item.version_name)
                 .filter(Boolean);
+            const percentIncreaseHeaders = propertyData.price_versions
+                .map((item) => item.percent_increase)
+                .filter(Boolean);
 
             const priceDetails = propertyData.pricebasic_details;
 
@@ -90,12 +93,14 @@ const ReviewsandApprovalRouting = ({
                 const pricingHeaders = ["List price w/ VAT", ...pricingKeys];
                 setSubHeaders({
                     versionHeaders: versionNames,
+                    percentIncreaseHeaders: percentIncreaseHeaders,
                     pricingHeaders: pricingHeaders,
                 });
             } else {
                 // If base_price is 0, only set version headers without pricing headers
                 setSubHeaders({
                     versionHeaders: versionNames,
+                    percentIncreaseHeaders: percentIncreaseHeaders,
                     pricingHeaders: [], // Empty array for no pricing headers
                 });
             }
@@ -110,81 +115,8 @@ const ReviewsandApprovalRouting = ({
         }));
     }, [propertyData, units]);
 
-    const data = {
-        test1: [
-            { id: 1, name: "John", age: 25 },
-            { id: 2, name: "Jane", age: 30 },
-        ],
-        test2: [
-            { id: 1, city: "New York", country: "USA" },
-            { id: 2, city: "London", country: "UK" },
-        ],
-        test3: [
-            { id: 1, product: "Laptop", price: 1000 },
-            { id: 2, product: "Phone", price: 500 },
-        ],
-    };
     //Event handlers
-    // const handleDownloadExcel = async () => {
-    //     // Create workbook
-    //     const wb = XLSX.utils.book_new();
 
-    //     // Initialize array to store all data that will go into Excel
-    //     let excelData = [];
-
-    //     // Check which test objects have data and prepare headers and data accordingly
-    //     Object.entries(data).forEach(([key, value]) => {
-    //         if (value && value.length > 0) {
-    //             // If this is the first data set, use its data directly
-    //             if (excelData.length === 0) {
-    //                 // Get headers from the first object's keys
-    //                 const headers = Object.keys(value[0]);
-    //                 excelData = [
-    //                     headers, // Add headers as first row
-    //                     ...value.map((item) =>
-    //                         headers.map((header) => item[header])
-    //                     ), // Add data rows
-    //                 ];
-    //             } else {
-    //                 // For subsequent data sets, add their data as new columns
-    //                 const headers = Object.keys(value[0]);
-
-    //                 // Add new headers
-    //                 excelData[0] = [...excelData[0], ...headers];
-
-    //                 // Add data or empty cells for each row
-    //                 const maxRows = Math.max(
-    //                     excelData.length - 1,
-    //                     value.length
-    //                 );
-
-    //                 for (let i = 0; i < maxRows; i++) {
-    //                     const existingRow = excelData[i + 1] || [];
-    //                     const newData = value[i]
-    //                         ? headers.map((header) => value[i][header])
-    //                         : headers.map(() => "");
-
-    //                     if (!excelData[i + 1]) {
-    //                         excelData[i + 1] = [...existingRow, ...newData];
-    //                     } else {
-    //                         excelData[i + 1] = [...existingRow, ...newData];
-    //                     }
-    //                 }
-    //             }
-    //         }
-    //     });
-
-    //     // Create worksheet only if there's data to export
-    //     if (excelData.length > 0) {
-    //         const ws = XLSX.utils.aoa_to_sheet(excelData);
-    //         XLSX.utils.book_append_sheet(wb, ws, "Data");
-
-    //         // Generate Excel file and trigger download
-    //         XLSX.writeFile(wb, "dynamic_data.xlsx");
-    //     } else {
-    //         alert("No data available to export");
-    //     }
-    // };
     const handleDownloadExcel = async () => {
         try {
             const payload = {
@@ -380,23 +312,25 @@ const ReviewsandApprovalRouting = ({
 
                                             {/* Third Row: Only render if there are version headers */}
                                             {hasVersionHeaders && (
-                                                <tr className="bg-[#aebee3] border-black border">
+                                                <tr className="bg-[#aebee3] border-black border montserrat-regular">
                                                     <th
                                                         colSpan={
                                                             staticHeaders.length
                                                         }
                                                     ></th>
-                                                    {/* Version Names */}
-                                                    {subHeaders.versionHeaders.map(
-                                                        (version, index) => (
+
+                                                    {/* Percent Increase Row */}
+                                                    {subHeaders.percentIncreaseHeaders.map(
+                                                        (percent, index) => (
                                                             <th
                                                                 key={index}
-                                                                className="montserrat-regular text-sm text-center"
+                                                                className="font-normal"
                                                             >
-                                                                {version}
+                                                                {percent}%
                                                             </th>
                                                         )
                                                     )}
+
                                                     {/* Pricing Fields - only render if there are pricing headers */}
                                                     {hasPricingHeaders &&
                                                         subHeaders.pricingHeaders.map(

@@ -34,7 +34,7 @@ class PriceListMasterExportData implements FromArray, WithHeadings, WithStyles, 
         $this->units = $units;
         $this->priceVersions = $priceVersions;
         $this->priceBasicDetails = $priceBasicDetails;
-        // dd($this->priceBasicDetails);
+        //  dd($this->priceBasicDetails);
     }
 
     /**
@@ -44,10 +44,15 @@ class PriceListMasterExportData implements FromArray, WithHeadings, WithStyles, 
      * into a multi-dimensional array.  The array includes headers, unit details, and
      * price information for each version.
      */
+
     public function array(): array
     {
         // Get base column headers
         $unitHeaders = ["Floor", "Room No.", "Unit", "Type", "Indoor Area", "Balcony Area", "Total Area"];
+
+        // Pricing subheaders
+        $pricingHeaders = ["List price (w/ VAT)", "Transfer Charge", "Reservation Fee"];
+
         // Check if versions exist
         $hasVersions = !empty($this->priceVersions);
 
@@ -56,45 +61,68 @@ class PriceListMasterExportData implements FromArray, WithHeadings, WithStyles, 
             isset($this->priceBasicDetails['base_price']) &&
             $this->priceBasicDetails['base_price'] !== 0;
 
-
         // Calculate total columns
-        $totalColumns = count($unitHeaders) + count($this->priceVersions);
-
-        // Calculate total columns based on what's present
         $totalColumns = count($unitHeaders);
         if ($hasVersions) {
             $totalColumns += count($this->priceVersions);
         }
         if ($hasPricing) {
-            $totalColumns += 1; // Add one column for pricing
+            $totalColumns += count($pricingHeaders); // Add columns for each pricing header
         }
-        // Create header rows
+
+        // Create main header row (Row 6)
         $headerRow = array_fill(0, $totalColumns, "");
+
+        // Fill UNIT header spanning all base columns
         $headerRow[0] = "UNIT";
 
         $currentCol = count($unitHeaders);
+
+        // Add VERSION header
         if ($hasVersions) {
             $headerRow[$currentCol] = "VERSION";
             $currentCol += count($this->priceVersions);
         }
+
+        // Add PRICING header
         if ($hasPricing) {
             $headerRow[$currentCol] = "PRICING";
         }
 
-        // Create subheader row
+        // Create subheader row (Row 7)
         $subHeaderRow = array_fill(0, $totalColumns, "");
+
+        // Add unit-related headers
         foreach ($unitHeaders as $index => $header) {
             $subHeaderRow[$index] = $header;
         }
 
-        // Add version names if they exist
+        // Add version names
         if ($hasVersions) {
             $versionStartCol = count($unitHeaders);
             foreach ($this->priceVersions as $index => $version) {
                 $subHeaderRow[$versionStartCol + $index] = $version['name'];
             }
         }
-        // Build the data array
+
+        // Add pricing subheaders
+        if ($hasPricing) {
+            $pricingStartCol = $currentCol;
+            foreach ($pricingHeaders as $index => $header) {
+                $subHeaderRow[$pricingStartCol + $index] = $header;
+            }
+        }
+
+        // Create version details row (Row 8)
+        $versionDetailsRow = array_fill(0, $totalColumns, "");
+        if ($hasVersions) {
+            $versionStartCol = count($unitHeaders);
+            foreach ($this->priceVersions as $index => $version) {
+                $versionDetailsRow[$versionStartCol + $index] = $version['percent_increase'] . "%";
+            }
+        }
+
+       
         $data = [
             ['VERTICAL INVENTORY PRICING TEMPLATE'],
             ["PROJECT", $this->propertyName],
@@ -103,8 +131,10 @@ class PriceListMasterExportData implements FromArray, WithHeadings, WithStyles, 
             [], // Empty row
             $headerRow,
             $subHeaderRow,
+            $versionDetailsRow,
         ];
-        // Add unit data
+
+        // Add unit data starting from row 9
         foreach ($this->units as $unit) {
             $row = [
                 $unit['floor'],
@@ -116,26 +146,26 @@ class PriceListMasterExportData implements FromArray, WithHeadings, WithStyles, 
                 $unit['total_area'],
             ];
 
-            // Add version data if it exists
+            // Add version data
             if ($hasVersions) {
                 foreach ($this->priceVersions as $version) {
                     $row[] = ($version['no_of_allowed_buyers'] ?? "-") .
-                        ($version['no_of_allowed_buyers'] ? "%" : "");
+                        ($version['no_of_allowed_buyers']);
                 }
             }
 
-            // Add pricing data if it exists
+            // Add pricing data
             if ($hasPricing) {
-                $row[] = ""; // Add empty cell for pricing column
-                // $row[] = $this->priceBasicDetails['base_price'];
-
+                $row[] = number_format($this->priceBasicDetails['vatable_less_price'], 2);
+                $row[] = $this->priceBasicDetails['transfer_charge'];
+                $row[] = number_format($this->priceBasicDetails['reservation_fee'], 2);
             }
 
             $data[] = $row;
         }
+
         return $data;
     }
-
 
 
     public function headings(): array
@@ -158,7 +188,7 @@ class PriceListMasterExportData implements FromArray, WithHeadings, WithStyles, 
     {
         // Calculate dynamic column positions
         $lastBaseCol = chr(65 + 6); // G for base columns
-        $currentCol = 8; // Start after base columns
+        $currentCol = 9; // Start after base columns
 
         $hasVersions = !empty($this->priceVersions);
         $hasPricing = isset($this->priceBasicDetails['base_price']) &&
@@ -189,7 +219,7 @@ class PriceListMasterExportData implements FromArray, WithHeadings, WithStyles, 
                 ],
             ],
 
-            // Main headers styling
+            // Main headers styling(Unit, Version , Pricing...)
             "A5:{$lastCol}5" => [
                 'font' => ['bold' => true, 'size' => 12, 'color' => ['rgb' => 'FFFFFF']],
                 'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '31498A']],
@@ -198,12 +228,33 @@ class PriceListMasterExportData implements FromArray, WithHeadings, WithStyles, 
                     'vertical' => Alignment::VERTICAL_CENTER
                 ],
             ],
-
-            // Base column headers styling
+            "A5:{$pricingCol}5" => [
+                'font' => ['bold' => true, 'size' => 12, 'color' => ['rgb' => 'FFFFFF']],
+                'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '31498A']],
+                'alignment' => [
+                    'horizontal' => Alignment::HORIZONTAL_CENTER,
+                    'vertical' => Alignment::VERTICAL_CENTER
+                ],
+            ],
+            // Base column headers styling ( Floor, Unit, Room #, ... V1,V2...)
             "A6:{$lastCol}6" => [
                 'font' => ['bold' => true],
                 'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'AEBEE3']],
                 'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
+            ],
+            "A6:{$pricingCol}6" => [
+                'font' => ['bold' => true],
+                'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'AEBEE3']],
+                'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
+            ],
+
+            // Ensure Row 7 (Version Details) is center-aligned
+            "A7:{$lastCol}7" => [
+                'font' => ['bold' => false],
+                'alignment' => [
+                    'horizontal' => Alignment::HORIZONTAL_CENTER,
+                    'vertical' => Alignment::VERTICAL_CENTER
+                ],
             ],
         ];
 
@@ -211,7 +262,6 @@ class PriceListMasterExportData implements FromArray, WithHeadings, WithStyles, 
         if ($hasVersions && $versionStartCol) {
             $styles["{$versionStartCol}7:{$lastCol}7"] = [
                 'font' => ['bold' => true],
-
                 'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
                 'vertical' => Alignment::VERTICAL_CENTER
             ];
@@ -225,6 +275,7 @@ class PriceListMasterExportData implements FromArray, WithHeadings, WithStyles, 
             ],
         ];
         $styles["A7:{$lastBaseCol}1000"] = [
+            'font' => ['bold' => false],
             'alignment' => [
                 'horizontal' => Alignment::HORIZONTAL_CENTER,
                 'vertical' => Alignment::VERTICAL_CENTER
@@ -242,6 +293,8 @@ class PriceListMasterExportData implements FromArray, WithHeadings, WithStyles, 
 
         return $styles;
     }
+
+
     /**
      * Registers events for spreadsheet styling and modifications after sheet creation.
      *
@@ -261,19 +314,46 @@ class PriceListMasterExportData implements FromArray, WithHeadings, WithStyles, 
                 // Calculate merge ranges
                 $lastBaseCol = chr(65 + 6); // 'G' for 7 base columns
                 $versionStartCol = chr(65 + 7); // 'H' for version section start
-                $lastCol = chr(65 + 6 + count($this->priceVersions));
+                $versionEndCol = chr(65 + 6 + count($this->priceVersions)); // Last column of version section
+
+                // Calculate pricing columns
+                $pricingStartCol = chr(ord($versionEndCol) + 1); // Start after version section
+                $pricingEndCol = chr(ord($pricingStartCol) + 2); // 3 pricing columns
 
                 // Merge Units section
                 $sheet->mergeCells("A5:{$lastBaseCol}5");
 
                 // Merge Version section if there are price versions
                 if (count($this->priceVersions) > 0) {
-                    $sheet->mergeCells("{$versionStartCol}5:{$lastCol}5");
+                    $sheet->mergeCells("{$versionStartCol}5:{$versionEndCol}5");
                 }
+
+                // Merge Pricing section
+                $sheet->mergeCells("{$pricingStartCol}5:{$pricingEndCol}5");
 
                 // Set Row Heights
                 $sheet->getRowDimension(5)->setRowHeight(30);
-                // $sheet->getRowDimension(9)->setRowHeight(20);
+
+                // Find and adjust the width of the Vatable List Price column
+                $columnIndex = ord($pricingStartCol) - 65;
+                $sheet->getColumnDimension(chr($columnIndex + 65))->setWidth(20);
+
+                // Get the last row number
+                $lastRow = $sheet->getHighestRow();
+                $lastColumn = $pricingEndCol;
+
+                // Add borders to all cells
+                $borderStyle = [
+                    'borders' => [
+                        'allBorders' => [
+                            'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                            'color' => ['argb' => 'FF000000'], // Black color
+                        ],
+                    ],
+                ];
+
+                // Apply borders to the entire range
+                $sheet->getStyle("A1:{$lastColumn}{$lastRow}")->applyFromArray($borderStyle);
             },
         ];
     }
@@ -289,6 +369,9 @@ class PriceListMasterExportData implements FromArray, WithHeadings, WithStyles, 
             'E' => 15,
             'F' => 15,
             'G' => 15,
+            'L' => 20,
+            'M' => 15,
+            'N' => 15,
         ];
     }
 }
