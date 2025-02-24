@@ -105,7 +105,7 @@ class PriceListMasterService
 
             // Fetch the current price version IDs in the PriceListMaster table
             $currentPriceVersionIds = json_decode($priceListMaster->price_versions_id, true) ?? [];
-
+            
             if (!empty($data['priceVersionsPayload']) && is_array($data['priceVersionsPayload'])) {
                 $newPriceVersionIds = []; // Track new/updated versions
 
@@ -124,7 +124,7 @@ class PriceListMasterService
                     ) {
                         continue;
                     }
-
+                  
                     if ($versionId && in_array($versionId, $currentPriceVersionIds)) {
                         // UPDATE existing PriceVersion
                         $priceVersion = $this->priceVersionModel->find($versionId);
@@ -136,6 +136,7 @@ class PriceListMasterService
                                 'expiry_date' => $this->formatExpiryDate($priceVersionData['expiry_date']),
                                 'status' => $priceVersionData['status'],
                                 'payment_scheme_id' => json_encode(array_column($priceVersionData['payment_scheme'], 'id')),
+                                // 'property_masters_id' => $data['property_masters_id'],
                             ]);
                             $newPriceVersionIds[] = $versionId;
                         }
@@ -151,6 +152,7 @@ class PriceListMasterService
                             'payment_scheme_id' => json_encode(array_column($priceVersionData['payment_scheme'], 'id')),
                             'tower_phase_name' => $data['tower_phase_id'],
                             'price_list_masters_id' => $data['price_list_master_id'],
+                            // 'property_masters_id' => $data['property_masters_id'],
                         ]);
 
                         $newPriceVersionIds[] = $newPriceVersion->id;
@@ -171,7 +173,7 @@ class PriceListMasterService
             //Fetch the current Floor Premiums ID in the Price List Master table
             $floorPremiumIdsFromDatabase = json_decode($priceListMaster->floor_premiums_id, true);
             $newFloorPremiumID = [] ?? null; // Keep track of floor premium in the payload
-             
+
             if (!empty($data['floorPremiumsPayload']) && is_array($data['floorPremiumsPayload'])) {
                 foreach ($data['floorPremiumsPayload'] as $floorPremium) {
                     $floorPremiumId = $floorPremium['id'] ?? null;
@@ -223,7 +225,7 @@ class PriceListMasterService
             $additionalPremiumIdsFromDatabase = json_decode($priceListMaster->additional_premiums_id, true);
             $additionalPremiumIdsFromDatabase = is_array($additionalPremiumIdsFromDatabase) ? $additionalPremiumIdsFromDatabase : []; // Ensure it's an array
             $newAdditionalPremiumIds = []; // Initialize the array to track new additional premium IDs.
-            
+
             if (!empty($data['additionalPremiumsPayload']) && is_array($data['additionalPremiumsPayload'])) {
                 foreach ($data['additionalPremiumsPayload'] as $additionalPremium) {
                     $additionalPremiumId = $additionalPremium['id'] ?? null;
@@ -275,7 +277,7 @@ class PriceListMasterService
             //Update the units table to store the additional premium IDs
             if (!empty($data['selectedAdditionalPremiumsPayload']) && is_array($data['selectedAdditionalPremiumsPayload'])) {
                 foreach ($data['selectedAdditionalPremiumsPayload'] as $additionalPremium) {
-                    $unitId =(int) $additionalPremium['unit_id'] ?? null;
+                    $unitId = (int) $additionalPremium['unit_id'] ?? null;
                     $additionalPremiumId = $additionalPremium['additional_premium_id'] ?? null;
 
                     if (!$unitId || $additionalPremiumId === null) {

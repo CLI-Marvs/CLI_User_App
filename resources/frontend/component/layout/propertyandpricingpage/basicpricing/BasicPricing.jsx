@@ -426,6 +426,8 @@ const BasicPricing = () => {
      */
     const buildSubmissionPayload = (status) => ({
         emp_id: user?.id,
+        property_masters_id:
+            data?.property_commercial_detail?.property_master_id,
         price_list_master_id:
             data?.price_list_master_id ||
             data?.data?.property_commercial_detail?.property_master_id,

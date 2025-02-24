@@ -44,6 +44,8 @@ class UpdatePriceListMasterRequest extends FormRequest
             'priceVersionsPayload.*.expiry_date' => 'nullable | date_format:m-d-Y H:i:s',
             'priceVersionsPayload.*.payment_scheme' => 'array',
             'priceVersionsPayload.*.version_id' => 'integer',
+   
+
 
             //Floor premium
             'floorPremiumsPayload' =>  'array',
@@ -74,6 +76,7 @@ class UpdatePriceListMasterRequest extends FormRequest
             'required|integer',
             'price_list_master_id' =>
             'required|integer',
+            'property_masters_id' => 'integer',
         ];
     }
 }

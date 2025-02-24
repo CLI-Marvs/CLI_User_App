@@ -6,6 +6,9 @@ import "react-datepicker/dist/react-datepicker.css";
 import DateLogo from "../../../../../../public/Images/Date_range.svg";
 import AddPriceVersionModal from "./AddPriceVersionModal";
 import { usePriceVersion } from "@/context/PropertyPricing/PriceVersionContext";
+import TableSkeleton from "@/component/layout/propertyandpricingpage/component/TableSkeleton";
+import { toLowerCaseText } from "@/component/layout/propertyandpricingpage/utils/formatToLowerCase";
+
 const PriceVersioning = () => {
     //States
     const [startDate, setStartDate] = useState(new Date());
@@ -15,12 +18,11 @@ const PriceVersioning = () => {
     const modalRef = useRef(null);
     const { priceVersion, isFetchingpriceVersions, getPriceVersions } =
         usePriceVersion();
-    
-    // console.log("priceVersion", priceVersion, isFetchingpriceVersions);
 
     //Hooks
     useEffect(() => {
-        getPriceVersions();
+        console.log("priceVersion1", priceVersion);
+        getPriceVersions(true);
     }, []);
 
     //Event handler
@@ -186,232 +188,85 @@ const PriceVersioning = () => {
                         </tr>
                     </thead>
                     <tbody className="flex flex-col gap-[20px]">
-                        {/*                                                      example 1                                                                     */}
-                        <div className="border-b border-custom-lightestgreen pb-[20px]">
-                            <tr className="flex  gap-[10px]  overflow-hidden bg-white p-1">
-                                <td className="flex flex-col gap-[10px] justify-center w-[169px] p-[20px] rounded-[10px] shadow-custom5">
-                                    <p className="montserrat-semibold text-sm leading-[17px]">
-                                        38 Park Avenue Parking, Tower 2
-                                    </p>
-                                    <p className="underline text-blue-500 cursor-pointer text-sm">
-                                        Edit
-                                    </p>
-                                </td>
-                                <td className="rounded-[10px] shadow-custom5 text-sm w-[572px] overflow-hidden">
-                                    <table className="w-full border-separate">
-                                        <tr className="flex items-center bg-white gap-[30px] ">
-                                            <td className=" w-[150px] p-[15px]">
-                                                Version 1
-                                            </td>
-                                            <td className="w-[100px] p-[15px]">
-                                                0%
-                                            </td>
-                                            <td className="w-[100px] p-[15px]">
-                                                100
-                                            </td>
-                                            <td className="w-[100px] p-[15px]">
-                                                NA
-                                            </td>
-                                        </tr>
-                                        <tr className="flex  bg-custom-grayFA gap-[30px]">
-                                            <td className="w-[150px] p-[15px]">
-                                                Version 2
-                                            </td>
-                                            <td className="w-[100px] p-[15px]">
-                                                5%
-                                            </td>
-                                            <td className="w-[100px] p-[15px]">
-                                                100
-                                            </td>
-                                            <td className="w-[100px] p-[15px]">
-                                                NA
-                                            </td>
-                                        </tr>
-                                        <tr className="flex bg-custom-white gap-[30px]">
-                                            <td className="w-[150px] p-[15px]">
-                                                Version 3
-                                            </td>
-                                            <td className="w-[100px] p-[15px]">
-                                                5%
-                                            </td>
-                                            <td className="w-[100px] p-[15px]">
-                                                100
-                                            </td>
-                                            <td className="w-[100px] p-[15px]">
-                                                NA
-                                            </td>
-                                        </tr>
-                                        <tr className="flex bg-custom-grayFA gap-[30px]">
-                                            <td className="w-[150px] p-[15px]">
-                                                Version 4
-                                            </td>
-                                            <td className="w-[100px] p-[15px]">
-                                                5%
-                                            </td>
-                                            <td className="w-[100px] p-[15px]">
-                                                100
-                                            </td>
-                                            <td className="w-[100px] p-[15px]">
-                                                NA
-                                            </td>
-                                        </tr>
+                        {isFetchingpriceVersions ? (
+                            <div>
+                                <TableSkeleton />
+                            </div>
+                        ) : (
+                            priceVersion &&
+                            priceVersion.map((item, index) => (
+                                <div
+                                    className="border-b border-custom-lightestgreen pb-[20px]"
+                                    key={index}
+                                >
+                                    <table className="w-full border-separate bg-white  rounded-[10px]">
+                                        <tbody>
+                                            <tr className="flex gap-[10px] overflow-hidden p-1">
+                                                {/* Property Name and Edit */}
+                                                <td className="flex flex-col gap-[10px] justify-center w-[169px] p-[20px] rounded-[10px] shadow-custom5">
+                                                    <p className="montserrat-semibold text-sm leading-[17px]">
+                                                        {toLowerCaseText(
+                                                            item?.propertyName
+                                                        )}
+
+                                                        {item?.tower_phase_name
+                                                            ? ", Tower "
+                                                            : ""}
+                                                        {item?.tower_phase_name}
+                                                    </p>
+                                                    <p className="underline text-blue-500 cursor-pointer text-sm">
+                                                        Edit
+                                                    </p>
+                                                </td>
+
+                                                {/* Price Versions Table */}
+                                                <td className="rounded-[10px] shadow-custom5 text-sm w-[572px] overflow-hidden">
+                                                    <table className="w-full border-separate">
+                                                        <tbody>
+                                                            {item?.versions.map(
+                                                                (
+                                                                    versionItem,
+                                                                    versionIndex
+                                                                ) => (
+                                                                    <tr
+                                                                        className="flex items-center bg-white gap-[30px]"
+                                                                        key={
+                                                                            versionIndex
+                                                                        }
+                                                                    >
+                                                                        <td className="w-[150px] p-[15px]">
+                                                                            {
+                                                                                versionItem?.version
+                                                                            }
+                                                                        </td>
+                                                                        <td className="w-[100px] p-[15px]">
+                                                                            {
+                                                                                versionItem?.percent_increase
+                                                                            }{" "}
+                                                                            %
+                                                                        </td>
+                                                                        <td className="w-[100px] p-[15px]">
+                                                                            {
+                                                                                versionItem?.no_of_allowed_buyers
+                                                                            }
+                                                                        </td>
+                                                                        <td className="w-[120px] p-[15px]">
+                                                                            {
+                                                                                versionItem?.expiry_date
+                                                                            }
+                                                                        </td>
+                                                                    </tr>
+                                                                )
+                                                            )}
+                                                        </tbody>
+                                                    </table>
+                                                </td>
+                                            </tr>
+                                        </tbody>
                                     </table>
-                                </td>
-                            </tr>
-                        </div>
-                        {/*                                                   END                                                  */}
-                        {/*                                                      example 2                                                                    */}
-                        <div className="border-b border-custom-lightestgreen pb-[20px]">
-                            <tr className="flex  gap-[10px]  overflow-hidden bg-white p-1">
-                                <td className="flex flex-col gap-[10px] justify-center w-[169px] p-[20px] rounded-[10px] shadow-custom5">
-                                    <p className="montserrat-semibold text-sm leading-[17px]">
-                                        38 Park Avenue, Tower 2
-                                    </p>
-                                    <p className="underline text-blue-500 cursor-pointer text-sm">
-                                        Edit
-                                    </p>
-                                </td>
-                                <td className="rounded-[10px] shadow-custom5 text-sm w-[572px] overflow-hidden">
-                                    <table className="w-full border-separate">
-                                        <tr className="flex items-center bg-white gap-[30px]">
-                                            <td className=" w-[150px] p-[15px]">
-                                                Version 1
-                                            </td>
-                                            <td className="w-[100px] p-[15px]">
-                                                0%
-                                            </td>
-                                            <td className="w-[100px] p-[15px]">
-                                                100
-                                            </td>
-                                            <td className="w-[100px] p-[15px]">
-                                                NA
-                                            </td>
-                                        </tr>
-                                        <tr className="flex  bg-custom-grayFA gap-[30px]">
-                                            <td className="w-[150px] p-[15px]">
-                                                Version 2
-                                            </td>
-                                            <td className="w-[100px] p-[15px]">
-                                                5%
-                                            </td>
-                                            <td className="w-[100px] p-[15px]">
-                                                100
-                                            </td>
-                                            <td className="w-[100px] p-[15px]">
-                                                NA
-                                            </td>
-                                        </tr>
-                                        <tr className="flex bg-custom-white gap-[30px]">
-                                            <td className="w-[150px] p-[15px]">
-                                                Version 3
-                                            </td>
-                                            <td className="w-[100px] p-[15px]">
-                                                5%
-                                            </td>
-                                            <td className="w-[100px] p-[15px]">
-                                                100
-                                            </td>
-                                            <td className="w-[100px] p-[15px]">
-                                                NA
-                                            </td>
-                                        </tr>
-                                        <tr className="flex bg-custom-grayFA gap-[30px]">
-                                            <td className="w-[150px] p-[15px]">
-                                                Version 4
-                                            </td>
-                                            <td className="w-[100px] p-[15px]">
-                                                5%
-                                            </td>
-                                            <td className="w-[100px] p-[15px]">
-                                                100
-                                            </td>
-                                            <td className="w-[100px] p-[15px]">
-                                                NA
-                                            </td>
-                                        </tr>
-                                    </table>
-                                </td>
-                            </tr>
-                        </div>
-                        {/*                                                   END                                                  */}
-                        {/*                                                      example 2                                                                    */}
-                        <div className="border-b border-custom-lightestgreen pb-[20px]">
-                            <tr className="flex  gap-[10px]  overflow-hidden bg-white p-1">
-                                <td className="flex flex-col gap-[10px] justify-center w-[169px] p-[20px] rounded-[10px] shadow-custom5">
-                                    <p className="montserrat-semibold text-sm leading-[17px]">
-                                        38 Park Avenue, Tower 2
-                                    </p>
-                                    <p className="underline text-blue-500 cursor-pointer text-sm">
-                                        Edit
-                                    </p>
-                                </td>
-                                <td className="rounded-[10px] shadow-custom5 text-sm w-[572px] overflow-hidden">
-                                    <table className="w-full border-separate">
-                                        <tr className="flex items-center bg-white gap-[30px]">
-                                            <td className=" w-[150px] p-[15px]">
-                                                Version 1
-                                            </td>
-                                            <td className="w-[100px] p-[15px]">
-                                                0%
-                                            </td>
-                                            <td className="w-[100px] p-[15px]">
-                                                100
-                                            </td>
-                                            <td className="w-[100px] p-[15px]">
-                                                NA
-                                            </td>
-                                        </tr>
-                                        <tr className="flex items-center bg-custom-grayFA gap-[30px]">
-                                            <td className="flex flex-col gap-[10px] w-[150px] p-[15px]">
-                                                <p>Version 2</p>
-                                                <p className="font-bold text-[#E06464] flex items-center">
-                                                    Active
-                                                    <span className="ml-1.5 w-[10px] h-[10px] bg-[#E06464] rounded-full inline-block"></span>
-                                                </p>
-                                            </td>
-                                            <td className="w-[100px] p-[15px]">
-                                                5%
-                                            </td>
-                                            <td className="w-[100px] p-[15px]">
-                                                100
-                                            </td>
-                                            <td className="w-[100px] p-[15px]">
-                                                NA
-                                            </td>
-                                        </tr>
-                                        <tr className="flex bg-custom-white gap-[30px]">
-                                            <td className="w-[150px] p-[15px]">
-                                                Version 3
-                                            </td>
-                                            <td className="w-[100px] p-[15px]">
-                                                5%
-                                            </td>
-                                            <td className="w-[100px] p-[15px]">
-                                                100
-                                            </td>
-                                            <td className="w-[100px] p-[15px]">
-                                                NA
-                                            </td>
-                                        </tr>
-                                        <tr className="flex bg-custom-grayFA gap-[30px]">
-                                            <td className="w-[150px] p-[15px]">
-                                                Version 4
-                                            </td>
-                                            <td className="w-[100px] p-[15px]">
-                                                5%
-                                            </td>
-                                            <td className="w-[100px] p-[15px]">
-                                                100
-                                            </td>
-                                            <td className="w-[100px] p-[15px]">
-                                                NA
-                                            </td>
-                                        </tr>
-                                    </table>
-                                </td>
-                            </tr>
-                        </div>
-                        {/*                                                   END                                                  */}
+                                </div>
+                            ))
+                        )}
                     </tbody>
                 </table>
             </div>

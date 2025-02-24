@@ -14,7 +14,7 @@ class PriceVersion extends Model
 {
     use HasFactory;
     protected $guarded = array();
-    protected $fillable=['version_name', 'status', 'percent_increase', 'allowed_buyer', 'expiry_date', 'payment_scheme_id', 'tower_phase_name', 'price_list_masters_id'];
+    protected $fillable=['version_name', 'status', 'percent_increase', 'allowed_buyer', 'expiry_date', 'payment_scheme_id', 'tower_phase_name', 'price_list_masters_id','property_masters_id'];
     //Relationships
     public function soldPerVersion()
     {

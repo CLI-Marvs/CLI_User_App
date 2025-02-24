@@ -119,6 +119,7 @@ class PriceListMasterRepository
                             'payment_scheme_id' => json_encode(array_column($priceVersionData['payment_scheme'], 'id')),
                             'tower_phase_name' => $data['tower_phase_id'],
                             'price_list_masters_id' => $data['price_list_master_id'],
+                            // 'property_masters_id' => $data['property_masters_id'],
                         ]);
                         // Store the created ID
                         $createdPriceVersionIds[] = $priceVersion->id;
@@ -355,8 +356,7 @@ class PriceListMasterRepository
 
             $paymentSchemeData = PaymentScheme::whereIn('id', $priceVersionIds)->get();
             // Add this line to filter for active payment schemes
-
-
+            
             $paymentSchemes = $paymentSchemeData->map(function ($scheme) {
                 return [
                     'id' => $scheme->id,
@@ -381,7 +381,7 @@ class PriceListMasterRepository
     public function exportExcel($data): BinaryFileResponse
     {
         // dd($building, $propertyName, $priceVersions, $units);
-        
+
 
         $export = new PriceListMasterExportData($data['payload']['building'], $data['payload']['project_name'], $data['payload']['exportPricingData']['priceVersions'], $data['payload']['exportPricingData']['units'], $data['payload']['exportPricingData']['priceListSettings']);
         return $this->excel->download($export, 'price_list_master.xlsx');

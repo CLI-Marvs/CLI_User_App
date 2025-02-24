@@ -23,7 +23,8 @@ export const PriceVersionProvider = ({ children }) => {
             try {
                 if (setLoading) setIsFetchingpriceVersions(true);
                 const response = await priceVersionService.getPriceVersions();
-                console.log("response 25", response);
+                setPriceVersion(response?.data.data);
+                
                 return response;
             } catch (error) {
                 console.error("Error getting price versions:", error);
@@ -35,6 +36,7 @@ export const PriceVersionProvider = ({ children }) => {
         [priceVersion]
     );
     
+ 
     const value = {
         isFetchingpriceVersions,
         getPriceVersions,

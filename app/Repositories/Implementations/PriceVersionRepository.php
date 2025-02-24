@@ -4,12 +4,13 @@ namespace App\Repositories\Implementations;
 
 use App\Models\PaymentScheme;
 use App\Models\PriceVersion;
+use App\Models\PropertyMaster;
 use Illuminate\Support\Facades\DB;
 
 class PriceVersionRepository
 {
     protected $model;
-
+    protected $towerPhase;
     public function __construct(PriceVersion $model)
     {
         $this->model = $model;
@@ -21,13 +22,18 @@ class PriceVersionRepository
      */
     public function index()
     {
-        //TODO: Paginate to 10 records
-        // First pluck all unique property_masters_Id values
+        // First pluck all unique property_masters_id values
         $propertyMasterIds = $this->model->pluck('property_masters_id')->unique()->values();
+
+        // Get property master data
+        $propertyMasters = PropertyMaster::whereIn('id', $propertyMasterIds)
+            ->get()
+            ->keyBy('id'); // Index by ID for easier lookup
 
         // Then retrieve full data for these IDs
         $priceVersions = $this->model
             ->whereIn('property_masters_id', $propertyMasterIds)
+            ->where('status', '=', 'Active')
             ->orderBy('created_at', 'desc')
             ->get();
 
@@ -39,9 +45,35 @@ class PriceVersionRepository
             ], 404);
         }
 
-        return [
-            $priceVersions,
-            'masterIds' => $propertyMasterIds
+
+        // Group and transform the data
+        $groupedData = $priceVersions
+            ->groupBy('property_masters_id')
+            ->map(function ($versions, $propertyId) use ($propertyMasters) {
+                return [
+                    'property_masters_id' => $propertyId,
+                    'propertyName' => $propertyMasters[$propertyId]->property_name ?? null,
+                    'tower_phase_name' =>
+                    $this->towerPhase,
+                    'versions' => $versions->map(function ($version) {
+                        $this->towerPhase = $version->tower_phase_name;
+                        return [
+                            'id' => $version->id,
+                            'version' => $version->version_name,
+                            'percent_increase' => $version->percent_increase,
+                            'no_of_allowed_buyers' => $version->allowed_buyer,
+                            'expiry_date' => $version->expiry_date,
+                            'status' => $version->status,
+                            'created_at' => $version->created_at,
+                            'updated_at' => $version->updated_at,
+                        ];
+                    })->values()->all()
+                ];
+            })->values();
+
+        return  [
+            'status' => 'success',
+            'data' => $groupedData
         ];
     }
 
@@ -50,7 +82,7 @@ class PriceVersionRepository
      */
     public function store(array $data)
     {
-        
+
         DB::beginTransaction();
         try {
             $priceVersions = [];
@@ -64,6 +96,7 @@ class PriceVersionRepository
                     'percent_increase' => $version['percent_increase'],
                     'allowed_buyer' => $version['no_of_allowed_buyers'],
                     'expiry_date' => $expiryDate->format('Y-m-d H:i:s'),
+                    'status' => 'Active'
                 ]);
 
                 $priceVersions[] = $priceVersion;
