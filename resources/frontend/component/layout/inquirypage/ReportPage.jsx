@@ -639,10 +639,16 @@ const ReportPage = () => {
 
     const handleResetFilter = () => {
 
+        const summaryParts = [];
+
+        summaryParts.push(`Year: 2025`);
+        summaryParts.push('Month: All');
+
+        setSearchSummary(summaryParts);
         setDepartmentValue("");
         setProjectValue("");
-        setYearValue(new Date().getFullYear());
-        setMonthValue("All");
+        setYear(new Date().getFullYear());
+        setMonth("All");
         setStartDateValue(null);
         setEndDateValue(null);
     };
@@ -950,7 +956,7 @@ const ReportPage = () => {
                     </button>
                 </div>
             </div>
-            <div className="flex flex-col gap-1 p-2 mt-[15px] bg-white w-max rounded-[8px] shadow-custom7 text-sm">
+            <div className="flex flex-col gap-1 p-2 bg-white w-max rounded-[8px] shadow-custom7 text-sm">
                 <div className="flex flex-col">
                     <div className="mb-5">
                         <strong>Search {data?.length > 1 ? 'results for' : 'result for'} &nbsp;</strong>
