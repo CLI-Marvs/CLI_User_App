@@ -649,21 +649,55 @@ const ReportPage = () => {
 
     useEffect(() => {
 
-        setYear(new Date().getFullYear());
-        setMonthValue("All");
-        setDepartmentValue("");
-        setProjectValue("");
-        setStartDateValue(null);
-        setEndDateValue(null);
-
-
         const summaryParts = [];
 
-        summaryParts.push(`Year: 2025`);
-        summaryParts.push(`Month: All`);
+
+        if (yearValue !== "All"){
+            summaryParts.push(`Year: ${yearValue}`)
+        } else{
+            if(startDateValue || endDateValue){
+                
+            }else{
+                summaryParts.push(`Year: All`)
+            }
+        }
+        if (monthValue !== "All"){
+            summaryParts.push(`Month: ${formatMonth(monthValue)}`)
+        }else{
+            if(startDateValue || endDateValue){
+                    
+            }else{
+                summaryParts.push(`Month: All`)
+            }
+        }
+
+        if (startDateValue && endDateValue) {
+            summaryParts.push(`Start Date: ${format(startDateValue, "MMM dd, yyyy")}`);
+            summaryParts.push(`End Date: ${format(endDateValue, "MMM dd, yyyy")}`);
+        } else if (startDateValue) {
+            summaryParts.push(`Start Date: ${format(startDateValue, "MMM dd, yyyy")}`);
+        } else if (endDateValue) {
+            summaryParts.push(`End Date: ${format(endDateValue, "MMM dd, yyyy")}`);
+        }
+
+        if (projectValue !== "All" && projectValue !== "") summaryParts.push(`Project: ${projectValue}`);
+        if (departmentValue !== "All" && departmentValue !== "") summaryParts.push(`Department: ${departmentValue}`);
+
+     
+        if (!startDateValue && !endDateValue && (yearValue == "All" && monthValue == "All" && projectValue == "All" && departmentValue == "All")) {
+            summaryParts.push(`Year: All`);
+            summaryParts.push(`Project: All`);
+            summaryParts.push(`Department: All`);
+        }
+
 
         setSearchSummary(summaryParts);
-
+        setDepartment(departmentValue);
+        setProject(projectValue);
+        setYear(yearValue);
+        setMonth(monthValue);
+        setStartDate(startDateValue);
+        setEndDate(endDateValue);
 
     }, []);
 
