@@ -43,6 +43,7 @@ class StorePriceListMasterRequest extends FormRequest
             'priceVersionsPayload.*.no_of_allowed_buyers' => 'integer | nullable',
             'priceVersionsPayload.*.expiry_date' => 'nullable | date_format:m-d-Y H:i:s',
             'priceVersionsPayload.*.payment_scheme' => 'array',
+            'priceVersionsPayload.*.priority_number' => 'integer',
             
 
             //Floor premium

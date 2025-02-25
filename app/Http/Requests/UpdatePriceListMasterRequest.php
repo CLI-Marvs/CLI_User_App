@@ -44,8 +44,8 @@ class UpdatePriceListMasterRequest extends FormRequest
             'priceVersionsPayload.*.expiry_date' => 'nullable | date_format:m-d-Y H:i:s',
             'priceVersionsPayload.*.payment_scheme' => 'array',
             'priceVersionsPayload.*.version_id' => 'integer',
-   
-
+            'priceVersionsPayload.*.priority_number' => 'integer',
+            
 
             //Floor premium
             'floorPremiumsPayload' =>  'array',

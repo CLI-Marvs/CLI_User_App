@@ -83,6 +83,13 @@ const PriceVersions = ({
                 ? [...prev.priceVersions]
                 : [];
 
+            // Get the last priority_number and increment by 1
+            const lastPriorityNumber =
+                priceVersions.length > 0
+                    ? priceVersions[priceVersions.length - 1].priority_number ||
+                      0
+                    : 0;
+
             priceVersions.push({
                 id: 0,
                 name: "",
@@ -91,6 +98,7 @@ const PriceVersions = ({
                 no_of_allowed_buyers: 0,
                 expiry_date: "N/A",
                 payment_scheme: [],
+                priority_number: lastPriorityNumber + 1,
             });
 
             // Update the state
@@ -229,6 +237,9 @@ const PriceVersions = ({
                                 <table>
                                     <thead>
                                         <tr className="h-[83px] bg-custom-grayFA text-custom-grayA5 montserrat-semibold text-sm">
+                                            <th className="rounded-tl-[10px] pl-[2px] w-[90px] text-left">
+                                                Priority
+                                            </th>
                                             <th className="rounded-tl-[10px] pl-[10px] w-[150px] text-left">
                                                 Version
                                             </th>
@@ -264,6 +275,11 @@ const PriceVersions = ({
                                                             className="h-[66px] bg-white text-sm"
                                                             key={index}
                                                         >
+                                                            <td className="px-[10px]">
+                                                                {
+                                                                    form.priority_number
+                                                                }
+                                                            </td>
                                                             <td className="px-[10px]">
                                                                 <input
                                                                     type="text"

@@ -105,11 +105,12 @@ class PriceListMasterService
 
             // Fetch the current price version IDs in the PriceListMaster table
             $currentPriceVersionIds = json_decode($priceListMaster->price_versions_id, true) ?? [];
-            
+           
             if (!empty($data['priceVersionsPayload']) && is_array($data['priceVersionsPayload'])) {
                 $newPriceVersionIds = []; // Track new/updated versions
 
                 foreach ($data['priceVersionsPayload'] as $priceVersionData) {
+                    // dd($priceVersionData['priority_number']);
                     // Ensure expiry_date is formatted properly
                     // $expiryDate = !empty($priceVersionData['expiry_date'])
                     //     ? \DateTime::createFromFormat('m-d-Y H:i:s', $priceVersionData['expiry_date'])->format('Y-m-d H:i:s')
@@ -124,7 +125,7 @@ class PriceListMasterService
                     ) {
                         continue;
                     }
-                  
+
                     if ($versionId && in_array($versionId, $currentPriceVersionIds)) {
                         // UPDATE existing PriceVersion
                         $priceVersion = $this->priceVersionModel->find($versionId);
@@ -136,6 +137,7 @@ class PriceListMasterService
                                 'expiry_date' => $this->formatExpiryDate($priceVersionData['expiry_date']),
                                 'status' => $priceVersionData['status'],
                                 'payment_scheme_id' => json_encode(array_column($priceVersionData['payment_scheme'], 'id')),
+                                'priority_number' => $priceVersionData['priority_number'],
                                 // 'property_masters_id' => $data['property_masters_id'],
                             ]);
                             $newPriceVersionIds[] = $versionId;
@@ -151,10 +153,11 @@ class PriceListMasterService
                             'status' => $priceVersionData['status'],
                             'payment_scheme_id' => json_encode(array_column($priceVersionData['payment_scheme'], 'id')),
                             'tower_phase_name' => $data['tower_phase_id'],
-                            'price_list_masters_id' => $data['price_list_master_id'],
+                            'price_list_masters_id' => $data['price_list_master_id'],'priority_number' => $priceVersionData['priority_number'],
+
                             // 'property_masters_id' => $data['property_masters_id'],
                         ]);
-
+                       
                         $newPriceVersionIds[] = $newPriceVersion->id;
                     }
                 }

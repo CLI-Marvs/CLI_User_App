@@ -30,6 +30,7 @@ export const formatPayload = {
                         : priceVersion.expiry_date,
 
                 payment_scheme: priceVersion.payment_scheme,
+                priority_number: priceVersion.priority_number,
             };
             return formattedPriceVersion;
         });

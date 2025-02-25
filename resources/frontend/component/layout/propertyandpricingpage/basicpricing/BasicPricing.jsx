@@ -115,6 +115,7 @@ const BasicPricing = () => {
                     priceVersions: data.price_versions.length
                         ? data.price_versions.map((version) => ({
                               id: version.version_id || "",
+                              priority_number: version.priority_number,
                               name: version.version_name || "",
                               percent_increase: version.percent_increase || 0,
                               status: version.status,
@@ -131,6 +132,7 @@ const BasicPricing = () => {
                         : [
                               {
                                   id: 0,
+                                  priority_number: 1,
                                   name: "",
                                   percent_increase: "",
                                   no_of_allowed_buyers: "",

@@ -39,6 +39,7 @@ const initialState = () => ({
     priceVersions: [
         {
             id: 0,
+            priority_number: 1,
             name: "",
             percent_increase: "",
             no_of_allowed_buyers: "",
