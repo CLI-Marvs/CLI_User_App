@@ -90,16 +90,20 @@ const ReviewsandApprovalRouting = ({
                             .join(" ");
                     });
 
-                const pricingHeaders = ["List price w/ VAT", ...pricingKeys];
+                const pricingHeaders = [
+                    "List price w/ VAT",
+                    ...pricingKeys,
+                    "Total Contract Price  ",
+                ];
                 setSubHeaders({
-                    versionHeaders: versionNames,
+                    // versionHeaders: versionNames,
                     percentIncreaseHeaders: percentIncreaseHeaders,
                     pricingHeaders: pricingHeaders,
                 });
             } else {
                 // If base_price is 0, only set version headers without pricing headers
                 setSubHeaders({
-                    versionHeaders: versionNames,
+                    // versionHeaders: versionNames,
                     percentIncreaseHeaders: percentIncreaseHeaders,
                     pricingHeaders: [], // Empty array for no pricing headers
                 });
@@ -353,7 +357,6 @@ const ReviewsandApprovalRouting = ({
                                                 units.map((unit, unitIndex) => (
                                                     <tr key={unitIndex}>
                                                         {/* Map  Unit Data */}
-
                                                         <td className="px-2 border-black border">
                                                             {unit.floor}
                                                         </td>
@@ -375,9 +378,24 @@ const ReviewsandApprovalRouting = ({
                                                         <td className="px-2 border-black border">
                                                             {unit.total_area}
                                                         </td>
-
+                                                        <td className="px-2 border-black border">
+                                                            {unit?.list_price &&
+                                                                unit?.list_price.toLocaleString()}
+                                                        </td>
+                                                        <td className="px-2 border-black border">
+                                                            {unit?.transfer_charge &&
+                                                                unit?.transfer_charge.toLocaleString()}
+                                                        </td>
+                                                        <td className="px-2 border-black border">
+                                                            {unit?.reservation_fee &&
+                                                                unit?.reservation_fee.toLocaleString()}
+                                                        </td>{" "}
+                                                        <td className="px-2 border-black border">
+                                                            {unit?.totalContractPrice &&
+                                                                unit?.totalContractPrice.toLocaleString()}
+                                                        </td>
                                                         {/* Map Dynamic Price Versions */}
-                                                        {priceVersions.map(
+                                                        {/* {priceVersions.map(
                                                             (
                                                                 version,
                                                                 versionIndex
@@ -392,9 +410,8 @@ const ReviewsandApprovalRouting = ({
                                                                         "-"}
                                                                 </td>
                                                             )
-                                                        )}
-
-                                                        {pricingData &&
+                                                        )} */}
+                                                        {/* {pricingData &&
                                                             Object.keys(
                                                                 pricingData?.priceListSettings
                                                             ).length > 0 &&
@@ -422,7 +439,7 @@ const ReviewsandApprovalRouting = ({
                                                                             <td
                                                                                 key={
                                                                                     priceListItem
-                                                                                } // ✅ Use key directly (not `priceListItem.id`)
+                                                                                }  
                                                                                 className="px-2 border-black border text-center"
                                                                             >
                                                                                 {
@@ -431,11 +448,11 @@ const ReviewsandApprovalRouting = ({
                                                                                         priceListItem
                                                                                     ]
                                                                                 }{" "}
-                                                                                {/* ✅ Get the value */}
+                                                                                
                                                                             </td>
                                                                         );
                                                                     }
-                                                                )}
+                                                                )} */}
                                                     </tr>
                                                 ))}
                                         </tbody>

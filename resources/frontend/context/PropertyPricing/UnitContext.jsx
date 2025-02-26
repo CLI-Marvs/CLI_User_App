@@ -192,6 +192,7 @@ export const UnitProvider = ({ children }) => {
         excelIdFromPriceList,
         setExcelIdFromPriceList,
         setExcelId,
+        setUnits
     };
     return (
         <UnitContext.Provider value={value}>{children}</UnitContext.Provider>

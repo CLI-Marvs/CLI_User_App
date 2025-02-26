@@ -61,15 +61,39 @@ class PriceListMasterExportData implements FromArray, WithHeadings, WithStyles, 
             isset($this->priceBasicDetails['base_price']) &&
             $this->priceBasicDetails['base_price'] !== 0;
 
+        // Check if payment schemes exist in versions
+        $hasPaymentSchemes = false;
+        $paymentSchemeColumns = [];
+
+        // Find all unique payment schemes across all versions
+        if ($hasVersions) {
+            $allPaymentSchemes = [];
+            foreach ($this->priceVersions as $version) {
+                if (isset($version['payment_scheme']) && !empty($version['payment_scheme'])) {
+                    $hasPaymentSchemes = true;
+                    foreach ($version['payment_scheme'] as $scheme) {
+                        if (!isset($allPaymentSchemes[$scheme['id']])) {
+                            $allPaymentSchemes[$scheme['id']] = $scheme['payment_scheme_name'];
+                        }
+                    }
+                }
+            }
+            // Convert to indexed array for column headers
+            $paymentSchemeColumns = $allPaymentSchemes;
+        }
+
         // Calculate total columns
         $totalColumns = count($unitHeaders);
         if ($hasVersions) {
             $totalColumns += count($this->priceVersions);
         }
         if ($hasPricing) {
-            $totalColumns += count($pricingHeaders); // Add columns for each pricing header
+            $totalColumns += count($pricingHeaders);
         }
-
+        if ($hasPaymentSchemes) {
+            $totalColumns += count($paymentSchemeColumns);
+        }
+        
         // Create main header row (Row 6)
         $headerRow = array_fill(0, $totalColumns, "");
 
@@ -87,6 +111,12 @@ class PriceListMasterExportData implements FromArray, WithHeadings, WithStyles, 
         // Add PRICING header
         if ($hasPricing) {
             $headerRow[$currentCol] = "PRICING";
+            $currentCol += count($pricingHeaders);
+        }
+
+        // Add PAYMENT SCHEME header
+        if ($hasPaymentSchemes) {
+            $headerRow[$currentCol] = "PAYMENT SCHEME";
         }
 
         // Create subheader row (Row 7)
@@ -107,9 +137,26 @@ class PriceListMasterExportData implements FromArray, WithHeadings, WithStyles, 
 
         // Add pricing subheaders
         if ($hasPricing) {
-            $pricingStartCol = $currentCol;
+            $pricingStartCol = count($unitHeaders);
+            if ($hasVersions) {
+                $pricingStartCol += count($this->priceVersions);
+            }
             foreach ($pricingHeaders as $index => $header) {
                 $subHeaderRow[$pricingStartCol + $index] = $header;
+            }
+        }
+
+        // Add payment scheme subheaders
+        if ($hasPaymentSchemes) {
+            $paymentSchemeStartCol = count($unitHeaders);
+            if ($hasVersions) {
+                $paymentSchemeStartCol += count($this->priceVersions);
+            }
+            if ($hasPricing) {
+                $paymentSchemeStartCol += count($pricingHeaders);
+            }
+            foreach ($paymentSchemeColumns as $index => $schemeName) {
+                $subHeaderRow[$paymentSchemeStartCol + $index] = $schemeName;
             }
         }
 
@@ -122,7 +169,6 @@ class PriceListMasterExportData implements FromArray, WithHeadings, WithStyles, 
             }
         }
 
-       
         $data = [
             ['VERTICAL INVENTORY PRICING TEMPLATE'],
             ["PROJECT", $this->propertyName],
@@ -149,8 +195,7 @@ class PriceListMasterExportData implements FromArray, WithHeadings, WithStyles, 
             // Add version data
             if ($hasVersions) {
                 foreach ($this->priceVersions as $version) {
-                    $row[] = ($version['no_of_allowed_buyers'] ?? "-") .
-                        ($version['no_of_allowed_buyers']);
+                    $row[] = ($version['no_of_allowed_buyers'] ?? "-");
                 }
             }
 
@@ -161,12 +206,34 @@ class PriceListMasterExportData implements FromArray, WithHeadings, WithStyles, 
                 $row[] = number_format($this->priceBasicDetails['reservation_fee'], 2);
             }
 
+            // Add payment scheme availability indicators
+            if ($hasPaymentSchemes) {
+                // Initialize all schemes as unavailable
+                $availableSchemes = array_fill(0, count($paymentSchemeColumns), "No");
+
+                // Mark schemes as available based on version data
+                foreach ($this->priceVersions as $version) {
+                    if (isset($version['payment_scheme']) && !empty($version['payment_scheme'])) {
+                        foreach ($version['payment_scheme'] as $scheme) {
+                            $schemeIndex = array_search($scheme['payment_scheme_name'], $paymentSchemeColumns);
+                            if ($schemeIndex !== false) {
+                                $availableSchemes[$schemeIndex] = "Yes";
+                            }
+                        }
+                    }
+                }
+
+                // Add availability indicators to the row
+                foreach ($availableSchemes as $available) {
+                    $row[] = $available;
+                }
+            }
+
             $data[] = $row;
         }
 
         return $data;
     }
-
 
     public function headings(): array
     {
@@ -188,7 +255,7 @@ class PriceListMasterExportData implements FromArray, WithHeadings, WithStyles, 
     {
         // Calculate dynamic column positions
         $lastBaseCol = chr(65 + 6); // G for base columns
-        $currentCol = 9; // Start after base columns
+        $currentCol = 10; // Start after base columns
 
         $hasVersions = !empty($this->priceVersions);
         $hasPricing = isset($this->priceBasicDetails['base_price']) &&
@@ -320,6 +387,9 @@ class PriceListMasterExportData implements FromArray, WithHeadings, WithStyles, 
                 $pricingStartCol = chr(ord($versionEndCol) + 1); // Start after version section
                 $pricingEndCol = chr(ord($pricingStartCol) + 2); // 3 pricing columns
 
+                //Calculate payment scheme columns
+                $paymentSchemeStartCol = chr(ord($pricingEndCol) + 1); // Start after pricing section
+                $paymentSchemeEndCol = chr(ord($paymentSchemeStartCol) +  2); // 3 payment scheme columns
                 // Merge Units section
                 $sheet->mergeCells("A5:{$lastBaseCol}5");
 
@@ -331,6 +401,9 @@ class PriceListMasterExportData implements FromArray, WithHeadings, WithStyles, 
                 // Merge Pricing section
                 $sheet->mergeCells("{$pricingStartCol}5:{$pricingEndCol}5");
 
+                $sheet->mergeCells("{$paymentSchemeStartCol}5:{$paymentSchemeEndCol}5");
+
+
                 // Set Row Heights
                 $sheet->getRowDimension(5)->setRowHeight(30);
 
@@ -340,7 +413,7 @@ class PriceListMasterExportData implements FromArray, WithHeadings, WithStyles, 
 
                 // Get the last row number
                 $lastRow = $sheet->getHighestRow();
-                $lastColumn = $pricingEndCol;
+                $lastColumn = $paymentSchemeEndCol;
 
                 // Add borders to all cells
                 $borderStyle = [

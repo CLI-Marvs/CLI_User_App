@@ -1,10 +1,15 @@
-import React, { useState } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { IoIosArrowDown } from "react-icons/io";
 import { usePricing } from "@/component/layout/propertyandpricingpage/basicpricing/context/BasicPricingContext";
 
 const PriceListSettings = ({ isOpen, toggleAccordion }) => {
     //State
-    const { pricingData, updatePricingSection } = usePricing();
+    const { pricingData, updatePricingSection ,setPricingData} = usePricing();
+
+    //Hooks
+
+    // const computeEffectBasePrice
+
 
     //Event Handler
     const handleInputChange = (e) => {

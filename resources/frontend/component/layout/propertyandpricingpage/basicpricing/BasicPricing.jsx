@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useMemo } from "react";
 import ProjectDetails from "./ProjectDetails";
 import PriceListSettings from "./accordion/PriceListSettings";
 import AdditionalPremiums from "./accordion/AdditionalPremiums";
@@ -63,6 +63,7 @@ const BasicPricing = () => {
         checkExistingUnits,
         floors,
         units,
+        setUnits,
         setFloors,
         setFloorPremiumsAccordionOpen,
         excelId,
@@ -292,6 +293,129 @@ const BasicPricing = () => {
             });
         };
     }, [location]);
+
+    //COmpute the effective balcony base
+    const computeEffectiveBalconyBase = useMemo(() => {
+        const basePrice = pricingData.priceListSettings?.base_price;
+        return basePrice ? basePrice * 0.5 : 0; // Compute 50%
+    }, [pricingData.priceListSettings?.base_price]);
+
+    //Compute the effective base price
+
+    const computedEffectiveBasePrice = useMemo(() => {
+        return units.map((unit) => {
+            // Get Base Price
+            const basePrice =
+                parseFloat(pricingData.priceListSettings?.base_price) || 0;
+
+            // Get Floor Premium for the unit’s floor
+            const floorPremium = pricingData.floorPremiums[unit.floor];
+
+            const floorPremiumCost = floorPremium
+                ? parseFloat(floorPremium.premiumCost) || 0
+                : 0;
+
+            // Get Additional Premiums for the unit
+            const additionalPremiumCost =
+                pricingData.selectedAdditionalPremiums?.reduce(
+                    (total, selected) => {
+                        if (selected.unit !== unit.unit) return total; // Skip if unit doesn't match
+
+                        // Find all matching additional premiums
+                        const matchingPremiums =
+                            pricingData?.additionalPremiums?.filter((ap) =>
+                                selected.additional_premium_id.includes(ap.id)
+                            ) || [];
+
+                        // Sum up all matching premium costs
+                        const premiumTotal = matchingPremiums.reduce(
+                            (sum, premium) =>
+                                sum + (parseFloat(premium.premiumCost) || 0),
+                            0
+                        );
+
+                        return total + premiumTotal;
+                    },
+                    0
+                );
+
+            // Compute Effect base price
+            const effective_base_price =
+                basePrice + floorPremiumCost + additionalPremiumCost || 0;
+
+            const effective_balcony_base =
+                pricingData.priceListSettings?.effective_balcony_base || 0;
+
+            // Compute List Price
+            const list_price = parseFloat(
+                (
+                    (unit.indoor_area || 0) * effective_base_price +
+                    ((parseFloat(unit.balcony_area) || 0) +
+                        (parseFloat(unit.garden_area) || 0)) *
+                        effective_balcony_base
+                ).toFixed(2) // Ensure two decimal places
+            );
+
+            console.log("list_price", list_price);
+            //Compute transfer charge
+            const transfer_charge =
+                (parseFloat(list_price.toFixed(2)) *
+                    pricingData.priceListSettings?.transfer_charge) /
+                100;
+
+            // Define VAT percentage
+            const vatRate = pricingData.priceListSettings?.vat || 12; // Default to 12%
+
+            // Compute VAT (only if LP + TC is greater than 3.6M)
+            const listPricePlusTransferCharge = list_price + transfer_charge;
+            const vatAmount =
+                listPricePlusTransferCharge > 3600000
+                    ? (listPricePlusTransferCharge * vatRate) / 100
+                    : 0;
+
+            // Compute Total Contract Price (TCP)
+            const totalContractPrice = listPricePlusTransferCharge + vatAmount;
+
+            // Debugging output
+
+            return {
+                ...unit,
+                effective_base_price,
+                list_price,
+                reservation_fee:
+                    pricingData?.priceListSettings?.reservation_fee,
+                transfer_charge: parseFloat(transfer_charge.toFixed(2)),
+                vatAmount: parseFloat(vatAmount.toFixed(2)), // Ensure VAT is always defined
+                totalContractPrice: parseFloat(totalContractPrice.toFixed(2)), // Final TCP
+            };
+        });
+    }, [
+        pricingData.priceListSettings?.base_price,
+        pricingData.floorPremiums,
+        pricingData.selectedAdditionalPremiums,
+        pricingData.additionalPremium,
+    ]);
+
+    useEffect(() => {
+        setPricingData((prev) => ({
+            ...prev,
+            priceListSettings: {
+                ...prev.priceListSettings,
+                effective_balcony_base: computeEffectiveBalconyBase,
+            },
+        }));
+
+        //call the computedEffectiveBasePrice
+
+        // setUnits(computedEffectiveBasePrice);
+    }, [computeEffectiveBalconyBase]);
+
+    useEffect(() => {
+        if (units.length > 0) {
+            setUnits(computedEffectiveBasePrice);
+            console.log("units", units);
+        }
+    }, [computedEffectiveBasePrice]);
 
     //Event handler
     //Function to generate random Id

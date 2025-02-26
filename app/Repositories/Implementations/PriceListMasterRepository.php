@@ -118,7 +118,8 @@ class PriceListMasterRepository
                             'status' => $priceVersionData['status'],
                             'payment_scheme_id' => json_encode(array_column($priceVersionData['payment_scheme'], 'id')),
                             'tower_phase_name' => $data['tower_phase_id'],
-                            'price_list_masters_id' => $data['price_list_master_id'],
+                            'price_list_masters_id' => $data['price_list_master_id'],'priority_number' => $priceVersionData['priority_number'],
+
                             // 'property_masters_id' => $data['property_masters_id'],
                         ]);
                         // Store the created ID
@@ -372,6 +373,7 @@ class PriceListMasterRepository
                 'expiry_date' => $version->expiry_date,
                 'version_id' => $version->id,
                 'payment_schemes' => $paymentSchemes,
+                'priority_number' => $version->priority_number,
             ];
         });
     }
