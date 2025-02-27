@@ -647,6 +647,8 @@ const ReportPage = () => {
         setSearchSummary(summaryParts);
         setDepartmentValue("");
         setProjectValue("");
+        setYearValue(new Date().getFullYear());
+        setMonthValue("All");
         setYear(new Date().getFullYear());
         setMonth("All");
         setStartDateValue(null);
