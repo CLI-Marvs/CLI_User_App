@@ -51,6 +51,8 @@ const InquiryThread = () => {
     const [hasAttachments, setHasAttachments] = useState(false);
     const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
     const { propertyNamesList } = useStateContext();
+    const [endDate, setEndDate] = useState(null);
+    
     /*   const [dataConcern, setDataConcern] = useState({}); */
     const {
         messages,
@@ -66,7 +68,7 @@ const InquiryThread = () => {
         allEmployees,
         setMessages,
         setIsUserTypeChange,
-        isUserTypeChange
+        isUserTypeChange,
     } = useStateContext();
     const [chatMessage, setChatMessage] = useState("");
     const userLoggedInEmail = user?.employee_email;
@@ -579,410 +581,518 @@ const InquiryThread = () => {
                                 />
                             </svg>
                         </div>
-                        {isFilterVisible && (
-                            <div
-                                ref={filterBoxRef}
-                                className="absolute left-0 mt-12 p-8 bg-white border border-gray-300 shadow-lg rounded-lg z-10 w-[560px]"
-                            >
-                                <div className="flex flex-col gap-2">
-                                    <div className="flex">
-                                        <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
-                                            {" "}
-                                            Name
-                                        </label>
-                                        <input
-                                            type="text"
-                                            className="w-full  border-b-1 outline-none text-sm px-[8px]"
-                                            value={name}
-                                            onChange={(e) =>
-                                                setName(e.target.value)
-                                            }
-                                        />
-                                    </div>
-                                    <div className="flex relative">
-                                        <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
-                                            {" "}
-                                            Category
-                                        </label>
-                                        <select
-                                            className="w-full border-b-1 outline-none appearance-none text-sm px-[8px]"
-                                            value={category}
-                                            onChange={(e) =>
-                                                setCategory(e.target.value)
-                                            }
-                                        >
-                                            <option value="">
-                                                Select Category
-                                            </option>
-                                            <option value="Reservation Documents">
-                                                Reservation Documents
-                                            </option>
-                                            <option value="Payment Issues">
-                                                Payment Issues
-                                            </option>
-                                            <option value="SOA/ Buyer's Ledger">
-                                                SOA/ Buyer's Ledger
-                                            </option>
-                                            <option value="Turn Over Status">
-                                                Turn Over Status
-                                            </option>
-                                            <option value="Unit Status">
-                                                Unit Status
-                                            </option>
-                                            <option value="Loan Application">
-                                                Loan Application
-                                            </option>
-                                            <option value="Title and Other Registration Documents">
-                                                Title and Other Registration
-                                                Documents
-                                            </option>
-                                            <option value="Commissions">
-                                                Commissions
-                                            </option>
-                                            <option value="Other Concerns">
-                                                Other Concerns
-                                            </option>
-                                        </select>
-                                        <span className="absolute inset-y-0 right-0 flex items-center  pl-3 pointer-events-none">
-                                            <IoIosArrowDown />
-                                        </span>
-                                    </div>
-                                    <div className="flex relative">
-                                        <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
-                                            {" "}
-                                            Type
-                                        </label>
-                                        <div className="flex bg-red-900 justify-start w-full relative">
-                                            <label
-                                                htmlFor=""
-                                                className="w-full border-b-2"
-                                            >
-                                                {""}
-                                            </label>
-                                            <select
-                                                className="w-full border-b-1 outline-none appearance-none text-sm absolute px-[8px]"
-                                                value={type}
-                                                onChange={(e) =>
-                                                    setType(e.target.value)
-                                                }
-                                            >
-                                                <option value="">
-                                                    Select Type
-                                                </option>
-                                                <option value="Complaint">
-                                                    Complaint
-                                                </option>
-                                                <option value="Request">
-                                                    Request
-                                                </option>
-                                                <option value="Inquiry">
-                                                    Inquiry
-                                                </option>
-                                                <option value="Suggestion or Recommendation">
-                                                    Suggestion or Recommendation
-                                                </option>
-                                                <option value="No Type">
-                                                    No Type
-                                                </option>
-                                            </select>
-                                        </div>
-
-                                        <span className="absolute inset-y-0 right-0 flex items-center  pl-3 pointer-events-none">
-                                            <IoIosArrowDown />
-                                        </span>
-                                    </div>
-                                    <div className="flex relative">
-                                        <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
-                                            {" "}
-                                            Status
-                                        </label>
-                                        <div className="flex bg-red-900 justify-start w-full relative">
-                                            <label
-                                                htmlFor=""
-                                                className="w-full border-b-2"
-                                            >
-                                                {""}
-                                            </label>
-                                            <select
-                                                className="w-full border-b-1 outline-none appearance-none text-sm absolute px-[8px]"
-                                                value={status}
-                                                onChange={(e) =>
-                                                    setStatus(e.target.value)
-                                                }
-                                            >
-                                                <option value=" ">
-                                                    Select Status
-                                                </option>
-                                                <option value="Resolved">
-                                                    Resolved
-                                                </option>
-                                                <option value="Unresolved">
-                                                    Unresolved
-                                                </option>
-                                                <option value="Closed">
-                                                    Closed
-                                                </option>
-                                            </select>
-                                        </div>
-                                        <span className="absolute inset-y-0 right-0 flex items-center  pl-3 pointer-events-none">
-                                            <IoIosArrowDown />
-                                        </span>
-                                    </div>
-                                    <div className="flex relative">
-                                        <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
-                                            {" "}
-                                            Channel
-                                        </label>
-                                        <div className="flex bg-red-900 justify-start w-full relative">
-                                            <label
-                                                htmlFor=""
-                                                className="w-full border-b-2"
-                                            >
-                                                {""}
-                                            </label>
-                                            <select
-                                                className="w-full border-b-1 outline-none appearance-none text-sm absolute px-[8px]"
-                                                value={channels}
-                                                onChange={(e) =>
-                                                    setChannels(e.target.value)
-                                                }
-                                            >
-                                                <option value=" ">
-                                                    Select Channel
-                                                </option>
-                                                <option value="Email">
-                                                    Email
-                                                </option>
-                                                <option value="Call">
-                                                    Call
-                                                </option>
-                                                <option value="Walk-in">
-                                                    Walk-in
-                                                </option>
-                                                <option value="Website">
-                                                    Website
-                                                </option>
-                                                <option value="Social media">
-                                                    Social Media
-                                                </option>
-                                                <option value="Branch Tablet">
-                                                    Branch Tablet
-                                                </option>
-                                                <option value="Internal Endorsement">
-                                                    Internal Endorsement
-                                                </option>
-                                                <option value="No Channel">
-                                                    No Channel
-                                                </option>
-                                            </select>
-                                        </div>
-                                        <span className="absolute inset-y-0 right-0 flex items-center  pl-3 pointer-events-none">
-                                            <IoIosArrowDown />
-                                        </span>
-                                    </div>
-                                    <div className="flex relative">
-                                        <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
-                                            {" "}
-                                            Department
-                                        </label>
-                                        <div className="flex bg-red-900 justify-start w-full relative">
-                                            <label
-                                                htmlFor=""
-                                                className="w-full border-b-2"
-                                            >
-                                                {""}
-                                            </label>
-                                            <select
-                                                className="w-full border-b-1 outline-none appearance-none text-sm absolute px-[8px]"
-                                                value={departments}
-                                                onChange={(e) =>
-                                                    setDepartments(e.target.value)
-                                                }
-                                            >
-                                                <option value="">
-                                                    {" "}
-                                                    Select Department
-                                                </option>
-                                                {[...new Set(allEmployees
-                                                    .map(item => item.department)
-                                                    .filter(department => department !== null && department !== undefined && department !== "NULL")
-                                                    )]
-                                                    .sort((a, b) => a.localeCompare(b))
-                                                    .map((department, index) => (
-                                                    <option key={index} value={department}>
-                                                        {department}
-                                                    </option>
-                                                ))}
-                                                <option value="Unassigned">
-                                                    Unassigned
-                                                </option>
-                                            </select>
-                                        </div>
-                                        <span className="absolute inset-y-0 right-0 flex items-center  pl-3 pointer-events-none">
-                                            <IoIosArrowDown />
-                                        </span>
-                                    </div>
-                                    <div className="flex">
-                                        <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
-                                            {" "}
-                                            Email
-                                        </label>
-                                        <input
-                                            type="text"
-                                            className="w-full  border-b-1 outline-none text-sm px-[8px]"
-                                            value={email}
-                                            onChange={(e) =>
-                                                setEmail(e.target.value)
-                                            }
-                                        />
-                                    </div>
-                                    <div className="flex">
-                                        <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
-                                            {" "}
-                                            Ticket
-                                        </label>
-                                        <input
-                                            type="text"
-                                            className="w-full  border-b-1 outline-none text-sm px-[8px]"
-                                            value={ticket}
-                                            onChange={(e) =>
-                                                setTicket(e.target.value)
-                                            }
-                                        />
-                                    </div>
-                                    <div className="flex gap-3">
-                                        <div className="flex">
-                                            <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[93px]">
-                                                Date
-                                            </label>
-                                            <div className="relative">
-                                                <DatePicker
-                                                    selected={startDate}
-                                                    onChange={handleDateChange}
-                                                    className="border-b-1 outline-none w-[146px] text-sm px-[8px]"
-                                                    calendarClassName="custom-calendar"
-                                                />
-
-                                                <img
-                                                    src={DateLogo}
-                                                    alt="date"
-                                                    className="absolute top-[45%] right-0 transform -translate-y-1/2 text-custom-bluegreen size-6 cursor-pointer pointer-events-none"
-                                                />
-                                            </div>
-                                        </div>
-                                        <div className="flex relative">
-                                            <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[65px]">
-                                                {" "}
-                                                Property
-                                            </label>
-                                            <select
-                                                className="w-[179px] border-b-1 outline-none appearance-none text-sm px-[8px]"
-                                                onChange={handleSelectProperty}
-                                                value={selectedProperty}
-                                            >
-                                                <option value="">
-                                                    Select Property
-                                                </option>
-                                                {formattedPropertyNames.map(
-                                                    (item, index) => {
-                                                        return (
-                                                            <option
-                                                                key={index}
-                                                                value={item}
-                                                            >
-                                                                {item}
-                                                            </option>
-                                                        );
-                                                    }
-                                                )}
-                                            </select>
-                                            <span className="absolute inset-y-0 right-0 flex items-center  pl-3 pointer-events-none">
-                                                <IoIosArrowDown />
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <div className="flex gap-3">
-                                        <div className="flex">
-                                            <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[94px]">
-                                                Year
-                                            </label>
-                                            <div className="relative w-[146px]">
-                                                <select
-                                                className="w-full border-b-1 outline-none appearance-none text-sm absolute px-[8px]"
-                                                value={selectedYear}
-                                                onChange={(e) =>
-                                                    setSelectedYear(e.target.value)
-                                                }
-                                            >
-                                                <option value="">
-                                                    {" "}
-                                                    Select Year
-                                                </option>
-                                                {fullYear && fullYear.map((item, index) => (
-                                                    <option key={index} value={item.year}>  {item.year}</option>
-                                                ))}
-                                            </select>
-                                            <span className="absolute inset-y-0 right-0 flex items-center  pl-3 pointer-events-none">
-                                                <IoIosArrowDown />
-                                            </span>
-                                            </div>
-                                        </div>
-                                        <div className="flex relative">
-                                            <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[65px]">
-                                                {" "}
-                                                Month
-                                            </label>
-                                            <select
-                                                className="w-[179px] border-b-1 outline-none appearance-none text-sm px-[8px]"
-                                                onChange={(e) =>
-                                                    setSelectedMonth(e.target.value)
-                                                }
-                                                value={selectedMonth}
-                                            >
-                                                <option value="">
-                                                    {" "}
-                                                    Select Month
-                                                </option>
-                                                {Object.entries(monthNames)
-                                                    .sort(([keyA], [keyB]) => keyA - keyB)
-                                                    .map(([key, name]) => (
-                                                        <option key={key} value={key}>
-                                                            {name}
-                                                        </option>
-                                                ))}
-                                            </select>
-                                            <span className="absolute inset-y-0 right-0 flex items-center  pl-3 pointer-events-none">
-                                                <IoIosArrowDown />
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <div className="mt-5 flex gap-5">
-                                        <input
-                                            type="checkbox"
-                                            checked={hasAttachments}
-                                            onChange={handleCheckboxChange}
-                                        />
-                                        <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
-                                            {" "}
-                                            Has Attachments
-                                        </label>
-                                    </div>
-                                    <div className="mt-3 flex justify-end">
-                                        <button
-                                            className="h-[37px] w-[88px] gradient-btn rounded-[10px] text-white text-sm"
-                                            onClick={handleSearch}
-                                        >
-                                            {/* Search */}
-                                            {isSearchLoading ? (
-                                                <CircularProgress className="spinnerSize" />
-                                            ) : (
-                                                <>Search</>
-                                            )}
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
+                       {isFilterVisible && (
+                                                   <div
+                                                       ref={filterBoxRef}
+                                                       className="absolute left-0 mt-12 p-8 bg-white border border-gray-300 shadow-lg rounded-lg z-10 w-[604px]"
+                                                   >
+                                                       <div className="flex flex-col gap-2">
+                                                           <div className="flex">
+                                                               <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
+                                                                   {" "}
+                                                                   Name
+                                                               </label>
+                                                               <input
+                                                                   type="text"
+                                                                   value={name}
+                                                                   onChange={(e) =>
+                                                                       setName(e.target.value)
+                                                                   }
+                                                                   className="w-full  border-b-1 outline-none text-sm px-[8px]"
+                                                               />
+                                                           </div>
+                                                           <div className="flex relative">
+                                                               <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
+                                                                   {" "}
+                                                                   Category
+                                                               </label>
+                       
+                                                               <div className="flex bg-red-900 justify-start w-full relative">
+                                                                   <label
+                                                                       htmlFor=""
+                                                                       className="w-full border-b-2"
+                                                                   >
+                                                                       {""}
+                                                                   </label>
+                                                                   <select
+                                                                       className="w-full border-b-1 outline-none appearance-none text-sm absolute px-[8px]"
+                                                                       value={category}
+                                                                       onChange={(e) =>
+                                                                           setCategory(e.target.value)
+                                                                       }
+                                                                   >
+                                                                       <option value=" ">
+                                                                           Select Category
+                                                                       </option>
+                                                                       <option value="Reservation Documents">
+                                                                           Reservation Documents
+                                                                       </option>
+                                                                       <option value="Payment Issues">
+                                                                           Payment Issues
+                                                                       </option>
+                                                                       <option value="SOA/ Buyer's Ledger">
+                                                                           SOA/ Buyer's Ledger
+                                                                       </option>
+                                                                       <option value="Turn Over Status">
+                                                                           Turn Over Status
+                                                                       </option>
+                                                                       <option value="Unit Status">
+                                                                           Unit Status
+                                                                       </option>
+                                                                       <option value="Loan Application">
+                                                                           Loan Application
+                                                                       </option>
+                                                                       <option value="Title and Other Registration Documents">
+                                                                           Title and Other Registration
+                                                                           Documents
+                                                                       </option>
+                                                                       <option value="Commissions">
+                                                                           Commissions
+                                                                       </option>
+                                                                       <option value="Other Concerns">
+                                                                           Other Concerns
+                                                                       </option>
+                                                                   </select>
+                                                               </div>
+                       
+                                                               <span className="absolute inset-y-0 right-0 flex items-center  pl-3 pointer-events-none">
+                                                                   <IoIosArrowDown />
+                                                               </span>
+                                                           </div>
+                                                           <div className="flex relative">
+                                                               <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
+                                                                   {" "}
+                                                                   Type
+                                                               </label>
+                                                               <div className="flex bg-red-900 justify-start w-full relative">
+                                                                   <label
+                                                                       htmlFor=""
+                                                                       className="w-full border-b-2"
+                                                                   >
+                                                                       {""}
+                                                                   </label>
+                                                                   <select
+                                                                       className="w-full border-b-1 outline-none appearance-none text-sm absolute px-[8px]"
+                                                                       value={type}
+                                                                       onChange={(e) =>
+                                                                           setType(e.target.value)
+                                                                       }
+                                                                   >
+                                                                       <option value="">
+                                                                           Select Type
+                                                                       </option>
+                                                                       <option value="Complaint">
+                                                                           Complaint
+                                                                       </option>
+                                                                       <option value="Request">
+                                                                           Request
+                                                                       </option>
+                                                                       <option value="Inquiry">
+                                                                           Inquiry
+                                                                       </option>
+                                                                       <option value="Suggestion or Recommendation">
+                                                                           Suggestion or Recommendation
+                                                                       </option>
+                                                                       <option value="No Type">
+                                                                           No Type
+                                                                       </option>
+                                                                   </select>
+                                                               </div>
+                       
+                                                               <span className="absolute inset-y-0 right-0 flex items-center  pl-3 pointer-events-none">
+                                                                   <IoIosArrowDown />
+                                                               </span>
+                                                           </div>
+                                                           <div className="flex relative">
+                                                               <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
+                                                                   {" "}
+                                                                   Status
+                                                               </label>
+                                                               <div className="flex bg-red-900 justify-start w-full relative">
+                                                                   <label
+                                                                       htmlFor=""
+                                                                       className="w-full border-b-2"
+                                                                   >
+                                                                       {""}
+                                                                   </label>
+                                                                   <select
+                                                                       className="w-full border-b-1 outline-none appearance-none text-sm absolute px-[8px]"
+                                                                       value={status}
+                                                                       onChange={(e) =>
+                                                                           setStatus(e.target.value)
+                                                                       }
+                                                                   >
+                                                                       <option value=" ">
+                                                                           Select Status
+                                                                       </option>
+                                                                       <option value="Resolved">
+                                                                           Resolved
+                                                                       </option>
+                                                                       <option value="unresolved">
+                                                                           Unresolved
+                                                                       </option>
+                                                                       <option value="Closed">
+                                                                           Closed
+                                                                       </option>
+                                                                   </select>
+                                                               </div>
+                       
+                                                               <span className="absolute inset-y-0 right-0 flex items-center  pl-3 pointer-events-none">
+                                                                   <IoIosArrowDown />
+                                                               </span>
+                                                           </div>
+                       
+                                                           <div className="flex relative">
+                                                               <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
+                                                                   {" "}
+                                                                   Channel
+                                                               </label>
+                                                               <div className="flex bg-red-900 justify-start w-full relative">
+                                                                   <label
+                                                                       htmlFor=""
+                                                                       className="w-full border-b-2"
+                                                                   >
+                                                                       {""}
+                                                                   </label>
+                                                                   <select
+                                                                       className="w-full border-b-1 outline-none appearance-none text-sm absolute px-[8px]"
+                                                                       value={channels}
+                                                                       onChange={(e) =>
+                                                                           setChannels(e.target.value)
+                                                                       }
+                                                                   >
+                                                                       <option value="">
+                                                                           {" "}
+                                                                           Select Channel
+                                                                       </option>
+                                                                       <option value="Email">
+                                                                           Email
+                                                                       </option>
+                                                                       <option value="Call">
+                                                                           Call
+                                                                       </option>
+                                                                       <option value="Walk in">
+                                                                           Walk-in
+                                                                       </option>
+                                                                       <option value="Website">
+                                                                           Website
+                                                                       </option>
+                                                                       <option value="Social media">
+                                                                           Social Media
+                                                                       </option>
+                                                                       <option value="Branch Tablet">
+                                                                           Branch Table
+                                                                       </option>
+                                                                       <option value="Internal Endorsement">
+                                                                           Internal Endorsement
+                                                                       </option>
+                                                                       <option value="No Channel">
+                                                                           No Channel
+                                                                       </option>
+                                                                   </select>
+                                                               </div>
+                       
+                                                               <span className="absolute inset-y-0 right-0 flex items-center  pl-3 pointer-events-none">
+                                                                   <IoIosArrowDown />
+                                                               </span>
+                                                           </div>
+                                                           <div className="flex relative">
+                                                               <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
+                                                                   {" "}
+                                                                   Department
+                                                               </label>
+                                                               <div className="flex bg-red-900 justify-start w-full relative">
+                                                                   <label
+                                                                       htmlFor=""
+                                                                       className="w-full border-b-2"
+                                                                   >
+                                                                       {""}
+                                                                   </label>
+                                                                   <select
+                                                                       className="w-full border-b-1 outline-none appearance-none text-sm absolute px-[8px]"
+                                                                       value={departments}
+                                                                       onChange={(e) =>
+                                                                           setDepartments(
+                                                                               e.target.value
+                                                                           )
+                                                                       }
+                                                                   >
+                                                                       <option value="">
+                                                                           {" "}
+                                                                           Select Department
+                                                                       </option>
+                                                                       {[
+                                                                           ...new Set(
+                                                                               allEmployees
+                                                                                   .map(
+                                                                                       (item) =>
+                                                                                           item.department
+                                                                                   )
+                                                                                   .filter(
+                                                                                       (department) =>
+                                                                                           department !==
+                                                                                           null &&
+                                                                                           department !==
+                                                                                           undefined &&
+                                                                                           department !==
+                                                                                           "NULL"
+                                                                                   )
+                                                                           ),
+                                                                       ]
+                                                                           .sort((a, b) =>
+                                                                               a.localeCompare(b)
+                                                                           )
+                                                                           .map(
+                                                                               (department, index) => (
+                                                                                   <option
+                                                                                       key={index}
+                                                                                       value={
+                                                                                           department
+                                                                                       }
+                                                                                   >
+                                                                                       {department}
+                                                                                   </option>
+                                                                               )
+                                                                           )}
+                                                                       <option value="Unassigned">
+                                                                       {" "}
+                                                                       Unassigned
+                                                                       </option>
+                                                                   </select>
+                                                               </div>
+                                                               <span className="absolute inset-y-0 right-0 flex items-center  pl-3 pointer-events-none">
+                                                                   <IoIosArrowDown />
+                                                               </span>
+                                                           </div>
+                                                           <div className="flex relative">
+                                                               <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
+                                                                   {" "}
+                                                                   Property
+                                                               </label>
+                                                               <div className="fle justify-start w-full relative">
+                                                                   <label
+                                                                       htmlFor=""
+                                                                       className="w-full border-b-2"
+                                                                   >
+                                                                       {""}
+                                                                   </label>
+                                                                   <select
+                                                                       className="w-full border-b-1 outline-none appearance-none text-sm px-[8px]"
+                                                                       onChange={handleSelectProperty}
+                                                                       value={selectedProperty}
+                                                                   >
+                                                                       <option value="">
+                                                                           Select Property
+                                                                       </option>
+                                                                       {formattedPropertyNames.map(
+                                                                           (item, index) => {
+                                                                               return (
+                                                                                   <option
+                                                                                       key={index}
+                                                                                       value={item}
+                                                                                   >
+                                                                                       {item}
+                                                                                   </option>
+                                                                               );
+                                                                           }
+                                                                       )}
+                                                                   </select>
+                                                               </div>
+                                                               <span className="absolute inset-y-0 right-0 flex items-center  pl-3 pointer-events-none">
+                                                                   <IoIosArrowDown />
+                                                               </span>
+                                                           </div>
+                                                           <div className="flex">
+                                                               <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
+                                                                   {" "}
+                                                                   Email
+                                                               </label>
+                                                               <input
+                                                                   type="text"
+                                                                   value={email}
+                                                                   onChange={(e) =>
+                                                                       setEmail(e.target.value)
+                                                                   }
+                                                                   className="w-full  border-b-1 outline-none text-sm px-[8px]"
+                                                               />
+                                                           </div>
+                                                           <div className="flex">
+                                                               <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
+                                                                   {" "}
+                                                                   Ticket
+                                                               </label>
+                                                               <input
+                                                                   type="text"
+                                                                   value={ticket}
+                                                                   onChange={(e) =>
+                                                                       setTicket(e.target.value)
+                                                                   }
+                                                                   className="w-full  border-b-1 outline-none text-sm px-[8px]"
+                                                               />
+                                                           </div>
+                                                           <div className="flex gap-3">
+                                                               <div className="flex">
+                                                                   <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[94px]">
+                                                                       Date
+                                                                   </label>
+                                                                   <div className="flex gap-[15px]">
+                                                                       <div className="flex">
+                                                                           <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-max pr-[10px]">
+                                                                               From
+                                                                           </label>
+                                                                           <div className="relative">
+                                                                               <DatePicker
+                                                                                   selected={startDate}
+                                                                                   onChange={(date) => {
+                                                                                       setStartDate(date);
+                                                                                       setSelectedYear("");
+                                                                                       setSelectedMonth("");
+                                                                                   }}
+                                                                                   onFocus={() => {
+                                                                                       setSelectedYear("");
+                                                                                       setSelectedMonth("");
+                                                                                   }}
+                                                                                   className="border-b-1 outline-none w-[180px] text-sm px-[8px]"
+                                                                                   calendarClassName="custom-calendar"
+                                                                                   
+                                                                               />
+                       
+                                                                               <img
+                                                                                   src={DateLogo}
+                                                                                   alt="date"
+                                                                                   className="absolute top-[45%] right-0 transform -translate-y-1/2 text-custom-bluegreen size-6 cursor-pointer pointer-events-none"
+                                                                               />
+                                                                           </div>
+                                                                       </div>
+                                                                       <div className="flex">
+                                                                           <label className="flex justify-end items-end text-custom-bluegreen text-[12px] w-max px-[10px]">
+                                                                               To
+                                                                           </label>
+                                                                           <div className="relative">
+                                                                               <DatePicker
+                                                                                   selected={endDate}
+                                                                                   onChange={(date) => {
+                                                                                       setEndDate(date);
+                                                                                       setSelectedYear("");
+                                                                                       setSelectedMonth("");
+                                                                                   }}
+                                                                                   onFocus={() => {
+                                                                                       setSelectedYear("");
+                                                                                       setSelectedMonth("");
+                                                                                   }}
+                                                                                   className="border-b-1 outline-none w-full text-sm px-[8px]"
+                                                                                   calendarClassName="custom-calendar"
+                                                                                   minDate={startDate}
+                                                                               />
+                       
+                                                                               <img
+                                                                                   src={DateLogo}
+                                                                                   alt="date"
+                                                                                   className="absolute top-[45%] right-0 transform -translate-y-1/2 text-custom-bluegreen size-6 cursor-pointer pointer-events-none"
+                                                                               />
+                                                                           </div>
+                                                                       </div>
+                                                                   </div>
+                                                               </div>
+                                                           </div>
+                                                           <div className="flex gap-3">
+                                                               <div className="flex">
+                                                                   <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[94px]">
+                                                                       Year
+                                                                   </label>
+                                                                   <div className="relative w-[146px]">
+                                                                       <select
+                                                                           className="w-full border-b-1 outline-none appearance-none text-sm absolute px-[8px]"
+                                                                           value={selectedYear}
+                                                                           onChange={(e) => {
+                                                                               setSelectedYear(e.target.value);
+                                                                               setStartDate(null);
+                                                                               setEndDate(null);
+                                                                           }}
+                                                                       >
+                                                                           <option value="">
+                                                                               {" "}
+                                                                               Select Year
+                                                                           </option>
+                                                                           {fullYear &&
+                                                                               fullYear.map(
+                                                                                   (item, index) => (
+                                                                                       <option
+                                                                                           key={index}
+                                                                                           value={
+                                                                                               item.year
+                                                                                           }
+                                                                                       >
+                                                                                           {" "}
+                                                                                           {item.year}
+                                                                                       </option>
+                                                                                   )
+                                                                               )}
+                                                                       </select>
+                                                                       <span className="absolute inset-y-0 right-0 flex items-center  pl-3 pointer-events-none">
+                                                                           <IoIosArrowDown />
+                                                                       </span>
+                                                                   </div>
+                                                               </div>
+                                                               <div className="flex relative ">
+                                                                   <label className="flex justify-start items-end text-custom-bluegreen text-[12px] px-[15px]">
+                                                                       {" "}
+                                                                       Month
+                                                                   </label>
+                                                                   <select
+                                                                       className="w-[220px] border-b-1 outline-none appearance-none text-sm px-[8px]"
+                                                                       onChange={(e) => {
+                                                                           setSelectedMonth(e.target.value);
+                                                                           setStartDate(null);
+                                                                           setEndDate(null);
+                                                                       }}
+                                                                       value={selectedMonth}
+                                                                   >
+                                                                       <option value="">
+                                                                           {" "}
+                                                                           Select Month
+                                                                       </option>
+                                                                       {Object.entries(monthNames)
+                                                                           .sort(
+                                                                               ([keyA], [keyB]) =>
+                                                                                   keyA - keyB
+                                                                           )
+                                                                           .map(([key, name]) => (
+                                                                               <option
+                                                                                   key={key}
+                                                                                   value={key}
+                                                                               >
+                                                                                   {name}
+                                                                               </option>
+                                                                           ))}
+                                                                   </select>
+                                                                   <span className="absolute inset-y-0 right-0 flex items-center  pl-3 pointer-events-none">
+                                                                       <IoIosArrowDown />
+                                                                   </span>
+                                                               </div>
+                                                           </div>
+                                                           <div className="mt-5 flex gap-5">
+                                                               <input
+                                                                   type="checkbox"
+                                                                   checked={hasAttachments}
+                                                                   onChange={handleCheckboxChange}
+                                                               />
+                                                               <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
+                                                                   {" "}
+                                                                   Has Attachments
+                                                               </label>
+                                                           </div>
+                                                           <div className="mt-3 flex justify-end">
+                                                               <button
+                                                                   className="h-[37px] w-[88px] gradient-btn rounded-[10px] text-white text-sm"
+                                                                   onClick={handleSearch}
+                                                               >
+                                                                   Search
+                                                               </button>
+                                                           </div>
+                                                       </div>
+                                                   </div>
+                                               )}
                     </div>
                     <div className="p-[16px] shrink-0 bg-white rounded-[10px] shadow-custom7 flex flex-col flex-grow min-h-screen">
                         {" "}

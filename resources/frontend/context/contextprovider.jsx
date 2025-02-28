@@ -110,6 +110,10 @@ export const ContextProvider = ({ children }) => {
     const [projectValue, setProjectValue] = useState("All");
     const [yearValue, setYearValue] = useState(new Date().getFullYear());
     const [monthValue, setMonthValue] = useState("All");
+    const [startDateValue, setStartDateValue] = useState(null);
+    const [endDateValue, setEndDateValue] = useState(null);
+    const [startDate, setStartDate] = useState(null);
+    const [endDate, setEndDate] = useState(null);
 
     const [customerData, setCustomerData] = useState([]);
     const [customerDetails, setCustomerDetails] = useState([]);
@@ -263,6 +267,8 @@ export const ContextProvider = ({ children }) => {
                     property: project,
                     month: month,
                     year: year,
+                    startDate: startDate,
+                    endDate: endDate,
                 },
             });
             const result = response.data;
@@ -313,6 +319,8 @@ export const ContextProvider = ({ children }) => {
                     property: project,
                     month: month,
                     year: year,
+                    startDate: startDate,
+                    endDate: endDate,
                 },
             });
             const result = response.data;
@@ -325,7 +333,7 @@ export const ContextProvider = ({ children }) => {
             );
 
             const formattedData = filteredResult.map((item) => ({
-                name: item.month.toString().padStart(2, "0"),
+                name: `${item.month.toString().padStart(2, "0")}/${item.year.toString().slice(-2)}`,
                 Resolved: item.resolved,
                 Unresolved: item.unresolved,
                 Closed: item.closed,
@@ -345,6 +353,8 @@ export const ContextProvider = ({ children }) => {
                     property: project,
                     department: department,
                     year: year,
+                    startDate: startDate,
+                    endDate: endDate,
                 },
             });
             const result = response.data;
@@ -382,7 +392,9 @@ export const ContextProvider = ({ children }) => {
                     property: project,
                     department: department,
                     year: year,
-                },
+                    startDate: startDate,
+                    endDate: endDate,
+                },  
             });
 
             const departments = response.data.departments;
@@ -427,12 +439,14 @@ export const ContextProvider = ({ children }) => {
                         property: project,
                         department: department,
                         year: year,
+                        startDate: startDate,
+                        endDate: endDate,
                     },
                 }
             );
             const result = response.data;
             const formattedData = result.reduce((acc, item) => {
-                const name = item.communication_type || "No type";
+                const name = item.communication_type || "No Type";
                 const existing = acc.find((entry) => entry.name === name);
 
                 if (existing) {
@@ -458,6 +472,8 @@ export const ContextProvider = ({ children }) => {
                     property: project,
                     department: department,
                     year: year,
+                    startDate: startDate,
+                    endDate: endDate,
                 },
             });
             const result = response.data;
@@ -1047,6 +1063,15 @@ export const ContextProvider = ({ children }) => {
                 yearValue,
                 setMonthValue,
                 monthValue,
+                startDateValue,
+                setStartDateValue,
+                endDateValue,
+                setEndDateValue,
+                startDate,
+                setStartDate,
+                endDate,
+                setEndDate
+
             }}
         >
             {children}
