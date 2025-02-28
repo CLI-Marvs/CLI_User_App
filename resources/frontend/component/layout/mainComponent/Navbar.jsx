@@ -71,7 +71,7 @@ const Navbar = () => {
             );
 
             if (value.toLowerCase() === "inquirymanagement") {
-                breadcrumbLabel = "Inquiry Management";
+                breadcrumbLabel = "Customer Relations";
                 // Non-linkable
                 return (
                     <span
@@ -148,8 +148,21 @@ const Navbar = () => {
                 );
             }
 
+            if (value.toLowerCase() === "report") {
+                breadcrumbLabel = "Reports";
+                // Non-linkable
+                return (
+                    <span
+                        key={routeTo}
+                        className="text-custom-solidgreen cursor-default"
+                    >
+                        {breadcrumbLabel}
+                    </span>
+                );
+            }
+
             if (value.toLowerCase() === "inquirylist") {
-                breadcrumbLabel = "Inquiries";
+                breadcrumbLabel = "Feedback";
             }
 
             if (value.toLowerCase() === "transactionrecords") {
@@ -157,7 +170,7 @@ const Navbar = () => {
             }
 
             if (value.toLowerCase() === "thread") {
-                breadcrumbLabel = "Inquiries";
+                breadcrumbLabel = "Feedback";
                 return (
                     <Link
                         key={routeTo}
