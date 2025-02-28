@@ -645,14 +645,20 @@ const ReportPage = () => {
         summaryParts.push('Month: All');
 
         setSearchSummary(summaryParts);
-        setDepartmentValue("");
-        setProjectValue("");
+
         setYearValue(new Date().getFullYear());
         setMonthValue("All");
-        setYear(new Date().getFullYear());
-        setMonth("All");
+        setDepartmentValue("");
+        setProjectValue("");
         setStartDateValue(null);
         setEndDateValue(null);
+
+        setYear(new Date().getFullYear());
+        setMonth("All");
+        setDepartment("");
+        setProject("");
+        setStartDate(null);
+        setEndDate(null);
     };
 
     useEffect(() => {
