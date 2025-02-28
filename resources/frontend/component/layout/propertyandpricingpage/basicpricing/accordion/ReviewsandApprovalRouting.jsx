@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { IoIosArrowDown } from "react-icons/io";
-import { IoMdArrowDropdown } from "react-icons/io";
+import { IoMdArrowDropdown, IoIosCloseCircle } from "react-icons/io";
 import { usePricing } from "@/component/layout/propertyandpricingpage/basicpricing/context/BasicPricingContext";
 import { useUnit } from "@/context/PropertyPricing/UnitContext";
 import * as XLSX from "xlsx";
 import { priceListMasterService } from "@/component/servicesApi/apiCalls/propertyPricing/priceListMaster/priceListMasterService";
 import CircularProgress from "@mui/material/CircularProgress";
+import { useStateContext } from "@/context/contextprovider";
 
 const staticHeaders = [
     "Floor",
@@ -27,6 +28,7 @@ const ReviewsandApprovalRouting = ({
     //States
 
     const { pricingData } = usePricing();
+    const { user } = useStateContext();
     const [isExcelDownloading, setIsExcelDownloading] = useState(false);
     const [exportPricingData, setExportPricingData] = useState([]);
     const { units, excelId, excelIdFromPriceList, computedUnitPrices } =
@@ -251,6 +253,22 @@ const ReviewsandApprovalRouting = ({
                                             </p>
                                         </div>
                                     </div>
+                                    <div className="flex w-full max-w-[450px]">
+                                        <h6 className="w-1/3">VERSION</h6>
+                                        <div className="border border-black  flex-1  ml-10">
+                                            <div className="relative w-full  ">
+                                                <select
+                                                    name="reviewedBy"
+                                                    className="appearance-none w-full px-5 py-1   focus:outline-none border-0"
+                                                >
+                                                    <option value="">V1</option>
+                                                </select>
+                                                <span className="absolute inset-y-0 right-0 flex text-custom-gray81 items-center  pointer-events-none">
+                                                    <IoMdArrowDropdown />
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
@@ -357,13 +375,13 @@ const ReviewsandApprovalRouting = ({
                                         <tbody className="bg-white">
                                             {units &&
                                                 units.map((unit, unitIndex) => {
-                                                      const priceData =
-                                                          computedUnitPrices.find(
-                                                              (p) =>
-                                                                  p.unit ===
-                                                                  unit.unit
-                                                          );
-                                                         
+                                                    const priceData =
+                                                        computedUnitPrices.find(
+                                                            (p) =>
+                                                                p.unit ===
+                                                                unit.unit
+                                                        );
+
                                                     return (
                                                         <tr key={unitIndex}>
                                                             {/* Map  Unit Data */}
@@ -485,52 +503,48 @@ const ReviewsandApprovalRouting = ({
                             )}
                         </div>
 
-                        <div className="flex flex-col gap-[10px] w-[429px]">
-                            <div className="flex  items-center border border-custom-grayF1 rounded-md overflow-hidden w-[375px] text-sm">
-                                <span className="text-custom-gray81 bg-custom-grayFA flex w-[80%] h-[31px] pl-3 py-1">
-                                    Prepared by
-                                </span>
-                                <input
-                                    name="preparedBy"
-                                    type="text"
-                                    className="w-full h-[31px] px-4 focus:outline-none"
-                                    placeholder=""
-                                />
-                            </div>
-                            <div className="flex items-center border border-custom-grayF1 rounded-md overflow-hidden w-[375px] text-sm">
-                                <span className="text-custom-gray81 bg-custom-grayFA flex items-center w-[80%] h-[31px] -mr-3 pl-3 py-1">
-                                    Reviewed by
-                                </span>
-                                <div className="relative w-full">
-                                    <select
-                                        name="reviewedBy"
-                                        className="appearance-none w-full px-4 py-1 bg-white focus:outline-none border-0"
-                                    >
-                                        <option value="">
-                                            Firstname M. Lastname
-                                        </option>
-                                    </select>
-                                    <span className="absolute inset-y-0 right-0 flex text-custom-gray81 items-center pr-3 pl-3 bg-custom-grayFA pointer-events-none">
-                                        <IoMdArrowDropdown />
-                                    </span>
+                        <div className="flex flex-col gap-[10px] w-full">
+                            <div className="bg-custombg3 h-[49px] rounded-md flex px-2 items-center">
+                                <div className="w-[250px]">
+                                    <p className="montserrat-medium">
+                                        Prepared by
+                                    </p>
+                                </div>
+                                <div className="w-[280px]">
+                                    {" "}
+                                    <p className="montserrat-medium">
+                                        Reviewed by
+                                    </p>
+                                </div>
+                                <div className="  w-[280px]">
+                                    {" "}
+                                    <p className="montserrat-medium">
+                                        Approved by
+                                    </p>
                                 </div>
                             </div>
-                            <div className="flex items-center border border-custom-grayF1 rounded-md overflow-hidden w-[375px] text-sm">
-                                <span className="text-custom-gray81 bg-custom-grayFA flex items-center w-[80%] h-[31px] -mr-3 pl-3 py-1">
-                                    Approved by
-                                </span>
-                                <div className="relative w-full">
-                                    <select
-                                        name="approvedBy"
-                                        className="appearance-none w-full px-4 py-1 bg-white focus:outline-none border-0"
-                                    >
-                                        <option value="">
-                                            Firstname M. Lastname
-                                        </option>
-                                    </select>
-                                    <span className="absolute inset-y-0 right-0 flex items-center text-custom-gray81 pr-3 pl-3 bg-custom-grayFA pointer-events-none">
-                                        <IoMdArrowDropdown />
-                                    </span>
+                            <div className="mt-1 bg-custombg3 h-auto rounded-md px-1 flex">
+                                <div className="w-[250px]">
+                                    <p className="montserrat-regular px-1">
+                                        {user?.firstname} {user?.lastname}
+                                    </p>
+                                </div>
+                                <div className="w-[250px]">
+                                    <div className="flex justify-between">
+                                        <p className="montserrat-regular px-1">
+                                            {user?.firstname} {user?.lastname}
+                                        </p>
+                                        <IoIosCloseCircle className="h-6 w-6 cursor-pointer  text-red-500" />
+                                    </div>
+                                    <div className="mt-2">
+                                        <button className="gradient-btn5 p-[1px] w-[75px] h-[30px] rounded-[10px]">
+                                            <div className="w-full h-full rounded-[8px] bg-white flex justify-center items-center montserrat-regular text-sm">
+                                                <p className="text-base  bg-gradient-to-r from-custom-bluegreen via-custom-solidgreen to-custom-solidgreen bg-clip-text text-transparent">
+                                                    Add +
+                                                </p>
+                                            </div>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>

@@ -206,7 +206,7 @@ export const UnitProvider = ({ children }) => {
     const updateComputedPrices = useCallback(
         (newPrices) => {
             setComputedUnitPrices(newPrices);
-            saveComputedUnitPricingData(newPrices);
+            // saveComputedUnitPricingData(newPrices);
         },
         [saveComputedUnitPricingData]
     );
