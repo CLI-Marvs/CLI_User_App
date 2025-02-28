@@ -382,3 +382,37 @@
 .custom-checkbox-permission:disabled:checked::after {
     color: #175d5f !important;  
 }
+
+.custom-checkbox:checked::after {
+  content: '';
+  width: 8px; /* Adjust width */
+  height: 8px; /* Adjust height */
+  background-color: white; /* Color of the checkmark */
+  left: 2px; /* Adjust position */
+  top: 2px; /* Adjust position */
+  transform: rotate(45deg); /* Rotate to create a checkmark */
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  height: 9px; /* Change the height for horizontal scrollbar */
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #348017; /* Customize the color */
+  border-radius: 10px; /* Rounded corners */
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background-color: #f0f0f0; /* Track background */
+}
+
+textarea {
+  resize: none;
+}
+.shrink {
+  transform: scale(0.87); /* Adjust the scale factor as needed */
+}
+
+.custom-calendar {
+  z-index: 1000 !important;
+}
