@@ -71,7 +71,9 @@ const BasicPricing = () => {
         setLastFetchedExcelId,
         setTowerPhaseId,
         setExcelIdFromPriceList,
-        excelIdFromPriceList,
+        updateComputedPrices,
+        computedUnitPrices,
+        saveComputedUnitPricingData,
     } = useUnit();
     const [accordionStates, setAccordionStates] = useState({
         priceListSettings: false,
@@ -84,7 +86,7 @@ const BasicPricing = () => {
         isReviewAndApprovalAccordionOpen,
         setIsReviewAndApprovalAccordionOpen,
     ] = useState(false);
-
+    
     //Hooks
     /**
      * Hook to update pricing data based on incoming 'data' prop.
@@ -147,7 +149,6 @@ const BasicPricing = () => {
 
             // Update the floor premiums
             if (data?.floor_premiums && data?.floor_premiums.length > 0) {
-                // console.log("Floor premiums have data 1", data?.floor_premiums);
                 const floorPremiumData = data?.floor_premiums.reduce(
                     (acc, premium) => {
                         acc[premium.floor] = {
@@ -199,81 +200,51 @@ const BasicPricing = () => {
      * It also handles setting the additionalPremiums if it's currently empty.
      */
     useEffect(() => {
-        // if (!data?.excel_id) {
-        //     console.log(
-        //         "Excel ID is null, clearing previous data",
-        //         data?.excel_id
-        //     );
-        //     setFloors([]);
-        //     setPricingData((prev) => ({
-        //         ...prev,
-        //         floorPremiums: [],
-        //         additionalPremiums: [],
-        //     }));
-        //     // if (
-        //     //     floors.length > 0 ||
-        //     //     Object.keys(pricingData.floorPremiums).length > 0
-        //     // ) {
-        //     //     setFloors([]);
-        //     //     setPricingData((prev) => ({
-        //     //         ...prev,
-        //     //         floorPremiums: [],
-        //     //         additionalPremiums: [],
-        //     //     }));
-        //     // }
-        //     // return;
-        // }
         if (
             excelId &&
             data?.excel_id &&
             data?.excel_id !== lastFetchedExcelId
         ) {
-            console.log(
-                "Fetching floors due to excel_id change",
-                data?.excel_id
-            );
-
             checkExistingUnits(data.tower_phase_id, data.excel_id);
             setLastFetchedExcelId(data?.excel_id);
-            console.log("217", units);
         }
-
-        // if ((excelId || data?.excel_id) && pricingData.additionalPremiums.length === 0) {
-        //     console.log("221", excelId, data?.excel_id);
-        //     // setPricingData((prev) => ({
-        //     //     ...prev,
-        //     //     additionalPremiums: prev.additionalPremiums.length
-        //     //         ? prev.additionalPremiums // Keep existing if not empty
-        //     //         : additionalPremiums.map((item) => ({
-        //     //               ...item,
-        //     //               id: generateBigIntId(),
-        //     //           })),
-        //     // }));
-        //     // console.log("it runs here 231")
-        //     console.log("255", additionalPremiums);
-        //     // setPricingData((prev) => ({
-        //     //     ...prev,
-        //     //     additionalPremiums: additionalPremiums.map((item) => ({
-        //     //         ...item,
-        //     //         id: generateBigIntId(),
-        //     //     })),
-        //     // }));
-        // }
+ 
         if (excelId || data?.excel_id) {
-            console.log("excelid", excelId);
             setPricingData((prev) => ({
                 ...prev,
                 additionalPremiums: prev.additionalPremiums.length
                     ? prev.additionalPremiums // Keep existing if not empty
-                    : additionalPremiums.map((item) => ({
-                          ...item,
-                          id: generateBigIntId(),
-                      })),
+                    : additionalPremiums.map((item) => {
+                          const generatedId = generateBigIntId();
+                          // Validate if the generated ID is numeric
+                          if (!isNaN(Number(generatedId))) {
+                              return {
+                                  ...item,
+                                  id: parseInt(generatedId), // Convert to integer if needed
+                              };
+                          } else {
+                              // Handle the case where the ID is not numeric
+                              console.error(
+                                  "Generated ID is not numeric:",
+                                  generatedId
+                              );
+                              return {
+                                  ...item,
+                                  id: null, // or some default value
+                              };
+                          }
+                      }),
             }));
-            console.log("pricingData", pricingData);
         }
 
-        console.log("pricingData", pricingData);
+        // Function to generate random Id
+        const generateBigIntId = () => {
+            return (
+                BigInt(Date.now()) * BigInt(1000) +
+                BigInt(Math.floor(Math.random() * 1000))
+            ).toString();
+        };
+
     }, [
         excelId,
         data?.excel_id,
@@ -294,14 +265,13 @@ const BasicPricing = () => {
         };
     }, [location]);
 
-    //COmpute the effective balcony base
+    //Compute the effective balcony base
     const computeEffectiveBalconyBase = useMemo(() => {
         const basePrice = pricingData.priceListSettings?.base_price;
         return basePrice ? basePrice * 0.5 : 0; // Compute 50%
     }, [pricingData.priceListSettings?.base_price]);
 
     //Compute the effective base price
-
     const computedEffectiveBasePrice = useMemo(() => {
         return units.map((unit) => {
             // Get Base Price
@@ -315,29 +285,32 @@ const BasicPricing = () => {
                 ? parseFloat(floorPremium.premiumCost) || 0
                 : 0;
 
-            // Get Additional Premiums for the unit
-            const additionalPremiumCost =
-                pricingData.selectedAdditionalPremiums?.reduce(
-                    (total, selected) => {
-                        if (selected.unit !== unit.unit) return total; // Skip if unit doesn't match
+            const additionalPremiumCost = [
+                ...(pricingData.selectedAdditionalPremiums || []),
+                ...(unit.additional_premium_id || []),
+            ].reduce((total, selected) => {
+                const selectedPremiumId =
+                    selected.additional_premium_id || selected; // Handle both new selected and existing
+                if (selected.unit && selected.unit !== unit.unit) return total;
 
-                        // Find all matching additional premiums
-                        const matchingPremiums =
-                            pricingData?.additionalPremiums?.filter((ap) =>
-                                selected.additional_premium_id.includes(ap.id)
-                            ) || [];
+                // Find all matching additional premiums
+                const matchingPremiums =
+                    pricingData?.additionalPremiums?.filter((ap) =>
+                        (Array.isArray(selectedPremiumId)
+                            ? selectedPremiumId
+                            : [selectedPremiumId]
+                        ).includes(ap.id)
+                    ) || [];
 
-                        // Sum up all matching premium costs
-                        const premiumTotal = matchingPremiums.reduce(
-                            (sum, premium) =>
-                                sum + (parseFloat(premium.premiumCost) || 0),
-                            0
-                        );
-
-                        return total + premiumTotal;
-                    },
+                // Sum up all matching premium costs
+                const premiumTotal = matchingPremiums.reduce(
+                    (sum, premium) =>
+                        sum + (parseFloat(premium.premiumCost) || 0),
                     0
                 );
+
+                return total + premiumTotal;
+            }, 0);
 
             // Compute Effect base price
             const effective_base_price =
@@ -346,50 +319,56 @@ const BasicPricing = () => {
             const effective_balcony_base =
                 pricingData.priceListSettings?.effective_balcony_base || 0;
 
-            // Compute List Price
-            const list_price = parseFloat(
+            // Compute List balcony_area
+            const computed_list_price_with_vat = parseFloat(
                 (
                     (unit.indoor_area || 0) * effective_base_price +
                     ((parseFloat(unit.balcony_area) || 0) +
                         (parseFloat(unit.garden_area) || 0)) *
                         effective_balcony_base
-                ).toFixed(2) // Ensure two decimal places
+                ).toFixed(2)
             );
 
-            console.log("list_price", list_price);
             //Compute transfer charge
             const transfer_charge =
-                (parseFloat(list_price.toFixed(2)) *
+                (computed_list_price_with_vat *
                     pricingData.priceListSettings?.transfer_charge) /
                 100;
 
+
             // Define VAT percentage
-            const vatRate = pricingData.priceListSettings?.vat || 12; // Default to 12%
+            const vatRate = pricingData.priceListSettings?.vat || 12;
 
             // Compute VAT (only if LP + TC is greater than 3.6M)
-            const listPricePlusTransferCharge = list_price + transfer_charge;
+            const listPricePlusTransferCharge =
+                computed_list_price_with_vat + transfer_charge;
             const vatAmount =
-                listPricePlusTransferCharge > 3600000
+                listPricePlusTransferCharge >
+                pricingData.priceListSettings?.vatable_less_price
                     ? (listPricePlusTransferCharge * vatRate) / 100
                     : 0;
 
             // Compute Total Contract Price (TCP)
             const totalContractPrice = listPricePlusTransferCharge + vatAmount;
 
-            // Debugging output
-
             return {
                 ...unit,
                 effective_base_price,
-                list_price,
-                reservation_fee:
+                computed_list_price_with_vat,
+                computed_reservation_fee:
                     pricingData?.priceListSettings?.reservation_fee,
-                transfer_charge: parseFloat(transfer_charge.toFixed(2)),
-                vatAmount: parseFloat(vatAmount.toFixed(2)), // Ensure VAT is always defined
-                totalContractPrice: parseFloat(totalContractPrice.toFixed(2)), // Final TCP
+                computed_transfer_charge: parseFloat(
+                    transfer_charge.toFixed(2)
+                ),
+                vatAmount: parseFloat(vatAmount.toFixed(2)),
+                computed_total_contract_price: parseFloat(
+                    totalContractPrice.toFixed(2)
+                ),
             };
         });
     }, [
+        pricingData,
+        units,
         pricingData.priceListSettings?.base_price,
         pricingData.floorPremiums,
         pricingData.selectedAdditionalPremiums,
@@ -404,28 +383,22 @@ const BasicPricing = () => {
                 effective_balcony_base: computeEffectiveBalconyBase,
             },
         }));
-
-        //call the computedEffectiveBasePrice
-
-        // setUnits(computedEffectiveBasePrice);
     }, [computeEffectiveBalconyBase]);
 
     useEffect(() => {
         if (units.length > 0) {
-            setUnits(computedEffectiveBasePrice);
-            console.log("units", units);
+            // //setUnits(computedEffectiveBasePrice);
+            // console.log("units", units);
+            // console.log(
+            //     "computedEffectiveBasePrice",
+            //     computedEffectiveBasePrice
+            // );
+            // console.log("[pricingData]", pricingData);
+            updateComputedPrices(computedEffectiveBasePrice);
         }
-    }, [computedEffectiveBasePrice]);
+    }, [computedEffectiveBasePrice, updateComputedPrices]);
 
     //Event handler
-    //Function to generate random Id
-    const generateBigIntId = () => {
-        return (
-            BigInt(Date.now()) * BigInt(1000) +
-            BigInt(Math.floor(Math.random() * 1000))
-        ).toString();
-    };
-
     // Function to toggle a specific accordion
     const toggleAccordion = (name) => {
         setAccordionStates((prev) => ({
@@ -595,6 +568,9 @@ const BasicPricing = () => {
                     await priceListMasterService.updatePriceListMasters(
                         payload
                     );
+                if (units.length > 0) {
+                    await saveComputedUnitPricingData(computedUnitPrices);
+                }
                 console.log("response", response);
                 if (response?.status === 201 || response?.status === 200) {
                     showToast(
@@ -647,6 +623,9 @@ const BasicPricing = () => {
                 const response =
                     await priceListMasterService.storePriceListMasters(payload);
                 console.log("response 235", response);
+                if (units.length > 0) {
+                    await saveComputedUnitPricingData(computedUnitPrices);
+                }
                 if (response?.status === 201 || response?.status === 200) {
                     showToast(
                         response?.data?.message || "Data added successfully",

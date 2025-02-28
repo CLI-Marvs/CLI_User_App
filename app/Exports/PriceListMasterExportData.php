@@ -34,7 +34,7 @@ class PriceListMasterExportData implements FromArray, WithHeadings, WithStyles, 
         $this->units = $units;
         $this->priceVersions = $priceVersions;
         $this->priceBasicDetails = $priceBasicDetails;
-        //  dd($this->priceBasicDetails);
+    //    dd($this->units);
     }
 
     /**

@@ -113,7 +113,8 @@ class UnitRepository
      * Store unit details from the system
      */
     public function storeUnitDetails(array $data)
-    {
+    {  
+       
         $units = $this->model->create(array_merge(
             $data,
             ['status' => 'Active']

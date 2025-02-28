@@ -75,4 +75,25 @@ export const unitService = {
             throw error;
         }
     },
+
+    //Function to save the computed unit pricing data to the database
+    saveComputedUnitPricingData: async (payload) => {
+        try {
+          
+            const response = await apiService.post(
+                "units/save-computed-pricing-data",
+                payload,
+                {
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                }
+            );
+        
+            return response;
+        } catch (error) {
+            console.error("Error saving pricing data:", error);
+            throw error;
+        }
+    },
 };

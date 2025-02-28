@@ -14,6 +14,7 @@ const staticHeaders = [
     "Type",
     "Indoor Area",
     "Balcony Area",
+    "Garden Area",
     "Total Area",
 ];
 
@@ -28,7 +29,8 @@ const ReviewsandApprovalRouting = ({
     const { pricingData } = usePricing();
     const [isExcelDownloading, setIsExcelDownloading] = useState(false);
     const [exportPricingData, setExportPricingData] = useState([]);
-    const { units, excelId, excelIdFromPriceList } = useUnit();
+    const { units, excelId, excelIdFromPriceList, computedUnitPrices } =
+        useUnit();
     const [priceVersions, setPriceVersions] = useState([]);
     const [subHeaders, setSubHeaders] = useState([]);
     const headers = [
@@ -46,8 +48,9 @@ const ReviewsandApprovalRouting = ({
      * This hooks, map the price_versions from propertyData to subHeaders and priceVersions
      */
     useEffect(() => {
+        console.log("computedUnitPrices", computedUnitPrices);
         if (propertyData?.price_versions) {
-            console.log("propertyData", propertyData);
+            // console.log("propertyData", propertyData);
             const versionNames = propertyData.price_versions
                 .map((item) => item.version_name)
                 .filter(Boolean);
@@ -218,7 +221,7 @@ const ReviewsandApprovalRouting = ({
                                 </p>
                             )}
                         </div>
-                        <div className="  h-[400px] overflow-auto">
+                        <div className="h-[400px] overflow-auto">
                             <div className="">
                                 <h1 className="montserrat-semibold">
                                     VERTICAL INVENTORY PRICING TEMPLATE
@@ -354,48 +357,69 @@ const ReviewsandApprovalRouting = ({
 
                                         <tbody className="bg-white">
                                             {units &&
-                                                units.map((unit, unitIndex) => (
-                                                    <tr key={unitIndex}>
-                                                        {/* Map  Unit Data */}
-                                                        <td className="px-2 border-black border">
-                                                            {unit.floor}
-                                                        </td>
-                                                        <td className="px-2 border-black border">
-                                                            {unit.room_number}
-                                                        </td>
-                                                        <td className="px-2 border-black border">
-                                                            {unit.unit}
-                                                        </td>
-                                                        <td className="px-2 border-black border">
-                                                            {unit.type}
-                                                        </td>
-                                                        <td className="px-2 border-black border">
-                                                            {unit.indoor_area}
-                                                        </td>
-                                                        <td className="px-2 border-black border">
-                                                            {unit.balcony_area}
-                                                        </td>
-                                                        <td className="px-2 border-black border">
-                                                            {unit.total_area}
-                                                        </td>
-                                                        <td className="px-2 border-black border">
-                                                            {unit?.list_price &&
-                                                                unit?.list_price.toLocaleString()}
-                                                        </td>
-                                                        <td className="px-2 border-black border">
-                                                            {unit?.transfer_charge &&
-                                                                unit?.transfer_charge.toLocaleString()}
-                                                        </td>
-                                                        <td className="px-2 border-black border">
-                                                            {unit?.reservation_fee &&
-                                                                unit?.reservation_fee.toLocaleString()}
-                                                        </td>{" "}
-                                                        <td className="px-2 border-black border">
-                                                            {unit?.totalContractPrice &&
-                                                                unit?.totalContractPrice.toLocaleString()}
-                                                        </td>
-                                                        {/* Map Dynamic Price Versions */}
-                                                        {/* {priceVersions.map(
+                                                units.map((unit, unitIndex) => {
+                                                      const priceData =
+                                                          computedUnitPrices.find(
+                                                              (p) =>
+                                                                  p.unit ===
+                                                                  unit.unit
+                                                          );
+                                                         
+                                                    return (
+                                                        <tr key={unitIndex}>
+                                                            {/* Map  Unit Data */}
+                                                            <td className="px-2 border-black border">
+                                                                {unit.floor}
+                                                            </td>
+                                                            <td className="px-2 border-black border">
+                                                                {
+                                                                    unit.room_number
+                                                                }
+                                                            </td>
+                                                            <td className="px-2 border-black border">
+                                                                {unit.unit}
+                                                            </td>
+                                                            <td className="px-2 border-black border">
+                                                                {unit.type}
+                                                            </td>
+                                                            <td className="px-2 border-black border">
+                                                                {
+                                                                    unit.indoor_area
+                                                                }
+                                                            </td>
+                                                            <td className="px-2 border-black border">
+                                                                {
+                                                                    unit.balcony_area
+                                                                }
+                                                            </td>
+                                                            <td className="px-2 border-black border">
+                                                                {
+                                                                    unit.garden_area
+                                                                }
+                                                            </td>
+                                                            <td className="px-2 border-black border">
+                                                                {
+                                                                    unit.total_area
+                                                                }
+                                                            </td>
+                                                            <td className="px-2 border-black border">
+                                                                {priceData?.computed_list_price_with_vat &&
+                                                                    priceData?.computed_list_price_with_vat.toLocaleString()}
+                                                            </td>
+                                                            <td className="px-2 border-black border">
+                                                                {priceData?.computed_transfer_charge &&
+                                                                    priceData?.computed_transfer_charge.toLocaleString()}
+                                                            </td>
+                                                            <td className="px-2 border-black border">
+                                                                {priceData?.computed_reservation_fee &&
+                                                                    priceData?.computed_reservation_fee.toLocaleString()}
+                                                            </td>{" "}
+                                                            <td className="px-2 border-black border">
+                                                                {priceData?.computed_total_contract_price &&
+                                                                    priceData?.computed_total_contract_price.toLocaleString()}
+                                                            </td>
+                                                            {/* Map Dynamic Price Versions */}
+                                                            {/* {priceVersions.map(
                                                             (
                                                                 version,
                                                                 versionIndex
@@ -411,7 +435,7 @@ const ReviewsandApprovalRouting = ({
                                                                 </td>
                                                             )
                                                         )} */}
-                                                        {/* {pricingData &&
+                                                            {/* {pricingData &&
                                                             Object.keys(
                                                                 pricingData?.priceListSettings
                                                             ).length > 0 &&
@@ -453,8 +477,9 @@ const ReviewsandApprovalRouting = ({
                                                                         );
                                                                     }
                                                                 )} */}
-                                                    </tr>
-                                                ))}
+                                                        </tr>
+                                                    );
+                                                })}
                                         </tbody>
                                     </table>
                                 </div>

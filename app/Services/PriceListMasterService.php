@@ -66,7 +66,7 @@ class PriceListMasterService
     //TODO: refactor this and apply SOC
     public function update(array $data)
     {
-
+        // dd($data);
         DB::beginTransaction();
         try {
             $priceListMaster = $this->model->where('id', $data['price_list_master_id'])->first();
@@ -75,37 +75,13 @@ class PriceListMasterService
                 throw new \Exception("PriceListMaster not found for tower_phase_id: 
                     {$data['tower_phase_id']}");
             }
-
-            //Update the price basic detail
-            // $currentPriceBasicDetailId = $priceListMaster->pricebasic_details_id;
-            // if ($currentPriceBasicDetailId) {
-            //     // For update, we need to use the relationship and then update
-            //     $priceBasicDetail = $priceListMaster->priceBasicDetail;
-            //     $priceBasicDetail->update([
-            //         'base_price' => $data['priceListPayload']['base_price'],
-            //         'transfer_charge' => $data['priceListPayload']['transfer_charge'],
-            //         'effective_balcony_base' => $data['priceListPayload']['effective_balcony_base'],
-            //         'vat' => $data['priceListPayload']['vat'],
-            //         'vatable_less_price' => $data['priceListPayload']['vatable_less_price'],
-            //         'reservation_fee' => $data['priceListPayload']['reservation_fee'],
-            //     ]);
-            // } else {
-            //     // For create, we can use the relationship directly
-            //     $priceBasicDetail = $priceListMaster->priceBasicDetail()->create([
-            //         'base_price' => $data['priceListPayload']['base_price'],
-            //         'transfer_charge' => $data['priceListPayload']['transfer_charge'],
-            //         'effective_balcony_base' => $data['priceListPayload']['effective_balcony_base'],
-            //         'vat' => $data['priceListPayload']['vat'],
-            //         'vatable_less_price' => $data['priceListPayload']['vatable_less_price'],
-            //         'reservation_fee' => $data['priceListPayload']['reservation_fee'],
-            //     ]);
-            // }
+            //Update the price list settings
             $currentPriceBasicDetailId = $priceListMaster->pricebasic_details_id;
             $priceBasicDetail = $this->updatePriceBasicDetails($currentPriceBasicDetailId, $data, $priceListMaster);
 
             // Fetch the current price version IDs in the PriceListMaster table
             $currentPriceVersionIds = json_decode($priceListMaster->price_versions_id, true) ?? [];
-           
+
             if (!empty($data['priceVersionsPayload']) && is_array($data['priceVersionsPayload'])) {
                 $newPriceVersionIds = []; // Track new/updated versions
 
@@ -153,11 +129,12 @@ class PriceListMasterService
                             'status' => $priceVersionData['status'],
                             'payment_scheme_id' => json_encode(array_column($priceVersionData['payment_scheme'], 'id')),
                             'tower_phase_name' => $data['tower_phase_id'],
-                            'price_list_masters_id' => $data['price_list_master_id'],'priority_number' => $priceVersionData['priority_number'],
+                            'price_list_masters_id' => $data['price_list_master_id'],
+                            'priority_number' => $priceVersionData['priority_number'],
 
                             // 'property_masters_id' => $data['property_masters_id'],
                         ]);
-                       
+
                         $newPriceVersionIds[] = $newPriceVersion->id;
                     }
                 }
@@ -281,7 +258,7 @@ class PriceListMasterService
             if (!empty($data['selectedAdditionalPremiumsPayload']) && is_array($data['selectedAdditionalPremiumsPayload'])) {
                 foreach ($data['selectedAdditionalPremiumsPayload'] as $additionalPremium) {
                     $unitId = (int) $additionalPremium['unit_id'] ?? null;
-                    $additionalPremiumId = $additionalPremium['additional_premium_id'] ?? null;
+                    $additionalPremiumId =   $additionalPremium['additional_premium_id'] ?? null;
 
                     if (!$unitId || $additionalPremiumId === null) {
                         continue; // Skip if unit_id or additional_premium_id is missing
@@ -293,7 +270,7 @@ class PriceListMasterService
                         // If the unit does not exist, insert a new one with the selected additional premium(s)
                         $this->unitModel->insert([
                             'id' => $unitId,
-                            'additional_premium_id' => json_encode($additionalPremiumId), // Store the selected premium(s)
+                            'additional_premium_id' => json_encode([$additionalPremiumId]), // Store the selected premium(s)
                         ]);
 
                         return; // Exit since  already inserted
@@ -307,21 +284,6 @@ class PriceListMasterService
                         $unitIds = []; // Default to empty array if json_decode fails
                     }
 
-
-                    // Ensure `$additionalPremiumId` is always an array
-                    // if (!is_array($additionalPremiumId)) {
-                    //     $additionalPremiumId = [$additionalPremiumId]; // Convert single value to array
-                    // }
-
-                    // Check if the premium was **unchecked** (i.e., removed)
-                    // if (empty($additionalPremiumId)) {
-                    //     $unitIds = []; // If no premiums remain, clear the array
-                    // } else {
-                    //     // If the premium was unchecked, remove it
-                    //     $unitIds = array_values(array_intersect($unitIds, $additionalPremiumId));
-                    // }
-                    // $unitIds = array_values(array_intersect($unitIds, $additionalPremiumId));
-                    // Ensure $additionalPremiumId is always an array
                     $additionalPremiumId = is_array($additionalPremiumId) ? $additionalPremiumId : [$additionalPremiumId];
 
                     // Update the additional_premium_id list by replacing the old with the new

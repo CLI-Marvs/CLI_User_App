@@ -192,7 +192,10 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/tower/{towerPhaseId}/floor/{selectedFloor}/units/{excelId}', [UnitController::class, 'getUnits']);
         //Store  unit  details from the system
         Route::post('/store-unit', [UnitController::class, 'storeUnit']);
+        //Save the computed unit pricing data
+        Route::post('/save-computed-pricing-data', [UnitController::class, 'saveComputedUnitPricingData']); 
     });
+    
 
     /* Price Versioning */
     Route::prefix('/price-version')->group(function () {

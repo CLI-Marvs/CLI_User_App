@@ -68,8 +68,10 @@ const FloorPremiumAddUnitModal = ({
                 total_area: parseFloat(formData.totalArea).toFixed(2),
                 tower_phase_id: towerPhaseId,
                 excel_id: excelId || excelIdFromPriceList,
+                property_masters_id: propertyData?.property_commercial_detail?.property_master_id,
                 price_list_master_id: propertyData?.price_list_master_id,
             };
+            console.log("payload", payload);
             setIsLoading(true);
             const response = await unitService.storeUnitDetails(payload);
             if (response?.status === 201) {

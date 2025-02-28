@@ -15,6 +15,7 @@ use App\Http\Controllers\Controller;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Http\Requests\StoreUnitRequest;
 use Google\Cloud\Storage\StorageClient;
+use App\Http\Requests\UpdateStoreRequest;
 
 class UnitController extends Controller
 {
@@ -148,4 +149,22 @@ class UnitController extends Controller
             ], 422);
         }
     }
+
+    //Save the computed unit pricing data
+    public function saveComputedUnitPricingData(UpdateStoreRequest $request)
+    {
+        try {
+            $validatedData = $request->validated();
+            $result = $this->service->saveComputedUnitPricingData($validatedData);
+            return response()->json([
+                'message' => $result['message'],
+            ], 201);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Validation failed',
+                'messages' => $e->getMessage(),
+            ], 422);
+        }
+    }
+
 }
