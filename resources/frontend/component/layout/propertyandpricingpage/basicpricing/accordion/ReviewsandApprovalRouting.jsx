@@ -118,12 +118,11 @@ const ReviewsandApprovalRouting = ({
         setExportPricingData((prev) => ({
             ...prev,
             ...pricingData,
-            units: units,
+            units: computedUnitPrices, //Passed the computed unit price list
         }));
     }, [propertyData, units]);
 
     //Event handlers
-
     const handleDownloadExcel = async () => {
         try {
             const payload = {

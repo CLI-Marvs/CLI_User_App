@@ -34,7 +34,6 @@ class PriceListMasterExportData implements FromArray, WithHeadings, WithStyles, 
         $this->units = $units;
         $this->priceVersions = $priceVersions;
         $this->priceBasicDetails = $priceBasicDetails;
-    //    dd($this->units);
     }
 
     /**
@@ -51,7 +50,7 @@ class PriceListMasterExportData implements FromArray, WithHeadings, WithStyles, 
         $unitHeaders = ["Floor", "Room No.", "Unit", "Type", "Indoor Area", "Balcony Area", "Total Area"];
 
         // Pricing subheaders
-        $pricingHeaders = ["List price (w/ VAT)", "Transfer Charge", "Reservation Fee"];
+        $pricingHeaders = ["List price (w/ VAT)", "Transfer Charge", "Reservation Fee", "Total Contract Price"];
 
         // Check if versions exist
         $hasVersions = !empty($this->priceVersions);
@@ -62,25 +61,25 @@ class PriceListMasterExportData implements FromArray, WithHeadings, WithStyles, 
             $this->priceBasicDetails['base_price'] !== 0;
 
         // Check if payment schemes exist in versions
-        $hasPaymentSchemes = false;
+        // $hasPaymentSchemes = false;
         $paymentSchemeColumns = [];
 
         // Find all unique payment schemes across all versions
-        if ($hasVersions) {
-            $allPaymentSchemes = [];
-            foreach ($this->priceVersions as $version) {
-                if (isset($version['payment_scheme']) && !empty($version['payment_scheme'])) {
-                    $hasPaymentSchemes = true;
-                    foreach ($version['payment_scheme'] as $scheme) {
-                        if (!isset($allPaymentSchemes[$scheme['id']])) {
-                            $allPaymentSchemes[$scheme['id']] = $scheme['payment_scheme_name'];
-                        }
-                    }
-                }
-            }
-            // Convert to indexed array for column headers
-            $paymentSchemeColumns = $allPaymentSchemes;
-        }
+        // if ($hasVersions) {
+        //     $allPaymentSchemes = [];
+        //     foreach ($this->priceVersions as $version) {
+        //         if (isset($version['payment_scheme']) && !empty($version['payment_scheme'])) {
+        //             $hasPaymentSchemes = true;
+        //             foreach ($version['payment_scheme'] as $scheme) {
+        //                 if (!isset($allPaymentSchemes[$scheme['id']])) {
+        //                     $allPaymentSchemes[$scheme['id']] = $scheme['payment_scheme_name'];
+        //                 }
+        //             }
+        //         }
+        //     }
+        //     // Convert to indexed array for column headers
+        //     $paymentSchemeColumns = $allPaymentSchemes;
+        // }
 
         // Calculate total columns
         $totalColumns = count($unitHeaders);
@@ -90,10 +89,10 @@ class PriceListMasterExportData implements FromArray, WithHeadings, WithStyles, 
         if ($hasPricing) {
             $totalColumns += count($pricingHeaders);
         }
-        if ($hasPaymentSchemes) {
-            $totalColumns += count($paymentSchemeColumns);
-        }
-        
+        // if ($hasPaymentSchemes) {
+        //     $totalColumns += count($paymentSchemeColumns);
+        // }
+
         // Create main header row (Row 6)
         $headerRow = array_fill(0, $totalColumns, "");
 
@@ -103,10 +102,10 @@ class PriceListMasterExportData implements FromArray, WithHeadings, WithStyles, 
         $currentCol = count($unitHeaders);
 
         // Add VERSION header
-        if ($hasVersions) {
-            $headerRow[$currentCol] = "VERSION";
-            $currentCol += count($this->priceVersions);
-        }
+        // if ($hasVersions) {
+        //     $headerRow[$currentCol] = "VERSION";
+        //     $currentCol += count($this->priceVersions);
+        // }
 
         // Add PRICING header
         if ($hasPricing) {
@@ -115,9 +114,9 @@ class PriceListMasterExportData implements FromArray, WithHeadings, WithStyles, 
         }
 
         // Add PAYMENT SCHEME header
-        if ($hasPaymentSchemes) {
-            $headerRow[$currentCol] = "PAYMENT SCHEME";
-        }
+        // if ($hasPaymentSchemes) {
+        //     $headerRow[$currentCol] = "PAYMENT SCHEME";
+        // }
 
         // Create subheader row (Row 7)
         $subHeaderRow = array_fill(0, $totalColumns, "");
@@ -128,46 +127,46 @@ class PriceListMasterExportData implements FromArray, WithHeadings, WithStyles, 
         }
 
         // Add version names
-        if ($hasVersions) {
-            $versionStartCol = count($unitHeaders);
-            foreach ($this->priceVersions as $index => $version) {
-                $subHeaderRow[$versionStartCol + $index] = $version['name'];
-            }
-        }
+        // if ($hasVersions) {
+        //     $versionStartCol = count($unitHeaders);
+        //     foreach ($this->priceVersions as $index => $version) {
+        //         $subHeaderRow[$versionStartCol + $index] = $version['name'];
+        //     }
+        // }
 
         // Add pricing subheaders
         if ($hasPricing) {
             $pricingStartCol = count($unitHeaders);
-            if ($hasVersions) {
-                $pricingStartCol += count($this->priceVersions);
-            }
+            // if ($hasVersions) {
+            //     $pricingStartCol += count($this->priceVersions);
+            // }
             foreach ($pricingHeaders as $index => $header) {
                 $subHeaderRow[$pricingStartCol + $index] = $header;
             }
         }
 
         // Add payment scheme subheaders
-        if ($hasPaymentSchemes) {
-            $paymentSchemeStartCol = count($unitHeaders);
-            if ($hasVersions) {
-                $paymentSchemeStartCol += count($this->priceVersions);
-            }
-            if ($hasPricing) {
-                $paymentSchemeStartCol += count($pricingHeaders);
-            }
-            foreach ($paymentSchemeColumns as $index => $schemeName) {
-                $subHeaderRow[$paymentSchemeStartCol + $index] = $schemeName;
-            }
-        }
+        // if ($hasPaymentSchemes) {
+        //     $paymentSchemeStartCol = count($unitHeaders);
+        //     // if ($hasVersions) {
+        //     //     $paymentSchemeStartCol += count($this->priceVersions);
+        //     // }
+        //     if ($hasPricing) {
+        //         $paymentSchemeStartCol += count($pricingHeaders);
+        //     }
+        //     // foreach ($paymentSchemeColumns as $index => $schemeName) {
+        //     //     $subHeaderRow[$paymentSchemeStartCol + $index] = $schemeName;
+        //     // }
+        // }
 
         // Create version details row (Row 8)
-        $versionDetailsRow = array_fill(0, $totalColumns, "");
-        if ($hasVersions) {
-            $versionStartCol = count($unitHeaders);
-            foreach ($this->priceVersions as $index => $version) {
-                $versionDetailsRow[$versionStartCol + $index] = $version['percent_increase'] . "%";
-            }
-        }
+        // $versionDetailsRow = array_fill(0, $totalColumns, "");
+        // if ($hasVersions) {
+        //     $versionStartCol = count($unitHeaders);
+        //     foreach ($this->priceVersions as $index => $version) {
+        //         $versionDetailsRow[$versionStartCol + $index] = $version['percent_increase'] . "%";
+        //     }
+        // }
 
         $data = [
             ['VERTICAL INVENTORY PRICING TEMPLATE'],
@@ -177,7 +176,7 @@ class PriceListMasterExportData implements FromArray, WithHeadings, WithStyles, 
             [], // Empty row
             $headerRow,
             $subHeaderRow,
-            $versionDetailsRow,
+            // $versionDetailsRow,
         ];
 
         // Add unit data starting from row 9
@@ -190,44 +189,48 @@ class PriceListMasterExportData implements FromArray, WithHeadings, WithStyles, 
                 $unit['indoor_area'],
                 $unit['balcony_area'],
                 $unit['total_area'],
+                number_format($unit['computed_list_price_with_vat'], 2),
+                number_format($unit['computed_transfer_charge'], 2),
+                number_format($unit['computed_reservation_fee'], 2),
+                number_format($unit['computed_total_contract_price'], 2),
             ];
 
             // Add version data
-            if ($hasVersions) {
-                foreach ($this->priceVersions as $version) {
-                    $row[] = ($version['no_of_allowed_buyers'] ?? "-");
-                }
-            }
+            // if ($hasVersions) {
+            //     foreach ($this->priceVersions as $version) {
+            //         $row[] = ($version['no_of_allowed_buyers'] ?? "-");
+            //     }
+            // }
 
             // Add pricing data
-            if ($hasPricing) {
-                $row[] = number_format($this->priceBasicDetails['vatable_less_price'], 2);
-                $row[] = $this->priceBasicDetails['transfer_charge'];
-                $row[] = number_format($this->priceBasicDetails['reservation_fee'], 2);
-            }
+            // if ($hasPricing) {
+            //     $row[] = number_format($this->priceBasicDetails['vatable_less_price'], 2);
+            //     $row[] = $this->priceBasicDetails['transfer_charge'];
+            //     $row[] = number_format($this->priceBasicDetails['reservation_fee'], 2);
+            // }
 
             // Add payment scheme availability indicators
-            if ($hasPaymentSchemes) {
-                // Initialize all schemes as unavailable
-                $availableSchemes = array_fill(0, count($paymentSchemeColumns), "No");
+            // if ($hasPaymentSchemes) {
+            //     // Initialize all schemes as unavailable
+            //     $availableSchemes = array_fill(0, count($paymentSchemeColumns), "No");
 
-                // Mark schemes as available based on version data
-                foreach ($this->priceVersions as $version) {
-                    if (isset($version['payment_scheme']) && !empty($version['payment_scheme'])) {
-                        foreach ($version['payment_scheme'] as $scheme) {
-                            $schemeIndex = array_search($scheme['payment_scheme_name'], $paymentSchemeColumns);
-                            if ($schemeIndex !== false) {
-                                $availableSchemes[$schemeIndex] = "Yes";
-                            }
-                        }
-                    }
-                }
+            //     // Mark schemes as available based on version data
+            //     // foreach ($this->priceVersions as $version) {
+            //     //     if (isset($version['payment_scheme']) && !empty($version['payment_scheme'])) {
+            //     //         foreach ($version['payment_scheme'] as $scheme) {
+            //     //             $schemeIndex = array_search($scheme['payment_scheme_name'], $paymentSchemeColumns);
+            //     //             if ($schemeIndex !== false) {
+            //     //                 $availableSchemes[$schemeIndex] = "Yes";
+            //     //             }
+            //     //         }
+            //     //     }
+            //     // }
 
-                // Add availability indicators to the row
-                foreach ($availableSchemes as $available) {
-                    $row[] = $available;
-                }
-            }
+            //     // Add availability indicators to the row
+            //     foreach ($availableSchemes as $available) {
+            //         $row[] = $available;
+            //     }
+            // }
 
             $data[] = $row;
         }
@@ -257,15 +260,15 @@ class PriceListMasterExportData implements FromArray, WithHeadings, WithStyles, 
         $lastBaseCol = chr(65 + 6); // G for base columns
         $currentCol = 10; // Start after base columns
 
-        $hasVersions = !empty($this->priceVersions);
+        // $hasVersions = !empty($this->priceVersions);
         $hasPricing = isset($this->priceBasicDetails['base_price']) &&
             $this->priceBasicDetails['base_price'] !== 0;
 
         // Calculate version columns if they exist
-        $versionStartCol = $hasVersions ? chr(65 + $currentCol) : null;
-        if ($hasVersions) {
-            $currentCol += count($this->priceVersions);
-        }
+        // $versionStartCol = $hasVersions ? chr(65 + $currentCol) : null;
+        // if ($hasVersions) {
+        //     $currentCol += count($this->priceVersions);
+        // }
 
         // Calculate pricing column if it exists
         $pricingCol = $hasPricing ? chr(65 + $currentCol) : null;
@@ -295,7 +298,7 @@ class PriceListMasterExportData implements FromArray, WithHeadings, WithStyles, 
                     'vertical' => Alignment::VERTICAL_CENTER
                 ],
             ],
-            "A5:{$pricingCol}5" => [
+            "A5:{$lastCol}5" => [
                 'font' => ['bold' => true, 'size' => 12, 'color' => ['rgb' => 'FFFFFF']],
                 'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '31498A']],
                 'alignment' => [
@@ -307,12 +310,19 @@ class PriceListMasterExportData implements FromArray, WithHeadings, WithStyles, 
             "A6:{$lastCol}6" => [
                 'font' => ['bold' => true],
                 'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'AEBEE3']],
-                'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
+                'alignment' => [
+                    'horizontal' => Alignment::HORIZONTAL_CENTER,
+                    'vertical' => Alignment::VERTICAL_CENTER
+                ],
             ],
+
             "A6:{$pricingCol}6" => [
                 'font' => ['bold' => true],
                 'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'AEBEE3']],
-                'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
+                'alignment' => [
+                    'horizontal' => Alignment::HORIZONTAL_CENTER,
+                    'vertical' => Alignment::VERTICAL_CENTER
+                ],
             ],
 
             // Ensure Row 7 (Version Details) is center-aligned
@@ -326,13 +336,13 @@ class PriceListMasterExportData implements FromArray, WithHeadings, WithStyles, 
         ];
 
         // Add version column styles if they exist
-        if ($hasVersions && $versionStartCol) {
-            $styles["{$versionStartCol}7:{$lastCol}7"] = [
-                'font' => ['bold' => true],
-                'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
-                'vertical' => Alignment::VERTICAL_CENTER
-            ];
-        }
+        // if ($hasVersions && $versionStartCol) {
+        //     $styles["{$versionStartCol}7:{$lastCol}7"] = [
+        //         'font' => ['bold' => true],
+        //         'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
+        //         'vertical' => Alignment::VERTICAL_CENTER
+        //     ];
+        // }
 
         // Add data alignment styles
         $styles["A8:{$lastBaseCol}1000"] = [
@@ -349,14 +359,14 @@ class PriceListMasterExportData implements FromArray, WithHeadings, WithStyles, 
             ],
         ];
 
-        if ($hasVersions || $hasPricing) {
-            $styles["{$lastBaseCol}8:{$lastCol}1000"] = [
-                'alignment' => [
-                    'horizontal' => Alignment::HORIZONTAL_CENTER,
-                    'vertical' => Alignment::VERTICAL_CENTER
-                ],
-            ];
-        }
+        // if ($hasVersions || $hasPricing) {
+        //     $styles["{$lastBaseCol}8:{$lastCol}1000"] = [
+        //         'alignment' => [
+        //             'horizontal' => Alignment::HORIZONTAL_CENTER,
+        //             'vertical' => Alignment::VERTICAL_CENTER
+        //         ],
+        //     ];
+        // }
 
         return $styles;
     }
@@ -442,6 +452,9 @@ class PriceListMasterExportData implements FromArray, WithHeadings, WithStyles, 
             'E' => 15,
             'F' => 15,
             'G' => 15,
+            'H' => 20,
+            'I' => 20,
+            'K' => 20,
             'L' => 20,
             'M' => 15,
             'N' => 15,
