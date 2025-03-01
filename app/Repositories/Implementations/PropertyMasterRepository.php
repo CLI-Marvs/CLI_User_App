@@ -50,7 +50,6 @@ class PropertyMasterRepository
             $towerPhase->priceListMasters()->create([
                 'tower_phase_id' => $towerPhase->id,
                 'status' => $data['status'],
-                'emp_id' => $data['emp_id'],
             ]);
 
             DB::commit();

@@ -203,7 +203,7 @@ export const UnitProvider = ({ children }) => {
     );
 
     // Update computed prices and trigger save
-    const updateComputedPrices = useCallback(
+    const updateUnitComputedPrices = useCallback(
         (newPrices) => {
             setComputedUnitPrices(newPrices);
             // saveComputedUnitPricingData(newPrices);
@@ -237,7 +237,7 @@ export const UnitProvider = ({ children }) => {
         setExcelIdFromPriceList,
         setExcelId,
         setUnits,
-        updateComputedPrices,
+        updateUnitComputedPrices,
         computedUnitPrices,
         saveComputedUnitPricingData,
     };

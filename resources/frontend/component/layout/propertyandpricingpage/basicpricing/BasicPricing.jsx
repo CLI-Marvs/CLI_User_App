@@ -71,7 +71,7 @@ const BasicPricing = () => {
         setLastFetchedExcelId,
         setTowerPhaseId,
         setExcelIdFromPriceList,
-        updateComputedPrices,
+        updateUnitComputedPrices,
         computedUnitPrices,
         saveComputedUnitPricingData,
     } = useUnit();
@@ -86,7 +86,7 @@ const BasicPricing = () => {
         isReviewAndApprovalAccordionOpen,
         setIsReviewAndApprovalAccordionOpen,
     ] = useState(false);
-    
+
     //Hooks
     /**
      * Hook to update pricing data based on incoming 'data' prop.
@@ -191,6 +191,28 @@ const BasicPricing = () => {
                     additionalPremiums: updatedPremiums,
                 }));
             }
+
+            // Update the reviewedByEmployees
+            if (
+                data?.reviewedByEmployees &&
+                data?.reviewedByEmployees.length > 0
+            ) {
+                setPricingData((prev) => ({
+                    ...prev,
+                    reviewedByEmployees: data.reviewedByEmployees,
+                }));
+            }
+
+            // Update the approvedByEmployees
+            if (
+                data?.approvedByEmployees &&
+                data?.approvedByEmployees.length > 0
+            ) {
+                setPricingData((prev) => ({
+                    ...prev,
+                    approvedByEmployees: data.approvedByEmployees,
+                }));
+            }
         }
     }, [data]);
 
@@ -208,7 +230,7 @@ const BasicPricing = () => {
             checkExistingUnits(data.tower_phase_id, data.excel_id);
             setLastFetchedExcelId(data?.excel_id);
         }
- 
+
         if (excelId || data?.excel_id) {
             setPricingData((prev) => ({
                 ...prev,
@@ -244,7 +266,6 @@ const BasicPricing = () => {
                 BigInt(Math.floor(Math.random() * 1000))
             ).toString();
         };
-
     }, [
         excelId,
         data?.excel_id,
@@ -335,7 +356,6 @@ const BasicPricing = () => {
                     pricingData.priceListSettings?.transfer_charge) /
                 100;
 
-
             // Define VAT percentage
             const vatRate = pricingData.priceListSettings?.vat || 12;
 
@@ -394,9 +414,9 @@ const BasicPricing = () => {
             //     computedEffectiveBasePrice
             // );
             // console.log("[pricingData]", pricingData);
-            updateComputedPrices(computedEffectiveBasePrice);
+            updateUnitComputedPrices(computedEffectiveBasePrice);
         }
-    }, [computedEffectiveBasePrice, updateComputedPrices]);
+    }, [computedEffectiveBasePrice, updateUnitComputedPrices]);
 
     //Event handler
     // Function to toggle a specific accordion
@@ -549,6 +569,8 @@ const BasicPricing = () => {
             formatPayload.formatSelectedAdditionalPremiumsPayload(
                 pricingData.selectedAdditionalPremiums
             ),
+        reviewedByEmployeesPayload: pricingData?.reviewedByEmployees,
+        approvedByEmployeesPayload: pricingData?.approvedByEmployees,
         status: status,
     });
 

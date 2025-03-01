@@ -49,7 +49,9 @@ const initialState = () => ({
         },
     ],
     reviewsAndApproval: {},
-    computedListPrice: []
+    computedListPrice: [],
+    reviewedByEmployees: [],
+    approvedByEmployees: [],
 });
 export default function BasicPricingProvider({ children }) {
     const [pricingData, setPricingData] = useState(initialState());

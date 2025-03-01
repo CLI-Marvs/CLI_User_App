@@ -71,6 +71,14 @@ class UpdatePriceListMasterRequest extends FormRequest
             'computedPriceListPayload' => 'array',
             'computedPriceListPayload.*.unit_id' => 'integer',
 
+            //Reviewed by employee
+            'reviewedByEmployeesPayload' => 'array',
+            'reviewedByEmployeesPayload.*.id' => 'integer',
+
+            //Approved by employee
+            'approvedByEmployeesPayload' => 'array',
+
+            
             'status' =>
             'required|string|max:255',
             'emp_id' =>

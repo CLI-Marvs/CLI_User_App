@@ -1,13 +1,13 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { IoIosArrowDown } from "react-icons/io";
 import { IoMdArrowDropdown, IoIosCloseCircle } from "react-icons/io";
 import { usePricing } from "@/component/layout/propertyandpricingpage/basicpricing/context/BasicPricingContext";
 import { useUnit } from "@/context/PropertyPricing/UnitContext";
-import * as XLSX from "xlsx";
+import usePriceListEmployees from "@/component/layout/propertyandpricingpage/basicpricing/hooks/usePriceListEmployees";
 import { priceListMasterService } from "@/component/servicesApi/apiCalls/propertyPricing/priceListMaster/priceListMasterService";
 import CircularProgress from "@mui/material/CircularProgress";
 import { useStateContext } from "@/context/contextprovider";
-
+import EmployeeReviewerApproverModal from "@/component/layout/propertyandpricingpage/basicpricing/modals/ReviewSetting/EmployeeReviewerApproverModal";
 const staticHeaders = [
     "Floor",
     "Room",
@@ -26,8 +26,9 @@ const ReviewsandApprovalRouting = ({
     isReviewAndApprovalAccordionOpen,
 }) => {
     //States
-
+    const [type, setModalType] = useState(null);
     const { pricingData } = usePricing();
+    const reviewerApproverModalRef = useRef(null);
     const { user } = useStateContext();
     const [isExcelDownloading, setIsExcelDownloading] = useState(false);
     const [exportPricingData, setExportPricingData] = useState([]);
@@ -44,13 +45,13 @@ const ReviewsandApprovalRouting = ({
     const hasPricingHeaders = subHeaders?.pricingHeaders?.length > 0;
     // Check if we have version headers
     const hasVersionHeaders = subHeaders?.versionHeaders?.length > 0;
+    const { handleRemoveEmployee } = usePriceListEmployees();
 
     //Hooks
     /**
      * This hooks, map the price_versions from propertyData to subHeaders and priceVersions
      */
     useEffect(() => {
-        console.log("computedUnitPrices", computedUnitPrices);
         if (propertyData?.price_versions) {
             // console.log("propertyData", propertyData);
             const versionNames = propertyData.price_versions
@@ -158,6 +159,22 @@ const ReviewsandApprovalRouting = ({
             console.log("Error in downloading file", error);
         } finally {
             setIsExcelDownloading(false);
+        }
+    };
+
+    //Handle to open the customer list modal
+    const handleOpenEmployeeReviewerApproverModal = (type) => {
+        if (reviewerApproverModalRef.current) {
+            setModalType(type);
+            reviewerApproverModalRef.current.showModal();
+        }
+    };
+
+    //Handle to close the customer list modal
+    const handleCloseEmployeeReviewerApproverModal = () => {
+        if (reviewerApproverModalRef.current) {
+            setModalType(null);
+            reviewerApproverModalRef.current.close();
         }
     };
     return (
@@ -506,38 +523,112 @@ const ReviewsandApprovalRouting = ({
                         <div className="flex flex-col gap-[10px] w-full">
                             <div className="bg-custombg3 h-[49px] rounded-md flex px-2 items-center">
                                 <div className="w-[250px]">
-                                    <p className="montserrat-medium">
+                                    <p className="montserrat-semibold">
                                         Prepared by
                                     </p>
                                 </div>
                                 <div className="w-[280px]">
                                     {" "}
-                                    <p className="montserrat-medium">
+                                    <p className="montserrat-semibold">
                                         Reviewed by
                                     </p>
                                 </div>
                                 <div className="  w-[280px]">
                                     {" "}
-                                    <p className="montserrat-medium">
+                                    <p className="montserrat-semibold">
                                         Approved by
                                     </p>
                                 </div>
                             </div>
                             <div className="mt-1 bg-custombg3 h-auto rounded-md px-1 flex">
+                                {/* Prepared by */}
                                 <div className="w-[250px]">
-                                    <p className="montserrat-regular px-1">
+                                    <p className="montserrat-regular p-2">
                                         {user?.firstname} {user?.lastname}
                                     </p>
                                 </div>
+
+                                {/*  Reviewed By */}
                                 <div className="w-[250px]">
-                                    <div className="flex justify-between">
-                                        <p className="montserrat-regular px-1">
-                                            {user?.firstname} {user?.lastname}
-                                        </p>
-                                        <IoIosCloseCircle className="h-6 w-6 cursor-pointer  text-red-500" />
+                                    {pricingData?.reviewedByEmployees &&
+                                        pricingData?.reviewedByEmployees.map(
+                                            (emp) => {
+                                                return (
+                                                    <div
+                                                        className="flex justify-between items-center"
+                                                        key={emp?.id}
+                                                    >
+                                                        <p className="montserrat-regular p-2">
+                                                            {emp?.name}
+                                                        </p>
+                                                        <IoIosCloseCircle
+                                                            onClick={() =>
+                                                                handleRemoveEmployee(
+                                                                    emp,
+                                                                    "reviewedByEmployees"
+                                                                )
+                                                            }
+                                                            className="h-6 w-6 cursor-pointer  text-red-500"
+                                                        />
+                                                    </div>
+                                                );
+                                            }
+                                        )}
+
+                                    <div className="mt-2 py-2">
+                                        <button
+                                            className="gradient-btn5 p-[1px] w-[75px] h-[30px] rounded-[10px]"
+                                            onClick={() =>
+                                                handleOpenEmployeeReviewerApproverModal(
+                                                    "reviewedByEmployees"
+                                                )
+                                            }
+                                        >
+                                            <div className="w-full h-full rounded-[8px] bg-white flex justify-center items-center montserrat-regular text-sm">
+                                                <p className="text-base  bg-gradient-to-r from-custom-bluegreen via-custom-solidgreen to-custom-solidgreen bg-clip-text text-transparent">
+                                                    Add +
+                                                </p>
+                                            </div>
+                                        </button>
                                     </div>
-                                    <div className="mt-2">
-                                        <button className="gradient-btn5 p-[1px] w-[75px] h-[30px] rounded-[10px]">
+                                    {/* TODO: alwayss place the button at the end of the list */}
+                                </div>
+
+                                {/*  Approved By */}
+                                <div className="w-[250px] ml-8">
+                                    {pricingData?.approvedByEmployees &&
+                                        pricingData?.approvedByEmployees.map(
+                                            (emp) => {
+                                                return (
+                                                    <div
+                                                        className="flex justify-between items-center"
+                                                        key={emp?.id}
+                                                    >
+                                                        <p className="montserrat-regular p-2">
+                                                            {emp?.name}
+                                                        </p>
+                                                        <IoIosCloseCircle
+                                                            onClick={() =>
+                                                                handleRemoveEmployee(
+                                                                    emp,
+                                                                    "approvedByEmployees"
+                                                                )
+                                                            }
+                                                            className="h-6 w-6 cursor-pointer  text-red-500"
+                                                        />
+                                                    </div>
+                                                );
+                                            }
+                                        )}
+                                    <div className="mt-2 py-2">
+                                        <button
+                                            className="gradient-btn5 p-[1px] w-[75px] h-[30px] rounded-[10px]"
+                                            onClick={() =>
+                                                handleOpenEmployeeReviewerApproverModal(
+                                                    "approvedByEmployees"
+                                                )
+                                            }
+                                        >
                                             <div className="w-full h-full rounded-[8px] bg-white flex justify-center items-center montserrat-regular text-sm">
                                                 <p className="text-base  bg-gradient-to-r from-custom-bluegreen via-custom-solidgreen to-custom-solidgreen bg-clip-text text-transparent">
                                                     Add +
@@ -561,6 +652,13 @@ const ReviewsandApprovalRouting = ({
                         </div>
                     </div>
                 </div>
+            </div>
+            <div>
+                <EmployeeReviewerApproverModal
+                    type={type}
+                    onClose={handleCloseEmployeeReviewerApproverModal}
+                    reviewerApproverModalRef={reviewerApproverModalRef}
+                />
             </div>
         </>
     );

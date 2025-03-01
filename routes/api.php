@@ -134,13 +134,8 @@ Route::middleware('auth:sanctum')->group(function () {
     /* Property Master */
     Route::post('/property-details', [PropertyMasterController::class, 'storePropertyDetail']);
     Route::get('/get-property-master/{id}', [PropertyMasterController::class, 'getPropertyMaster']);
-
-    /*Basic Pricing */
-    Route::post('/basic-pricing', [PriceBasicDetailController::class, 'storeBasicPricing']);
-
-
-
-
+ 
+  
     /*Property Data*/
     Route::prefix('properties')->group(function () {
         // Get property names  

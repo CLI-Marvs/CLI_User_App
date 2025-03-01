@@ -4,6 +4,7 @@ namespace App\Services;
 
 
 use App\Models\Unit;
+use App\Models\Employee;
 use App\Models\FloorPremium;
 use App\Models\PriceVersion;
 use App\Traits\HasExpiryDate;
@@ -23,8 +24,9 @@ class PriceListMasterService
     protected $floorPremiumModel;
     protected $additionalPremiumModel;
     protected $unitModel;
+    protected $employeeModel;
 
-    public function __construct(PriceListMasterRepository $repository, PriceListMaster $model, PriceVersion $priceVersionModel, FloorPremium $floorPremiumModel, AdditionalPremium $additionalPremiumModel, Unit $unitModel)
+    public function __construct(PriceListMasterRepository $repository, PriceListMaster $model, PriceVersion $priceVersionModel, FloorPremium $floorPremiumModel, AdditionalPremium $additionalPremiumModel, Unit $unitModel, Employee $employeeModel)
     {
         $this->repository = $repository;
         $this->model = $model;
@@ -32,6 +34,7 @@ class PriceListMasterService
         $this->floorPremiumModel = $floorPremiumModel;
         $this->additionalPremiumModel = $additionalPremiumModel;
         $this->unitModel = $unitModel;
+        $this->employeeModel = $employeeModel;
     }
 
     /** 
@@ -66,7 +69,7 @@ class PriceListMasterService
     //TODO: refactor this and apply SOC
     public function update(array $data)
     {
-        // dd($data);
+        //  dd($data);
         DB::beginTransaction();
         try {
             $priceListMaster = $this->model->where('id', $data['price_list_master_id'])->first();
@@ -301,15 +304,60 @@ class PriceListMasterService
                 }
             }
 
+            //Fetch the current reviewed by employees ID in the Price List Master table
+            $reviewedByEmployeesIdsFromDatabase = json_decode($priceListMaster->reviewed_by_employees_id, true) ?? []; // Ensure it's an array
+            $reviewedByEmployeesId = []; // This will store the final list of IDs
+
+            // Check if the payload contains valid data
+            if (!empty($data['reviewedByEmployeesPayload']) && is_array($data['reviewedByEmployeesPayload'])) {
+                // Extract only the IDs from the frontend payload
+                $incommingReviewedIds = array_map(fn($emp) => $emp['id'] ?? null, $data['reviewedByEmployeesPayload']);
+                $incommingReviewedIds = array_filter($incommingReviewedIds); // Remove null values
+
+                // Compare with existing IDs and keep only those that are in $incomingIds
+                $reviewedByEmployeesIdsFromDatabase = array_values(array_intersect($reviewedByEmployeesIdsFromDatabase, $incommingReviewedIds));
+
+                // Add new IDs if not already present
+                foreach ($incommingReviewedIds as $incommingReviewedId) {
+                    if (!in_array($incommingReviewedId, $reviewedByEmployeesIdsFromDatabase)) {
+                        $reviewedByEmployeesIdsFromDatabase[] = $incommingReviewedId;
+                    }
+                }
+            }
+
+            //Fetch the current aproved by employees ID in the Price List Master table
+            $approvedByEmployeesIdsFromDatabase = json_decode($priceListMaster->approved_by_employee_id, true) ?? []; // Ensure it's an array
+
+
+            // Check if the payload contains valid data
+            if (!empty($data['approvedByEmployeesPayload']) && is_array($data['approvedByEmployeesPayload'])) {
+                // Extract only the IDs from the frontend payload
+                $incommingApprovedIds = array_map(fn($emp) => $emp['id'] ?? null, $data['approvedByEmployeesPayload']);
+                $incommingApprovedIds = array_filter($incommingApprovedIds);  
+
+                // Compare with existing IDs and keep only those that are in $incomingIds
+                $approvedByEmployeesIdsFromDatabase = array_values(array_intersect($approvedByEmployeesIdsFromDatabase, $incommingApprovedIds));
+
+                // Add new IDs if not already present
+                foreach ($incommingApprovedIds as $incommingApprovedId) {
+                    if (!in_array($incommingApprovedId, $approvedByEmployeesIdsFromDatabase)) {
+                        $approvedByEmployeesIdsFromDatabase[] = $incommingApprovedId;
+                    }
+                }
+            }
 
             $priceListMaster->update([
                 'status' => $data['status'],
+                'emp_id' => $data['emp_id'],
                 'date_last_update' => now(),
                 'pricebasic_details_id' => $priceBasicDetail->id,
                 'floor_premiums_id' => json_encode($newFloorPremiumID),
                 'price_versions_id' => json_encode($newPriceVersionIds), // Use the new list of IDs
-                'additional_premiums_id' => json_encode($newAdditionalPremiumIds)
+                'additional_premiums_id' => json_encode($newAdditionalPremiumIds),
+                'reviewed_by_employee_id' => json_encode($reviewedByEmployeesIdsFromDatabase),
+                'approved_by_employee_id' => json_encode($approvedByEmployeesIdsFromDatabase)
             ]);
+
             DB::commit();
             return [
                 'success' => true,
@@ -327,6 +375,21 @@ class PriceListMasterService
             ];
         }
     }
+
+    //Update the price lister master and store the reviewed by employees
+    // public function updateReviewedByEmployees($currentPriceListMasterId, $data, $priceListMaster)
+    // {
+    //     if ($currentPriceListMasterId) {
+    //         // For update, we need to use the relationship and then update
+    //         $priceListMaster->update([
+    //             'reviewed_by_employees_id' => json_encode($data['reviewedByEmployeesPayload']),
+    //         ]);
+    //     } else {
+    //         // For create, we can use the relationship directly
+    //         $priceListMaster->reviewed_by_employees()->createMany($data['reviewedByEmployeesPayload']);
+    //     }
+    //     return $priceListMaster;
+    // }
 
     //Update the price basic details
     public function updatePriceBasicDetails($currentPriceBasicDetailId, $data, $priceListMaster)

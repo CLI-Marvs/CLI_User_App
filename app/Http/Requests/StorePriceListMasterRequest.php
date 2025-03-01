@@ -67,6 +67,20 @@ class StorePriceListMasterRequest extends FormRequest
             'selectedAdditionalPremiumsPayload.*.unit_id' => 'integer',
             'selectedAdditionalPremiumsPayload.*.additional_premium_id' => 'array',
 
+            //Computed price list
+            'computedPriceListPayload' => 'array',
+            'computedPriceListPayload.*.unit_id' => 'integer',
+
+            
+            //Reviewed by employee
+            'reviewedByEmployeesPayload' => 'array',
+            'reviewedByEmployeesPayload.*.id' => 'integer',
+
+            //Approved by employee
+            'approvedByEmployeesPayload' => 'array',
+            'reviewedByEmployeesPayload.*.id' => 'integer',
+
+
             'status' =>
             'required|string|max:255',
             'emp_id' =>

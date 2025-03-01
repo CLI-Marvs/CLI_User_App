@@ -4,6 +4,7 @@ namespace App\Repositories\Implementations;
 
 use Exception;
 use App\Models\Unit;
+use App\Models\Employee;
 use App\Models\FloorPremium;
 use App\Models\PriceVersion;
 use Maatwebsite\Excel\Excel;
@@ -26,15 +27,17 @@ class PriceListMasterRepository
     protected $unitModel;
     protected $floorPremiumModel;
     protected  $excel;
+    protected $employeeModel;
 
 
-    public function __construct(PriceListMaster $model, PriceVersion $priceVersionModel, FloorPremium $floorPremiumModel, Excel $excel, Unit $unitModel)
+    public function __construct(PriceListMaster $model, PriceVersion $priceVersionModel, FloorPremium $floorPremiumModel, Excel $excel, Unit $unitModel, Employee $employeeModel)
     {
         $this->model = $model;
         $this->priceVersionModel = $priceVersionModel;
         $this->floorPremiumModel = $floorPremiumModel;
         $this->excel = $excel;
         $this->unitModel = $unitModel;
+        $this->employeeModel = $employeeModel;
     }
 
 
@@ -118,7 +121,8 @@ class PriceListMasterRepository
                             'status' => $priceVersionData['status'],
                             'payment_scheme_id' => json_encode(array_column($priceVersionData['payment_scheme'], 'id')),
                             'tower_phase_name' => $data['tower_phase_id'],
-                            'price_list_masters_id' => $data['price_list_master_id'],'priority_number' => $priceVersionData['priority_number'],
+                            'price_list_masters_id' => $data['price_list_master_id'],
+                            'priority_number' => $priceVersionData['priority_number'],
 
                             // 'property_masters_id' => $data['property_masters_id'],
                         ]);
@@ -233,6 +237,7 @@ class PriceListMasterRepository
 
             $priceListMaster->update([
                 'status' => $data['status'],
+                'emp_id' => $data['emp_id'],
                 'date_last_update' => now(),
                 'pricebasic_details_id' => $priceBasicDetail->id,
                 'floor_premiums_id' => json_encode($newFloorPremiumID),
@@ -306,7 +311,26 @@ class PriceListMasterRepository
             'property_commercial_detail' => $priceList->towerPhase->propertyMaster->propertyCommercialDetail->toArray(),
             'price_versions' => $this->transformPriceVersions($priceList->priceVersions),
             'floor_premiums' => $this->transformFloorPremiums($priceList->floorPremiums),
-            'additional_premiums' => $this->transformAdditionalPremium($priceList->additionalPremiums)
+            'additional_premiums' => $this->transformAdditionalPremium($priceList->additionalPremiums),
+            'reviewedByEmployees' => $this->employeeModel->whereIn(
+                'id',
+                json_decode($priceList->reviewed_by_employee_id, true) ?? []
+            )
+                ->select('id', 'firstname', 'lastname')
+                ->get()
+                ->makeHidden(['firstname', 'lastname'])
+                ->toArray(),
+
+            'approvedByEmployees' => $this->employeeModel->whereIn(
+                'id',
+                json_decode($priceList->approved_by_employee_id, true) ?? []
+            )
+                ->select('id', 'firstname', 'lastname')
+                ->get()
+                ->makeHidden(['firstname', 'lastname'])
+                ->toArray(),
+
+
         ];
     }
 
@@ -357,7 +381,7 @@ class PriceListMasterRepository
 
             $paymentSchemeData = PaymentScheme::whereIn('id', $priceVersionIds)->get();
             // Add this line to filter for active payment schemes
-            
+
             $paymentSchemes = $paymentSchemeData->map(function ($scheme) {
                 return [
                     'id' => $scheme->id,
