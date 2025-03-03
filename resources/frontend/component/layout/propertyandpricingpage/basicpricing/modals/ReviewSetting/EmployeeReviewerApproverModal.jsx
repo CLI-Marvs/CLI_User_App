@@ -32,8 +32,11 @@ const EmployeeReviewerApproverModal = ({
     //Hooks
     useEffect(() => {
         if (type === "reviewedByEmployees") {
+            console.log("it runs 35")
             setReviewedByEmployees(pricingData.reviewedByEmployees || []);
         } else {
+            console.log("it runs 38", pricingData);
+
             setApprovedByEmployees(pricingData.approvedByEmployees || []);
         }
         if (!type) {
@@ -54,6 +57,19 @@ const EmployeeReviewerApproverModal = ({
         if (!allEmployees) return [];
 
         return allEmployees.filter((employee) => {
+            // Create sets of reviewer and approver IDs for faster lookups
+            const reviewerAndApproverIds = new Set([
+                ...pricingData.reviewedByEmployees.map(
+                    (reviewer) => reviewer.id
+                ),
+                ...pricingData.approvedByEmployees.map(
+                    (approver) => approver.id
+                ),
+            ]);
+
+            // Skip employees who are already in reviewedByEmployees or approvedByEmployees
+            if (reviewerAndApproverIds.has(employee.id)) return false;
+
             const firstName = employee?.firstname?.toLowerCase() || "";
             const lastName = employee?.lastname?.toLowerCase() || "";
             const employeeDepartment = employee?.department
