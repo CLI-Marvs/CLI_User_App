@@ -8,6 +8,8 @@ import { priceListMasterService } from "@/component/servicesApi/apiCalls/propert
 import CircularProgress from "@mui/material/CircularProgress";
 import { useStateContext } from "@/context/contextprovider";
 import EmployeeReviewerApproverModal from "@/component/layout/propertyandpricingpage/basicpricing/modals/ReviewSetting/EmployeeReviewerApproverModal";
+import { toLowerCaseText } from "@/component/layout/propertyandpricingpage/utils/formatToLowerCase";
+
 const staticHeaders = [
     "Floor",
     "Room",
@@ -24,12 +26,12 @@ const ReviewsandApprovalRouting = ({
     toggleAccordion,
     propertyData,
     isReviewAndApprovalAccordionOpen,
-    action
 }) => {
     //States
     const [type, setModalType] = useState(null);
     const { pricingData } = usePricing();
     const reviewerApproverModalRef = useRef(null);
+    const [selectedVersion, setSelectedVersion] = useState(null);
     const { user } = useStateContext();
     const [isExcelDownloading, setIsExcelDownloading] = useState(false);
     const [exportPricingData, setExportPricingData] = useState([]);
@@ -41,6 +43,7 @@ const ReviewsandApprovalRouting = ({
         ...staticHeaders, // ["Floor", "Room", "Unit", "Type", ...]
         ...(subHeaders?.versionHeaders || []), // ["V1", "V2", ...]
         ...(subHeaders?.pricingHeaders || []), // ["Transfer Charge", "Vatable Less Price", ...]
+        ...(subHeaders?.paymentSchemeHeaders || []), // ["Payment Scheme 1", "Payment Scheme 2", ...]
     ];
     // Check if we have pricing headers
     const hasPricingHeaders = subHeaders?.pricingHeaders?.length > 0;
@@ -53,78 +56,85 @@ const ReviewsandApprovalRouting = ({
      * This hooks, map the price_versions from propertyData to subHeaders and priceVersions
      */
     useEffect(() => {
-        if (propertyData?.price_versions) {
-            // console.log("propertyData", propertyData);
-            const versionNames = propertyData.price_versions
-                .map((item) => item.version_name)
-                .filter(Boolean);
-            const percentIncreaseHeaders = propertyData.price_versions
-                .map((item) => item.percent_increase)
-                .filter(Boolean);
+        if (!propertyData?.price_versions) return;
 
-            const priceDetails = propertyData.pricebasic_details;
+        // If no version is selected, set the default version to the one with priority_number === 1
+        setSelectedVersion((prev) => {
+            if (!prev) {
+                const priorityVersion = propertyData.price_versions.find(
+                    (item) => item.priority_number === 1
+                );
+                return priorityVersion?.version_name || "";
+            }
+            return prev;
+        });
 
-            // Only set pricing headers if base_price is not 0
-            if (priceDetails.base_price !== 0) {
-                const excludedPriceListKeys = [
-                    "id",
-                    "created_at",
-                    "updated_at",
-                    "base_price",
-                    "effective_balcony_base",
-                    "vat",
-                    "vatable_less_price",
-                    "pricelist_master_id",
-                ];
+        const percentIncreaseHeaders = propertyData.price_versions
+            .map((item) => item.percent_increase)
+            .filter(Boolean);
 
-                // Extract property names that have non-zero values & are NOT in the excluded list
-                const pricingKeys = Object.keys(priceDetails)
+        const paymentSchemeHeaders = propertyData.price_versions
+            .filter((item) => item.version_name === selectedVersion) // Dynamically update based on selection
+            .flatMap(
+                (item) =>
+                    item.payment_schemes?.map(
+                        (scheme) => scheme.payment_scheme_name
+                    ) || []
+            );
+
+        const priceDetails = propertyData.pricebasic_details;
+        let pricingHeaders = [];
+
+        if (priceDetails.base_price !== 0) {
+            const excludedKeys = new Set([
+                "id",
+                "created_at",
+                "updated_at",
+                "base_price",
+                "effective_balcony_base",
+                "vat",
+                "vatable_less_price",
+                "pricelist_master_id",
+            ]);
+
+            pricingHeaders = [
+                "List price w/ VAT",
+                ...Object.keys(priceDetails)
                     .filter(
                         (key) =>
-                            !excludedPriceListKeys.includes(key) &&
+                            !excludedKeys.has(key) &&
                             priceDetails[key] &&
                             priceDetails[key] !== 0
                     )
-                    .map((key) => key.replace(/_/g, " "))
-                    .map((key) => {
-                        // Capitalize each word
-                        return key
+                    .map((key) => key.replace(/_/g, " ")) // Replace underscores with spaces
+                    .map((key) =>
+                        key
                             .split(" ")
                             .map(
                                 (word) =>
                                     word.charAt(0).toUpperCase() + word.slice(1)
                             )
-                            .join(" ");
-                    });
-
-                const pricingHeaders = [
-                    "List price w/ VAT",
-                    ...pricingKeys,
-                    "Total Contract Price  ",
-                ];
-                setSubHeaders({
-                    // versionHeaders: versionNames,
-                    percentIncreaseHeaders: percentIncreaseHeaders,
-                    pricingHeaders: pricingHeaders,
-                });
-            } else {
-                // If base_price is 0, only set version headers without pricing headers
-                setSubHeaders({
-                    // versionHeaders: versionNames,
-                    percentIncreaseHeaders: percentIncreaseHeaders,
-                    pricingHeaders: [], // Empty array for no pricing headers
-                });
-            }
-
-            setPriceVersions(propertyData.price_versions);
+                            .join(" ")
+                    ), // Capitalize words
+                "Total Contract Price",
+            ];
         }
+
+        setSubHeaders({
+            paymentSchemeHeaders,
+            percentIncreaseHeaders,
+            pricingHeaders,
+        });
+
+        setPriceVersions(propertyData.price_versions);
 
         setExportPricingData((prev) => ({
             ...prev,
             ...pricingData,
-            units: computedUnitPrices, //Passed the computed unit price list
+            units: computedUnitPrices,
         }));
-    }, [propertyData, units]);
+    }, [propertyData, units, selectedVersion]);
+
 
     //Event handlers
     const handleDownloadExcel = async () => {
@@ -178,6 +188,13 @@ const ReviewsandApprovalRouting = ({
             reviewerApproverModalRef.current.close();
         }
     };
+
+    //Handle select version
+    const handleSelectVersion = (e) => {
+        const {value } = e.target;
+        setSelectedVersion(value);
+    };
+
     return (
         <>
             <div
@@ -276,10 +293,30 @@ const ReviewsandApprovalRouting = ({
                                         <div className="border border-black  flex-1  ml-10">
                                             <div className="relative w-full  ">
                                                 <select
-                                                    name="reviewedBy"
+                                                    onChange={(e) =>
+                                                        handleSelectVersion(e)
+                                                    }
+                                                    name="version"
                                                     className="appearance-none w-full px-5 py-1   focus:outline-none border-0"
                                                 >
-                                                    <option value="">V1</option>
+                                                    {pricingData?.priceVersions &&
+                                                        pricingData?.priceVersions.map(
+                                                            (
+                                                                version,
+                                                                index
+                                                            ) => (
+                                                                <option
+                                                                    key={index}
+                                                                    value={
+                                                                        version.name
+                                                                    }
+                                                                >
+                                                                    {toLowerCaseText(
+                                                                        version.name
+                                                                    )}
+                                                                </option>
+                                                            )
+                                                        )}
                                                 </select>
                                                 <span className="absolute inset-y-0 right-0 flex text-custom-gray81 items-center  pointer-events-none">
                                                     <IoMdArrowDropdown />
@@ -329,6 +366,17 @@ const ReviewsandApprovalRouting = ({
                                                         Pricing
                                                     </th>
                                                 )}
+                                                <th
+                                                    colSpan={subHeaders
+                                                            .paymentSchemeHeaders && 
+                                                        subHeaders
+                                                            .paymentSchemeHeaders
+                                                            .length
+                                                    }
+                                                    className="bg-[#31498a] w-full py-3 montserrat-semibold text-white border-black border px-2"
+                                                >
+                                                    Payment Scheme
+                                                </th>
                                             </tr>
 
                                             {/* Second Row: Column Titles */}
@@ -350,6 +398,36 @@ const ReviewsandApprovalRouting = ({
                                                         </th>
                                                     )
                                                 )}
+                                                {/* {pricingData?.priceVersions.map(
+                                                    (priceVersionItem) => (
+                                                        <th
+                                                            key={
+                                                                priceVersionItem.id
+                                                            }
+                                                            className="bg-[#aebee3] w-full py-3 montserrat-regular text-black border-black border px-2 font-normal"
+                                                        > 
+                                                            <div className="flex gap-2 justify-center">
+                                                                {priceVersionItem.payment_scheme.map(
+                                                                    (
+                                                                        paymentSchemeItem
+                                                                    ) => (
+                                                                        <span
+                                                                            key={
+                                                                                paymentSchemeItem.id
+                                                                            }
+                                                                        >
+                                                                            {
+                                                                                paymentSchemeItem.payment_scheme_name
+                                                                            }
+                                                                        </span>
+                                                                    )
+                                                                )}
+                                                            </div>
+
+                                                            
+                                                        </th>
+                                                    )
+                                                )} */}
                                             </tr>
 
                                             {/* Third Row: Only render if there are version headers */}

@@ -278,7 +278,9 @@ class PriceListMasterRepository
             'towerPhase.propertyMaster.propertyCommercialDetail',
             'paymentSchemes',
             'priceVersions' => function ($query) {  // Add a closure to filter priceVersions
-                $query->where('status', 'Active'); // Filter for active price versions
+                $query->where('status', 'Active')
+                    ->oldest()
+                ; // Filter for active price versions
             },
             'floorPremiums' => function ($query) {
                 $query->where('status', 'Active');
@@ -379,7 +381,8 @@ class PriceListMasterRepository
             $paymentSchemeIds = json_decode($version->payment_scheme_id, true);
             $priceVersionIds = is_array($paymentSchemeIds) ? $paymentSchemeIds : [];
 
-            $paymentSchemeData = PaymentScheme::whereIn('id', $priceVersionIds)->get();
+            $paymentSchemeData = PaymentScheme::whereIn('id', $priceVersionIds)
+                ->get();
             // Add this line to filter for active payment schemes
 
             $paymentSchemes = $paymentSchemeData->map(function ($scheme) {
