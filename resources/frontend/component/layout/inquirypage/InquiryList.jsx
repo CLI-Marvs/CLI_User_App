@@ -60,7 +60,11 @@ const InquiryList = () => {
         searchSummary,
         setSearchSummary,
         resultSearchActive,
-        setResultSearchActive
+        setResultSearchActive,
+        startDate,
+        setStartDate,
+        endDate,
+        setEndDate,
         /*  setHasAttachments,
         hasAttachments */
     } = useStateContext();
@@ -71,6 +75,8 @@ const InquiryList = () => {
     const channelsParam = searchFilter?.channels;
     const categoryParam = searchFilter?.category;
     const departmentParam = searchFilter?.departments;
+    const startDateParam = searchFilter?.startDate;
+    const endDateParam = searchFilter?.endDate;
     const monthParam = searchFilter?.selectedMonth;
     const yearParam = searchFilter?.selectedYear;
 
@@ -89,14 +95,13 @@ const InquiryList = () => {
     const [hasAttachments, setHasAttachments] = useState(false);
     const { propertyNamesList } = useStateContext();
     const [assignedToMeActive, setAssignedToMeActive] = useState(false);
-    const [startDate, setStartDate] = useState(null);
     const [isFilterVisible, setIsFilterVisible] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
     const [lastActivity, setLastActivity] = useState(null);
     const filterBoxRef = useRef(null);
     const [isOpenSelect, setIsOpenSelect] = useState(false);
 
-   
+
 
 
     const handleSelect = (option) => {
@@ -127,6 +132,7 @@ const InquiryList = () => {
             setAssignedToMeActive(false);
         }
         setStartDate(null);
+        setEndDate(null);
 
         if (specificAssigneeCsr !== "" && daysFilter !== null) {
             setSpecificAssigneeCsr("");
@@ -153,10 +159,6 @@ const InquiryList = () => {
 
     const toggleFilterBox = () => {
         setIsFilterVisible((prev) => !prev);
-    };
-
-    const handleDateChange = (date) => {
-        setStartDate(date);
     };
 
     const handleClickOutside = (event) => {
@@ -277,38 +279,38 @@ const InquiryList = () => {
         "N/A",
         ...(Array.isArray(propertyNamesList) && propertyNamesList.length > 0
             ? propertyNamesList
-                  .filter((item) => !item.toLowerCase().includes("phase"))
-                  .map((item) => {
-                      let formattedItem = formatFunc(item);
+                .filter((item) => !item.toLowerCase().includes("phase"))
+                .map((item) => {
+                    let formattedItem = formatFunc(item);
 
-                      // Capitalize each word in the string
-                      formattedItem = formattedItem
-                          .split(" ")
-                          .map((word) => {
-                              // Check for specific words that need to be fully capitalized
-                              if (/^(Sjmv|Lpu|Cdo|Dgt)$/i.test(word)) {
-                                  return word.toUpperCase();
-                              }
-                              // Capitalize the first letter of all other words
-                              return (
-                                  word.charAt(0).toUpperCase() +
-                                  word.slice(1).toLowerCase()
-                              );
-                          })
-                          .join(" ");
+                    // Capitalize each word in the string
+                    formattedItem = formattedItem
+                        .split(" ")
+                        .map((word) => {
+                            // Check for specific words that need to be fully capitalized
+                            if (/^(Sjmv|Lpu|Cdo|Dgt)$/i.test(word)) {
+                                return word.toUpperCase();
+                            }
+                            // Capitalize the first letter of all other words
+                            return (
+                                word.charAt(0).toUpperCase() +
+                                word.slice(1).toLowerCase()
+                            );
+                        })
+                        .join(" ");
 
-                      // Replace specific names if needed
-                      if (formattedItem === "Casamira South") {
-                          formattedItem = "Casa Mira South";
-                      }
+                    // Replace specific names if needed
+                    if (formattedItem === "Casamira South") {
+                        formattedItem = "Casa Mira South";
+                    }
 
-                      return formattedItem;
-                  })
-                  .sort((a, b) => {
-                      if (a === "N/A") return -1;
-                      if (b === "N/A") return 1;
-                      return a.localeCompare(b);
-                  })
+                    return formattedItem;
+                })
+                .sort((a, b) => {
+                    if (a === "N/A") return -1;
+                    if (b === "N/A") return 1;
+                    return a.localeCompare(b);
+                })
             : []),
     ];
 
@@ -392,14 +394,20 @@ const InquiryList = () => {
                 channels === "Walk in"
                     ? "Walk-in"
                     : channels === "Social media"
-                    ? "Social Media"
-                    : channels;
+                        ? "Social Media"
+                        : channels;
             summaryParts.push(`Channel: ${formattedChannels}`);
         }
         if (departments) summaryParts.push(`Department: ${departments}`);
         if (ticket) summaryParts.push(`Ticket: ${ticket}`);
-        if (startDate)
+        if (startDate && endDate) {
             summaryParts.push(`Start Date: ${formatDate(startDate)}`);
+            summaryParts.push(`End Date: ${formatDate(endDate)}`);
+        } else if (startDate) {
+            summaryParts.push(`Start Date: ${formatDate(startDate)}`);
+        } else if (endDate) {
+            summaryParts.push(`End Date: ${formatDate(endDate)}`);
+        }
         if (selectedProperty)
             summaryParts.push(`Property: ${selectedProperty}`);
         if (selectedMonth)
@@ -419,6 +427,7 @@ const InquiryList = () => {
             departments,
             ticket,
             startDate,
+            endDate,
             selectedProperty,
             hasAttachments,
             selectedMonth,
@@ -441,17 +450,19 @@ const InquiryList = () => {
         setSelectedYear("");
         setSelectedMonth("");
         setDepartments("");
+        setStartDate(null);
+        setEndDate(null);
     };
 
-   
+
     useEffect(() => {
-      /*   console.log("categoryParam", categoryParam);
-        console.log("statusParam", statusParam);
-        console.log("monthParam", monthParam);
-        console.log("yearParam", yearParam);
-        console.log("departmentParam", departmentParam);
-        console.log("channelsParam", channelsParam);
- */
+        /*   console.log("categoryParam", categoryParam);
+          console.log("statusParam", statusParam);
+          console.log("monthParam", monthParam);
+          console.log("yearParam", yearParam);
+          console.log("departmentParam", departmentParam);
+          console.log("channelsParam", channelsParam);
+   */
 
         if (
             propertyParam ||
@@ -471,7 +482,7 @@ const InquiryList = () => {
                 summaryParts.push(`Category: ${categoryParam}`);
             if (statusParam) {
                 const displayStatus =
-                statusParam === "unresolved" ? "Unresolved" : statusParam;
+                    statusParam === "unresolved" ? "Unresolved" : statusParam;
                 summaryParts.push(`Status: ${displayStatus}`);
             }
             if (name) summaryParts.push(`Name: ${name}`);
@@ -483,15 +494,21 @@ const InquiryList = () => {
                     channelsParam === "Walk in"
                         ? "Walk-in"
                         : channelsParam === "Social media"
-                        ? "Social Media"
-                        : channelsParam;
+                            ? "Social Media"
+                            : channelsParam;
                 summaryParts.push(`Channel: ${formattedChannel}`);
             }
             if (departmentParam)
                 summaryParts.push(`Department: ${departmentParam}`);
             if (ticket) summaryParts.push(`Ticket: ${ticket}`);
-            if (startDate)
-                summaryParts.push(`Start Date: ${formatDate(startDate)}`);
+            if (startDateParam && endDateParam) {
+                summaryParts.push(`Start Date: ${formatDate(startDateParam)}`);
+                summaryParts.push(`End Date: ${formatDate(endDateParam)}`);
+            } else if (startDateParam) {
+                summaryParts.push(`Start Date: ${formatDate(startDateParam)}`);
+            } else if (endDateParam) {
+                summaryParts.push(`End Date: ${formatDate(endDateParam)}`);
+            }
             if (propertyParam)
                 summaryParts.push(`Property: ${propertyParam}`);
             if (yearParam) summaryParts.push(`Year: ${yearParam}`);
@@ -501,21 +518,21 @@ const InquiryList = () => {
 
             setSearchSummary(summaryParts);
 
-          /*   setSearchFilter({
-            name,
-            category: categoryParam,
-            type: typeParam,
-            status: statusParam,
-            email,
-            channels: channelsParam,
-            departments: departmentParam,
-            ticket,
-            startDate,
-            selectedProperty: propertyParam,
-            hasAttachments,
-            selectedMonth: monthParam,
-            selectedYear: yearParam,
-        }); */
+            /*   setSearchFilter({
+              name,
+              category: categoryParam,
+              type: typeParam,
+              status: statusParam,
+              email,
+              channels: channelsParam,
+              departments: departmentParam,
+              ticket,
+              pickDate,
+              selectedProperty: propertyParam,
+              hasAttachments,
+              selectedMonth: monthParam,
+              selectedYear: yearParam,
+          }); */
         }
     }, [/* propertyParam, statusParam, departmentParam, monthParam, yearParam */]);
 
@@ -593,15 +610,15 @@ const InquiryList = () => {
                         <div className="flex items-center">
                             {user?.department ===
                                 "Customer Relations - Services" && (
-                                <button
-                                    onClick={handleOpenModal}
-                                    className="h-[38px] w-[121px] gradient-btn5 text-white  text-xs rounded-[10px]"
-                                >
-                                    {" "}
-                                    <span className="text-[18px]">+</span> Add
-                                    Inquiry
-                                </button>
-                            )}
+                                    <button
+                                        onClick={handleOpenModal}
+                                        className="h-[38px] w-[121px] gradient-btn5 text-white  text-xs rounded-[10px]"
+                                    >
+                                        {" "}
+                                        <span className="text-[18px]">+</span> Add
+                                        Inquiry
+                                    </button>
+                                )}
                         </div>
 
                         {isFilterVisible && (
@@ -827,7 +844,7 @@ const InquiryList = () => {
                                         <div className="flex bg-red-900 justify-start w-full relative">
                                             <label
                                                 htmlFor=""
-                                                className="w-full border-b-2" 
+                                                className="w-full border-b-2"
                                             >
                                                 {""}
                                             </label>
@@ -854,11 +871,11 @@ const InquiryList = () => {
                                                             .filter(
                                                                 (department) =>
                                                                     department !==
-                                                                        null &&
+                                                                    null &&
                                                                     department !==
-                                                                        undefined &&
+                                                                    undefined &&
                                                                     department !==
-                                                                        "NULL"
+                                                                    "NULL"
                                                             )
                                                     ),
                                                 ]
@@ -881,6 +898,44 @@ const InquiryList = () => {
                                                 {" "}
                                                 Unassigned
                                                 </option>
+                                            </select>
+                                        </div>
+                                        <span className="absolute inset-y-0 right-0 flex items-center  pl-3 pointer-events-none">
+                                            <IoIosArrowDown />
+                                        </span>
+                                    </div>
+                                    <div className="flex relative">
+                                        <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
+                                            {" "}
+                                            Property
+                                        </label>
+                                        <div className="fle justify-start w-full relative">
+                                            <label
+                                                htmlFor=""
+                                                className="w-full border-b-2"
+                                            >
+                                                {""}
+                                            </label>
+                                            <select
+                                                className="w-full border-b-1 outline-none appearance-none text-sm px-[8px]"
+                                                onChange={handleSelectProperty}
+                                                value={selectedProperty}
+                                            >
+                                                <option value="">
+                                                    Select Property
+                                                </option>
+                                                {formattedPropertyNames.map(
+                                                    (item, index) => {
+                                                        return (
+                                                            <option
+                                                                key={index}
+                                                                value={item}
+                                                            >
+                                                                {item}
+                                                            </option>
+                                                        );
+                                                    }
+                                                )}
                                             </select>
                                         </div>
                                         <span className="absolute inset-y-0 right-0 flex items-center  pl-3 pointer-events-none">
@@ -920,50 +975,64 @@ const InquiryList = () => {
                                             <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[94px]">
                                                 Date
                                             </label>
-                                            <div className="relative">
-                                                <DatePicker
-                                                    selected={startDate}
-                                                    onChange={handleDateChange}
-                                                    className="border-b-1 outline-none w-[146px] text-sm px-[8px]"
-                                                    calendarClassName="custom-calendar"
-                                                />
+                                            <div className="flex gap-[15px]">
+                                                <div className="flex">
+                                                    <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-max pr-[10px]">
+                                                        From
+                                                    </label>
+                                                    <div className="relative">
+                                                        <DatePicker
+                                                            selected={startDate}
+                                                            onChange={(date) => {
+                                                                setStartDate(date);
+                                                                setSelectedYear("");
+                                                                setSelectedMonth("");
+                                                            }}
+                                                            onFocus={() => {
+                                                                setSelectedYear("");
+                                                                setSelectedMonth("");
+                                                            }}
+                                                            className="border-b-1 outline-none w-[180px] text-sm px-[8px]"
+                                                            calendarClassName="custom-calendar"
+                                                            
+                                                        />
 
-                                                <img
-                                                    src={DateLogo}
-                                                    alt="date"
-                                                    className="absolute top-[45%] right-0 transform -translate-y-1/2 text-custom-bluegreen size-6 cursor-pointer pointer-events-none"
-                                                />
+                                                        <img
+                                                            src={DateLogo}
+                                                            alt="date"
+                                                            className="absolute top-[45%] right-0 transform -translate-y-1/2 text-custom-bluegreen size-6 cursor-pointer pointer-events-none"
+                                                        />
+                                                    </div>
+                                                </div>
+                                                <div className="flex">
+                                                    <label className="flex justify-end items-end text-custom-bluegreen text-[12px] w-max px-[10px]">
+                                                        To
+                                                    </label>
+                                                    <div className="relative">
+                                                        <DatePicker
+                                                            selected={endDate}
+                                                            onChange={(date) => {
+                                                                setEndDate(date);
+                                                                setSelectedYear("");
+                                                                setSelectedMonth("");
+                                                            }}
+                                                            onFocus={() => {
+                                                                setSelectedYear("");
+                                                                setSelectedMonth("");
+                                                            }}
+                                                            className="border-b-1 outline-none w-full text-sm px-[8px]"
+                                                            calendarClassName="custom-calendar"
+                                                            minDate={startDate}
+                                                        />
+
+                                                        <img
+                                                            src={DateLogo}
+                                                            alt="date"
+                                                            className="absolute top-[45%] right-0 transform -translate-y-1/2 text-custom-bluegreen size-6 cursor-pointer pointer-events-none"
+                                                        />
+                                                    </div>
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div className="flex relative">
-                                            <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[65px]">
-                                                {" "}
-                                                Property
-                                            </label>
-                                            <select
-                                                className="w-[220px] border-b-1 outline-none appearance-none text-sm px-[8px]"
-                                                onChange={handleSelectProperty}
-                                                value={selectedProperty}
-                                            >
-                                                <option value="">
-                                                    Select Property
-                                                </option>
-                                                {formattedPropertyNames.map(
-                                                    (item, index) => {
-                                                        return (
-                                                            <option
-                                                                key={index}
-                                                                value={item}
-                                                            >
-                                                                {item}
-                                                            </option>
-                                                        );
-                                                    }
-                                                )}
-                                            </select>
-                                            <span className="absolute inset-y-0 right-0 flex items-center  pl-3 pointer-events-none">
-                                                <IoIosArrowDown />
-                                            </span>
                                         </div>
                                     </div>
                                     <div className="flex gap-3">
@@ -975,11 +1044,11 @@ const InquiryList = () => {
                                                 <select
                                                     className="w-full border-b-1 outline-none appearance-none text-sm absolute px-[8px]"
                                                     value={selectedYear}
-                                                    onChange={(e) =>
-                                                        setSelectedYear(
-                                                            e.target.value
-                                                        )
-                                                    }
+                                                    onChange={(e) => {
+                                                        setSelectedYear(e.target.value);
+                                                        setStartDate(null);
+                                                        setEndDate(null);
+                                                    }}
                                                 >
                                                     <option value="">
                                                         {" "}
@@ -1005,18 +1074,18 @@ const InquiryList = () => {
                                                 </span>
                                             </div>
                                         </div>
-                                        <div className="flex relative">
-                                            <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[65px]">
+                                        <div className="flex relative ">
+                                            <label className="flex justify-start items-end text-custom-bluegreen text-[12px] px-[15px]">
                                                 {" "}
                                                 Month
                                             </label>
                                             <select
                                                 className="w-[220px] border-b-1 outline-none appearance-none text-sm px-[8px]"
-                                                onChange={(e) =>
-                                                    setSelectedMonth(
-                                                        e.target.value
-                                                    )
-                                                }
+                                                onChange={(e) => {
+                                                    setSelectedMonth(e.target.value);
+                                                    setStartDate(null);
+                                                    setEndDate(null);
+                                                }}
                                                 value={selectedMonth}
                                             >
                                                 <option value="">
@@ -1065,9 +1134,6 @@ const InquiryList = () => {
                             </div>
                         )}
                     </div>
-                    {/*  <div className="flex items-center"> 
-                        <button onClick={handleOpenModal} className='h-[38px] w-[121px] gradient-btn5 text-white  text-xs rounded-[10px]'> <span className='text-[18px]'>+</span> Add Inquiry</button>
-                    </div> */}
                     {resultSearchActive && (
                         <div className="flex flex-col gap-1 p-2 mt-[15px] bg-white w-max rounded-[8px] shadow-custom7 text-sm">
                             <div className="flex flex-col">
@@ -1158,51 +1224,46 @@ const InquiryList = () => {
                                 <div className="flex items-center space-x-2">
                                     {user?.department ===
                                         "Customer Relations - Services" && (
-                                        <button
-                                            onClick={handleAssignedToMeClick}
-                                            className={`flex items-center text-custom-lightgreen h-[25px] w-[125px] rounded-[55px] p-[2px] ${
-                                                assignedToMeActive
-                                                    ? "bglightgreen-btn"
-                                                    : "gradient-btn2hover "
-                                            }`}
-                                        >
-                                            <p
-                                                className={`h-full w-full flex justify-center items-center text-xs montserrat-semibold rounded-[50px]   ${
-                                                    assignedToMeActive
+                                            <button
+                                                onClick={handleAssignedToMeClick}
+                                                className={`flex items-center text-custom-lightgreen h-[25px] w-[125px] rounded-[55px] p-[2px] ${assignedToMeActive
                                                         ? "bglightgreen-btn"
-                                                        : "bg-white hover:bg-custom-lightestgreen"
-                                                }
-                                        `}
+                                                        : "gradient-btn2hover "
+                                                    }`}
                                             >
-                                                Assigned to me
-                                            </p>
-                                        </button>
-                                    )}
+                                                <p
+                                                    className={`h-full w-full flex justify-center items-center text-xs montserrat-semibold rounded-[50px]   ${assignedToMeActive
+                                                            ? "bglightgreen-btn"
+                                                            : "bg-white hover:bg-custom-lightestgreen"
+                                                        }
+                                        `}
+                                                >
+                                                    Assigned to me
+                                                </p>
+                                            </button>
+                                        )}
                                     {dayButtonLabels.map((label) => (
                                         <button
                                             key={label}
                                             onClick={() =>
                                                 handleDayClick(label)
                                             }
-                                            className={`flex justify-center items-center  text-custom-lightgreen h-[25px] rounded-[55px] p-[2px] ${
-                                                activeDayButton === label
+                                            className={`flex justify-center items-center  text-custom-lightgreen h-[25px] rounded-[55px] p-[2px] ${activeDayButton === label
                                                     ? "bglightgreen-btn hover:bg-custom-lightgreen"
                                                     : "gradient-btn2hover border-custom-lightgreen"
-                                            } hover:bg-custom-lightestgreen ${
-                                                label === "3+ Days"
+                                                } hover:bg-custom-lightestgreen ${label === "3+ Days"
                                                     ? "w-[76px]"
                                                     : label === "2 Days"
-                                                    ? "w-[69px]"
-                                                    : "w-[60px]"
-                                            }`}
+                                                        ? "w-[69px]"
+                                                        : "w-[60px]"
+                                                }`}
                                         >
                                             <p
                                                 className={`h-full w-full flex justify-center items-center text-xs montserrat-semibold rounded-[50px]
-                                            ${
-                                                activeDayButton === label
-                                                    ? "bglightgreen-btn"
-                                                    : "bg-white hover:bg-custom-lightestgreen"
-                                            }
+                                            ${activeDayButton === label
+                                                        ? "bglightgreen-btn"
+                                                        : "bg-white hover:bg-custom-lightestgreen"
+                                                    }
                                             `}
                                             >
                                                 {label}
