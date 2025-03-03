@@ -189,7 +189,7 @@ export const UnitProvider = ({ children }) => {
                     property_masters_id: data[0]?.property_masters_id,
                     price_list_master_id: data[0]?.price_list_master_id,
                 };
-
+                console.log("payload 192", payload);
                 const response = await unitService.saveComputedUnitPricingData(
                     payload
                 );
@@ -205,8 +205,9 @@ export const UnitProvider = ({ children }) => {
     // Update computed prices and trigger save
     const updateUnitComputedPrices = useCallback(
         (newPrices) => {
+            console.log("it runs here");
             setComputedUnitPrices(newPrices);
-            // saveComputedUnitPricingData(newPrices);
+            saveComputedUnitPricingData(newPrices);
         },
         [saveComputedUnitPricingData]
     );

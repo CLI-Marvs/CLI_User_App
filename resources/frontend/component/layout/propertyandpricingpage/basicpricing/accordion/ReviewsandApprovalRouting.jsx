@@ -24,6 +24,7 @@ const ReviewsandApprovalRouting = ({
     toggleAccordion,
     propertyData,
     isReviewAndApprovalAccordionOpen,
+    action
 }) => {
     //States
     const [type, setModalType] = useState(null);

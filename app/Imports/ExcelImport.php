@@ -7,6 +7,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Hash;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithBatchInserts;
 use Maatwebsite\Excel\Concerns\WithChunkReading;
@@ -87,6 +88,7 @@ class ExcelImport implements ToModel, WithHeadingRow, WithChunkReading, WithBatc
             'excel_id' => $this->excelId,
             'status' => $this->status,
             'price_list_master_id' => $this->priceListMasterId,
+            'created_at' => Carbon::now(),
         ];
 
         // // Perform batch insert every 500 rows

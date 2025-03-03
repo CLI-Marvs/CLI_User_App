@@ -292,7 +292,7 @@ const BasicPricing = () => {
         return basePrice ? basePrice * 0.5 : 0; // Compute 50%
     }, [pricingData.priceListSettings?.base_price]);
 
-    //Compute the effective base price
+    //Compute the effective base price, effective balcony base, and transfer charge, vat, vatable list price, reservation fee, total contract price
     const computedEffectiveBasePrice = useMemo(() => {
         return units.map((unit) => {
             // Get Base Price
@@ -301,10 +301,10 @@ const BasicPricing = () => {
 
             // Get Floor Premium for the unit’s floor
             const floorPremium = pricingData.floorPremiums[unit.floor];
-
             const floorPremiumCost = floorPremium
                 ? parseFloat(floorPremium.premiumCost) || 0
                 : 0;
+             
 
             const additionalPremiumCost = [
                 ...(pricingData.selectedAdditionalPremiums || []),
@@ -332,7 +332,7 @@ const BasicPricing = () => {
 
                 return total + premiumTotal;
             }, 0);
-
+          
             // Compute Effect base price
             const effective_base_price =
                 basePrice + floorPremiumCost + additionalPremiumCost || 0;
@@ -387,12 +387,16 @@ const BasicPricing = () => {
             };
         });
     }, [
-        pricingData,
         units,
         pricingData.priceListSettings?.base_price,
+        pricingData.priceListSettings?.effective_balcony_base,
+        pricingData.priceListSettings?.transfer_charge,
+        pricingData.priceListSettings?.vat,
+        pricingData.priceListSettings?.vatable_less_price,
+        pricingData.priceListSettings?.reservation_fee,
         pricingData.floorPremiums,
         pricingData.selectedAdditionalPremiums,
-        pricingData.additionalPremium,
+        pricingData.additionalPremiums,
     ]);
 
     useEffect(() => {
@@ -407,13 +411,6 @@ const BasicPricing = () => {
 
     useEffect(() => {
         if (units.length > 0) {
-            // //setUnits(computedEffectiveBasePrice);
-            // console.log("units", units);
-            // console.log(
-            //     "computedEffectiveBasePrice",
-            //     computedEffectiveBasePrice
-            // );
-            // console.log("[pricingData]", pricingData);
             updateUnitComputedPrices(computedEffectiveBasePrice);
         }
     }, [computedEffectiveBasePrice, updateUnitComputedPrices]);
@@ -592,7 +589,7 @@ const BasicPricing = () => {
                     );
                 if (units.length > 0) {
                     await saveComputedUnitPricingData(computedUnitPrices);
-                }
+                } 
                 console.log("response", response);
                 if (response?.status === 201 || response?.status === 200) {
                     showToast(
@@ -644,7 +641,7 @@ const BasicPricing = () => {
 
                 const response =
                     await priceListMasterService.storePriceListMasters(payload);
-                console.log("response 235", response);
+                console.log("response 235", response); 
                 if (units.length > 0) {
                     await saveComputedUnitPricingData(computedUnitPrices);
                 }
@@ -792,6 +789,7 @@ const BasicPricing = () => {
                 />
 
                 <ReviewsandApprovalRouting
+                    action={action}
                     propertyData={propertyData}
                     isReviewAndApprovalAccordionOpen={
                         isReviewAndApprovalAccordionOpen
