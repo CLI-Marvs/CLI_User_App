@@ -799,6 +799,8 @@ export const ContextProvider = ({ children }) => {
         month,
         project,
         year,
+        startDate,
+        endDate,
         departmentStatusYear,
         inquiriesPerCategoryYear,
         inquiriesPerPropertyYear,
