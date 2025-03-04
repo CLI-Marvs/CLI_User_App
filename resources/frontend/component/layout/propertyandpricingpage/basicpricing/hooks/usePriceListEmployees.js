@@ -2,14 +2,16 @@ import { useState } from "react";
 import { usePricing } from "@/component/layout/propertyandpricingpage/basicpricing/context/BasicPricingContext";
 
 const usePriceListEmployees = () => {
-    const [approvedByEmployees, setApprovedByEmployees] = useState([]);
-    const [reviewedByEmployees, setReviewedByEmployees] = useState([]);
-    const { setPricingData } = usePricing();
+    const { setPricingData, pricingData } = usePricing();
+    const [approvedByEmployees, setApprovedByEmployees] = useState(
+        pricingData.approvedByEmployees
+    );
+    const [reviewedByEmployees, setReviewedByEmployees] = useState(
+        pricingData.reviewedByEmployees
+    );
 
     //Handle remove the selected employee
-    const handleRemoveEmployee = (employee, type) => {
-        const employeeId = employee.id;
-
+    const handleRemoveEmployee = (employeeId, type) => {
         if (type === "reviewedByEmployees") {
             setReviewedByEmployees((prevEmployees) => {
                 const updatedEmployees = prevEmployees.filter(
@@ -24,6 +26,19 @@ const usePriceListEmployees = () => {
 
                 return updatedEmployees;
             });
+            // Create new array excluding the employee with matching ID
+            // const updatedEmployees = reviewedByEmployees.filter(
+            //     (emp) => emp.id !== employeeId
+            // );
+
+            // // Update state with the filtered array
+            // setReviewedByEmployees(updatedEmployees);
+
+            // // Also update pricingData
+            // setPricingData((prev) => ({
+            //     ...prev,
+            //     reviewedByEmployees: updatedEmployees,
+            // }));
         } else {
             setApprovedByEmployees((prevEmployees) => {
                 const updatedEmployees = prevEmployees.filter(

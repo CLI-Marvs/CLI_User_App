@@ -30,6 +30,7 @@ const ReviewsandApprovalRouting = ({
     //States
     const [type, setModalType] = useState(null);
     const { pricingData } = usePricing();
+    console.log('pricingData', pricingData)
     const reviewerApproverModalRef = useRef(null);
     const [selectedVersion, setSelectedVersion] = useState(null);
     const { user } = useStateContext();
@@ -52,7 +53,7 @@ const ReviewsandApprovalRouting = ({
     const { handleRemoveEmployee } = usePriceListEmployees();
 
     //Hooks
-    /**
+    /*
      * This hooks, map the price_versions from propertyData to subHeaders and priceVersions
      */
     useEffect(() => {
@@ -643,7 +644,7 @@ const ReviewsandApprovalRouting = ({
                                                         <IoIosCloseCircle
                                                             onClick={() =>
                                                                 handleRemoveEmployee(
-                                                                    emp,
+                                                                    emp.id,
                                                                     "reviewedByEmployees"
                                                                 )
                                                             }
@@ -689,7 +690,7 @@ const ReviewsandApprovalRouting = ({
                                                         <IoIosCloseCircle
                                                             onClick={() =>
                                                                 handleRemoveEmployee(
-                                                                    emp,
+                                                                    emp.id,
                                                                     "approvedByEmployees"
                                                                 )
                                                             }

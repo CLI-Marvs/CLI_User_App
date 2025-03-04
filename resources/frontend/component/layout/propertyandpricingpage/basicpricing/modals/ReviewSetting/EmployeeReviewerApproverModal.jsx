@@ -32,11 +32,8 @@ const EmployeeReviewerApproverModal = ({
     //Hooks
     useEffect(() => {
         if (type === "reviewedByEmployees") {
-            console.log("it runs 35")
             setReviewedByEmployees(pricingData.reviewedByEmployees || []);
         } else {
-            console.log("it runs 38", pricingData);
-
             setApprovedByEmployees(pricingData.approvedByEmployees || []);
         }
         if (!type) {
@@ -57,19 +54,22 @@ const EmployeeReviewerApproverModal = ({
         if (!allEmployees) return [];
 
         return allEmployees.filter((employee) => {
-            // Create sets of reviewer and approver IDs for faster lookups
-            const reviewerAndApproverIds = new Set([
-                ...pricingData.reviewedByEmployees.map(
-                    (reviewer) => reviewer.id
-                ),
-                ...pricingData.approvedByEmployees.map(
-                    (approver) => approver.id
-                ),
-            ]);
+            const isAlreadyReviewer = pricingData.reviewedByEmployees.some(
+                (reviewer) => reviewer.id === employee.id
+            );
+            const isAlreadyApprover = pricingData.approvedByEmployees.some(
+                (approver) => approver.id === employee.id
+            );
 
-            // Skip employees who are already in reviewedByEmployees or approvedByEmployees
-            if (reviewerAndApproverIds.has(employee.id)) return false;
+            if (type === "approvedByEmployees") {
+                // Exclude employees who are in reviewedByEmployees but KEEP those in approvedByEmployees
+                if (isAlreadyReviewer) return false;
+            } else if (type === "reviewedByEmployees") {
+                //  Exclude employees who are in approvedByEmployees but KEEP those in reviewedByEmployees
+                if (isAlreadyApprover) return false;
+            }
 
+            // Apply search filtering logic
             const firstName = employee?.firstname?.toLowerCase() || "";
             const lastName = employee?.lastname?.toLowerCase() || "";
             const employeeDepartment = employee?.department
@@ -83,7 +83,13 @@ const EmployeeReviewerApproverModal = ({
                 employeeDepartment.includes(searchTerm)
             );
         });
-    }, [searchEmployee, allEmployees]);
+    }, [
+        searchEmployee,
+        allEmployees,
+        pricingData.reviewedByEmployees,
+        pricingData.approvedByEmployees,
+        type,
+    ]);
 
     //Event handler
     //Handle the change event of the searchEmployee input
@@ -212,7 +218,7 @@ const EmployeeReviewerApproverModal = ({
                                                 className="ml-2 pb-[2px] border border-white text-[15px] text-white bg-custom-solidgreen rounded-full h-5 w-5 flex items-center justify-center"
                                                 onClick={(e) =>
                                                     handleRemoveEmployee(
-                                                        emp,
+                                                        emp.id,
                                                         type
                                                     )
                                                 }
@@ -235,7 +241,10 @@ const EmployeeReviewerApproverModal = ({
                                         <span>{emp.name}</span>
                                         <button
                                             onClick={(e) =>
-                                                handleRemoveEmployee(emp, type)
+                                                handleRemoveEmployee(
+                                                    emp.id,
+                                                    type
+                                                )
                                             }
                                             className="ml-2 pb-[2px] border border-white text-[15px] text-white bg-custom-solidgreen rounded-full h-5 w-5 flex items-center justify-center"
                                         >
@@ -259,10 +268,10 @@ const EmployeeReviewerApproverModal = ({
                         >
                             <ul className="flex flex-col space-y-2 max-h-[500px] overflow-auto  ">
                                 {filteredEmployees &&
-                                    filteredEmployees.map((item, index) => {
+                                    filteredEmployees.map((item) => {
                                         return (
                                             <li
-                                                key={index}
+                                                key={item.id}
                                                 className="flex h-[110px] w-full py-[20px] px-[30px] gap-[18px] bg-custom-lightestgreen rounded-[10px]"
                                             >
                                                 <div className="flex items-start py-[5px]">
