@@ -9,6 +9,7 @@ import { propertyMasterService } from "@/component/servicesApi/apiCalls/property
 import { usePriceListMaster } from "@/context/PropertyPricing/PriceListMasterContext";
 import { useProperty } from "@/context/PropertyPricing/PropertyContext";
 import { useUnit } from "@/context/PropertyPricing/UnitContext";
+import { toLowerCaseText } from "@/component/layout/propertyandpricingpage/utils/formatToLowerCase";
 
 const formDataState = {
     propertyName: "",
@@ -144,7 +145,7 @@ const AddPropertyModal = ({ propertyModalRef }) => {
                                             key={property.id}
                                             value={property.id}
                                         >
-                                            {property.name}
+                                            {toLowerCaseText(property.name)}
                                         </option>
                                     ))}
                                 </select>
