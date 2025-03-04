@@ -68,7 +68,7 @@ const Navbar = () => {
             );
 
             if (value.toLowerCase() === "inquirymanagement") {
-                breadcrumbLabel = "Inquiry Management";
+                breadcrumbLabel = "Customer Relations";
                 // Non-linkable
                 return (
                     <span
@@ -144,6 +144,11 @@ const Navbar = () => {
                     </span>
                 );
             }
+
+            if (value.toLowerCase() === "report") {
+                breadcrumbLabel = "Reports";
+            }
+            
             if (value.toLowerCase() === "sales") {
                 breadcrumbLabel = "Sales Management";
                 // Non-linkable
@@ -193,7 +198,7 @@ const Navbar = () => {
                breadcrumbLabel = "User Rights & Permissions";
             }
             if (value.toLowerCase() === "inquirylist") {
-                breadcrumbLabel = "Inquiries";
+                breadcrumbLabel = "Feedback";
             }
 
             if (value.toLowerCase() === "sales/customer") {
@@ -204,7 +209,7 @@ const Navbar = () => {
             }
 
             if (value.toLowerCase() === "thread") {
-                breadcrumbLabel = "Inquiries";
+                breadcrumbLabel = "Feedback";
                 return (
                     <Link
                         key={routeTo}

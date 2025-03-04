@@ -842,7 +842,7 @@ const ReportPage = () => {
                 <div className="flex gap-[10px] flex-wrap">
                     <div className="relative flex border w-max border-custom-lightgreen rounded-[5px] shrink-0 z-10">
                         <span className="text-white bg-custom-lightgreen text-sm flex items-center w-max px-[15px] pl-3 py-1 shrink-0">
-                            Filter by duration
+                            By Date Range
                         </span>
                         <span className="border-l border-white text-white bg-custom-lightgreen text-sm flex items-center w-max px-[15px] pl-3 py-1 shrink-0">
                             From
