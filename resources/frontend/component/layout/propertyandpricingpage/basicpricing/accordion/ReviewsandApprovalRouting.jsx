@@ -9,6 +9,10 @@ import CircularProgress from "@mui/material/CircularProgress";
 import { useStateContext } from "@/context/contextprovider";
 import EmployeeReviewerApproverModal from "@/component/layout/propertyandpricingpage/basicpricing/modals/ReviewSetting/EmployeeReviewerApproverModal";
 import { toLowerCaseText } from "@/component/layout/propertyandpricingpage/utils/formatToLowerCase";
+import { usePropertyPricing } from "@/component/layout/propertyandpricingpage/basicpricing/hooks/usePropertyPricing";
+import { formatPayload } from "@/component/layout/propertyandpricingpage/basicpricing/utils/payloadFormatter";
+import { showToast } from "@/util/toastUtil";
+import { usePriceListMaster } from "@/context/PropertyPricing/PriceListMasterContext";
 
 const staticHeaders = [
     "Floor",
@@ -25,18 +29,27 @@ const ReviewsandApprovalRouting = ({
     isOpen,
     toggleAccordion,
     propertyData,
+    data,
+    action,
     isReviewAndApprovalAccordionOpen,
 }) => {
     //States
+    const { fetchPropertyListMasters } = usePriceListMaster();
     const [type, setModalType] = useState(null);
-    const { pricingData } = usePricing();
+    const { pricingData, resetPricingData } = usePricing();
     const reviewerApproverModalRef = useRef(null);
     const [selectedVersion, setSelectedVersion] = useState(null);
     const { user } = useStateContext();
     const [isExcelDownloading, setIsExcelDownloading] = useState(false);
     const [exportPricingData, setExportPricingData] = useState([]);
-    const { units, excelId, excelIdFromPriceList, computedUnitPrices } =
-        useUnit();
+    const {
+        setFloorPremiumsAccordionOpen,
+        units,
+        excelId,
+        excelIdFromPriceList,
+        computedUnitPrices,
+        checkExistingUnits,
+    } = useUnit();
     const [priceVersions, setPriceVersions] = useState([]);
     const [subHeaders, setSubHeaders] = useState([]);
     const headers = [
@@ -54,7 +67,17 @@ const ReviewsandApprovalRouting = ({
         setApprovedByEmployees,
         setReviewedByEmployees,
     } = usePriceListEmployees();
-
+    const { isLoading, buildSubmissionPayload, handleSubmit } =
+        usePropertyPricing(
+            user,
+            data,
+            formatPayload,
+            pricingData,
+            resetPricingData,
+            showToast,
+            fetchPropertyListMasters,
+            checkExistingUnits
+        );
     //Hooks
     /*
      * This effect maps the price_versions from propertyData to subHeaders and priceVersions.
@@ -205,6 +228,10 @@ const ReviewsandApprovalRouting = ({
         setSelectedVersion(value);
     };
 
+    //Handle form submit
+    const handleFormSubmit = (e, status) => {
+        handleSubmit(e, status, action, excelId, setFloorPremiumsAccordionOpen);
+    };
     return (
         <>
             <div
@@ -730,12 +757,28 @@ const ReviewsandApprovalRouting = ({
                         </div>
 
                         <div className="flex gap-1 justify-center">
-                            <button className="h-[37px] w-[176px] rounded-[10px] text-white montserrat-semibold text-sm gradient-btn5 hover:shadow-custom4">
-                                Submit for Approval
+                            <button
+                                className="h-[37px] w-[176px] rounded-[10px] text-white montserrat-semibold text-sm gradient-btn5 hover:shadow-custom4"
+                                onClick={(e) =>
+                                    handleFormSubmit(e, "On-going Approval")
+                                }
+                            >
+                                {isLoading["On-going Approval"] ? (
+                                    <CircularProgress className="spinnerSize" />
+                                ) : (
+                                    <> Submit for Approval </>
+                                )}
                             </button>
-                            <button className="h-[37px] w-[117px] rounded-[10px] text-custom-solidgreen montserrat-semibold text-sm gradient-btn5 hover:shadow-custom4 p-[3px]">
+                            <button
+                                className="h-[37px] w-[117px] rounded-[10px] text-custom-solidgreen montserrat-semibold text-sm gradient-btn5 hover:shadow-custom4 p-[3px]"
+                                onClick={(e) => handleFormSubmit(e, "Draft")}
+                            >
                                 <div className="flex justify-center items-center h-full w-full rounded-[8px] bg-white">
-                                    Save as Draft
+                                    {isLoading["Draft"] ? (
+                                        <CircularProgress className="spinnerSize" />
+                                    ) : (
+                                        <>Save as Draft</>
+                                    )}
                                 </div>
                             </button>
                         </div>
