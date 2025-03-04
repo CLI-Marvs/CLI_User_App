@@ -1103,7 +1103,7 @@ const InquiryList = () => {
                                 onClick={toggleDropdown}
                             >
                                 {isOpen ? <IoIosArrowUp /> : <IoIosArrowDown />}{" "}
-                                {resultSearchActive || daysActive || assignedToMeActive ? (
+                                {resultSearchActive || daysActive || assignedToMeActive ? ( 
                                     dataCount && dataCount === 0 ? (
                                         <p>No Records Found</p>
                                     ) : (
