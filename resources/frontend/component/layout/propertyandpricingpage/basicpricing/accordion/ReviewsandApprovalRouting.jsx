@@ -136,7 +136,6 @@ const ReviewsandApprovalRouting = ({
         });
 
         setPriceVersions(propertyData.price_versions);
-
         //Update export pricing data with the latest computed unit prices
         setExportPricingData((prev) => ({
             ...prev,
@@ -155,11 +154,9 @@ const ReviewsandApprovalRouting = ({
             const payload = {
                 project_name: propertyData?.property_name,
                 building: propertyData?.tower_phase_name,
-                // units: units,
-                // priceVersions: priceVersions,
                 exportPricingData: exportPricingData,
+                selectedVersion: selectedVersion,
             };
-            console.log("payload", payload);
 
             setIsExcelDownloading(true);
             const response =
@@ -261,14 +258,14 @@ const ReviewsandApprovalRouting = ({
                         <div className="w-28">
                             {isExcelDownloading ? (
                                 <CircularProgress className="spinnerSize h-6 w-6" />
-                            ) : (
+                            ) : computedUnitPrices.length > 0 ? (
                                 <p
                                     className="underline text-blue-500 text-sm cursor-pointer"
                                     onClick={handleDownloadExcel}
                                 >
                                     Download Excel
                                 </p>
-                            )}
+                            ) : null}
                         </div>
                         <div className="h-[400px] overflow-auto">
                             <div className="">
