@@ -30,7 +30,6 @@ const ReviewsandApprovalRouting = ({
     //States
     const [type, setModalType] = useState(null);
     const { pricingData } = usePricing();
-    console.log('pricingData', pricingData)
     const reviewerApproverModalRef = useRef(null);
     const [selectedVersion, setSelectedVersion] = useState(null);
     const { user } = useStateContext();
@@ -50,16 +49,21 @@ const ReviewsandApprovalRouting = ({
     const hasPricingHeaders = subHeaders?.pricingHeaders?.length > 0;
     // Check if we have version headers
     const hasVersionHeaders = subHeaders?.versionHeaders?.length > 0;
-    const { handleRemoveEmployee } = usePriceListEmployees();
+    const {
+        handleRemoveEmployee,
+        setApprovedByEmployees,
+        setReviewedByEmployees,
+    } = usePriceListEmployees();
 
     //Hooks
     /*
-     * This hooks, map the price_versions from propertyData to subHeaders and priceVersions
+     * This effect maps the price_versions from propertyData to subHeaders and priceVersions.
+     * It also initializes selectedVersion, pricing headers, and employee selections.
      */
     useEffect(() => {
         if (!propertyData?.price_versions) return;
 
-        // If no version is selected, set the default version to the one with priority_number === 1
+        // If no version is selected, set the default to the one with priority_number === 1
         setSelectedVersion((prev) => {
             if (!prev) {
                 const priorityVersion = propertyData.price_versions.find(
@@ -70,12 +74,14 @@ const ReviewsandApprovalRouting = ({
             return prev;
         });
 
+        // Extract percent increase headers
         const percentIncreaseHeaders = propertyData.price_versions
             .map((item) => item.percent_increase)
             .filter(Boolean);
 
+        //Filter payment schemes dynamically based on the selected version
         const paymentSchemeHeaders = propertyData.price_versions
-            .filter((item) => item.version_name === selectedVersion) // Dynamically update based on selection
+            .filter((item) => item.version_name === selectedVersion)
             .flatMap(
                 (item) =>
                     item.payment_schemes?.map(
@@ -98,6 +104,7 @@ const ReviewsandApprovalRouting = ({
                 "pricelist_master_id",
             ]);
 
+            // Extract pricing headers, format them
             pricingHeaders = [
                 "List price w/ VAT",
                 ...Object.keys(priceDetails)
@@ -121,6 +128,7 @@ const ReviewsandApprovalRouting = ({
             ];
         }
 
+        //Set headers and price versions
         setSubHeaders({
             paymentSchemeHeaders,
             percentIncreaseHeaders,
@@ -129,13 +137,17 @@ const ReviewsandApprovalRouting = ({
 
         setPriceVersions(propertyData.price_versions);
 
+        //Update export pricing data with the latest computed unit prices
         setExportPricingData((prev) => ({
             ...prev,
             ...pricingData,
             units: computedUnitPrices,
         }));
-    }, [propertyData, units, selectedVersion]);
 
+        //Initialize selected employees, ensuring the state never holds null values
+        setReviewedByEmployees(pricingData.reviewedByEmployees || []);
+        setApprovedByEmployees(pricingData.approvedByEmployees || []);
+    }, [propertyData, units, selectedVersion]);
 
     //Event handlers
     const handleDownloadExcel = async () => {
@@ -192,7 +204,7 @@ const ReviewsandApprovalRouting = ({
 
     //Handle select version
     const handleSelectVersion = (e) => {
-        const {value } = e.target;
+        const { value } = e.target;
         setSelectedVersion(value);
     };
 
@@ -368,8 +380,8 @@ const ReviewsandApprovalRouting = ({
                                                     </th>
                                                 )}
                                                 <th
-                                                    colSpan={subHeaders
-                                                            .paymentSchemeHeaders && 
+                                                    colSpan={
+                                                        subHeaders.paymentSchemeHeaders &&
                                                         subHeaders
                                                             .paymentSchemeHeaders
                                                             .length
