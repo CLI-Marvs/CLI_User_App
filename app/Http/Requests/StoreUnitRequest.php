@@ -25,6 +25,10 @@ class StoreUnitRequest extends FormRequest
         //Request if the user ADD UNIT from excel
         if ($method === 'store') {
             return [
+                'excelDataRows' => 'required|array',
+                'excelDataRows.*' => 'required|array',
+                'excelDataRows.*.*' => 'sometimes|nullable',
+
                 'headers' => 'required|array',
                 'headers.*.rowHeader' => 'required|string',
                 'headers.*.columnIndex' => 'required|integer|min:1|max:8',

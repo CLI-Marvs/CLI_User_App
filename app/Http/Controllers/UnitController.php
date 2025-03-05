@@ -34,8 +34,19 @@ class UnitController extends Controller
     public function store(StoreUnitRequest $request)
     {
         $validatedData = $request->validated();
+        // $excelDataRows = $validatedData['excelDataRows'];
+
+        // // Ensure each row has all columns (including `null` values)
+        // $normalizedRows = array_map(function ($row) {
+        //     return array_replace(array_fill(0, 8, null), $row);
+        // }, $excelDataRows);
+
+        // // Update the validated data
+        // $validatedData['excelDataRows'] = $normalizedRows;
+
         try {
             $result = $this->service->store($validatedData);
+            
             return response()->json([
                 'message' => $result['message'],
                 'data' => $result['excel_id'],
@@ -166,5 +177,4 @@ class UnitController extends Controller
             ], 422);
         }
     }
-
 }

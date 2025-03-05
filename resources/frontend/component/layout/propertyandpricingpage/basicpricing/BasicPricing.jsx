@@ -9,10 +9,8 @@ import FloorPremiums from "./accordion/FloorPremiums";
 import { useLocation } from "react-router-dom";
 import UploadUnitDetailsModal from "./modals/UploadUnitDetailsModal";
 import { useStateContext } from "../../../../context/contextprovider";
-import { priceListMasterService } from "@/component/servicesApi/apiCalls/propertyPricing/priceListMaster/priceListMasterService";
 import expectedHeaders from "@/constant/data/excelHeader";
 import * as XLSX from "xlsx";
-import { useNavigate } from "react-router-dom";
 import { usePricing } from "@/component/layout/propertyandpricingpage/basicpricing/context/BasicPricingContext";
 import { formatPayload } from "@/component/layout/propertyandpricingpage/basicpricing/utils/payloadFormatter";
 import { showToast } from "@/util/toastUtil";
@@ -46,7 +44,6 @@ const additionalPremiums = [
 
 const BasicPricing = () => {
     //State
-    const navigate = useNavigate();
     const { user } = useStateContext();
     const modalRef = useRef(null);
     const uploadUnitModalRef = useRef(null);
@@ -55,11 +52,11 @@ const BasicPricing = () => {
     const { data = {}, action = null } = location.state || {};
     const [propertyData, setPropertyData] = useState();
     const [fileName, setFileName] = useState("");
+    const [excelDataRows, setExcelDataRows] = useState([]);
     const [fileSelected, setFileSelected] = useState({});
     const [selectedExcelHeader, setSelectedExcelHeader] = useState([]);
     const { pricingData, resetPricingData, setPricingData } = usePricing();
     const { fetchPropertyListMasters } = usePriceListMaster();
-    // const [isLoading, setIsLoading] = useState({});
     const {
         checkExistingUnits,
         floors,
@@ -98,6 +95,9 @@ const BasicPricing = () => {
             fetchPropertyListMasters,
             checkExistingUnits
         );
+    
+    
+    
     //Hooks
     /**
      * Hook to update pricing data based on incoming 'data' prop.
@@ -459,6 +459,23 @@ const BasicPricing = () => {
         }
     };
 
+    //Handle close the unit upload modal
+    const handleClose = () => {
+        // Reset file input field
+        if (fileInputRef.current) {
+            fileInputRef.current.value = "";  
+        }
+
+        // Reset state variables
+        setFileName("");
+        setFileSelected({});
+
+        // Close modal
+        if (uploadUnitModalRef.current) {
+            uploadUnitModalRef.current.close();
+        }
+    };
+
     /**
      * Handles the process of uploading an Excel file, extracting the headers
      */
@@ -479,6 +496,17 @@ const BasicPricing = () => {
 
             const selectedHeaders = jsonData[0]; // First row contains headers
             const dataRows = jsonData.slice(1); // All rows after the first one
+            
+            // Normalize empty values to `null` and Remove empty rows
+            const normalizedDataRows = dataRows
+                .map((row) =>
+                    selectedHeaders.map((_, index) =>
+                        row[index] !== undefined ? row[index] : null
+                    )
+                )
+                .filter((row) => row.some((value) => value !== null)); // Remove completely empty rows
+
+            setExcelDataRows(normalizedDataRows);
 
             // Check for missing headers
             const missingHeaders = expectedHeaders.filter(
@@ -492,11 +520,11 @@ const BasicPricing = () => {
 
             // Notify user if missing headers are found
             if (missingHeaders.length > 0) {
-                //TODO: Convert this into Toast
-                alert(
+                showToast(
                     `Please check your Excel header row.\nMissing Headers: ${missingHeaders.join(
                         ", "
-                    )}`
+                    )}`,
+                    "warning"
                 );
                 setSelectedExcelHeader([]);
                 return;
@@ -504,11 +532,11 @@ const BasicPricing = () => {
 
             // Notify user if extra headers are found, but continue with expected headers
             if (extraHeaders.length > 0) {
-                //TODO: Convert this into Toast
-                alert(
+                showToast(
                     `Please check your Excel header row.\nExtra Headers: ${extraHeaders.join(
                         ", "
-                    )}\nProcessing will continue with expected headers only.`
+                    )}\nProcessing will continue with expected headers only.`,
+                    "warning"
                 );
             }
 
@@ -702,6 +730,7 @@ const BasicPricing = () => {
     const handleFormSubmit = (e, status) => {
         handleSubmit(e, status, action, excelId, setFloorPremiumsAccordionOpen);
     };
+
     return (
         <div className="h-screen max-w-[957px] min-w-[897px] bg-custom-grayFA px-[30px] ">
             {/* button ra if walay pa property */}
@@ -768,6 +797,8 @@ const BasicPricing = () => {
             />
             <div>
                 <UploadUnitDetailsModal
+                    excelDataRows={excelDataRows}
+                    onClose={handleClose}
                     propertyData={propertyData}
                     handleFileChange={handleFileChange}
                     uploadUnitModalRef={uploadUnitModalRef}

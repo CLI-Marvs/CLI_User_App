@@ -52,7 +52,7 @@ export const usePropertyPricing = (
         approvedByEmployeesPayload: pricingData?.approvedByEmployees,
         status: status,
     });
-
+ 
     /*
      * Handles in submitting all data in creating price master list
      */

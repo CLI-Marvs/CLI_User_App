@@ -6,31 +6,35 @@ import { showToast } from "@/util/toastUtil";
 import { usePriceListMaster } from "@/context/PropertyPricing/PriceListMasterContext";
 
 const UploadUnitDetailsModal = ({
+    excelDataRows,
     uploadUnitModalRef,
     fileName,
     selectedExcelHeader,
     fileSelected,
     handleFileChange,
     propertyData,
+    onClose
 }) => {
     //State
     const [formData, setFormData] = useState({});
     const newFileInputRef = useRef();
-    const [towerPhaseId, setTowerPhaseId] = useState();
+    // const [towerPhaseId, setTowerPhaseId] = useState();
     const [propertyMasterId, setPropertyMasterId] = useState();
     const [priceListMasterId, setPriceListMasterId] = useState();
     const {
         uploadUnits,
+        towerPhaseId,
         isUploadingUnits,
         fetchFloorCount,
         setFloors,
         setFloorPremiumsAccordionOpen,
     } = useUnit();
     const { priceListMaster } = usePriceListMaster();
-
+ 
     //Hooks
     useEffect(() => {
         if (selectedExcelHeader || propertyData) {
+            // console.log('selectedExcelHeader', selectedExcelHeader);
             const initialFormData = selectedExcelHeader.reduce((acc, item) => {
                 acc[item.rowHeader] = {
                     rowHeader: item.rowHeader,
@@ -39,10 +43,10 @@ const UploadUnitDetailsModal = ({
                 return acc;
             }, {});
 
-            const towerPhaseId =
-                propertyData?.data?.tower_phases[0]?.id ||
-                propertyData?.tower_phase_id;
-            
+            // const towerPhaseId =
+            //     propertyData?.data?.tower_phases[0]?.id ||
+            //     propertyData?.tower_phase_id;
+
             const priceListMasterId =
                 priceListMaster && priceListMaster.length > 0
                     ? priceListMaster.find(
@@ -50,7 +54,7 @@ const UploadUnitDetailsModal = ({
                       )?.price_list_master_id
                     : null;
             setFormData(initialFormData);
-            setTowerPhaseId(propertyData?.tower_phase_id || towerPhaseId);
+            // setTowerPhaseId(propertyData?.tower_phase_id || towerPhaseId);
             setPropertyMasterId(
                 propertyData?.property_commercial_detail?.property_master_id ||
                     propertyData?.data?.property_commercial_detail
@@ -80,12 +84,13 @@ const UploadUnitDetailsModal = ({
         e.preventDefault();
         const payload = {
             headers: Object.values(formData),
+            excelDataRows:excelDataRows,
             file: fileSelected,
             tower_phase_id: towerPhaseId,
             property_masters_id: propertyMasterId,
             price_list_master_id: priceListMasterId,
         };
-        console.log("payload",payload)
+        console.log("payload", payload);
         try {
             const response = await uploadUnits(payload);
             if (response?.success === true) {
@@ -114,10 +119,7 @@ const UploadUnitDetailsModal = ({
 
     //Handle close the unit upload modal
     const handleClose = () => {
-        //TODO: if close, reset the ref of file input field
-        if (uploadUnitModalRef.current) {
-            uploadUnitModalRef.current.close();
-        }
+        onClose();
     };
     return (
         <dialog

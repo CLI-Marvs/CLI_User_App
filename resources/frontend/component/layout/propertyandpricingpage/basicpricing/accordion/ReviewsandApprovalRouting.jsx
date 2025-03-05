@@ -35,13 +35,9 @@ const ReviewsandApprovalRouting = ({
 }) => {
     //States
     const { fetchPropertyListMasters } = usePriceListMaster();
-    const [type, setModalType] = useState(null);
     const { pricingData, resetPricingData } = usePricing();
     const reviewerApproverModalRef = useRef(null);
-    const [selectedVersion, setSelectedVersion] = useState(null);
     const { user } = useStateContext();
-    const [isExcelDownloading, setIsExcelDownloading] = useState(false);
-    const [exportPricingData, setExportPricingData] = useState([]);
     const {
         setFloorPremiumsAccordionOpen,
         units,
@@ -78,6 +74,11 @@ const ReviewsandApprovalRouting = ({
             fetchPropertyListMasters,
             checkExistingUnits
         );
+    const [type, setModalType] = useState(null);
+    const [selectedVersion, setSelectedVersion] = useState(null);
+    const [isExcelDownloading, setIsExcelDownloading] = useState(false);
+    const [exportPricingData, setExportPricingData] = useState([]);
+
     //Hooks
     /*
      * This effect maps the price_versions from propertyData to subHeaders and priceVersions.
@@ -115,7 +116,7 @@ const ReviewsandApprovalRouting = ({
         const priceDetails = propertyData.pricebasic_details;
         let pricingHeaders = [];
 
-        if (priceDetails.base_price !== 0) {
+        if (priceDetails && priceDetails.base_price !== 0) {
             const excludedKeys = new Set([
                 "id",
                 "created_at",
