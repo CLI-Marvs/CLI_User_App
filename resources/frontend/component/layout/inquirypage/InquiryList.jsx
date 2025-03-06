@@ -65,6 +65,10 @@ const InquiryList = () => {
         setStartDate,
         endDate,
         setEndDate,
+        setAssignedToMeActive,
+        assignedToMeActive,
+        
+
         /*  setHasAttachments,
         hasAttachments */
     } = useStateContext();
@@ -94,7 +98,7 @@ const InquiryList = () => {
     const [selectedMonth, setSelectedMonth] = useState("");
     const [hasAttachments, setHasAttachments] = useState(false);
     const { propertyNamesList } = useStateContext();
-    const [assignedToMeActive, setAssignedToMeActive] = useState(false);
+    
     const [isFilterVisible, setIsFilterVisible] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
     const [lastActivity, setLastActivity] = useState(null);

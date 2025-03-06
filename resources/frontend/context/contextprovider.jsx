@@ -29,6 +29,7 @@ export const ContextProvider = ({ children }) => {
     const [specificAssigneeCsr, setSpecificAssigneeCsr] = useState("");
     const [currentPage, setCurrentPage] = useState(0);
     const [selectedOption, setSelectedOption] = useState("All");
+    const [assignedToMeActive, setAssignedToMeActive] = useState(false);
 
     const [notifCurrentPage, setNotifCurrentPage] = useState(0);
     const [searchFilter, setSearchFilter] = useState({});
@@ -974,8 +975,11 @@ export const ContextProvider = ({ children }) => {
                 startDate,
                 setStartDate,
                 endDate,
-                setEndDate
-
+                setEndDate,
+                setAssignedToMeActive,
+                assignedToMeActive,
+                setSpecificAssigneeCsr,
+                specificAssigneeCsr,
             }}
         >
             {children}
