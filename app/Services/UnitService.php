@@ -2,8 +2,9 @@
 
 namespace App\Services;
 
-use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 use App\Models\Unit;
+use Illuminate\Support\Facades\DB;
 use App\Repositories\Implementations\UnitRepository;
 
 class UnitService
@@ -18,11 +19,65 @@ class UnitService
     }
 
     /* 
-     Store property data
+     Store unit from excel file
     */
-    public function store(array $data)
+    public function storeUnitFromExcel(array $data)
     {
-        return $this->repository->store($data);
+        // Increase PHP limits for this request
+        ini_set('max_execution_time', 300);
+        ini_set('memory_limit', '512M');
+
+        $excelRowsData = $data['excelDataRows'];
+        $propertyId = $data['property_masters_id'];
+        $towerPhaseId = $data['tower_phase_id'];
+        $priceListMasterId = $data['price_list_master_id'];
+        $excelId = 'Excel_' . md5(uniqid(rand(), true));
+
+        DB::beginTransaction();
+        try {
+            DB::disableQueryLog();
+
+            collect($excelRowsData)
+                ->chunk(500)
+                ->each(function ($chunk) use ($propertyId, $towerPhaseId, $priceListMasterId, $excelId) {
+                    $createdAt = Carbon::now()->toDateString();
+
+                    $formattedData = $chunk->map(function ($row) use ($propertyId, $towerPhaseId, $priceListMasterId, $excelId, $createdAt) {
+                        return [
+                            'floor' => $row[0],  
+                            'room_number' => $row[1],
+                            'unit' => $row[2],
+                            'type' => $row[3],
+                            'indoor_area' => $row[4],
+                            'balcony_area' => $row[5],
+                            'garden_area' => $row[6],
+                            'total_area' => $row[7],
+                            'status' => 'Active',
+                            'property_masters_id' => $propertyId,
+                            'tower_phase_id' => $towerPhaseId,
+                            'price_list_master_id' => $priceListMasterId,
+                            'excel_id' => $excelId,   
+                            'created_at' => $createdAt,
+                        ];
+                    });
+
+                    $this->model->insert($formattedData->toArray()); 
+                });
+
+            DB::commit();
+
+            return [
+                'success' => true,
+                'excel_id' => $excelId,
+                'message' => 'File uploaded successfully.'
+            ];
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return [
+                'success' => false,
+                'message' => 'Failed to insert unit: ' . $e->getMessage()
+            ];
+        }
     }
 
     /**
@@ -42,11 +97,7 @@ class UnitService
                 ->distinct('floor')
                 ->pluck('floor');
 
-            //Count the number of distinct floors
-            $count = $distinctFloors->count();
-
             return [
-                // $count,
                 $distinctFloors
             ];
         } catch (\Exception $e) {
@@ -56,16 +107,6 @@ class UnitService
                 'message' => 'Failed to count floor: ' . $e->getMessage()
             ], 500);
         }
-        // $distinctFloors = Unit::where('tower_phase_id', $towerPhaseId)
-        //     ->distinct('floor')
-        //     ->pluck('floor');
-
-        // //Count the number of distinct floors
-        // $count = $distinctFloors->count();
-        // return response()->json([
-        //     'count' => $count,
-        //     'floors' => $distinctFloors,
-        // ], 200);
     }
 
     /**
@@ -109,7 +150,7 @@ class UnitService
                     ->where('id', (int) $unit['id']) // Ensure 'id' is integer
                     ->where('status', 'Active')
                     ->update([
-                         
+
                         'floor' => (int) $unit['floor'],  // Cast to integer
                         'room_number' => (int) $unit['room_number'], // Cast to integer
                         'unit' => (string) $unit['unit'], // Ensure it's a string
@@ -148,5 +189,4 @@ class UnitService
             ];
         }
     }
-
 }

@@ -18,7 +18,22 @@ class Unit extends Model
     protected $casts = [
         'additional_premium_id' => 'array',
     ];
-
+    protected $fillable = [
+        'floor',
+        'room_number',
+        'unit',
+        'type',
+        'indoor_area',
+        'balcony_area',
+        'garden_area',
+        'total_area',
+        'property_masters_id',
+        'tower_phase_id',
+        'excel_id',
+        'status',
+        'price_list_master_id'
+    ];
+    
     public function additionalPremiums()
     {
         return $this->hasMany(AdditionalPremium::class);

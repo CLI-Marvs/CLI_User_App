@@ -13,7 +13,7 @@ use Maatwebsite\Excel\Concerns\WithBatchInserts;
 use Maatwebsite\Excel\Concerns\WithChunkReading;
 use Maatwebsite\Excel\Concerns\WithMultipleSheets;
 
-class ExcelImport implements ToModel, WithHeadingRow, WithChunkReading, WithBatchInserts
+class ExcelImport
 {
 
     private $table;
@@ -67,6 +67,7 @@ class ExcelImport implements ToModel, WithHeadingRow, WithChunkReading, WithBatc
      */
     public function model(array $row)
     {
+       
         $mappedData = $this->mapData($row);
         // Return null to skip invalid rows
         if (!$this->hasValidData($mappedData)) {
@@ -91,14 +92,10 @@ class ExcelImport implements ToModel, WithHeadingRow, WithChunkReading, WithBatc
             'created_at' => Carbon::now(),
         ];
 
-        // // Perform batch insert every 500 rows
-        // if (count($this->data) >= 500) {
-        //     DB::table($this->table)->insertOrIgnore($this->data);
-        //     $this->data = []; // Reset batch
-        // }
+
         $this->rowCount++;
 
-        if ($this->rowCount >= $this->batchSize()) {
+        if ($this->rowCount >= 500) {
             $this->insertBatch();
         }
 
@@ -134,27 +131,32 @@ class ExcelImport implements ToModel, WithHeadingRow, WithChunkReading, WithBatc
         return false;
     }
 
-    private function insertBatch(): void
+    // private function insertBatch(): void
+    // {
+    //     if (empty($this->data)) {
+    //         return;
+    //     }
+    //     try {
+    //         DB::beginTransaction();
+
+    //         // Use chunks for very large batches
+    //         foreach (array_chunk($this->data, 500) as $chunk) {
+    //             DB::table($this->table)->insert($chunk);
+    //         }
+
+    //         DB::commit();
+
+    //         // Clear the processed data
+    //         $this->data = [];
+    //         $this->rowCount = 0;
+    //     } catch (\Exception $e) {
+    //         DB::rollBack();
+    //     }
+    // }
+    private function insertBatch()
     {
-        if (empty($this->data)) {
-            return;
-        }
-        try {
-            DB::beginTransaction();
-
-            // Use chunks for very large batches
-            foreach (array_chunk($this->data, 500) as $chunk) {
-                DB::table($this->table)->insert($chunk);
-            }
-
-            DB::commit();
-
-            // Clear the processed data
-            $this->data = [];
-            $this->rowCount = 0;
-        } catch (\Exception $e) {
-            DB::rollBack();
-        }
+        DB::table($this->table)->insertOrIgnore($this->data);
+        $this->data = []; // Reset after batch insertion
     }
 
 
@@ -186,7 +188,7 @@ class ExcelImport implements ToModel, WithHeadingRow, WithChunkReading, WithBatc
      */
     public function batchSize(): int
     {
-        return 5000;
+        return 500;
     }
 
     /**
@@ -201,7 +203,7 @@ class ExcelImport implements ToModel, WithHeadingRow, WithChunkReading, WithBatc
      */
     public function chunkSize(): int
     {
-        return 5000;
+        return 500;
     }
 
     /**

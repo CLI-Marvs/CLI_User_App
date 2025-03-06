@@ -53,7 +53,6 @@ const BasicPricing = () => {
     const [propertyData, setPropertyData] = useState();
     const [fileName, setFileName] = useState("");
     const [excelDataRows, setExcelDataRows] = useState([]);
-    const [fileSelected, setFileSelected] = useState({});
     const [selectedExcelHeader, setSelectedExcelHeader] = useState([]);
     const { pricingData, resetPricingData, setPricingData } = usePricing();
     const { fetchPropertyListMasters } = usePriceListMaster();
@@ -468,7 +467,6 @@ const BasicPricing = () => {
 
         // Reset state variables
         setFileName("");
-        setFileSelected({});
 
         // Close modal
         if (uploadUnitModalRef.current) {
@@ -481,7 +479,6 @@ const BasicPricing = () => {
      */
     const handleFileChange = async (event) => {
         const file = event.target.files[0];
-        setFileSelected(file);
         setFileName(file.name);
         const reader = new FileReader();
 
@@ -804,7 +801,6 @@ const BasicPricing = () => {
                     uploadUnitModalRef={uploadUnitModalRef}
                     fileName={fileName}
                     selectedExcelHeader={selectedExcelHeader}
-                    fileSelected={fileSelected}
                 />
             </div>
             <div className="flex flex-col gap-1 w-full border-t-1 border-custom-lightestgreen py-4  ">

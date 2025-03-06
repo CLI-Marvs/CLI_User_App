@@ -20,7 +20,7 @@ export const UnitProvider = ({ children }) => {
     const [isUploadingUnits, setIsUploadingUnits] = useState(false);
     const [lastFetchedExcelId, setLastFetchedExcelId] = useState(null);
     const [computedUnitPrices, setComputedUnitPrices] = useState([]);
-
+ 
     /**
      * Fetches the count of floors for a given tower phase and excel ID.
      * It calls the unitService.countFloor method to retrieve the data.
@@ -126,8 +126,9 @@ export const UnitProvider = ({ children }) => {
             try {
                 setIsUploadingUnits(true);
                 const response = await unitService.storeUnit(payload);
+                console.log("response129",response)
                 if (response?.status === 201) {
-                    const newExcelId = response?.data?.data?.excel_id;
+                    const newExcelId = response?.data?.excel_id;
                     setExcelId(newExcelId);
                     return { success: true, excelId: newExcelId };
                 }

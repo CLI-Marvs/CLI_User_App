@@ -10,31 +10,29 @@ const UploadUnitDetailsModal = ({
     uploadUnitModalRef,
     fileName,
     selectedExcelHeader,
-    fileSelected,
     handleFileChange,
     propertyData,
-    onClose
+    onClose,
 }) => {
     //State
     const [formData, setFormData] = useState({});
     const newFileInputRef = useRef();
-    // const [towerPhaseId, setTowerPhaseId] = useState();
     const [propertyMasterId, setPropertyMasterId] = useState();
     const [priceListMasterId, setPriceListMasterId] = useState();
     const {
         uploadUnits,
         towerPhaseId,
         isUploadingUnits,
+        setIsUploadingUnits,
         fetchFloorCount,
         setFloors,
         setFloorPremiumsAccordionOpen,
     } = useUnit();
     const { priceListMaster } = usePriceListMaster();
- 
+
     //Hooks
     useEffect(() => {
         if (selectedExcelHeader || propertyData) {
-            // console.log('selectedExcelHeader', selectedExcelHeader);
             const initialFormData = selectedExcelHeader.reduce((acc, item) => {
                 acc[item.rowHeader] = {
                     rowHeader: item.rowHeader,
@@ -42,11 +40,6 @@ const UploadUnitDetailsModal = ({
                 };
                 return acc;
             }, {});
-
-            // const towerPhaseId =
-            //     propertyData?.data?.tower_phases[0]?.id ||
-            //     propertyData?.tower_phase_id;
-
             const priceListMasterId =
                 priceListMaster && priceListMaster.length > 0
                     ? priceListMaster.find(
@@ -54,7 +47,6 @@ const UploadUnitDetailsModal = ({
                       )?.price_list_master_id
                     : null;
             setFormData(initialFormData);
-            // setTowerPhaseId(propertyData?.tower_phase_id || towerPhaseId);
             setPropertyMasterId(
                 propertyData?.property_commercial_detail?.property_master_id ||
                     propertyData?.data?.property_commercial_detail
@@ -66,6 +58,7 @@ const UploadUnitDetailsModal = ({
             );
         }
     }, [selectedExcelHeader, propertyData]);
+
 
     //Event hander
     // Handle change in column selection
@@ -82,24 +75,30 @@ const UploadUnitDetailsModal = ({
     //Handle submit units from excel file
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        if (isUploadingUnits) return;
+        setIsUploadingUnits(true);
+
+
         const payload = {
-            headers: Object.values(formData),
-            excelDataRows:excelDataRows,
-            file: fileSelected,
+            excelDataRows: excelDataRows,
             tower_phase_id: towerPhaseId,
             property_masters_id: propertyMasterId,
             price_list_master_id: priceListMasterId,
         };
-        console.log("payload", payload);
+
         try {
             const response = await uploadUnits(payload);
+            console.log("response 110", response);
+
             if (response?.success === true) {
                 setFloors([]);
-                console.log("it runs here 93");
+
                 const floors = await fetchFloorCount(
                     towerPhaseId,
                     response?.excelId
                 );
+                console.log("floors 110", floors);
                 setFloors(floors);
                 showToast("Unit uploaded successfully", "success");
                 setFloorPremiumsAccordionOpen(true);
@@ -109,8 +108,10 @@ const UploadUnitDetailsModal = ({
             }
         } catch (error) {
             console.log("error uploading excel", error);
+             setIsUploadingUnits(false);
         }
     };
+    
 
     const replaceFile = async (event) => {
         // Trigger the `handleFileChange` function received from BasicPricing

@@ -28,11 +28,6 @@ class StoreUnitRequest extends FormRequest
                 'excelDataRows' => 'required|array',
                 'excelDataRows.*' => 'required|array',
                 'excelDataRows.*.*' => 'sometimes|nullable',
-
-                'headers' => 'required|array',
-                'headers.*.rowHeader' => 'required|string',
-                'headers.*.columnIndex' => 'required|integer|min:1|max:8',
-                'file' => 'required|file|mimes:csv,txt,xlsx|max:5120',
                 'tower_phase_id' => 'integer',
                 'property_masters_id' => 'integer',
                 'price_list_master_id' => 'integer',
