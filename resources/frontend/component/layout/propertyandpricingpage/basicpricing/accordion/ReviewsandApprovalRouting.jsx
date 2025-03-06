@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { IoIosArrowDown } from "react-icons/io";
+import { IoIosArrowDown, IoIosExpand } from "react-icons/io";
 import { IoMdArrowDropdown, IoIosCloseCircle } from "react-icons/io";
 import { usePricing } from "@/component/layout/propertyandpricingpage/basicpricing/context/BasicPricingContext";
 import { useUnit } from "@/context/PropertyPricing/UnitContext";
@@ -8,11 +8,13 @@ import { priceListMasterService } from "@/component/servicesApi/apiCalls/propert
 import CircularProgress from "@mui/material/CircularProgress";
 import { useStateContext } from "@/context/contextprovider";
 import EmployeeReviewerApproverModal from "@/component/layout/propertyandpricingpage/basicpricing/modals/ReviewSetting/EmployeeReviewerApproverModal";
+import ExpandableDataTable from "@/component/layout/propertyandpricingpage/basicpricing/modals/ReviewSetting/ExpandableDataTable";
 import { toLowerCaseText } from "@/component/layout/propertyandpricingpage/utils/formatToLowerCase";
 import { usePropertyPricing } from "@/component/layout/propertyandpricingpage/basicpricing/hooks/usePropertyPricing";
 import { formatPayload } from "@/component/layout/propertyandpricingpage/basicpricing/utils/payloadFormatter";
 import { showToast } from "@/util/toastUtil";
 import { usePriceListMaster } from "@/context/PropertyPricing/PriceListMasterContext";
+import CustomToolTip from "@/component/layout/mainComponent/Tooltip/CustomToolTip";
 
 const staticHeaders = [
     "Floor",
@@ -37,6 +39,7 @@ const ReviewsandApprovalRouting = ({
     const { fetchPropertyListMasters } = usePriceListMaster();
     const { pricingData, resetPricingData } = usePricing();
     const reviewerApproverModalRef = useRef(null);
+    const expandUnitTableViewRef = useRef(null);
     const { user } = useStateContext();
     const {
         setFloorPremiumsAccordionOpen,
@@ -63,17 +66,16 @@ const ReviewsandApprovalRouting = ({
         setApprovedByEmployees,
         setReviewedByEmployees,
     } = usePriceListEmployees();
-    const { isLoading, buildSubmissionPayload, handleSubmit } =
-        usePropertyPricing(
-            user,
-            data,
-            formatPayload,
-            pricingData,
-            resetPricingData,
-            showToast,
-            fetchPropertyListMasters,
-            checkExistingUnits
-        );
+    const { isLoading, handleSubmit } = usePropertyPricing(
+        user,
+        data,
+        formatPayload,
+        pricingData,
+        resetPricingData,
+        showToast,
+        fetchPropertyListMasters,
+        checkExistingUnits
+    );
     const [type, setModalType] = useState(null);
     const [selectedVersion, setSelectedVersion] = useState(null);
     const [isExcelDownloading, setIsExcelDownloading] = useState(false);
@@ -229,10 +231,18 @@ const ReviewsandApprovalRouting = ({
         setSelectedVersion(value);
     };
 
-    //Handle form submit
+    //Handle price list submit
     const handleFormSubmit = (e, status) => {
         handleSubmit(e, status, action, excelId, setFloorPremiumsAccordionOpen);
     };
+
+    //Handle open expand unit table view
+    const toggleExpandUnitTableView = () => {
+        if (expandUnitTableViewRef.current) {
+            expandUnitTableViewRef.current.showModal();
+        }
+    };
+
     return (
         <>
             <div
@@ -282,19 +292,37 @@ const ReviewsandApprovalRouting = ({
             overflow-auto`}
             >
                 <div className="  ">
-                    <div className="p-[20px] space-y-[10px] ">
-                        <div className="w-28">
-                            {isExcelDownloading ? (
-                                <CircularProgress className="spinnerSize h-6 w-6" />
-                            ) : computedUnitPrices.length > 0 ? (
-                                <p
-                                    className="underline text-blue-500 text-sm cursor-pointer"
-                                    onClick={handleDownloadExcel}
-                                >
-                                    Download Excel
-                                </p>
-                            ) : null}
-                        </div>
+                    <div className="p-[20px] space-y-[10px]">
+                        {units && computedUnitPrices.length > 0 && (
+                            <div className="justify-between flex items-center">
+                                {isExcelDownloading ? (
+                                    <CircularProgress className="spinnerSize h-6 w-6" />
+                                ) : computedUnitPrices.length > 0 ? (
+                                    <p
+                                        className="underline text-blue-500 text-sm cursor-pointer"
+                                        onClick={handleDownloadExcel}
+                                    >
+                                        Download Excel
+                                    </p>
+                                ) : null}
+
+                                <div className="px-5 text-black">
+                                    <CustomToolTip
+                                        text="Expand Table View"
+                                        position="left"
+                                    >
+                                        <button
+                                            onClick={toggleExpandUnitTableView}
+                                            aria-label="ExpandTableView"
+                                            className="flex items-center"
+                                        >
+                                            <IoIosExpand className="text-[25px]" />
+                                        </button>
+                                    </CustomToolTip>
+                                </div>
+                            </div>
+                        )}
+
                         <div className="h-[400px] overflow-auto">
                             <div className="">
                                 <h1 className="montserrat-semibold">
@@ -791,6 +819,17 @@ const ReviewsandApprovalRouting = ({
                     type={type}
                     onClose={handleCloseEmployeeReviewerApproverModal}
                     reviewerApproverModalRef={reviewerApproverModalRef}
+                />
+            </div>
+            <div>
+                <ExpandableDataTable
+                    hasVersionHeaders={hasVersionHeaders}
+                    hasPricingHeaders={hasPricingHeaders}
+                    subHeaders={subHeaders}
+                    headers={headers}
+                    staticHeaders={staticHeaders}
+                    computedUnitPrices={computedUnitPrices}
+                    expandUnitTableViewRef={expandUnitTableViewRef}
                 />
             </div>
         </>
