@@ -1,13 +1,11 @@
 import React, { useState, useRef, useEffect } from "react";
 import { IoIosArrowDown } from "react-icons/io";
-import { IoMdArrowDropdown } from "react-icons/io";
 import { FaRegTrashAlt } from "react-icons/fa";
 import FloorPremiumAssignModal from "../modals/FloorPremiumAssignModal";
 import CircularProgress from "@mui/material/CircularProgress";
 import { useUnit } from "@/context/PropertyPricing/UnitContext";
 import { usePricing } from "@/component/layout/propertyandpricingpage/basicpricing/context/BasicPricingContext";
 import { showToast } from "@/util/toastUtil";
-import { property } from "lodash";
 
 const newFloorState = {
     floor: null,
@@ -126,9 +124,28 @@ const FloorPremiums = ({ isOpen, toggleAccordion, propertyData }) => {
     }
 
     /**
-     * Handling the button click for adding a new floor
-     * If entered new floor (e.g.2 ) is already in the 'floor array' [floor=2], show an error toast
-     * Else, add to the floorPremiumFormData
+     * Handles the button click for adding a new floor premium configuration.
+     * Validates the input data, checks for existing floor entries, and updates the 'pricingData' state.
+     *
+     * @function handleAddNewFloor
+     * @returns {void}
+     *
+     * @description
+     * This function performs the following actions:
+     * 1.  Retrieves the 'floor', 'premiumCost', and 'excludedUnits' values from 'newFloorPremiumData'.
+     * 2.  Validates that both 'floor' and 'premiumCost' are provided. If not, displays an error toast and returns.
+     * 3.  Checks if 'pricingData.floorPremiums' is empty. If so, initializes it with the new floor data and updates the 'floors' array.
+     * 4.  Checks if the entered 'floor' already exists in 'pricingData.floorPremiums'. If it does, displays an error toast and returns.
+     * 5.  If the 'floor' does not exist, adds the new floor premium configuration to 'pricingData.floorPremiums'.
+     * 6.  Displays a success toast message indicating that the floor was added successfully.
+     * 7.  Resets the 'newFloorPremiumData' state to its initial state ('newFloorState').
+     *
+     * @requires {object} newFloorPremiumData - Contains the floor, premium cost, and excluded units for the new floor.
+     * @requires {object} pricingData - The current pricing data containing floor premiums and floors.
+     * @requires {function} setPricingData - State setter for updating 'pricingData'.
+     * @requires {function} showToast - Displays toast messages for errors and success.
+     * @requires {function} setNewFloorPremiumData - State setter for resetting 'newFloorPremiumData'.
+     * @requires {object} newFloorState - The initial state for 'newFloorPremiumData'.
      */
     const handleAddNewFloor = () => {
         const { floor, premiumCost, excludedUnits } = newFloorPremiumData;
@@ -182,16 +199,11 @@ const FloorPremiums = ({ isOpen, toggleAccordion, propertyData }) => {
         setNewFloorPremiumData(newFloorState);
     };
 
-    /*
-    Handle remove floor premium
-     */
+    //Handle remove floor premium
     const handleRemoveFloorPremium = (floorNumber) => {
-        console.log("handleRemoveFloorPremium", floorNumber);
-        console.log("pricingData", pricingData.floorPremiums);
-
         setPricingData((prevPricingData) => {
             const updatedFloorPremiums = { ...prevPricingData.floorPremiums };
-            delete updatedFloorPremiums[floorNumber]; // Remove the key from the object
+            delete updatedFloorPremiums[floorNumber];
 
             return {
                 ...prevPricingData,
@@ -302,7 +314,7 @@ const FloorPremiums = ({ isOpen, toggleAccordion, propertyData }) => {
                             <div className="w-auto">
                                 <p className="montserrat-regular text-center text-red-500">
                                     No units have been uploaded.
-                                    <span className="underline ml-2 text-blue-500">
+                                    <span className="underline ml-2 text-blue-500 w-80">
                                         {" "}
                                         Upload{" "}
                                     </span>

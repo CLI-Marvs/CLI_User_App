@@ -57,9 +57,7 @@ const ReviewsandApprovalRouting = ({
         ...(subHeaders?.pricingHeaders || []), // ["Transfer Charge", "Vatable Less Price", ...]
         ...(subHeaders?.paymentSchemeHeaders || []), // ["Payment Scheme 1", "Payment Scheme 2", ...]
     ];
-    // Check if we have pricing headers
     const hasPricingHeaders = subHeaders?.pricingHeaders?.length > 0;
-    // Check if we have version headers
     const hasVersionHeaders = subHeaders?.versionHeaders?.length > 0;
     const {
         handleRemoveEmployee,
@@ -293,7 +291,9 @@ const ReviewsandApprovalRouting = ({
             >
                 <div className="  ">
                     <div className="p-[20px] space-y-[10px]">
-                        {units && computedUnitPrices.length > 0 && (
+                        {(excelIdFromPriceList ||
+                            excelId ||
+                            computedUnitPrices.length > 0) && (
                             <div className="justify-between flex items-center">
                                 {isExcelDownloading ? (
                                     <CircularProgress className="spinnerSize h-6 w-6" />
@@ -694,33 +694,35 @@ const ReviewsandApprovalRouting = ({
                                 </div>
 
                                 {/*  Reviewed By */}
-                                <div className="w-[250px]">
-                                    {pricingData?.reviewedByEmployees &&
-                                        pricingData?.reviewedByEmployees.map(
-                                            (emp) => {
-                                                return (
-                                                    <div
-                                                        className="flex justify-between items-center"
-                                                        key={emp?.id}
-                                                    >
-                                                        <p className="montserrat-regular p-2">
-                                                            {emp?.name}
-                                                        </p>
-                                                        <IoIosCloseCircle
-                                                            onClick={() =>
-                                                                handleRemoveEmployee(
-                                                                    emp.id,
-                                                                    "reviewedByEmployees"
-                                                                )
-                                                            }
-                                                            className="h-6 w-6 cursor-pointer  text-red-500"
-                                                        />
-                                                    </div>
-                                                );
-                                            }
-                                        )}
+                                <div className="w-[250px] flex flex-col min-h-[170px] ">
+                                    <div className="flex-1">
+                                        {pricingData?.reviewedByEmployees &&
+                                            pricingData?.reviewedByEmployees.map(
+                                                (emp) => {
+                                                    return (
+                                                        <div
+                                                            className="flex justify-between items-center"
+                                                            key={emp?.id}
+                                                        >
+                                                            <p className="montserrat-regular p-2">
+                                                                {emp?.name}
+                                                            </p>
+                                                            <IoIosCloseCircle
+                                                                onClick={() =>
+                                                                    handleRemoveEmployee(
+                                                                        emp.id,
+                                                                        "reviewedByEmployees"
+                                                                    )
+                                                                }
+                                                                className="h-6 w-6 cursor-pointer  text-red-500"
+                                                            />
+                                                        </div>
+                                                    );
+                                                }
+                                            )}
+                                    </div>
 
-                                    <div className="mt-2 py-2">
+                                    <div className="mt-auto py-2">
                                         <button
                                             className="gradient-btn5 p-[1px] w-[75px] h-[30px] rounded-[10px]"
                                             onClick={() =>
@@ -736,36 +738,38 @@ const ReviewsandApprovalRouting = ({
                                             </div>
                                         </button>
                                     </div>
-                                    {/* TODO: alwayss place the button at the end of the list */}
                                 </div>
 
                                 {/*  Approved By */}
-                                <div className="w-[250px] ml-8">
-                                    {pricingData?.approvedByEmployees &&
-                                        pricingData?.approvedByEmployees.map(
-                                            (emp) => {
-                                                return (
-                                                    <div
-                                                        className="flex justify-between items-center"
-                                                        key={emp?.id}
-                                                    >
-                                                        <p className="montserrat-regular p-2">
-                                                            {emp?.name}
-                                                        </p>
-                                                        <IoIosCloseCircle
-                                                            onClick={() =>
-                                                                handleRemoveEmployee(
-                                                                    emp.id,
-                                                                    "approvedByEmployees"
-                                                                )
-                                                            }
-                                                            className="h-6 w-6 cursor-pointer  text-red-500"
-                                                        />
-                                                    </div>
-                                                );
-                                            }
-                                        )}
-                                    <div className="mt-2 py-2">
+                                <div className="w-[250px] ml-8 flex flex-col min-h-[170px]">
+                                    <div className="flex-1">
+                                        {pricingData?.approvedByEmployees &&
+                                            pricingData?.approvedByEmployees.map(
+                                                (emp) => {
+                                                    return (
+                                                        <div
+                                                            className="flex justify-between items-center"
+                                                            key={emp?.id}
+                                                        >
+                                                            <p className="montserrat-regular p-2">
+                                                                {emp?.name}
+                                                            </p>
+                                                            <IoIosCloseCircle
+                                                                onClick={() =>
+                                                                    handleRemoveEmployee(
+                                                                        emp.id,
+                                                                        "approvedByEmployees"
+                                                                    )
+                                                                }
+                                                                className="h-6 w-6 cursor-pointer  text-red-500"
+                                                            />
+                                                        </div>
+                                                    );
+                                                }
+                                            )}
+                                    </div>
+                                    {/* Button */}
+                                    <div className="mt-auto py-2">
                                         <button
                                             className="gradient-btn5 p-[1px] w-[75px] h-[30px] rounded-[10px]"
                                             onClick={() =>
@@ -775,7 +779,7 @@ const ReviewsandApprovalRouting = ({
                                             }
                                         >
                                             <div className="w-full h-full rounded-[8px] bg-white flex justify-center items-center montserrat-regular text-sm">
-                                                <p className="text-base  bg-gradient-to-r from-custom-bluegreen via-custom-solidgreen to-custom-solidgreen bg-clip-text text-transparent">
+                                                <p className="text-base bg-gradient-to-r from-custom-bluegreen via-custom-solidgreen to-custom-solidgreen bg-clip-text text-transparent">
                                                     Add +
                                                 </p>
                                             </div>
@@ -785,7 +789,7 @@ const ReviewsandApprovalRouting = ({
                             </div>
                         </div>
 
-                        <div className="flex gap-1 justify-center">
+                        <div className="flex gap-1 justify-center  py-3">
                             <button
                                 className="h-[37px] w-[176px] rounded-[10px] text-white montserrat-semibold text-sm gradient-btn5 hover:shadow-custom4"
                                 onClick={(e) =>

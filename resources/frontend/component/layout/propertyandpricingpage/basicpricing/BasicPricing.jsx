@@ -94,9 +94,7 @@ const BasicPricing = () => {
             fetchPropertyListMasters,
             checkExistingUnits
         );
-    
-    
-    
+
     //Hooks
     /**
      * Hook to update pricing data based on incoming 'data' prop.
@@ -462,7 +460,7 @@ const BasicPricing = () => {
     const handleClose = () => {
         // Reset file input field
         if (fileInputRef.current) {
-            fileInputRef.current.value = "";  
+            fileInputRef.current.value = "";
         }
 
         // Reset state variables
@@ -493,7 +491,7 @@ const BasicPricing = () => {
 
             const selectedHeaders = jsonData[0]; // First row contains headers
             const dataRows = jsonData.slice(1); // All rows after the first one
-            
+
             // Normalize empty values to `null` and Remove empty rows
             const normalizedDataRows = dataRows
                 .map((row) =>
@@ -569,161 +567,7 @@ const BasicPricing = () => {
         reader.readAsArrayBuffer(file);
     };
 
-    /*
-     * Payload object for submission with the provided status.
-     * The payload includes employee ID, tower phase ID, price list settings, payment scheme, and the specified status.
-     * @param {*} status
-     * @returns
-     */
-    // const buildSubmissionPayload = (status) => ({
-    //     emp_id: user?.id,
-    //     property_masters_id:
-    //         data?.property_commercial_detail?.property_master_id,
-    //     price_list_master_id:
-    //         data?.price_list_master_id ||
-    //         data?.data?.property_commercial_detail?.property_master_id,
-    //     tower_phase_id: data.data?.tower_phases[0]?.id || data?.tower_phase_id,
-    //     priceListPayload: formatPayload.formatPriceListSettingsPayload(
-    //         pricingData.priceListSettings
-    //     ),
-    //     paymentSchemePayload: pricingData.paymentSchemes,
-    //     priceVersionsPayload: formatPayload.formatPriceVersionsPayload(
-    //         pricingData.priceVersions
-    //     ),
-    //     floorPremiumsPayload: formatPayload.formatMultipleFloorPremiums(
-    //         pricingData.floorPremiums
-    //     ),
-    //     additionalPremiumsPayload:
-    //         formatPayload.formatAdditionalPremiumsPayload(
-    //             pricingData.additionalPremiums
-    //         ),
-    //     selectedAdditionalPremiumsPayload:
-    //         formatPayload.formatSelectedAdditionalPremiumsPayload(
-    //             pricingData.selectedAdditionalPremiums
-    //         ),
-    //     reviewedByEmployeesPayload: pricingData?.reviewedByEmployees,
-    //     approvedByEmployeesPayload: pricingData?.approvedByEmployees,
-    //     status: status,
-    // });
-
-    /**
-     * Handles in submitting all data in creating price master list
-     */
-    // const handleSubmit = async (e, status) => {
-    //     e.preventDefault();
-    //     if (action === "Edit") {
-    //         try {
-    //             setIsLoading((prev) => ({ ...prev, [status]: true }));
-    //             const payload = buildSubmissionPayload(status);
-    //             console.log("Edit Payload", payload);
-    //             // console.log("Edit Payload", JSON.stringify(payload));
-
-    //             const response =
-    //                 await priceListMasterService.updatePriceListMasters(
-    //                     payload
-    //                 );
-    //             if (units.length > 0) {
-    //                 await saveComputedUnitPricingData(computedUnitPrices);
-    //             }
-    //             console.log("response", response);
-    //             if (response?.status === 201 || response?.status === 200) {
-    //                 showToast(
-    //                     response?.data?.message || "Data updated successfully",
-    //                     "success"
-    //                 );
-
-    //                 // Refresh the 'units' data to reflect the selected unit and additional premium
-    //                 await checkExistingUnits(
-    //                     data.tower_phase_id,
-    //                     excelId || data?.excelId,
-    //                     true
-    //                 );
-    //                 //To update the data of price list master
-    //                 await fetchPropertyListMasters(true, true);
-    //                 setTimeout(() => {
-    //                     navigate("/property-pricing/master-lists");
-    //                 }, 1000);
-    //                 setFloorPremiumsAccordionOpen(false);
-    //             } else {
-    //                 console.log(
-    //                     "Unexpected response status:",
-    //                     response?.status,
-    //                     response
-    //                 );
-    //                 showToast(
-    //                     "Unexpected response received. Please verify the changes.",
-    //                     "warning"
-    //                 );
-    //             }
-    //         } catch (error) {
-    //             if (error.response?.data?.message) {
-    //                 showToast(error.response.data.message, "error");
-    //             } else {
-    //                 showToast(
-    //                     "An error occurred during submission. Please try again.",
-    //                     "error"
-    //                 );
-    //                 console.log("error 408", error);
-    //             }
-    //         } finally {
-    //             setIsLoading((prev) => ({ ...prev, [status]: false }));
-    //         }
-    //     } else {
-    //         try {
-    //             setIsLoading((prev) => ({ ...prev, [status]: true }));
-    //             const payload = buildSubmissionPayload(status);
-    //             console.log("ADd Payload", payload);
-
-    //             const response =
-    //                 await priceListMasterService.storePriceListMasters(payload);
-    //             console.log("response 235", response);
-    //             if (units.length > 0) {
-    //                 await saveComputedUnitPricingData(computedUnitPrices);
-    //             }
-    //             if (response?.status === 201 || response?.status === 200) {
-    //                 showToast(
-    //                     response?.data?.message || "Data added successfully",
-    //                     "success"
-    //                 );
-    //                 // Reset data and navigate to master list page
-    //                 resetPricingData();
-    //                 // Refresh the 'units' data to reflect the selected unit and additional premium
-    //                 await checkExistingUnits(
-    //                     data.tower_phase_id,
-    //                     excelId || data?.excelId,
-    //                     true
-    //                 );
-    //                 await fetchPropertyListMasters(true, true);
-
-    //                 setTimeout(() => {
-    //                     navigate("/property-pricing/master-lists");
-    //                 }, 1000);
-    //                 setFloorPremiumsAccordionOpen(false);
-    //             } else {
-    //                 console.log(
-    //                     "Unexpected response status:",
-    //                     response?.status,
-    //                     response
-    //                 );
-    //                 showToast(
-    //                     "Unexpected response received. Please verify the changes.",
-    //                     "warning"
-    //                 );
-    //             }
-    //         } catch (error) {
-    //             if (error.response?.data?.message) {
-    //                 showToast(error.response.data.message, "error");
-    //             } else {
-    //                 showToast(
-    //                     "An error occurred during submission. Please try again.",
-    //                     "error"
-    //                 );
-    //             }
-    //         } finally {
-    //             setIsLoading((prev) => ({ ...prev, [status]: false }));
-    //         }
-    //     }
-    // };
+    //Handle price list submit
     const handleFormSubmit = (e, status) => {
         handleSubmit(e, status, action, excelId, setFloorPremiumsAccordionOpen);
     };

@@ -9,7 +9,9 @@ const ExpandableDataTable = ({
     subHeaders,
     headers,
 }) => {
-    useEffect(() => {}, [computedUnitPrices]);
+    useEffect(() => {
+        console.log("computedUnitPrices", computedUnitPrices);
+    }, [computedUnitPrices]);
 
     //Evend handler
     const handleCloseExpandableDataTable = () => {

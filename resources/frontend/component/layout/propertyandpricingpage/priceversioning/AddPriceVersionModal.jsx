@@ -104,7 +104,6 @@ const AddPriceVersionModal = ({ modalRef }) => {
             setFormData([{ ...formDataState }]);
             setSelectedProperty("");
             setSelectedTowerPhase("");
-
             modalRef.current.close();
         }
     };
