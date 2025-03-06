@@ -49,7 +49,19 @@ const EmployeeReviewerApproverModal = ({
         []
     );
 
-    //Memoized filtered employee
+    /**
+     * Memoized list of filtered employees based on search criteria and existing reviewer/approver lists.
+     * Filters the 'allEmployees' array to exclude employees already selected as reviewers or approvers,
+     * depending on the 'type' parameter. It also applies a search filter based on employee first name,
+     * last name, and department.
+     *
+     * @returns {Array<Object>} An array of filtered employee objects.
+     * @dependencies {string} searchEmployee - The search term for filtering employees.
+     * @dependencies {Array<Object>} allEmployees - The complete list of employee objects.
+     * @dependencies {Array<Object>} pricingData.reviewedByEmployees - List of employees already selected as reviewers.
+     * @dependencies {Array<Object>} pricingData.approvedByEmployees - List of employees already selected as approvers.
+     * @dependencies {string} type - The type of employee list to filter ('reviewedByEmployees' or 'approvedByEmployees').
+     */
     const filteredEmployees = useMemo(() => {
         if (!allEmployees) return [];
 
@@ -98,7 +110,20 @@ const EmployeeReviewerApproverModal = ({
         debouncedSearch(value);
     };
 
-    //Handle the change event of the selected employee
+    /**
+     * Handles the selection or deselection of an employee based on a checkbox event.
+     * Updates either the 'reviewedByEmployees' or 'approvedByEmployees' state array,
+     * adding or removing the selected employee based on the checkbox's checked status.
+     *
+     * @param {Event} e - The checkbox change event.
+     * @param {Object} employee - The employee object containing id, firstname, and lastname.
+     * @param {string} employee.id - The unique identifier of the employee.
+     * @param {string} employee.firstname - The first name of the employee.
+     * @param {string} employee.lastname - The last name of the employee.
+     * @param {string} type - The type of employee list to update ('reviewedByEmployees' or 'approvedByEmployees').
+     * @param {Function} setReviewedByEmployees - State setter for the reviewedByEmployees array.
+     * @param {Function} setApprovedByEmployees - State setter for the approvedByEmployees array.
+     */
     const handleSelectedEmployee = (e, employee) => {
         const employeeId = employee.id;
         const isChecked = e.target.checked;
@@ -171,8 +196,6 @@ const EmployeeReviewerApproverModal = ({
         // Delay closing the modal slightly to ensure state updates first
         setTimeout(() => onClose(), 0);
     };
-
-
 
     return (
         <dialog
