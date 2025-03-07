@@ -2,19 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use Log;
 use Exception;
-use App\Models\Unit;
-use App\Exports\ExcelExport;
-use App\Imports\ExcelImport;
-use App\Jobs\ImportUnitsJob;
 use Illuminate\Http\Request;
 use App\Services\UnitService;
-use PhpParser\Node\Stmt\TryCatch;
 use App\Http\Controllers\Controller;
-use Maatwebsite\Excel\Facades\Excel;
 use App\Http\Requests\StoreUnitRequest;
-use Google\Cloud\Storage\StorageClient;
 use App\Http\Requests\UpdateStoreRequest;
 
 class UnitController extends Controller
@@ -28,12 +20,13 @@ class UnitController extends Controller
     }
 
 
-    /**
+    /*
      * Store a newly created resource in storage from the excel file
      */
     public function store(StoreUnitRequest $request)
     {
         $validatedData = $request->validated();
+        $validatedData['excel_id'] = $validatedData['excel_id'] ?? null;
         $excelDataRows = $validatedData['excelDataRows'];
 
         // Ensure each row has all columns (including `null` values)
@@ -43,9 +36,10 @@ class UnitController extends Controller
 
         // Update the validated data
         $validatedData['excelDataRows'] = $normalizedRows;
-
+        
         try {
             $result = $this->service->storeUnitFromExcel($validatedData);
+
             return response()->json([
                 'message' => $result['message'],
                 'excel_id' => $result['excel_id'],
@@ -58,7 +52,7 @@ class UnitController extends Controller
         }
     }
 
-    /**
+    /*
      * Custom functions
      */
 
@@ -70,8 +64,8 @@ class UnitController extends Controller
      */
     public function countFloors(int $towerPhaseId, string $excelId)
     {
-
         $distinctFloors = $this->service->countFloor($towerPhaseId, $excelId);
+
         return response()->json([
             'data' => $distinctFloors,
         ]);
@@ -97,8 +91,6 @@ class UnitController extends Controller
      */
     public function getUnits($selectedFloor, $towerPhaseId, $excelId)
     {
-        // dd($selectedFloor, $towerPhaseId, $excelId);
-
         try {
             // Query the database for units matching the specified towerPhaseId and selectedFloor
             $units =  $this->service->getUnits($towerPhaseId, $selectedFloor, $excelId);
@@ -114,12 +106,13 @@ class UnitController extends Controller
         }
     }
 
-    //Add new uni from the system/admin page
+    //Add new unit from the system/admin page
     public function storeUnit(StoreUnitRequest $request)
     {
         try {
             $validatedData = $request->validated();
             $result = $this->service->storeUnitDetails($validatedData);
+
             return response()->json([
                 'message' => $result['message'],
             ], 201);
@@ -137,6 +130,7 @@ class UnitController extends Controller
         try {
             $validatedData = $request->validated();
             $result = $this->service->saveComputedUnitPricingData($validatedData);
+
             return response()->json([
                 'message' => $result['message'],
             ], 201);

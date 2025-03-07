@@ -4,6 +4,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 import { useUnit } from "@/context/PropertyPricing/UnitContext";
 import { showToast } from "@/util/toastUtil";
 import { usePriceListMaster } from "@/context/PropertyPricing/PriceListMasterContext";
+import { usePricing } from "@/component/layout/propertyandpricingpage/basicpricing/context/BasicPricingContext";
 
 const UploadUnitDetailsModal = ({
     excelDataRows,
@@ -26,8 +27,12 @@ const UploadUnitDetailsModal = ({
         setIsUploadingUnits,
         fetchFloorCount,
         setFloors,
+        setUnits,
         setFloorPremiumsAccordionOpen,
+        excelId,
+        excelIdFromPriceList,
     } = useUnit();
+    const { setPricingData } = usePricing();
     const { priceListMaster } = usePriceListMaster();
 
     //Hooks
@@ -59,7 +64,6 @@ const UploadUnitDetailsModal = ({
         }
     }, [selectedExcelHeader, propertyData]);
 
-
     //Event hander
     // Handle change in column selection
     const handleColumnChange = (newColumnIndex, rowHeader) => {
@@ -73,61 +77,133 @@ const UploadUnitDetailsModal = ({
     };
 
     //Handle submit units from excel file
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+    // const handleSubmit = async (e) => {
+    //     e.preventDefault();
 
-        if (isUploadingUnits) return;
-        setIsUploadingUnits(true);
+    //     if (isUploadingUnits) return;
+    //     setIsUploadingUnits(true);
+ 
+    //     const payload = {
+    //         excelDataRows: excelDataRows,
+    //         tower_phase_id: towerPhaseId,
+    //         property_masters_id: propertyMasterId,
+    //         price_list_master_id: priceListMasterId,
+    //         excel_id: excelId || excelIdFromPriceList || null,
+    //     };
+    //     console.log("payload", payload);
+    //     try {
+    //         const response = await uploadUnits(payload);
+    //         console.log("response 110", response);
 
+    //         if (response?.success === true) {
+    //             setFloors([]);
 
+    //             const floors = await fetchFloorCount(
+    //                 towerPhaseId,
+    //                 response?.excelId
+    //             );
+    //             console.log("floors 110", floors);
+    //             setFloors(floors);
+    //             showToast("Unit uploaded successfully", "success");
+    //             setFloorPremiumsAccordionOpen(true);
+    //             if (uploadUnitModalRef.current) {
+    //                 uploadUnitModalRef.current.close();
+    //             }
+    //         }
+    //     } catch (error) {
+    //         console.log("error uploading excel", error);
+    //         setIsUploadingUnits(false);
+    //     }
+    // };
+const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    // Prevent multiple submissions while upload is in progress
+    if (isUploadingUnits) return;
+    setIsUploadingUnits(true);
+
+    try {
+        // Clear related data if we're uploading a new Excel to replace existing one
+        if (excelId || excelIdFromPriceList) {
+            // Reset units array
+            setUnits([]);
+
+            // Reset specific pricing data fields while preserving other fields
+            setPricingData((prev) => ({
+                ...prev,
+                floorPremiums: {},
+                additionalPremiums: [],
+                reviewedByEmployees: [],
+                approvedByEmployees: [],
+            }));
+
+            console.log(
+                "Existing Excel detected - resetting related pricing data"
+            );
+        }
+
+        // Prepare the payload for API
         const payload = {
             excelDataRows: excelDataRows,
             tower_phase_id: towerPhaseId,
             property_masters_id: propertyMasterId,
             price_list_master_id: priceListMasterId,
+            excel_id: excelId || excelIdFromPriceList || null,
         };
+        console.log("Upload payload:", payload);
 
-        try {
-            const response = await uploadUnits(payload);
-            console.log("response 110", response);
+        // Call the API to upload units
+        const response = await uploadUnits(payload);
+        console.log("Upload response:", response);
 
-            if (response?.success === true) {
-                setFloors([]);
+        // Handle successful response
+        if (response?.success === true) {
+            // Reset floors and fetch new floor data based on the uploaded Excel
+            setFloors([]);
+            const floors = await fetchFloorCount(
+                towerPhaseId,
+                response?.excelId
+            );
+            console.log("Fetched floors:", floors);
+            setFloors(floors);
 
-                const floors = await fetchFloorCount(
-                    towerPhaseId,
-                    response?.excelId
-                );
-                console.log("floors 110", floors);
-                setFloors(floors);
-                showToast("Unit uploaded successfully", "success");
-                setFloorPremiumsAccordionOpen(true);
-                if (uploadUnitModalRef.current) {
-                    uploadUnitModalRef.current.close();
-                }
+            // Show success message and update UI
+            showToast("Units uploaded successfully", "success");
+            setFloorPremiumsAccordionOpen(true);
+
+            // Close the modal if reference exists
+            if (uploadUnitModalRef.current) {
+                uploadUnitModalRef.current.close();
             }
-        } catch (error) {
-            console.log("error uploading excel", error);
-             setIsUploadingUnits(false);
+        } else {
+            // Handle unsuccessful response
+            showToast(response?.message || "Failed to upload units", "error");
+            setIsUploadingUnits(false);
         }
-    };
-    
-
-    const replaceFile = async (event) => {
+    } catch (error) {
+        // Handle errors
+        console.error("Error uploading Excel:", error);
+        showToast("An error occurred while uploading units", "error");
+        setIsUploadingUnits(false);
+    }
+};
+    //Handle in replacing the file
+    const onChangeReplaceFile = async (event) => {
         // Trigger the `handleFileChange` function received from BasicPricing
         await handleFileChange(event);
-    }; //Handle in replacing the file
+    };
 
     //Handle close the unit upload modal
-    const handleClose = () => {
+    const handleCloseUnitModal = () => {
         onClose();
     };
+
     return (
         <dialog
-            className="modal w-[474px] rounded-lg backdrop:bg-black/50"
+            className="modal w-[474px] rounded-lg backdrop:bg-black/50 backdrop-blur-md z-50 fixed inset-0"
             ref={uploadUnitModalRef}
         >
-            <div className=" px-14 mb-5 rounded-[10px]">
+            <div className=" px-14 mb-5 rounded-[10px] relative z-40">
                 <div className="">
                     <div
                         method="dialog"
@@ -135,17 +211,15 @@ const UploadUnitDetailsModal = ({
                     >
                         <button
                             className="flex justify-center w-10 h-10 items-center rounded-full bg-custom-grayFA3 text-custom-bluegreen hover:bg-custom-grayFA"
-                            onClick={handleClose}
+                            onClick={handleCloseUnitModal}
                         >
                             ✕
                         </button>
                     </div>
                 </div>
-                <div className="flex justify-between items-center bg-custom-grayFA h-[54px] px-[15px] mb-3">
+                <div className="flex justify-between items-center bg-custom-grayFA h-[54px]  mb-3">
                     <div>
-                        <p className="underline text-blue-500 cursor-pointer">
-                            {fileName}
-                        </p>
+                        <p className="underline text-blue-500 ">{fileName}</p>
                     </div>
                     <div>
                         <label
@@ -160,7 +234,7 @@ const UploadUnitDetailsModal = ({
                             <input
                                 type="file"
                                 className="hidden"
-                                onChange={replaceFile}
+                                onChange={onChangeReplaceFile}
                             />
                         </label>
                     </div>

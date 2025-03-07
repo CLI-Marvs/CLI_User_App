@@ -70,6 +70,7 @@ const BasicPricing = () => {
         setExcelIdFromPriceList,
         updateUnitComputedPrices,
         computedUnitPrices,
+        excelIdFromPriceList,
         saveComputedUnitPricingData,
     } = useUnit();
     const [accordionStates, setAccordionStates] = useState({
@@ -83,17 +84,16 @@ const BasicPricing = () => {
         isReviewAndApprovalAccordionOpen,
         setIsReviewAndApprovalAccordionOpen,
     ] = useState(false);
-    const { isLoading, buildSubmissionPayload, handleSubmit } =
-        usePropertyPricing(
-            user,
-            data,
-            formatPayload,
-            pricingData,
-            resetPricingData,
-            showToast,
-            fetchPropertyListMasters,
-            checkExistingUnits
-        );
+    const { isLoading, handleSubmit } = usePropertyPricing(
+        user,
+        data,
+        formatPayload,
+        pricingData,
+        resetPricingData,
+        showToast,
+        fetchPropertyListMasters,
+        checkExistingUnits
+    );
 
     //Hooks
     /**
@@ -442,13 +442,6 @@ const BasicPricing = () => {
         }
     };
 
-    // Open the add property modal
-    const handleOpenAddPropertyModal = () => {
-        if (modalRef.current) {
-            modalRef.current.showModal();
-        }
-    };
-
     //Handle to open the unit upload modal
     const handleOpenUnitUploadModal = () => {
         if (fileInputRef.current) {
@@ -557,7 +550,7 @@ const BasicPricing = () => {
             //  console.log("reorderedData", reorderedData);
             // Save the formatted headers
             setSelectedExcelHeader(reorderedHeaders);
-            //  setExcelData(reorderedData);
+        
             // Proceed with your modal display logic
             if (uploadUnitModalRef.current) {
                 uploadUnitModalRef.current.showModal();
@@ -574,18 +567,6 @@ const BasicPricing = () => {
 
     return (
         <div className="h-screen max-w-[957px] min-w-[897px] bg-custom-grayFA px-[30px] ">
-            {/* button ra if walay pa property */}
-            {/* <div className="px-5 mb-7  ">
-                {!passPropertyData && (
-                    <button
-                        onClick={handleOpenAddPropertyModal}
-                        className="montserrat-semibold text-sm px-2 gradient-btn2 w-[214px] h-[37px] rounded-[10px] text-white hover:shadow-custom4"
-                    >
-                        Add Property and Pricing
-                    </button>
-                )}
-            </div> */}
-            {/* kung naa nay property */}
             {propertyData && Object.keys(propertyData).length > 0 && (
                 <ProjectDetails propertyData={propertyData} />
             )}
@@ -593,9 +574,11 @@ const BasicPricing = () => {
             <div className="flex gap-[15px] py-5">
                 <button
                     onClick={handleOpenUnitUploadModal}
-                    className="h-[37px] w-[162px] rounded-[10px] text-white montserrat-semibold text-sm gradient-btn2 hover:shadow-custom4"
+                    className="h-[37px] w-auto px-4 rounded-[10px] text-white montserrat-semibold text-sm gradient-btn2 hover:shadow-custom4"
                 >
-                    Upload Unit Details
+                    {excelId || excelIdFromPriceList
+                        ? "Change Uploaded Units"
+                        : "Upload Unit Details"}
                 </button>
                 <button
                     className={`h-[37px] w-[176px] rounded-[10px] text-white montserrat-semibold text-sm gradient-btn2 hover:shadow-custom4 ${

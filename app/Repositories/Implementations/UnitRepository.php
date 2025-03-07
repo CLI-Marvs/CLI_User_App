@@ -3,12 +3,8 @@
 namespace App\Repositories\Implementations;
 
 
-use Carbon\Carbon;
+
 use App\Models\Unit;
-use App\Imports\ExcelImport;
-use Illuminate\Support\Facades\DB;
-use Maatwebsite\Excel\Facades\Excel;
-use Rap2hpoutre\FastExcel\FastExcel;
 
 class UnitRepository
 {
@@ -60,11 +56,11 @@ class UnitRepository
      */
     public function storeUnitDetails(array $data)
     {
-
         $units = $this->model->create(array_merge(
             $data,
             ['status' => 'Active']
         ));
+
         return [
             'message' => 'Unit details stored successfully',
             'data' => $units->fresh()

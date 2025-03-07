@@ -31,8 +31,10 @@ class StoreUnitRequest extends FormRequest
                 'tower_phase_id' => 'integer',
                 'property_masters_id' => 'integer',
                 'price_list_master_id' => 'integer',
+                'excel_id' => 'nullable|string',
             ];
         }
+
         //Request if the user ADD UNIT from the system 'admin'
         if ($method === 'storeUnit') {
             return [
@@ -50,6 +52,7 @@ class StoreUnitRequest extends FormRequest
                 'price_list_master_id' => 'integer',
             ];
         }
-       
+
+        return [];
     }
 }

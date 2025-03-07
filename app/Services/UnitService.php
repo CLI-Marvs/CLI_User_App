@@ -4,6 +4,9 @@ namespace App\Services;
 
 use Carbon\Carbon;
 use App\Models\Unit;
+use App\Models\FloorPremium;
+use App\Models\PriceListMaster;
+use App\Models\AdditionalPremium;
 use Illuminate\Support\Facades\DB;
 use App\Repositories\Implementations\UnitRepository;
 
@@ -18,33 +21,92 @@ class UnitService
         $this->model = $model;
     }
 
-    /* 
-     Store unit from excel file
-    */
+    /**
+     * Stores unit data from an Excel file into the database.
+     *
+     * This function processes an array of data containing Excel rows, property, tower phase, and price list information.
+     * It handles both new and existing Excel uploads, deactivating previous units and price lists if necessary.
+     * It chunks the Excel data for efficient database insertion and returns a success or failure message.
+     *
+     * @param array $data An array containing Excel data, property, tower phase, and price list information.
+     * Expected keys:
+     * - 'excel_id' (optional): The ID of the existing Excel file.
+     * - 'excelDataRows': An array of Excel rows, each row being an array of unit details.
+     * - 'property_masters_id': The ID of the property master.
+     * - 'tower_phase_id': The ID of the tower phase.
+     * - 'price_list_master_id': The ID of the price list master.
+     *
+     * @return array An array containing the success status, Excel ID, and message.
+     * - 'success' (bool): Indicates whether the operation was successful.
+     * - 'excel_id' (string): The generated Excel ID.
+     * - 'message' (string): A message indicating the result of the operation.
+     *
+     * @throws \Exception If 'excel_id' is missing in the input data.
+     */
     public function storeUnitFromExcel(array $data)
     {
+        if (!array_key_exists('excel_id', $data)) {
+            throw new \Exception('excel_id is missing in storeUnitFromExcel');
+        }
         // Increase PHP limits for this request
         ini_set('max_execution_time', 300);
         ini_set('memory_limit', '512M');
-
         $excelRowsData = $data['excelDataRows'];
+        $existingExcelId = $data['excel_id'] ?? null;
         $propertyId = $data['property_masters_id'];
         $towerPhaseId = $data['tower_phase_id'];
         $priceListMasterId = $data['price_list_master_id'];
-        $excelId = 'Excel_' . md5(uniqid(rand(), true));
+        $newExcelId = 'Excel_' . md5(uniqid(rand(), true));
+
 
         DB::beginTransaction();
         try {
             DB::disableQueryLog();
 
+            
+            if ($existingExcelId !== null) {
+                $this->model->where('price_list_master_id', $priceListMasterId)
+                    ->where('tower_phase_id', $towerPhaseId)
+                    ->where('excel_id', $existingExcelId)
+                    ->update([
+                        'status' => 'Inactive',
+                        'excel_id' => null,
+                    ]);
+
+                PriceListMaster::where('id', $priceListMasterId)
+                    ->where('tower_phase_id', $towerPhaseId)
+                    ->update([
+                        'additional_premiums_id' => null,
+                        'floor_premiums_id' => null,
+                        'reviewed_by_employee_id' => null,
+                        'approved_by_employee_id' => null,
+                    ]);
+
+                FloorPremium::where('pricelist_master_id', $priceListMasterId)
+                    ->where('tower_phase_id', $towerPhaseId)
+                    ->update([
+                        'pricelist_master_id' => null,
+                        'status' => 'Inactive',
+                        'tower_phase_id' => null,
+                    ]);
+
+                AdditionalPremium::where('price_list_master_id', $priceListMasterId)
+                    ->where('tower_phase_id', $towerPhaseId)
+                    ->update([
+                        'price_list_master_id' => null,
+                        'status' => 'Inactive',
+                        'tower_phase_id' => null,
+                    ]);
+            }
+
             collect($excelRowsData)
                 ->chunk(500)
-                ->each(function ($chunk) use ($propertyId, $towerPhaseId, $priceListMasterId, $excelId) {
+                ->each(function ($chunk) use ($propertyId, $towerPhaseId, $priceListMasterId, $newExcelId) {
                     $createdAt = Carbon::now()->toDateString();
 
-                    $formattedData = $chunk->map(function ($row) use ($propertyId, $towerPhaseId, $priceListMasterId, $excelId, $createdAt) {
+                    $formattedData = $chunk->map(function ($row) use ($propertyId, $towerPhaseId, $priceListMasterId, $newExcelId, $createdAt) {
                         return [
-                            'floor' => $row[0],  
+                            'floor' => $row[0],
                             'room_number' => $row[1],
                             'unit' => $row[2],
                             'type' => $row[3],
@@ -56,19 +118,19 @@ class UnitService
                             'property_masters_id' => $propertyId,
                             'tower_phase_id' => $towerPhaseId,
                             'price_list_master_id' => $priceListMasterId,
-                            'excel_id' => $excelId,   
+                            'excel_id' => $newExcelId,
                             'created_at' => $createdAt,
                         ];
                     });
 
-                    $this->model->insert($formattedData->toArray()); 
+                    $this->model->insert($formattedData->toArray());
                 });
 
             DB::commit();
 
             return [
                 'success' => true,
-                'excel_id' => $excelId,
+                'excel_id' => $newExcelId,
                 'message' => 'File uploaded successfully.'
             ];
         } catch (\Exception $e) {
@@ -102,10 +164,10 @@ class UnitService
             ];
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json([
+            return [
                 'success' => false,
                 'message' => 'Failed to count floor: ' . $e->getMessage()
-            ], 500);
+            ];
         }
     }
 
