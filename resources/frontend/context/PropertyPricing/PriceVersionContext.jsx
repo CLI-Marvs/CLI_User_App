@@ -3,7 +3,6 @@ import React, {
     useContext,
     useState,
     useCallback,
-    useEffect,
 } from "react";
 import { priceVersionService } from "@/component/servicesApi/apiCalls/propertyPricing/priceVersion/priceVersionService";
 
@@ -16,7 +15,7 @@ export const PriceVersionProvider = ({ children }) => {
 
     const getPriceVersions = useCallback(
         async (forceFetch = false, setLoading = true) => {
-            if (priceVersion && !forceFetch) {
+            if (priceVersion.length > 0 && !forceFetch) {
                 return priceVersion;
             }
 

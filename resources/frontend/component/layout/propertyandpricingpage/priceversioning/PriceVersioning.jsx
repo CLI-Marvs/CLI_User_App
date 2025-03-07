@@ -13,7 +13,6 @@ const PriceVersioning = () => {
     //States
     const [startDate, setStartDate] = useState(new Date());
     const [toggled, setToggled] = useState(false);
-
     const [isFilterVisible, setIsFilterVisible] = useState(false);
     const modalRef = useRef(null);
     const { priceVersion, isFetchingpriceVersions, getPriceVersions } =
@@ -21,8 +20,9 @@ const PriceVersioning = () => {
 
     //Hooks
     useEffect(() => {
-        console.log("priceVersion1", priceVersion);
-        getPriceVersions(true);
+        if (priceVersion.length === 0) {
+            getPriceVersions();
+        }
     }, []);
 
     //Event handler

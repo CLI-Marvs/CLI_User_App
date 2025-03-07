@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { FaRegCalendar } from "react-icons/fa";
+import React, { useState, useCallback } from "react";
+import { FaPray, FaRegCalendar } from "react-icons/fa";
 import { IoMdArrowDropdown } from "react-icons/io";
 import { MdFormatListBulletedAdd } from "react-icons/md";
 import { useProperty } from "@/context/PropertyPricing/PropertyContext";
@@ -11,6 +11,7 @@ import { showToast } from "@/util/toastUtil";
 import { usePriceVersion } from "@/context/PropertyPricing/PriceVersionContext";
 import CircularProgress from "@mui/material/CircularProgress";
 import { IoIosCloseCircle } from "react-icons/io";
+import { toLowerCaseText } from "@/component/layout/propertyandpricingpage/utils/formatToLowerCase";
 
 const formDataState = {
     name: "",
@@ -59,11 +60,11 @@ const AddPriceVersionModal = ({ modalRef }) => {
                 tower_phase_id: selectedTowerPhase,
                 price_version: formData,
             };
-            console.log("Payload Add price version", payload);
+
             const response = await priceVersionService.storePriceVersion(
                 payload
             );
-            console.log("response", response);
+
             if (response?.status === 201) {
                 showToast(response?.data?.message, "success");
                 setFormData([{ ...formDataState }]);
@@ -107,6 +108,24 @@ const AddPriceVersionModal = ({ modalRef }) => {
             modalRef.current.close();
         }
     };
+
+    //Utility function to handle button disable state
+    const isButtonDisabled = useCallback(
+        (formDataArray) => {
+            if (!formDataArray?.length) return true; // Disable if array is empty
+
+            const formData = formDataArray[0];
+
+            return (
+                formData.name.trim() === "" ||
+                Number(formData.percent_increase) === 0 ||
+                Number(formData.no_of_allowed_buyers) === 0 ||
+                !selectedProperty ||
+                !selectedTowerPhase
+            );
+        },
+        [selectedProperty, selectedTowerPhase]
+    );
 
     return (
         <dialog
@@ -152,7 +171,7 @@ const AddPriceVersionModal = ({ modalRef }) => {
                                         key={property.id}
                                         value={property.id}
                                     >
-                                        {property.name}
+                                        {toLowerCaseText(property.name)}
                                     </option>
                                 ))}
                             </select>
@@ -268,14 +287,18 @@ const AddPriceVersionModal = ({ modalRef }) => {
                                                 <span>
                                                     <td className="flex justify-between gap-2 items-center">
                                                         <FaRegCalendar className="size-5 text-custom-gray81 hover:text-red-500 mt-1" />
-                                                        <IoIosCloseCircle
-                                                            onClick={() =>
-                                                                handleRemoveFields(
-                                                                    index
-                                                                )
-                                                            }
-                                                            className="text-custom-gray h-6 w-6 cursor-pointer hover:text-red-500 mt-1"
-                                                        />
+                                                        {formData &&
+                                                            formData.length >
+                                                                1 && (
+                                                                <IoIosCloseCircle
+                                                                    onClick={() =>
+                                                                        handleRemoveFields(
+                                                                            index
+                                                                        )
+                                                                    }
+                                                                    className="text-custom-gray h-6 w-6 cursor-pointer hover:text-red-500 mt-1"
+                                                                />
+                                                            )}
                                                     </td>
                                                 </span>
                                             </td>
@@ -299,16 +322,20 @@ const AddPriceVersionModal = ({ modalRef }) => {
                     <div className="flex justify-center my-3">
                         {/* TODO: add validation here to disable the btn if there is no data yet */}
                         <button
-                            disabled={isLoading}
+                            disabled={
+                                isLoading || isButtonDisabled(formData ?? {})
+                            }
                             className={`w-[129px] h-[37px] text-white montserrat-semibold text-sm gradient-btn2 rounded-[10px] hover:shadow-custom4 ${
-                                isLoading ? "cursor-not-allowed opacity-50" : ""
+                                isLoading || isButtonDisabled(formData ?? {})
+                                    ? "cursor-not-allowed opacity-50"
+                                    : ""
                             }`}
                             onClick={handleSubmit}
                         >
                             {isLoading ? (
                                 <CircularProgress className="spinnerSize" />
                             ) : (
-                                <>Save Versions </>
+                                <>Save Versions</>
                             )}
                         </button>
                     </div>
