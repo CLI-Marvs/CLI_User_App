@@ -77,116 +77,81 @@ const UploadUnitDetailsModal = ({
     };
 
     //Handle submit units from excel file
-    // const handleSubmit = async (e) => {
-    //     e.preventDefault();
+    const handleSubmit = async (e) => {
+        e.preventDefault();
 
-    //     if (isUploadingUnits) return;
-    //     setIsUploadingUnits(true);
- 
-    //     const payload = {
-    //         excelDataRows: excelDataRows,
-    //         tower_phase_id: towerPhaseId,
-    //         property_masters_id: propertyMasterId,
-    //         price_list_master_id: priceListMasterId,
-    //         excel_id: excelId || excelIdFromPriceList || null,
-    //     };
-    //     console.log("payload", payload);
-    //     try {
-    //         const response = await uploadUnits(payload);
-    //         console.log("response 110", response);
+        // Prevent multiple submissions while upload is in progress
+        if (isUploadingUnits) return;
+        setIsUploadingUnits(true);
 
-    //         if (response?.success === true) {
-    //             setFloors([]);
+        try {
+            // Clear related data if we're uploading a new Excel to replace existing one
+            if (excelId || excelIdFromPriceList) {
+                // Reset units array
+                setUnits([]);
 
-    //             const floors = await fetchFloorCount(
-    //                 towerPhaseId,
-    //                 response?.excelId
-    //             );
-    //             console.log("floors 110", floors);
-    //             setFloors(floors);
-    //             showToast("Unit uploaded successfully", "success");
-    //             setFloorPremiumsAccordionOpen(true);
-    //             if (uploadUnitModalRef.current) {
-    //                 uploadUnitModalRef.current.close();
-    //             }
-    //         }
-    //     } catch (error) {
-    //         console.log("error uploading excel", error);
-    //         setIsUploadingUnits(false);
-    //     }
-    // };
-const handleSubmit = async (e) => {
-    e.preventDefault();
+                // Reset specific pricing data fields while preserving other fields
+                setPricingData((prev) => ({
+                    ...prev,
+                    floorPremiums: {},
+                    additionalPremiums: [],
+                    reviewedByEmployees: [],
+                    approvedByEmployees: [],
+                }));
 
-    // Prevent multiple submissions while upload is in progress
-    if (isUploadingUnits) return;
-    setIsUploadingUnits(true);
-
-    try {
-        // Clear related data if we're uploading a new Excel to replace existing one
-        if (excelId || excelIdFromPriceList) {
-            // Reset units array
-            setUnits([]);
-
-            // Reset specific pricing data fields while preserving other fields
-            setPricingData((prev) => ({
-                ...prev,
-                floorPremiums: {},
-                additionalPremiums: [],
-                reviewedByEmployees: [],
-                approvedByEmployees: [],
-            }));
-
-            console.log(
-                "Existing Excel detected - resetting related pricing data"
-            );
-        }
-
-        // Prepare the payload for API
-        const payload = {
-            excelDataRows: excelDataRows,
-            tower_phase_id: towerPhaseId,
-            property_masters_id: propertyMasterId,
-            price_list_master_id: priceListMasterId,
-            excel_id: excelId || excelIdFromPriceList || null,
-        };
-        console.log("Upload payload:", payload);
-
-        // Call the API to upload units
-        const response = await uploadUnits(payload);
-        console.log("Upload response:", response);
-
-        // Handle successful response
-        if (response?.success === true) {
-            // Reset floors and fetch new floor data based on the uploaded Excel
-            setFloors([]);
-            const floors = await fetchFloorCount(
-                towerPhaseId,
-                response?.excelId
-            );
-            console.log("Fetched floors:", floors);
-            setFloors(floors);
-
-            // Show success message and update UI
-            showToast("Units uploaded successfully", "success");
-            setFloorPremiumsAccordionOpen(true);
-
-            // Close the modal if reference exists
-            if (uploadUnitModalRef.current) {
-                uploadUnitModalRef.current.close();
+                console.log(
+                    "Existing Excel detected - resetting related pricing data"
+                );
             }
-        } else {
-            // Handle unsuccessful response
-            showToast(response?.message || "Failed to upload units", "error");
+
+            // Prepare the payload for API
+            const payload = {
+                excelDataRows: excelDataRows,
+                tower_phase_id: towerPhaseId,
+                property_masters_id: propertyMasterId,
+                price_list_master_id: priceListMasterId,
+                excel_id: excelId || excelIdFromPriceList || null,
+            };
+            console.log("Upload payload:", payload);
+
+            // Call the API to upload units
+            const response = await uploadUnits(payload);
+            console.log("Upload response:", response);
+
+            // Handle successful response
+            if (response?.success === true) {
+                // Reset floors and fetch new floor data based on the uploaded Excel
+                setFloors([]);
+                const floors = await fetchFloorCount(
+                    towerPhaseId,
+                    response?.excelId
+                );
+                console.log("Fetched floors:", floors);
+                setFloors(floors);
+
+                // Show success message and update UI
+                showToast("Units uploaded successfully", "success");
+                setFloorPremiumsAccordionOpen(true);
+
+                // Close the modal if reference exists
+                if (uploadUnitModalRef.current) {
+                    uploadUnitModalRef.current.close();
+                }
+            } else {
+                // Handle unsuccessful response
+                showToast(
+                    response?.message || "Failed to upload units",
+                    "error"
+                );
+                setIsUploadingUnits(false);
+            }
+        } catch (error) {
+            // Handle errors
+            console.error("Error uploading Excel:", error);
+            showToast("An error occurred while uploading units", "error");
             setIsUploadingUnits(false);
         }
-    } catch (error) {
-        // Handle errors
-        console.error("Error uploading Excel:", error);
-        showToast("An error occurred while uploading units", "error");
-        setIsUploadingUnits(false);
-    }
-};
+    };
     //Handle in replacing the file
     const onChangeReplaceFile = async (event) => {
         // Trigger the `handleFileChange` function received from BasicPricing

@@ -10,9 +10,6 @@ const ExpandableDataTable = ({
     headers,
     units,
 }) => {
-    useEffect(() => {
-        console.log("computedUnitPrices", computedUnitPrices);
-    }, [computedUnitPrices]);
 
     //Evend handler
     const handleCloseExpandableDataTable = () => {
@@ -20,6 +17,7 @@ const ExpandableDataTable = ({
             expandUnitTableViewRef.current.close();
         }
     };
+    
     return (
         <dialog
             className="modal min-w-[400px] max-w-[90vw] rounded-lg  overflow-auto"

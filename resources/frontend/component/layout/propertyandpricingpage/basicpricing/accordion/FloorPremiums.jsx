@@ -46,12 +46,6 @@ const FloorPremiums = ({ isOpen, toggleAccordion, propertyData }) => {
         }
 
         if (propertyData?.excelId || excelId) {
-            console.log(
-                "excelIdFromPriceList",
-                excelIdFromPriceList,
-                propertyData?.excelId
-            );
-
             const floorNumbers = floors[Object.keys(floors)[0]];
             if (Array.isArray(floorNumbers) && floorNumbers.length > 0) {
                 const initialFloorPremiums = floorNumbers.reduce(
