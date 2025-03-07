@@ -1,6 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
-import { IoIosArrowDown, IoIosExpand } from "react-icons/io";
-import { IoMdArrowDropdown, IoIosCloseCircle } from "react-icons/io";
+import {
+    IoIosArrowDown,
+    IoIosExpand,
+    IoIosCloseCircle,
+    IoMdArrowDropdown,
+} from "react-icons/io";
 import { usePricing } from "@/component/layout/propertyandpricingpage/basicpricing/context/BasicPricingContext";
 import { useUnit } from "@/context/PropertyPricing/UnitContext";
 import usePriceListEmployees from "@/component/layout/propertyandpricingpage/basicpricing/hooks/usePriceListEmployees";
@@ -15,7 +19,7 @@ import { formatPayload } from "@/component/layout/propertyandpricingpage/basicpr
 import { showToast } from "@/util/toastUtil";
 import { usePriceListMaster } from "@/context/PropertyPricing/PriceListMasterContext";
 import CustomToolTip from "@/component/layout/mainComponent/Tooltip/CustomToolTip";
-
+import UnitTableComponent from "@/component/layout/propertyandpricingpage/component/UnitTableComponent";
 const staticHeaders = [
     "Floor",
     "Room",
@@ -55,7 +59,7 @@ const ReviewsandApprovalRouting = ({
         ...staticHeaders, // ["Floor", "Room", "Unit", "Type", ...]
         ...(subHeaders?.versionHeaders || []), // ["V1", "V2", ...]
         ...(subHeaders?.pricingHeaders || []), // ["Transfer Charge", "Vatable Less Price", ...]
-        ...(subHeaders?.paymentSchemeHeaders || []), // ["Payment Scheme 1", "Payment Scheme 2", ...]
+        // ...(subHeaders?.paymentSchemeHeaders || []), // ["Payment Scheme 1", "Payment Scheme 2", ...]
     ];
     const hasPricingHeaders = subHeaders?.pricingHeaders?.length > 0;
     const hasVersionHeaders = subHeaders?.versionHeaders?.length > 0;
@@ -104,14 +108,14 @@ const ReviewsandApprovalRouting = ({
             .filter(Boolean);
 
         //Filter payment schemes dynamically based on the selected version
-        const paymentSchemeHeaders = propertyData.price_versions
-            .filter((item) => item.version_name === selectedVersion)
-            .flatMap(
-                (item) =>
-                    item.payment_schemes?.map(
-                        (scheme) => scheme.payment_scheme_name
-                    ) || []
-            );
+        // const paymentSchemeHeaders = propertyData.price_versions
+        //     .filter((item) => item.version_name === selectedVersion)
+        //     .flatMap(
+        //         (item) =>
+        //             item.payment_schemes?.map(
+        //                 (scheme) => scheme.payment_scheme_name
+        //             ) || []
+        //     );
 
         const priceDetails = propertyData.pricebasic_details;
         let pricingHeaders = [];
@@ -154,7 +158,7 @@ const ReviewsandApprovalRouting = ({
 
         //Set headers and price versions
         setSubHeaders({
-            paymentSchemeHeaders,
+            // paymentSchemeHeaders,
             percentIncreaseHeaders,
             pricingHeaders,
         });
@@ -291,35 +295,43 @@ const ReviewsandApprovalRouting = ({
             >
                 <div className="  ">
                     <div className="p-[20px] space-y-[10px]">
-                        {(excelIdFromPriceList ||
-                            excelId ||
+                        {(excelId ||
+                            excelIdFromPriceList ||
                             computedUnitPrices.length > 0) && (
-                            <div className="justify-between flex items-center">
+                            <div className="flex items-center justify-between">
+                                {/* Download Excel section */}
                                 {isExcelDownloading ? (
-                                    <CircularProgress className="spinnerSize h-6 w-6" />
+                                    <CircularProgress className="h-6 w-6 spinnerSize" />
                                 ) : computedUnitPrices.length > 0 ? (
                                     <p
-                                        className="underline text-blue-500 text-sm cursor-pointer"
+                                        className="text-sm text-blue-500 underline cursor-pointer"
                                         onClick={handleDownloadExcel}
                                     >
                                         Download Excel
                                     </p>
-                                ) : null}
+                                ) : (
+                                    <div />
+                                )}
 
-                                <div className="px-5 text-black">
-                                    <CustomToolTip
-                                        text="Expand Table View"
-                                        position="left"
-                                    >
-                                        <button
-                                            onClick={toggleExpandUnitTableView}
-                                            aria-label="ExpandTableView"
-                                            className="flex items-center"
+                                {/* Expand Table View button */}
+                                {computedUnitPrices.length > 0 && (
+                                    <div className="px-5 text-black">
+                                        <CustomToolTip
+                                            text="Expand Table View"
+                                            position="left"
                                         >
-                                            <IoIosExpand className="text-[25px]" />
-                                        </button>
-                                    </CustomToolTip>
-                                </div>
+                                            <button
+                                                onClick={
+                                                    toggleExpandUnitTableView
+                                                }
+                                                aria-label="ExpandTableView"
+                                                className="flex items-center"
+                                            >
+                                                <IoIosExpand className="text-[25px]" />
+                                            </button>
+                                        </CustomToolTip>
+                                    </div>
+                                )}
                             </div>
                         )}
 
@@ -394,274 +406,16 @@ const ReviewsandApprovalRouting = ({
                             </div>
 
                             {(excelId ? true : excelIdFromPriceList) && (
-                                <div className="mt-4 w-80 ">
-                                    <table className="bg-blue-900 w-full montserrat-regular">
-                                        <thead>
-                                            {/* First Row: Main Headers */}
-                                            <tr>
-                                                <th
-                                                    colSpan={
-                                                        staticHeaders.length
-                                                    }
-                                                    className="bg-[#31498a] w-full py-3 montserrat-semibold text-white border-black border"
-                                                >
-                                                    Unit
-                                                </th>
-                                                {/* Only show Version column if there are version headers */}
-                                                {hasVersionHeaders && (
-                                                    <th
-                                                        colSpan={
-                                                            subHeaders
-                                                                .versionHeaders
-                                                                .length
-                                                        }
-                                                        className="bg-[#31498a] w-full py-3 montserrat-semibold text-white border-black border px-2"
-                                                    >
-                                                        Version
-                                                    </th>
-                                                )}
-                                                {hasPricingHeaders && (
-                                                    <th
-                                                        colSpan={
-                                                            subHeaders
-                                                                .pricingHeaders
-                                                                .length
-                                                        }
-                                                        className="bg-[#31498a] w-full py-3 montserrat-semibold text-white border-black border px-2"
-                                                    >
-                                                        Pricing
-                                                    </th>
-                                                )}
-                                                <th
-                                                    colSpan={
-                                                        subHeaders.paymentSchemeHeaders &&
-                                                        subHeaders
-                                                            .paymentSchemeHeaders
-                                                            .length
-                                                    }
-                                                    className="bg-[#31498a] w-full py-3 montserrat-semibold text-white border-black border px-2"
-                                                >
-                                                    Payment Scheme
-                                                </th>
-                                            </tr>
-
-                                            {/* Second Row: Column Titles */}
-                                            <tr className="bg-[#aebee3] border-black border">
-                                                {headers.map(
-                                                    (title, headerIndex) => (
-                                                        <th
-                                                            key={headerIndex}
-                                                            className={`${
-                                                                title === "Type"
-                                                                    ? "px-9"
-                                                                    : title ===
-                                                                      "List price w/ VAT"
-                                                                    ? "px-10"
-                                                                    : "px-4"
-                                                            } py-4 border-black border montserrat-medium`}
-                                                        >
-                                                            {title}
-                                                        </th>
-                                                    )
-                                                )}
-                                                {/* {pricingData?.priceVersions.map(
-                                                    (priceVersionItem) => (
-                                                        <th
-                                                            key={
-                                                                priceVersionItem.id
-                                                            }
-                                                            className="bg-[#aebee3] w-full py-3 montserrat-regular text-black border-black border px-2 font-normal"
-                                                        > 
-                                                            <div className="flex gap-2 justify-center">
-                                                                {priceVersionItem.payment_scheme.map(
-                                                                    (
-                                                                        paymentSchemeItem
-                                                                    ) => (
-                                                                        <span
-                                                                            key={
-                                                                                paymentSchemeItem.id
-                                                                            }
-                                                                        >
-                                                                            {
-                                                                                paymentSchemeItem.payment_scheme_name
-                                                                            }
-                                                                        </span>
-                                                                    )
-                                                                )}
-                                                            </div>
-
-                                                            
-                                                        </th>
-                                                    )
-                                                )} */}
-                                            </tr>
-
-                                            {/* Third Row: Only render if there are version headers */}
-                                            {hasVersionHeaders && (
-                                                <tr className="bg-[#aebee3] border-black border montserrat-regular">
-                                                    <th
-                                                        colSpan={
-                                                            staticHeaders.length
-                                                        }
-                                                    ></th>
-
-                                                    {/* Percent Increase Row */}
-                                                    {subHeaders.percentIncreaseHeaders.map(
-                                                        (percent, index) => (
-                                                            <th
-                                                                key={index}
-                                                                className="font-normal"
-                                                            >
-                                                                {percent}%
-                                                            </th>
-                                                        )
-                                                    )}
-
-                                                    {/* Pricing Fields - only render if there are pricing headers */}
-                                                    {hasPricingHeaders &&
-                                                        subHeaders.pricingHeaders.map(
-                                                            (
-                                                                priceKey,
-                                                                index
-                                                            ) => (
-                                                                <th
-                                                                    key={index}
-                                                                    className="montserrat-regular text-sm text-center pl-4"
-                                                                ></th>
-                                                            )
-                                                        )}
-                                                </tr>
-                                            )}
-                                        </thead>
-
-                                        <tbody className="bg-white">
-                                            {units &&
-                                                units.map((unit, unitIndex) => {
-                                                    const priceData =
-                                                        computedUnitPrices.find(
-                                                            (p) =>
-                                                                p.unit ===
-                                                                unit.unit
-                                                        );
-
-                                                    return (
-                                                        <tr key={unitIndex}>
-                                                            {/* Map  Unit Data */}
-                                                            <td className="px-2 border-black border">
-                                                                {unit.floor}
-                                                            </td>
-                                                            <td className="px-2 border-black border">
-                                                                {
-                                                                    unit.room_number
-                                                                }
-                                                            </td>
-                                                            <td className="px-2 border-black border">
-                                                                {unit.unit}
-                                                            </td>
-                                                            <td className="px-2 border-black border">
-                                                                {unit.type}
-                                                            </td>
-                                                            <td className="px-2 border-black border">
-                                                                {
-                                                                    unit.indoor_area
-                                                                }
-                                                            </td>
-                                                            <td className="px-2 border-black border">
-                                                                {
-                                                                    unit.balcony_area
-                                                                }
-                                                            </td>
-                                                            <td className="px-2 border-black border">
-                                                                {
-                                                                    unit.garden_area
-                                                                }
-                                                            </td>
-                                                            <td className="px-2 border-black border">
-                                                                {
-                                                                    unit.total_area
-                                                                }
-                                                            </td>
-                                                            <td className="px-2 border-black border">
-                                                                {priceData?.computed_list_price_with_vat &&
-                                                                    priceData?.computed_list_price_with_vat.toLocaleString()}
-                                                            </td>
-                                                            <td className="px-2 border-black border">
-                                                                {priceData?.computed_transfer_charge &&
-                                                                    priceData?.computed_transfer_charge.toLocaleString()}
-                                                            </td>
-                                                            <td className="px-2 border-black border">
-                                                                {priceData?.computed_reservation_fee &&
-                                                                    priceData?.computed_reservation_fee.toLocaleString()}
-                                                            </td>{" "}
-                                                            <td className="px-2 border-black border">
-                                                                {priceData?.computed_total_contract_price &&
-                                                                    priceData?.computed_total_contract_price.toLocaleString()}
-                                                            </td>
-                                                            {/* Map Dynamic Price Versions */}
-                                                            {/* {priceVersions.map(
-                                                            (
-                                                                version,
-                                                                versionIndex
-                                                            ) => (
-                                                                <td
-                                                                    key={
-                                                                        versionIndex
-                                                                    }
-                                                                    className="px-2 border-black border text-center"
-                                                                >
-                                                                    {version.no_of_allowed_buyers ||
-                                                                        "-"}
-                                                                </td>
-                                                            )
-                                                        )} */}
-                                                            {/* {pricingData &&
-                                                            Object.keys(
-                                                                pricingData?.priceListSettings
-                                                            ).length > 0 &&
-                                                            pricingData
-                                                                ?.priceListSettings
-                                                                ?.base_price !==
-                                                                0 &&
-                                                            Object.keys(
-                                                                pricingData?.priceListSettings
-                                                            )
-                                                                .filter((key) =>
-                                                                    [
-                                                                        "transfer_charge",
-                                                                        "reservation_fee",
-                                                                        "vatable_less_price",
-                                                                    ].includes(
-                                                                        key
-                                                                    )
-                                                                )
-                                                                .map(
-                                                                    (
-                                                                        priceListItem
-                                                                    ) => {
-                                                                        return (
-                                                                            <td
-                                                                                key={
-                                                                                    priceListItem
-                                                                                }  
-                                                                                className="px-2 border-black border text-center"
-                                                                            >
-                                                                                {
-                                                                                    pricingData
-                                                                                        .priceListSettings[
-                                                                                        priceListItem
-                                                                                    ]
-                                                                                }{" "}
-                                                                                
-                                                                            </td>
-                                                                        );
-                                                                    }
-                                                                )} */}
-                                                        </tr>
-                                                    );
-                                                })}
-                                        </tbody>
-                                    </table>
-                                </div>
+                                <UnitTableComponent
+                                    tableWidth="w-80"
+                                    computedUnitPrices={computedUnitPrices}
+                                    units={units}
+                                    headers={headers}
+                                    staticHeaders={staticHeaders}
+                                    hasVersionHeaders={hasVersionHeaders}
+                                    hasPricingHeaders={hasPricingHeaders}
+                                    subHeaders={subHeaders}
+                                />
                             )}
                         </div>
 
@@ -827,12 +581,19 @@ const ReviewsandApprovalRouting = ({
             </div>
             <div>
                 <ExpandableDataTable
+                    // hasVersionHeaders={hasVersionHeaders}
+                    // hasPricingHeaders={hasPricingHeaders}
+                    // subHeaders={subHeaders}
+                    // headers={headers}
+                    // staticHeaders={staticHeaders}
+                    // computedUnitPrices={computedUnitPrices}
+                    computedUnitPrices={computedUnitPrices}
+                    units={units}
+                    headers={headers}
+                    staticHeaders={staticHeaders}
                     hasVersionHeaders={hasVersionHeaders}
                     hasPricingHeaders={hasPricingHeaders}
                     subHeaders={subHeaders}
-                    headers={headers}
-                    staticHeaders={staticHeaders}
-                    computedUnitPrices={computedUnitPrices}
                     expandUnitTableViewRef={expandUnitTableViewRef}
                 />
             </div>

@@ -309,7 +309,7 @@ class PriceListMasterRepository
             'status' => $priceList->status,
             'property_name' => $priceList->towerPhase->propertyMaster->property_name ?? null,
             'pricebasic_details' => $priceList->priceBasicDetail ? $priceList->priceBasicDetail->toArray() : null,
-            'excel_id' => $priceList->towerPhase->units->pluck('excel_id')->unique()->first() ?? null,
+            'excel_id' => $priceList->towerPhase->units->where('status', 'Active')->pluck('excel_id')->unique()->first() ?? null,
             'property_commercial_detail' => $priceList->towerPhase->propertyMaster->propertyCommercialDetail->toArray(),
             'price_versions' => $this->transformPriceVersions($priceList->priceVersions),
             'floor_premiums' => $this->transformFloorPremiums($priceList->floorPremiums),
