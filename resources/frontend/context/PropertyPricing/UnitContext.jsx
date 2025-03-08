@@ -37,7 +37,7 @@ export const UnitProvider = ({ children }) => {
                     towerPhaseId,
                     excelId
                 );
-                console.log("response fetchFloorCount", response);
+    
 
                 if (response?.data?.data) {
                     setFloors(response.data.data);
@@ -66,7 +66,6 @@ export const UnitProvider = ({ children }) => {
     const checkExistingUnits = useCallback(
         async (towerPhaseId, excelId, forceFetch = false) => {
             if (!towerPhaseId || !excelId) {
-                console.log("Invalid towerPhaseId or excelId, clearing data");
                 setFloors([]);
                 setUnits([]);
                 return;
@@ -78,24 +77,20 @@ export const UnitProvider = ({ children }) => {
                 lastFetchedExcelId === excelId &&
                 units.length > 0
             ) {
-                console.log("Using cached units data for excelId:", excelId);
                 return;
             }
 
             if (isCheckingUnits) {
-                console.log("Already checking units, skipping duplicate call");
                 return;
             }
 
             try {
                 setIsCheckingUnits(true);
-                console.log("Fetching units for:", towerPhaseId, excelId);
-
                 const response = await unitService.getExistingUnits(
                     towerPhaseId,
                     excelId
                 );
-                console.log("response checkExistingUnits", response);
+              
                 const unitsData = response?.data?.data || [];
                 setUnits(unitsData);
                 setLastFetchedExcelId(excelId);
@@ -126,7 +121,6 @@ export const UnitProvider = ({ children }) => {
             try {
                 setIsUploadingUnits(true);
                 const response = await unitService.storeUnit(payload);
-                console.log("response129",response)
                 if (response?.status === 201) {
                     const newExcelId = response?.data?.excel_id;
                     setExcelId(newExcelId);
@@ -190,12 +184,9 @@ export const UnitProvider = ({ children }) => {
                     property_masters_id: data[0]?.property_masters_id,
                     price_list_master_id: data[0]?.price_list_master_id,
                 };
-                console.log("payload 192", payload);
                 const response = await unitService.saveComputedUnitPricingData(
                     payload
                 );
-                console.log("response 186   ", response);
-                // console.log("Pricing data saved to database");
             } catch (error) {
                 console.error("Failed to save pricing data", error);
             }

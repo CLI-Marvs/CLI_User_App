@@ -37,7 +37,6 @@ const ReviewsandApprovalRouting = ({
     propertyData,
     data,
     action,
-    isReviewAndApprovalAccordionOpen,
 }) => {
     //States
     const { fetchPropertyListMasters } = usePriceListMaster();

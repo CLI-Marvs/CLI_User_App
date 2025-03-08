@@ -6,6 +6,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 import { useUnit } from "@/context/PropertyPricing/UnitContext";
 import { usePricing } from "@/component/layout/propertyandpricingpage/basicpricing/context/BasicPricingContext";
 import { showToast } from "@/util/toastUtil";
+import UnitUploadButton from "@/component/layout/propertyandpricingpage/basicpricing/component/UnitUploadButton";
 
 const newFloorState = {
     floor: null,
@@ -298,7 +299,6 @@ const FloorPremiums = ({ isOpen, toggleAccordion, propertyData }) => {
                                             className="flex justify-center items-center  bg-white montserrat-bold h-full w-full rounded-[4px] p-[4px]"
                                             onClick={handleAddNewFloor}
                                         >
-                                            {/*TODO: Hide if the floor premium is empty*/}
                                             ADD
                                         </div>
                                     </button>
@@ -306,13 +306,10 @@ const FloorPremiums = ({ isOpen, toggleAccordion, propertyData }) => {
                             </div>
                         ) : (
                             <div className="w-auto">
-                                <p className="montserrat-regular text-center text-red-500">
-                                    No units have been uploaded.
-                                    <span className="underline ml-2 text-blue-500 w-80">
-                                        {" "}
-                                        Upload{" "}
-                                    </span>
-                                </p>
+                                <UnitUploadButton
+                                    buttonType="link"
+                                    propertyData={propertyData}
+                                />
                             </div>
                         )}
 

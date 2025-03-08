@@ -2,28 +2,7 @@ import { createContext, useContext, useState } from "react";
 import moment from "moment";
 const BasicPricingContext = createContext();
 
-// const additionalPremiums = [
-//     {
-//         viewName: "Sea View",
-//         premiumCost: 0,
-//         excludedUnitIds: [],
-//     },
-//     {
-//         viewName: "Mountain View",
-//         premiumCost: 0,
-//         excludedUnitIds: [],
-//     },
-//     {
-//         viewName: "City View",
-//         premiumCost: 0,
-//         excludedUnitIds: [],
-//     },
-//     {
-//         viewName: "Amenity View",
-//         premiumCost: 0,
-//         excludedUnitIds: [],
-//     },
-// ];
+ 
 const initialState = () => ({
     priceListSettings: {
         base_price: "",
