@@ -38,7 +38,7 @@ class PriceVersionController extends Controller
         $validatedData = $request->validated();
 
         try {
-            $priceVersion = $this->service->store($validatedData);
+            $priceVersion = $this->service->storePriceVersion($validatedData);
             return response()->json([
                 'message' => 'Price version created successfully',
                 'data' => $priceVersion,

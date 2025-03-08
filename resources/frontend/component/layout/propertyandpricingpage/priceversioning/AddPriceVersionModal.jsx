@@ -77,7 +77,10 @@ const AddPriceVersionModal = ({ modalRef }) => {
                 }
             }
         } catch (error) {
-            console.log("Error", error);
+            console.log("Error123", error.response);
+            if (error.response.status === 422) {
+                showToast(error.response.data.message, "error");
+            }
         } finally {
             setIsLoading(false);
         }

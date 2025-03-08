@@ -194,9 +194,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     /* Price Versioning */
     Route::prefix('/price-version')->group(function () {
-        // Store unit details
+        // Store price version
         Route::post('/', [PriceVersionController::class, 'store']);
-        //Get all units
+        //Get all price version
         Route::get('/', [PriceVersionController::class, 'index']);
     });
 
