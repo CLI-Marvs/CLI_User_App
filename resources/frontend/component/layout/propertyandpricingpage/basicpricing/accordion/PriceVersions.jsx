@@ -186,7 +186,7 @@ const PriceVersions = ({
     return (
         <>
             <div
-                className={`transition-all duration-2000 ease-in-out relative
+                className={`transition-all duration-2000 ease-in-out  
       ${
           isOpen
               ? "h-[74px] mx-5 bg-white shadow-custom5 rounded-[10px]"
