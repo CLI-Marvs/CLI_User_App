@@ -118,7 +118,7 @@ const ReviewsandApprovalRouting = ({
 
         const priceDetails =
             propertyData?.pricebasic_details || pricingData?.priceListSettings;
-  
+        let pricingHeaders = [];
         if (priceDetails && priceDetails.base_price !== 0) {
             const excludedKeys = new Set([
                 "id",
