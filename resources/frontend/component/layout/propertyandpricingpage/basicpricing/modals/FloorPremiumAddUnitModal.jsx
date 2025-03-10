@@ -245,7 +245,6 @@ const FloorPremiumAddUnitModal = ({
                     </div>
                 </div>
                 <div className="flex justify-center mt-4 mb-8">
-                    {/* TODO: disable here if no data */}
                     <button
                         type="submit"
                         onClick={handleSubmit}

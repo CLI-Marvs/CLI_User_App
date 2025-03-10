@@ -4,11 +4,10 @@ import CircularProgress from "@mui/material/CircularProgress";
 import { useUnit } from "@/context/PropertyPricing/UnitContext";
 import { usePricing } from "@/component/layout/propertyandpricingpage/basicpricing/context/BasicPricingContext";
 const FloorPremiumAssignModal = ({ modalRef, selectedFloor, propertyData }) => {
+   
     //State
-
     const modalRef2 = useRef(null);
-    const [excludedUnit, setExcludedUnit] = useState([]);
-    // console.log("excludedUnit", excludedUnit[selectedFloor]);
+    const [excludedUnit, setExcludedUnit] = useState({});
     const {
         fetchUnitsInTowerPhase,
         unitsByFloor,
@@ -22,14 +21,11 @@ const FloorPremiumAssignModal = ({ modalRef, selectedFloor, propertyData }) => {
     //Hooks
     useEffect(() => {
         if (selectedFloor) {
-            console.log(
-                "selectedFloor towerPhaseId excelID25",
+            fetchUnitsInTowerPhase(
                 selectedFloor,
                 towerPhaseId,
-                excelIdFromPriceList
+                excelIdFromPriceList || excelId
             );
-            const excel_id = excelIdFromPriceList || excelId;
-            fetchUnitsInTowerPhase(selectedFloor, towerPhaseId, excel_id);
         }
     }, [selectedFloor]);
 
@@ -46,74 +42,57 @@ const FloorPremiumAssignModal = ({ modalRef, selectedFloor, propertyData }) => {
      * @returns
      */
     const handleUnitSelect = (id) => {
-        setExcludedUnit((prevSelectedUnits) => {
-            // Determine the new list of excluded unitsByFloor
-            const newSelectedUnits = prevSelectedUnits.includes(id)
-                ? prevSelectedUnits.filter((unitId) => unitId !== id)
-                : [...prevSelectedUnits, id];
+        setExcludedUnit((prevExcludedUnits) => {
+            const prevUnitsForFloor = prevExcludedUnits[selectedFloor] || [];
 
-            // If pricing data is available, update the pricing data
-            if (
-                pricingData?.floorPremiums &&
-                Object.keys(pricingData?.floorPremiums).length > 0
-            ) {
-                const floorPremiums = pricingData.floorPremiums[selectedFloor];
+            
+            const newUnitsForFloor = prevUnitsForFloor.includes(id)
+                ? prevUnitsForFloor.filter((unitId) => unitId !== id)
+                : [...prevUnitsForFloor, id];
 
-                // Handle existing and new excluded unitsByFloor
-                let updatedExcludedUnits;
-                if (floorPremiums.excludedUnits?.includes(id)) {
-                    // If the unit was originally from the database, remove it
-                    updatedExcludedUnits = (
-                        floorPremiums.excludedUnits || []
-                    ).filter((unitId) => unitId !== id);
-                } else {
-                    // If it's a new selection, add it to the list
-                    updatedExcludedUnits = [
-                        ...(floorPremiums.excludedUnits || []),
-                        id,
-                    ];
-                }
-                // Update the floorPremiums state using the merged excluded unitsByFloor
-                const updatedFloorPremiums = {
-                    ...floorPremiums,
-                    excludedUnits: updatedExcludedUnits,
-                };
-                setPricingData((prevState) => ({
-                    ...prevState,
-                    floorPremiums: {
-                        ...prevState.floorPremiums,
-                        [selectedFloor]: updatedFloorPremiums,
-                    },
-                }));
+            return {
+                ...prevExcludedUnits,
+                [selectedFloor]: newUnitsForFloor, 
+            };
+        });
+
+        if (
+            pricingData?.floorPremiums &&
+            Object.keys(pricingData?.floorPremiums).length > 0
+        ) {
+            const floorPremiums = pricingData.floorPremiums[selectedFloor];
+
+            let updatedExcludedUnits;
+            if (floorPremiums.excludedUnits?.includes(id)) {
+                updatedExcludedUnits = (
+                    floorPremiums.excludedUnits || []
+                ).filter((unitId) => unitId !== id);
+            } else {
+                updatedExcludedUnits = [
+                    ...(floorPremiums.excludedUnits || []),
+                    id,
+                ];
             }
 
-            // Return the new list of selected unitsByFloor
-            return newSelectedUnits;
-        });
+            const updatedFloorPremiums = {
+                ...floorPremiums,
+                excludedUnits: updatedExcludedUnits,
+            };
+
+            setPricingData((prevState) => ({
+                ...prevState,
+                floorPremiums: {
+                    ...prevState.floorPremiums,
+                    [selectedFloor]: updatedFloorPremiums,
+                },
+            }));
+        }
     };
 
     //Handle close the modal and reset the excluded unit
     const handleCloseModal = () => {
         // setExcludedUnit([]);
         if (modalRef2.current) {
-            //  if (
-            //      pricingData?.floorPremiums &&
-            //      Object.keys(pricingData?.floorPremiums).length > 0
-            //  ) {
-            //      const floorPremiums = pricingData.floorPremiums[selectedFloor];
-            //      // Update the floorPremiums state using the new selected unitsByFloor
-            //      const updatedFloorPremiums = {
-            //          ...floorPremiums,
-            //          excludedUnits: [],
-            //      };
-            //      setPricingData((prevState) => ({
-            //          ...prevState,
-            //          floorPremiums: {
-            //              ...prevState.floorPremiums,
-            //              [selectedFloor]: updatedFloorPremiums,
-            //          },
-            //      }));
-            //  }
             modalRef.current.close();
         }
     };
@@ -142,12 +121,13 @@ const FloorPremiumAssignModal = ({ modalRef, selectedFloor, propertyData }) => {
                         Unit Assignment
                     </p>
                     <p className="montserrat-regular text-[21px]">Floor</p>
-                    {excludedUnit && excludedUnit.length > 0 && (
-                        <p className="ml-10 text-red-500">
-                            You made changes. Make sure to click 'Save as
-                            Draft'.
-                        </p>
-                    )}
+                    {excludedUnit[selectedFloor] &&
+                        excludedUnit[selectedFloor].length > 0 && (
+                            <p className="ml-10 text-red-500">
+                                You made changes. Make sure to click 'Save as
+                                Draft'.
+                            </p>
+                        )}
                 </div>
                 <div className="flex items-center p-[20px] h-[91px] gap-[22px] border-b-1 border-custom-lightestgreen mb-[30px]">
                     <p className="text-custom-gray81">Legend</p>

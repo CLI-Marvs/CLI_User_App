@@ -20,7 +20,7 @@ export const UnitProvider = ({ children }) => {
     const [isUploadingUnits, setIsUploadingUnits] = useState(false);
     const [lastFetchedExcelId, setLastFetchedExcelId] = useState(null);
     const [computedUnitPrices, setComputedUnitPrices] = useState([]);
- 
+
     /**
      * Fetches the count of floors for a given tower phase and excel ID.
      * It calls the unitService.countFloor method to retrieve the data.
@@ -37,7 +37,6 @@ export const UnitProvider = ({ children }) => {
                     towerPhaseId,
                     excelId
                 );
-    
 
                 if (response?.data?.data) {
                     setFloors(response.data.data);
@@ -90,7 +89,7 @@ export const UnitProvider = ({ children }) => {
                     towerPhaseId,
                     excelId
                 );
-              
+
                 const unitsData = response?.data?.data || [];
                 setUnits(unitsData);
                 setLastFetchedExcelId(excelId);
@@ -198,6 +197,7 @@ export const UnitProvider = ({ children }) => {
     const updateUnitComputedPrices = useCallback(
         (newPrices) => {
             setComputedUnitPrices(newPrices);
+            //TODO: uncomment this line to save the computed prices
             //saveComputedUnitPricingData(newPrices);
         },
         [saveComputedUnitPricingData]

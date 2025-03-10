@@ -323,7 +323,6 @@ const AddPriceVersionModal = ({ modalRef }) => {
                         </div>
                     </table>
                     <div className="flex justify-center my-3">
-                        {/* TODO: add validation here to disable the btn if there is no data yet */}
                         <button
                             disabled={
                                 isLoading || isButtonDisabled(formData ?? {})

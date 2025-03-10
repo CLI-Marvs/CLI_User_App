@@ -211,12 +211,6 @@ const UploadUnitDetailsModal = ({
                 <div className="flex justify-start items-center h-40px my-6">
                     <p className="montserrat-bold">Confirm Columns</p>
                 </div>
-                {/* <div className="py-2 bg-red-900">
-                    <p>
-                        Loader/ progress bar here
-                        TODO: add loader here or progress bar
-                    </p>
-                </div> */}
                 <div className="flex flex-col gap-2">
                     {selectedExcelHeader &&
                         Object.values(formData).map((item, index) => {

@@ -32,7 +32,6 @@ export const unitService = {
     //Function to check existing units for a tower phase
     getExistingUnits: async (towerPhaseId, excelId) => {
         if (excelId === null || excelId === undefined) {
-            console.warn("Skipping API request: excelId is null or undefined");
             return { data: { data: [] } }; // Return empty data to prevent errors
         }
         try {
@@ -49,12 +48,6 @@ export const unitService = {
     //Function to get all units in a tower phase and selected floor
     getUnitsInTowerPhase: async (towerPhaseId, selectedFloor, excelId) => {
         try {
-            console.log(
-                "getUnitsInTowerPhase",
-                towerPhaseId,
-                selectedFloor,
-                excelId
-            );
             const response = await apiService.get(
                 `units/tower/${towerPhaseId}/floor/${selectedFloor}/units/${excelId}`
             );

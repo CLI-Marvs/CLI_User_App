@@ -61,10 +61,11 @@ const BasicPricing = () => {
         computedUnitPrices,
         excelIdFromPriceList,
         saveComputedUnitPricingData,
+        floorPremiumsAccordionOpen
     } = useUnit();
     const [accordionStates, setAccordionStates] = useState({
         priceListSettings: false,
-        floorPremium: false,
+        floorPremium: floorPremiumsAccordionOpen,
         additionalPremiums: false,
         priceVersions: false,
         reviewAndApprovalSetting: false,
