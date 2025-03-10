@@ -4,7 +4,6 @@ const ExpandableDataTable = ({
     expandUnitTableViewRef,
     computedUnitPrices,
     staticHeaders,
-    hasVersionHeaders,
     hasPricingHeaders,
     subHeaders,
     headers,
@@ -43,7 +42,7 @@ const ExpandableDataTable = ({
                         units={units}
                         headers={headers}
                         staticHeaders={staticHeaders}
-                        hasVersionHeaders={hasVersionHeaders}
+                        // hasVersionHeaders={hasVersionHeaders}
                         hasPricingHeaders={hasPricingHeaders}
                         subHeaders={subHeaders}
                     />

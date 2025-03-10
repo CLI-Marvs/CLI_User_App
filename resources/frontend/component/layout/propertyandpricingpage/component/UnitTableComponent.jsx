@@ -5,11 +5,12 @@ const UnitTableComponent = ({
     computedUnitPrices,
     headers,
     staticHeaders,
-    hasVersionHeaders,
+    // hasVersionHeaders,
     hasPricingHeaders,
     subHeaders,
     tableWidth = "w-full",
 }) => {
+ 
     return (
         <div className={`mt-4 ${tableWidth}`}>
             <table className="bg-blue-900 w-full montserrat-regular">
@@ -23,14 +24,14 @@ const UnitTableComponent = ({
                             Unit
                         </th>
                         {/* Only show Version column if there are version headers */}
-                        {hasVersionHeaders && (
+                        {/* {hasVersionHeaders && (
                             <th
                                 colSpan={subHeaders.versionHeaders.length}
                                 className="bg-[#31498a] w-full py-3 montserrat-semibold text-white border-black border px-2"
                             >
                                 Version
                             </th>
-                        )}
+                        )} */}
                         {hasPricingHeaders && (
                             <th
                                 colSpan={subHeaders.pricingHeaders.length}
@@ -101,21 +102,21 @@ const UnitTableComponent = ({
                     </tr>
 
                     {/* Third Row: Only render if there are version headers */}
-                    {hasVersionHeaders && (
+                    
                         <tr className="bg-[#aebee3] border-black border montserrat-regular">
-                            <th colSpan={staticHeaders.length}></th>
+                            {/* <th colSpan={staticHeaders.length}></th> */}
 
                             {/* Percent Increase Row */}
-                            {subHeaders.percentIncreaseHeaders.map(
+                            {/* {subHeaders.percentIncreaseHeaders.map(
                                 (percent, index) => (
                                     <th key={index} className="font-normal">
                                         {percent}%
                                     </th>
                                 )
-                            )}
+                            )} */}
 
                             {/* Pricing Fields - only render if there are pricing headers */}
-                            {hasPricingHeaders &&
+                            {/* {hasPricingHeaders &&
                                 subHeaders.pricingHeaders.map(
                                     (priceKey, index) => (
                                         <th
@@ -123,9 +124,9 @@ const UnitTableComponent = ({
                                             className="montserrat-regular text-sm text-center pl-4"
                                         ></th>
                                     )
-                                )}
+                                )} */}
                         </tr>
-                    )}
+                   
                 </thead>
 
                 <tbody className="bg-white">

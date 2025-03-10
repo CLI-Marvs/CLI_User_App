@@ -20,6 +20,7 @@ import { showToast } from "@/util/toastUtil";
 import { usePriceListMaster } from "@/context/PropertyPricing/PriceListMasterContext";
 import CustomToolTip from "@/component/layout/mainComponent/Tooltip/CustomToolTip";
 import UnitTableComponent from "@/component/layout/propertyandpricingpage/component/UnitTableComponent";
+import { property } from "lodash";
 const staticHeaders = [
     "Floor",
     "Room",
@@ -56,12 +57,12 @@ const ReviewsandApprovalRouting = ({
     const [subHeaders, setSubHeaders] = useState([]);
     const headers = [
         ...staticHeaders, // ["Floor", "Room", "Unit", "Type", ...]
-        ...(subHeaders?.versionHeaders || []), // ["V1", "V2", ...]
+        // ...(subHeaders?.versionHeaders || []), // ["V1", "V2", ...]
         ...(subHeaders?.pricingHeaders || []), // ["Transfer Charge", "Vatable Less Price", ...]
         // ...(subHeaders?.paymentSchemeHeaders || []), // ["Payment Scheme 1", "Payment Scheme 2", ...]
     ];
     const hasPricingHeaders = subHeaders?.pricingHeaders?.length > 0;
-    const hasVersionHeaders = subHeaders?.versionHeaders?.length > 0;
+    // const hasVersionHeaders = subHeaders?.versionHeaders?.length > 0;
     const {
         handleRemoveEmployee,
         setApprovedByEmployees,
@@ -87,24 +88,23 @@ const ReviewsandApprovalRouting = ({
      * This effect maps the price_versions from propertyData to subHeaders and priceVersions.
      * It also initializes selectedVersion, pricing headers, and employee selections.
      */
-    useEffect(() => {
-        if (!propertyData?.price_versions) return;
 
+    useEffect(() => {
         // If no version is selected, set the default to the one with priority_number === 1
-        setSelectedVersion((prev) => {
-            if (!prev) {
-                const priorityVersion = propertyData.price_versions.find(
-                    (item) => item.priority_number === 1
-                );
-                return priorityVersion?.version_name || "";
-            }
-            return prev;
-        });
+        // setSelectedVersion((prev) => {
+        //     if (!prev) {
+        //         const priorityVersion = propertyData.price_versions.find(
+        //             (item) => item.priority_number === 1
+        //         );
+        //         return priorityVersion?.version_name || "";
+        //     }
+        //     return prev;
+        // });
 
         // Extract percent increase headers
-        const percentIncreaseHeaders = propertyData.price_versions
-            .map((item) => item.percent_increase)
-            .filter(Boolean);
+        // const percentIncreaseHeaders = propertyData.price_versions
+        //     .map((item) => item.percent_increase)
+        //     .filter(Boolean);
 
         //Filter payment schemes dynamically based on the selected version
         // const paymentSchemeHeaders = propertyData.price_versions
@@ -116,9 +116,9 @@ const ReviewsandApprovalRouting = ({
         //             ) || []
         //     );
 
-        const priceDetails = propertyData.pricebasic_details;
-        let pricingHeaders = [];
-
+        const priceDetails =
+            propertyData?.pricebasic_details || pricingData?.priceListSettings;
+  
         if (priceDetails && priceDetails.base_price !== 0) {
             const excludedKeys = new Set([
                 "id",
@@ -158,11 +158,11 @@ const ReviewsandApprovalRouting = ({
         //Set headers and price versions
         setSubHeaders({
             // paymentSchemeHeaders,
-            percentIncreaseHeaders,
+            // percentIncreaseHeaders,
             pricingHeaders,
         });
 
-        setPriceVersions(propertyData.price_versions);
+        // setPriceVersions(propertyData?.price_versions);
         //Update export pricing data with the latest computed unit prices
         setExportPricingData((prev) => ({
             ...prev,
@@ -173,7 +173,7 @@ const ReviewsandApprovalRouting = ({
         //Initialize selected employees, ensuring the state never holds null values
         setReviewedByEmployees(pricingData.reviewedByEmployees || []);
         setApprovedByEmployees(pricingData.approvedByEmployees || []);
-    }, [propertyData, units, selectedVersion]);
+    }, [propertyData, units, selectedVersion, pricingData]);
 
     //Event handlers
     const handleDownloadExcel = async () => {
@@ -343,14 +343,21 @@ const ReviewsandApprovalRouting = ({
                                     <div className="flex w-full max-w-[450px]">
                                         <h6 className="w-1/3">PROJECT</h6>
                                         <div className="border border-black px-6 flex-1 ml-10">
-                                            <p>{propertyData?.property_name}</p>
+                                            <p>
+                                                {propertyData?.property_name ||
+                                                    propertyData?.data
+                                                        ?.property_name}
+                                            </p>
                                         </div>
                                     </div>
                                     <div className="flex w-full max-w-[450px]">
                                         <h6 className="w-1/3">BUILDING</h6>
                                         <div className="border border-black px-6 flex-1  ml-10">
                                             <p>
-                                                {propertyData?.tower_phase_name}
+                                                {propertyData?.tower_phase_name ||
+                                                    propertyData?.data
+                                                        ?.tower_phases[0]
+                                                        ?.tower_phase_name}
                                             </p>
                                         </div>
                                     </div>
@@ -411,7 +418,7 @@ const ReviewsandApprovalRouting = ({
                                     units={units}
                                     headers={headers}
                                     staticHeaders={staticHeaders}
-                                    hasVersionHeaders={hasVersionHeaders}
+                                    // hasVersionHeaders={hasVersionHeaders}
                                     hasPricingHeaders={hasPricingHeaders}
                                     subHeaders={subHeaders}
                                 />
@@ -590,7 +597,7 @@ const ReviewsandApprovalRouting = ({
                     units={units}
                     headers={headers}
                     staticHeaders={staticHeaders}
-                    hasVersionHeaders={hasVersionHeaders}
+                    // hasVersionHeaders={hasVersionHeaders}
                     hasPricingHeaders={hasPricingHeaders}
                     subHeaders={subHeaders}
                     expandUnitTableViewRef={expandUnitTableViewRef}

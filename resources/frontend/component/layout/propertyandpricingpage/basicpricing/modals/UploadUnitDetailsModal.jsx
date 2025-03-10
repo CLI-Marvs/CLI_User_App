@@ -28,6 +28,8 @@ const UploadUnitDetailsModal = ({
         fetchFloorCount,
         setFloors,
         setUnits,
+        setExcelId,
+        setExcelIdFromPriceList,
         setFloorPremiumsAccordionOpen,
         excelId,
         excelIdFromPriceList,
@@ -89,7 +91,9 @@ const UploadUnitDetailsModal = ({
             if (excelId || excelIdFromPriceList) {
                 // Reset units array
                 setUnits([]);
-
+                setExcelId("");
+                setExcelIdFromPriceList("");
+                
                 // Reset specific pricing data fields while preserving other fields
                 setPricingData((prev) => ({
                     ...prev,
