@@ -63,7 +63,7 @@ const PrivateRoute = ({ requiredPermission }) => {
     }
 
     //Check if logged in user is allowed to view the superadmin page
-  /*   if (!ALLOWED_EMPLOYEES_CRS.includes(userLoggedInEmail)) {
+    /*   if (!ALLOWED_EMPLOYEES_CRS.includes(userLoggedInEmail)) {
         return (
             <div className="w-full h-full flex justify-center   text-custom-bluegreen text-lg mt-4">
                 You do not have permission to view this page.
@@ -100,7 +100,7 @@ const App = () => {
             window.removeEventListener("storage", handleStorageChange);
         };
     }, []);
-    
+
     const Layout = () => {
         return (
             <div className="bg-white relative max-h-screen flex flex-col h-screen">
@@ -193,7 +193,7 @@ const App = () => {
                                 {
                                     path: "records",
                                     element: <BankStatementView />,
-                                },      
+                                },
                             ],
                         },
                         {
@@ -239,9 +239,10 @@ const App = () => {
                             ],
                         },
                         {
-                            //TODO: add permission here
                             path: "property-pricing",
-                            element: <PropertyAndPricingLayout />,
+                            element: (
+                                <PrivateRoute requiredPermission="Property Pricing" />
+                            ),
                             children: [
                                 {
                                     path: "master-lists",
@@ -265,30 +266,18 @@ const App = () => {
                                 },
                             ],
                         },
-                       /*  {
-                            path: "salesmanagement",
-                            element: <SalesManagementLayout />,
-                            children: [
-                                {
-                                    path: "reservationlist",
-                                    element: <ReservationListView />,
-                                },
-                                {
-                                    path: "reservationpage",
-                                    element: <ReservationPageView />,
-                                },
-                            ],
-                        }, */
-
                         {
                             path: "sales",
+                            element: (
+                                <PrivateRoute requiredPermission="Sales Management" />
+                            ),
                             children: [
                                 {
                                     path: "customer",
                                     element: <CustomerMasterListView />,
                                 },
                                 {
-                                    path: "details/:id",    
+                                    path: "details/:id",
                                     element: <CustomerDetailsView />,
                                 },
                             ],
