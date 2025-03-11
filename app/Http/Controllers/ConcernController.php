@@ -1117,9 +1117,21 @@ class ConcernController extends Controller
             }
         }
 
-        if (!empty($searchParams['startDate'])) {
+        if (!empty($searchParams['startDate']) || !empty($searchParams['endDate'])) {
             $startDate = Carbon::parse($searchParams['startDate'])->setTimezone('Asia/Manila');
-            $query->whereDate('concerns.created_at', '=', $startDate);
+            $endDate = Carbon::parse($searchParams['endDate'])->setTimezone('Asia/Manila');
+            if ($startDate && $endDate) {
+                $query->whereBetween(DB::raw('DATE(created_at)'), [$startDate, $endDate]);
+            }
+           
+            elseif ($startDate) {
+                $query->whereDate('created_at', '>=', $startDate); 
+            }
+            
+            elseif ($endDate) {
+                $query->whereDate('created_at', '<=', $endDate); 
+            }
+            
         }
 
         if (!empty($searchParams['selectedYear'])) {
@@ -2015,51 +2027,74 @@ class ConcernController extends Controller
 
     public function getMonthlyReports(Request $request)
     {
+    // Get the parameters from the request
+    $year = $request->year ?? Carbon::now()->year;
+    $department = $request->department;
+    $project = $request->property;
+    $month = $request->month;
+    $startDate = $request->startDate ? Carbon::parse($request->startDate)->setTimezone('Asia/Manila')->toDateString() : null;
+    $endDate = $request->endDate ? Carbon::parse($request->endDate)->setTimezone('Asia/Manila')->toDateString() : null;
 
-        $year = $request->year ?? Carbon::now()->year;
-        $department = $request->department;
-        $project = $request->property;
-        $month = $request->month;
-        /* $monthNumber = Carbon::parse($request->propertyMonth)->month; */
+    $query = Concerns::select(
+        DB::raw('EXTRACT(MONTH FROM created_at) as month'),
+        DB::raw('EXTRACT(YEAR FROM created_at) as year'),
+        DB::raw('SUM(case when status = \'Resolved\' then 1 else 0 end) as Resolved'),
+        DB::raw('SUM(case when status = \'unresolved\' then 1 else 0 end) as Unresolved'),
+        DB::raw('SUM(case when status = \'Closed\' then 1 else 0 end) as Closed')
+    );
 
-        $query = Concerns::select(
-            DB::raw('EXTRACT(MONTH FROM created_at) as month'),
-            DB::raw('SUM(case when status = \'Resolved\' then 1 else 0 end) as Resolved'),
-            DB::raw('SUM(case when status = \'unresolved\' then 1 else 0 end) as Unresolved'),
-            DB::raw('SUM(case when status = \'Closed\' then 1 else 0 end) as Closed')
-
-        )
-            /* ->whereMonth('created_at', $monthNumber) */
-            ->whereYear('created_at', $year);
-
-        if ($department && $department !== 'All') {
-            $query->whereRaw("resolve_from::jsonb @> ?", json_encode([['department' => $department]]));
-        }
-
-        if ($month && $month !== 'All') {
-            $query->whereMonth('created_at', $month);
-        }
-
-        if ($project && $project !== 'All') {
-            $query->where('property', $project);
-        }
-
-        $reports = $query->groupBy('month')
-            ->orderBy('month')
-            ->get()
-            ->keyBy('month');
-
-        $allMonths = collect(range(1, 12))->map(function ($month) use ($reports) {
-            return [
-                'month' => $month,
-                'resolved' => $reports->get($month)?->resolved ?? 0,
-                'unresolved' => $reports->get($month)?->unresolved ?? 0,
-                'closed' => $reports->get($month)?->closed ?? 0,
-            ];
-        });
-
-        return response()->json($allMonths);
+    if($year && $year !== 'All') {
+        $query->whereYear('created_at', $year);
     }
+
+    // Apply department filter
+    if ($department && $department !== 'All') {
+        $query->whereRaw("assign_to::jsonb @> ?", json_encode([['department' => $department]]));
+    }
+
+    // Apply month filter
+    if ($month && $month !== 'All') {
+        $query->whereMonth('created_at', $month);
+    }
+
+    // Apply project filter
+    if ($project && $project !== 'All') {
+        $query->where('property', $project);
+    }
+
+    if ($startDate && $endDate) {
+        $query->whereBetween(DB::raw('DATE(created_at)'), [$startDate, $endDate]);
+    }
+    // If only start date is provided, filter from start date to present
+    elseif ($startDate) {
+        $query->whereDate('created_at', '>=', $startDate); // Using whereDate for exact date match
+    }
+    // If only end date is provided, filter from start to end date
+    elseif ($endDate) {
+        $query->whereDate('created_at', '<=', $endDate); // Using whereDate for exact date match
+    }
+
+    // Group by month and order by month
+    $reports = $query->groupBy('month', 'year')
+    ->orderBy('year')
+    ->orderBy('month')
+    ->get();
+
+    
+    $allMonths = $reports->map(function ($report) {
+        return [
+            'month' => $report->month, // Directly use the month without formatting
+            'year' => $report->year,   // Directly use the year
+            'resolved' => $report->resolved ?? 0,
+            'unresolved' => $report->unresolved ?? 0,
+            'closed' => $report->closed ?? 0,
+        ];
+    });
+
+    // Return the response as JSON
+    return response()->json($allMonths);
+}
+
 
 
     public function getInquiriesPerProperty(Request $request)
@@ -2068,14 +2103,21 @@ class ConcernController extends Controller
         $month = $request->month;
         $project = $request->property;
         $year = $request->year ?? Carbon::now()->year;
+        $startDate = $request->startDate ? Carbon::parse($request->startDate)->setTimezone('Asia/Manila')->toDateString() : null;
+        $endDate = $request->endDate ? Carbon::parse($request->endDate)->setTimezone('Asia/Manila')->toDateString() : null;
+
+
         $query = Concerns::select(
             DB::raw('property'),
             /*   DB::raw('EXTRACT(MONTH FROM created_at) as month'), */
             DB::raw('SUM(case when status = \'Resolved\' then 1 else 0 end) as Resolved'),
             DB::raw('SUM(case when status = \'unresolved\' then 1 else 0 end) as Unresolved'),
             DB::raw('SUM(case when status = \'Closed\' then 1 else 0 end) as Closed')
-        )
-            ->whereYear('created_at', $year);
+        );
+
+        if($year && $year !== 'All') {
+            $query->whereYear('created_at', $year);
+        }
 
         if ($project && $project !== 'All') {
             if ($project === "N/A") {
@@ -2093,7 +2135,19 @@ class ConcernController extends Controller
         }
 
         if ($department && $department !== "All") {
-            $query->whereRaw("resolve_from::jsonb @> ?", json_encode([['department' => $department]]));
+            $query->whereRaw("assign_to::jsonb @> ?", json_encode([['department' => $department]]));
+        }
+
+        if ($startDate && $endDate) {
+            $query->whereBetween(DB::raw('DATE(created_at)'), [$startDate, $endDate]);
+        }
+        // If only start date is provided, filter from start date to present
+        elseif ($startDate) {
+            $query->whereDate('created_at', '>=', $startDate); // Using whereDate for exact date match
+        }
+        // If only end date is provided, filter from start to end date
+        elseif ($endDate) {
+            $query->whereDate('created_at', '<=', $endDate); // Using whereDate for exact date match
         }
 
         $concerns = $query->groupBy('property')->get();
@@ -2108,35 +2162,52 @@ class ConcernController extends Controller
         $month = $request->month;
         $project = $request->property;
         $year = $request->year ?? Carbon::now()->year;
+        $startDate = $request->startDate ? Carbon::parse($request->startDate)->setTimezone('Asia/Manila')->toDateString() : null;
+        $endDate = $request->endDate ? Carbon::parse($request->endDate)->setTimezone('Asia/Manila')->toDateString() : null;
 
         $query = Concerns::select(
-            DB::raw("jsonb_array_elements(resolve_from::jsonb)->>'department' as department"),
+            DB::raw("jsonb_array_elements(assign_to::jsonb)->>'department' as department"),
             DB::raw('COUNT(DISTINCT CASE WHEN status = \'unresolved\' THEN id ELSE NULL END) as unresolved'),
             DB::raw('COUNT(DISTINCT CASE WHEN status = \'Closed\' THEN id ELSE NULL END) as closed'),
             DB::raw('COUNT(DISTINCT CASE WHEN status = \'Resolved\' THEN id ELSE NULL END) as resolved')
         )
-            ->whereYear('created_at', $year)
             ->whereNotNull('status');
 
+            if($year !== 'All') {
+                $query->whereYear('created_at', $year);
+            }
+            
+            if ($month !== 'All') {
+                $query->whereMonth('created_at', $month);
+            }
         if ($project && $project !== 'All') {
             $query->where('property', $project);
         }
 
-        if ($month && $month !== 'All') {
-            $query->whereMonth('created_at', $month);
-        }
 
         if ($department && $department !== 'All') {
             if ($department === 'Unassigned') {
-                $query->whereRaw("resolve_from::jsonb @> ?", [json_encode([['department' => null]])]);
+                $query->whereRaw("assign_to::jsonb @> ?", [json_encode([['department' => null]])]);
             } else {
                 $query->whereRaw("
                     EXISTS (
-                        SELECT 1 FROM jsonb_array_elements(resolve_from::jsonb) AS elem
+                        SELECT 1 FROM jsonb_array_elements(assign_to::jsonb) AS elem
                         WHERE elem->>'department' = ?
                     )
                 ", [$department]);
             }
+        }
+
+        if ($startDate && $endDate) {
+            $query->whereBetween(DB::raw('DATE(created_at)'), [$startDate, $endDate]);
+        }
+        // If only start date is provided, filter from start date to present
+        elseif ($startDate) {
+            $query->whereDate('created_at', '>=', $startDate); // Using whereDate for exact date match
+        }
+        // If only end date is provided, filter from start to end date
+        elseif ($endDate) {
+            $query->whereDate('created_at', '<=', $endDate); // Using whereDate for exact date match
         }
 
 
@@ -2148,22 +2219,23 @@ class ConcernController extends Controller
         COUNT(DISTINCT CASE WHEN status = 'Resolved' AND assign_to IS NULL THEN id ELSE NULL END) as total_resolved,
         COUNT(DISTINCT CASE WHEN assign_to IS NULL THEN id ELSE NULL END) as total_unassigned,
         COUNT(DISTINCT id) as total_all
-    ")
-            ->whereYear('created_at', $year)
+    ") 
             ->whereNotNull('status');
 
         if ($project && $project !== 'All') {
             $totalUnassigned->where('property', $project);
         }
-
-        if ($month && $month !== 'All') {
+        if ($year !== 'All') {
+            $totalUnassigned->whereYear('created_at', $year);
+        }
+        
+        if ($month !== 'All') {
             $totalUnassigned->whereMonth('created_at', $month);
         }
-
         $totalCounts = $totalUnassigned->first();
 
         $concerns = $query
-            ->groupBy(DB::raw("jsonb_array_elements(resolve_from::jsonb)->>'department'"))
+            ->groupBy(DB::raw("jsonb_array_elements(assign_to::jsonb)->>'department'"))
             ->orderBy('department')
             ->get();
 
@@ -2187,14 +2259,18 @@ class ConcernController extends Controller
         $month = $request->month;
         $project = $request->property;
         $year = $request->year ?? Carbon::now()->year;
+        $startDate = $request->startDate ? Carbon::parse($request->startDate)->setTimezone('Asia/Manila')->toDateString() : null;
+        $endDate = $request->endDate ? Carbon::parse($request->endDate)->setTimezone('Asia/Manila')->toDateString() : null;
 
 
-        $query = Concerns::select('channels', DB::raw('COUNT(*) as total'))
+        $query = Concerns::select('channels', DB::raw('COUNT(*) as total'));
 
-            ->whereYear('created_at', $year);
+        if($year && $year !== 'All') {
+            $query->whereYear('created_at', $year);
+        }
 
         if ($department && $department !== "All") {
-            $query->whereRaw("resolve_from::jsonb @> ?", json_encode([['department' => $department]]));
+            $query->whereRaw("assign_to::jsonb @> ?", json_encode([['department' => $department]]));
         }
 
         if ($month && $month !== 'All') {
@@ -2203,6 +2279,18 @@ class ConcernController extends Controller
 
         if ($project && $project !== 'All') {
             $query->where('property', $project);
+        }
+
+        if ($startDate && $endDate) {
+            $query->whereBetween(DB::raw('DATE(created_at)'), [$startDate, $endDate]);
+        }
+        // If only start date is provided, filter from start date to present
+        elseif ($startDate) {
+            $query->whereDate('created_at', '>=', $startDate); // Using whereDate for exact date match
+        }
+        // If only end date is provided, filter from start to end date
+        elseif ($endDate) {
+            $query->whereDate('created_at', '<=', $endDate); // Using whereDate for exact date match
         }
 
         $query->orderByRaw("
@@ -2241,16 +2329,19 @@ class ConcernController extends Controller
         $department = $request->department;
         $month = $request->month;
         $project = $request->property;
+        $startDate = $request->startDate ? Carbon::parse($request->startDate)->setTimezone('Asia/Manila')->toDateString() : null;
+        $endDate = $request->endDate ? Carbon::parse($request->endDate)->setTimezone('Asia/Manila')->toDateString() : null;
 
 
         // Query to count each <communication_t></communication_t>ype grouped by property
-        $query = Concerns::select('communication_type', DB::raw('COUNT(*) as total'))
+        $query = Concerns::select('communication_type', DB::raw('COUNT(*) as total'));
 
-            ->whereYear('created_at', $year);
-
-
+        if($year && $year !== 'All') {
+            $query->whereYear('created_at', $year);
+        }
+            
         if ($department && $department !== "All") {
-            $query->whereRaw("resolve_from::jsonb @> ?", json_encode([['department' => $department]]));
+            $query->whereRaw("assign_to::jsonb @> ?", json_encode([['department' => $department]]));
         }
 
         if ($month && $month !== 'All') {
@@ -2259,6 +2350,18 @@ class ConcernController extends Controller
 
         if ($project && $project !== 'All') {
             $query->where('property', $project);
+        }
+
+        if ($startDate && $endDate) {
+            $query->whereBetween(DB::raw('DATE(created_at)'), [$startDate, $endDate]);
+        }
+        // If only start date is provided, filter from start date to present
+        elseif ($startDate) {
+            $query->whereDate('created_at', '>=', $startDate); // Using whereDate for exact date match
+        }
+        // If only end date is provided, filter from start to end date
+        elseif ($endDate) {
+            $query->whereDate('created_at', '<=', $endDate); // Using whereDate for exact date match
         }
 
         $query->orderByRaw("
@@ -2307,17 +2410,22 @@ class ConcernController extends Controller
             $department = $request->department;
             $month = $request->month;
             $year = $request->year ?? Carbon::now()->year;
+            $startDate = $request->startDate ? Carbon::parse($request->startDate)->setTimezone('Asia/Manila')->toDateString() : null;
+            $endDate = $request->endDate ? Carbon::parse($request->endDate)->setTimezone('Asia/Manila')->toDateString() : null;
+
         } catch (\Exception $e) {
             return response()->json(['error' => 'Invalid month format'], 400);
         }
 
         $department = $request->department;
-        $query = Concerns::select('details_concern', DB::raw('COUNT(*) as total'))
+        $query = Concerns::select('details_concern', DB::raw('COUNT(*) as total'));
 
-            ->whereYear('created_at', $year);
+        if($year && $year !== 'All') {
+            $query->whereYear('created_at', $year);
+        }
 
         if ($department && $department !== "All") {
-            $query->whereRaw("resolve_from::jsonb @> ?", json_encode([['department' => $department]]));
+            $query->whereRaw("assign_to::jsonb @> ?", json_encode([['department' => $department]]));
         }
 
         if ($project && $project !== 'All') {
@@ -2326,6 +2434,18 @@ class ConcernController extends Controller
 
         if ($month && $month !== 'All') {
             $query->whereMonth('created_at', $month);
+        }
+
+        if ($startDate && $endDate) {
+            $query->whereBetween(DB::raw('DATE(created_at)'), [$startDate, $endDate]);
+        }
+        // If only start date is provided, filter from start date to present
+        elseif ($startDate) {
+            $query->whereDate('created_at', '>=', $startDate); // Using whereDate for exact date match
+        }
+        // If only end date is provided, filter from start to end date
+        elseif ($endDate) {
+            $query->whereDate('created_at', '<=', $endDate); // Using whereDate for exact date match
         }
 
         $concerns = $query->groupBy('details_concern')->get();
@@ -2596,30 +2716,21 @@ class ConcernController extends Controller
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
         }
     }
+
     public function fromBuyerEmail($buyerData, $buyerDataErratum)
     {
-
         $responses  = [];
 
         if (!empty($buyerData)) {
             foreach ($buyerData as $buyer) {
                 if ($buyer) {
-                    
-                    $data = [
-                        'lastname' => $buyer['buyer_name'],
-                        'messageId' => $buyer['message_id'],
-                        'buyer_email' => $buyer['buyer_email'],
-                        'email_subject' => $buyer['email_subject'],
-                    ];
+                    $lastConcern = Concerns::latest()->first();
+                    $nextId = $lastConcern ? $lastConcern->id + 1 : 1;
 
-                    \Log::info([
-                        'data from buyer' => $data,
-                    ]);
+                    $formattedId = str_pad($nextId, 8, '0', STR_PAD_LEFT);
+                    $ticketId = 'Ticket#' . $this->dynamicTicketYear . $formattedId;
 
-                    Mail::to($buyer['buyer_email'])->send(new DirectEmailResponse($data));
-
-
-                    /*    $concerns = new Concerns();
+                    $concerns = new Concerns();
                     $concerns->email_subject = $buyer['email_subject'];
                     $concerns->ticket_id = $ticketId;
                     $concerns->buyer_email = $buyer['buyer_email'];
@@ -2640,8 +2751,9 @@ class ConcernController extends Controller
                     $messagesRef->attachment = json_encode($fileLinks);
                     $messagesRef->created_at = Carbon::parse(now())->setTimezone('Asia/Manila');
                     $messagesRef->buyer_name = $concerns->buyer_name;
-                    $messagesRef->save(); */
+                    $messagesRef->save();
 
+                    $this->inquiryLogsFromBuyer($concerns->ticket_id);
 
                     $responses[] = "Posted Successfully " . $buyer['buyer_email'];
                 } else {
@@ -2652,20 +2764,7 @@ class ConcernController extends Controller
         if (!empty($buyerDataErratum)) {
             foreach ($buyerDataErratum as $buyer) {
                 if ($buyer) {
-                    $data = [
-                        'lastname' => $buyer['buyer_name'],
-                        'messageId' => $buyer['message_id'],
-                        'buyer_email' => $buyer['buyer_email'],
-                        'email_subject' => $buyer['email_subject'],
-
-                    ];
-
-                    \Log::info([
-                        'data from buyer' => $data,
-                    ]);
-                    Mail::to($buyer['buyer_email'])->send(new DirectEmailResponse($data));
-
-                    /*   $existingTicket = Concerns::where('email_subject', $buyer['email_subject'])
+                    $existingTicket = Concerns::where('email_subject', $buyer['email_subject'])
                         ->where('buyer_email', $buyer['buyer_email'])
                         ->first();
 
@@ -2680,7 +2779,7 @@ class ConcernController extends Controller
                         $messagesRef->buyer_firstname = $existingTicket->buyer_name;
                         $messagesRef->buyer_name = $existingTicket->buyer_name;
                         $messagesRef->save();
-                    } */
+                    }
 
                     $responses[] = "Posted Successfully " . $buyer['buyer_email'];
                 } else {
@@ -2691,6 +2790,7 @@ class ConcernController extends Controller
 
         return $responses;
     }
+
 
     public function buyerReplyNotif($ticketId, $concernId, $message)
     {
