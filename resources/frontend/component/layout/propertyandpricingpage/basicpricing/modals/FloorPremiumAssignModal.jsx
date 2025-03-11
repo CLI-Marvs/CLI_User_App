@@ -3,36 +3,38 @@ import FloorPremiumAddUnitModal from "./FloorPremiumAddUnitModal";
 import CircularProgress from "@mui/material/CircularProgress";
 import { useUnit } from "@/context/PropertyPricing/UnitContext";
 import { usePricing } from "@/component/layout/propertyandpricingpage/basicpricing/context/BasicPricingContext";
-const FloorPremiumAssignModal = ({ modalRef, selectedFloor, propertyData }) => {
-   
+const FloorPremiumAssignModal = ({
+    floorPremiumAssignModalRef,
+    selectedFloor,
+    propertyData,
+}) => {
     //State
-    const modalRef2 = useRef(null);
+    const floorPremiumAddUnitModalRef = useRef(null);
     const [excludedUnit, setExcludedUnit] = useState({});
     const {
-        fetchUnitsInTowerPhase,
-        unitsByFloor,
         isFetchingUnits,
-        excelIdFromPriceList,
         towerPhaseId,
-        excelId,
+        units,
     } = useUnit();
     const { pricingData, setPricingData } = usePricing();
-
+    const [unitsByFloor, setUnitsByFloor] = useState([]);
+   
     //Hooks
     useEffect(() => {
-        if (selectedFloor) {
-            fetchUnitsInTowerPhase(
-                selectedFloor,
-                towerPhaseId,
-                excelIdFromPriceList || excelId
-            );
+        if (!selectedFloor || !units || units.length === 0) {
+            setUnitsByFloor([]);
+            return;
         }
-    }, [selectedFloor]);
+        const filteredUnits = units.filter(
+            (unit) => Number(unit.floor) === Number(selectedFloor)
+        );
+        setUnitsByFloor(filteredUnits);
+    }, [selectedFloor, units]);
 
     //Event handler
     const handleOpenModal = () => {
-        if (modalRef2.current) {
-            modalRef2.current.showModal();
+        if (floorPremiumAddUnitModalRef.current) {
+            floorPremiumAddUnitModalRef.current.showModal();
         }
     };
 
@@ -45,14 +47,13 @@ const FloorPremiumAssignModal = ({ modalRef, selectedFloor, propertyData }) => {
         setExcludedUnit((prevExcludedUnits) => {
             const prevUnitsForFloor = prevExcludedUnits[selectedFloor] || [];
 
-            
             const newUnitsForFloor = prevUnitsForFloor.includes(id)
                 ? prevUnitsForFloor.filter((unitId) => unitId !== id)
                 : [...prevUnitsForFloor, id];
 
             return {
                 ...prevExcludedUnits,
-                [selectedFloor]: newUnitsForFloor, 
+                [selectedFloor]: newUnitsForFloor,
             };
         });
 
@@ -92,15 +93,15 @@ const FloorPremiumAssignModal = ({ modalRef, selectedFloor, propertyData }) => {
     //Handle close the modal and reset the excluded unit
     const handleCloseModal = () => {
         // setExcludedUnit([]);
-        if (modalRef2.current) {
-            modalRef.current.close();
+        if (floorPremiumAddUnitModalRef.current) {
+            floorPremiumAssignModalRef.current.close();
         }
     };
 
     return (
         <dialog
             className="modal w-[1200px] rounded-lg bg-custom-grayFA backdrop:bg-black/50"
-            ref={modalRef}
+            ref={floorPremiumAssignModalRef}
         >
             <div className=" px-14 mb-5 rounded-[10px]">
                 <div className="">
@@ -164,29 +165,34 @@ const FloorPremiumAssignModal = ({ modalRef, selectedFloor, propertyData }) => {
                         ) : (
                             unitsByFloor &&
                             unitsByFloor.length > 0 &&
-                            unitsByFloor.map((item, key) => {
-                                // Check if this unit's ID is in the excludedUnits for the current floor
-                                const isExcluded = pricingData?.floorPremiums?.[
-                                    selectedFloor
-                                ]?.excludedUnits?.includes(item?.id);
-                                return (
-                                    <div
-                                        onClick={() =>
-                                            handleUnitSelect(item?.id)
-                                        }
-                                        className={`h-[63px] w-[95px] p-[6px] ${
-                                            !isExcluded ? "gradient-btn4" : ""
-                                        } rounded-[15px]  cursor-pointer`}
-                                        key={key}
-                                    >
-                                        <div className="flex justify-center items-center bg-white h-full w-full text-custom-solidgreen rounded-[10px]">
-                                            <p className="font-bold">
-                                                {item?.unit}
-                                            </p>
+                            unitsByFloor
+                                // .filter((item) => item.floor === selectedFloor)
+                                .map((item, key) => {
+                                    // Check if this unit's ID is in the excludedUnits for the current floor
+                                    const isExcluded =
+                                        pricingData?.floorPremiums?.[
+                                            selectedFloor
+                                        ]?.excludedUnits?.includes(item?.id);
+                                    return (
+                                        <div
+                                            onClick={() =>
+                                                handleUnitSelect(item?.id)
+                                            }
+                                            className={`h-[63px] w-[95px] p-[6px] ${
+                                                !isExcluded
+                                                    ? "gradient-btn4"
+                                                    : ""
+                                            } rounded-[15px]  cursor-pointer`}
+                                            key={key}
+                                        >
+                                            <div className="flex justify-center items-center bg-white h-full w-full text-custom-solidgreen rounded-[10px]">
+                                                <p className="font-bold">
+                                                    {item?.unit}
+                                                </p>
+                                            </div>
                                         </div>
-                                    </div>
-                                );
-                            })
+                                    );
+                                })
                         )}
 
                         <div>
@@ -204,7 +210,7 @@ const FloorPremiumAssignModal = ({ modalRef, selectedFloor, propertyData }) => {
             </div>
             <div>
                 <FloorPremiumAddUnitModal
-                    modalRef={modalRef2}
+                    floorPremiumAddUnitModalRef={floorPremiumAddUnitModalRef}
                     propertyData={propertyData}
                     unitsByFloor={unitsByFloor}
                     towerPhaseId={towerPhaseId}

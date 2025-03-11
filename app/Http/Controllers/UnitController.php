@@ -36,7 +36,7 @@ class UnitController extends Controller
 
         // Update the validated data
         $validatedData['excelDataRows'] = $normalizedRows;
-        
+
         try {
             $result = $this->service->storeUnitFromExcel($validatedData);
 
@@ -89,22 +89,22 @@ class UnitController extends Controller
      * @param Request $request The incoming HTTP request
      * @return \Illuminate\Http\JsonResponse JSON response containing units or error message
      */
-    public function getUnits($selectedFloor, $towerPhaseId, $excelId)
-    {
-        try {
-            // Query the database for units matching the specified towerPhaseId and selectedFloor
-            $units =  $this->service->getUnits($towerPhaseId, $selectedFloor, $excelId);
+    // public function getUnits($selectedFloor, $towerPhaseId, $excelId)
+    // {
+    //     try {
+    //         // Query the database for units matching the specified towerPhaseId and selectedFloor
+    //         $units =  $this->service->getUnits($towerPhaseId, $selectedFloor, $excelId);
 
-            return response()->json([
-                'data' => $units
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Error getting the units.',
-                'error' => $e->getMessage(),
-            ], 500);
-        }
-    }
+    //         return response()->json([
+    //             'data' => $units
+    //         ]);
+    //     } catch (\Exception $e) {
+    //         return response()->json([
+    //             'message' => 'Error getting the units.',
+    //             'error' => $e->getMessage(),
+    //         ], 500);
+    //     }
+    // }
 
     //Add new unit from the system/admin page
     public function storeUnit(StoreUnitRequest $request)
@@ -115,6 +115,7 @@ class UnitController extends Controller
 
             return response()->json([
                 'message' => $result['message'],
+                'data' => $result['data'],
             ], 201);
         } catch (\Exception $e) {
             return response()->json([

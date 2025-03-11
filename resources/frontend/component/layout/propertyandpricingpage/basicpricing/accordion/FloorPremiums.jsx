@@ -19,7 +19,7 @@ const FloorPremiums = ({ isOpen, toggleAccordion, propertyData }) => {
     const [newFloorPremiumData, setNewFloorPremiumData] =
         useState(newFloorState);
 
-    const modalRef = useRef(null);
+    const floorPremiumAssignModalRef = useRef(null);
     const {
         floors,
         isFloorCountLoading,
@@ -73,8 +73,8 @@ const FloorPremiums = ({ isOpen, toggleAccordion, propertyData }) => {
     //Handle to open modal to assign floor premiums
     const handleOpenModal = (floor) => {
         setSelectedFloor(floor);
-        if (modalRef.current) {
-            modalRef.current.showModal();
+        if (floorPremiumAssignModalRef.current) {
+            floorPremiumAssignModalRef.current.showModal();
         }
     };
 
@@ -447,7 +447,7 @@ const FloorPremiums = ({ isOpen, toggleAccordion, propertyData }) => {
             <div>
                 <FloorPremiumAssignModal
                     propertyData={propertyData}
-                    modalRef={modalRef}
+                    floorPremiumAssignModalRef={floorPremiumAssignModalRef}
                     selectedFloor={selectedFloor}
                 />
             </div>

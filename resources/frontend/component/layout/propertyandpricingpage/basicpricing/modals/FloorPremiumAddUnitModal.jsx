@@ -16,7 +16,7 @@ const formDataState = {
 };
 
 const FloorPremiumAddUnitModal = ({
-    modalRef,
+    floorPremiumAddUnitModalRef,
     unitsByFloor,
     propertyData,
     towerPhaseId,
@@ -25,10 +25,10 @@ const FloorPremiumAddUnitModal = ({
     //States
     const [formData, setFormData] = useState(formDataState);
     const {
-        fetchUnitsInTowerPhase,
         checkExistingUnits,
         excelId,
         excelIdFromPriceList,
+        setUnits,
     } = useUnit();
     const [isLoading, setIsLoading] = useState(false);
 
@@ -41,7 +41,7 @@ const FloorPremiumAddUnitModal = ({
                 floor: selectedFloor,
             }));
         }
-    }, [unitsByFloor]);
+    }, [unitsByFloor, selectedFloor]);
 
     //Event handler
     //Handle input field change
@@ -68,33 +68,40 @@ const FloorPremiumAddUnitModal = ({
                 total_area: parseFloat(formData.totalArea).toFixed(2),
                 tower_phase_id: towerPhaseId,
                 excel_id: excelId || excelIdFromPriceList,
-                property_masters_id: propertyData?.property_commercial_detail?.property_master_id,
+                property_masters_id:
+                    propertyData?.property_commercial_detail
+                        ?.property_master_id,
                 price_list_master_id: propertyData?.price_list_master_id,
             };
-            console.log("payload", payload);
             setIsLoading(true);
             const response = await unitService.storeUnitDetails(payload);
+
             if (response?.status === 201) {
                 showToast(
                     response?.data?.message || "Data added successfully!",
                     "success"
                 );
                 setFormData(formDataState);
+                // setUnits(response?.data?.data);
+                setUnits((prevUnits) => {
+                    const newUnits = [...prevUnits, response?.data?.data];
+                    // Sort units in ascending order based on 'unit' property
+                    // return newUnits.sort((a, b) =>
+                    //     a.unit.localeCompare(b.unit)
+                    // );
+                    return newUnits;
+                });
                 await Promise.all([
-                    fetchUnitsInTowerPhase(
-                        selectedFloor,
-                        towerPhaseId,
-                        excelId || excelIdFromPriceList
-                    ),
                     checkExistingUnits(
                         towerPhaseId,
                         excelId || excelIdFromPriceList,
+                        true,
                         true
                     ),
                 ]);
 
-                if (modalRef.current) {
-                    modalRef.current.close();
+                if (floorPremiumAddUnitModalRef.current) {
+                    floorPremiumAddUnitModalRef.current.close();
                 }
             }
         } catch (error) {
@@ -110,17 +117,20 @@ const FloorPremiumAddUnitModal = ({
 
     //Handle close the modal and reset all state
     const handleCloseModal = () => {
-        if (modalRef.current) {
+        if (floorPremiumAddUnitModalRef.current) {
             setFormData((prevData) => ({
                 ...formDataState,
                 floor: selectedFloor,
             }));
-            modalRef.current.close();
+            floorPremiumAddUnitModalRef.current.close();
         }
     };
 
     return (
-        <dialog className="modal w-[474px] rounded-lg" ref={modalRef}>
+        <dialog
+            className="modal w-[474px] rounded-lg"
+            ref={floorPremiumAddUnitModalRef}
+        >
             <div className=" px-14 mb-5 rounded-[10px]">
                 <div className="">
                     <div

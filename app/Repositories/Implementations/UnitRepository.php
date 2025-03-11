@@ -27,6 +27,8 @@ class UnitRepository
         return  $this->model->where('tower_phase_id', $towerPhaseId)
             ->where('excel_id', $excelId)
             ->where('status', 'Active')
+            ->orderBy('floor', 'asc')
+            ->orderBy('unit', 'asc')
             ->get();
     }
 
@@ -40,6 +42,8 @@ class UnitRepository
             ->where('floor', $selectedFloor)
             ->where('excel_id', $excelId)
             ->where('status', 'Active')
+            ->orderBy('floor', 'asc')
+            ->orderBy('unit', 'asc')
             ->get();
 
         if ($units->isEmpty()) {
@@ -60,7 +64,7 @@ class UnitRepository
             $data,
             ['status' => 'Active']
         ));
-
+ 
         return [
             'message' => 'Unit details stored successfully',
             'data' => $units->fresh()

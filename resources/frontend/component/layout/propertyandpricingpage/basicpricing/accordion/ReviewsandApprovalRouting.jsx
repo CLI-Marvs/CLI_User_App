@@ -88,7 +88,7 @@ const ReviewsandApprovalRouting = ({
      * This effect maps the price_versions from propertyData to subHeaders and priceVersions.
      * It also initializes selectedVersion, pricing headers, and employee selections.
      */
-
+    
     useEffect(() => {
         // If no version is selected, set the default to the one with priority_number === 1
         // setSelectedVersion((prev) => {

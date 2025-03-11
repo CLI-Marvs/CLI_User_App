@@ -63,7 +63,7 @@ export const UnitProvider = ({ children }) => {
      * Handles loading and error states during the API call.
      */
     const checkExistingUnits = useCallback(
-        async (towerPhaseId, excelId, forceFetch = false) => {
+        async (towerPhaseId, excelId, forceFetch = false, skipFloorCount = false) => {
             if (!towerPhaseId || !excelId) {
                 setFloors([]);
                 setUnits([]);
@@ -95,9 +95,13 @@ export const UnitProvider = ({ children }) => {
                 setLastFetchedExcelId(excelId);
 
                 // Fetch floor count only if units exist
-                if (unitsData.length > 0 && unitsData[0]?.excel_id) {
-                    await fetchFloorCount(towerPhaseId, unitsData[0].excel_id);
-                }
+               if (
+                   !skipFloorCount &&
+                   unitsData.length > 0 &&
+                   unitsData[0]?.excel_id
+               ) {
+                   await fetchFloorCount(towerPhaseId, unitsData[0].excel_id);
+               }
             } catch (err) {
                 setError(err);
                 console.error("Error in checkExistingUnits:", err);
@@ -212,7 +216,6 @@ export const UnitProvider = ({ children }) => {
         uploadUnits,
         floorPremiumsAccordionOpen,
         setFloorPremiumsAccordionOpen,
-        fetchUnitsInTowerPhase,
         unitsByFloor,
         isUploadingUnits,
         setIsUploadingUnits,
