@@ -5,7 +5,7 @@ export const priceListMasterService = {
     getPriceListMasters: async () => {
         try {
             const response = await apiService.get("price-list-masters/");
-            return response;
+            return response.data;
         } catch (error) {
             console.error("Error getting price list masters:", error);
             throw error;

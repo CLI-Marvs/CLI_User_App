@@ -8,7 +8,6 @@ import {
 } from "@react-google-maps/api";
 import CircularProgress from "@mui/material/CircularProgress";
 
-
 const ProjectDetails = ({ propertyData }) => {
     // Extract property details with fallback values
     const latitude =
@@ -19,13 +18,13 @@ const ProjectDetails = ({ propertyData }) => {
         parseFloat(propertyData?.data?.property_commercial_detail?.longitude) ||
         parseFloat(propertyData?.property_commercial_detail?.longitude) ||
         0;
- 
+
     // Map location data
     const location = { lat: latitude, lng: longitude };
 
     // Load the Google Maps script
     const { isLoaded, loadError } = useLoadScript({
-        googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,  
+        googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
     });
 
     // Map container style
@@ -39,14 +38,21 @@ const ProjectDetails = ({ propertyData }) => {
         <>
             <div className="min-w-full  bg-custom-lightestgreen p-[20px] rounded-[10px] ">
                 <div className="h-full flex  gap-x-4">
-                    <div className="max-w-[350px] w-full  h-[259px]  flex-shrink-0">
-                        {!isLoaded ? (
+                    <div className="max-w-[350px] w-full h-[259px] flex-shrink-0">
+                        {!location.lat || !location.lng ? (
+                            // Render nothing or a placeholder when no coordinates are available
+                            <div className="w-full h-full flex items-center justify-center bg-gray-100 rounded-xl">
+                                <p className="text-gray-500">
+                                    No location data available
+                                </p>
+                            </div>
+                        ) : !isLoaded ? (
                             <CircularProgress className="spinnerSize" />
                         ) : (
                             <GoogleMap
                                 options={{
-                                    mapTypeControl: false, // Hides the Map/Satellite option
-                                    zoomControl: true, //  Hides the Zoom control
+                                    mapTypeControl: false,
+                                    zoomControl: true,
                                     streetViewControl: false,
                                 }}
                                 mapContainerStyle={mapContainerStyle}

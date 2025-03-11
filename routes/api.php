@@ -145,7 +145,7 @@ Route::middleware('auth:sanctum')->group(function () {
         // Store property details
         Route::post('/', [PropertyMasterController::class, 'store']);
         // Get single property
-        Route::get('{property}', [PropertyMasterController::class, 'show']);
+        // Route::get('{property}', [PropertyMasterController::class, 'show']);
     });
 
     /*Payment Scheme */
@@ -177,8 +177,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('units')->group(function () {
         // Store unit details from excel
         Route::post('/', [UnitController::class, 'store']);
-        //Get all units
-        Route::get('/', [UnitController::class, 'index']);
         //Count units floors
         Route::get('/floors/{towerPhaseId}/{excelId}', [UnitController::class, 'countFloors']);
         // Check existing units for a tower phase
