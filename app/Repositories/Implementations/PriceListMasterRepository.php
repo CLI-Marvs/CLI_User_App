@@ -331,6 +331,7 @@ class PriceListMasterRepository
      */
     protected function transformPriceListMaster($priceList)
     {
+
         return [
             'price_list_master_id' => $priceList->id,
             'updated_at' => $priceList->updated_at,
@@ -342,7 +343,14 @@ class PriceListMasterRepository
             'property_name' => $priceList->towerPhase->propertyMaster->property_name ?? null,
             'pricebasic_details' => $priceList->priceBasicDetail ? $priceList->priceBasicDetail->toArray() : null,
             'excel_id' => $priceList->towerPhase->units->where('status', 'Active')->pluck('excel_id')->unique()->first() ?? null,
-            'property_commercial_detail' => $priceList->towerPhase->propertyMaster->propertyCommercialDetail->toArray(),
+            // 'property_commercial_detail' => $priceList->towerPhase->propertyMaster->propertyCommercialDetail->toArray(),
+            // 'property_commercial_detail' => optional($priceList->towerPhase->propertyMaster->propertyCommercialDetail)->where('price_list_master_id', $priceList->id)->toArray(),
+            'property_commercial_detail' => optional(
+                $priceList->towerPhase->propertyMaster->propertyCommercialDetail()
+                    ->where('price_list_master_id', $priceList->id)
+                    ->latest('id')
+                    ->first()
+            )->toArray(),
             'price_versions' => $this->transformPriceVersions($priceList->priceVersions),
             'floor_premiums' => $this->transformFloorPremiums($priceList->floorPremiums),
             'additional_premiums' => $this->transformAdditionalPremium(

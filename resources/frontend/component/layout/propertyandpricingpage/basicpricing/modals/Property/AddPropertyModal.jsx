@@ -289,11 +289,11 @@ const AddPropertyModal = ({ propertyModalRef }) => {
                                 <p className="text-custom-gray81 text-sm bg-custombg3 pl-3  montserrat-semibold flex-grow mobile:text-xs mobile:w-[170px]">
                                     Google Map Link
                                 </p>
-                                <span className="bg-white text-sm2 text-gray-400 font-normal py-3 border-l   pl-2 pr-12 mobile:pr-1 mobile:text-xs ml-auto rounded-tr-[4px]">
+                                {/* <span className="bg-white text-sm2 text-gray-400 font-normal py-3 border-l   pl-2 pr-12 mobile:pr-1 mobile:text-xs ml-auto rounded-tr-[4px]">
                                     {" "}
                                     {formData.google_map_link?.length}/350
                                     characters
-                                </span>
+                                </span> */}
                             </div>
                             <div className="flex gap-3 ">
                                 <textarea
@@ -302,7 +302,7 @@ const AddPropertyModal = ({ propertyModalRef }) => {
                                     name="google_map_link"
                                     placeholder=""
                                     onChange={handleInputChange}
-                                    maxLength={350}
+                                    // maxLength={350}
                                     rows="4"
                                     className={` rounded-b-[5px] border-t w-full pl-2 outline-none`}
                                 />

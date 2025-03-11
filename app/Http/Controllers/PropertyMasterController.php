@@ -40,7 +40,7 @@ class PropertyMasterController extends Controller
         try {
             //TODO: validate the request to make sure it's valid and match in the request
             $property = $this->service->store($request->validated());
-            
+             
             return response()->json($property, 201);
         } catch (ValidationException $e) {
             return response()->json([
@@ -87,7 +87,7 @@ class PropertyMasterController extends Controller
     {
         //
     }
-    
+
     /**
      * Get all property names
      */
