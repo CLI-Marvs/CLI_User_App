@@ -154,12 +154,13 @@ class PriceListMasterRepository
 
             $newAdditionalPremiumId = [] ?? null;
             if (!empty($data['additionalPremiumsPayload']) && is_array($data['additionalPremiumsPayload'])) {
+                // dd($data['additionalPremiumsPayload']);
 
                 foreach ($data['additionalPremiumsPayload'] as $additionalPremium) {
                     $premiumCost = $this->validatePremiumCost($additionalPremium['premium_cost']);
 
                     $newFloorPremium = $priceListMaster->additionalPremiums()->create([
-                        'id' => $additionalPremium['id'],
+                        // 'id' => $additionalPremium['id'],
                         'additional_premium' => $additionalPremium['view_name'],
                         'premium_cost' => $premiumCost,
                         'excluded_unit' => json_encode($additionalPremium['excluded_units']),
@@ -176,8 +177,10 @@ class PriceListMasterRepository
             if (!empty($data['selectedAdditionalPremiumsPayload']) && is_array($data['selectedAdditionalPremiumsPayload'])) {
                 foreach ($data['selectedAdditionalPremiumsPayload'] as $additionalPremium) {
                     $unitId = (int) $additionalPremium['unit_id'] ?? null;
-                    $additionalPremiumId = $additionalPremium['additional_premium_id'] ?? null;
-
+                    // $additionalPremiumId = $additionalPremium['additional_premium_id'] ?? null;
+                    // Use new additional premium IDs
+                    $additionalPremiumId = $newAdditionalPremiumId;
+                    // dd($newAdditionalPremiumId);
                     if (!$unitId || $additionalPremiumId === null) {
                         continue; // Skip if unit_id or additional_premium_id is missing
                     }
@@ -202,21 +205,6 @@ class PriceListMasterRepository
                         $unitIds = []; // Default to empty array if json_decode fails
                     }
 
-
-                    // Ensure `$additionalPremiumId` is always an array
-                    // if (!is_array($additionalPremiumId)) {
-                    //     $additionalPremiumId = [$additionalPremiumId]; // Convert single value to array
-                    // }
-
-                    // Check if the premium was **unchecked** (i.e., removed)
-                    // if (empty($additionalPremiumId)) {
-                    //     $unitIds = []; // If no premiums remain, clear the array
-                    // } else {
-                    //     // If the premium was unchecked, remove it
-                    //     $unitIds = array_values(array_intersect($unitIds, $additionalPremiumId));
-                    // }
-                    // $unitIds = array_values(array_intersect($unitIds, $additionalPremiumId));
-                    // Ensure $additionalPremiumId is always an array
                     $additionalPremiumId = is_array($additionalPremiumId) ? $additionalPremiumId : [$additionalPremiumId];
 
                     // Update the additional_premium_id list by replacing the old with the new
@@ -235,6 +223,48 @@ class PriceListMasterRepository
             }
 
 
+            //Fetch the current reviewed by employees ID in the Price List Master table
+            $reviewedByEmployeesIdsFromDatabase = json_decode($priceListMaster->reviewed_by_employees_id, true) ?? []; // Ensure it's an array
+            $reviewedByEmployeesId = []; // This will store the final list of IDs
+
+            // Check if the payload contains valid data
+            if (!empty($data['reviewedByEmployeesPayload']) && is_array($data['reviewedByEmployeesPayload'])) {
+                // Extract only the IDs from the frontend payload
+                $incommingReviewedIds = array_map(fn($emp) => $emp['id'] ?? null, $data['reviewedByEmployeesPayload']);
+                $incommingReviewedIds = array_filter($incommingReviewedIds); // Remove null values
+
+                // Compare with existing IDs and keep only those that are in $incomingIds
+                $reviewedByEmployeesIdsFromDatabase = array_values(array_intersect($reviewedByEmployeesIdsFromDatabase, $incommingReviewedIds));
+
+                // Add new IDs if not already present
+                foreach ($incommingReviewedIds as $incommingReviewedId) {
+                    if (!in_array($incommingReviewedId, $reviewedByEmployeesIdsFromDatabase)) {
+                        $reviewedByEmployeesIdsFromDatabase[] = $incommingReviewedId;
+                    }
+                }
+            }
+
+            //Fetch the current aproved by employees ID in the Price List Master table
+            $approvedByEmployeesIdsFromDatabase = json_decode($priceListMaster->approved_by_employee_id, true) ?? []; // Ensure it's an array
+
+
+            // Check if the payload contains valid data
+            if (!empty($data['approvedByEmployeesPayload']) && is_array($data['approvedByEmployeesPayload'])) {
+                // Extract only the IDs from the frontend payload
+                $incommingApprovedIds = array_map(fn($emp) => $emp['id'] ?? null, $data['approvedByEmployeesPayload']);
+                $incommingApprovedIds = array_filter($incommingApprovedIds);
+
+                // Compare with existing IDs and keep only those that are in $incomingIds
+                $approvedByEmployeesIdsFromDatabase = array_values(array_intersect($approvedByEmployeesIdsFromDatabase, $incommingApprovedIds));
+
+                // Add new IDs if not already present
+                foreach ($incommingApprovedIds as $incommingApprovedId) {
+                    if (!in_array($incommingApprovedId, $approvedByEmployeesIdsFromDatabase)) {
+                        $approvedByEmployeesIdsFromDatabase[] = $incommingApprovedId;
+                    }
+                }
+            }
+
             $priceListMaster->update([
                 'status' => $data['status'],
                 'emp_id' => $data['emp_id'],
@@ -242,7 +272,9 @@ class PriceListMasterRepository
                 'pricebasic_details_id' => $priceBasicDetail->id,
                 'floor_premiums_id' => json_encode($newFloorPremiumID),
                 'price_versions_id' => json_encode($createdPriceVersionIds),
-                'additional_premiums_id' => json_encode($newAdditionalPremiumId)
+                'additional_premiums_id' => json_encode($newAdditionalPremiumId),
+                'reviewed_by_employee_id' => json_encode($reviewedByEmployeesIdsFromDatabase),
+                'approved_by_employee_id' => json_encode($approvedByEmployeesIdsFromDatabase)
             ]);
 
             DB::commit();
@@ -313,7 +345,10 @@ class PriceListMasterRepository
             'property_commercial_detail' => $priceList->towerPhase->propertyMaster->propertyCommercialDetail->toArray(),
             'price_versions' => $this->transformPriceVersions($priceList->priceVersions),
             'floor_premiums' => $this->transformFloorPremiums($priceList->floorPremiums),
-            'additional_premiums' => $this->transformAdditionalPremium($priceList->additionalPremiums),
+            'additional_premiums' => $this->transformAdditionalPremium(
+                $priceList->additionalPremiums()->oldest()->get()
+            ),
+
             'reviewedByEmployees' => $this->employeeModel->whereIn(
                 'id',
                 json_decode($priceList->reviewed_by_employee_id, true) ?? []

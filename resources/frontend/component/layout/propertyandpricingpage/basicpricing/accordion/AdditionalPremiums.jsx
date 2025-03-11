@@ -67,12 +67,20 @@ const AdditionalPremiums = ({ propertyData, isOpen, toggleAccordion }) => {
             showToast(`Premium ${viewName} already exists.`, "error");
             return;
         }
-
+        // Function to generate random Id
+        const generateBigIntId = () => {
+            return (
+                BigInt(Date.now()) * BigInt(1000) +
+                BigInt(Math.floor(Math.random() * 1000))
+            ).toString();
+        };
+        const generatedId = generateBigIntId();
         setPricingData((prevState) => ({
             ...prevState,
             additionalPremiums: [
                 ...prevState.additionalPremiums,
                 {
+                    id: parseInt(generatedId),
                     viewName,
                     premiumCost,
                     excludedUnitIds: excludedUnitIds || [],
@@ -95,7 +103,7 @@ const AdditionalPremiums = ({ propertyData, isOpen, toggleAccordion }) => {
     };
 
     //Handle new additional premium on change
-    const handleNewAdditionalPremiumOnChange = (e) => {
+    const onChangeNewAdditionalPremium = (e) => {
         setNewAdditionalPremium((prevData) => ({
             ...prevData,
             [e.target.name]: e.target.value,
@@ -169,7 +177,7 @@ const AdditionalPremiums = ({ propertyData, isOpen, toggleAccordion }) => {
                                                 ""
                                             }
                                             onChange={
-                                                handleNewAdditionalPremiumOnChange
+                                                onChangeNewAdditionalPremium
                                             }
                                             className="outline-none  -mr-3 pl-3 py-1 bg-custom-grayFA   w-full "
                                         />
@@ -180,9 +188,7 @@ const AdditionalPremiums = ({ propertyData, isOpen, toggleAccordion }) => {
                                         Cost (Sq.m)
                                     </span>
                                     <input
-                                        onChange={
-                                            handleNewAdditionalPremiumOnChange
-                                        }
+                                        onChange={onChangeNewAdditionalPremium}
                                         name="premiumCost"
                                         value={
                                             newAdditionalPremium.premiumCost ||
@@ -228,16 +234,6 @@ const AdditionalPremiums = ({ propertyData, isOpen, toggleAccordion }) => {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {/*
-                                            TODO: 
-                                            Default view values are;
-                                            Sea View,
-                                            Mountain View,
-                                            City View,
-                                            Amenity View
-
-                                            So if mag add ko og laen view it must append of the end of tha Amenity View, dapat dili siya ma shuffle
-                                        */}
                                         {pricingData &&
                                         pricingData.additionalPremiums?.length >
                                             0 ? (
@@ -256,7 +252,7 @@ const AdditionalPremiums = ({ propertyData, isOpen, toggleAccordion }) => {
                                                                     <input
                                                                         type="number"
                                                                         name="premiumCost"
-                                                                        id={`premiumCost-${index}`} // Unique ID
+                                                                        id={`premiumCost-${index}`}
                                                                         value={
                                                                             item.premiumCost
                                                                         }

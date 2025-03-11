@@ -199,13 +199,13 @@ const EmployeeReviewerApproverModal = ({
 
     return (
         <dialog
-            className="modal w-[623px] rounded-lg h-[700px]"
+            className="modal w-[623px] rounded-lg h-[700px] backdrop:bg-black/50 backdrop-blur-md"
             ref={reviewerApproverModalRef}
         >
             <div className=" px-14 rounded-[10px] h-full">
                 <div
                     method="dialog"
-                    className="pt-2 flex justify-end -mr-[50px] backdrop:bg-black/100"
+                    className="pt-2 flex justify-end -mr-[50px] "
                 >
                     <button
                         className="flex justify-center w-10 h-10 items-center rounded-full  text-custom-bluegreen hover:bg-custombg"

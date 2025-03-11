@@ -208,7 +208,7 @@ class PriceListMasterService
             $additionalPremiumIdsFromDatabase = json_decode($priceListMaster->additional_premiums_id, true);
             $additionalPremiumIdsFromDatabase = is_array($additionalPremiumIdsFromDatabase) ? $additionalPremiumIdsFromDatabase : []; // Ensure it's an array
             $newAdditionalPremiumIds = []; // Initialize the array to track new additional premium IDs.
-
+            // dd($data['additionalPremiumsPayload']);
             if (!empty($data['additionalPremiumsPayload']) && is_array($data['additionalPremiumsPayload'])) {
                 foreach ($data['additionalPremiumsPayload'] as $additionalPremium) {
                     $additionalPremiumId = $additionalPremium['id'] ?? null;
@@ -233,13 +233,14 @@ class PriceListMasterService
                     } else {
                         // CREATE new additional premium
                         $newAdditionalPremium = $priceListMaster->additionalPremiums()->create([
-                            'id' => $additionalPremiumId,
+                            // 'id' => $additionalPremiumId,
                             'additional_premium' => $additionalPremium['view_name'],
                             'premium_cost' => $premiumCost,
                             'excluded_unit' => json_encode($additionalPremium['excluded_units']),
                             'status' => 'Active',
                             'tower_phase_id' => $data['tower_phase_id'],
                             'price_list_master_id' => $data['price_list_master_id'],
+
                         ]);
 
                         $newAdditionalPremiumIds[] = $newAdditionalPremium->id;
@@ -257,7 +258,7 @@ class PriceListMasterService
                 }
             }
 
-            //Update the units table to store the additional premium IDs
+            //  Update the units table to store the additional premium IDs
             if (!empty($data['selectedAdditionalPremiumsPayload']) && is_array($data['selectedAdditionalPremiumsPayload'])) {
                 foreach ($data['selectedAdditionalPremiumsPayload'] as $additionalPremium) {
                     $unitId = (int) $additionalPremium['unit_id'] ?? null;
@@ -304,6 +305,7 @@ class PriceListMasterService
                 }
             }
 
+
             //Fetch the current reviewed by employees ID in the Price List Master table
             $reviewedByEmployeesIdsFromDatabase = json_decode($priceListMaster->reviewed_by_employees_id, true) ?? []; // Ensure it's an array
             $reviewedByEmployeesId = []; // This will store the final list of IDs
@@ -333,7 +335,7 @@ class PriceListMasterService
             if (!empty($data['approvedByEmployeesPayload']) && is_array($data['approvedByEmployeesPayload'])) {
                 // Extract only the IDs from the frontend payload
                 $incommingApprovedIds = array_map(fn($emp) => $emp['id'] ?? null, $data['approvedByEmployeesPayload']);
-                $incommingApprovedIds = array_filter($incommingApprovedIds);  
+                $incommingApprovedIds = array_filter($incommingApprovedIds);
 
                 // Compare with existing IDs and keep only those that are in $incomingIds
                 $approvedByEmployeesIdsFromDatabase = array_values(array_intersect($approvedByEmployeesIdsFromDatabase, $incommingApprovedIds));
