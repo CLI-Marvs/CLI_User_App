@@ -79,7 +79,10 @@ const Sidebar = () => {
       case "/inquirymanagement/settings":
       case "/inquirymanagement/settings/bannersettings":
       case "/inquirymanagement/settings/autoassign":
-        case "/inquirymanagement/settings/versionlogs":
+      case "/inquirymanagement/settings/versionlogs":
+      case "/inquirymanagement/settings/surveysettings":
+      case "/inquirymanagement/settings/surveysettings/surveyform":
+      case "/inquirymanagement/settings/surveysettings/surveyreview":
         setIsInvoiceOpen(false);
         setInquiryOpen(true);
         setSuperAdminOpen(false);
