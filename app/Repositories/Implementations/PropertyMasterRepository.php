@@ -41,7 +41,7 @@ class PropertyMasterRepository
                 ? null
                 : $this->parseGoogleMapLink($data['google_map_link']);
 
-
+           
             // Create the price list master
             $priceListMaster = $towerPhase->priceListMasters()->create([
                 'tower_phase_id' => $towerPhase->id,
@@ -179,6 +179,7 @@ class PropertyMasterRepository
     // }
     public function parseGoogleMapLink($googleMapLink)
     {
+
         try {
             // Return null if the link is empty or not set
             if (empty(trim($googleMapLink))) {
@@ -186,10 +187,8 @@ class PropertyMasterRepository
             }
 
             $result = [
-                'name' => '',
                 'latitude' => null,
                 'longitude' => null,
-                'placeId' => null
             ];
 
             // Parse googleMapLink
@@ -200,9 +199,9 @@ class PropertyMasterRepository
             }
 
             // Extract name from /place/{name}/ pattern
-            if (preg_match('/\/place\/([^\/]+)/', $parsedUrl['path'] ?? '', $nameMatch)) {
-                $result['name'] = urldecode(str_replace('+', ' ', $nameMatch[1]));
-            }
+            // if (preg_match('/\/place\/([^\/]+)/', $parsedUrl['path'] ?? '', $nameMatch)) {
+            //     $result['name'] = urldecode(str_replace('+', ' ', $nameMatch[1]));
+            // }
 
             // Extract coordinates from @latitude,longitude
             if (preg_match('/@(-?\d+\.\d+),(-?\d+\.\d+)/', $googleMapLink, $locationMatch)) {
@@ -222,16 +221,16 @@ class PropertyMasterRepository
                 }
 
                 // Extract place ID from 'cid' parameter or !1s pattern
-                if (isset($queryParams['cid'])) {
-                    $result['placeId'] = $queryParams['cid'];
-                } elseif (preg_match('/!1s([\w\-]+)/', $googleMapLink, $placeIdMatch)) {
-                    $result['placeId'] = $placeIdMatch[1];
-                }
+                // if (isset($queryParams['cid'])) {
+                //     $result['placeId'] = $queryParams['cid'];
+                // } elseif (preg_match('/!1s([\w\-]+)/', $googleMapLink, $placeIdMatch)) {
+                //     $result['placeId'] = $placeIdMatch[1];
+                // }
 
                 // Extract name from 'q' parameter if available
-                if (!$result['name'] && isset($queryParams['q'])) {
-                    $result['name'] = urldecode($queryParams['q']);
-                }
+                // if (!$result['name'] && isset($queryParams['q'])) {
+                //     $result['name'] = urldecode($queryParams['q']);
+                // }
             }
 
             // Fallback: Detect generic coordinates in googleMapLink

@@ -25,6 +25,7 @@ export const PriceListMasterProvider = ({ children }) => {
                 if (!silentFetch) setIsLoading(true);
                 const response =
                     await priceListMasterService.getPriceListMasters();
+                console.log("Price list masters fetched:", response.data);
                 setPriceListMaster(response.data);
                 setError(null);
                 return response.data;

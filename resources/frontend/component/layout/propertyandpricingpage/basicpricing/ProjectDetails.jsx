@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef, useEffect, useState, useCallback } from "react";
 import { toLowerCaseText } from "@/component/layout/propertyandpricingpage/utils/formatToLowerCase";
 import {
     GoogleMap,
@@ -6,33 +6,115 @@ import {
     InfoWindow,
     useLoadScript,
 } from "@react-google-maps/api";
+import {
+    GOOGLE_MAPS_LIBRARIES,
+    DEFAULT_MAP_CONTAINER_STYLE,
+    DEFAULT_MAP_OPTIONS,
+} from "@/constant/googleMapsConfig";
 import CircularProgress from "@mui/material/CircularProgress";
-
+const mapId = import.meta.env.VITE_APP_GOOGLE_MAP_ID;
 const ProjectDetails = ({ propertyData }) => {
+    //States
+    const mapRef = useRef(null);
+    const markerRef = useRef(null);
+    const infoWindowRef = useRef(null);
+    const [address, setAddress] = useState("Fetching address...");
+
     // Extract property details with fallback values
     const latitude =
-        parseFloat(propertyData?.data?.property_commercial_detail?.latitude) ||
-        parseFloat(propertyData?.property_commercial_detail?.latitude) ||
-        0;
+        parseFloat(
+            propertyData?.data?.property_commercial_detail?.latitude ??
+                propertyData?.property_commercial_detail?.latitude
+        ) || 0;
+
     const longitude =
-        parseFloat(propertyData?.data?.property_commercial_detail?.longitude) ||
-        parseFloat(propertyData?.property_commercial_detail?.longitude) ||
-        0;
+        parseFloat(
+            propertyData?.data?.property_commercial_detail?.longitude ??
+                propertyData?.property_commercial_detail?.longitude
+        ) || 0;
 
     // Map location data
     const location = { lat: latitude, lng: longitude };
+    // Function to get address from lat/lng
+    const fetchAddress = useCallback((lat, lng, callback) => {
+        if (!window.google) return;
+        const geocoder = new window.google.maps.Geocoder();
+        geocoder.geocode({ location: { lat, lng } }, (results, status) => {
+            if (status === "OK" && results[0]) {
+                const formattedAddress = results[0].formatted_address.replace(
+                    /, /g,
+                    "<br>"
+                );
+                setAddress(formattedAddress);
+                if (callback) callback(formattedAddress);
+            } else {
+                setAddress("Address not found");
+                if (callback) callback("Address not found");
+            }
+        });
+    }, []);
+
+    //Hooks
+    const onLoad = useCallback(
+        (map) => {
+            mapRef.current = map;
+            if (window.google) {
+                const position = {
+                    lat: latitude,
+                    lng: longitude,
+                };
+                console.log("location11",typeof latitude);
+
+                markerRef.current =
+                    new window.google.maps.marker.AdvancedMarkerElement({
+                        position: position,
+                        map: map,
+                        title: "Hello World!",
+                        gmpClickable: true,
+                    });
+
+                // Initialize InfoWindow
+                infoWindowRef.current = new window.google.maps.InfoWindow();
+
+                // Attach click event to marker
+                markerRef.current.addListener("gmp-click", () => {
+                    fetchAddress(
+                        latitude,
+                       longitude,
+                        (resolvedAddress) => {
+                            infoWindowRef.current.setContent(
+                                `<p style="white-space: pre-line;">${resolvedAddress}</p>`
+                            );
+                            infoWindowRef.current.open(map, markerRef.current);
+                        }
+                    );
+                });
+            } else {
+                markerRef.current.setPosition(position);
+            }
+        },
+        [location, fetchAddress, latitude,longitude]
+    );
+
+    const onUnmount = useCallback(() => {
+        if (markerRef.current) {
+            markerRef.current.setMap(null);
+            markerRef.current = null;
+        }
+        if (infoWindowRef.current) {
+            infoWindowRef.current.close();
+            infoWindowRef.current = null;
+        }
+        mapRef.current = null;
+    }, []);
 
     // Load the Google Maps script
-    const { isLoaded, loadError } = useLoadScript({
+    const { isLoaded } = useLoadScript({
+        id: "google-map-script",
         googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
+        libraries: GOOGLE_MAPS_LIBRARIES,
+        mapIds: [mapId],
     });
-
-    // Map container style
-    const mapContainerStyle = {
-        width: "100%",
-        height: "100%",
-        borderRadius: "0.50rem",
-    };
 
     return (
         <>
@@ -40,7 +122,6 @@ const ProjectDetails = ({ propertyData }) => {
                 <div className="h-full flex  gap-x-4">
                     <div className="max-w-[350px] w-full h-[259px] flex-shrink-0">
                         {!location.lat || !location.lng ? (
-                            // Render nothing or a placeholder when no coordinates are available
                             <div className="w-full h-full flex items-center justify-center bg-gray-100 rounded-xl">
                                 <p className="text-gray-500">
                                     No location data available
@@ -50,25 +131,19 @@ const ProjectDetails = ({ propertyData }) => {
                             <CircularProgress className="spinnerSize" />
                         ) : (
                             <GoogleMap
+                                onLoad={onLoad}
+                                onUnmount={onUnmount}
                                 options={{
-                                    mapTypeControl: false,
-                                    zoomControl: true,
-                                    streetViewControl: false,
+                                    ...DEFAULT_MAP_OPTIONS,
+                                    mapId: mapId,
                                 }}
-                                mapContainerStyle={mapContainerStyle}
+                                mapContainerStyle={DEFAULT_MAP_CONTAINER_STYLE}
                                 center={{
                                     lat: location.lat,
                                     lng: location.lng,
                                 }}
                                 zoom={16}
-                            >
-                                <Marker
-                                    position={{
-                                        lat: location.lat,
-                                        lng: location.lng,
-                                    }}
-                                />
-                            </GoogleMap>
+                            ></GoogleMap>
                         )}
                     </div>
                     <div className="mt-8">
