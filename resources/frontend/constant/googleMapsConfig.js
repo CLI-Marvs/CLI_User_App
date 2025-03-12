@@ -1,7 +1,7 @@
 export const GOOGLE_MAPS_LIBRARIES = ["marker", "places"];
 export const DEFAULT_MAP_ZOOM = 16;
 export const DEFAULT_MAP_OPTIONS = {
-    mapTypeControl: true, //set to false
+    mapTypeControl: false, 
     zoomControl: true,
     streetViewControl: false,
 };

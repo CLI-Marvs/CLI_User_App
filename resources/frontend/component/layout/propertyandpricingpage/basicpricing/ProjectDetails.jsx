@@ -1,11 +1,6 @@
-import React, { useRef, useEffect, useState, useCallback } from "react";
+import React, { useRef, useState, useCallback } from "react";
 import { toLowerCaseText } from "@/component/layout/propertyandpricingpage/utils/formatToLowerCase";
-import {
-    GoogleMap,
-    Marker,
-    InfoWindow,
-    useLoadScript,
-} from "@react-google-maps/api";
+import { GoogleMap, useLoadScript } from "@react-google-maps/api";
 import {
     GOOGLE_MAPS_LIBRARIES,
     DEFAULT_MAP_CONTAINER_STYLE,
@@ -13,6 +8,7 @@ import {
 } from "@/constant/googleMapsConfig";
 import CircularProgress from "@mui/material/CircularProgress";
 const mapId = import.meta.env.VITE_APP_GOOGLE_MAP_ID;
+
 const ProjectDetails = ({ propertyData }) => {
     //States
     const mapRef = useRef(null);
@@ -35,6 +31,8 @@ const ProjectDetails = ({ propertyData }) => {
 
     // Map location data
     const location = { lat: latitude, lng: longitude };
+    // const googleMapsUrl = `https://www.google.com/maps?q=${latitude},${longitude}`;
+
     // Function to get address from lat/lng
     const fetchAddress = useCallback((lat, lng, callback) => {
         if (!window.google) return;
@@ -44,7 +42,8 @@ const ProjectDetails = ({ propertyData }) => {
                 const formattedAddress = results[0].formatted_address.replace(
                     /, /g,
                     "<br>"
-                );
+                ); //breakline
+
                 setAddress(formattedAddress);
                 if (callback) callback(formattedAddress);
             } else {
@@ -59,11 +58,7 @@ const ProjectDetails = ({ propertyData }) => {
         (map) => {
             mapRef.current = map;
             if (window.google) {
-                const position = {
-                    lat: latitude,
-                    lng: longitude,
-                };
-                console.log("location11",typeof latitude);
+                const position = location;
 
                 markerRef.current =
                     new window.google.maps.marker.AdvancedMarkerElement({
@@ -74,26 +69,55 @@ const ProjectDetails = ({ propertyData }) => {
                     });
 
                 // Initialize InfoWindow
-                infoWindowRef.current = new window.google.maps.InfoWindow();
+                infoWindowRef.current = new window.google.maps.InfoWindow({
+                    closeButtonControl: false,
+                });
+
+                // Additional listener to ensure the close button is hidden
+                infoWindowRef.current.addListener("domready", () => {
+                    const closeButtons = document.querySelectorAll(
+                        ".gm-ui-hover-effect"
+                    );
+                    closeButtons.forEach((button) => {
+                        button.style.display = "none";
+                    });
+                });
 
                 // Attach click event to marker
                 markerRef.current.addListener("gmp-click", () => {
-                    fetchAddress(
-                        latitude,
-                       longitude,
-                        (resolvedAddress) => {
-                            infoWindowRef.current.setContent(
-                                `<p style="white-space: pre-line;">${resolvedAddress}</p>`
-                            );
-                            infoWindowRef.current.open(map, markerRef.current);
-                        }
-                    );
+                    fetchAddress(latitude, longitude, (resolvedAddress) => {
+                        // Create content with the address and a properly positioned close button
+                        const content = `
+                        <div style="position: relative; min-width: 150px;">
+                            <div style="position: absolute; top: 0; right: 0;">
+                                <button id="customCloseBtn" style="background: none; border: none; font-size: 24px; font-weight: semi-bold; cursor: pointer; padding: 2px 8px;">×</button>
+                            </div>
+                            <div style="padding-top: 5px; padding-right: 25px;">
+                                <p style="white-space: pre-line; margin: 0;">${resolvedAddress}</p>
+                            </div>
+                        </div>
+                    `;
+
+                        infoWindowRef.current.setContent(content);
+                        infoWindowRef.current.open(map, markerRef.current);
+
+                        // Add event listener to custom close button
+                        setTimeout(() => {
+                            const closeBtn =
+                                document.getElementById("customCloseBtn");
+                            if (closeBtn) {
+                                closeBtn.addEventListener("click", () => {
+                                    infoWindowRef.current.close();
+                                });
+                            }
+                        }, 10);
+                    });
                 });
             } else {
                 markerRef.current.setPosition(position);
             }
         },
-        [location, fetchAddress, latitude,longitude]
+        [location, fetchAddress]
     );
 
     const onUnmount = useCallback(() => {
@@ -120,6 +144,7 @@ const ProjectDetails = ({ propertyData }) => {
         <>
             <div className="min-w-full  bg-custom-lightestgreen p-[20px] rounded-[10px] ">
                 <div className="h-full flex  gap-x-4">
+                    {/* Map view */}
                     <div className="max-w-[350px] w-full h-[259px] flex-shrink-0">
                         {!location.lat || !location.lng ? (
                             <div className="w-full h-full flex items-center justify-center bg-gray-100 rounded-xl">
@@ -128,7 +153,9 @@ const ProjectDetails = ({ propertyData }) => {
                                 </p>
                             </div>
                         ) : !isLoaded ? (
-                            <CircularProgress className="spinnerSize" />
+                            <div className="w-full flex items-center justify-center h-full">
+                                <CircularProgress className="spinnerSize" />
+                            </div>
                         ) : (
                             <GoogleMap
                                 onLoad={onLoad}
@@ -146,7 +173,9 @@ const ProjectDetails = ({ propertyData }) => {
                             ></GoogleMap>
                         )}
                     </div>
-                    <div className="mt-8">
+
+                    {/* Property details */}
+                    <div className="mt-5">
                         <div className="flex gap-1 py-2">
                             <div>
                                 <p className="text-sm font-semibold text-custom-bluegreen w-[120px]">
@@ -163,11 +192,13 @@ const ProjectDetails = ({ propertyData }) => {
                             </div>
                         </div>
                         <div className="flex gap-1  py-2">
+                            {/*Property name */}
                             <div>
                                 <p className="text-sm font-semibold text-custom-bluegreen w-[120px]">
                                     Type
                                 </p>
                             </div>
+                            {/* Type */}
                             <div className="h-[26px] w-auto px-[15px] py-[5px] bg-white rounded-[5px]">
                                 <p className="text-custom-gray81 text-xs">
                                     {propertyData?.data
@@ -177,6 +208,7 @@ const ProjectDetails = ({ propertyData }) => {
                                 </p>
                             </div>
                         </div>
+                        {/* Tower/Phase */}
                         <div className="flex gap-1  py-2">
                             <div>
                                 <p className="text-sm font-semibold text-custom-bluegreen w-[120px]">
@@ -191,6 +223,29 @@ const ProjectDetails = ({ propertyData }) => {
                                 </p>
                             </div>
                         </div>
+
+                        {/* Address */}
+                        <div className="flex gap-1  py-2">
+                            <div>
+                                <p className="text-sm font-semibold text-custom-bluegreen w-[120px]">
+                                    Address
+                                </p>
+                            </div>
+                            <div className=" w-auto h-auto px-[15px] py-[5px] bg-white rounded-[5px] mr-2">
+                                <p className="text-custom-gray81 text-xs">
+                                    {propertyData?.property_commercial_detail
+                                        ?.barangay ??
+                                        propertyData?.data
+                                            ?.property_commercial_detail
+                                            ?.barangay}{" "}
+                                    {propertyData?.property_commercial_detail
+                                        ?.city ??
+                                        propertyData?.data
+                                            ?.property_commercial_detail?.city}
+                                </p>
+                            </div>
+                        </div>
+                        {/* Description */}
                         <div className="flex gap-1  py-2 ">
                             <div className="">
                                 <p className="text-sm font-semibold text-custom-bluegreen w-[120px]">
