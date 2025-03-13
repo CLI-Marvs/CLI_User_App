@@ -2,34 +2,31 @@ import React from "react";
 
 /**
  * A flexible custom input component that supports different input types.
- * It includes an optional "onlyNumbers" prop to restrict text inputs to numbers.
  *
  * @param {Object} props - The properties passed to the input component.
- * @param {string} props.type - The type of the input (e.g., "text", "email", "password").
- * @param {boolean} [props.onlyNumbers] - If true, restricts text input to numbers only.
- * @param {Function} props.onChange - The function to handle input changes.
+ * @param {string} props.type - The type of the input (e.g., "text", "email", "password", "number").
+ * @param {boolean} props.restrictNumbers - Whether to restrict non-numeric characters.
+ * @param {Function} props.onChange - Function to handle input changes.
+ * @param {string} props.value - The current value of the input field.
+ * @param {string} props.className - Additional classes for styling.
  * @returns {JSX.Element} A customizable input field.
  */
-const CustomInput = (props) => {
-    /**
-     * Handles the input event and filters out non-numeric values
-     * if "onlyNumbers" is enabled.
-     *
-     * @param {Event} e - The input event object.
-     */
-    //Event handler
-    const handleInput = (e) => {
-        let { value } = e.target;
-
-        // If input type is "text" and only numbers are allowed
-        if (props.type === "text" && props.onlyNumbers) {
-            value = value.replace(/[^0-9]/g, ""); // Allow only numbers
+const CustomInput = ({ restrictNumbers, value, onChange, ...props }) => {
+    //Help function to handle user input 'e or -' key
+    const handleKeyDown = (e) => {
+        if (restrictNumbers && (e.key === "e" || e.key === "-")) {
+            e.preventDefault();
         }
-
-        props.onChange({ ...e, target: { ...e.target, value } });
     };
-
-    return <input {...props} onChange={handleInput} />;
+    return (
+        <input
+            {...props}
+            value={value || ""}
+            onInput={onChange}
+            onKeyDown={handleKeyDown}
+            className={props.className}
+        />
+    );
 };
 
 export default CustomInput;

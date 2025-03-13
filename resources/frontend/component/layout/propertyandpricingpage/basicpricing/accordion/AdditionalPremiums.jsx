@@ -6,6 +6,7 @@ import { usePricing } from "@/component/layout/propertyandpricingpage/basicprici
 import { useUnit } from "@/context/PropertyPricing/UnitContext";
 import { showToast } from "@/util/toastUtil";
 import UnitUploadButton from "@/component/layout/propertyandpricingpage/basicpricing/component/UnitUploadButton";
+import CustomInput from "@/component/Input/CustomInput";
 
 const AdditionalPremiums = ({ propertyData, isOpen, toggleAccordion }) => {
     //States
@@ -169,9 +170,8 @@ const AdditionalPremiums = ({ propertyData, isOpen, toggleAccordion }) => {
                                         Additional Premium
                                     </span>
                                     <div className="relative w-full">
-                                        <input
+                                        <CustomInput
                                             name="viewName"
-                                            type="text"
                                             value={
                                                 newAdditionalPremium.viewName ||
                                                 ""

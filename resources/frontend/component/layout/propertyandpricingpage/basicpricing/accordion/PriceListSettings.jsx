@@ -1,15 +1,15 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { IoIosArrowDown } from "react-icons/io";
 import { usePricing } from "@/component/layout/propertyandpricingpage/basicpricing/context/BasicPricingContext";
+import CustomInput from "@/component/Input/CustomInput";
 
 const PriceListSettings = ({ isOpen, toggleAccordion }) => {
     //State
-    const { pricingData, updatePricingSection ,setPricingData} = usePricing();
+    const { pricingData, updatePricingSection, setPricingData } = usePricing();
 
     //Hooks
 
     // const computeEffectBasePrice
-
 
     //Event Handler
     const handleInputChange = (e) => {
@@ -72,16 +72,18 @@ const PriceListSettings = ({ isOpen, toggleAccordion }) => {
                                 <span className="text-custom-gray81 bg-custom-grayFA font-semibold flex w-[180%] pl-3 py-1">
                                     Base Price Per Sq. M.
                                 </span>
-                                <input
-                                    name="base_price"
+                                <CustomInput
                                     type="number"
-                                    onChange={handleInputChange}
+                                    name="base_price"
                                     value={
                                         pricingData?.priceListSettings
-                                            ?.base_price
+                                            ?.base_price || ""
                                     }
                                     className="w-full px-4 focus:outline-none "
+                                    onChange={handleInputChange}
+                                    restrictNumbers={true}
                                 />
+
                                 {/* TODO: add percent % suffix here */}
                             </div>
                             <div className="flex items-center border border-custom-grayF1 rounded-[5px] overflow-hidden w-[375px] text-sm">

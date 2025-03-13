@@ -61,7 +61,8 @@ export const usePropertyPricing = (
         status,
         action,
         excelId,
-        setFloorPremiumsAccordionOpen
+        setFloorPremiumsAccordionOpen,
+        currentPage
     ) => {
         e.preventDefault();
         if (action === "Edit") {
@@ -85,7 +86,7 @@ export const usePropertyPricing = (
                         excelId || data?.excelId,
                         true
                     );
-                    await fetchPropertyListMasters(true, true);
+                    await fetchPropertyListMasters(true, true, currentPage);
 
                     setTimeout(() => {
                         navigate("/property-pricing/master-lists");
@@ -129,7 +130,7 @@ export const usePropertyPricing = (
                         excelId || data?.excelId,
                         true
                     );
-                    await fetchPropertyListMasters(true, true);
+                    await fetchPropertyListMasters(true, true, currentPage);
 
                     setTimeout(() => {
                         navigate("/property-pricing/master-lists");

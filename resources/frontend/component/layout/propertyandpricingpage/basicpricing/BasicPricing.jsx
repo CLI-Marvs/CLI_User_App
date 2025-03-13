@@ -47,7 +47,7 @@ const BasicPricing = () => {
     const { data = {}, action = null } = location.state || {};
     const [propertyData, setPropertyData] = useState();
     const { pricingData, resetPricingData, setPricingData } = usePricing();
-    const { fetchPropertyListMasters } = usePriceListMaster();
+    const { fetchPropertyListMasters, currentPage } = usePriceListMaster();
     const {
         checkExistingUnits,
         units,
@@ -61,7 +61,7 @@ const BasicPricing = () => {
         computedUnitPrices,
         excelIdFromPriceList,
         saveComputedUnitPricingData,
-        floorPremiumsAccordionOpen
+        floorPremiumsAccordionOpen,
     } = useUnit();
     const [accordionStates, setAccordionStates] = useState({
         priceListSettings: false,
@@ -78,7 +78,8 @@ const BasicPricing = () => {
         resetPricingData,
         showToast,
         fetchPropertyListMasters,
-        checkExistingUnits
+        checkExistingUnits,
+        currentPage
     );
 
     //Hooks
@@ -229,21 +230,15 @@ const BasicPricing = () => {
             setPricingData((prev) => ({
                 ...prev,
                 additionalPremiums: prev.additionalPremiums.length
-                    ? prev.additionalPremiums // Keep existing if not empty
+                    ? prev.additionalPremiums
                     : additionalPremiums.map((item) => {
                           const generatedId = generateBigIntId();
-                          // Validate if the generated ID is numeric
                           if (!isNaN(Number(generatedId))) {
                               return {
                                   ...item,
-                                  id: parseInt(generatedId), // Convert to integer if needed
+                                  id: parseInt(generatedId),
                               };
                           } else {
-                              // Handle the case where the ID is not numeric
-                              console.error(
-                                  "Generated ID is not numeric:",
-                                  generatedId
-                              );
                               return {
                                   ...item,
                                   id: null, // or some default value
@@ -292,12 +287,18 @@ const BasicPricing = () => {
             // Get Base Price
             const basePrice =
                 parseFloat(pricingData.priceListSettings?.base_price) || 0;
-
             // Get Floor Premium for the unit’s floor
             const floorPremium = pricingData.floorPremiums[unit.floor];
-            const floorPremiumCost = floorPremium
-                ? parseFloat(floorPremium.premiumCost) || 0
-                : 0;
+            // Check if the unit is excluded from the floor premium
+            const isUnitExcluded =
+                floorPremium?.excludedUnits?.some(
+                    (excludedId) => excludedId === unit.id
+                ) || false;
+            
+            const floorPremiumCost =
+                floorPremium && !isUnitExcluded
+                    ? parseFloat(floorPremium.premiumCost) || 0
+                    : 0;
 
             const additionalPremiumCost = [
                 ...(pricingData.selectedAdditionalPremiums || []),
@@ -309,11 +310,11 @@ const BasicPricing = () => {
 
                 // Find all matching additional premiums
                 const matchingPremiums =
-                    pricingData?.additionalPremiums?.filter((ap) =>
+                    pricingData?.additionalPremiums?.filter((additionalPrem) =>
                         (Array.isArray(selectedPremiumId)
                             ? selectedPremiumId
                             : [selectedPremiumId]
-                        ).includes(ap.id)
+                        ).includes(additionalPrem.id)
                     ) || [];
 
                 // Sum up all matching premium costs
@@ -419,7 +420,14 @@ const BasicPricing = () => {
 
     //Handle price list submit
     const handleFormSubmit = (e, status) => {
-        handleSubmit(e, status, action, excelId, setFloorPremiumsAccordionOpen);
+        handleSubmit(
+            e,
+            status,
+            action,
+            excelId,
+            setFloorPremiumsAccordionOpen,
+            currentPage
+        );
     };
 
     return (
