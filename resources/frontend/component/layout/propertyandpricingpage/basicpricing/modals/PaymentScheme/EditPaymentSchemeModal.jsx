@@ -52,9 +52,6 @@ const EditPaymentSchemeModal = ({
                     : version
         );
 
-        console.log("updatedPriceVersions", updatedPriceVersions);
-        console.log(Array.isArray(updatedPriceVersions)); // Should always be true
-
         setPricingData((prev) => ({
             ...prev,
             priceVersions: updatedPriceVersions,

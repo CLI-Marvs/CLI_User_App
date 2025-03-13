@@ -12,7 +12,12 @@ const AddPaymentSchemeModal = ({
     const { paymentScheme, fetchPaymentSchemes } = usePaymentScheme();
     const [selectedSchemes, setSelectedSchemes] = useState([]);
     const { pricingData, setPricingData } = usePricing();
-  
+    const isDisabled =
+        !selectedSchemes ||
+        selectedSchemes.length === 0 ||
+        (Array.isArray(selectedSchemes?.paymentSchemes) &&
+            selectedSchemes.paymentSchemes.length === 0);
+
     //Hooks
     useEffect(() => {
         fetchPaymentSchemes();
@@ -37,7 +42,7 @@ const AddPaymentSchemeModal = ({
 
     //Event handler
     const handleCancel = () => {
-        setSelectedSchemes(null);
+        setSelectedSchemes([]);
         addPaymentSchemeModalRef.current.close();
     };
 
@@ -54,12 +59,6 @@ const AddPaymentSchemeModal = ({
                           }
                         : version
             );
-
-            console.log(
-                "updatedPriceVersions after edit",
-                updatedPriceVersions
-            );
-            //   updatePricingSection("priceVersions", updatedPriceVersions); // Keep the array intact
             setPricingData((prev) => ({
                 ...prev,
                 priceVersions: updatedPriceVersions,
@@ -79,11 +78,6 @@ const AddPaymentSchemeModal = ({
                           }
                         : version
             );
-
-            console.log("updatedPriceVersions", updatedPriceVersions);
-            console.log(Array.isArray(updatedPriceVersions)); // Should always be true
-
-            //   updatePricingSection("priceVersions", updatedPriceVersions); // Again, just work with the array
             setPricingData((prev) => ({
                 ...prev,
                 priceVersions: updatedPriceVersions,
@@ -168,9 +162,9 @@ const AddPaymentSchemeModal = ({
             return paymentScheme.map((item, index) => {
                 const paymentSchemesArray =
                     action === "Edit"
-                        ? selectedSchemes?.paymentSchemes || [] // For Edit, extract paymentSchemes
+                        ? selectedSchemes?.paymentSchemes || []
                         : Array.isArray(selectedSchemes)
-                        ? selectedSchemes // For Add, selectedSchemes is already an array
+                        ? selectedSchemes
                         : [];
                 const isChecked = paymentSchemesArray.some(
                     (scheme) => scheme.id === item.id
@@ -232,14 +226,10 @@ const AddPaymentSchemeModal = ({
 
                         <button
                             type="submit"
-                            disabled={
-                                !selectedSchemes ||
-                                selectedSchemes?.paymentSchemes?.length === 0
-                            }
+                            disabled={isDisabled}
                             onClick={handleConfirm}
                             className={`h-[37px] w-[185px] text-white rounded-[10px] gradient-btn2 hover:shadow-custom4 ${
-                                !selectedSchemes ||
-                                selectedSchemes?.paymentSchemes?.length === 0
+                                isDisabled
                                     ? "cursor-not-allowed opacity-60"
                                     : ""
                             }`}
