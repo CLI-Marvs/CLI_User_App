@@ -5,9 +5,8 @@ import { MdContentCopy } from "react-icons/md";
 import { FaRegTrashAlt } from "react-icons/fa";
 import { SurveyRadioOption } from './SurveyRadioOption';
 
-export const SurveyAddQuestion = ({ questionData }) => {
+export const SurveyAddQuestion = () => {
 
-    console.log("Question Data:", questionData);
 
     const [selectedOption, setSelectedOption] = useState("Multiple choice");
     const [isOpen, setIsOpen] = useState(false);

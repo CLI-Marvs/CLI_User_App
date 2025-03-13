@@ -9,11 +9,11 @@ import { SurveyAddQuestion } from './SurveyAddQuestion';
 
 
 
-export const SurveySection = ({ surveyData , addQuestion}) => {
+export const SurveySection = () => {
 
 
 
-    const [title, setTitle] = useState(surveyData.section[0].sectionTitle);
+    const [title, setTitle] = useState("Untitled Form");
 
     const handleInput = (e) => {
         const value = e.target.value;
@@ -27,9 +27,6 @@ export const SurveySection = ({ surveyData , addQuestion}) => {
     return (
         <div>
             <div className='flex flex-col gap-[15px]'>
-                <div className='hidden'>
-                    <p>Section 1 of 2</p>
-                </div>
                 <div>
                     <textarea
                         className="text-[32px] w-full h-auto min-h-[50px] resize-none overflow-hidden px-[3px]"
@@ -55,7 +52,7 @@ export const SurveySection = ({ surveyData , addQuestion}) => {
             <div className='w-full border-b-1 border-custom-grayA5 my-[20px]'></div>
 
             <div className='flex gap-[17.25px] mb-[15px]'>
-                <button onClick={addQuestion} className='w-[163px] h-[56px] border-[0.5px] border-custom-grayA5 rounded-[10px] p-[10px] flex justify-center items-center gap-[7px]'>
+                <button className='w-[163px] h-[56px] border-[0.5px] border-custom-grayA5 rounded-[10px] p-[10px] flex justify-center items-center gap-[7px]'>
                     <IoMdAddCircleOutline className='size-[32px]' />
                     <p className='text-[#3A3A3A] text-[16px]'>Add Question</p>
                 </button>
@@ -63,7 +60,7 @@ export const SurveySection = ({ surveyData , addQuestion}) => {
                     <IoEyeOutline className='size-[32px]' />
                     <p className='text-[#3A3A3A] text-[16px]'>Preview</p>
                 </button>
-               {/*  <button className='w-[151px] h-[56px] border-[0.5px] border-custom-grayA5 rounded-[10px] p-[10px] flex justify-center items-center gap-[7px]'>
+                {/*  <button className='w-[151px] h-[56px] border-[0.5px] border-custom-grayA5 rounded-[10px] p-[10px] flex justify-center items-center gap-[7px]'>
                     <TiEqualsOutline className='size-[32px]' />
                     <p className='text-[#3A3A3A] text-[16px]'>Add Section</p>
                 </button>
@@ -71,16 +68,14 @@ export const SurveySection = ({ surveyData , addQuestion}) => {
                     <MdOutlineTextFields className='size-[32px]' />
                     <p className='text-[#3A3A3A] text-[16px]'>Add Title</p>
                 </button> */}
-              
+
                 {/* <button className='w-[56px] h-[56px] border-[0.5px] border-custom-grayA5 rounded-[10px] p-[10px] flex justify-center items-center gap-[7px]'>
                     <FaTrash className='size-[24px]' />
                 </button> */}
             </div>
 
             <div className={`w-full rounded-[10px] bg-custom-lightestgreen p-[10px] flex flex-col gap-[10px]`}>
-                {surveyData.section[0].dataSet.map((item, index) => (
-                    <SurveyAddQuestion key={index} questionData={item} />
-                ))}
+                <SurveyAddQuestion  />
             </div>
         </div>
     )

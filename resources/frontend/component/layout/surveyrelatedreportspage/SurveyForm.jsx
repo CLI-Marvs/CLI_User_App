@@ -46,30 +46,7 @@ const SurveyForm = () => {
         },
       ];
     });
-  }, [surveyTitle, sectionTitle]);
-
-
-  const addQuestion = (sectionIndex) => {
-    setSurveyData((prevSurveyData) =>
-      prevSurveyData.map((section, idx) => {
-        if (idx === sectionIndex) { // Match dynamic section index
-          return {
-            ...section,
-            section: section.section.map((s, sIdx) => ({
-              ...s,
-              dataSet: [
-                ...s.dataSet,
-                { question: "", options: [""], required: false },
-              ],
-            })),
-          };
-        }
-        return section;
-      })
-    );
-  };
-
-
+  }, []);
 
   return (
     <div className='h-screen max-w-full bg-custom-grayFA'>
@@ -79,16 +56,7 @@ const SurveyForm = () => {
       </div>
       <div className='flex flex-col max-w-[687px]'>
         <div className='flex flex-col gap-[80px]'>
-          {surveyData.map((item, index) => (
-            <SurveySection
-              key={index}
-              sectionIndex={index}
-              surveyData={item}
-              addQuestion={addQuestion}
-
-            />
-          ))}
-
+            <SurveySection />
         </div>
 
         <div className='w-full border-b-1 border-custom-grayA5 my-[20px]'></div>
