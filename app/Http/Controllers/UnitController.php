@@ -2,19 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use Log;
 use Exception;
-use App\Models\Unit;
-use App\Exports\ExcelExport;
-use App\Imports\ExcelImport;
-use App\Jobs\ImportUnitsJob;
 use Illuminate\Http\Request;
 use App\Services\UnitService;
-use PhpParser\Node\Stmt\TryCatch;
 use App\Http\Controllers\Controller;
-use Maatwebsite\Excel\Facades\Excel;
 use App\Http\Requests\StoreUnitRequest;
-use Google\Cloud\Storage\StorageClient;
+use App\Http\Requests\UpdateStoreRequest;
 
 class UnitController extends Controller
 {
@@ -27,17 +20,29 @@ class UnitController extends Controller
     }
 
 
-    /**
-     * Store a newly created resource in storage.
+    /*
+     * Store a newly created resource in storage from the excel file
      */
     public function store(StoreUnitRequest $request)
     {
         $validatedData = $request->validated();
+        $validatedData['excel_id'] = $validatedData['excel_id'] ?? null;
+        $excelDataRows = $validatedData['excelDataRows'];
+
+        // Ensure each row has all columns (including `null` values)
+        $normalizedRows = array_map(function ($row) {
+            return array_replace(array_fill(0, 8, null), $row);
+        }, $excelDataRows);
+
+        // Update the validated data
+        $validatedData['excelDataRows'] = $normalizedRows;
+
         try {
-            $result = $this->service->store($validatedData);
+            $result = $this->service->storeUnitFromExcel($validatedData);
+
             return response()->json([
                 'message' => $result['message'],
-                'data' => $result['excel_id'],
+                'excel_id' => $result['excel_id'],
             ], 201);
         } catch (\Exception $e) {
             return response()->json([
@@ -47,38 +52,9 @@ class UnitController extends Controller
         }
     }
 
-
-    //Upload the excel file to google cloud
-    // public function uploadToGCS($files)
-    // {
-    //     $fileLinks = []; // Ensure $files is an array, even if a single file is passed
-    //     if (!is_array($files)) {
-    //         $files = [$files];
-    //     }
-
-    //     if ($files) {
-    //         $keyJson = config('services.gcs.key_json');  //Access from services.php
-    //         $keyArray = json_decode($keyJson, true); // Decode the JSON string to an array
-    //         $storage = new StorageClient([
-    //             'keyFile' => $keyArray
-    //         ]);
-    //         $bucket = $storage->bucket('super-app-storage');
-    //         foreach ($files as $file) {
-    //             $fileName = uniqid() . '.' . $file->getClientOriginalExtension();
-    //             $filePath = 'units/' . $fileName;
-
-    //             $bucket->upload(
-    //                 fopen($file->getPathname(), 'r'),
-    //                 ['name' => $filePath]
-    //             );
-
-    //             $fileLink = $bucket->object($filePath)->signedUrl(new \DateTime('+10 years'));
-
-    //             $fileLinks[] = $fileLink;
-    //         }
-    //     }
-    //     return $fileLinks;
-    // }
+    /*
+     * Custom functions
+     */
 
     /**
      * Returns the count of distinct floors for a given tower phase.
@@ -88,8 +64,8 @@ class UnitController extends Controller
      */
     public function countFloors(int $towerPhaseId, string $excelId)
     {
-
         $distinctFloors = $this->service->countFloor($towerPhaseId, $excelId);
+
         return response()->json([
             'data' => $distinctFloors,
         ]);
@@ -113,31 +89,49 @@ class UnitController extends Controller
      * @param Request $request The incoming HTTP request
      * @return \Illuminate\Http\JsonResponse JSON response containing units or error message
      */
-    public function getUnits($selectedFloor, $towerPhaseId, $excelId)
-    {
-        // dd($selectedFloor, $towerPhaseId, $excelId);
+    // public function getUnits($selectedFloor, $towerPhaseId, $excelId)
+    // {
+    //     try {
+    //         // Query the database for units matching the specified towerPhaseId and selectedFloor
+    //         $units =  $this->service->getUnits($towerPhaseId, $selectedFloor, $excelId);
 
-        try {
-            // Query the database for units matching the specified towerPhaseId and selectedFloor
-            $units =  $this->service->getUnits($towerPhaseId, $selectedFloor, $excelId);
+    //         return response()->json([
+    //             'data' => $units
+    //         ]);
+    //     } catch (\Exception $e) {
+    //         return response()->json([
+    //             'message' => 'Error getting the units.',
+    //             'error' => $e->getMessage(),
+    //         ], 500);
+    //     }
+    // }
 
-            return response()->json([
-                'data' => $units
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Error getting the units.',
-                'error' => $e->getMessage(),
-            ], 500);
-        }
-    }
-
-    //Add new units
+    //Add new unit from the system/admin page
     public function storeUnit(StoreUnitRequest $request)
     {
         try {
             $validatedData = $request->validated();
             $result = $this->service->storeUnitDetails($validatedData);
+
+            return response()->json([
+                'message' => $result['message'],
+                'data' => $result['data'],
+            ], 201);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Validation failed',
+                'messages' => $e->getMessage(),
+            ], 422);
+        }
+    }
+
+    //Save the computed unit pricing data
+    public function saveComputedUnitPricingData(UpdateStoreRequest $request)
+    {
+        try {
+            $validatedData = $request->validated();
+            $result = $this->service->saveComputedUnitPricingData($validatedData);
+
             return response()->json([
                 'message' => $result['message'],
             ], 201);

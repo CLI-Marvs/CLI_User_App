@@ -1,11 +1,16 @@
 import apiService from "@/component/servicesApi/apiService";
 
 export const priceListMasterService = {
-    //Function to get property master lists
-    getPriceListMasters: async () => {
+    /**
+     * Fetches the list of price list masters from the API.
+     * @returns {Promise<Array>} Resolves with an array of price list masters.
+     * @throws Will throw an error if the API request fails.
+     */
+    getPriceListMasters: async (page = 1, perPage = 10) => {
         try {
-            const response = await apiService.get("price-list-masters/");
-            console.log("response getPriceListMasters", response);
+            const response = await apiService.get(
+                `price-list-masters?page=${page}&per_page=${perPage}`
+            );
             return response;
         } catch (error) {
             console.error("Error getting price list masters:", error);
@@ -13,7 +18,12 @@ export const priceListMasterService = {
         }
     },
 
-    //Function to store price list masters
+    /**
+     * Stores a new price list master by sending a POST request to the API.
+     * @param {Object} payload - The data to be sent in the request body.
+     * @returns {Promise<Object>} Resolves with the API response.
+     * @throws Will throw an error if the API request fails.
+     */
     storePriceListMasters: async (payload) => {
         try {
             const response = await apiService.post(
@@ -27,7 +37,10 @@ export const priceListMasterService = {
         }
     },
 
-    //Function to update price list masters (e.g Price List Settings, floor premiums, Additional premiums, price versions
+    /**
+     * Updates the price list masters, including Price List Settings,
+     * floor premiums, Additional premiums, and price versions.
+     */
     updatePriceListMasters: async (payload) => {
         try {
             const response = await apiService.put(
@@ -42,8 +55,9 @@ export const priceListMasterService = {
     },
 
     /**
-     * Function to update the price list master status
-     * If status is On-going approval then user can click 'cancel' and set the status to 'Inactive'
+     * Updates the price list master status.
+     * If the status is "On-going approval," the user can click 'cancel'
+     * to set the status to 'Inactive'.
      */
     updatePriceListMasterStatus: async (id) => {
         try {
@@ -57,7 +71,9 @@ export const priceListMasterService = {
         }
     },
 
-    //Function to download the price list masters excel file
+    /**
+     * Downloads the price list masters as an Excel file.
+     */
     exportPriceListMasterDataToExcel: async (payload) => {
         try {
             const response = await apiService.post(

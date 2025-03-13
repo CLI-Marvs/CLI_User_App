@@ -11,8 +11,8 @@ const AddPaymentSchemeModal = ({
     //States
     const { paymentScheme, fetchPaymentSchemes } = usePaymentScheme();
     const [selectedSchemes, setSelectedSchemes] = useState([]);
-    const { updatePricingSection, pricingData, setPricingData } = usePricing();
-
+    const { pricingData, setPricingData } = usePricing();
+  
     //Hooks
     useEffect(() => {
         fetchPaymentSchemes();
@@ -69,8 +69,6 @@ const AddPaymentSchemeModal = ({
                 addPaymentSchemeModalRef.current.close();
             }
         } else {
-            console.log("add payment scheme");
-
             // In the else block (for adding a version)
             const updatedPriceVersions = pricingData?.priceVersions?.map(
                 (version, index) =>
@@ -234,11 +232,19 @@ const AddPaymentSchemeModal = ({
 
                         <button
                             type="submit"
+                            disabled={
+                                !selectedSchemes ||
+                                selectedSchemes?.paymentSchemes?.length === 0
+                            }
                             onClick={handleConfirm}
-                            className={`h-[37px] w-[185px] text-white rounded-[10px] gradient-btn2 hover:shadow-custom4`}
+                            className={`h-[37px] w-[185px] text-white rounded-[10px] gradient-btn2 hover:shadow-custom4 ${
+                                !selectedSchemes ||
+                                selectedSchemes?.paymentSchemes?.length === 0
+                                    ? "cursor-not-allowed opacity-60"
+                                    : ""
+                            }`}
                         >
-                            {/* TODO: disable if there is no selected scheme */}
-                            <> Confirm </>
+                            Confirm
                         </button>
                     </div>
                 </div>

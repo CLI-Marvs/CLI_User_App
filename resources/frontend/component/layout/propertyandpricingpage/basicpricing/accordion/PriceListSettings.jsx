@@ -1,11 +1,15 @@
-import React, { useState } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { IoIosArrowDown } from "react-icons/io";
 import { usePricing } from "@/component/layout/propertyandpricingpage/basicpricing/context/BasicPricingContext";
 
 const PriceListSettings = ({ isOpen, toggleAccordion }) => {
     //State
+    const { pricingData, updatePricingSection ,setPricingData} = usePricing();
 
-    const { pricingData, updatePricingSection } = usePricing();
+    //Hooks
+
+    // const computeEffectBasePrice
+
 
     //Event Handler
     const handleInputChange = (e) => {
@@ -128,7 +132,7 @@ const PriceListSettings = ({ isOpen, toggleAccordion }) => {
                         <div className="flex gap-2 h-[31px]">
                             <div className="flex items-center border border-custom-grayF1 rounded-[5px] overflow-hidden w-[375px] text-sm">
                                 <span className="text-custom-gray81 bg-custom-grayFA font-semibold flex w-[180%] pl-3 py-1 ">
-                                    VATable Less Price&nbsp;
+                                    VATable List Price&nbsp;
                                     <span className="flex items-center font-semibold text-xs">
                                         (greater than)
                                     </span>

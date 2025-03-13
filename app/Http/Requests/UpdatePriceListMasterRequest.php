@@ -44,6 +44,8 @@ class UpdatePriceListMasterRequest extends FormRequest
             'priceVersionsPayload.*.expiry_date' => 'nullable | date_format:m-d-Y H:i:s',
             'priceVersionsPayload.*.payment_scheme' => 'array',
             'priceVersionsPayload.*.version_id' => 'integer',
+            'priceVersionsPayload.*.priority_number' => 'integer',
+            
 
             //Floor premium
             'floorPremiumsPayload' =>  'array',
@@ -65,7 +67,18 @@ class UpdatePriceListMasterRequest extends FormRequest
             'selectedAdditionalPremiumsPayload.*.unit_id' => 'integer',
             'selectedAdditionalPremiumsPayload.*.additional_premium_id' => 'array',
             
+            //Computed price list
+            'computedPriceListPayload' => 'array',
+            'computedPriceListPayload.*.unit_id' => 'integer',
 
+            //Reviewed by employee
+            'reviewedByEmployeesPayload' => 'array',
+            'reviewedByEmployeesPayload.*.id' => 'integer',
+
+            //Approved by employee
+            'approvedByEmployeesPayload' => 'array',
+
+            
             'status' =>
             'required|string|max:255',
             'emp_id' =>
@@ -74,6 +87,7 @@ class UpdatePriceListMasterRequest extends FormRequest
             'required|integer',
             'price_list_master_id' =>
             'required|integer',
+            'property_masters_id' => 'integer',
         ];
     }
 }

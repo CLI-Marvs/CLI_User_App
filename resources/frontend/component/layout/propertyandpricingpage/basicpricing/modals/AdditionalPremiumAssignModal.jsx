@@ -22,34 +22,15 @@ const AdditionalPremiumAssignModal = ({ modalRef, propertyData }) => {
     useEffect(() => {
         const newExcelId = propertyData?.excel_id || excelId;
         const newTowerPhaseId = propertyData?.tower_phase_id || towerPhaseId;
-
         if (!newExcelId || !newTowerPhaseId) return;
-
-        console.log("Fetching units for:", newExcelId, newTowerPhaseId);
+        // console.log("units", units);
 
         const fetchData = async () => {
-            await checkExistingUnits(newTowerPhaseId, newExcelId);
+            await checkExistingUnits(newTowerPhaseId, newExcelId,false);
         };
 
         fetchData();
     }, [propertyData, excelId, towerPhaseId, checkExistingUnits]);
-    // useEffect(() => {
-    //     setLocalExcelId(propertyData?.excel_id || excelId);
-    //     console.log("propertyData", propertyData);
-    //     setLocalTowerPhaseId(propertyData?.tower_phase_id || towerPhaseId);
-    // }, [propertyData]);
-
-    // useEffect(() => {
-    //     // Combine conditions to avoid unnecessary checks
-    //     if (!localExcelId || !localTowerPhaseId) return;
-    //     console.log("localExcelId", localExcelId);
-    //     // Memoize the function call if checkExistingUnits is passed as a prop
-    //     const fetchData = async () => {
-    //         await checkExistingUnits(localTowerPhaseId, localExcelId);
-    //     };
-
-    //     fetchData();
-    // }, [localExcelId, localTowerPhaseId, checkExistingUnits]);
 
     /**
      * Groups units by floor using `useMemo` for optimization.

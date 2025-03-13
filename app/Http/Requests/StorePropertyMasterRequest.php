@@ -48,7 +48,7 @@ class StorePropertyMasterRequest extends FormRequest
             'required',
             'regex:/^(?=.*[a-zA-Z])[\pL\pN\s\-\.\']+$/u',
             'max:255',
-            'google_map_link' => 'nullable|string|max:255',
+            'google_map_link' => 'nullable|string',
             'status' => 'nullable|string|max:255',
             'emp_id' => 'required|integer',
         ];

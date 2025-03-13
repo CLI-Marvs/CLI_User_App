@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useCallback } from "react";
 import { unitService } from "@/component/servicesApi/apiCalls/propertyPricing/unit/unitService";
+import { debounce } from "lodash";
 
 const UnitContext = createContext();
 
@@ -18,6 +19,7 @@ export const UnitProvider = ({ children }) => {
     const [isFetchingUnits, setIsFetchingUnits] = useState(false);
     const [isUploadingUnits, setIsUploadingUnits] = useState(false);
     const [lastFetchedExcelId, setLastFetchedExcelId] = useState(null);
+    const [computedUnitPrices, setComputedUnitPrices] = useState([]);
 
     /**
      * Fetches the count of floors for a given tower phase and excel ID.
@@ -35,7 +37,6 @@ export const UnitProvider = ({ children }) => {
                     towerPhaseId,
                     excelId
                 );
-                console.log("response fetchFloorCount", response);
 
                 if (response?.data?.data) {
                     setFloors(response.data.data);
@@ -62,9 +63,8 @@ export const UnitProvider = ({ children }) => {
      * Handles loading and error states during the API call.
      */
     const checkExistingUnits = useCallback(
-        async (towerPhaseId, excelId, forceFetch = false) => {
+        async (towerPhaseId, excelId, forceFetch = false, skipFloorCount = false) => {
             if (!towerPhaseId || !excelId) {
-                console.log("Invalid towerPhaseId or excelId, clearing data");
                 setFloors([]);
                 setUnits([]);
                 return;
@@ -76,31 +76,32 @@ export const UnitProvider = ({ children }) => {
                 lastFetchedExcelId === excelId &&
                 units.length > 0
             ) {
-                console.log("Using cached units data for excelId:", excelId);
                 return;
             }
 
             if (isCheckingUnits) {
-                console.log("Already checking units, skipping duplicate call");
                 return;
             }
 
             try {
                 setIsCheckingUnits(true);
-                console.log("Fetching units for:", towerPhaseId, excelId);
-
                 const response = await unitService.getExistingUnits(
                     towerPhaseId,
                     excelId
                 );
+
                 const unitsData = response?.data?.data || [];
                 setUnits(unitsData);
-                setLastFetchedExcelId(excelId);  
+                setLastFetchedExcelId(excelId);
 
                 // Fetch floor count only if units exist
-                if (unitsData.length > 0 && unitsData[0]?.excel_id) {
-                    await fetchFloorCount(towerPhaseId, unitsData[0].excel_id);
-                }
+               if (
+                   !skipFloorCount &&
+                   unitsData.length > 0 &&
+                   unitsData[0]?.excel_id
+               ) {
+                   await fetchFloorCount(towerPhaseId, unitsData[0].excel_id);
+               }
             } catch (err) {
                 setError(err);
                 console.error("Error in checkExistingUnits:", err);
@@ -124,7 +125,7 @@ export const UnitProvider = ({ children }) => {
                 setIsUploadingUnits(true);
                 const response = await unitService.storeUnit(payload);
                 if (response?.status === 201) {
-                    const newExcelId = response?.data?.data?.excel_id;
+                    const newExcelId = response?.data?.excel_id;
                     setExcelId(newExcelId);
                     return { success: true, excelId: newExcelId };
                 }
@@ -166,6 +167,46 @@ export const UnitProvider = ({ children }) => {
         [fetchFloorCount]
     );
 
+    /*
+     * Saves computed unit pricing data to the database, including
+     * the computed price list, transfer charge, reservation fee,
+     * and total contract price.
+     *
+     * This function is debounced to optimize performance, ensuring
+     * it only executes after 1 second of inactivity to prevent
+     * redundant API calls.
+     */
+    const saveComputedUnitPricingData = useCallback(
+        debounce(async (data) => {
+            try {
+                const payload = {
+                    payload: Object.values(data),
+                    excel_id:
+                        excelId || excelIdFromPriceList || data[0]?.excel_id,
+                    tower_phase_id: towerPhaseId || data[0]?.tower_phase_id,
+                    property_masters_id: data[0]?.property_masters_id,
+                    price_list_master_id: data[0]?.price_list_master_id,
+                };
+                const response = await unitService.saveComputedUnitPricingData(
+                    payload
+                );
+            } catch (error) {
+                console.error("Failed to save pricing data", error);
+            }
+        }, 1000),
+        []
+    );
+
+    // Update computed prices and trigger save
+    const updateUnitComputedPrices = useCallback(
+        (newPrices) => {
+            setComputedUnitPrices(newPrices);
+            //TODO: uncomment this line to save the computed prices
+            //saveComputedUnitPricingData(newPrices);
+        },
+        [saveComputedUnitPricingData]
+    );
+
     const value = {
         excelId,
         floors,
@@ -175,7 +216,6 @@ export const UnitProvider = ({ children }) => {
         uploadUnits,
         floorPremiumsAccordionOpen,
         setFloorPremiumsAccordionOpen,
-        fetchUnitsInTowerPhase,
         unitsByFloor,
         isUploadingUnits,
         setIsUploadingUnits,
@@ -190,6 +230,11 @@ export const UnitProvider = ({ children }) => {
         setTowerPhaseId,
         excelIdFromPriceList,
         setExcelIdFromPriceList,
+        setExcelId,
+        setUnits,
+        updateUnitComputedPrices,
+        computedUnitPrices,
+        saveComputedUnitPricingData,
     };
     return (
         <UnitContext.Provider value={value}>{children}</UnitContext.Provider>

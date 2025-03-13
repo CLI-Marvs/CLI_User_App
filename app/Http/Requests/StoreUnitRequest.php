@@ -25,15 +25,16 @@ class StoreUnitRequest extends FormRequest
         //Request if the user ADD UNIT from excel
         if ($method === 'store') {
             return [
-                'headers' => 'required|array',
-                'headers.*.rowHeader' => 'required|string',
-                'headers.*.columnIndex' => 'required|integer|min:1|max:8',
-                'file' => 'required|file|mimes:csv,txt,xlsx|max:5120',
+                'excelDataRows' => 'required|array',
+                'excelDataRows.*' => 'required|array',
+                'excelDataRows.*.*' => 'sometimes|nullable',
                 'tower_phase_id' => 'integer',
                 'property_masters_id' => 'integer',
                 'price_list_master_id' => 'integer',
+                'excel_id' => 'nullable|string',
             ];
         }
+
         //Request if the user ADD UNIT from the system 'admin'
         if ($method === 'storeUnit') {
             return [
@@ -51,6 +52,7 @@ class StoreUnitRequest extends FormRequest
                 'price_list_master_id' => 'integer',
             ];
         }
-       
+
+        return [];
     }
 }

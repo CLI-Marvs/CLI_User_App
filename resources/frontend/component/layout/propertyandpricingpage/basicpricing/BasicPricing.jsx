@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import ProjectDetails from "./ProjectDetails";
 import PriceListSettings from "./accordion/PriceListSettings";
 import AdditionalPremiums from "./accordion/AdditionalPremiums";
@@ -7,62 +7,79 @@ import moment from "moment";
 import ReviewsandApprovalRouting from "./accordion/ReviewsandApprovalRouting";
 import FloorPremiums from "./accordion/FloorPremiums";
 import { useLocation } from "react-router-dom";
-import UploadUnitDetailsModal from "./modals/UploadUnitDetailsModal";
 import { useStateContext } from "../../../../context/contextprovider";
-import { priceListMasterService } from "@/component/servicesApi/apiCalls/propertyPricing/priceListMaster/priceListMasterService";
-import expectedHeaders from "@/constant/data/excelHeader";
-import * as XLSX from "xlsx";
-import { useNavigate } from "react-router-dom";
 import { usePricing } from "@/component/layout/propertyandpricingpage/basicpricing/context/BasicPricingContext";
 import { formatPayload } from "@/component/layout/propertyandpricingpage/basicpricing/utils/payloadFormatter";
 import { showToast } from "@/util/toastUtil";
 import { usePriceListMaster } from "@/context/PropertyPricing/PriceListMasterContext";
 import { useUnit } from "@/context/PropertyPricing/UnitContext";
 import CircularProgress from "@mui/material/CircularProgress";
+import { usePropertyPricing } from "@/component/layout/propertyandpricingpage/basicpricing/hooks/usePropertyPricing";
+import UnitUploadButton from "@/component/layout/propertyandpricingpage/basicpricing/component/UnitUploadButton";
+
+const additionalPremiums = [
+    {
+        viewName: "Sea View",
+        premiumCost: 0,
+        excludedUnitIds: [],
+    },
+    {
+        viewName: "Mountain View",
+        premiumCost: 0,
+        excludedUnitIds: [],
+    },
+    {
+        viewName: "City View",
+        premiumCost: 0,
+        excludedUnitIds: [],
+    },
+    {
+        viewName: "Amenity View",
+        premiumCost: 0,
+        excludedUnitIds: [],
+    },
+];
 
 const BasicPricing = () => {
     //State
-    const navigate = useNavigate();
     const { user } = useStateContext();
-    const modalRef = useRef(null);
-    const uploadUnitModalRef = useRef(null);
-    const fileInputRef = useRef(null);
     const location = useLocation();
     const { data = {}, action = null } = location.state || {};
     const [propertyData, setPropertyData] = useState();
-    const [fileName, setFileName] = useState("");
-    const [fileSelected, setFileSelected] = useState({});
-    const [selectedExcelHeader, setSelectedExcelHeader] = useState([]);
-    const {
-        pricingData,
-        resetPricingData,
-        setPricingData,
-        additionalPremiums,
-    } = usePricing();
+    const { pricingData, resetPricingData, setPricingData } = usePricing();
     const { fetchPropertyListMasters } = usePriceListMaster();
-    const [isLoading, setIsLoading] = useState({});
     const {
         checkExistingUnits,
-        floors,
-        setFloors,
+        units,
         setFloorPremiumsAccordionOpen,
         excelId,
         lastFetchedExcelId,
         setLastFetchedExcelId,
         setTowerPhaseId,
         setExcelIdFromPriceList,
+        updateUnitComputedPrices,
+        computedUnitPrices,
+        excelIdFromPriceList,
+        saveComputedUnitPricingData,
+        floorPremiumsAccordionOpen
     } = useUnit();
     const [accordionStates, setAccordionStates] = useState({
         priceListSettings: false,
-        floorPremium: false,
+        floorPremium: floorPremiumsAccordionOpen,
         additionalPremiums: false,
         priceVersions: false,
         reviewAndApprovalSetting: false,
     });
-    const [
-        isReviewAndApprovalAccordionOpen,
-        setIsReviewAndApprovalAccordionOpen,
-    ] = useState(false);
+    const { isLoading, handleSubmit } = usePropertyPricing(
+        user,
+        data,
+        formatPayload,
+        pricingData,
+        resetPricingData,
+        showToast,
+        fetchPropertyListMasters,
+        checkExistingUnits
+    );
 
     //Hooks
     /**
@@ -95,6 +112,7 @@ const BasicPricing = () => {
                     priceVersions: data.price_versions.length
                         ? data.price_versions.map((version) => ({
                               id: version.version_id || "",
+                              priority_number: version.priority_number,
                               name: version.version_name || "",
                               percent_increase: version.percent_increase || 0,
                               status: version.status,
@@ -111,9 +129,10 @@ const BasicPricing = () => {
                         : [
                               {
                                   id: 0,
+                                  priority_number: 1,
                                   name: "",
-                                  percent_increase: "",
-                                  no_of_allowed_buyers: "",
+                                  percent_increase: 0,
+                                  no_of_allowed_buyers: 0,
                                   status: "Active",
                                   expiry_date: "N/A",
                                   payment_scheme: [],
@@ -124,7 +143,6 @@ const BasicPricing = () => {
 
             // Update the floor premiums
             if (data?.floor_premiums && data?.floor_premiums.length > 0) {
-                // console.log("Floor premiums have data 1", data?.floor_premiums);
                 const floorPremiumData = data?.floor_premiums.reduce(
                     (acc, premium) => {
                         acc[premium.floor] = {
@@ -167,6 +185,28 @@ const BasicPricing = () => {
                     additionalPremiums: updatedPremiums,
                 }));
             }
+
+            // Update the reviewedByEmployees
+            if (
+                data?.reviewedByEmployees &&
+                data?.reviewedByEmployees.length > 0
+            ) {
+                setPricingData((prev) => ({
+                    ...prev,
+                    reviewedByEmployees: data.reviewedByEmployees,
+                }));
+            }
+
+            // Update the approvedByEmployees
+            if (
+                data?.approvedByEmployees &&
+                data?.approvedByEmployees.length > 0
+            ) {
+                setPricingData((prev) => ({
+                    ...prev,
+                    approvedByEmployees: data.approvedByEmployees,
+                }));
+            }
         }
     }, [data]);
 
@@ -176,53 +216,52 @@ const BasicPricing = () => {
      * It also handles setting the additionalPremiums if it's currently empty.
      */
     useEffect(() => {
-        if (!data?.excel_id) {
-            console.log(
-                "Excel ID is null, clearing previous data",
-                data?.excel_id
-            );
-            setFloors([]);
-            setPricingData((prev) => ({
-                ...prev,
-                floorPremiums: [],
-                additionalPremiums: [],
-            }));
-            // if (
-            //     floors.length > 0 ||
-            //     Object.keys(pricingData.floorPremiums).length > 0
-            // ) {
-            //     setFloors([]);
-            //     setPricingData((prev) => ({
-            //         ...prev,
-            //         floorPremiums: [],
-            //         additionalPremiums: [],
-            //     }));
-            // }
-            // return;
-        }
-
         if (
             excelId &&
             data?.excel_id &&
             data?.excel_id !== lastFetchedExcelId
         ) {
-            console.log(
-                "Fetching floors due to excel_id change",
-                data?.excel_id
-            );
-
             checkExistingUnits(data.tower_phase_id, data.excel_id);
             setLastFetchedExcelId(data?.excel_id);
         }
 
-        if (excelId || pricingData.additionalPremiums.length === 0) {
+        if (excelId || data?.excel_id) {
             setPricingData((prev) => ({
                 ...prev,
-                additionalPremiums: additionalPremiums,
+                additionalPremiums: prev.additionalPremiums.length
+                    ? prev.additionalPremiums // Keep existing if not empty
+                    : additionalPremiums.map((item) => {
+                          const generatedId = generateBigIntId();
+                          // Validate if the generated ID is numeric
+                          if (!isNaN(Number(generatedId))) {
+                              return {
+                                  ...item,
+                                  id: parseInt(generatedId), // Convert to integer if needed
+                              };
+                          } else {
+                              // Handle the case where the ID is not numeric
+                              console.error(
+                                  "Generated ID is not numeric:",
+                                  generatedId
+                              );
+                              return {
+                                  ...item,
+                                  id: null, // or some default value
+                              };
+                          }
+                      }),
             }));
-            console.log("pricingdata", pricingData);
         }
+
+        // Function to generate random Id
+        const generateBigIntId = () => {
+            return (
+                BigInt(Date.now()) * BigInt(1000) +
+                BigInt(Math.floor(Math.random() * 1000))
+            ).toString();
+        };
     }, [
+        excelId,
         data?.excel_id,
         data?.tower_phase_id,
         additionalPremiums,
@@ -241,6 +280,134 @@ const BasicPricing = () => {
         };
     }, [location]);
 
+    //Compute the effective balcony base
+    const computeEffectiveBalconyBase = useMemo(() => {
+        const basePrice = pricingData.priceListSettings?.base_price;
+        return basePrice ? basePrice * 0.5 : 0; // Compute 50%
+    }, [pricingData.priceListSettings?.base_price]);
+
+    //Compute the effective base price, effective balcony base, and transfer charge, vat, vatable list price, reservation fee, total contract price
+    const computedEffectiveBasePrice = useMemo(() => {
+        return units.map((unit) => {
+            // Get Base Price
+            const basePrice =
+                parseFloat(pricingData.priceListSettings?.base_price) || 0;
+
+            // Get Floor Premium for the unit’s floor
+            const floorPremium = pricingData.floorPremiums[unit.floor];
+            const floorPremiumCost = floorPremium
+                ? parseFloat(floorPremium.premiumCost) || 0
+                : 0;
+
+            const additionalPremiumCost = [
+                ...(pricingData.selectedAdditionalPremiums || []),
+                ...(unit.additional_premium_id || []),
+            ].reduce((total, selected) => {
+                const selectedPremiumId =
+                    selected.additional_premium_id || selected; // Handle both new selected and existing
+                if (selected.unit && selected.unit !== unit.unit) return total;
+
+                // Find all matching additional premiums
+                const matchingPremiums =
+                    pricingData?.additionalPremiums?.filter((ap) =>
+                        (Array.isArray(selectedPremiumId)
+                            ? selectedPremiumId
+                            : [selectedPremiumId]
+                        ).includes(ap.id)
+                    ) || [];
+
+                // Sum up all matching premium costs
+                const premiumTotal = matchingPremiums.reduce(
+                    (sum, premium) =>
+                        sum + (parseFloat(premium.premiumCost) || 0),
+                    0
+                );
+
+                return total + premiumTotal;
+            }, 0);
+
+            // Compute Effect base price
+            const effective_base_price =
+                basePrice + floorPremiumCost + additionalPremiumCost || 0;
+
+            const effective_balcony_base =
+                pricingData.priceListSettings?.effective_balcony_base || 0;
+
+            // Compute List balcony_area
+            const computed_list_price_with_vat = parseFloat(
+                (
+                    (unit.indoor_area || 0) * effective_base_price +
+                    ((parseFloat(unit.balcony_area) || 0) +
+                        (parseFloat(unit.garden_area) || 0)) *
+                        effective_balcony_base
+                ).toFixed(2)
+            );
+
+            //Compute transfer charge
+            const transfer_charge =
+                (computed_list_price_with_vat *
+                    pricingData.priceListSettings?.transfer_charge) /
+                100;
+
+            // Define VAT percentage
+            const vatRate = pricingData.priceListSettings?.vat || 12;
+
+            // Compute VAT (only if LP + TC is greater than 3.6M)
+            const listPricePlusTransferCharge =
+                computed_list_price_with_vat + transfer_charge;
+            const vatAmount =
+                listPricePlusTransferCharge >
+                pricingData.priceListSettings?.vatable_less_price
+                    ? (listPricePlusTransferCharge * vatRate) / 100
+                    : 0;
+
+            // Compute Total Contract Price (TCP)
+            const totalContractPrice = listPricePlusTransferCharge + vatAmount;
+
+            return {
+                ...unit,
+                effective_base_price,
+                computed_list_price_with_vat,
+                computed_reservation_fee:
+                    pricingData?.priceListSettings?.reservation_fee,
+                computed_transfer_charge: parseFloat(
+                    transfer_charge.toFixed(2)
+                ),
+                vatAmount: parseFloat(vatAmount.toFixed(2)),
+                computed_total_contract_price: parseFloat(
+                    totalContractPrice.toFixed(2)
+                ),
+            };
+        });
+    }, [
+        units,
+        pricingData.priceListSettings?.base_price,
+        pricingData.priceListSettings?.effective_balcony_base,
+        pricingData.priceListSettings?.transfer_charge,
+        pricingData.priceListSettings?.vat,
+        pricingData.priceListSettings?.vatable_less_price,
+        pricingData.priceListSettings?.reservation_fee,
+        pricingData.floorPremiums,
+        pricingData.selectedAdditionalPremiums,
+        pricingData.additionalPremiums,
+    ]);
+
+    useEffect(() => {
+        setPricingData((prev) => ({
+            ...prev,
+            priceListSettings: {
+                ...prev.priceListSettings,
+                effective_balcony_base: computeEffectiveBalconyBase,
+            },
+        }));
+    }, [computeEffectiveBalconyBase]);
+
+    useEffect(() => {
+        if (units.length > 0) {
+            updateUnitComputedPrices(computedEffectiveBasePrice);
+        }
+    }, [computedEffectiveBasePrice, updateUnitComputedPrices]);
+
     //Event handler
     // Function to toggle a specific accordion
     const toggleAccordion = (name) => {
@@ -248,277 +415,34 @@ const BasicPricing = () => {
             ...prev,
             [name]: !prev[name],
         }));
-
-        // Handle review setting state
-        if (name === "reviewAndApprovalSetting") {
-            // If opening the review accordion, set to true
-            if (!accordionStates.reviewAndApprovalSetting) {
-                setIsReviewAndApprovalAccordionOpen(true);
-            } else {
-                // If closing the review accordion, set to false
-                setIsReviewAndApprovalAccordionOpen(false);
-            }
-        }
     };
 
-    // Open the add property modal
-    const handleOpenAddPropertyModal = () => {
-        if (modalRef.current) {
-            modalRef.current.showModal();
-        }
-    };
-
-    //Handle to open the unit upload modal
-    const handleOpenUnitUploadModal = () => {
-        if (fileInputRef.current) {
-            fileInputRef.current.click();
-        }
-    };
-
-    /**
-     * Handles the process of uploading an Excel file, extracting the headers
-     */
-    const handleFileChange = async (event) => {
-        const file = event.target.files[0];
-        setFileSelected(file);
-        setFileName(file.name);
-        const reader = new FileReader();
-
-        reader.onload = (e) => {
-            const data = new Uint8Array(e.target.result);
-            const workbook = XLSX.read(data, { type: "array" });
-            const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-
-            const jsonData = XLSX.utils.sheet_to_json(worksheet, {
-                header: 1,
-            }); //all data in excel
-
-            const selectedHeaders = jsonData[0]; // First row contains headers
-            const dataRows = jsonData.slice(1); // All rows after the first one
-
-            // Check for missing headers
-            const missingHeaders = expectedHeaders.filter(
-                (header) => !selectedHeaders.includes(header)
-            );
-
-            //Check for extra headers
-            const extraHeaders = selectedHeaders.filter(
-                (header) => !expectedHeaders.includes(header)
-            );
-
-            // Notify user if missing headers are found
-            if (missingHeaders.length > 0) {
-                //TODO: Convert this into Toast
-                alert(
-                    `Please check your Excel header row.\nMissing Headers: ${missingHeaders.join(
-                        ", "
-                    )}`
-                );
-                setSelectedExcelHeader([]);
-                return;
-            }
-
-            // Notify user if extra headers are found, but continue with expected headers
-            if (extraHeaders.length > 0) {
-                //TODO: Convert this into Toast
-                alert(
-                    `Please check your Excel header row.\nExtra Headers: ${extraHeaders.join(
-                        ", "
-                    )}\nProcessing will continue with expected headers only.`
-                );
-            }
-
-            const reorderedHeaders = expectedHeaders.map((expectedHeader) => {
-                // Find the index of the selected header that matches the expected header
-                const selectedIndex = selectedHeaders.indexOf(expectedHeader);
-                return {
-                    rowHeader: expectedHeader,
-                    columnIndex: selectedIndex + 1, // Adjust for 1-based column index
-                };
-            }); //Reorder filtered headers based on expected headers order
-
-            // Now we need to reorder data rows based on this mapping
-            const reorderedData = dataRows.map((row) => {
-                const reorderedRow = {};
-                reorderedHeaders.forEach((headerMapping) => {
-                    reorderedRow[headerMapping.rowHeader] =
-                        row[headerMapping.columnIndex];
-                });
-                return reorderedRow;
-            });
-
-            //  console.log("reorderedData", reorderedData);
-            // Save the formatted headers
-            setSelectedExcelHeader(reorderedHeaders);
-            //  setExcelData(reorderedData);
-            // Proceed with your modal display logic
-            if (uploadUnitModalRef.current) {
-                uploadUnitModalRef.current.showModal();
-            }
-        };
-
-        reader.readAsArrayBuffer(file);
-    };
-
-    /*
-     * Payload object for submission with the provided status.
-     * The payload includes employee ID, tower phase ID, price list settings, payment scheme, and the specified status.
-     * @param {*} status
-     * @returns
-     */
-    const buildSubmissionPayload = (status) => ({
-        emp_id: user?.id,
-        price_list_master_id:
-            data?.price_list_master_id ||
-            data?.data?.property_commercial_detail?.property_master_id,
-        tower_phase_id: data.data?.tower_phases[0]?.id || data?.tower_phase_id,
-        priceListPayload: formatPayload.formatPriceListSettingsPayload(
-            pricingData.priceListSettings
-        ),
-        paymentSchemePayload: pricingData.paymentSchemes,
-        priceVersionsPayload: formatPayload.formatPriceVersionsPayload(
-            pricingData.priceVersions
-        ),
-        floorPremiumsPayload: formatPayload.formatMultipleFloorPremiums(
-            pricingData.floorPremiums
-        ),
-        additionalPremiumsPayload:
-            formatPayload.formatAdditionalPremiumsPayload(
-                pricingData.additionalPremiums
-            ),
-        selectedAdditionalPremiumsPayload:
-            formatPayload.formatSelectedAdditionalPremiumsPayload(
-                pricingData.selectedAdditionalPremiums
-            ),
-        status: status,
-    });
-
-    /**
-     * Handles in submitting all data in creating price master list
-     */
-    const handleSubmit = async (e, status) => {
-        e.preventDefault();
-        if (action === "Edit") {
-            try {
-                setIsLoading((prev) => ({ ...prev, [status]: true }));
-                const payload = buildSubmissionPayload(status);
-                console.log("Edit Payload", payload);
-                // console.log("Edit Payload", JSON.stringify(payload));
-
-                const response =
-                    await priceListMasterService.updatePriceListMasters(
-                        payload
-                    );
-                console.log("response", response);
-                if (response?.status === 201 || response?.status === 200) {
-                    showToast(
-                        response?.data?.message || "Data updated successfully",
-                        "success"
-                    );
-
-                    // Reset data and navigate to master list page
-                    await fetchPropertyListMasters(true,true);
-                    setTimeout(() => {
-                        navigate("/property-pricing/master-lists");
-                    }, 1000);
-                    setFloorPremiumsAccordionOpen(false);
-                } else {
-                    console.log(
-                        "Unexpected response status:",
-                        response?.status,
-                        response
-                    );
-                    showToast(
-                        "Unexpected response received. Please verify the changes.",
-                        "warning"
-                    );
-                }
-            } catch (error) {
-                if (error.response?.data?.message) {
-                    showToast(error.response.data.message, "error");
-                } else {
-                    showToast(
-                        "An error occurred during submission. Please try again.",
-                        "error"
-                    );
-                    console.log("error 408", error);
-                }
-            } finally {
-                setIsLoading((prev) => ({ ...prev, [status]: false }));
-            }
-        } else {
-            try {
-                setIsLoading((prev) => ({ ...prev, [status]: true }));
-                const payload = buildSubmissionPayload(status);
-                console.log("ADd Payload", payload);
-
-                const response =
-                    await priceListMasterService.storePriceListMasters(payload);
-                console.log("response 235", response);
-                if (response?.status === 201 || response?.status === 200) {
-                    showToast(
-                        response?.data?.message || "Data added successfully",
-                        "success"
-                    );
-                    // Reset data and navigate to master list page
-                    resetPricingData();
-                    await fetchPropertyListMasters(true,true);
-
-                    setTimeout(() => {
-                        navigate("/property-pricing/master-lists");
-                    }, 1000);
-                    setFloorPremiumsAccordionOpen(false);
-                } else {
-                    console.log(
-                        "Unexpected response status:",
-                        response?.status,
-                        response
-                    );
-                    showToast(
-                        "Unexpected response received. Please verify the changes.",
-                        "warning"
-                    );
-                }
-            } catch (error) {
-                if (error.response?.data?.message) {
-                    showToast(error.response.data.message, "error");
-                } else {
-                    showToast(
-                        "An error occurred during submission. Please try again.",
-                        "error"
-                    );
-                }
-            } finally {
-                setIsLoading((prev) => ({ ...prev, [status]: false }));
-            }
-        }
+    //Handle price list submit
+    const handleFormSubmit = (e, status) => {
+        handleSubmit(e, status, action, excelId, setFloorPremiumsAccordionOpen);
     };
 
     return (
         <div className="h-screen max-w-[957px] min-w-[897px] bg-custom-grayFA px-[30px] ">
-            {/* button ra if walay pa property */}
-            {/* <div className="px-5 mb-7  ">
-                {!passPropertyData && (
-                    <button
-                        onClick={handleOpenAddPropertyModal}
-                        className="montserrat-semibold text-sm px-2 gradient-btn2 w-[214px] h-[37px] rounded-[10px] text-white hover:shadow-custom4"
-                    >
-                        Add Property and Pricing
-                    </button>
-                )}
-            </div> */}
-            {/* kung naa nay property */}
             {propertyData && Object.keys(propertyData).length > 0 && (
                 <ProjectDetails propertyData={propertyData} />
             )}
 
             <div className="flex gap-[15px] py-5">
-                <button
-                    onClick={handleOpenUnitUploadModal}
-                    className="h-[37px] w-[162px] rounded-[10px] text-white montserrat-semibold text-sm gradient-btn2 hover:shadow-custom4"
-                >
-                    Upload Unit Details
-                </button>
+                <UnitUploadButton
+                    buttonText={
+                        excelId || excelIdFromPriceList
+                            ? "Change Uploaded Units"
+                            : "Upload Unit Details"
+                    }
+                    className={`h-[37px] w-[176px] rounded-[10px] text-white montserrat-semibold text-sm gradient-btn2 hover:shadow-custom4 ${
+                        isLoading["On-going Approval"]
+                            ? "cursor-not-allowed opacity-50"
+                            : ""
+                    }`}
+                    propertyData={propertyData}
+                />
+
                 <button
                     className={`h-[37px] w-[176px] rounded-[10px] text-white montserrat-semibold text-sm gradient-btn2 hover:shadow-custom4 ${
                         isLoading["On-going Approval"]
@@ -526,7 +450,7 @@ const BasicPricing = () => {
                             : ""
                     }`}
                     type="submit"
-                    onClick={(e) => handleSubmit(e, "On-going Approval")}
+                    onClick={(e) => handleFormSubmit(e, "On-going Approval")}
                 >
                     {isLoading["On-going Approval"] ? (
                         <CircularProgress className="spinnerSize" />
@@ -541,7 +465,7 @@ const BasicPricing = () => {
                             : ""
                     }`}
                     type="submit"
-                    onClick={(e) => handleSubmit(e, "Draft")}
+                    onClick={(e) => handleFormSubmit(e, "Draft")}
                 >
                     <div className="flex justify-center items-center h-full w-full rounded-[8px] bg-white">
                         {isLoading["Draft"] ? (
@@ -551,22 +475,6 @@ const BasicPricing = () => {
                         )}
                     </div>
                 </button>
-            </div>
-            <input
-                type="file"
-                ref={fileInputRef}
-                className="hidden"
-                onChange={handleFileChange}
-            />
-            <div>
-                <UploadUnitDetailsModal
-                    propertyData={propertyData}
-                    handleFileChange={handleFileChange}
-                    uploadUnitModalRef={uploadUnitModalRef}
-                    fileName={fileName}
-                    selectedExcelHeader={selectedExcelHeader}
-                    fileSelected={fileSelected}
-                />
             </div>
             <div className="flex flex-col gap-1 w-full border-t-1 border-custom-lightestgreen py-4  ">
                 <PriceListSettings
@@ -593,10 +501,9 @@ const BasicPricing = () => {
                 />
 
                 <ReviewsandApprovalRouting
+                    action={action}
                     propertyData={propertyData}
-                    isReviewAndApprovalAccordionOpen={
-                        isReviewAndApprovalAccordionOpen
-                    }
+                    data={data}
                     isOpen={accordionStates.reviewAndApprovalSetting}
                     toggleAccordion={() =>
                         toggleAccordion("reviewAndApprovalSetting")

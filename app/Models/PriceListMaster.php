@@ -19,6 +19,7 @@ class PriceListMaster extends Model
     use HasFactory;
     protected $table = 'price_list_masters';
     protected $guarded = array();
+   
 
 
     //Relationship

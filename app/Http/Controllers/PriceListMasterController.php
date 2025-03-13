@@ -23,13 +23,18 @@ class PriceListMasterController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $priceListMasters = $this->service->index();
+        // Capture query parameters from request
+        $perPage = $request->input('per_page', 10);
+        $page = $request->input('page', 1);
 
-        return response()->json(
-            $priceListMasters
-        );
+        $priceListMastersResponse = $this->service->index($page, $perPage);
+       
+        return response()->json([
+            'data' => $priceListMastersResponse['data'],
+            'pagination' => $priceListMastersResponse['pagination']
+        ]);
     }
 
     /**
@@ -38,16 +43,16 @@ class PriceListMasterController extends Controller
     public function store(StorePriceListMasterRequest $request)
     {
         try {
-            $result = $this->service->store($request->validated());
-            if ($result['success']) {
+            $storeResponse = $this->service->store($request->validated());
+            if ($storeResponse['success']) {
                 return response()->json([
-                    'message' => $result['message'],
-                    'data' => $result['data'],
+                    'message' => $storeResponse['message'],
+                    'data' => $storeResponse['data'],
                 ], 200);
             }
 
             return response()->json([
-                'message' => $result['message']
+                'message' => $storeResponse['message']
             ], 400);
         } catch (ValidationException $e) {
             return response()->json([
@@ -71,18 +76,19 @@ class PriceListMasterController extends Controller
     public function update(UpdatePriceListMasterRequest $request)
     {
         $validatedData = $request->validated();
-        try {
-            $result  = $this->service->update($validatedData, $validatedData['tower_phase_id']);
 
-            if ($result['success']) {
+        try {
+            $updateResponse  = $this->service->update($validatedData, $validatedData['tower_phase_id']);
+
+            if ($updateResponse['success']) {
                 return response()->json([
-                    'message' => $result['message'],
-                    'data' => $result['data'],
+                    'message' => $updateResponse['message'],
+                    'data' => $updateResponse['data'],
                 ], 200);
             }
 
             return response()->json([
-                'message' => $result['message']
+                'message' => $updateResponse['message']
             ], 400);
         } catch (\Exception $e) {
             return response()->json(
@@ -100,37 +106,37 @@ class PriceListMasterController extends Controller
     public function updateStatus($id)
     {
         try {
-            $result = $this->service->updateStatus($id);
-            if ($result['success']) {
+            $statusUpdate  = $this->service->updateStatus($id);
+            if ($statusUpdate['success']) {
                 return response()->json([
-                    'message' => $result['message'],
-                    'data' => $result['data'],
+                    'message' => $statusUpdate['message'],
+                    'data' => $statusUpdate['data'],
                 ], 200);
             }
 
             return response()->json([
-                'message' => $result['message']
+                'message' => $statusUpdate['message']
             ], 400);
         } catch (\Exception $e) {
             return response()->json(
                 [
-                    'Error updating price list master status' => $e->getMessage()
+                    'error' => 'Error updating price list master status',
+                    'details' => $e->getMessage()
                 ],
                 500
             );
         }
     }
 
-    /**Export the price list master data to excel */
+    /* Export the price list master data to excel */
     public function exportExcel(Request $request)
     {
-
         try {
             return $this->service->exportExcel($request->all());
         } catch (\Exception $e) {
             return response()->json(
                 [
-                    'Error updating price list master status' => $e->getMessage()
+                    'Error exporting excel' => $e->getMessage()
                 ],
                 500
             );

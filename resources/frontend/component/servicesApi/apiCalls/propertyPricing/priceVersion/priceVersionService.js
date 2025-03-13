@@ -5,7 +5,6 @@ export const priceVersionService = {
     getPriceVersions: async () => {
         try {
             const response = await apiService.get("price-version/");
-            console.log("response", response);
             return response;
         } catch (error) {
             console.error("Error getting price list masters:", error);

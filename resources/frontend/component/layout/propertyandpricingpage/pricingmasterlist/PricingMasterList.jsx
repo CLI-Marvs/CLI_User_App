@@ -18,8 +18,14 @@ import { priceListMasterService } from "@/component/servicesApi/apiCalls/propert
 
 const PricingMasterList = () => {
     //States
-    const { priceListMaster, isLoading, fetchPropertyListMasters } =
-        usePriceListMaster();
+    const {
+        priceListMaster,
+        isLoading,
+        fetchPropertyListMasters,
+        currentPage,
+        setCurrentPage,
+        isFirstLoad,
+    } = usePriceListMaster();
     const { fetchPaymentSchemes } = usePaymentScheme();
     const [startDate, setStartDate] = useState(new Date());
     const [toggled, setToggled] = useState(false);
@@ -33,11 +39,7 @@ const PricingMasterList = () => {
     //Hooks
     useEffect(() => {
         fetchPaymentSchemes();
-        console.log("priceListMaster", priceListMaster);
-        if (!priceListMaster) {
-            fetchPropertyListMasters(true);
-        }
-    }, [fetchPropertyListMasters, priceListMaster]);
+    }, [fetchPaymentSchemes, priceListMaster]);
 
     //Event handler
     /**
@@ -78,6 +80,14 @@ const PricingMasterList = () => {
     const handleOpenModal = () => {
         if (propertyModalRef.current) {
             propertyModalRef.current.showModal();
+        }
+    };
+
+    // Handles pagination: Moves to the next page when clicked
+    const handlePageChange = (selectedPage) => {
+        if (selectedPage !== currentPage) {
+            setCurrentPage(selectedPage);
+            fetchPropertyListMasters(false, false, selectedPage);
         }
     };
 
@@ -310,17 +320,18 @@ const PricingMasterList = () => {
                         {/*                                                   END                                                  */}
                         {/*                                            ONGOING APPROVAL                                          bg-[#F0F3EE]       */}
 
-                        {isLoading ? (
+                        {isLoading && isFirstLoad ? (
                             <tr>
                                 <td className="w-full mt-1">
                                     <TableSkeleton />
                                 </td>
                             </tr>
-                        ) : priceListMaster && priceListMaster.length > 0 ? (
-                            Object.values(priceListMaster).map(
-                                (item, index) => (
+                        ) : priceListMaster &&
+                          priceListMaster.data.length > 0 ? (
+                            priceListMaster.data.map((item) => {
+                                return (
                                     <tr
-                                        key={index}
+                                        key={item.price_list_master_id}
                                         className={`flex gap-4 mt-2 h-[144px] shadow-custom5 rounded-[10px] overflow-hidden px-4 ${
                                             item?.status === "Draft"
                                                 ? "bg-white"
@@ -370,6 +381,8 @@ const PricingMasterList = () => {
                                                           "Approved"
                                                         ? null
                                                         : "Edit"}
+                                                    {" - "}
+                                                    {item?.price_list_master_id}
                                                 </p>
                                             </div>
                                         </td>
@@ -586,8 +599,8 @@ const PricingMasterList = () => {
                                             </div>
                                         </td>
                                     </tr>
-                                )
-                            )
+                                );
+                            })
                         ) : (
                             <tr>
                                 <td
@@ -717,7 +730,7 @@ const PricingMasterList = () => {
                     </tbody>
                 </table>
             </div>
-            <div className="flex w-full justify-start mt-3">
+            <div className="flex w-full justify-start py-5">
                 <ReactPaginate
                     previousLabel={
                         <MdKeyboardArrowLeft className="text-[#404B52]" />
@@ -726,10 +739,10 @@ const PricingMasterList = () => {
                         <MdKeyboardArrowRight className="text-[#404B52]" />
                     }
                     breakLabel={"..."}
-                    pageCount={2}
+                    pageCount={priceListMaster?.pagination?.last_page || 1}
                     marginPagesDisplayed={2}
                     pageRangeDisplayed={1}
-                    /* onPageChange={handlePageClick} */
+                    onPageChange={(data) => handlePageChange(data.selected + 1)}
                     containerClassName={"flex gap-2"}
                     previousClassName="border border-[#EEEEEE] text-custom-bluegreen font-semibold w-[26px] h-[24px] rounded-[4px] flex justify-center items-center hover:text-white hover:bg-custom-lightgreen hover:text-white"
                     nextClassName="border border-[#EEEEEE] text-custom-bluegreen font-semibold w-[26px] h-[24px] rounded-[4px] flex justify-center items-center hover:text-white hover:bg-custom-lightgreen hover:text-white"
@@ -738,7 +751,7 @@ const PricingMasterList = () => {
                     pageLinkClassName="w-full h-full flex justify-center items-center"
                     activeLinkClassName="w-full h-full flex justify-center items-center"
                     disabledLinkClassName={"text-gray-300 cursor-not-allowed"}
-                    /* forcePage={currentPage} */
+                    forcePage={currentPage - 1}
                 />
             </div>
             <div>

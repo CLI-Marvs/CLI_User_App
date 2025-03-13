@@ -22,7 +22,7 @@ const PriceVersions = ({
     // const [isOpen, setAccordionOpen] = useState(false);
     const addPaymentSchemeModalRef = useRef(null);
     const editPaymentSchemeModalRef = useRef(null);
-    const { pricingData, updatePricingSection, setPricingData } = usePricing();
+    const { pricingData, setPricingData } = usePricing();
     const [versionIndex, setVersionIndex] = useState(0);
     const [selectedPaymentSchemes, setSelectedPaymentSchemes] = useState([]);
     const [isDatePickerVisible, setIsDatePickerVisible] = useState(false);
@@ -33,27 +33,18 @@ const PriceVersions = ({
     const handlePriceVersionInputChange = (event, formIndex) => {
         const { name, value } = event.target;
 
-        // Ensure pricingData and priceVersions are valid
         if (!Array.isArray(pricingData?.priceVersions)) {
-            console.error(
-                "pricingData.priceVersions is not an array",
-                pricingData?.priceVersions
-            );
             return;
         }
 
         const updatedPriceVersions = [...pricingData.priceVersions];
-
-        // Check if formIndex is within bounds
         if (formIndex >= updatedPriceVersions.length || formIndex < 0) {
-            console.error("Form index is out of bounds");
-            return; // If index out of bounds, return early
+            return;
         }
 
-        // Update the specific form object at the given index
         updatedPriceVersions[formIndex] = {
             ...updatedPriceVersions[formIndex],
-            [name]: value, // Update only the changed field
+            [name]: value,
         };
 
         // After updating, update the state with the new priceVersions
@@ -83,6 +74,13 @@ const PriceVersions = ({
                 ? [...prev.priceVersions]
                 : [];
 
+            // Get the last priority_number and increment by 1
+            const lastPriorityNumber =
+                priceVersions.length > 0
+                    ? priceVersions[priceVersions.length - 1].priority_number ||
+                      0
+                    : 0;
+
             priceVersions.push({
                 id: 0,
                 name: "",
@@ -91,9 +89,9 @@ const PriceVersions = ({
                 no_of_allowed_buyers: 0,
                 expiry_date: "N/A",
                 payment_scheme: [],
+                priority_number: lastPriorityNumber + 1,
             });
 
-            // Update the state
             return {
                 ...prev,
                 priceVersions: priceVersions,
@@ -101,11 +99,8 @@ const PriceVersions = ({
         });
     };
 
-    //TODO: 1. Assume the price version have 1 data, and the ACTION Is EDIT then the user can view the Remove button, and remove the version data.
-
     //Handle remove the fields
     const handleRemovePriceVersions = (index) => {
-        //TODO: KUNG Edit mode, then ang versions kay naa nay data, if iyang e remove, ma remove siya but ang status sa price versions kay ma in active na isya
         setPricingData((prev) => {
             // Copy the current priceVersions array
             const updatedPriceVersions = [...prev.priceVersions];
@@ -153,7 +148,7 @@ const PriceVersions = ({
     };
 
     //Handle date change
-    const handleDateChange = (date, formIndex) => {
+    const onDateChange = (date, formIndex) => {
         setPricingData((prevState) => {
             const updatedPriceVersions = prevState.priceVersions.map(
                 (item, i) =>
@@ -177,7 +172,7 @@ const PriceVersions = ({
     return (
         <>
             <div
-                className={`transition-all duration-2000 ease-in-out relative
+                className={`transition-all duration-2000 ease-in-out  
       ${
           isOpen
               ? "h-[74px] mx-5 bg-white shadow-custom5 rounded-[10px]"
@@ -229,6 +224,9 @@ const PriceVersions = ({
                                 <table>
                                     <thead>
                                         <tr className="h-[83px] bg-custom-grayFA text-custom-grayA5 montserrat-semibold text-sm">
+                                            <th className="rounded-tl-[10px] pl-[2px] w-[90px] text-left">
+                                                Priority
+                                            </th>
                                             <th className="rounded-tl-[10px] pl-[10px] w-[150px] text-left">
                                                 Version
                                             </th>
@@ -264,6 +262,11 @@ const PriceVersions = ({
                                                             className="h-[66px] bg-white text-sm"
                                                             key={index}
                                                         >
+                                                            <td className="px-[10px]">
+                                                                {
+                                                                    form.priority_number
+                                                                }
+                                                            </td>
                                                             <td className="px-[10px]">
                                                                 <input
                                                                     type="text"
@@ -336,7 +339,7 @@ const PriceVersions = ({
                                                                         onChange={(
                                                                             date
                                                                         ) =>
-                                                                            handleDateChange(
+                                                                            onDateChange(
                                                                                 date,
                                                                                 index
                                                                             )
@@ -396,8 +399,6 @@ const PriceVersions = ({
                                                                             paymentScheme.length >
                                                                                 0 && (
                                                                                 <div className="flex items-center">
-                                                                                    {/* TODO: DOnt show edit and delete button , X button, if the Status is Ongoing approve, approved live */}
-
                                                                                     <HiPencil
                                                                                         onClick={() =>
                                                                                             handleEditPaymentScheme(
@@ -406,9 +407,6 @@ const PriceVersions = ({
                                                                                         }
                                                                                         className="text-custom-solidgreen h-6 w-6 cursor-pointer"
                                                                                     />
-                                                                                    {/**
-                                                                                     *TODO:  If many data in price versions, assume 2 data with corresponding payment scheme, then if user will click the delete button then only the payment scheme of that version will remove
-                                                                                     */}
                                                                                     <MdDelete
                                                                                         onClick={() =>
                                                                                             handleRemovePaymentScheme(
@@ -446,20 +444,32 @@ const PriceVersions = ({
                                                             </td>
 
                                                             <td className="px-[10px]">
-                                                                {pricingData &&
-                                                                    Object.keys(
-                                                                        pricingData?.priceVersions
-                                                                    ).length >
-                                                                        1 && (
-                                                                        <IoIosCloseCircle
-                                                                            onClick={() =>
-                                                                                handleRemovePriceVersions(
-                                                                                    index
-                                                                                )
-                                                                            }
-                                                                            className="text-custom-gray h-6 w-6 cursor-pointer hover:text-red-500"
-                                                                        />
-                                                                    )}
+                                                                {/**
+                                                                 * Show the remove button if there is more than one priceVersion
+                                                                 * Show the remove button if at least one priceVersion has data from db
+                                                                 * Hide the remove button if there is only one default empty priceVersion
+                                                                 */}
+                                                                {(pricingData &&
+                                                                    pricingData
+                                                                        .priceVersions
+                                                                        .length >
+                                                                        1) ||
+                                                                pricingData.priceVersions.some(
+                                                                    (pv) =>
+                                                                        pv.id !==
+                                                                            0 ||
+                                                                        pv.name.trim() !==
+                                                                            ""
+                                                                ) ? (
+                                                                    <IoIosCloseCircle
+                                                                        onClick={() =>
+                                                                            handleRemovePriceVersions(
+                                                                                index
+                                                                            )
+                                                                        }
+                                                                        className="text-custom-gray h-6 w-6 cursor-pointer hover:text-red-500"
+                                                                    />
+                                                                ) : null}{" "}
                                                             </td>
                                                         </tr>
                                                     </tbody>

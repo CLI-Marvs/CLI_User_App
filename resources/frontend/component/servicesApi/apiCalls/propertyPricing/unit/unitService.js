@@ -32,7 +32,6 @@ export const unitService = {
     //Function to check existing units for a tower phase
     getExistingUnits: async (towerPhaseId, excelId) => {
         if (excelId === null || excelId === undefined) {
-            console.warn("Skipping API request: excelId is null or undefined");
             return { data: { data: [] } }; // Return empty data to prevent errors
         }
         try {
@@ -47,23 +46,17 @@ export const unitService = {
     },
 
     //Function to get all units in a tower phase and selected floor
-    getUnitsInTowerPhase: async (towerPhaseId, selectedFloor, excelId) => {
-        try {
-            console.log(
-                "getUnitsInTowerPhase",
-                towerPhaseId,
-                selectedFloor,
-                excelId
-            );
-            const response = await apiService.get(
-                `units/tower/${towerPhaseId}/floor/${selectedFloor}/units/${excelId}`
-            );
-            return response;
-        } catch (error) {
-            console.error("Error getting units in tower phase:", error);
-            throw error;
-        }
-    },
+    // getUnitsInTowerPhase: async (towerPhaseId, selectedFloor, excelId) => {
+    //     try {
+    //         const response = await apiService.get(
+    //             `units/tower/${towerPhaseId}/floor/${selectedFloor}/units/${excelId}`
+    //         );
+    //         return response;
+    //     } catch (error) {
+    //         console.error("Error getting units in tower phase:", error);
+    //         throw error;
+    //     }
+    // },
 
     //Function to store unit details from the system
     storeUnitDetails: async (payload) => {
@@ -72,6 +65,26 @@ export const unitService = {
             return response;
         } catch (error) {
             console.error("Error storing unit details:", error);
+            throw error;
+        }
+    },
+
+    //Function to save the computed unit pricing data to the database
+    saveComputedUnitPricingData: async (payload) => {
+        try {
+            const response = await apiService.post(
+                "units/save-computed-pricing-data",
+                payload,
+                {
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                }
+            );
+
+            return response;
+        } catch (error) {
+            console.error("Error saving pricing data:", error);
             throw error;
         }
     },

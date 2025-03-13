@@ -92,6 +92,8 @@ Route::get('/get-transactions', [SapController::class, 'retrieveTransactions']);
 Route::get('/get-matches', [SapController::class, 'runAutoPosting']);
 
 
+Route::post('paygate-webhook', [TransactionController::class, 'paygateWebHook']);
+Route::post('bank/statement', [TransactionController::class, 'clearedBankStatements']);
 
 
 
@@ -105,22 +107,34 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/customer/details', [TransactionController::class, 'getCustomerDetailsByEmail']);
     Route::get('/get-transaction-bank', [SapController::class, 'getTransactionByBankName']);
     Route::post('/upload-notepad', [SapController::class, 'uploadNotepad']);
-    Route::get('/get-concern', [ConcernController::class, 'getAllConcerns']);
-    Route::get('/get-count-all-concerns', [ConcernController::class, 'getCountAllConcerns']);
-    Route::post('/add-concern', [ConcernController::class, 'addConcernPublic']);
-    Route::post('/add-concern-prev', [ConcernController::class, 'addConcernFromPreviousInquiry']);
-    Route::get('/get-message/{ticketId}', [ConcernController::class, 'getMessage']);
-    Route::post('/send-message', [ConcernController::class, 'sendMessage']);
-    Route::get('/get-logs/{ticketId}', [ConcernController::class, 'getInquiryLogs']);
-    Route::get('/get-messageId/{ticketId}', [ConcernController::class, 'getMessageId']);
-    Route::get('/employee-list', [ConcernController::class, 'getAllEmployeeList']);
-    Route::get('/notifications', [ConcernController::class, 'listOfNotifications']);
-    Route::get('/unread-count', [ConcernController::class, 'countUnreadNotifications']);
-    Route::post('/pin-concern/{id}', [ConcernController::class, 'pinConcern']);
-    Route::get('/navbar-data', [ConcernController::class, 'getNavBarData']);
-    Route::post('/isread/{concernId}', [ConcernController::class, 'readNotifByUser']);
-    Route::get('/specific-assignee', [ConcernController::class, 'getSpecificInquiry']);
-    Route::post('/remove-assignee', [ConcernController::class, 'removeAssignee']);
+
+    Route::controller(TransactionController::class)->group(function () {
+        Route::get('/customer/inquiries','getCustomerInquiries');
+        Route::get('/customer/data', 'getCustomerData');
+        Route::get('/customer/details', 'getCustomerDetailsByEmail');
+        Route::get('/transaction-list', 'retrieveTransactions');
+        Route::patch('/transaction-update', 'updateTransactionStatus');
+    });
+
+    Route::controller(ConcernController::class)->group(function () {
+        Route::get('/get-concern', 'getAllConcerns');
+        Route::get('/get-count-all-concerns', 'getCountAllConcerns');
+        Route::post('/add-concern', 'addConcernPublic');
+        Route::post('/add-concern-prev', 'addConcernFromPreviousInquiry');
+        Route::get('/get-message/{ticketId}', 'getMessage');
+        Route::post('/send-message', 'sendMessage');
+        Route::get('/get-logs/{ticketId}', 'getInquiryLogs');
+        Route::get('/get-messageId/{ticketId}', 'getMessageId');
+        Route::get('/employee-list', 'getAllEmployeeList');
+        Route::get('/notifications', 'listOfNotifications');
+        Route::get('/unread-count', 'countUnreadNotifications');
+        Route::post('/pin-concern/{id}', 'pinConcern');
+        Route::get('/navbar-data', 'getNavBarData');
+        Route::post('/isread/{concernId}', 'readNotifByUser');
+        Route::get('/specific-assignee', 'getSpecificInquiry');
+        Route::post('/remove-assignee', 'removeAssignee');
+    });
+    
     Route::get('/property-name', [PropertyMasterController::class, 'getPropertyName']);
     /* Download the file attachment */
     Route::post('/download-file', [ConcernController::class, 'downloadFileFromGCS']);
@@ -134,13 +148,8 @@ Route::middleware('auth:sanctum')->group(function () {
     /* Property Master */
     Route::post('/property-details', [PropertyMasterController::class, 'storePropertyDetail']);
     Route::get('/get-property-master/{id}', [PropertyMasterController::class, 'getPropertyMaster']);
-
-    /*Basic Pricing */
-    Route::post('/basic-pricing', [PriceBasicDetailController::class, 'storeBasicPricing']);
-
-
-
-
+ 
+  
     /*Property Data*/
     Route::prefix('properties')->group(function () {
         // Get property names  
@@ -150,7 +159,7 @@ Route::middleware('auth:sanctum')->group(function () {
         // Store property details
         Route::post('/', [PropertyMasterController::class, 'store']);
         // Get single property
-        Route::get('{property}', [PropertyMasterController::class, 'show']);
+        // Route::get('{property}', [PropertyMasterController::class, 'show']);
     });
 
     /*Payment Scheme */
@@ -182,23 +191,24 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('units')->group(function () {
         // Store unit details from excel
         Route::post('/', [UnitController::class, 'store']);
-        //Get all units
-        Route::get('/', [UnitController::class, 'index']);
         //Count units floors
         Route::get('/floors/{towerPhaseId}/{excelId}', [UnitController::class, 'countFloors']);
         // Check existing units for a tower phase
         Route::get('/check/{towerPhaseId}/{excelId}', [UnitController::class, 'getExistingUnits']);
-        //Get units for selected floor and tower phase
-        Route::get('/tower/{towerPhaseId}/floor/{selectedFloor}/units/{excelId}', [UnitController::class, 'getUnits']);
+        // //Get units for selected floor and tower phase
+        // Route::get('/tower/{towerPhaseId}/floor/{selectedFloor}/units/{excelId}', [UnitController::class, 'getUnits']);
         //Store  unit  details from the system
         Route::post('/store-unit', [UnitController::class, 'storeUnit']);
+        //Save the computed unit pricing data
+        Route::post('/save-computed-pricing-data', [UnitController::class, 'saveComputedUnitPricingData']); 
     });
+    
 
     /* Price Versioning */
     Route::prefix('/price-version')->group(function () {
-        // Store unit details
+        // Store price version
         Route::post('/', [PriceVersionController::class, 'store']);
-        //Get all units
+        //Get all price version
         Route::get('/', [PriceVersionController::class, 'index']);
     });
 
