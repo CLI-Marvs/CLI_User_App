@@ -150,7 +150,7 @@ const EditDepartmentModal = ({
     //Handle show the alert modal
     const handleShowUpdateAlert = () => {
         setShowAlert(true);
-        modalRef.current.showModal();
+        editDepartmentModalRef.current.showModal();
     };
 
     return (

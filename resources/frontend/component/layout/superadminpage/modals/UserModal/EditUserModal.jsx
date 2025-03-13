@@ -149,7 +149,7 @@ const EditUserModal = ({ editEmployeeModalRef, selectedEmployee }) => {
     //Handle show the alert modal
     const handleShowUpdateAlert = () => {
         setShowAlert(true);
-        modalRef.current.showModal();
+        editEmployeeModalRef.current.showModal();
     };
 
     return (
