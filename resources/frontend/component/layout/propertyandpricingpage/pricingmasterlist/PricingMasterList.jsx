@@ -385,6 +385,37 @@ const PricingMasterList = () => {
                                                     {item?.price_list_master_id}
                                                 </p>
                                             </div>
+                                            {item?.status === "Approved" && (
+                                                <div className="flex gap-2 items-center">
+                                                    <div>
+                                                        <p
+                                                            className={`${
+                                                                toggled
+                                                                    ? "text-[#FF0000]"
+                                                                    : "text-custom-gray81"
+                                                            } font-semibold`}
+                                                        >
+                                                            Live
+                                                        </p>
+                                                    </div>
+                                                    <div className="mt-1">
+                                                        <button
+                                                            className={`toggle-btn ${
+                                                                toggled
+                                                                    ? "toggled"
+                                                                    : ""
+                                                            }`}
+                                                            onClick={() =>
+                                                                setToggled(
+                                                                    !toggled
+                                                                )
+                                                            }
+                                                        >
+                                                            <div className="thumb"></div>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            )}
                                         </td>
                                         <td className="w-[150px] flex items-center justify-start">
                                             <div>
