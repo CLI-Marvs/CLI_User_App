@@ -790,13 +790,13 @@ const ReportPage = () => {
             <div className="flex flex-col gap-[10px] bg-[#F2F8FC] rounded-[10px] w-full py-[24px] px-[30px]">
                 <div className=" flex gap-[10px]">
                     <div className="relative flex border border-custom-lightgreen rounded-[5px] overflow-hidden">
-                        <span className="text-white bg-custom-lightgreen text-sm flex items-center w-[60px] px-[15px] -mr-3 pl-3 py-1 shrink-0">
+                        <span className="text-white bg-custom-lightgreen text-sm flex items-center w-[60px] px-[15px] -mr-3 pl-3 py-1 shrink-0 cursor-default">
                             Year
                         </span>
                         <select
                             name="year"
                             value={yearValue}
-                            className="appearance-none w-[100px] px-4 py-1 bg-white focus:outline-none border-0"
+                            className="appearance-none w-[100px] px-4 py-1 bg-white focus:outline-none border-0 cursor-pointer"
                             onChange={(e) => {
                                 setYearValue(e.target.value);
                                 setStartDateValue(null);
@@ -811,18 +811,18 @@ const ReportPage = () => {
                                 </option>
                             ))}
                         </select>
-                        <span className="absolute inset-y-0 right-0 flex items-center text-white pr-3 pl-3 bg-custom-lightgreen pointer-events-none">
+                        <span className="absolute inset-y-0 right-0 flex items-center text-white pr-3 pl-3 bg-custom-lightgreen pointer-events-none cursor-pointer">
                             <MdCalendarToday />
                         </span>
                     </div>
                     <div className="relative flex border w-[203px] border-custom-lightgreen rounded-[5px] overflow-hidden shrink-0">
-                        <span className="text-white bg-custom-lightgreen text-sm flex items-center w-[75px] px-[15px] -mr-3 pl-3 py-1 shrink-0">
+                        <span className="text-white bg-custom-lightgreen text-sm flex items-center w-[75px] px-[15px] -mr-3 pl-3 py-1 shrink-0 cursor-default">
                             Month
                         </span>
                         <select
                             name="month"
                             value={monthValue}
-                            className="appearance-none w-full px-4 py-1 bg-white focus:outline-none border-0"
+                            className="appearance-none w-full px-4 py-1 bg-white focus:outline-none border-0 cursor-pointer"
                             onChange={(e) => {
                                 setMonthValue(e.target.value);
                                 setStartDateValue(null);
@@ -838,17 +838,17 @@ const ReportPage = () => {
                                     </option>
                                 ))}
                         </select>
-                        <span className="absolute inset-y-0 right-0 flex items-center text-white pr-3 pl-3 bg-custom-lightgreen pointer-events-none">
+                        <span className="absolute inset-y-0 right-0 flex items-center text-white pr-3 pl-3 bg-custom-lightgreen pointer-events-none cursor-pointer">
                             <MdCalendarToday />
                         </span>
                     </div>
                 </div>
                 <div className="flex gap-[10px] flex-wrap">
                     <div className="relative flex border w-max border-custom-lightgreen rounded-[5px] shrink-0 z-10">
-                        <span className="text-white bg-custom-lightgreen text-sm flex items-center w-max px-[15px] pl-3 py-1 shrink-0">
+                        <span className="text-white bg-custom-lightgreen text-sm flex items-center w-max px-[15px] pl-3 py-1 shrink-0 cursor-default">
                             By Date Range
                         </span>
-                        <span className="border-l border-white text-white bg-custom-lightgreen text-sm flex items-center w-max px-[15px] pl-3 py-1 shrink-0">
+                        <span className="border-l border-white text-white bg-custom-lightgreen text-sm flex items-center w-max px-[15px] pl-3 py-1 shrink-0 cursor-default">
                             From
                         </span>
                         <div className="relative flex items-center bg-white">
@@ -863,14 +863,14 @@ const ReportPage = () => {
                                     setYearValue("All");
                                     setMonthValue("All");
                                 }}
-                                className="outline-none w-[126px] h-full text-sm px-2"
+                                className="outline-none w-[126px] h-full text-sm px-2 cursor-pointer"
                                 calendarClassName="custom-calendar"
                             />
                         </div>
                         <span className="absolute inset-y-0 right-0 flex items-center text-white pr-3 pl-3 bg-custom-lightgreen pointer-events-none">
                             <MdCalendarToday />
                         </span>
-                        <span className="text-white bg-custom-lightgreen text-sm flex items-center w-max px-[15px] pl-3 py-1 shrink-0">
+                        <span className="text-white bg-custom-lightgreen text-sm flex items-center w-max px-[15px] pl-3 py-1 shrink-0 cursor-default">
                             To
                         </span>
                         <div className="relative flex items-center bg-white">
@@ -885,25 +885,26 @@ const ReportPage = () => {
                                     setYearValue("All");
                                     setMonthValue("All");
                                 }}
-                                className="outline-none w-[156px] h-full text-sm px-2"
+                                className="outline-none w-[156px] h-full text-sm px-2 cursor-pointer"
                                 calendarClassName="custom-calendar"
                                 minDate={startDateValue}
                             />
                         </div>
-                        <span className="absolute inset-y-0 right-0 flex items-center text-white pr-3 pl-3 bg-custom-lightgreen pointer-events-none">
+                        <span className="absolute inset-y-0 right-0 flex items-center text-white pr-3 pl-3 bg-custom-lightgreen pointer-events-none cursor-pointer">
                             <MdCalendarToday />
                         </span>
+
                     </div>
                 </div>
                 <div className="flex gap-[10px] flex-wrap">
                     <div className="flex w-[388px] items-center border border-custom-lightgreen rounded-[5px] overflow-hidden shrink-0">
-                        <span className="text-white text-sm h-full bg-custom-lightgreen flex items-center w-[76px] px-[15px] -mr-3 pl-3 py-1 shrink-0">
+                        <span className="text-white text-sm h-full bg-custom-lightgreen flex items-center w-[76px] px-[15px] -mr-3 pl-3 py-1 shrink-0 cursor-default">
                             Project
                         </span>
                         <div className="relative w-full">
                             <select
                                 name="concern"
-                                className="appearance-none w-full px-4 py-1 bg-white focus:outline-none border-0"
+                                className="appearance-none w-full px-4 py-1 bg-white focus:outline-none border-0 cursor-pointer"
                                 value={projectValue}
                                 onChange={(e) => setProjectValue(e.target.value || "All")}
                             >
@@ -915,19 +916,19 @@ const ReportPage = () => {
                                     </option>
                                 ))}
                             </select>
-                            <span className="absolute inset-y-0 right-0 flex items-center text-white pr-3 pl-3 bg-custom-lightgreen pointer-events-none">
+                            <span className="absolute inset-y-0 right-0 flex items-center text-white pr-3 pl-3 bg-custom-lightgreen pointer-events-none cursor-pointer">
                                 <IoMdArrowDropdown />
                             </span>
                         </div>
                     </div>
                     <div className="flex w-[550px] items-center border border-custom-lightgreen rounded-[5px] overflow-hidden shrink-0">
-                        <span className="text-white text-sm h-full bg-custom-lightgreen flex items-center w-[110px] -mr-3 pl-3 py-1 shrink-0">
+                        <span className="text-white text-sm h-full bg-custom-lightgreen flex items-center w-[110px] -mr-3 pl-3 py-1 shrink-0 cursor-default">
                             Department
                         </span>
                         <div className="relative w-full">
                             <select
                                 name="concern"
-                                className="appearance-none w-full px-4 py-1 bg-white focus:outline-none border-0"
+                                className="appearance-none w-full px-4 py-1 bg-white focus:outline-none border-0 cursor-pointer"
                                 value={departmentValue}
                                 onChange={(e) => setDepartmentValue(e.target.value || "All")}
                             >
@@ -947,7 +948,7 @@ const ReportPage = () => {
                                     )}
                                 <option value="Unassigned">Unassigned</option>
                             </select>
-                            <span className="absolute inset-y-0 right-0 flex items-center text-white pr-3 pl-3 bg-custom-lightgreen pointer-events-none">
+                            <span className="absolute inset-y-0 right-0 flex items-center text-white pr-3 pl-3 bg-custom-lightgreen pointer-events-none cursor-pointer">
                                 <IoMdArrowDropdown />
                             </span>
                         </div>
