@@ -201,20 +201,19 @@ export const ContextProvider = ({ children }) => {
     };
 
     const getBankName = async () => {
-        if (token) {
+       /*  if (token) {
             try {
                 const response = await apiService.get("get-transaction-bank");
                 setBankList(response.data);
             } catch (error) {
                 console.log("error retrieving banks", error);
             }
-        }
+        } */
     };
 
     const getTransactions = async () => {
-        try {
+       /*  try {
             const searchParams = new URLSearchParams({
-                /*   search: JSON.stringify(searchFilter), */
                 page: currentPageTransaction + 1,
                 bank_name: bankNames ? bankNames : null,
             }).toString();
@@ -225,22 +224,22 @@ export const ContextProvider = ({ children }) => {
             setTransactionsPageCount(response.data.last_page);
         } catch (error) {
             console.error("Error fetching data: ", error);
-        }
+        } */
     };
 
     const getMatches = async () => {
-        if (token) {
+       /*  if (token) {
             try {
                 const response = await apiService.get("get-matches");
                 setMatchesData(response.data);
             } catch (error) {
                 console.log("error uploading data", error);
             }
-        }
+        } */
     };
 
     const getInvoices = async () => {
-        try {
+        /* try {
             const searchParams = new URLSearchParams({
                 dueDate: filterDueDate ? filterDueDate : null,
                 page: currentPageInvoices,
@@ -252,7 +251,7 @@ export const ContextProvider = ({ children }) => {
             setInvoicesPageCount(response.data.last_page);
         } catch (error) {
             console.log("error", error);
-        }
+        } */
     };
 
     const fetchCategory = async () => {

@@ -163,6 +163,12 @@ const Navbar = () => {
             if (value.toLowerCase() === "transactionrecords") {
                 breadcrumbLabel = "Transaction Records";
             }
+            if (value.toLowerCase() === "bank-monitoring") {
+                breadcrumbLabel = "Bank Monitoring";
+            }
+            if (value.toLowerCase() === "bank-statements") {
+                breadcrumbLabel = "Bank Statements";
+            }
 
             if (value.toLowerCase() === "thread") {
                 breadcrumbLabel = "Inquiries";

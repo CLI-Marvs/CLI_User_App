@@ -81,10 +81,6 @@ class SapController extends Controller
     public function retrieveInvoicesFromSap(Request $request)
     {
         try {
-            \Log::info('Invoice posting request', [
-                'request' => $request->all()
-            ]);
-
             $existingInvoice = Invoices::where('document_number', $request->input('D_BELNR'))
                 ->where('flow_type', $request->input('D_VBEWA'))
                 ->first();
@@ -342,7 +338,7 @@ class SapController extends Controller
     public function getTransactionByBankName()
     {
         try {
-            $listOfBanks = BankTransaction::distinct()->pluck('bank_name')->toArray();
+            $listOfBanks = BankTransaction::distinct()->pluck('destination_bank')->toArray();
             return response()->json($listOfBanks);
         } catch (\Exception $e) {
             return response()->json(['error' => 'An error occurred', 'message' => $e->getMessage()], 500);
@@ -365,10 +361,6 @@ class SapController extends Controller
     public function postRecordsFromSap(Request $request)
     {
         try {
-            \Log::info('Posting Records from SAP', [
-                $request->all()
-            ]);
-
             $idRef = $request->input('ID');
             $invoiceIdRef = $request->input('INVID');
             $attachment = $request->input('file'); 

@@ -3,8 +3,9 @@ import ReactDOM from "react-dom/client";
 import App from "./App";
 import { ContextProvider } from "../context/contextprovider";
 import { ToastContainer } from "react-toastify";
-import { RoleManagementProvider } from '@/context/RoleManagement/RoleManagementContext';
-import { PropertyPricingProvider } from '@/context/PropertyPricing/PropertyPricingContext';
+import { RoleManagementProvider } from "@/context/RoleManagement/RoleManagementContext";
+import { PropertyPricingProvider } from "@/context/PropertyPricing/PropertyPricingContext";
+import { TransactionProvider } from "@/context/Transaction/TransactionContext";
 
 const rootElement = document.getElementById("root");
 
@@ -14,12 +15,13 @@ if (rootElement) {
             <ContextProvider>
                 <PropertyPricingProvider>
                     <RoleManagementProvider>
-                        <ToastContainer />
-                        <App />
+                        <TransactionProvider>
+                            <ToastContainer />
+                            <App />
+                        </TransactionProvider>
                     </RoleManagementProvider>
                 </PropertyPricingProvider>
             </ContextProvider>
         </React.StrictMode>
-
     );
 }
