@@ -1,18 +1,20 @@
 import { Card } from "@mui/material";
 import React, { useEffect, useState } from "react";
-import { useStateContext } from "../../../context/contextprovider";
 import DatePicker from "react-datepicker";
-import DateLogo from "../../../../../public/Images/Date_range.svg";
 import ReactPaginate from "react-paginate";
 import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md";
 import "./loader.css";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import apiServiceSap from "../../servicesApi/apiServiceSap";
-import apiService from "../../servicesApi/apiService";
+import apiServiceSap from "../../../servicesApi/apiServiceSap";
+import DateLogo from "../../../../../../public/Images/Date_range.svg";
+import apiService from "../../../servicesApi/apiService";
 import moment from "moment";
+import { useStateContext } from "@/context/contextprovider";
+import GlobalTable from "../GlobalTable";
+import InvoicesTableCell from "./InvoicesTableCell";
 
-const TransactionCom = () => {
+const InvoicesCom = () => {
     const {
         invoices,
         setInvoicesPageCount,
@@ -22,7 +24,7 @@ const TransactionCom = () => {
         getInvoices,
         setFilterDueDate,
         filterDueDate,
-        userAccessData
+        userAccessData,
     } = useStateContext();
 
     const [startDate, setStartDate] = useState(null);
@@ -36,13 +38,71 @@ const TransactionCom = () => {
         setCurrentPageInvoices(selectedPage);
     };
 
-   useEffect(() => {
+    const data = [
+        {
+            customer_name: "Mr. Ira Klark T. Fischer",
+            contract_number: "10000023345",
+            invoice_number: "10000023345",
+            invoice_status: "Paid",
+            invoice_amount: 10000,
+            invoice_details: "Payment for the month",
+            invoice_due_date: "2025-01-31",
+            invoice_link: "https://www.google.com",
+        },
+
+        {
+            customer_name: "Mr. Ira Klark T. Fischer",
+            contract_number: "10000023345",
+            invoice_number: "10000023345",
+            invoice_status: "Unpaid",
+            invoice_amount: 10000,
+            invoice_details: "Payment for the month",
+            invoice_due_date: "2025-01-31",
+            invoice_link: "https://www.google.com",
+        },
+    ];
+
+    const columns = [
+        {
+            header: "Customer Name",
+            accessor: "customer_name",
+            render: (row) => (
+                <InvoicesTableCell type="customer_name" row={row} />
+            ),
+        },
+
+        {
+            header: "Invoice Details",
+            accessor: "invoice_details", // Note: There's a typo in `data`, should be `invoice_description`
+            render: (row) => (
+                <InvoicesTableCell type="invoice_details" row={row} />
+            ),
+        },
+        {
+            header: "Status",
+            accessor: "invoice_status",
+            render: (row) => (
+                <InvoicesTableCell type="invoice_status" row={row} />
+            ),
+        },
+        {
+            header: "Invoice Link",
+            accessor: "invoice_link",
+            render: (row) => (
+                <InvoicesTableCell type="invoice_link" row={row} />
+            ),
+        },
+    ];
+
+    useEffect(() => {
         if (userAccessData) {
-            const transactionPermissions = userAccessData?.employeePermissions?.find(
-                (perm) => perm.name === 'Transaction Management'
-            ) || userAccessData?.departmentPermissions?.find(
-                (perm) => perm.name === 'Transaction Management'
-            );
+            const transactionPermissions =
+                userAccessData?.employeePermissions?.find(
+                    (perm) => perm.name === "Transaction Management"
+                ) ||
+                userAccessData?.departmentPermissions?.find(
+                    (perm) => perm.name === "Transaction Management"
+                );
             setCanWrite(transactionPermissions?.pivot?.can_write);
         }
     }, [userAccessData]);
@@ -107,20 +167,18 @@ const TransactionCom = () => {
         getInvoices();
     }, []);
 
-
     return (
         <>
-            {sapLoader && (
+            {/* {sapLoader && (
                 <div className="fixed inset-0 bg-gray-800 bg-opacity-75 flex flex-col items-center justify-center z-50">
                     <div className="loader ease-linear rounded-full border-8 border-t-8 border-gray-200 h-16 w-16 mb-4"></div>
                     <p className="text-white text-lg">
                         Please wait, Retrieving data from SAP...
                     </p>
                 </div>
-            )}
+            )} */}
 
-            <div className="px-4">
-                {/* Table */}
+            {/*  <div className="px-4">
                 <ToastContainer position="top-center" />
                 <div className="flex justify-between mb-4 gap-5">
                     <div className="flex gap-5">
@@ -133,14 +191,13 @@ const TransactionCom = () => {
                             />
 
                             <img
-                                src={DateLogo}
                                 alt="date"
+                                src={DateLogo}
                                 className="absolute top-[45%] right-0 transform -translate-y-1/2 text-custom-bluegreen size-6  pointer-events-none"
                             />
                         </div>
                         {canWrite && (
                             <button
-                                /* onClick={sendSoapRequest} */
                                 className="h-[38px] w-[121px] gradient-btn5 text-white  text-xs rounded-[10px]"
                                 onClick={sendSoapRequest}
                             >
@@ -149,21 +206,6 @@ const TransactionCom = () => {
                             </button>
                         )}
                     </div>
-
-                    {/* <div className="relative border border-gray-500 z-40 mr-10">
-                        <DatePicker
-                            selected={isDate}
-                            onChange={handleFilterDueDate}
-                            className=" outline-none w-[176px] text-sm"
-                            calendarClassName="custom-calendar"
-                        />
-
-                        <img
-                            src={DateLogo}
-                            alt="date"
-                            className="absolute top-[45%] right-0 transform -translate-y-1/2 text-custom-bluegreen size-6  pointer-events-none"
-                        />
-                    </div> */}
                 </div>
                 <table className="min-w-full bg-white border border-gray-500 border-collapse">
                     <thead>
@@ -256,8 +298,6 @@ const TransactionCom = () => {
 
                     </tbody>
                 </table>
-
-                {/* Pagination */}
                 <div className="flex justify-end mt-4">
                     <div className="flex w-full justify-end mt-3 mb-10">
                         <ReactPaginate
@@ -282,13 +322,16 @@ const TransactionCom = () => {
                             disabledLinkClassName={
                                 "text-gray-300 cursor-not-allowed"
                             }
-                        /*       forcePage={currentPageInvoices} */
                         />
                     </div>
                 </div>
+            </div> */}
+
+            <div className="overflow-y-hidden px-3 mt-3">
+                <GlobalTable columns={columns} data={data} />
             </div>
         </>
     );
 };
 
-export default TransactionCom;
+export default InvoicesCom;

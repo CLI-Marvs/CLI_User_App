@@ -3,16 +3,18 @@ import React, { useEffect, useRef, useState } from "react";
 import ReactPaginate from "react-paginate";
 import { IoIosSend, IoMdArrowDropdown, IoMdTrash } from "react-icons/io";
 import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md";
-import { useStateContext } from "../../../context/contextprovider";
-import apiService from "../../servicesApi/apiService";
+import { useStateContext } from "../../../../context/contextprovider";
+import apiService from "../../../servicesApi/apiService";
 import CircularProgress from "@mui/material/CircularProgress";
 import { set } from "lodash";
-import DataMatchTable from "./DataMatchTable";
+import DataMatchTable from "../DataMatchTable";
 
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import apiServiceSap from "../../servicesApi/apiServiceSap";
+import apiServiceSap from "../../../servicesApi/apiServiceSap";
 import { data } from "autoprefixer";
+import GlobalTable from "@/component/layout/transaction/GlobalTable";
+import BankTableCell from "./BankTableCell";
 
 const BankStatementCom = () => {
     const {
@@ -30,6 +32,91 @@ const BankStatementCom = () => {
     const [files, setFiles] = useState([]);
     const modalRef = useRef(null);
     const [loading, setLoading] = useState(false);
+
+    const data = [
+        {
+            bank_name: "Bank of America",
+            transaction_details: "Deposit",
+            credit: "$1,000",
+            debit: "$0",
+            running_balance: "$5,000",
+            status: "Posted",
+            account_number: "123456789",
+            transaction_number: "123456789",
+            reference_number: "123456789",
+            transact_date: "2025-01-31",
+            transaction_code: "123456789",
+        },
+        {
+            bank_name: "Chase Bank",
+            transaction_details: "Withdrawal",
+            credit: "$0",
+            debit: "$500",
+            running_balance: "$4,500",
+            status: "Pending",
+            account_number: "123456789",
+            transaction_number: "123456789",
+            reference_number: "123456789",
+            transact_date: "2025-01-31",
+            transaction_code: "123456789",
+        },
+    ];
+
+    const columns = [
+        {
+            header: "Bank",
+            accessor: "bank_name",
+            render: (row) => {
+                return <BankTableCell type="bank_name" row={row} />;
+            },
+        },
+        {
+            header: "Transaction Details",
+            accessor: "transaction_details",
+            render: (row) => {
+                return <BankTableCell type="transaction_details" row={row} />;
+            },
+        },
+        {
+            header: "Credit",
+            accessor: "credit",
+            render: (row) => {
+                return <BankTableCell type="credit" row={row} />;
+            },
+        },
+        {
+            header: "Debit",
+            accessor: "debit",
+            render: (row) => {
+                return <BankTableCell type="debit" row={row} />;
+            },
+        },
+        {
+            header: "Running Balance",
+            accessor: "running_balance",
+            render: (row) => {
+                return <BankTableCell type="running_balance" row={row} />;
+            },
+        },
+        {
+            header: "Status",
+            accessor: "status",
+            render: (row) => {
+                return <BankTableCell type="status" row={row} />;
+            },
+        },
+    ];
+
+    useEffect(() => {
+        if (files.length > 0 && modalRef.current) {
+            modalRef.current.showModal();
+        }
+        getMatches();
+    }, [files]);
+    useEffect(() => {
+        getTransactions();
+    }, []);
+
     const handleFileChange = (e) => {
         setFiles(Array.from(e.target.files));
         e.target.value = null;
@@ -115,7 +202,7 @@ const BankStatementCom = () => {
             }
 
             getMatches();
-            getTransactions(); 
+            getTransactions();
 
             if (modalRef.current) {
                 modalRef.current.close();
@@ -128,83 +215,13 @@ const BankStatementCom = () => {
                 "Error:",
                 error.response ? error.response.data : error.message
             );
-             if (modalRef.current) {
+            if (modalRef.current) {
                 modalRef.current.close();
             }
             setLoading(false);
             toast.error("Sometine went wrong. Please refresh the page");
         }
     };
-
-    //     const handleSubmitSap = async () => {
-    //         console.log("matchesData", matchesData);
-    //         setLoading(true); // Start loading
-
-    //         const batchSize = 10; // Number of items per batch
-    //         const maxRetries = 3; // Max retries for failed requests
-    //         const resultsLog = []; // Array to log results
-
-    //         const sendBatch = async (batch) => {
-    //             let soapBody = `
-    //            <soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:urn="urn:sap-com:document:sap:soap:functions:mc-style">
-    //    <soap:Header/>
-    //             <soap:Body>
-    //                <urn:ZdataWarehousePosted>
-    //                   <LtZcol>`;
-
-    //             batch.forEach((item) => {
-    //                 soapBody += `
-    //                      <item>
-    //                         <Id>${item.ID}</Id>
-    //                         <Bukrs>${item.BUKRS}</Bukrs>
-    //                         <Recnnr>${item.RECNNR}</Recnnr>
-    //                         <Vbewa>${item.VBEWA}</Vbewa>
-    //                         <Belnr>${item.BELNR}</Belnr>
-    //                         <Amt>${item.AMT}</Amt>
-    //                         <Payd>${item.PAYD}</Payd>
-    //                      </item>`;
-    //             });
-
-    //             soapBody += `
-    //                   </LtZcol>
-    //                </urn:ZdataWarehousePosted>
-    //             </soap:Body>
-    //             </soap:Envelope>`;
-
-    //             console.log("Sending batch:", soapBody);
-
-    //             try {
-    //                 const response = await apiServiceSap.post(
-    //                     "post-data-sap",
-    //                     soapBody
-    //                 );
-    //                 console.log("Response for batch:", response.data);
-    //             } catch (error) {
-    //                 console.error(
-    //                     `Error on attempt ${attempt + 1}:`,
-    //                     error.response ? error.response.data : error.message
-    //                 );
-
-    //             }
-    //         };
-
-    //         // Loop through matchesData in batches
-    //         for (let i = 0; i < matchesData.length; i += batchSize) {
-    //             const batch = matchesData.slice(i, i + batchSize);
-    //             await sendBatch(batch); // Send the current batch
-    //         }
-
-    //         getTransactions();
-    //         if (modalRef.current) {
-    //             modalRef.current.close();
-    //         }
-    //         setLoading(false); // End loading
-
-    //         // Log results
-
-    //         console.log("Batch Processing Results:", resultsLog);
-    //         toast.success("Data Posted Successfully!");
-    //     };
 
     const handleBankChange = (e) => {
         setBankNames(e.target.value);
@@ -216,34 +233,11 @@ const BankStatementCom = () => {
         }
     };
 
-    useEffect(() => {
-        if (files.length > 0 && modalRef.current) {
-            modalRef.current.showModal();
-        }
-        getMatches();
-    }, [files]);
-    useEffect(() => {
-        getTransactions();
-    }, []);
     return (
         <>
-            <div className="px-4">
+            {/* <div className="px-4">
                 <ToastContainer position="top-center" />
                 <div className="flex mb-4 gap-10">
-                    {/*  <select
-                        className="border-b-1 w-[121px] outline-none text-sm"
-                        value={bankNames}
-                        onChange={handleBankChange}
-                    >
-                        <option value="">Select Banks</option>
-                        <option value="All">All</option>
-                        {bankList.length > 0 &&
-                            bankList.map((item, index) => (
-                                <option key={index} value={item}>
-                                    {item}
-                                </option>
-                            ))}
-                    </select> */}
                     <input
                         type="file"
                         id="fileInput"
@@ -260,7 +254,6 @@ const BankStatementCom = () => {
                         Upload Transaction Report
                     </button>
                     <button
-                        /* onClick={sendSoapRequest} */
                         className="h-[38px] w-[121px] outline-none gradient-btn5 text-white  text-xs rounded-[10px]"
                         onClick={openPostingModal}
                     >
@@ -269,7 +262,6 @@ const BankStatementCom = () => {
                     </button>
                 </div>
 
-                {/* Table */}
                 <table className="min-w-full bg-white border border-gray-500 border-collapse">
                     <thead>
                         <tr>
@@ -298,9 +290,6 @@ const BankStatementCom = () => {
                                 Document Number
                             </th>
 
-                            {/*  <th className=" px-4 border border-gray-500">
-                                Invoice Link
-                            </th> */}
                             <th className=" px-4 border border-gray-500">
                                 Collection Receipt Link
                             </th>
@@ -341,9 +330,7 @@ const BankStatementCom = () => {
                             <td className=" px-4 border border-gray-500">
                                 {item.document_number}
                             </td>
-                            {/*  <td className=" px-4 border border-gray-500">
-                               {item.invoice_link}
-                           </td> */}
+                           
                             <td className="px-4 border border-gray-500">
                                 {item.collection_receipt_link ? (
                                     <a
@@ -371,7 +358,6 @@ const BankStatementCom = () => {
                     </tbody>
                 </table>
 
-                {/* Pagination */}
                 <div className="flex justify-end mt-4">
                     <div className="flex w-full justify-end mt-3 mb-10">
                         <ReactPaginate
@@ -419,14 +405,6 @@ const BankStatementCom = () => {
                                                 className="flex justify-between"
                                             >
                                                 {file.name}
-                                                {/*  <button
-                                                    onClick={() =>
-                                                        handleRemoveFile(index)
-                                                    }
-                                                    className="text-red-500 ml-4"
-                                                >
-                                                    Remove
-                                                </button> */}
                                             </li>
                                         ))}
                                     </ul>
@@ -436,7 +414,6 @@ const BankStatementCom = () => {
 
                         <div className="flex justify-end gap-3">
                             <button
-                                /* onClick={sendSoapRequest} */
                                 className="h-[38px] w-[121px] gradient-btn5 text-white  text-xs rounded-[10px]"
                                 onClick={handleCancel}
                             >
@@ -474,7 +451,6 @@ const BankStatementCom = () => {
 
                         <div className="flex justify-end gap-3">
                             <button
-                                /* onClick={sendSoapRequest} */
                                 className="h-[38px] outline-none w-[121px] gradient-btn5 text-white  text-xs rounded-[10px]"
                                 onClick={handleCancel}
                             >
@@ -505,7 +481,11 @@ const BankStatementCom = () => {
                         </div>
                     </>
                 )}
-            </dialog>
+            </dialog>   */}
+
+            <div className="overflow-y-hidden px-3 mt-3">
+                <GlobalTable columns={columns} data={data} />
+            </div>
         </>
     );
 };

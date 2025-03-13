@@ -1,0 +1,301 @@
+import { useEffect, useState } from "react";
+import PostingTableCell from "./PostingTableCell";
+import { useTransactionContext } from "@/context/Transaction/TransactionContext";
+import ReactPaginate from "react-paginate";
+import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md";
+import { transaction } from "@/component/servicesApi/apiCalls/transactions";
+
+const AutoPostingCom = () => {
+    const statuses = ["Cleared", "Posted", "Floating"];
+    const labelStatuses = [
+        {
+            statusRef: "Cleared",
+            name: "For Clearing",
+        },
+        {
+            statusRef: "Posted",
+            name: "For Posting",
+        },
+        {
+            statusRef: "Floating",
+            name: "For Floating",
+        },
+    ];
+
+    const dynamicClass = (item) =>
+        item === "Floating"
+            ? "bg-[#FFFCD9]"
+            : item === "Posted"
+            ? "bg-[#EAF1FA]"
+            : "bg-[#ECFCE6]";
+
+    const {
+        postingList,
+        setPostingList,
+        currentPagePosting,
+        setCurrentPagePosting,
+        totalPagePosting,
+        setTotalPagePosting,
+        activeItemTransaction,
+        setActiveItemTransaction,
+    } = useTransactionContext();
+    const [selectedRows, setSelectedRows] = useState([]);
+    const [statusToPost, setStatusPost] = useState([]);
+
+    const getPostingList = async () => {
+        const response = await transaction.transactionList(
+            currentPagePosting,
+            activeItemTransaction
+        );
+        setPostingList(response.data.data);
+        setTotalPagePosting(response.data.last_page);
+    };
+
+    const handleActiveItem = (item) => {    
+        setActiveItemTransaction((prev) => (prev === item ? "Cleared" : item));
+        setCurrentPagePosting(0);
+        setSelectedRows([]);
+        setStatusPost([]);
+    };
+
+    const handleUpdateItems = async (item) => {
+        const response = await transaction.transactionUpdate(selectedRows);
+        getPostingList();
+
+        console.log("response",response);
+    };
+
+    const handlePageClick = (data) => {
+        setCurrentPagePosting(data.selected);
+    };
+
+    useEffect(() => {
+        getPostingList();
+    }, [currentPagePosting, activeItemTransaction]);
+
+    const handleCheckboxChange = (item) => {
+        setSelectedRows((prev) =>
+            prev.some((row) => row.id === item.id)
+                ? prev.filter((row) => row.id !== item.id)
+                : [...prev, { id: item.id, status: item.status }]
+        );
+        setStatusPost(
+            labelStatuses
+                .filter((ref) => ref.statusRef !== item.status)
+                .map((item) => item.name)
+        );
+    };
+
+    const handleSelectAll = (e) => {
+        if (e.target.checked) {
+            const selectedItems = postingList.map((row) => ({
+                id: row.id,
+                status: row.status,
+            }));
+            const selectedStatuses = selectedItems.map((item) => item.status);
+
+            setSelectedRows(selectedItems);
+            setStatusPost(
+                labelStatuses
+                    .filter((ref) => !selectedStatuses.includes(ref.statusRef))
+                    .map((item) => item.name)
+            );
+        } else {
+            setSelectedRows([]);
+        }
+    };
+
+    const columns = [
+        {
+            header: (
+                <>
+                    <div className="flex gap-5 items-center">
+                        <input
+                            type="checkbox"
+                            className="w-[15px] h-[15px]"
+                            checked={selectedRows.length === postingList.length}
+                            onChange={(e) => handleSelectAll(e)}
+                        />
+                        <span>Select All</span>
+                    </div>
+                </>
+            ),
+            accessor: "checkbox",
+            render: (row) => (
+                <div className="w-[100px]">
+                    <input
+                        type="checkbox"
+                        checked={selectedRows.some(
+                            (selected) => selected.id === row.id
+                        )}
+                        onChange={() => handleCheckboxChange(row)}
+                    />
+                </div>
+            ),
+        },
+        {
+            header: "Transaction",
+            accessor: "transaction",
+            render: (row) => <PostingTableCell type="transaction" row={row} />,
+        },
+
+        {
+            header: "Details",
+            accessor: "details",
+            render: (row) => <PostingTableCell type="details" row={row} />,
+        },
+        {
+            header: "Amount",
+            accessor: "amount",
+            render: (row) => <PostingTableCell type="amount" row={row} />,
+        },
+        {
+            header: "Payment Method",
+            accessor: "payment_method",
+            render: (row) => (
+                <PostingTableCell type="payment_method" row={row} />
+            ),
+        },
+        {
+            header: "Status",
+            accessor: "status",
+            render: (row) => <PostingTableCell type="status" row={row} />,
+        },
+        {
+            header: "Receipt",
+            accessor: "collection_receipt_link",
+            render: (row) => (
+                <PostingTableCell type="collection_receipt_link" row={row} />
+            ),
+        },
+        {
+            header: "Destination Bank",
+            accessor: "destination_bank",
+            render: (row) => (
+                <PostingTableCell type="destination_bank" row={row} />
+            ),
+        },
+    ];
+
+    console.log("selectedRows", selectedRows);
+
+    return (
+        <div className="overflow-y-hidden px-3 mt-3 space-y-3">
+            <div className="flex justify-between px-2">
+                <div className="flex gap-[21px]">
+                    {statuses.map((item, index) => {
+                        return (
+                            <div
+                                className={`w-[143px] h-[37px] shadow-custom12 mt-5 rounded-md flex items-center justify-center cursor-pointer ${dynamicClass(
+                                    item
+                                )} ${
+                                    activeItemTransaction === item
+                                        ? "bg-[#F1F1F1] shadow-custom13"
+                                        : ""
+                                }`}
+                                key={index}
+                                onClick={() => handleActiveItem(item)}
+                            >
+                                <button className="montserrat-medium text-sm">
+                                    {item}
+                                </button>
+                            </div>
+                        );
+                    })}
+                </div>
+                {selectedRows.length > 0 && (
+                    <div className="flex gap-[21px]">
+                        {statusToPost.map((item, index) => {
+                            return (
+                                <div
+                                    className={`w-[143px] h-[37px] shadow-custom12 mt-5 rounded-md flex items-center justify-center cursor-pointer ${dynamicClass(
+                                        item
+                                    )} ${
+                                        activeItemTransaction === item
+                                            ? "bg-[#F1F1F1] shadow-custom13"
+                                            : ""
+                                    }`}
+                                    key={index}
+                                >
+                                    <button className="montserrat-medium text-sm" onClick={() => handleUpdateItems(item)}>
+                                        {item}
+                                    </button>
+                                </div>
+                            );
+                        })}
+                    </div>
+                )}
+            </div>
+            <div className="overflow-x-auto px-2">
+                <table className="border-separate border-spacing-y-2 w-full min-w-max">
+                    <thead>
+                        <tr className="text-white bg-custom-lightgreen">
+                            {columns.map((col, index) => (
+                                <th
+                                    key={index}
+                                    className="border-r-[1px] border-[#B9B7B7] px-[10px] py-[16px] text-sm shadow-custom12 font-semibold text-center"
+                                >
+                                    {col.header}
+                                </th>
+                            ))}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {postingList.map((row, rowIndex) => {
+                            return (
+                                <tr
+                                    key={rowIndex}
+                                    className="cursor-pointer border-r-[1px] border-opacity-10 border-[#B9B7B7] shadow-custom11"
+                                >
+                                    {columns.map((col, colIndex) => (
+                                        <td
+                                            className={`px-3 py-3 cursor-pointer w-[208px] text-xs border-r-[1px] border-opacity-50 border-[#B9B7B7] relative ${dynamicClass(
+                                                row.status
+                                            )}`}
+                                            key={colIndex}
+                                        >
+                                            {col.render
+                                                ? col.render(row)
+                                                : row[col.accessor]}
+                                        </td>
+                                    ))}
+                                </tr>
+                            );
+                        })}
+                    </tbody>
+                </table>
+            </div>
+
+            <div className="flex justify-end mt-4">
+                <div className="flex w-full justify-end mt-3 mb-10">
+                    <ReactPaginate
+                        previousLabel={
+                            <MdKeyboardArrowLeft className="text-[#404B52]" />
+                        }
+                        nextLabel={
+                            <MdKeyboardArrowRight className="text-[#404B52]" />
+                        }
+                        breakLabel={"..."}
+                        pageCount={totalPagePosting}
+                        marginPagesDisplayed={2}
+                        pageRangeDisplayed={1}
+                        onPageChange={handlePageClick}
+                        containerClassName={"flex gap-2"}
+                        previousClassName="border border-[#EEEEEE] text-custom-bluegreen font-semibold w-[26px] h-[24px] rounded-[4px] flex justify-center items-center hover:text-white hover:bg-custom-lightgreen hover:text-white"
+                        nextClassName="border border-[#EEEEEE] text-custom-bluegreen font-semibold w-[26px] h-[24px] rounded-[4px] flex justify-center items-center hover:text-white hover:bg-custom-lightgreen hover:text-white"
+                        pageClassName="border border-[#EEEEEE] text-black w-[26px] h-[24px] rounded-[4px] flex justify-center items-center hover:bg-custom-lightgreen text-[12px]"
+                        activeClassName="w-[26px] h-[24px] border border-[#EEEEEE] bg-custom-lightgreen text-[#404B52] rounded-[4px] text-white text-[12px]"
+                        pageLinkClassName="w-full h-full flex justify-center items-center"
+                        activeLinkClassName="w-full h-full flex justify-center items-center"
+                        disabledLinkClassName={
+                            "text-gray-300 cursor-not-allowed"
+                        }
+                        forcePage={currentPagePosting}
+                    />
+                </div>
+            </div>
+        </div>
+    );
+};
+
+export default AutoPostingCom;

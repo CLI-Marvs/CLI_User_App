@@ -92,6 +92,8 @@ Route::get('/get-transactions', [SapController::class, 'retrieveTransactions']);
 Route::get('/get-matches', [SapController::class, 'runAutoPosting']);
 
 
+Route::post('paygate-webhook', [TransactionController::class, 'paygateWebHook']);
+Route::post('bank/statement', [TransactionController::class, 'clearedBankStatements']);
 
 
 
@@ -105,22 +107,34 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/customer/details', [TransactionController::class, 'getCustomerDetailsByEmail']);
     Route::get('/get-transaction-bank', [SapController::class, 'getTransactionByBankName']);
     Route::post('/upload-notepad', [SapController::class, 'uploadNotepad']);
-    Route::get('/get-concern', [ConcernController::class, 'getAllConcerns']);
-    Route::get('/get-count-all-concerns', [ConcernController::class, 'getCountAllConcerns']);
-    Route::post('/add-concern', [ConcernController::class, 'addConcernPublic']);
-    Route::post('/add-concern-prev', [ConcernController::class, 'addConcernFromPreviousInquiry']);
-    Route::get('/get-message/{ticketId}', [ConcernController::class, 'getMessage']);
-    Route::post('/send-message', [ConcernController::class, 'sendMessage']);
-    Route::get('/get-logs/{ticketId}', [ConcernController::class, 'getInquiryLogs']);
-    Route::get('/get-messageId/{ticketId}', [ConcernController::class, 'getMessageId']);
-    Route::get('/employee-list', [ConcernController::class, 'getAllEmployeeList']);
-    Route::get('/notifications', [ConcernController::class, 'listOfNotifications']);
-    Route::get('/unread-count', [ConcernController::class, 'countUnreadNotifications']);
-    Route::post('/pin-concern/{id}', [ConcernController::class, 'pinConcern']);
-    Route::get('/navbar-data', [ConcernController::class, 'getNavBarData']);
-    Route::post('/isread/{concernId}', [ConcernController::class, 'readNotifByUser']);
-    Route::get('/specific-assignee', [ConcernController::class, 'getSpecificInquiry']);
-    Route::post('/remove-assignee', [ConcernController::class, 'removeAssignee']);
+
+    Route::controller(TransactionController::class)->group(function () {
+        Route::get('/customer/inquiries','getCustomerInquiries');
+        Route::get('/customer/data', 'getCustomerData');
+        Route::get('/customer/details', 'getCustomerDetailsByEmail');
+        Route::get('/transaction-list', 'retrieveTransactions');
+        Route::patch('/transaction-update', 'updateTransactionStatus');
+    });
+
+    Route::controller(ConcernController::class)->group(function () {
+        Route::get('/get-concern', 'getAllConcerns');
+        Route::get('/get-count-all-concerns', 'getCountAllConcerns');
+        Route::post('/add-concern', 'addConcernPublic');
+        Route::post('/add-concern-prev', 'addConcernFromPreviousInquiry');
+        Route::get('/get-message/{ticketId}', 'getMessage');
+        Route::post('/send-message', 'sendMessage');
+        Route::get('/get-logs/{ticketId}', 'getInquiryLogs');
+        Route::get('/get-messageId/{ticketId}', 'getMessageId');
+        Route::get('/employee-list', 'getAllEmployeeList');
+        Route::get('/notifications', 'listOfNotifications');
+        Route::get('/unread-count', 'countUnreadNotifications');
+        Route::post('/pin-concern/{id}', 'pinConcern');
+        Route::get('/navbar-data', 'getNavBarData');
+        Route::post('/isread/{concernId}', 'readNotifByUser');
+        Route::get('/specific-assignee', 'getSpecificInquiry');
+        Route::post('/remove-assignee', 'removeAssignee');
+    });
+    
     Route::get('/property-name', [PropertyMasterController::class, 'getPropertyName']);
     /* Download the file attachment */
     Route::post('/download-file', [ConcernController::class, 'downloadFileFromGCS']);
