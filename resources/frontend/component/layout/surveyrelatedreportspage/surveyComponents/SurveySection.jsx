@@ -59,21 +59,22 @@ export const SurveySection = ({ surveyData , addQuestion}) => {
                     <IoMdAddCircleOutline className='size-[32px]' />
                     <p className='text-[#3A3A3A] text-[16px]'>Add Question</p>
                 </button>
-                <button className='w-[151px] h-[56px] border-[0.5px] border-custom-grayA5 rounded-[10px] p-[10px] flex justify-center items-center gap-[7px]'>
+                <button className='w-[122px] h-[56px] border-[0.5px] border-custom-grayA5 rounded-[10px] p-[10px] flex justify-center items-center gap-[7px]'>
+                    <IoEyeOutline className='size-[32px]' />
+                    <p className='text-[#3A3A3A] text-[16px]'>Preview</p>
+                </button>
+               {/*  <button className='w-[151px] h-[56px] border-[0.5px] border-custom-grayA5 rounded-[10px] p-[10px] flex justify-center items-center gap-[7px]'>
                     <TiEqualsOutline className='size-[32px]' />
                     <p className='text-[#3A3A3A] text-[16px]'>Add Section</p>
                 </button>
                 <button className='w-[126px] h-[56px] border-[0.5px] border-custom-grayA5 rounded-[10px] p-[10px] flex justify-center items-center gap-[7px]'>
                     <MdOutlineTextFields className='size-[32px]' />
                     <p className='text-[#3A3A3A] text-[16px]'>Add Title</p>
-                </button>
-                <button className='w-[122px] h-[56px] border-[0.5px] border-custom-grayA5 rounded-[10px] p-[10px] flex justify-center items-center gap-[7px]'>
-                    <IoEyeOutline className='size-[32px]' />
-                    <p className='text-[#3A3A3A] text-[16px]'>Preview</p>
-                </button>
-                <button className='w-[56px] h-[56px] border-[0.5px] border-custom-grayA5 rounded-[10px] p-[10px] flex justify-center items-center gap-[7px]'>
+                </button> */}
+              
+                {/* <button className='w-[56px] h-[56px] border-[0.5px] border-custom-grayA5 rounded-[10px] p-[10px] flex justify-center items-center gap-[7px]'>
                     <FaTrash className='size-[24px]' />
-                </button>
+                </button> */}
             </div>
 
             <div className={`w-full rounded-[10px] bg-custom-lightestgreen p-[10px] flex flex-col gap-[10px]`}>

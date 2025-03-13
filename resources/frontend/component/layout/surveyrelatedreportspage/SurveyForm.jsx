@@ -29,11 +29,11 @@ const SurveyForm = () => {
       return [
         {
           surveyTitle: surveyTitle,
-          section: [
+          surveyData: [
             {
-              sectionTitle: sectionTitle,
-              sectionDescription: "",
-              dataSet: [
+              Title: sectionTitle,
+              Description: "",
+              dataQASet: [
                 {
                   question: "",
                   options: [""],
@@ -42,6 +42,7 @@ const SurveyForm = () => {
               ],
             },
           ],
+          status: "Inactive",
         },
       ];
     });
@@ -80,12 +81,12 @@ const SurveyForm = () => {
         <div className='flex flex-col gap-[80px]'>
           {surveyData.map((item, index) => (
             <SurveySection
-            key={index}
-            sectionIndex={index}
-            surveyData={item}
-            addQuestion={addQuestion}
-            
-          />
+              key={index}
+              sectionIndex={index}
+              surveyData={item}
+              addQuestion={addQuestion}
+
+            />
           ))}
 
         </div>

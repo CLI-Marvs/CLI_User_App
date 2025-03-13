@@ -75,7 +75,7 @@ export const SurveyAddQuestion = ({ questionData }) => {
             <div className='border-b-[0.5px] w-full border-custom-grayA5'></div>
             <div className='w-full h-[25px] flex justify-end items-center px-[20px] gap-[14px]'>
               <div className='flex gap-[10px]'>
-                <MdContentCopy className='size-[20px]' />
+                {/* <MdContentCopy className='size-[20px]' /> */}
                 <FaRegTrashAlt
                 className='size-[20px] cursor-pointer'
                 /* onClick={deleteQuestion} */
