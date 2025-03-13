@@ -9,9 +9,9 @@ import { SurveyAddQuestion } from './SurveyAddQuestion';
 
 
 
-export const SurveySection = () => {
+export const SurveySection = ({ data, addQuestion }) => {
 
-
+    console.log("SurveySection Data: ", data);
 
     const [title, setTitle] = useState("Untitled Form");
 
@@ -52,7 +52,7 @@ export const SurveySection = () => {
             <div className='w-full border-b-1 border-custom-grayA5 my-[20px]'></div>
 
             <div className='flex gap-[17.25px] mb-[15px]'>
-                <button className='w-[163px] h-[56px] border-[0.5px] border-custom-grayA5 rounded-[10px] p-[10px] flex justify-center items-center gap-[7px]'>
+                <button onClick={addQuestion} className='w-[163px] h-[56px] border-[0.5px] border-custom-grayA5 rounded-[10px] p-[10px] flex justify-center items-center gap-[7px]'>
                     <IoMdAddCircleOutline className='size-[32px]' />
                     <p className='text-[#3A3A3A] text-[16px]'>Add Question</p>
                 </button>
@@ -74,9 +74,15 @@ export const SurveySection = () => {
                 </button> */}
             </div>
 
-            <div className={`w-full rounded-[10px] bg-custom-lightestgreen p-[10px] flex flex-col gap-[10px]`}>
-                <SurveyAddQuestion  />
+            <div
+                className={`w-full rounded-[10px] bg-custom-lightestgreen p-[10px] flex flex-col gap-[10px] ${ data?.dataQASet?.length === 0 && "hidden"
+                    }`}
+            >
+                {data?.dataQASet?.map((item, index) => (
+                    <SurveyAddQuestion key={index} data={item} />
+                ))}
             </div>
+
         </div>
     )
 }

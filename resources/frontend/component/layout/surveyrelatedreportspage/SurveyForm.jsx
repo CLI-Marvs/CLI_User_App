@@ -17,36 +17,53 @@ const SurveyForm = () => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [section, setSections] = useState([]);
-  const [surveyData, setSurveyData] = useState([]);
-
   const [surveyTitle, setSurveyTitle] = useState("Untitled Form");
   const [sectionTitle, setSectionTitle] = useState("Untitled Form");
 
-  useEffect(() => {
-    setSurveyData((prevSurveyData) => {
-      if (prevSurveyData.length > 0) return prevSurveyData; // Avoid duplicate initialization
 
-      return [
-        {
-          surveyTitle: surveyTitle,
-          data: [
-            {
-              Title: sectionTitle,
-              Description: "",
-              dataQASet: [
-                {
-                  question: "",
-                  options: [""],
-                  required: false,
-                },
-              ],
-            },
-          ],
-          status: "Inactive",
-        },
-      ];
-    });
+  const [surveyData, setSurveyData] = useState([]);
+
+  useEffect(() => {
+    // Initialize surveyData on mount
+    setSurveyData([
+      {
+        surveyTitle: "",
+        data: [
+          {
+            Title: "",
+            Description: "",
+            dataQASet: [],
+          },
+        ],
+        status: "Inactive",
+      },
+    ]);
   }, []);
+
+
+
+  const addQuestion = (sectionIndex) => {
+    setSurveyData((prevSurveyData) => {
+      if (!prevSurveyData.length) return prevSurveyData;
+
+      // Clone the state to avoid mutation
+      const updatedSurveyData = structuredClone(prevSurveyData);
+
+      // Ensure dataQASet exists for the target section
+      if (!updatedSurveyData[0].data[sectionIndex].dataQASet) {
+        updatedSurveyData[0].data[sectionIndex].dataQASet = [];
+      }
+
+      // Add new question to the correct section
+      updatedSurveyData[0].data[sectionIndex].dataQASet.push({
+        question: "",
+        options: [""],
+        required: false,
+      });
+
+      return updatedSurveyData; // Return updated state
+    });
+  };
 
   return (
     <div className='h-screen max-w-full bg-custom-grayFA'>
@@ -56,9 +73,9 @@ const SurveyForm = () => {
       </div>
       <div className='flex flex-col max-w-[687px]'>
         <div className='flex flex-col gap-[80px]'>
-        {surveyData?.[0]?.data?.map((item, index) => (
-          <SurveySection key={index} data={item} />
-        ))}
+          {surveyData?.[0]?.data?.map((item, index) => (
+            <SurveySection key={index} data={item} addQuestion={() => addQuestion(index)} />
+          ))}
         </div>
 
         <div className='w-full border-b-1 border-custom-grayA5 my-[20px]'></div>
