@@ -14,7 +14,8 @@ export const PriceListMasterProvider = ({ children }) => {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
     const [currentPage, setCurrentPage] = useState(1);
-
+    const [isFirstLoad, setIsFirstLoad] = useState(true);
+    
     // This function does the actual database fetch
     const fetchPropertyListMasters = useCallback(
         async (forceFetch = false, silentFetch = false, page) => {
@@ -23,21 +24,30 @@ export const PriceListMasterProvider = ({ children }) => {
             }
 
             try {
-                if (!silentFetch) setIsLoading(true);
+                
+                if (!silentFetch) {
+                    if (isFirstLoad) {
+                        setIsLoading(true); 
+                    }
+                }
                 const response =
                     await priceListMasterService.getPriceListMasters(page, 10);
                 const { data, pagination } = response.data;
                 setPriceListMaster((prev) => ({
-                    data: prev?.data || [], // ✅ Keep previous data until new data arrives
-                    pagination,
+                    data: prev?.data || [],
+                    pagination: prev?.pagination || pagination,
                 }));
 
-                // ✅ After the data is fetched, update it
                 setTimeout(() => {
                     setPriceListMaster({ data, pagination });
-                }, 300); // Optional delay for smooth transition
+                }, 200); 
                 setCurrentPage(pagination?.current_page);
                 setError(null);
+
+                if (isFirstLoad) {
+                    setIsFirstLoad(false);
+                }
+
                 return { data, pagination };
             } catch (error) {
                 setError(error.message);
@@ -46,11 +56,13 @@ export const PriceListMasterProvider = ({ children }) => {
                 if (!silentFetch) setIsLoading(false);
             }
         },
-        [priceListMaster, currentPage]
+        [priceListMaster, currentPage, isFirstLoad]
     );
+
     useEffect(() => {
         fetchPropertyListMasters(true, false, currentPage);
     }, [currentPage]);
+
     const value = {
         priceListMaster,
         isLoading,
@@ -59,6 +71,7 @@ export const PriceListMasterProvider = ({ children }) => {
         setPriceListMaster,
         currentPage,
         setCurrentPage,
+        isFirstLoad
     };
 
     return (
