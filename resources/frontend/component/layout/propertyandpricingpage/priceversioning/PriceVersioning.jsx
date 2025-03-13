@@ -20,7 +20,7 @@ const PriceVersioning = () => {
 
     //Hooks
     useEffect(() => {
-        if (priceVersion.length === 0) {
+        if (priceVersion && priceVersion.length === 0) {
             getPriceVersions();
         }
     }, []);
