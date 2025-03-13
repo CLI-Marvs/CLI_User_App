@@ -29,7 +29,7 @@ const SurveyForm = () => {
       return [
         {
           surveyTitle: surveyTitle,
-          surveyData: [
+          data: [
             {
               Title: sectionTitle,
               Description: "",
@@ -56,7 +56,9 @@ const SurveyForm = () => {
       </div>
       <div className='flex flex-col max-w-[687px]'>
         <div className='flex flex-col gap-[80px]'>
-            <SurveySection />
+        {surveyData?.[0]?.data?.map((item, index) => (
+          <SurveySection key={index} data={item} />
+        ))}
         </div>
 
         <div className='w-full border-b-1 border-custom-grayA5 my-[20px]'></div>
