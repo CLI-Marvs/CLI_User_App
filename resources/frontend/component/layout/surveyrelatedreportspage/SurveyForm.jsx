@@ -1,219 +1,112 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom';
 import { MdKeyboardArrowLeft } from "react-icons/md";
-import { IoMdAddCircleOutline } from "react-icons/io";
-import { TiEqualsOutline } from "react-icons/ti";
-import { MdOutlineTextFields } from "react-icons/md";
-import { IoEyeOutline } from "react-icons/io5";
-import { FaTrash } from "react-icons/fa";
-import { RxDragHandleDots2 } from "react-icons/rx";
 import { IoMdRadioButtonOn } from "react-icons/io";
 import { RxCross2 } from "react-icons/rx";
 import { MdContentCopy } from "react-icons/md";
 import { FaRegTrashAlt } from "react-icons/fa";
+import { SurveySection } from './surveyComponents/SurveySection';
 const SurveyForm = () => {
 
+  const navigate = useNavigate();
 
-  const [title, setTitle] = useState("Untitled Form");
-  const [selectedOption, setSelectedOption] = useState("Multiple choice");
-  const [isOpen, setIsOpen] = useState(false);
-
-  const options = [
-    { value: "multiple-choice", label: "Multiple choice", icon: <IoMdRadioButtonOn /> },
-    // Add more options here if needed
-  ];
-
-  const handleInput = (e) => {
-    const value = e.target.value;
-    setTitle(value);
-
-    // Auto-expand height
-    e.target.style.height = "auto";
-    e.target.style.height = e.target.scrollHeight + "px";
+  const navigateToSurveyList = () => {
+    navigate(-1);
   };
+
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [section, setSections] = useState([]);
+  const [surveyData, setSurveyData] = useState([]);
+
+  const [surveyTitle, setSurveyTitle] = useState("Untitled Form");
+  const [sectionTitle, setSectionTitle] = useState("Untitled Form");
+
+  useEffect(() => {
+    setSurveyData((prevSurveyData) => {
+      if (prevSurveyData.length > 0) return prevSurveyData; // Avoid duplicate initialization
+
+      return [
+        {
+          surveyTitle: surveyTitle,
+          section: [
+            {
+              sectionTitle: sectionTitle,
+              sectionDescription: "",
+              dataSet: [
+                {
+                  question: "",
+                  options: [""],
+                  required: false,
+                },
+              ],
+            },
+          ],
+        },
+      ];
+    });
+  }, [surveyTitle, sectionTitle]);
+
+
+  const addQuestion = (sectionIndex) => {
+    setSurveyData((prevSurveyData) =>
+      prevSurveyData.map((section, idx) => {
+        if (idx === sectionIndex) { // Match dynamic section index
+          return {
+            ...section,
+            section: section.section.map((s, sIdx) => ({
+              ...s,
+              dataSet: [
+                ...s.dataSet,
+                { question: "", options: [""], required: false },
+              ],
+            })),
+          };
+        }
+        return section;
+      })
+    );
+  };
+
 
 
   return (
     <div className='h-screen max-w-full bg-custom-grayFA'>
-      <div className='flex gap-[2px] items-center cursor-pointer mb-[20px]'>
+      <div onClick={navigateToSurveyList} className='flex gap-[2px] items-center cursor-pointer mb-[20px] hover:underline'>
         <MdKeyboardArrowLeft />
         <p>Back to list</p>
       </div>
       <div className='flex flex-col max-w-[687px]'>
-        <div className='flex flex-col gap-[15px]'>
-          <div className='hidden'>
-            <p>Section 1 of 2</p>
-          </div>
-          <div>
-            <textarea
-              className="text-[32px] w-full h-auto min-h-[50px] resize-none overflow-hidden px-[3px]"
-              rows="1"
-              value={title}
-              onInput={handleInput}
-              onFocus={(e) => title === "Untitled Form" && setTitle("")} // Clear when focused
-              onBlur={(e) => title === "" && setTitle("Untitled Form")} // Reset when empty
-            />
-          </div>
-          <div>
-            <textarea
-              className="w-full min-h-[16px] max-h-[200px] resize-none overflow-hidden leading-tight text-[16px] p-[6px]"
-              rows="1"
-              placeholder="Description"
-              onInput={(e) => {
-                e.target.style.height = "auto"; // Reset height to min
-                e.target.style.height = `${e.target.scrollHeight}px`; // Expand dynamically
-              }}
-            />
-          </div>
+        <div className='flex flex-col gap-[80px]'>
+          {surveyData.map((item, index) => (
+            <SurveySection
+            key={index}
+            sectionIndex={index}
+            surveyData={item}
+            addQuestion={addQuestion}
+            
+          />
+          ))}
+
         </div>
 
         <div className='w-full border-b-1 border-custom-grayA5 my-[20px]'></div>
 
-        <div className='flex gap-[17.25px] mb-[15px]'>
-          <button className='w-[163px] h-[56px] border-[0.5px] border-custom-grayA5 rounded-[10px] p-[10px] flex justify-center items-center gap-[7px]'>
-            <IoMdAddCircleOutline className='size-[32px]' />
-            <p className='text-[#3A3A3A] text-[16px]'>Add Question</p>
-          </button>
-          <button className='w-[151px] h-[56px] border-[0.5px] border-custom-grayA5 rounded-[10px] p-[10px] flex justify-center items-center gap-[7px]'>
-            <TiEqualsOutline className='size-[32px]' />
-            <p className='text-[#3A3A3A] text-[16px]'>Add Section</p>
-          </button>
-          <button className='w-[126px] h-[56px] border-[0.5px] border-custom-grayA5 rounded-[10px] p-[10px] flex justify-center items-center gap-[7px]'>
-            <MdOutlineTextFields className='size-[32px]' />
-            <p className='text-[#3A3A3A] text-[16px]'>Add Title</p>
-          </button>
-          <button className='w-[122px] h-[56px] border-[0.5px] border-custom-grayA5 rounded-[10px] p-[10px] flex justify-center items-center gap-[7px]'>
-            <IoEyeOutline className='size-[32px]' />
-            <p className='text-[#3A3A3A] text-[16px]'>Preview</p>
-          </button>
-          <button className='w-[56px] h-[56px] border-[0.5px] border-custom-grayA5 rounded-[10px] p-[10px] flex justify-center items-center gap-[7px]'>
-            <FaTrash className='size-[24px]' />
-          </button>
-        </div>
-        <div className='w-full rounded-[10px] bg-custom-lightestgreen p-[10px] flex flex-col gap-[10px]'>
-          <div className='relative flex flex-col w-full bg-white rounded-[10px] gap-[15px] p-[15px]'>
-            <div className='flex flex-col'>
-              <textarea
-                className="w-full min-h-[12px] max-h-[200px] resize-none overflow-hidden leading-tight text-[16px] montserrat-medium p-[8px]"
-                rows="1"
-                placeholder="Question"
-                onInput={(e) => {
-                  e.target.style.height = "auto"; // Reset height to min
-                  e.target.style.height = `${e.target.scrollHeight}px`; // Expand dynamically
-                }}
-              />
-              <div className='flex w-full border-b border-custom-grayA5'></div>
-            </div>
-            <div className="relative w-[238px] z-20">
-              {/* Selected Option */}
-              <div
-                className="flex items-center justify-between w-full h-[35px] border-[0.5px] px-[10px] rounded-[6px] cursor-pointer bg-white"
-                onClick={() => setIsOpen(!isOpen)}
-              >
-                <span className="flex items-center gap-2">
-                  {options.find((option) => option.label === selectedOption)?.icon}
-                  {selectedOption}
-                </span>
-                <span>▼</span>
+        <div className="mt-5 mb-[25px]">
+          <div
+            className="flex justify-center h-[31px] gap-[14px]"
+          >
+            <button className='h-[31px] w-[104px] gradient-btn2 p-[1px] rounded-[5px] text-sm'>
+              <div className='bg-white w-full h-full flex justify-center items-center rounded-[4px]'>
+                Save
               </div>
-
-              {/* Dropdown Options */}
-              {isOpen && (
-                <ul className="absolute w-full bg-white border-[0.5px] rounded-[6px] mt-1 shadow-lg">
-                  {options.map((option) => (
-                    <li
-                      key={option.value}
-                      className="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-gray-100"
-                      onClick={() => {
-                        setSelectedOption(option.label);
-                        setIsOpen(false);
-                      }}
-                    >
-                      {option.icon}
-                      {option.label}
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-            <div className='flex flex-col gap-[16px] z-10'>
-              <div className="flex items-center gap-2">
-                <input
-                  type="radio"
-                  name="question-type"
-                  value="multiple-choice"
-                  id="multiple-choice"
-                  className="w-[17px] h-[16px] appearance-none border-[1px] border-custom-solidgreen bg-white rounded-full flex items-center justify-center relative
-                  before:content-[''] before:w-[14px] before:h-[14px] before:bg-white before:rounded-full before:absolute
-                  after:content-[''] after:w-[10px] after:h-[10px] after:bg-custom-solidgreen after:rounded-full after:absolute after:scale-0 checked:after:scale-100 transition-all"
-                />
-                <div className='flex justify-center w-full'>
-                  <textarea
-                    className="w-full h-full resize-none overflow-hidden leading-tight text-[16px] p-[6px]"
-                    rows="1"
-                    placeholder="Option"
-                    onInput={(e) => {
-                      e.target.style.height = "auto"; // Reset height to min
-                      e.target.style.height = `${e.target.scrollHeight}px`; // Expand dynamically
-                    }}
-                  />
-                </div>
-                <button><RxCross2 className='size-[24px]' /></button>
-              </div>
-              <div className="flex items-center gap-2">
-                <input
-                  type="radio"
-                  name="question-type"
-                  value="multiple-choice"
-                  id="multiple-choice"
-                  className="w-[17px] h-[16px] appearance-none border-[1px] border-custom-solidgreen bg-white rounded-full flex items-center justify-center relative
-                  before:content-[''] before:w-[14px] before:h-[14px] before:bg-white before:rounded-full before:absolute
-                  after:content-[''] after:w-[10px] after:h-[10px] after:bg-custom-solidgreen after:rounded-full after:absolute after:scale-0 checked:after:scale-100 transition-all"
-                />
-                <div className='montserrat-light text-sm text-custom-lightgreen underline cursor-pointer'>
-                  Add option
-                </div>
-              </div>
-            </div>
-            <div className='border-b-[0.5px] w-full border-custom-grayA5'></div>
-            <div className='w-full h-[25px] flex justify-end items-center px-[20px] gap-[14px]'>
-              <div className='flex gap-[10px]'>
-                <MdContentCopy className='size-[20px]' />
-                <FaRegTrashAlt className='size-[20px]' />
-              </div>
-              <div className='border-r-[0.5px] border-custom-grayA5 h-full '></div>
-              <div className='flex gap-[10px]'>
-                <p>Required</p>
-                <div class="flex w-full">
-                  <label for="toogleA" class="flex items-center cursor-pointer">
-                    <div class="relative">
-                      <input id="toogleA" type="checkbox" class="sr-only peer" />
-                      <div class="w-10 h-4 bg-gray-400 rounded-full shadow-inner peer-checked:bg-custom-lightestgreen transition"></div>
-                      <div class="dot absolute w-6 h-6 bg-white border-[1px] rounded-full shadow -left-1 -top-1 transition peer-checked:translate-x-6 peer-checked:bg-custom-solidgreen"></div>
-                    </div>
-                  </label>
-                </div>
-              </div>
-            </div>
+            </button>
+            <button className='h-[31px] w-[104px] gradient-btn2 text-white rounded-[5px] text-sm' >
+              Publish
+            </button>
           </div>
-          {/* <div className='flex flex-col w-full bg-white rounded-[10px] gap-[15px] p-[15px]'>
-            <div className='flex h-[40px] '>
-              <p>Survey Question #1</p>
-            </div>
-            <div>
-              Multiple choice
-            </div>
-          </div> */}
         </div>
-
-        <div className='w-full border-b-1 border-custom-grayA5 my-[20px]'></div>
-        
-        <div>
-          <button>Save</button>
-        </div>   
       </div>
-
-
-
     </div>
   )
 }
