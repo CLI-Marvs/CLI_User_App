@@ -50,9 +50,8 @@ import CustomerMasterListView from "@/component/views/pages/transactionViews/Cus
 import CustomerDetailsView from "@/component/views/pages/transactionViews/CustomerDetailsView";
 
 // PrivateRoute component to check authentication and permissions( department and employee )
-const PrivateRoute = ({ requiredPermission }) => {
-    const { hasPermission, user } = useStateContext();
-    const userLoggedInEmail = user?.employee_email;
+const PrivateRoute = ({ requiredPermission ,children}) => {
+    const { hasPermission } = useStateContext();
 
     // Check for authentication token
     const authToken = localStorage.getItem("authToken");
@@ -61,15 +60,6 @@ const PrivateRoute = ({ requiredPermission }) => {
     if (!authToken) {
         return <Navigate to="/" replace />;
     }
-
-    //Check if logged in user is allowed to view the superadmin page
-    /*   if (!ALLOWED_EMPLOYEES_CRS.includes(userLoggedInEmail)) {
-        return (
-            <div className="w-full h-full flex justify-center   text-custom-bluegreen text-lg mt-4">
-                You do not have permission to view this page.
-            </div>
-        );
-    } */
 
     // Check for required permissions
     if (requiredPermission && !hasPermission(requiredPermission)) {
@@ -81,9 +71,10 @@ const PrivateRoute = ({ requiredPermission }) => {
     }
 
     // Render the child routes if authentication and permission checks pass
-    return <Outlet />;
+     return children ? children : <Outlet />;
 };
 const App = () => {
+    
     /**
      * Implement storage event listener to handle authToken changes across tabs
      */
@@ -241,7 +232,9 @@ const App = () => {
                         {
                             path: "property-pricing",
                             element: (
-                                <PrivateRoute requiredPermission="Property Pricing" />
+                                <PrivateRoute requiredPermission="Property Pricing">
+                                    <PropertyAndPricingLayout />
+                                </PrivateRoute>
                             ),
                             children: [
                                 {
