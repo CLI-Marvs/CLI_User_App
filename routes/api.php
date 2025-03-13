@@ -135,52 +135,34 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/remove-assignee', 'removeAssignee');
     });
     
-    Route::get('/property-name', [PropertyMasterController::class, 'getPropertyName']);
-    /* Download the file attachment */
-    Route::post('/download-file', [ConcernController::class, 'downloadFileFromGCS']);
-    /* Pricing Master List */
-    Route::get('/get-pricing-master-lists', [PriceListMasterController::class, 'getAllPricingMasterLists']);
-    /*Basic Pricing */
-    Route::post('/basic-pricing', [PriceBasicDetailController::class, 'storeBasicPricing']);
-    /*Payment Scheme */
-    Route::post('/payment-schemes', [PaymentSchemeController::class, 'storePaymentScheme']);
-    Route::get('/get-payment-schemes', [PaymentSchemeController::class, 'getAllPaymentSchemes']);
+    // Route::get('/property-name', [PropertyMasterController::class, 'getPropertyName']);
+    // Route::post('/download-file', [ConcernController::class, 'downloadFileFromGCS']);
+ 
     /* Property Master */
-    Route::post('/property-details', [PropertyMasterController::class, 'storePropertyDetail']);
-    Route::get('/get-property-master/{id}', [PropertyMasterController::class, 'getPropertyMaster']);
+    // Route::post('/property-details', [PropertyMasterController::class, 'storePropertyDetail']);
+    // Route::get('/get-property-master/{id}', [PropertyMasterController::class, 'getPropertyMaster']);
  
   
     /*Property Data*/
     Route::prefix('properties')->group(function () {
-        // Get property names  
         Route::get('names', [PropertyMasterController::class, 'getPropertyNames']);
-        // Get property names with ids
         Route::get('names/with-ids', [PropertyMasterController::class, 'getPropertyNamesWithIds']);
-        // Store property details
         Route::post('/', [PropertyMasterController::class, 'store']);
-        // Get single property
         // Route::get('{property}', [PropertyMasterController::class, 'show']);
     });
 
     /*Payment Scheme */
     Route::prefix('payment-schemes')->group(function () {
-        // Get list of all payment schemes
         Route::get('/', [PaymentSchemeController::class, 'index']);
-        // Store payment scheme
         Route::post('/', [PaymentSchemeController::class, 'store']);
     });
 
     /*Property Price Master List */
     Route::prefix('price-list-masters')->group(function () {
-        // Get price list masters
         Route::get('/', [PriceListMasterController::class, 'index']);
-        //Store a price list masters
         Route::post('/', [PriceListMasterController::class, 'store']);
-        //Update a price list masters (e.g. Price versions, Floor premium, price list setting, additional premium)
         Route::put('/update', [PriceListMasterController::class, 'update']);
-        //Update the price list master status (e.g. Status = "On-going approval" set to Status="Cancel)
         Route::patch('/{id}/status', [PriceListMasterController::class, 'updateStatus']);
-        //Export the excel
         Route::post(
             '/export-excel',
             [PriceListMasterController::class, 'exportExcel']
@@ -189,26 +171,18 @@ Route::middleware('auth:sanctum')->group(function () {
 
     /* Units */
     Route::prefix('units')->group(function () {
-        // Store unit details from excel
         Route::post('/', [UnitController::class, 'store']);
-        //Count units floors
         Route::get('/floors/{towerPhaseId}/{excelId}', [UnitController::class, 'countFloors']);
-        // Check existing units for a tower phase
         Route::get('/check/{towerPhaseId}/{excelId}', [UnitController::class, 'getExistingUnits']);
-        // //Get units for selected floor and tower phase
         // Route::get('/tower/{towerPhaseId}/floor/{selectedFloor}/units/{excelId}', [UnitController::class, 'getUnits']);
-        //Store  unit  details from the system
         Route::post('/store-unit', [UnitController::class, 'storeUnit']);
-        //Save the computed unit pricing data
         Route::post('/save-computed-pricing-data', [UnitController::class, 'saveComputedUnitPricingData']); 
     });
     
 
     /* Price Versioning */
     Route::prefix('/price-version')->group(function () {
-        // Store price version
         Route::post('/', [PriceVersionController::class, 'store']);
-        //Get all price version
         Route::get('/', [PriceVersionController::class, 'index']);
     });
 
