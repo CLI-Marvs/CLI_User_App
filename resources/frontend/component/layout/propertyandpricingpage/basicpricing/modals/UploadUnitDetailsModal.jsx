@@ -4,32 +4,42 @@ import CircularProgress from "@mui/material/CircularProgress";
 import { useUnit } from "@/context/PropertyPricing/UnitContext";
 import { showToast } from "@/util/toastUtil";
 import { usePriceListMaster } from "@/context/PropertyPricing/PriceListMasterContext";
+import { usePricing } from "@/component/layout/propertyandpricingpage/basicpricing/context/BasicPricingContext";
 
 const UploadUnitDetailsModal = ({
+    excelDataRows,
     uploadUnitModalRef,
     fileName,
     selectedExcelHeader,
-    fileSelected,
     handleFileChange,
     propertyData,
+    onClose,
 }) => {
     //State
     const [formData, setFormData] = useState({});
     const newFileInputRef = useRef();
-    const [towerPhaseId, setTowerPhaseId] = useState();
     const [propertyMasterId, setPropertyMasterId] = useState();
     const [priceListMasterId, setPriceListMasterId] = useState();
     const {
         uploadUnits,
+        towerPhaseId,
         isUploadingUnits,
+        setIsUploadingUnits,
         fetchFloorCount,
         setFloors,
+        setUnits,
+        setExcelId,
+        setExcelIdFromPriceList,
         setFloorPremiumsAccordionOpen,
+        excelId,
+        excelIdFromPriceList,
     } = useUnit();
+    const { setPricingData } = usePricing();
     const { priceListMaster } = usePriceListMaster();
 
     //Hooks
     useEffect(() => {
+    
         if (selectedExcelHeader || propertyData) {
             const initialFormData = selectedExcelHeader.reduce((acc, item) => {
                 acc[item.rowHeader] = {
@@ -38,11 +48,6 @@ const UploadUnitDetailsModal = ({
                 };
                 return acc;
             }, {});
-
-            const towerPhaseId =
-                propertyData?.data?.tower_phases[0]?.id ||
-                propertyData?.tower_phase_id;
-            console.log("priceListMaster", priceListMaster);
             const priceListMasterId =
                 priceListMaster && priceListMaster.length > 0
                     ? priceListMaster.find(
@@ -50,7 +55,6 @@ const UploadUnitDetailsModal = ({
                       )?.price_list_master_id
                     : null;
             setFormData(initialFormData);
-            setTowerPhaseId(propertyData?.tower_phase_id || towerPhaseId);
             setPropertyMasterId(
                 propertyData?.property_commercial_detail?.property_master_id ||
                     propertyData?.data?.property_commercial_detail
@@ -78,53 +82,98 @@ const UploadUnitDetailsModal = ({
     //Handle submit units from excel file
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const payload = {
-            headers: Object.values(formData),
-            file: fileSelected,
-            tower_phase_id: towerPhaseId,
-            property_masters_id: propertyMasterId,
-            price_list_master_id: priceListMasterId,
-        };
-        console.log("payload",payload)
+
+        // Prevent multiple submissions while upload is in progress
+        if (isUploadingUnits) return;
+        setIsUploadingUnits(true);
+
         try {
+            // Clear related data if we're uploading a new Excel to replace existing one
+            if (excelId || excelIdFromPriceList) {
+                // Reset units array
+                setUnits([]);
+                setExcelId("");
+                setExcelIdFromPriceList("");
+                
+                // Reset specific pricing data fields while preserving other fields
+                setPricingData((prev) => ({
+                    ...prev,
+                    floorPremiums: {},
+                    additionalPremiums: [],
+                    reviewedByEmployees: [],
+                    approvedByEmployees: [],
+                }));
+
+                console.log(
+                    "Existing Excel detected - resetting related pricing data"
+                );
+            }
+
+            // Prepare the payload for API
+            const payload = {
+                excelDataRows: excelDataRows,
+                tower_phase_id: towerPhaseId,
+                property_masters_id: propertyMasterId,
+                price_list_master_id: priceListMasterId,
+                excel_id: excelId || excelIdFromPriceList || null,
+            };
+            console.log("Upload payload:", payload);
+
+            // Call the API to upload units
             const response = await uploadUnits(payload);
+            console.log("Upload response:", response);
+
+            // Handle successful response
             if (response?.success === true) {
+                // Reset floors and fetch new floor data based on the uploaded Excel
                 setFloors([]);
-                console.log("it runs here 93");
                 const floors = await fetchFloorCount(
                     towerPhaseId,
                     response?.excelId
                 );
+                console.log("Fetched floors:", floors);
                 setFloors(floors);
-                showToast("Unit uploaded successfully", "success");
+
+                // Show success message and update UI
+                showToast("Units uploaded successfully", "success");
                 setFloorPremiumsAccordionOpen(true);
+
+                // Close the modal if reference exists
                 if (uploadUnitModalRef.current) {
                     uploadUnitModalRef.current.close();
                 }
+            } else {
+                // Handle unsuccessful response
+                showToast(
+                    response?.message || "Failed to upload units",
+                    "error"
+                );
+                setIsUploadingUnits(false);
             }
         } catch (error) {
-            console.log("error uploading excel", error);
+            // Handle errors
+            console.error("Error uploading Excel:", error);
+            showToast("An error occurred while uploading units", "error");
+            setIsUploadingUnits(false);
         }
     };
-
-    const replaceFile = async (event) => {
+    //Handle in replacing the file
+    const onChangeReplaceFile = async (event) => {
         // Trigger the `handleFileChange` function received from BasicPricing
         await handleFileChange(event);
-    }; //Handle in replacing the file
+    };
 
     //Handle close the unit upload modal
-    const handleClose = () => {
-        //TODO: if close, reset the ref of file input field
-        if (uploadUnitModalRef.current) {
-            uploadUnitModalRef.current.close();
-        }
+    const handleCloseUnitModal = () => {
+        onClose();
     };
+
     return (
         <dialog
-            className="modal w-[474px] rounded-lg backdrop:bg-black/50"
+            className="modal w-[474px] rounded-lg backdrop:bg-black/50 backdrop-blur-md z-50 fixed inset-0"
             ref={uploadUnitModalRef}
         >
-            <div className=" px-14 mb-5 rounded-[10px]">
+            <div className=" px-14 mb-5 rounded-[10px] relative z-40">
                 <div className="">
                     <div
                         method="dialog"
@@ -132,17 +181,15 @@ const UploadUnitDetailsModal = ({
                     >
                         <button
                             className="flex justify-center w-10 h-10 items-center rounded-full bg-custom-grayFA3 text-custom-bluegreen hover:bg-custom-grayFA"
-                            onClick={handleClose}
+                            onClick={handleCloseUnitModal}
                         >
                             ✕
                         </button>
                     </div>
                 </div>
-                <div className="flex justify-between items-center bg-custom-grayFA h-[54px] px-[15px] mb-3">
+                <div className="flex justify-between items-center bg-custom-grayFA h-[54px]  mb-3">
                     <div>
-                        <p className="underline text-blue-500 cursor-pointer">
-                            {fileName}
-                        </p>
+                        <p className="underline text-blue-500 ">{fileName}</p>
                     </div>
                     <div>
                         <label
@@ -157,7 +204,7 @@ const UploadUnitDetailsModal = ({
                             <input
                                 type="file"
                                 className="hidden"
-                                onChange={replaceFile}
+                                onChange={onChangeReplaceFile}
                             />
                         </label>
                     </div>
@@ -165,12 +212,6 @@ const UploadUnitDetailsModal = ({
                 <div className="flex justify-start items-center h-40px my-6">
                     <p className="montserrat-bold">Confirm Columns</p>
                 </div>
-                {/* <div className="py-2 bg-red-900">
-                    <p>
-                        Loader/ progress bar here
-                        TODO: add loader here or progress bar
-                    </p>
-                </div> */}
                 <div className="flex flex-col gap-2">
                     {selectedExcelHeader &&
                         Object.values(formData).map((item, index) => {

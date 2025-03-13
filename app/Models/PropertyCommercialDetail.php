@@ -19,7 +19,9 @@ class PropertyCommercialDetail extends Model
         'city',
         'province',
         'country',
-        'google_map_link'
+        'latitude',
+        'longitude',
+        'price_list_master_id'
     ];
 
     

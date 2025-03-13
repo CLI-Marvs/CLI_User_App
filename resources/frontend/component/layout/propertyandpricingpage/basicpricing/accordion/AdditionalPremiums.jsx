@@ -5,10 +5,11 @@ import AdditionalPremiumAssignModal from "../modals/AdditionalPremiumAssignModal
 import { usePricing } from "@/component/layout/propertyandpricingpage/basicpricing/context/BasicPricingContext";
 import { useUnit } from "@/context/PropertyPricing/UnitContext";
 import { showToast } from "@/util/toastUtil";
+import UnitUploadButton from "@/component/layout/propertyandpricingpage/basicpricing/component/UnitUploadButton";
 
 const AdditionalPremiums = ({ propertyData, isOpen, toggleAccordion }) => {
     //States
-    const { excelId, excelIdFromPriceList, lastFetchedExcelId,towerPhaseId } = useUnit();
+    const { excelId, excelIdFromPriceList } = useUnit();
     const [newAdditionalPremium, setNewAdditionalPremium] = useState({
         viewName: "",
         premiumCost: 0,
@@ -66,12 +67,20 @@ const AdditionalPremiums = ({ propertyData, isOpen, toggleAccordion }) => {
             showToast(`Premium ${viewName} already exists.`, "error");
             return;
         }
-
+        // Function to generate random Id
+        const generateBigIntId = () => {
+            return (
+                BigInt(Date.now()) * BigInt(1000) +
+                BigInt(Math.floor(Math.random() * 1000))
+            ).toString();
+        };
+        const generatedId = generateBigIntId();
         setPricingData((prevState) => ({
             ...prevState,
             additionalPremiums: [
                 ...prevState.additionalPremiums,
                 {
+                    id: parseInt(generatedId),
                     viewName,
                     premiumCost,
                     excludedUnitIds: excludedUnitIds || [],
@@ -94,7 +103,7 @@ const AdditionalPremiums = ({ propertyData, isOpen, toggleAccordion }) => {
     };
 
     //Handle new additional premium on change
-    const handleNewAdditionalPremiumOnChange = (e) => {
+    const onChangeNewAdditionalPremium = (e) => {
         setNewAdditionalPremium((prevData) => ({
             ...prevData,
             [e.target.name]: e.target.value,
@@ -168,7 +177,7 @@ const AdditionalPremiums = ({ propertyData, isOpen, toggleAccordion }) => {
                                                 ""
                                             }
                                             onChange={
-                                                handleNewAdditionalPremiumOnChange
+                                                onChangeNewAdditionalPremium
                                             }
                                             className="outline-none  -mr-3 pl-3 py-1 bg-custom-grayFA   w-full "
                                         />
@@ -179,9 +188,7 @@ const AdditionalPremiums = ({ propertyData, isOpen, toggleAccordion }) => {
                                         Cost (Sq.m)
                                     </span>
                                     <input
-                                        onChange={
-                                            handleNewAdditionalPremiumOnChange
-                                        }
+                                        onChange={onChangeNewAdditionalPremium}
                                         name="premiumCost"
                                         value={
                                             newAdditionalPremium.premiumCost ||
@@ -204,14 +211,11 @@ const AdditionalPremiums = ({ propertyData, isOpen, toggleAccordion }) => {
                                 </div>
                             </div>
                         ) : (
-                            <div className="w-full flex justify-center items-center ">
-                                <p className="montserrat-regular text-center text-red-500">
-                                    No units have been uploaded.
-                                    <span className="underline ml-2 text-blue-500">
-                                        {" "}
-                                        Upload
-                                    </span>
-                                </p>
+                            <div className="w-auto">
+                                <UnitUploadButton
+                                    buttonType="link"
+                                    propertyData={propertyData}
+                                />
                             </div>
                         )}
 
@@ -230,36 +234,25 @@ const AdditionalPremiums = ({ propertyData, isOpen, toggleAccordion }) => {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {/*
-                                            TODO: 
-                                            Default view values are;
-                                            Sea View,
-                                            Mountain View,
-                                            City View,
-                                            Amenity View
-
-                                            So if mag add ko og laen view it must append of the end of tha Amenity View, dapat dili siya ma shuffle
-                                        */}
                                         {pricingData &&
-                                            pricingData.additionalPremiums
-                                                .length > 0 &&
+                                        pricingData.additionalPremiums?.length >
+                                            0 ? (
                                             pricingData.additionalPremiums.map(
                                                 (item, index) => {
-                                                    // console.log("item",item)
                                                     return (
                                                         <tr
-                                                            className="h-[46px] even:bg-custombg3 text-sm "
+                                                            className="h-[46px] even:bg-custombg3 text-sm"
                                                             key={index}
                                                         >
                                                             <td className="text-custom-gray81 pl-3">
                                                                 {item?.viewName}
                                                             </td>
                                                             <td>
-                                                                <div className=" ">
+                                                                <div>
                                                                     <input
                                                                         type="number"
                                                                         name="premiumCost"
-                                                                        id="premiumCost"
+                                                                        id={`premiumCost-${index}`}
                                                                         value={
                                                                             item.premiumCost
                                                                         }
@@ -277,7 +270,7 @@ const AdditionalPremiums = ({ propertyData, isOpen, toggleAccordion }) => {
                                                             </td>
                                                             <td>
                                                                 <FaRegTrashAlt
-                                                                    className="size-5 text-custom-gray81 hover:text-red-500"
+                                                                    className="size-5 text-custom-gray81 hover:text-red-500 cursor-pointer"
                                                                     onClick={() =>
                                                                         handleRemovePremium(
                                                                             index
@@ -288,7 +281,17 @@ const AdditionalPremiums = ({ propertyData, isOpen, toggleAccordion }) => {
                                                         </tr>
                                                     );
                                                 }
-                                            )}
+                                            )
+                                        ) : (
+                                            <tr key="no-premiums">
+                                                <td
+                                                    colSpan="5"
+                                                    className="text-center text-custom-gray81 py-2 montserrat-semibold"
+                                                >
+                                                    No additional premiums
+                                                </td>
+                                            </tr>
+                                        )}
                                     </tbody>
                                 </table>
                             </div>

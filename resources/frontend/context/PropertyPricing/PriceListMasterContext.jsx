@@ -13,10 +13,11 @@ export const PriceListMasterProvider = ({ children }) => {
     const [priceListMaster, setPriceListMaster] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
+    const [currentPage, setCurrentPage] = useState(1);
 
     // This function does the actual database fetch
     const fetchPropertyListMasters = useCallback(
-        async (forceFetch = false, silentFetch = false) => {
+        async (forceFetch = false, silentFetch = false, page) => {
             if (priceListMaster && !forceFetch) {
                 return priceListMaster;
             }
@@ -24,10 +25,20 @@ export const PriceListMasterProvider = ({ children }) => {
             try {
                 if (!silentFetch) setIsLoading(true);
                 const response =
-                    await priceListMasterService.getPriceListMasters();
-                setPriceListMaster(response.data);
+                    await priceListMasterService.getPriceListMasters(page, 10);
+                const { data, pagination } = response.data;
+                setPriceListMaster((prev) => ({
+                    data: prev?.data || [], // ✅ Keep previous data until new data arrives
+                    pagination,
+                }));
+
+                // ✅ After the data is fetched, update it
+                setTimeout(() => {
+                    setPriceListMaster({ data, pagination });
+                }, 300); // Optional delay for smooth transition
+                setCurrentPage(pagination?.current_page);
                 setError(null);
-                return response.data;
+                return { data, pagination };
             } catch (error) {
                 setError(error.message);
                 console.error("Error fetching property master list:", error);
@@ -35,15 +46,19 @@ export const PriceListMasterProvider = ({ children }) => {
                 if (!silentFetch) setIsLoading(false);
             }
         },
-        [priceListMaster]
+        [priceListMaster, currentPage]
     );
-
+    useEffect(() => {
+        fetchPropertyListMasters(true, false, currentPage);
+    }, [currentPage]);
     const value = {
         priceListMaster,
         isLoading,
         error,
         fetchPropertyListMasters,
         setPriceListMaster,
+        currentPage,
+        setCurrentPage,
     };
 
     return (

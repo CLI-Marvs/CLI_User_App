@@ -21,13 +21,13 @@ class PropertyMasterService
         return $this->repository->store($data);
     }
 
-    /**
-     * Get specific property data
-     */
-    public function getPropertyMaster($id)
-    {
-        return $this->repository->getPropertyMaster($id);
-    }
+    // /**
+    //  * Get specific property data
+    //  */
+    // public function getPropertyMaster($id)
+    // {
+    //     return $this->repository->getPropertyMaster($id);
+    // }
 
     /**
      * Get all property names

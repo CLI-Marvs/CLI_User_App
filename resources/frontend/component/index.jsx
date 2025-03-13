@@ -16,7 +16,19 @@ if (rootElement) {
                 <PropertyPricingProvider>
                     <RoleManagementProvider>
                         <TransactionProvider>
-                            <ToastContainer />
+                            <ToastContainer
+                                position="top-right"
+                                style={{ zIndex: 9999, position: "fixed" }}
+                                // containerStyle={{
+                                //     zIndex: "10000  !important",
+                                // }}
+                                // toastOptions={{
+                                //     className: "react-hot-toast",
+                                //     style: {
+                                //         zIndex: "10000  !important",
+                                //     },
+                                // }}
+                            />
                             <App />
                         </TransactionProvider>
                     </RoleManagementProvider>

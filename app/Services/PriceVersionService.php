@@ -12,15 +12,7 @@ class PriceVersionService
     {
         $this->repository = $repository;
     }
-
-    /* 
-     Store price  version data
-    */
-    public function store(array $data)
-    {
-        return $this->repository->store($data);
-    }
-
+    
     /**
      * Get all price version data
      */
@@ -28,4 +20,14 @@ class PriceVersionService
     {
         return $this->repository->index();
     }
+
+    /* 
+     Store price  version data
+    */
+    public function storePriceVersion(array $data)
+    {
+        return $this->repository->storePriceVersion($data);
+    }
+
+    
 }

@@ -2,28 +2,7 @@ import { createContext, useContext, useState } from "react";
 import moment from "moment";
 const BasicPricingContext = createContext();
 
-const additionalPremiums = [
-    {
-        viewName: "Sea View",
-        premiumCost: 0,
-        excludedUnitIds: [],
-    },
-    {
-        viewName: "Mountain View",
-        premiumCost: 0,
-        excludedUnitIds: [],
-    },
-    {
-        viewName: "City View",
-        premiumCost: 0,
-        excludedUnitIds: [],
-    },
-    {
-        viewName: "Amenity View",
-        premiumCost: 0,
-        excludedUnitIds: [],
-    },
-];
+ 
 const initialState = () => ({
     priceListSettings: {
         base_price: "",
@@ -34,20 +13,24 @@ const initialState = () => ({
         reservation_fee: "",
     },
     floorPremiums: {},
-    additionalPremiums: additionalPremiums,
+    additionalPremiums: [],
     selectedAdditionalPremiums: [],
     priceVersions: [
         {
             id: 0,
+            priority_number: 1,
             name: "",
-            percent_increase: "",
-            no_of_allowed_buyers: "",
+            percent_increase: 0,
+            no_of_allowed_buyers: 0,
             status: "Active",
             expiry_date: "N/A",
             payment_scheme: [],
         },
     ],
     reviewsAndApproval: {},
+    computedListPrice: [],
+    reviewedByEmployees: [],
+    approvedByEmployees: [],
 });
 export default function BasicPricingProvider({ children }) {
     const [pricingData, setPricingData] = useState(initialState());
@@ -71,7 +54,6 @@ export default function BasicPricingProvider({ children }) {
                 updatePricingSection,
                 resetPricingData,
                 setPricingData,
-                additionalPremiums,
             }}
         >
             {children}

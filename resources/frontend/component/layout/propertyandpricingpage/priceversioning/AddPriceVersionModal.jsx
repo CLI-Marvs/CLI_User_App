@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useRef } from "react";
-import { FaRegCalendar } from "react-icons/fa";
+import React, { useState, useCallback } from "react";
+import { FaPray, FaRegCalendar } from "react-icons/fa";
 import { IoMdArrowDropdown } from "react-icons/io";
 import { MdFormatListBulletedAdd } from "react-icons/md";
 import { useProperty } from "@/context/PropertyPricing/PropertyContext";
@@ -10,6 +10,8 @@ import { priceVersionService } from "@/component/servicesApi/apiCalls/propertyPr
 import { showToast } from "@/util/toastUtil";
 import { usePriceVersion } from "@/context/PropertyPricing/PriceVersionContext";
 import CircularProgress from "@mui/material/CircularProgress";
+import { IoIosCloseCircle } from "react-icons/io";
+import { toLowerCaseText } from "@/component/layout/propertyandpricingpage/utils/formatToLowerCase";
 
 const formDataState = {
     name: "",
@@ -20,18 +22,15 @@ const formDataState = {
 
 const AddPriceVersionModal = ({ modalRef }) => {
     //States
-    const {  propertyNamesList } =
-        useProperty();
+    const { propertyNamesList } = useProperty();
     const [formData, setFormData] = useState([formDataState]);
     const [isLoading, setIsLoading] = useState(false);
-    const dateRef = useRef(null);
-    const [isDatePickerVisible, setIsDatePickerVisible] = useState(false);
     const [selectedProperty, setSelectedProperty] = useState("");
     const [selectedTowerPhase, setSelectedTowerPhase] = useState("");
     const { getPriceVersions } = usePriceVersion();
- 
+
     //Event Handler
-    //Handle change in the input field for price versio
+    //Handle change in the input field for price version
     const handlePriceVersionInputChange = (event, index) => {
         const { name, value } = event.target;
         const data = [...formData];
@@ -39,20 +38,12 @@ const AddPriceVersionModal = ({ modalRef }) => {
         setFormData(data);
     };
 
-    //Handle data change
-    const handleDateChange = () => {};
-
-    //Handle click the calendar icon
-    const handleClickCalendar = () => {
-        setIsDatePickerVisible(true);
-    };
-
-    //Handle click to iterate more fields
+    //Handle click to add  more version fields
     const handleAddFields = () => {
         setFormData([...formData, formDataState]);
     };
 
-    //Handle remove the fields
+    //Handle remove the version fields
     const handleRemoveFields = (index) => {
         const data = [...formData];
         data.splice(index, 1);
@@ -69,17 +60,14 @@ const AddPriceVersionModal = ({ modalRef }) => {
                 tower_phase_id: selectedTowerPhase,
                 price_version: formData,
             };
-            console.log("Payload Add price version", payload);
+
             const response = await priceVersionService.storePriceVersion(
                 payload
             );
-            console.log("response", response);
+
             if (response?.status === 201) {
-                showToast(
-                    response?.data?.data?.message || "Data added successfully!",
-                    "success"
-                );
-                setFormData([formDataState]);
+                showToast(response?.data?.message, "success");
+                setFormData([{ ...formDataState }]);
                 setSelectedProperty("");
                 setSelectedTowerPhase("");
                 await getPriceVersions(true, false);
@@ -89,21 +77,58 @@ const AddPriceVersionModal = ({ modalRef }) => {
                 }
             }
         } catch (error) {
-            console.log("Error", error);
+            console.log("Error123", error.response);
+            if (error.response.status === 422) {
+                showToast(error.response.data.message, "error");
+            }
         } finally {
             setIsLoading(false);
         }
     };
 
+    //Handle date change
+    const handleDateChange = (date, formIndex) => {
+        setFormData((prevState) =>
+            prevState.map((item, i) =>
+                i === formIndex
+                    ? {
+                          ...item,
+                          expiry_date: date
+                              ? moment(date).format("MM-DD-YYYY HH:mm:ss")
+                              : "N/A",
+                      }
+                    : item
+            )
+        );
+    };
+
     //Handle close the modal
     const handleCloseModal = () => {
         if (modalRef.current) {
-            setFormData([formDataState]); //TODO: remove all state here
+            setFormData([{ ...formDataState }]);
             setSelectedProperty("");
             setSelectedTowerPhase("");
             modalRef.current.close();
         }
     };
+
+    //Utility function to handle button disable state
+    const isButtonDisabled = useCallback(
+        (formDataArray) => {
+            if (!formDataArray?.length) return true; // Disable if array is empty
+
+            const formData = formDataArray[0];
+
+            return (
+                formData.name.trim() === "" ||
+                Number(formData.percent_increase) === 0 ||
+                Number(formData.no_of_allowed_buyers) === 0 ||
+                !selectedProperty ||
+                !selectedTowerPhase
+            );
+        },
+        [selectedProperty, selectedTowerPhase]
+    );
 
     return (
         <dialog
@@ -117,6 +142,7 @@ const AddPriceVersionModal = ({ modalRef }) => {
                         className="pt-3 flex justify-end -mr-[40px]"
                     >
                         <button
+                            type="button"
                             className="flex justify-center w-10 h-10 items-center rounded-full bg-custombg3 text-custom-bluegreen hover:bg-custombg"
                             onClick={handleCloseModal}
                         >
@@ -148,7 +174,7 @@ const AddPriceVersionModal = ({ modalRef }) => {
                                         key={property.id}
                                         value={property.id}
                                     >
-                                        {property.name}
+                                        {toLowerCaseText(property.name)}
                                     </option>
                                 ))}
                             </select>
@@ -184,9 +210,7 @@ const AddPriceVersionModal = ({ modalRef }) => {
                                 <th className="w-[100px] text-left pl-[10px] pr-10 leading-[18px]">
                                     No. of allowed buyers
                                 </th>
-                                <th className="w-[100px] text-left pl-[10px]">
-                                    Expiry Date
-                                </th>
+                                <th className="w-[100px]">Expiry Date</th>
                                 <th className="rounded-tr-[10px] w-[62px]"></th>
                             </tr>
                         </thead>
@@ -229,7 +253,7 @@ const AddPriceVersionModal = ({ modalRef }) => {
                                                 <input
                                                     type="text"
                                                     name="no_of_allowed_buyers"
-                                                    className="pl-3 w-[100px] border border-custom-grayF1 rounded-[5px] h-[31px]"
+                                                    className="pl-3 w-[80px] border border-custom-grayF1 rounded-[5px] h-[31px]"
                                                     onChange={(event) =>
                                                         handlePriceVersionInputChange(
                                                             event,
@@ -242,40 +266,43 @@ const AddPriceVersionModal = ({ modalRef }) => {
                                                 />
                                             </td>
                                             <td className="px-[10px] mt-4 flex items-center gap-x-2">
-                                                <input
-                                                    className="pl-3 w-[90px] border border-custom-grayF1 rounded-[5px] h-[31px] outline-none"
-                                                    readOnly
+                                                <DatePicker
+                                                    selected={
+                                                        formData.expiry_date !==
+                                                        "N/A"
+                                                            ? moment(
+                                                                  form.expiry_date,
+                                                                  "MM-DD-YYYY HH:mm:ss"
+                                                              ).toDate()
+                                                            : null
+                                                    }
+                                                    onChange={(date) =>
+                                                        handleDateChange(
+                                                            date,
+                                                            index
+                                                        )
+                                                    }
+                                                    className="w-[100px] border border-custom-grayF1 rounded-[5px] h-[31px] pl-2"
+                                                    name="expiry_date"
+                                                    calendarClassName="custom-calendar"
+                                                    placeholderText="N/A" // Display "N/A" when no date is selected
                                                 />
                                                 <span>
-                                                    <td className="flex justify-between gap-2">
-                                                        <FaRegCalendar
-                                                            className="size-5 text-custom-gray81 hover:text-red-500 mt-1"
-                                                            onClick={
-                                                                handleClickCalendar
-                                                            }
-                                                        />
-                                                        {formData.length >
-                                                            1 && (
-                                                            <button
-                                                                className="text-lg"
-                                                                onClick={() =>
-                                                                    handleRemoveFields(
-                                                                        index
-                                                                    )
-                                                                }
-                                                            >
-                                                                ✕
-                                                            </button>
-                                                        )}
+                                                    <td className="flex justify-between gap-2 items-center">
+                                                        <FaRegCalendar className="size-5 text-custom-gray81 hover:text-red-500 mt-1" />
+                                                        {formData &&
+                                                            formData.length >
+                                                                1 && (
+                                                                <IoIosCloseCircle
+                                                                    onClick={() =>
+                                                                        handleRemoveFields(
+                                                                            index
+                                                                        )
+                                                                    }
+                                                                    className="text-custom-gray h-6 w-6 cursor-pointer hover:text-red-500 mt-1"
+                                                                />
+                                                            )}
                                                     </td>
-                                                    {/* {isDatePickerVisible && (
-                                                <DatePicker
-                                                    ref={dateRef}
-                                                    onChange={handleDateChange}
-                                                    className="border-b-1 outline-none w-[146px] text-sm px-[8px]  "
-                                                    calendarClassName="custom-calendar"
-                                                />
-                                            )} */}
                                                 </span>
                                             </td>
                                         </tr>
@@ -297,16 +324,20 @@ const AddPriceVersionModal = ({ modalRef }) => {
                     </table>
                     <div className="flex justify-center my-3">
                         <button
-                            disabled={isLoading}
+                            disabled={
+                                isLoading || isButtonDisabled(formData ?? {})
+                            }
                             className={`w-[129px] h-[37px] text-white montserrat-semibold text-sm gradient-btn2 rounded-[10px] hover:shadow-custom4 ${
-                                isLoading ? "cursor-not-allowed opacity-50" : ""
+                                isLoading || isButtonDisabled(formData ?? {})
+                                    ? "cursor-not-allowed opacity-50"
+                                    : ""
                             }`}
                             onClick={handleSubmit}
                         >
                             {isLoading ? (
                                 <CircularProgress className="spinnerSize" />
                             ) : (
-                                <>Save Versions </>
+                                <>Save Versions</>
                             )}
                         </button>
                     </div>

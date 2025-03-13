@@ -24,10 +24,10 @@ class PriceVersionController extends Controller
     public function index()
     {
         $priceVersions = $this->service->index();
-        dd($priceVersions);
-        return response()->json([
-            'price_versions' => $priceVersions,
-        ]);
+        
+        return response()->json(
+            $priceVersions,
+        );
     }
 
     /**
@@ -36,9 +36,9 @@ class PriceVersionController extends Controller
     public function store(StorePriceVersionRequest $request)
     {
         $validatedData = $request->validated();
-        
+
         try {
-            $priceVersion = $this->service->store($validatedData);
+            $priceVersion = $this->service->storePriceVersion($validatedData);
             return response()->json([
                 'message' => 'Price version created successfully',
                 'data' => $priceVersion,

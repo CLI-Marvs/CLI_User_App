@@ -3,39 +3,38 @@ import FloorPremiumAddUnitModal from "./FloorPremiumAddUnitModal";
 import CircularProgress from "@mui/material/CircularProgress";
 import { useUnit } from "@/context/PropertyPricing/UnitContext";
 import { usePricing } from "@/component/layout/propertyandpricingpage/basicpricing/context/BasicPricingContext";
-const FloorPremiumAssignModal = ({ modalRef, selectedFloor, propertyData }) => {
+const FloorPremiumAssignModal = ({
+    floorPremiumAssignModalRef,
+    selectedFloor,
+    propertyData,
+}) => {
     //State
-
-    const modalRef2 = useRef(null);
-    const [excludedUnit, setExcludedUnit] = useState([]);
+    const floorPremiumAddUnitModalRef = useRef(null);
+    const [excludedUnit, setExcludedUnit] = useState({});
     const {
-        fetchUnitsInTowerPhase,
-        unitsByFloor,
         isFetchingUnits,
-        excelIdFromPriceList,
         towerPhaseId,
-        excelId,
+        units,
     } = useUnit();
     const { pricingData, setPricingData } = usePricing();
-
+    const [unitsByFloor, setUnitsByFloor] = useState([]);
+   
     //Hooks
     useEffect(() => {
-        if (selectedFloor) {
-            console.log(
-                "selectedFloor towerPhaseId excelID25",
-                selectedFloor,
-                towerPhaseId,
-                excelIdFromPriceList
-            );
-            const excel_id = excelIdFromPriceList || excelId;
-            fetchUnitsInTowerPhase(selectedFloor, towerPhaseId, excel_id);
+        if (!selectedFloor || !units || units.length === 0) {
+            setUnitsByFloor([]);
+            return;
         }
-    }, [selectedFloor]);
+        const filteredUnits = units.filter(
+            (unit) => Number(unit.floor) === Number(selectedFloor)
+        );
+        setUnitsByFloor(filteredUnits);
+    }, [selectedFloor, units]);
 
     //Event handler
     const handleOpenModal = () => {
-        if (modalRef2.current) {
-            modalRef2.current.showModal();
+        if (floorPremiumAddUnitModalRef.current) {
+            floorPremiumAddUnitModalRef.current.showModal();
         }
     };
 
@@ -45,82 +44,64 @@ const FloorPremiumAssignModal = ({ modalRef, selectedFloor, propertyData }) => {
      * @returns
      */
     const handleUnitSelect = (id) => {
-        setExcludedUnit((prevSelectedUnits) => {
-            // Determine the new list of excluded unitsByFloor
-            const newSelectedUnits = prevSelectedUnits.includes(id)
-                ? prevSelectedUnits.filter((unitId) => unitId !== id)
-                : [...prevSelectedUnits, id];
+        setExcludedUnit((prevExcludedUnits) => {
+            const prevUnitsForFloor = prevExcludedUnits[selectedFloor] || [];
 
-            // If pricing data is available, update the pricing data
-            if (
-                pricingData?.floorPremiums &&
-                Object.keys(pricingData?.floorPremiums).length > 0
-            ) {
-                const floorPremiums = pricingData.floorPremiums[selectedFloor];
+            const newUnitsForFloor = prevUnitsForFloor.includes(id)
+                ? prevUnitsForFloor.filter((unitId) => unitId !== id)
+                : [...prevUnitsForFloor, id];
 
-                // Handle existing and new excluded unitsByFloor
-                let updatedExcludedUnits;
-                if (floorPremiums.excludedUnits?.includes(id)) {
-                    // If the unit was originally from the database, remove it
-                    updatedExcludedUnits = (
-                        floorPremiums.excludedUnits || []
-                    ).filter((unitId) => unitId !== id);
-                } else {
-                    // If it's a new selection, add it to the list
-                    updatedExcludedUnits = [
-                        ...(floorPremiums.excludedUnits || []),
-                        id,
-                    ];
-                }
-                // Update the floorPremiums state using the merged excluded unitsByFloor
-                const updatedFloorPremiums = {
-                    ...floorPremiums,
-                    excludedUnits: updatedExcludedUnits,
-                };
-                setPricingData((prevState) => ({
-                    ...prevState,
-                    floorPremiums: {
-                        ...prevState.floorPremiums,
-                        [selectedFloor]: updatedFloorPremiums,
-                    },
-                }));
+            return {
+                ...prevExcludedUnits,
+                [selectedFloor]: newUnitsForFloor,
+            };
+        });
+
+        if (
+            pricingData?.floorPremiums &&
+            Object.keys(pricingData?.floorPremiums).length > 0
+        ) {
+            const floorPremiums = pricingData.floorPremiums[selectedFloor];
+
+            let updatedExcludedUnits;
+            if (floorPremiums.excludedUnits?.includes(id)) {
+                updatedExcludedUnits = (
+                    floorPremiums.excludedUnits || []
+                ).filter((unitId) => unitId !== id);
+            } else {
+                updatedExcludedUnits = [
+                    ...(floorPremiums.excludedUnits || []),
+                    id,
+                ];
             }
 
-            // Return the new list of selected unitsByFloor
-            return newSelectedUnits;
-        });
+            const updatedFloorPremiums = {
+                ...floorPremiums,
+                excludedUnits: updatedExcludedUnits,
+            };
+
+            setPricingData((prevState) => ({
+                ...prevState,
+                floorPremiums: {
+                    ...prevState.floorPremiums,
+                    [selectedFloor]: updatedFloorPremiums,
+                },
+            }));
+        }
     };
 
     //Handle close the modal and reset the excluded unit
     const handleCloseModal = () => {
         // setExcludedUnit([]);
-        if (modalRef2.current) {
-            //  if (
-            //      pricingData?.floorPremiums &&
-            //      Object.keys(pricingData?.floorPremiums).length > 0
-            //  ) {
-            //      const floorPremiums = pricingData.floorPremiums[selectedFloor];
-            //      // Update the floorPremiums state using the new selected unitsByFloor
-            //      const updatedFloorPremiums = {
-            //          ...floorPremiums,
-            //          excludedUnits: [],
-            //      };
-            //      setPricingData((prevState) => ({
-            //          ...prevState,
-            //          floorPremiums: {
-            //              ...prevState.floorPremiums,
-            //              [selectedFloor]: updatedFloorPremiums,
-            //          },
-            //      }));
-            //  }
-            modalRef.current.close();
+        if (floorPremiumAddUnitModalRef.current) {
+            floorPremiumAssignModalRef.current.close();
         }
     };
 
     return (
         <dialog
             className="modal w-[1200px] rounded-lg bg-custom-grayFA backdrop:bg-black/50"
-            ref={modalRef}
+            ref={floorPremiumAssignModalRef}
         >
             <div className=" px-14 mb-5 rounded-[10px]">
                 <div className="">
@@ -141,12 +122,13 @@ const FloorPremiumAssignModal = ({ modalRef, selectedFloor, propertyData }) => {
                         Unit Assignment
                     </p>
                     <p className="montserrat-regular text-[21px]">Floor</p>
-                    {excludedUnit && excludedUnit.length > 0 && (
-                        <p className="ml-10 text-red-500">
-                            You made changes. Make sure to click 'Save as
-                            Draft'.
-                        </p>
-                    )}
+                    {excludedUnit[selectedFloor] &&
+                        excludedUnit[selectedFloor].length > 0 && (
+                            <p className="ml-10 text-red-500">
+                                You made changes. Make sure to click 'Save as
+                                Draft'.
+                            </p>
+                        )}
                 </div>
                 <div className="flex items-center p-[20px] h-[91px] gap-[22px] border-b-1 border-custom-lightestgreen mb-[30px]">
                     <p className="text-custom-gray81">Legend</p>
@@ -183,29 +165,34 @@ const FloorPremiumAssignModal = ({ modalRef, selectedFloor, propertyData }) => {
                         ) : (
                             unitsByFloor &&
                             unitsByFloor.length > 0 &&
-                            unitsByFloor.map((item, key) => {
-                                // Check if this unit's ID is in the excludedUnits for the current floor
-                                const isExcluded = pricingData?.floorPremiums?.[
-                                    selectedFloor
-                                ]?.excludedUnits?.includes(item?.id);
-                                return (
-                                    <div
-                                        onClick={() =>
-                                            handleUnitSelect(item?.id)
-                                        }
-                                        className={`h-[63px] w-[95px] p-[6px] ${
-                                            !isExcluded ? "gradient-btn4" : ""
-                                        } rounded-[15px]  cursor-pointer`}
-                                        key={key}
-                                    >
-                                        <div className="flex justify-center items-center bg-white h-full w-full text-custom-solidgreen rounded-[10px]">
-                                            <p className="font-bold">
-                                                {item?.unit}
-                                            </p>
+                            unitsByFloor
+                                // .filter((item) => item.floor === selectedFloor)
+                                .map((item, key) => {
+                                    // Check if this unit's ID is in the excludedUnits for the current floor
+                                    const isExcluded =
+                                        pricingData?.floorPremiums?.[
+                                            selectedFloor
+                                        ]?.excludedUnits?.includes(item?.id);
+                                    return (
+                                        <div
+                                            onClick={() =>
+                                                handleUnitSelect(item?.id)
+                                            }
+                                            className={`h-[63px] w-[95px] p-[6px] ${
+                                                !isExcluded
+                                                    ? "gradient-btn4"
+                                                    : ""
+                                            } rounded-[15px]  cursor-pointer`}
+                                            key={key}
+                                        >
+                                            <div className="flex justify-center items-center bg-white h-full w-full text-custom-solidgreen rounded-[10px]">
+                                                <p className="font-bold">
+                                                    {item?.unit}
+                                                </p>
+                                            </div>
                                         </div>
-                                    </div>
-                                );
-                            })
+                                    );
+                                })
                         )}
 
                         <div>
@@ -223,7 +210,7 @@ const FloorPremiumAssignModal = ({ modalRef, selectedFloor, propertyData }) => {
             </div>
             <div>
                 <FloorPremiumAddUnitModal
-                    modalRef={modalRef2}
+                    floorPremiumAddUnitModalRef={floorPremiumAddUnitModalRef}
                     propertyData={propertyData}
                     unitsByFloor={unitsByFloor}
                     towerPhaseId={towerPhaseId}
