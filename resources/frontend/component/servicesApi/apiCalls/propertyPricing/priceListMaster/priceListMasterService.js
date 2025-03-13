@@ -6,10 +6,12 @@ export const priceListMasterService = {
      * @returns {Promise<Array>} Resolves with an array of price list masters.
      * @throws Will throw an error if the API request fails.
      */
-    getPriceListMasters: async () => {
+    getPriceListMasters: async (page = 1, perPage = 10) => {
         try {
-            const response = await apiService.get("price-list-masters/");
-            return response.data;
+            const response = await apiService.get(
+                `price-list-masters?page=${page}&per_page=${perPage}`
+            );
+            return response;
         } catch (error) {
             console.error("Error getting price list masters:", error);
             throw error;

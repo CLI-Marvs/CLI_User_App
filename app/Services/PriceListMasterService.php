@@ -40,9 +40,9 @@ class PriceListMasterService
     /** 
      * Get all property price list masters
      */
-    public function index()
+    public function index($page, $perPage)
     {
-        return $this->repository->index();
+        return $this->repository->index($page, $perPage);
     }
 
     /*

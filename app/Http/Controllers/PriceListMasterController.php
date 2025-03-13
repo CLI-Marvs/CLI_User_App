@@ -23,13 +23,14 @@ class PriceListMasterController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $priceListMastersResponse = $this->service->index();
+        // Capture query parameters from request
+        $perPage = $request->input('per_page', 10);
+        $page = $request->input('page', 1);
 
-        // return response()->json(
-        //     $priceListMastersResponse
-        // );
+        $priceListMastersResponse = $this->service->index($page, $perPage);
+       
         return response()->json([
             'data' => $priceListMastersResponse['data'],
             'pagination' => $priceListMastersResponse['pagination']

@@ -44,12 +44,10 @@ class PriceListMasterRepository
     /*
      * Get all property price list masters
      */
-    public function index()
+    public function index($page, $perPage)
     {
         //TODO: Paginate here into 10 per page
-        $priceListMasters = $this->getPriceListMastersWithRelations()->paginate(10);
-        // return $priceListMasters->map(fn($priceList) =>
-        // $this->transformPriceListMaster($priceList));
+        $priceListMasters = $this->getPriceListMastersWithRelations()->paginate($perPage, ['*'], 'page', $page);
         return [
             'data' => $priceListMasters->getCollection()->map(
                 fn($priceList) =>
@@ -334,7 +332,7 @@ class PriceListMasterRepository
         ])->select('price_list_masters.*')
             ->orderBy('created_at', 'desc')
             ->where('status', '!=', 'InActive');
-            // ->get();
+        // ->get();
     }
 
     /**
