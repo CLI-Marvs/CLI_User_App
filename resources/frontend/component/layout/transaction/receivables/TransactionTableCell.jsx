@@ -26,6 +26,9 @@ const TransactionTableCell = ({ type, row }) => {
                         <span className="montserrat-medium text-[13px] break-all whitespace-normal overflow-hidden">
                             {row.transaction_type}
                         </span>
+                        <span className="montserrat-medium text-[13px] break-all whitespace-normal overflow-hidden">
+                            {row.processor_response_id}
+                        </span>
                     </div>
                 </div>
             );
