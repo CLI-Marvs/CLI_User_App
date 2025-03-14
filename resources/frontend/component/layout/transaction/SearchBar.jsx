@@ -55,10 +55,10 @@ const SearchBar = () => {
         "Business Partner": ["Test"],
     };
     return (
-        <div className="bg-custom-grayF1 rounded-[10px] p-[12px] w-[604px] h-[47px] cursor-pointer relative z-50">
+        <div className="bg-custom-grayF1 rounded-[10px] p-[12px] w-[604px] h-[47px]  relative z-50">
             <div className="" ref={dropdownRef}>
                 <div
-                    className="flex justify-between"
+                    className="flex justify-between cursor-pointer"
                     onClick={() => setOpenSearch((prev) => !prev)}
                 >
                     <div className="flex items-center gap-[12px]">

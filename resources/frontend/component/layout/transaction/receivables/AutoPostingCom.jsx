@@ -61,11 +61,23 @@ const AutoPostingCom = () => {
     };
 
     const handleUpdateItems = async (item) => {
-        const response = await transaction.transactionUpdate(selectedRows);
+        let payload = [];
+
+        const statusRef = labelStatuses
+            .filter((ref) => ref.name === item)
+            .map((item) => item.statusRef);
+
+        if (statusRef.length > 0) {
+            const updatedRows = selectedRows.map((row) => ({
+                ...row,
+                statusRef: statusRef[0],
+            }));
+
+            payload = updatedRows;
+        }
+        const response = await transaction.transactionUpdate(payload);
         setIsSelectedAll(false);
         getPostingList();
-
-        console.log("response", response);
     };
 
     const handlePageClick = (data) => {
@@ -183,9 +195,6 @@ const AutoPostingCom = () => {
         },
     ];
 
-    console.log("selectedRows", selectedRows);
-
-
     return (
         <div className="overflow-y-hidden px-3 mt-3 space-y-3">
             <div className="flex justify-between px-2">
@@ -243,8 +252,8 @@ const AutoPostingCom = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {postingList.map((row, rowIndex) => {
-                            return (
+                        {postingList.length > 0 ? (
+                            postingList.map((row, rowIndex) => (
                                 <tr
                                     key={rowIndex}
                                     className="cursor-pointer border-r-[1px] border-opacity-10 border-[#B9B7B7] shadow-custom11"
@@ -262,8 +271,17 @@ const AutoPostingCom = () => {
                                         </td>
                                     ))}
                                 </tr>
-                            );
-                        })}
+                            ))
+                        ) : (
+                            <tr>
+                                <td
+                                    colSpan={columns.length}
+                                    className="text-center py-4 text-gray-500"
+                                >
+                                    No data to show.
+                                </td>
+                            </tr>
+                        )}
                     </tbody>
                 </table>
             </div>

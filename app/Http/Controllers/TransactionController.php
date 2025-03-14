@@ -97,6 +97,7 @@ class TransactionController extends Controller
     {
         try {
             $data = $request->all();
+            \Log::info("from paynamics", $data);
             $response = $this->transactionService->paygateWebHook($data);
     
             if (isset($response['message']) && $response['message'] === 'Transaction ID not found') {
