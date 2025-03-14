@@ -5,7 +5,7 @@ import { MdContentCopy } from "react-icons/md";
 import { FaRegTrashAlt } from "react-icons/fa";
 import { SurveyRadioOption } from './SurveyRadioOption';
 
-export const SurveyAddQuestion = ({data}) => {
+export const SurveyAddQuestion = ({data, onDelete}) => {
 
 
     const [selectedOption, setSelectedOption] = useState("Multiple choice");
@@ -77,7 +77,7 @@ export const SurveyAddQuestion = ({data}) => {
                 {/* <MdContentCopy className='size-[20px]' /> */}
                 <FaRegTrashAlt
                 className='size-[20px] cursor-pointer'
-                /* onClick={deleteQuestion} */
+                onClick={onDelete}
                 />
               </div>
               <div className='border-r-[0.5px] border-custom-grayA5 h-full '></div>

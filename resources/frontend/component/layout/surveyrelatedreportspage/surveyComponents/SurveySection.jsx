@@ -9,9 +9,9 @@ import { SurveyAddQuestion } from './SurveyAddQuestion';
 
 
 
-export const SurveySection = ({ data, addQuestion }) => {
+export const SurveySection = ({ data, sectionIndex, addQuestion, deleteQuestion }) => {
 
-    console.log("SurveySection Data: ", data);
+
 
     const [title, setTitle] = useState("Untitled Form");
 
@@ -52,7 +52,7 @@ export const SurveySection = ({ data, addQuestion }) => {
             <div className='w-full border-b-1 border-custom-grayA5 my-[20px]'></div>
 
             <div className='flex gap-[17.25px] mb-[15px]'>
-                <button onClick={addQuestion} className='w-[163px] h-[56px] border-[0.5px] border-custom-grayA5 rounded-[10px] p-[10px] flex justify-center items-center gap-[7px]'>
+                <button onClick={() => addQuestion(sectionIndex)} className='w-[163px] h-[56px] border-[0.5px] border-custom-grayA5 rounded-[10px] p-[10px] flex justify-center items-center gap-[7px]'>
                     <IoMdAddCircleOutline className='size-[32px]' />
                     <p className='text-[#3A3A3A] text-[16px]'>Add Question</p>
                 </button>
@@ -75,14 +75,17 @@ export const SurveySection = ({ data, addQuestion }) => {
             </div>
 
             <div
-                className={`w-full rounded-[10px] bg-custom-lightestgreen p-[10px] flex flex-col gap-[10px] ${ data?.dataQASet?.length === 0 && "hidden"
+                className={`w-full rounded-[10px] bg-custom-lightestgreen p-[10px] flex flex-col gap-[10px] ${data?.dataQASet?.length === 0 && "hidden"
                     }`}
             >
-                {data?.dataQASet?.map((item, index) => (
-                    <SurveyAddQuestion key={index} data={item} />
+                {data?.dataQASet?.map((item, questionIndex) => (
+                    <SurveyAddQuestion
+                        key={item.id}
+                        data={item}
+                        onDelete={() => deleteQuestion(sectionIndex, questionIndex)}
+                    />
                 ))}
             </div>
-
         </div>
     )
 }

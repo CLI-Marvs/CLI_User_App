@@ -20,50 +20,95 @@ const SurveyForm = () => {
   const [surveyTitle, setSurveyTitle] = useState("Untitled Form");
   const [sectionTitle, setSectionTitle] = useState("Untitled Form");
 
+  const generateId = () => crypto?.randomUUID?.() || Date.now().toString();
 
-  const [surveyData, setSurveyData] = useState([]);
+  const initialSurveyData = [
+    {
+      surveyTitle: "",
+      status: false,
+      data: [
+        {
+          Title: "",
+          Description: "",
+          dataQASet: [
+            {
+              id: generateId(),
+              question: "New Question",
+              inputType: "dropdown",
+              option: [],
+              required: false,
+            },
+          ],
+        },
+      ],
+    },
+  ];
 
-  useEffect(() => {
-    // Initialize surveyData on mount
-    setSurveyData([
-      {
-        surveyTitle: "",
-        data: [
-          {
-            Title: "",
-            Description: "",
-            dataQASet: [],
-          },
-        ],
-        status: "Inactive",
-      },
-    ]);
-  }, []);
-
-
+  const [surveyData, setSurveyData] = useState(initialSurveyData);
 
   const addQuestion = (sectionIndex) => {
-    setSurveyData((prevSurveyData) => {
-      if (!prevSurveyData.length) return prevSurveyData;
-
-      // Clone the state to avoid mutation
-      const updatedSurveyData = structuredClone(prevSurveyData);
-
-      // Ensure dataQASet exists for the target section
-      if (!updatedSurveyData[0].data[sectionIndex].dataQASet) {
-        updatedSurveyData[0].data[sectionIndex].dataQASet = [];
-      }
-
-      // Add new question to the correct section
-      updatedSurveyData[0].data[sectionIndex].dataQASet.push({
-        question: "",
-        options: [""],
-        required: false,
-      });
-
-      return updatedSurveyData; // Return updated state
-    });
+    setSurveyData((prev) =>
+      prev.map((survey, surveyIndex) =>
+        surveyIndex === 0
+          ? {
+              ...survey,
+              data: survey.data.map((section, idx) =>
+                idx === sectionIndex
+                  ? {
+                      ...section,
+                      dataQASet: [
+                        ...section.dataQASet,
+                        {
+                          id: generateId(), // Ensure unique ID
+                          question: "New Question",
+                          option: [],
+                          required: false,
+                        },
+                      ],
+                    }
+                  : section
+              ),
+            }
+          : survey
+      )
+    );
   };
+
+  const deleteQuestion = (sectionIndex, questionIndex) => {
+    setSurveyData((prev) =>
+      prev.map((survey, surveyIndex) =>
+        surveyIndex === 0
+          ? {
+              ...survey,
+              data: survey.data.map((section, idx) =>
+                idx === sectionIndex
+                  ? {
+                      ...section,
+                      dataQASet: section.dataQASet
+                        .filter((_, qIndex) => qIndex !== questionIndex)
+                        .map((item, newIndex) => ({
+                          ...item,
+                          index: newIndex, // Reset index after deletion
+                        })),
+                    }
+                  : section
+              ),
+            }
+          : survey
+      )
+    );
+  };
+  
+
+
+
+
+
+
+  const handleSubmit = () => {
+    console.log("surveyData", surveyData[0]?.data[0]?.dataQASet);
+  };
+
 
   return (
     <div className='h-screen max-w-full bg-custom-grayFA'>
@@ -73,8 +118,14 @@ const SurveyForm = () => {
       </div>
       <div className='flex flex-col max-w-[687px]'>
         <div className='flex flex-col gap-[80px]'>
-          {surveyData?.[0]?.data?.map((item, index) => (
-            <SurveySection key={index} data={item} addQuestion={() => addQuestion(index)} />
+          {surveyData[0]?.data?.map((item, index) => (
+            <SurveySection
+              key={index}
+              data={item}
+              sectionIndex={index}
+              addQuestion={addQuestion}
+              deleteQuestion={deleteQuestion}
+            />
           ))}
         </div>
 
@@ -89,7 +140,7 @@ const SurveyForm = () => {
                 Save
               </div>
             </button>
-            <button className='h-[31px] w-[104px] gradient-btn2 text-white rounded-[5px] text-sm' >
+            <button onClick={handleSubmit} className='h-[31px] w-[104px] gradient-btn2 text-white rounded-[5px] text-sm' >
               Publish
             </button>
           </div>
