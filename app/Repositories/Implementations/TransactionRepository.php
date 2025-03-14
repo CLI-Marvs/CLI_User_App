@@ -151,7 +151,7 @@ class TransactionRepository
         foreach ($data as $item) {
             $transactionData = $this->transactionModel
                 ->where('transaction_id', $item['id'])
-                ->update(['status' => 'Floating']);
+                ->update(['status' => $item['statusRef']]);
         }
 
         return $transactionData;

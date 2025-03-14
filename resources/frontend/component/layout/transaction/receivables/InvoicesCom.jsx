@@ -13,6 +13,7 @@ import moment from "moment";
 import { useStateContext } from "@/context/contextprovider";
 import GlobalTable from "../GlobalTable";
 import InvoicesTableCell from "./InvoicesTableCell";
+import { MdCalendarToday } from "react-icons/md";
 
 const InvoicesCom = () => {
     const {
@@ -328,6 +329,40 @@ const InvoicesCom = () => {
             </div> */}
 
             <div className="overflow-y-hidden px-3 mt-3">
+                <div className="flex gap-[15px] flex-wrap px-3 mb-[21px]">
+                    <div className="relative flex border w-max border-custom-lightgreen rounded-[5px] shrink-0 z-10">
+                        <span className="border-white text-white bg-custom-lightgreen text-sm flex items-center w-max px-[15px] pl-3 py-1 shrink-0 cursor-default">
+                            From
+                        </span>
+                        <div className="relative flex items-center bg-white">
+                            <DatePicker
+                                className="outline-none w-[126px] h-full text-sm px-2 cursor-pointer"
+                                calendarClassName="custom-calendar"
+                            />
+                        </div>
+                        <span className="absolute inset-y-0 right-0 flex items-center text-white pr-3 pl-3 bg-custom-lightgreen pointer-events-none">
+                            <MdCalendarToday />
+                        </span>
+                        <span className="text-white bg-custom-lightgreen text-sm flex items-center w-max px-[15px] pl-3 py-1 shrink-0 cursor-default">
+                            To
+                        </span>
+                        <div className="relative flex items-center bg-white">
+                            <DatePicker
+                                /*   selected={endDateValue} */
+                                className="outline-none w-[156px] h-full text-sm px-2 cursor-pointer"
+                                calendarClassName="custom-calendar"
+                            />
+                        </div>
+                        <span className="absolute inset-y-0 right-0 flex items-center text-white pr-3 pl-3 bg-custom-lightgreen pointer-events-none cursor-pointer">
+                            <MdCalendarToday />
+                        </span>
+                    </div>
+                    <div className="flex items-center justify-center">
+                        <button className="px-4 w-[153px] h-[37px] text-white font-semibold rounded-md bg-gradient-to-r from-[#348017] to-[#175D5F] hover:opacity-90 transition duration-300">
+                            Sap Sync
+                        </button>
+                    </div>
+                </div>
                 <GlobalTable columns={columns} data={data} />
             </div>
         </>
