@@ -15,48 +15,60 @@ export const PriceListMasterProvider = ({ children }) => {
     const [error, setError] = useState(null);
     const [currentPage, setCurrentPage] = useState(1);
     const [isFirstLoad, setIsFirstLoad] = useState(true);
-    
-    // This function does the actual database fetch
+    const [previousFilters, setPreviousFilters] = useState([]);
+
     const fetchPropertyListMasters = useCallback(
-        async (forceFetch = false, silentFetch = false, page) => {
-            if (priceListMaster && !forceFetch) {
-                return priceListMaster;
+        async (
+            forceFetch = false,
+            silentFetch = false,
+            page,
+            searchFilters
+        ) => {
+            const isFilterChanged =
+                JSON.stringify(searchFilters) !==
+                JSON.stringify(previousFilters);
+            const isSamePage = page === currentPage;
+            if (
+                priceListMaster &&
+                !forceFetch &&
+                !isFilterChanged &&
+                isSamePage
+            ) {
+                return priceListMaster; // Prevents unnecessary fetching
             }
 
             try {
-                
-                if (!silentFetch) {
-                    if (isFirstLoad) {
-                        setIsLoading(true); 
-                    }
+                if (!silentFetch && isFirstLoad) {
+                    setIsLoading(true);
                 }
                 const response =
-                    await priceListMasterService.getPriceListMasters(page, 10);
+                    await priceListMasterService.getPriceListMasters(
+                        page,
+                        10,
+                        searchFilters
+                    );
                 const { data, pagination } = response.data;
-                setPriceListMaster((prev) => ({
-                    data: prev?.data || [],
-                    pagination: prev?.pagination || pagination,
-                }));
-
-                setTimeout(() => {
-                    setPriceListMaster({ data, pagination });
-                }, 200); 
+                setPriceListMaster({ data, pagination });
                 setCurrentPage(pagination?.current_page);
                 setError(null);
-
+                setPreviousFilters(searchFilters);
+                if (isFilterChanged) {
+                    setPreviousFilters(searchFilters);
+                }
                 if (isFirstLoad) {
                     setIsFirstLoad(false);
                 }
 
                 return { data, pagination };
             } catch (error) {
+                setPriceListMaster({ data: [], pagination: null });
                 setError(error.message);
                 console.error("Error fetching property master list:", error);
             } finally {
                 if (!silentFetch) setIsLoading(false);
             }
         },
-        [priceListMaster, currentPage, isFirstLoad]
+        [priceListMaster, currentPage, isFirstLoad, previousFilters]
     );
 
     useEffect(() => {
@@ -71,7 +83,8 @@ export const PriceListMasterProvider = ({ children }) => {
         setPriceListMaster,
         currentPage,
         setCurrentPage,
-        isFirstLoad
+        isFirstLoad,
+        previousFilters,
     };
 
     return (

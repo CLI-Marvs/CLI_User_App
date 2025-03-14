@@ -6,10 +6,25 @@ export const priceListMasterService = {
      * @returns {Promise<Array>} Resolves with an array of price list masters.
      * @throws Will throw an error if the API request fails.
      */
-    getPriceListMasters: async (page = 1, perPage = 10) => {
+    getPriceListMasters: async (page = 1, perPage = 10, filters) => {
         try {
+            const cleanFilters = Object.fromEntries(
+                Object.entries(filters || {}).filter(
+                    ([_, v]) => v != null && v !== ""
+                )
+            );
+            console.log("cleanFilters", cleanFilters);
+            console.log("filters", filters);
+
+            // Convert filters object into query parameters
+            const queryParams = new URLSearchParams({
+                page,
+                per_page: perPage,
+                ...cleanFilters, // Spread the filters object
+            }).toString();
+
             const response = await apiService.get(
-                `price-list-masters?page=${page}&per_page=${perPage}`
+                `price-list-masters?${queryParams}`
             );
             return response;
         } catch (error) {
@@ -90,6 +105,23 @@ export const priceListMasterService = {
             return response;
         } catch (error) {
             console.error("Error downloading price list masters:", error);
+            throw error;
+        }
+    },
+
+    /**
+     * Filter the price list masters
+     */
+    filterPriceListMaster: async (payload) => {
+        console.log("payload", payload);
+        try {
+            const response = await apiService.post(
+                "price-list-masters/filter",
+                payload
+            );
+            console.log("result of filter", response);
+        } catch (error) {
+            console.error("Error filtering the pricelist:", error);
             throw error;
         }
     },

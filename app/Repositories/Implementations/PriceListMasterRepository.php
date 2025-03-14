@@ -3,6 +3,7 @@
 namespace App\Repositories\Implementations;
 
 use Exception;
+use Carbon\Carbon;
 use App\Models\Unit;
 use App\Models\Employee;
 use App\Models\FloorPremium;
@@ -42,12 +43,20 @@ class PriceListMasterRepository
 
 
     /*
-     * Get all property price list masters
+     * Get all property price list masters with pagination of 10 per page, apply the filters also if any
      */
-    public function index($page, $perPage)
+    public function index(array $validatedData)
     {
-        //TODO: Paginate here into 10 per page
-        $priceListMasters = $this->getPriceListMastersWithRelations()->paginate($perPage, ['*'], 'page', $page);
+        $query = $this->getPriceListMastersWithRelations();
+        $query = $this->filterPriceList($validatedData, $query);
+
+        $priceListMasters = $query->paginate(
+            $validatedData['per_page'],
+            ['*'],
+            'page',
+            $validatedData['page']
+        );
+
         return [
             'data' => $priceListMasters->getCollection()->map(
                 fn($priceList) =>
@@ -62,6 +71,38 @@ class PriceListMasterRepository
                 'prev_page_url' => $priceListMasters->previousPageUrl(),
             ]
         ];
+    }
+
+    /**
+     * Filter price list base
+     */
+    public function filterPriceList($validatedData, $query)
+    {
+        return $query
+            ->when(!empty($validatedData['property']), function ($q) use ($validatedData) {
+                $q->whereHas('towerPhase.propertyMaster', function ($q) use ($validatedData) {
+                    $q->where(
+                        'property_name',
+                        'ILIKE',
+                        '%'
+                            . $validatedData['property'] . '%'
+                    );
+                });
+            })
+
+            ->when(!empty($validatedData['status']), function ($q) use ($validatedData) {
+                $q->where(
+                    'status',
+                    $validatedData['status']
+                );
+            })
+
+            ->when(!empty($validatedData['date']), function ($q) use ($validatedData) {
+                $q->whereDate(
+                    'created_at',
+                    $validatedData['date']
+                );
+            });
     }
 
     /**
@@ -89,223 +130,6 @@ class PriceListMasterRepository
 
         ];
     }
-
-
-    /**
-     * Store price list master data
-     */
-    //TODO: refactor this and move to service
-    // public function store(array $data)
-    // {
-    //     //    dd($data);
-    //     DB::beginTransaction();
-    //     try {
-    //         $priceListMaster = $this->model->where('tower_phase_id', $data['tower_phase_id'])->first();
-    //         if (!$priceListMaster) {
-    //             throw new \Exception("PriceListMaster not found for tower_phase_id: {$data['tower_phase_id']}");
-    //         }
-
-    //         // Create a PriceBasicDetail for the PriceListMaster
-    //         $priceBasicDetail = $priceListMaster->priceBasicDetail()->create([
-    //             'base_price' => $data['priceListPayload']['base_price'],
-    //             'transfer_charge' => $data['priceListPayload']['transfer_charge'],
-    //             'effective_balcony_base' => $data['priceListPayload']['effective_balcony_base'],
-    //             'vat' => $data['priceListPayload']['vat'],
-    //             'vatable_less_price' => $data['priceListPayload']['vatable_less_price'],
-    //             'reservation_fee' => $data['priceListPayload']['reservation_fee'],
-    //         ]);
-
-    //         if (isset($data['priceVersionsPayload']) && is_array($data['priceVersionsPayload']) && !empty($data['priceVersionsPayload'])) {
-    //             $createdPriceVersionIds = []; // Initialize the array to store created IDs
-    //             foreach ($data['priceVersionsPayload'] as $priceVersionData) {
-
-    //                 if (!empty($priceVersionData['name']) || $priceVersionData['percent_increase'] > 0 || $priceVersionData['no_of_allowed_buyers'] > 0) {
-
-    //                     // Create a Price version
-    //                     $priceVersion = $priceListMaster->priceVersions()->create([
-    //                         'version_name' => $priceVersionData['name'],
-    //                         'percent_increase' => $priceVersionData['percent_increase'],
-    //                         'allowed_buyer' => $priceVersionData['no_of_allowed_buyers'],
-    //                         'expiry_date' => $this->formatExpiryDate($priceVersionData['expiry_date']),
-    //                         'status' => $priceVersionData['status'],
-    //                         'payment_scheme_id' => json_encode(array_column($priceVersionData['payment_scheme'], 'id')),
-    //                         'tower_phase_name' => $data['tower_phase_id'],
-    //                         'price_list_masters_id' => $data['price_list_master_id'],
-    //                         'priority_number' => $priceVersionData['priority_number'],
-
-    //                         // 'property_masters_id' => $data['property_masters_id'],
-    //                     ]);
-    //                     // Store the created ID
-    //                     $createdPriceVersionIds[] = $priceVersion->id;
-    //                 }
-    //             }
-    //         }
-
-    //         //Fetch the current Floor Premiums ID in the Price List Master table
-
-    //         $newFloorPremiumID = [] ?? null; // Keep track of floor premium in the payload
-    //         if (!empty($data['floorPremiumsPayload']) && is_array($data['floorPremiumsPayload'])) {
-
-    //             foreach ($data['floorPremiumsPayload'] as $floorPremium) {
-    //                 $premiumCost = $this->validatePremiumCost($floorPremium['premium_cost']);
-
-    //                 $newFloorPremium = $priceListMaster->floorPremiums()->create([
-    //                     'floor' => $floorPremium['floor'],
-    //                     'premium_cost' => $premiumCost,
-    //                     'lucky_number' => $floorPremium['lucky_number'],
-    //                     'excluded_unit' => json_encode($floorPremium['excluded_units']),
-    //                     'tower_phase_id' => $data['tower_phase_id'],
-    //                     'status' => 'Active'
-    //                 ]);
-    //                 $newFloorPremiumID[] = $newFloorPremium->id;
-    //             }
-    //         }
-
-    //         $newAdditionalPremiumId = [] ?? null;
-    //         if (!empty($data['additionalPremiumsPayload']) && is_array($data['additionalPremiumsPayload'])) {
-    //             // dd($data['additionalPremiumsPayload']);
-
-    //             foreach ($data['additionalPremiumsPayload'] as $additionalPremium) {
-    //                 $premiumCost = $this->validatePremiumCost($additionalPremium['premium_cost']);
-
-    //                 $newFloorPremium = $priceListMaster->additionalPremiums()->create([
-    //                     // 'id' => $additionalPremium['id'],
-    //                     'additional_premium' => $additionalPremium['view_name'],
-    //                     'premium_cost' => $premiumCost,
-    //                     'excluded_unit' => json_encode($additionalPremium['excluded_units']),
-    //                     'status' => 'Active',
-    //                     'tower_phase_id' => $data['tower_phase_id'],
-    //                     'price_list_master_id' => $data['price_list_master_id'],
-    //                 ]);
-    //                 $newAdditionalPremiumId[] = $newFloorPremium->id;
-    //             }
-    //         }
-
-
-    //         //Update the units table to store the additional premium IDs
-    //         if (!empty($data['selectedAdditionalPremiumsPayload']) && is_array($data['selectedAdditionalPremiumsPayload'])) {
-    //             foreach ($data['selectedAdditionalPremiumsPayload'] as $additionalPremium) {
-    //                 $unitId = (int) $additionalPremium['unit_id'] ?? null;
-    //                 // $additionalPremiumId = $additionalPremium['additional_premium_id'] ?? null;
-    //                 // Use new additional premium IDs
-    //                 $additionalPremiumId = $newAdditionalPremiumId;
-    //                 // dd($newAdditionalPremiumId);
-    //                 if (!$unitId || $additionalPremiumId === null) {
-    //                     continue; // Skip if unit_id or additional_premium_id is missing
-    //                 }
-
-    //                 // Fetch the unit and ensure it exists
-    //                 $unit = $this->unitModel->where('id', $unitId)->first();
-    //                 if (!$unit) {
-    //                     // If the unit does not exist, insert a new one with the selected additional premium(s)
-    //                     $this->unitModel->insert([
-    //                         'id' => $unitId,
-    //                         'additional_premium_id' => json_encode(array_map('intval', $additionalPremiumId))
-    //                     ]);
-
-    //                     return; // Exit since we already inserted
-    //                 }
-    //                 // Decode the stored additional_premium_id JSON array
-    //                 $unitIds = (!empty($unit->additional_premium_id) && is_string($unit->additional_premium_id))
-    //                     ? json_decode($unit->additional_premium_id, true)
-    //                     : [];
-
-    //                 if (!is_array($unitIds)) {
-    //                     $unitIds = []; // Default to empty array if json_decode fails
-    //                 }
-
-    //                 $additionalPremiumId = is_array($additionalPremiumId) ? $additionalPremiumId : [$additionalPremiumId];
-
-    //                 // Update the additional_premium_id list by replacing the old with the new
-    //                 // If user deselects everything, store an empty array `[]`
-    //                 if (empty($additionalPremiumId)) {
-    //                     $unitIds = null; // Store empty array in DB
-    //                 } else {
-    //                     $unitIds = $additionalPremiumId; // Update with new selection
-    //                 }
-
-    //                 // Update database with the modified additional premium list
-    //                 $this->unitModel->where('id', $unitId)->update([
-    //                     'additional_premium_id' => json_encode(array_map('intval', $unitIds))
-    //                 ]);
-    //             }
-    //         }
-
-
-    //         //Fetch the current reviewed by employees ID in the Price List Master table
-    //         $reviewedByEmployeesIdsFromDatabase = json_decode($priceListMaster->reviewed_by_employees_id, true) ?? []; // Ensure it's an array
-    //         $reviewedByEmployeesId = []; // This will store the final list of IDs
-
-    //         // Check if the payload contains valid data
-    //         if (!empty($data['reviewedByEmployeesPayload']) && is_array($data['reviewedByEmployeesPayload'])) {
-    //             // Extract only the IDs from the frontend payload
-    //             $incommingReviewedIds = array_map(fn($emp) => $emp['id'] ?? null, $data['reviewedByEmployeesPayload']);
-    //             $incommingReviewedIds = array_filter($incommingReviewedIds); // Remove null values
-
-    //             // Compare with existing IDs and keep only those that are in $incomingIds
-    //             $reviewedByEmployeesIdsFromDatabase = array_values(array_intersect($reviewedByEmployeesIdsFromDatabase, $incommingReviewedIds));
-
-    //             // Add new IDs if not already present
-    //             foreach ($incommingReviewedIds as $incommingReviewedId) {
-    //                 if (!in_array($incommingReviewedId, $reviewedByEmployeesIdsFromDatabase)) {
-    //                     $reviewedByEmployeesIdsFromDatabase[] = $incommingReviewedId;
-    //                 }
-    //             }
-    //         }
-
-    //         //Fetch the current aproved by employees ID in the Price List Master table
-    //         $approvedByEmployeesIdsFromDatabase = json_decode($priceListMaster->approved_by_employee_id, true) ?? []; // Ensure it's an array
-
-
-    //         // Check if the payload contains valid data
-    //         if (!empty($data['approvedByEmployeesPayload']) && is_array($data['approvedByEmployeesPayload'])) {
-    //             // Extract only the IDs from the frontend payload
-    //             $incommingApprovedIds = array_map(fn($emp) => $emp['id'] ?? null, $data['approvedByEmployeesPayload']);
-    //             $incommingApprovedIds = array_filter($incommingApprovedIds);
-
-    //             // Compare with existing IDs and keep only those that are in $incomingIds
-    //             $approvedByEmployeesIdsFromDatabase = array_values(array_intersect($approvedByEmployeesIdsFromDatabase, $incommingApprovedIds));
-
-    //             // Add new IDs if not already present
-    //             foreach ($incommingApprovedIds as $incommingApprovedId) {
-    //                 if (!in_array($incommingApprovedId, $approvedByEmployeesIdsFromDatabase)) {
-    //                     $approvedByEmployeesIdsFromDatabase[] = $incommingApprovedId;
-    //                 }
-    //             }
-    //         }
-
-    //         $priceListMaster->update([
-    //             'status' => $data['status'],
-    //             'emp_id' => $data['emp_id'],
-    //             'date_last_update' => now(),
-    //             'pricebasic_details_id' => $priceBasicDetail->id,
-    //             'floor_premiums_id' => json_encode($newFloorPremiumID),
-    //             'price_versions_id' => json_encode($createdPriceVersionIds),
-    //             'additional_premiums_id' => json_encode($newAdditionalPremiumId),
-    //             'reviewed_by_employee_id' => json_encode($reviewedByEmployeesIdsFromDatabase),
-    //             'approved_by_employee_id' => json_encode($approvedByEmployeesIdsFromDatabase)
-    //         ]);
-
-    //         DB::commit();
-
-    //         return [
-    //             'success' => true,
-    //             'message' => 'Price List Master created successfully.',
-    //             'data' => $priceListMaster->fresh()
-    //         ];
-    //     } catch (\Exception $e) {
-    //         DB::rollBack();
-    //         // Return failure status and error message
-    //         return [
-    //             'success' => false,
-    //             'message' => 'Error creating price price list master. ' . $e->getMessage(),
-    //             'error_details' => $e->getTraceAsString() // Include stack trace for debugging
-    //         ];
-    //     }
-    // }
-
-
-
 
     /**
      * Fetch price list masters with related models and fields.
@@ -344,6 +168,7 @@ class PriceListMasterRepository
         return [
             'price_list_master_id' => $priceList->id,
             'updated_at' => $priceList->updated_at,
+            'created_at' => $priceList->created_at,
             'tower_phase_id' => $priceList->towerPhase->id,
             'tower_phase_name' => $priceList->towerPhase->tower_phase_name,
             // 'excel_id'=> $priceList->towerPhase->units->property_masters_id
@@ -352,8 +177,6 @@ class PriceListMasterRepository
             'property_name' => $priceList->towerPhase->propertyMaster->property_name ?? null,
             'pricebasic_details' => $priceList->priceBasicDetail ? $priceList->priceBasicDetail->toArray() : null,
             'excel_id' => $priceList->towerPhase->units->where('status', 'Active')->pluck('excel_id')->unique()->first() ?? null,
-            // 'property_commercial_detail' => $priceList->towerPhase->propertyMaster->propertyCommercialDetail->toArray(),
-            // 'property_commercial_detail' => optional($priceList->towerPhase->propertyMaster->propertyCommercialDetail)->where('price_list_master_id', $priceList->id)->toArray(),
             'property_commercial_detail' => optional(
                 $priceList->towerPhase->propertyMaster->propertyCommercialDetail()
                     ->where('price_list_master_id', $priceList->id)
@@ -382,8 +205,6 @@ class PriceListMasterRepository
                 ->get()
                 ->makeHidden(['firstname', 'lastname'])
                 ->toArray(),
-
-
         ];
     }
 

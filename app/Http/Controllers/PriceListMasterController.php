@@ -6,6 +6,8 @@ namespace App\Http\Controllers;
 use Log;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\FilterPriceListRequest;
+use App\Http\Requests\IndexPriceListRequest;
 use App\Services\PriceListMasterService;
 use Illuminate\Validation\ValidationException;
 use App\Http\Requests\StorePriceListMasterRequest;
@@ -23,14 +25,18 @@ class PriceListMasterController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request)
+    public function index(IndexPriceListRequest $request)
     {
+        $validatedData = $request->validated();
+        // dd($validatedData);
         // Capture query parameters from request
-        $perPage = $request->input('per_page', 10);
-        $page = $request->input('page', 1);
+        // $perPage = $request->input('per_page', 10);
+        // $page = $request->input('page', 1);
 
-        $priceListMastersResponse = $this->service->index($page, $perPage);
+        // $priceListMastersResponse = $this->service->index($page, $perPage);
+        $priceListMastersResponse = $this->service->index($validatedData);
        
+
         return response()->json([
             'data' => $priceListMastersResponse['data'],
             'pagination' => $priceListMastersResponse['pagination']
@@ -69,6 +75,14 @@ class PriceListMasterController extends Controller
         }
     }
 
+    /**
+     * Filter the price list base on filter search params
+     */
+    public function filterPriceList(FilterPriceListRequest $request)
+    {
+        $filterResponse = $this->service->filterPriceList($request->validated());
+        dd($filterResponse);
+    }
 
     /*
      * Update the specified resource in storage.

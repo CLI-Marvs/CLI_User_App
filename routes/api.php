@@ -109,7 +109,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/upload-notepad', [SapController::class, 'uploadNotepad']);
 
     Route::controller(TransactionController::class)->group(function () {
-        Route::get('/customer/inquiries','getCustomerInquiries');
+        Route::get('/customer/inquiries', 'getCustomerInquiries');
         Route::get('/customer/data', 'getCustomerData');
         Route::get('/customer/details', 'getCustomerDetailsByEmail');
         Route::get('/transaction-list', 'retrieveTransactions');
@@ -134,15 +134,15 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/specific-assignee', 'getSpecificInquiry');
         Route::post('/remove-assignee', 'removeAssignee');
     });
-    
+
     // Route::get('/property-name', [PropertyMasterController::class, 'getPropertyName']);
     // Route::post('/download-file', [ConcernController::class, 'downloadFileFromGCS']);
- 
+
     /* Property Master */
     // Route::post('/property-details', [PropertyMasterController::class, 'storePropertyDetail']);
     // Route::get('/get-property-master/{id}', [PropertyMasterController::class, 'getPropertyMaster']);
- 
-  
+
+
     /*Property Data*/
     Route::prefix('properties')->group(function () {
         Route::get('names', [PropertyMasterController::class, 'getPropertyNames']);
@@ -160,6 +160,7 @@ Route::middleware('auth:sanctum')->group(function () {
     /*Property Price Master List */
     Route::prefix('price-list-masters')->group(function () {
         Route::get('/', [PriceListMasterController::class, 'index']);
+        // Route::post('/filter', [PriceListMasterController::class, 'filterPriceList']);
         Route::post('/', [PriceListMasterController::class, 'store']);
         Route::put('/update', [PriceListMasterController::class, 'update']);
         Route::patch('/{id}/status', [PriceListMasterController::class, 'updateStatus']);
@@ -176,9 +177,9 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/check/{towerPhaseId}/{excelId}', [UnitController::class, 'getExistingUnits']);
         // Route::get('/tower/{towerPhaseId}/floor/{selectedFloor}/units/{excelId}', [UnitController::class, 'getUnits']);
         Route::post('/store-unit', [UnitController::class, 'storeUnit']);
-        Route::post('/save-computed-pricing-data', [UnitController::class, 'saveComputedUnitPricingData']); 
+        Route::post('/save-computed-pricing-data', [UnitController::class, 'saveComputedUnitPricingData']);
     });
-    
+
 
     /* Price Versioning */
     Route::prefix('/price-version')->group(function () {

@@ -40,11 +40,17 @@ class PriceListMasterService
     /** 
      * Get all property price list masters
      */
-    public function index($page, $perPage)
+    public function index(array $validatedData)
     {
-        return $this->repository->index($page, $perPage);
+        return $this->repository->index($validatedData);
     }
 
+    /**
+     * Filter price list base on filter 
+     */
+    public function filterPriceList($data){
+        return $this->repository->filterPriceList($data);
+    }
     /*
     Store price list master data
     */

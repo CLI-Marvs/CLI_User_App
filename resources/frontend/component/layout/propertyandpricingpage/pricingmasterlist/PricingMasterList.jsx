@@ -15,6 +15,7 @@ import { toLowerCaseText } from "@/component/layout/propertyandpricingpage/utils
 import { useProperty } from "@/context/PropertyPricing/PropertyContext";
 import { showToast } from "@/util/toastUtil";
 import { priceListMasterService } from "@/component/servicesApi/apiCalls/propertyPricing/priceListMaster/priceListMasterService";
+import CustomInput from "@/component/Input/CustomInput";
 
 const PricingMasterList = () => {
     //States
@@ -26,23 +27,65 @@ const PricingMasterList = () => {
         setCurrentPage,
         isFirstLoad,
     } = usePriceListMaster();
+    const [searchFilters, setSearchFilters] = useState({
+        property: "",
+        paymentScheme: "",
+        // promo: "",
+        date: null, // or keep new Date() if needed
+        status: "",
+    });
     const { fetchPaymentSchemes } = usePaymentScheme();
     const [startDate, setStartDate] = useState(new Date());
     const [toggled, setToggled] = useState(false);
     const [isFilterVisible, setIsFilterVisible] = useState(false);
     const navigate = useNavigate();
+    const dropdownRef = useRef(null);
     const propertyModalRef = useRef(null);
     const toggleFilterBox = () => {
         setIsFilterVisible(!isFilterVisible);
     };
-  
+
     //Hooks
     useEffect(() => {
         fetchPaymentSchemes();
         console.log("priceListMaster", priceListMaster);
     }, [fetchPaymentSchemes, priceListMaster]);
 
+    useEffect(() => {
+        const handleOutsideClick = (event) => {
+            if (
+                dropdownRef.current &&
+                !dropdownRef.current.contains(event.target)
+            ) {
+                setIsFilterVisible(false);
+            }
+        };
+
+        document.addEventListener("mousedown", handleOutsideClick);
+        return () => {
+            document.removeEventListener("mousedown", handleOutsideClick);
+        };
+    }, []);
+
     //Event handler
+    //Handle search filter input change
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setSearchFilters((prevFilters) => ({
+            ...prevFilters,
+            [name]: value,
+        }));
+    };
+
+    //Handle search filter date change
+    const handleDateChange = (date) => {
+        setStartDate(moment(date).format("MM-DD-YYYY HH:mm:ss") ?? null);
+        setSearchFilters((prevFilters) => ({
+            ...prevFilters,
+            date: moment(date).format("YYYY-MM-DD HH:mm:ss") ?? null,
+        }));
+    };
+
     /**
      * Handle to navigate to basic pricing component, only if the Status !== On-going Approval
      * @param {*} id
@@ -88,8 +131,21 @@ const PricingMasterList = () => {
     const handlePageChange = (selectedPage) => {
         if (selectedPage !== currentPage) {
             setCurrentPage(selectedPage);
-            fetchPropertyListMasters(false, false, selectedPage);
+            fetchPropertyListMasters(false, false, selectedPage, searchFilters);
         }
+    };
+
+    //Handle search button
+    const handleSearch = async () => {
+        setCurrentPage(1);
+        await fetchPropertyListMasters(true, false, 1, searchFilters);
+        setSearchFilters({
+            property: "",
+            paymentScheme: "",
+            // promo: "",
+            date: null, // or keep new Date() if needed
+            status: "",
+        });
     };
 
     return (
@@ -120,6 +176,8 @@ const PricingMasterList = () => {
                     </svg>
                     <input
                         type="text"
+                        readOnly={true}
+                        onClick={toggleFilterBox}
                         className="h-10 w-full rounded-lg pl-9 pr-6 text-sm"
                         placeholder="Search"
                     />
@@ -140,16 +198,22 @@ const PricingMasterList = () => {
                     </svg>
                 </div>
                 {isFilterVisible && (
-                    <div className="absolute left-0 mt-12 p-8 bg-white border border-gray-300 shadow-lg rounded-lg z-10 w-[582px]">
+                    <div
+                        className="absolute left-0 mt-12 p-8 bg-white border border-gray-300 shadow-lg rounded-lg z-10 w-[582px]"
+                        ref={dropdownRef}
+                    >
                         <div className="flex flex-col gap-2">
                             <div className="flex">
                                 <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
                                     {" "}
                                     Property
                                 </label>
-                                <input
+                                <CustomInput
                                     type="text"
-                                    className="w-full  border-b-1 outline-none"
+                                    name="property"
+                                    value={searchFilters.property || ""}
+                                    className="w-full  border-b-1 outline-none ml-2"
+                                    onChange={handleInputChange}
                                 />
                             </div>
                             <div className="flex">
@@ -157,21 +221,27 @@ const PricingMasterList = () => {
                                     {" "}
                                     Payment Scheme
                                 </label>
-                                <input
+                                <CustomInput
                                     type="text"
-                                    className="w-full  border-b-1 outline-none"
+                                    name="paymentScheme"
+                                    value={searchFilters.paymentScheme || ""}
+                                    className="w-full  border-b-1 outline-none ml-2"
+                                    onChange={handleInputChange}
                                 />
                             </div>
-                            <div className="flex">
+                            {/* <div className="flex">
                                 <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
                                     {" "}
                                     Promo
                                 </label>
-                                <input
+                                <CustomInput
                                     type="text"
-                                    className="w-full  border-b-1 outline-none"
+                                    name="promo"
+                                    value={searchFilters.promo || ""}
+                                    className="w-full  border-b-1 outline-none ml-2"
+                                    onChange={handleInputChange}
                                 />
-                            </div>
+                            </div> */}
                             <div className="flex gap-3">
                                 <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
                                     Date
@@ -179,7 +249,9 @@ const PricingMasterList = () => {
                                 <div className="relative">
                                     <DatePicker
                                         selected={startDate}
-                                        onChange={(date) => setStartDate(date)}
+                                        onChange={(date) =>
+                                            handleDateChange(date)
+                                        }
                                         className=" border-b-1 outline-none w-[176px]"
                                         calendarClassName="custom-calendar"
                                     />
@@ -194,22 +266,30 @@ const PricingMasterList = () => {
                                     {" "}
                                     Status
                                 </label>
-                                <select className="w-full border-b-1 outline-none">
+                                <select
+                                    className="w-full border-b-1 outline-none px-[5px]"
+                                    name="status"
+                                    value={searchFilters.status || ""}
+                                    onChange={handleInputChange}
+                                >
                                     <option value="">Select Status</option>
-                                    <option value="draft">Draft</option>
-                                    <option value="ongoing">
-                                        On-going approval
+                                    <option value="Draft">Draft</option>
+                                    <option value="On-going Approval">
+                                        On-going Approval
                                     </option>
-                                    <option value="approvenotlive">
+                                    <option value="Approved Not Live">
                                         Approved not Live
                                     </option>
-                                    <option value="approveandlive">
+                                    <option value="Approved And Live">
                                         Approve and Live
                                     </option>
                                 </select>
                             </div>
                             <div className="mt-3 flex justify-end">
-                                <button className="h-[37px] w-[88px] gradient-btn rounded-[10px] text-white text-sm">
+                                <button
+                                    className="h-[37px] w-[88px] gradient-btn rounded-[10px] text-white text-sm"
+                                    onClick={handleSearch}
+                                >
                                     Search
                                 </button>
                             </div>
@@ -358,7 +438,7 @@ const PricingMasterList = () => {
                                                 <span>
                                                     {/* Fix the formatting */}
                                                     {moment(
-                                                        item.updated_at
+                                                        item.created_at
                                                     ).format("M / D / YYYY")}
                                                 </span>
                                             </div>

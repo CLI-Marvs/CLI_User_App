@@ -45,7 +45,6 @@ const paymentScheme = ({ action, priceListMasterData }) => {
      * @param {number} schemeId - The ID of the payment scheme being selected/unselected.
      */
     const handleSelectedPaymentScheme = (e, schemeId) => {
-        //TODO: to clarify here, if already selected, naa ba freedom si user nga iya e uncheck
         const isChecked = e.target.checked;
         if (action === 'Edit') {
             setSelectedSchemes((prevSchemes) => {
@@ -93,9 +92,9 @@ const paymentScheme = ({ action, priceListMasterData }) => {
         if (paymentScheme && Array.isArray(paymentScheme)) {
             return paymentScheme.map((item, index) => {
                 const paymentSchemesArray = action === 'Edit'
-                    ? selectedSchemes?.paymentSchemes || [] // For Edit, extract paymentSchemes
+                    ? selectedSchemes?.paymentSchemes || [] 
                     : Array.isArray(selectedSchemes)
-                        ? selectedSchemes // For Add, selectedSchemes is already an array
+                        ? selectedSchemes  
                         : [];
                 const isChecked = paymentSchemesArray.includes(item.id);
 
