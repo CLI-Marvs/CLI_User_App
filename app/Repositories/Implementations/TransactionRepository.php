@@ -105,7 +105,7 @@ class TransactionRepository
                 'payment_method_transaction_id' => $preSubmissionData->payment_transaction_id,
                 'transaction_type' => $preSubmissionData->transaction_type,
                 'amount' => $preSubmissionData->amount,
-                'project_id' => $preSubmissionData->id,
+                'id' => $preSubmissionData->id,
                 'remarks' => $preSubmissionData->remarks,
                 'payment_method' => "Online Payment Aggregator",
                 'payment_option' => $preSubmissionData->payment_option,
