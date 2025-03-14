@@ -1,7 +1,6 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { priceListMasterService } from "@/component/servicesApi/apiCalls/propertyPricing/priceListMaster/priceListMasterService"; 
+import { priceListMasterService } from "@/component/servicesApi/apiCalls/propertyPricing/priceListMaster/priceListMasterService";
 
 export const usePropertyPricing = (
     user,
@@ -52,7 +51,7 @@ export const usePropertyPricing = (
         approvedByEmployeesPayload: pricingData?.approvedByEmployees,
         status: status,
     });
- 
+
     /*
      * Handles in submitting all data in creating price master list
      */
@@ -84,7 +83,8 @@ export const usePropertyPricing = (
                     await checkExistingUnits(
                         data.tower_phase_id,
                         excelId || data?.excelId,
-                        true
+                        true,
+                        false
                     );
                     await fetchPropertyListMasters(true, true, currentPage);
 
@@ -128,7 +128,8 @@ export const usePropertyPricing = (
                     await checkExistingUnits(
                         data.tower_phase_id,
                         excelId || data?.excelId,
-                        true
+                        true,
+                        false
                     );
                     await fetchPropertyListMasters(true, true, currentPage);
 

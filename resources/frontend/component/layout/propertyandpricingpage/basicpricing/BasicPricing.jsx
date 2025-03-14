@@ -222,7 +222,7 @@ const BasicPricing = () => {
             data?.excel_id &&
             data?.excel_id !== lastFetchedExcelId
         ) {
-            checkExistingUnits(data.tower_phase_id, data.excel_id);
+            checkExistingUnits(data.tower_phase_id, data.excel_id,false,false);
             setLastFetchedExcelId(data?.excel_id);
         }
 
@@ -294,7 +294,7 @@ const BasicPricing = () => {
                 floorPremium?.excludedUnits?.some(
                     (excludedId) => excludedId === unit.id
                 ) || false;
-            
+
             const floorPremiumCost =
                 floorPremium && !isUnitExcluded
                     ? parseFloat(floorPremium.premiumCost) || 0

@@ -351,7 +351,7 @@ class PriceListMasterService
             $premiumCost = $this->validatePremiumCost($additionalPremium['premium_cost']);
 
             $newAdditionalPremium = $priceListMaster->additionalPremiums()->create([
-                'id'=>$additionalPremium['id'],
+                'id' => $additionalPremium['id'],
                 'additional_premium' => $additionalPremium['view_name'],
                 'premium_cost' => $premiumCost,
                 'excluded_unit' => json_encode($additionalPremium['excluded_units']),
@@ -744,7 +744,7 @@ class PriceListMasterService
                     } else {
                         // CREATE new additional premium
                         $newAdditionalPremium = $priceListMaster->additionalPremiums()->create([
-                            // 'id' => $additionalPremiumId,
+                            'id' => $additionalPremiumId,
                             'additional_premium' => $additionalPremium['view_name'],
                             'premium_cost' => $premiumCost,
                             'excluded_unit' => json_encode($additionalPremium['excluded_units']),

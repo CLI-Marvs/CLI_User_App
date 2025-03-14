@@ -15,7 +15,7 @@ const ProjectDetails = ({ propertyData }) => {
     const markerRef = useRef(null);
     const infoWindowRef = useRef(null);
     const [address, setAddress] = useState("Fetching address...");
-
+ 
     // Extract property details with fallback values
     const latitude =
         parseFloat(

@@ -200,9 +200,16 @@ export const UnitProvider = ({ children }) => {
     // Update computed prices and trigger save
     const updateUnitComputedPrices = useCallback(
         (newPrices) => {
-            setComputedUnitPrices(newPrices);
+            // setComputedUnitPrices(newPrices);
+             setComputedUnitPrices((prevPrices) => {
+                 if (JSON.stringify(prevPrices) !== JSON.stringify(newPrices)) {
+                     // Only trigger save if prices actually changed
+                     saveComputedUnitPricingData(newPrices);
+                 }
+                 return newPrices;
+             });
             //TODO: uncomment this line to save the computed prices
-            //saveComputedUnitPricingData(newPrices);
+             saveComputedUnitPricingData(newPrices);
         },
         [saveComputedUnitPricingData]
     );

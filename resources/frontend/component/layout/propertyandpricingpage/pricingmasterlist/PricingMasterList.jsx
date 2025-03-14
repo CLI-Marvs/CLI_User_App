@@ -35,10 +35,11 @@ const PricingMasterList = () => {
     const toggleFilterBox = () => {
         setIsFilterVisible(!isFilterVisible);
     };
-
+  
     //Hooks
     useEffect(() => {
         fetchPaymentSchemes();
+        console.log("priceListMaster", priceListMaster);
     }, [fetchPaymentSchemes, priceListMaster]);
 
     //Event handler

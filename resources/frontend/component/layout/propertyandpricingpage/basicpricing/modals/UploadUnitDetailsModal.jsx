@@ -39,7 +39,6 @@ const UploadUnitDetailsModal = ({
 
     //Hooks
     useEffect(() => {
-    
         if (selectedExcelHeader || propertyData) {
             const initialFormData = selectedExcelHeader.reduce((acc, item) => {
                 acc[item.rowHeader] = {
@@ -53,7 +52,11 @@ const UploadUnitDetailsModal = ({
                     ? priceListMaster.find(
                           (master) => master.tower_phase_id === towerPhaseId
                       )?.price_list_master_id
-                    : null;
+                    : propertyData &&
+                      propertyData?.data?.property_commercial_detail
+                          .price_list_master_id;
+    
+
             setFormData(initialFormData);
             setPropertyMasterId(
                 propertyData?.property_commercial_detail?.property_master_id ||
@@ -94,7 +97,7 @@ const UploadUnitDetailsModal = ({
                 setUnits([]);
                 setExcelId("");
                 setExcelIdFromPriceList("");
-                
+
                 // Reset specific pricing data fields while preserving other fields
                 setPricingData((prev) => ({
                     ...prev,
