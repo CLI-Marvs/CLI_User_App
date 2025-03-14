@@ -131,11 +131,11 @@ class TransactionRepository
     public function retrieveTransactions(array $data)
     {
         $query = $this->transactionModel
-            ->join('property_masters', 'property_masters.id', '=', 'bank_transactions.project_id')
-            ->select('bank_transactions.*', 'property_masters.property_name');
+            ->join('property_masters', 'property_masters.id', '=', 'transaction.id')
+            ->select('transaction.*', 'property_masters.property_name');
 
         if (!empty($data['filter'])) {
-            $query->where('bank_transactions.status', $data['filter']);
+            $query->where('transaction.status', $data['filter']);
         }
 
 
@@ -146,14 +146,14 @@ class TransactionRepository
 
     public function updateTransactionStatus(array $data)
     {
-        $updatedCount = 0;
+        $transactionData = null;
 
         foreach ($data as $item) {
-            $updatedCount += $this->transactionModel
-                ->where('id', $item['id'])
-                ->update(['status' => 'Cleared']);
+            $transactionData = $this->transactionModel
+                ->where('transaction_id', $item['id'])
+                ->update(['status' => 'Floating']);
         }
 
-        return $updatedCount;
+        return $transactionData;
     }
 }
