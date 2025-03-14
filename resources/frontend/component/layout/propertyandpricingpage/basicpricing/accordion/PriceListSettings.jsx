@@ -5,11 +5,7 @@ import CustomInput from "@/component/Input/CustomInput";
 
 const PriceListSettings = ({ isOpen, toggleAccordion }) => {
     //State
-    const { pricingData, updatePricingSection, setPricingData } = usePricing();
-
-    //Hooks
-
-    // const computeEffectBasePrice
+    const { pricingData, updatePricingSection } = usePricing();
 
     //Event Handler
     const handleInputChange = (e) => {
@@ -73,7 +69,6 @@ const PriceListSettings = ({ isOpen, toggleAccordion }) => {
                                     Base Price Per Sq. M.
                                 </span>
                                 <CustomInput
-                                    type="number"
                                     name="base_price"
                                     value={
                                         pricingData?.priceListSettings
@@ -90,15 +85,15 @@ const PriceListSettings = ({ isOpen, toggleAccordion }) => {
                                 <span className="text-custom-gray81 bg-custom-grayFA font-semibold flex w-[180%] pl-3 py-1 ">
                                     Transfer charge
                                 </span>
-                                <input
-                                    onChange={handleInputChange}
+                                <CustomInput
+                                    name="transfer_charge"
                                     value={
                                         pricingData?.priceListSettings
-                                            ?.transfer_charge
+                                            ?.transfer_charge || ""
                                     }
-                                    name="transfer_charge"
-                                    type="number"
-                                    className="w-full px-4 focus:outline-none"
+                                    className="w-full px-4 focus:outline-none "
+                                    onChange={handleInputChange}
+                                    restrictNumbers={true}
                                 />
                             </div>
                         </div>
@@ -108,6 +103,7 @@ const PriceListSettings = ({ isOpen, toggleAccordion }) => {
                                     Effective Balcony Base
                                 </span>
                                 <input
+                                    disabled
                                     name="effective_balcony_base"
                                     type="number"
                                     onChange={handleInputChange}
@@ -122,12 +118,15 @@ const PriceListSettings = ({ isOpen, toggleAccordion }) => {
                                 <span className="text-custom-gray81 bg-custom-grayFA font-semibold flex w-[180%] pl-3 py-1 ">
                                     VAT
                                 </span>
-                                <input
+                                <CustomInput
                                     name="vat"
+                                    value={
+                                        pricingData?.priceListSettings?.vat ||
+                                        ""
+                                    }
+                                    className="w-full px-4 focus:outline-none "
                                     onChange={handleInputChange}
-                                    value={pricingData?.priceListSettings?.vat}
-                                    type="number"
-                                    className="w-full px-4 focus:outline-none"
+                                    restrictNumbers={true}
                                 />
                             </div>
                         </div>
@@ -139,31 +138,30 @@ const PriceListSettings = ({ isOpen, toggleAccordion }) => {
                                         (greater than)
                                     </span>
                                 </span>
-                                <input
+                                <CustomInput
                                     name="vatable_less_price"
-                                    type="number"
-                                    onChange={handleInputChange}
                                     value={
                                         pricingData?.priceListSettings
-                                            ?.vatable_less_price
+                                            ?.vatable_less_price || ""
                                     }
-                                    className="w-full px-4 focus:outline-none"
+                                    className="w-full px-4 focus:outline-none "
+                                    onChange={handleInputChange}
+                                    restrictNumbers={true}
                                 />
                             </div>
                             <div className="flex items-center border border-custom-grayF1 rounded-[5px] overflow-hidden w-[375px] text-sm">
                                 <span className="text-custom-gray81 bg-custom-grayFA font-semibold flex w-[180%] pl-3 py-1 text-sm">
                                     Reservation Fee
                                 </span>
-                                <input
+                                <CustomInput
                                     name="reservation_fee"
-                                    type="number"
-                                    onChange={handleInputChange}
                                     value={
                                         pricingData?.priceListSettings
-                                            ?.reservation_fee
+                                            ?.reservation_fee || ""
                                     }
-                                    className="w-full px-4 focus:outline-none"
-                                    placeholder=""
+                                    className="w-full px-4 focus:outline-none "
+                                    onChange={handleInputChange}
+                                    restrictNumbers={true}
                                 />
                             </div>
                         </div>

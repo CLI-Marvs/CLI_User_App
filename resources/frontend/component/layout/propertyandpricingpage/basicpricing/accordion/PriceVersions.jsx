@@ -11,6 +11,7 @@ import { HiPencil } from "react-icons/hi";
 import { MdDelete } from "react-icons/md";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import CustomInput from "@/component/Input/CustomInput";
 
 const PriceVersions = ({
     priceListMasterData,
@@ -24,9 +25,6 @@ const PriceVersions = ({
     const editPaymentSchemeModalRef = useRef(null);
     const { pricingData, setPricingData } = usePricing();
     const [versionIndex, setVersionIndex] = useState(0);
-    const [selectedPaymentSchemes, setSelectedPaymentSchemes] = useState([]);
-    const [isDatePickerVisible, setIsDatePickerVisible] = useState(false);
-    const [expiryDate, setExpiryDate] = useState(null);
 
     //Event handler
     //Handle change in the input field for price version
@@ -268,13 +266,14 @@ const PriceVersions = ({
                                                                 }
                                                             </td>
                                                             <td className="px-[10px]">
-                                                                <input
+                                                                <CustomInput
                                                                     type="text"
                                                                     name="name"
-                                                                    className="pl-3 w-[150px] border border-custom-grayF1 rounded-[5px] h-[31px]"
                                                                     value={
-                                                                        form.name
+                                                                        form.name ||
+                                                                        ""
                                                                     }
+                                                                    className="pl-3 w-[150px] border border-custom-grayF1 rounded-[5px] h-[31px]"
                                                                     onChange={(
                                                                         event
                                                                     ) =>
@@ -286,13 +285,14 @@ const PriceVersions = ({
                                                                 />
                                                             </td>
                                                             <td className="px-[10px]">
-                                                                <input
+                                                                <CustomInput
                                                                     type="number"
                                                                     name="percent_increase"
-                                                                    className="pl-3 w-[100px] border border-custom-grayF1 rounded-[5px] h-[31px]"
                                                                     value={
-                                                                        form.percent_increase
+                                                                        form.percent_increase ||
+                                                                        ""
                                                                     }
+                                                                    className="pl-3 w-[100px] border border-custom-grayF1 rounded-[5px] h-[31px]"
                                                                     onChange={(
                                                                         event
                                                                     ) =>
@@ -300,19 +300,22 @@ const PriceVersions = ({
                                                                             event,
                                                                             index
                                                                         )
+                                                                    }
+                                                                    restrictNumbers={
+                                                                        true
                                                                     }
                                                                 />
                                                             </td>
                                                             <td className="px-[10px]">
-                                                                {/* TODO:Create an reusable component for this input to use other field*/}
-                                                                <input
+                                                                <CustomInput
                                                                     type="number"
-                                                                    className="pl-3  w-[100px] border 
-                                                        border-custom-grayF1 rounded-[5px] h-[31px]"
                                                                     name="no_of_allowed_buyers"
                                                                     value={
-                                                                        form.no_of_allowed_buyers
+                                                                        form.no_of_allowed_buyers ||
+                                                                        ""
                                                                     }
+                                                                    className="pl-3  w-[100px] border 
+                                                        border-custom-grayF1 rounded-[5px] h-[31px]"
                                                                     onChange={(
                                                                         event
                                                                     ) =>
@@ -320,6 +323,9 @@ const PriceVersions = ({
                                                                             event,
                                                                             index
                                                                         )
+                                                                    }
+                                                                    restrictNumbers={
+                                                                        true
                                                                     }
                                                                 />
                                                             </td>

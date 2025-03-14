@@ -20,7 +20,7 @@ import { showToast } from "@/util/toastUtil";
 import { usePriceListMaster } from "@/context/PropertyPricing/PriceListMasterContext";
 import CustomToolTip from "@/component/layout/mainComponent/Tooltip/CustomToolTip";
 import UnitTableComponent from "@/component/layout/propertyandpricingpage/component/UnitTableComponent";
-import { property } from "lodash";
+
 const staticHeaders = [
     "Floor",
     "Room",

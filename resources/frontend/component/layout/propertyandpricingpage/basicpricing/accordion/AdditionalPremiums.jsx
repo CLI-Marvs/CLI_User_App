@@ -171,15 +171,16 @@ const AdditionalPremiums = ({ propertyData, isOpen, toggleAccordion }) => {
                                     </span>
                                     <div className="relative w-full">
                                         <CustomInput
+                                            type="text"
                                             name="viewName"
                                             value={
                                                 newAdditionalPremium.viewName ||
                                                 ""
                                             }
+                                            className="outline-none  -mr-3 pl-3 py-1 bg-custom-grayFA   w-full "
                                             onChange={
                                                 onChangeNewAdditionalPremium
                                             }
-                                            className="outline-none  -mr-3 pl-3 py-1 bg-custom-grayFA   w-full "
                                         />
                                     </div>
                                 </div>
@@ -187,16 +188,16 @@ const AdditionalPremiums = ({ propertyData, isOpen, toggleAccordion }) => {
                                     <span className="text-custom-gray81 bg-custombg3 font-semibold flex w-[250px] pl-3 py-1">
                                         Cost (Sq.m)
                                     </span>
-                                    <input
-                                        onChange={onChangeNewAdditionalPremium}
+                                    <CustomInput
+                                        type="number"
                                         name="premiumCost"
                                         value={
                                             newAdditionalPremium.premiumCost ||
                                             ""
                                         }
-                                        type="number"
-                                        className="w-full px-4 focus:outline-none"
-                                        placeholder=""
+                                        className="outline-none  -mr-3 pl-3 py-1 bg-custom-grayFA   w-full "
+                                        onChange={onChangeNewAdditionalPremium}
+                                        restrictNumbers={true}
                                     />
                                 </div>
                                 <div>
@@ -249,12 +250,13 @@ const AdditionalPremiums = ({ propertyData, isOpen, toggleAccordion }) => {
                                                             </td>
                                                             <td>
                                                                 <div>
-                                                                    <input
+                                                                    <CustomInput
                                                                         type="number"
-                                                                        name="premiumCost"
                                                                         id={`premiumCost-${index}`}
+                                                                        name="premiumCost"
                                                                         value={
-                                                                            item.premiumCost
+                                                                            item.premiumCost ||
+                                                                            ""
                                                                         }
                                                                         onChange={(
                                                                             e
@@ -265,6 +267,9 @@ const AdditionalPremiums = ({ propertyData, isOpen, toggleAccordion }) => {
                                                                             )
                                                                         }
                                                                         className="bg-white h-[29px] w-[120px] border border-[#D9D9D9] rounded-[5px] px-2 outline-none text-center"
+                                                                        restrictNumbers={
+                                                                            true
+                                                                        }
                                                                     />
                                                                 </div>
                                                             </td>

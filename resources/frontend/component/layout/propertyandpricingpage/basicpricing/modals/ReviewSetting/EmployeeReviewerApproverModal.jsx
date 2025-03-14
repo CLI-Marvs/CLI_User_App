@@ -10,6 +10,7 @@ import { debounce } from "lodash";
 import highlightText from "@/util/hightlightText";
 import { usePricing } from "@/component/layout/propertyandpricingpage/basicpricing/context/BasicPricingContext";
 import usePriceListEmployees from "@/component/layout/propertyandpricingpage/basicpricing/hooks/usePriceListEmployees";
+import CustomInput from "@/component/Input/CustomInput";
 
 const EmployeeReviewerApproverModal = ({
     reviewerApproverModalRef,
@@ -218,13 +219,13 @@ const EmployeeReviewerApproverModal = ({
                 <div
                     className={`flex items-center border  rounded-[5px] overflow-hidden `}
                 >
-                    <input
+                    <CustomInput
                         type="text"
-                        value={searchEmployee}
-                        onChange={(e) => handleSearchOnChange(e.target.value)}
-                        placeholder="Name"
+                        name="no_of_allowed_buyers"
+                        value={searchEmployee || ""}
                         className={` 
                                  h-[40px] px-[20px] pr-[40px] rounded-[10px]  w-full outline-none`}
+                        onChange={(e) => handleSearchOnChange(e.target.value)}
                     />
                 </div>
                 {/*Selected Employee  */}

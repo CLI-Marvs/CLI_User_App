@@ -7,6 +7,7 @@ import { useUnit } from "@/context/PropertyPricing/UnitContext";
 import { usePricing } from "@/component/layout/propertyandpricingpage/basicpricing/context/BasicPricingContext";
 import { showToast } from "@/util/toastUtil";
 import UnitUploadButton from "@/component/layout/propertyandpricingpage/basicpricing/component/UnitUploadButton";
+import CustomInput from "@/component/Input/CustomInput";
 
 const newFloorState = {
     floor: null,
@@ -263,34 +264,29 @@ const FloorPremiums = ({ isOpen, toggleAccordion, propertyData }) => {
                                     <span className="text-custom-gray81 bg-custom-grayFA  flex items-center w-[120%] font-semibold -mr-3 pl-3 py-1">
                                         Floor
                                     </span>
-                                    <input
-                                        onChange={handleNewFloorChange}
+                                    <CustomInput
+                                        type="number"
                                         name="floor"
                                         value={newFloorPremiumData.floor || ""}
-                                        className="outline-none  -mr-3 pl-3 py-1 bg-custom-grayFA   w-full "
-                                        onInput={(e) =>
-                                            (e.target.value =
-                                                e.target.value.replace(
-                                                    /[^0-9]/g,
-                                                    ""
-                                                ))
-                                        }
+                                        className="w-full px-4 focus:outline-none "
+                                        onChange={handleNewFloorChange}
+                                        restrictNumbers={true}
                                     />
                                 </div>
                                 <div className="flex items-center border border-custom-grayF1 rounded-[5px] overflow-hidden w-[204px] text-sm">
                                     <span className="text-custom-gray81 bg-custom-grayFA font-semibold flex w-[250px] pl-3 py-1">
                                         Cost (Sq.m)
                                     </span>
-                                    <input
-                                        onChange={handleNewFloorChange}
-                                        name="premiumCost"
-                                        className="w-full px-4 focus:outline-none "
-                                        placeholder=""
+                                    <CustomInput
                                         type="number"
+                                        name="premiumCost"
                                         value={
                                             newFloorPremiumData.premiumCost ||
                                             ""
                                         }
+                                        className="w-full px-4 focus:outline-none "
+                                        onChange={handleNewFloorChange}
+                                        restrictNumbers={true}
                                     />
                                 </div>
                                 <div>
@@ -364,13 +360,15 @@ const FloorPremiums = ({ isOpen, toggleAccordion, propertyData }) => {
                                                             </td>
                                                             <td>
                                                                 <div className="">
-                                                                    <input
+                                                                    <CustomInput
                                                                         type="number"
                                                                         name="premiumCost"
                                                                         id="premiumCost"
                                                                         value={
-                                                                            floorData.premiumCost
+                                                                            floorData.premiumCost ||
+                                                                            ""
                                                                         }
+                                                                        className="bg-white h-[29px] w-[120px] border border-[#D9D9D9] rounded-[5px] px-2 outline-none text-center"
                                                                         onChange={(
                                                                             e
                                                                         ) =>
@@ -379,7 +377,9 @@ const FloorPremiums = ({ isOpen, toggleAccordion, propertyData }) => {
                                                                                 e
                                                                             )
                                                                         }
-                                                                        className="bg-white h-[29px] w-[120px] border border-[#D9D9D9] rounded-[5px] px-2 outline-none text-center"
+                                                                        restrictNumbers={
+                                                                            true
+                                                                        }
                                                                     />
                                                                 </div>
                                                             </td>

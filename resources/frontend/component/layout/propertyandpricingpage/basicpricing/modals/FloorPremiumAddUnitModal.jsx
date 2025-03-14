@@ -3,6 +3,7 @@ import { useUnit } from "@/context/PropertyPricing/UnitContext";
 import { unitService } from "@/component/servicesApi/apiCalls/propertyPricing/unit/unitService";
 import { showToast } from "@/util/toastUtil";
 import CircularProgress from "@mui/material/CircularProgress";
+import CustomInput from "@/component/Input/CustomInput";
 
 const formDataState = {
     floor: "",
@@ -24,12 +25,8 @@ const FloorPremiumAddUnitModal = ({
 }) => {
     //States
     const [formData, setFormData] = useState(formDataState);
-    const {
-        checkExistingUnits,
-        excelId,
-        excelIdFromPriceList,
-        setUnits,
-    } = useUnit();
+    const { checkExistingUnits, excelId, excelIdFromPriceList, setUnits } =
+        useUnit();
     const [isLoading, setIsLoading] = useState(false);
 
     //Hooks
@@ -45,7 +42,7 @@ const FloorPremiumAddUnitModal = ({
 
     //Event handler
     //Handle input field change
-    const handleChange = (e) => {
+    const handleInputChange = (e) => {
         const { name, value } = e.target;
         setFormData((prevData) => ({
             ...prevData,
@@ -166,91 +163,89 @@ const FloorPremiumAddUnitModal = ({
                         <span className="text-custom-gray81 bg-custom-grayFA flex w-[180%] pl-3 py-1 border border-custom-grayF1 font-semibold">
                             Room Number
                         </span>
-                        <input
-                            name="roomNumber"
+                        <CustomInput
                             type="number"
-                            onChange={handleChange}
-                            className="w-full px-4 focus:outline-none"
-                            placeholder=""
+                            name="roomNumber"
                             value={formData.roomNumber || ""}
+                            className="w-full px-4 focus:outline-none "
+                            onChange={handleInputChange}
+                            restrictNumbers={true}
                         />
                     </div>
                     <div className="flex items-center border rounded-md overflow-hidden h-[31px]">
                         <span className="text-custom-gray81 bg-custom-grayFA flex w-[180%] pl-3 py-1 border border-custom-grayF1 font-semibold">
                             Unit
                         </span>
-                        <input
-                            name="unit"
+                        <CustomInput
                             type="text"
-                            onChange={handleChange}
-                            className="w-full px-4 focus:outline-none"
-                            placeholder=""
+                            name="unit"
                             value={formData.unit || ""}
+                            className="w-full px-4 focus:outline-none "
+                            onChange={handleInputChange}
                         />
                     </div>
                     <div className="flex items-center border rounded-md overflow-hidden h-[31px]">
                         <span className="text-custom-gray81 bg-custom-grayFA flex w-[180%] pl-3 py-1 border border-custom-grayF1 font-semibold">
                             Type
                         </span>
-                        <input
-                            name="type"
+                        <CustomInput
                             type="text"
-                            onChange={handleChange}
-                            className="w-full px-4 focus:outline-none"
-                            placeholder=""
+                            name="type"
                             value={formData.type || ""}
+                            className="w-full px-4 focus:outline-none "
+                            onChange={handleInputChange}
                         />
                     </div>
                     <div className="flex items-center border rounded-md overflow-hidden h-[31px]">
                         <span className="text-custom-gray81 bg-custom-grayFA flex w-[180%] pl-3 py-1 border border-custom-grayF1 font-semibold">
                             Indoor Area
                         </span>
-                        <input
-                            name="indoorArea"
+                        <CustomInput
                             type="number"
-                            onChange={handleChange}
-                            className="w-full px-4 focus:outline-none"
-                            placeholder=""
+                            name="indoorArea"
                             value={formData.indoorArea || ""}
+                            className="w-full px-4 focus:outline-none "
+                            onChange={handleInputChange}
+                            restrictNumbers={true}
                         />
                     </div>
                     <div className="flex items-center border rounded-md overflow-hidden h-[31px]">
                         <span className="text-custom-gray81 bg-custom-grayFA flex w-[180%] pl-3 py-1 border border-custom-grayF1 font-semibold">
                             Balcony Area
                         </span>
-                        <input
-                            name="balconyArea"
+                        <CustomInput
                             type="number"
-                            onChange={handleChange}
-                            className="w-full px-4 focus:outline-none"
-                            placeholder=""
+                            name="balconyArea"
                             value={formData.balconyArea || ""}
+                            className="w-full px-4 focus:outline-none "
+                            onChange={handleInputChange}
+                            restrictNumbers={true}
                         />
                     </div>
                     <div className="flex items-center border rounded-md overflow-hidden h-[31px]">
                         <span className="text-custom-gray81 bg-custom-grayFA flex w-[180%] pl-3 py-1 border border-custom-grayF1 font-semibold">
                             Garden Area
                         </span>
-                        <input
-                            name="gardenArea"
+                        <CustomInput
                             type="number"
-                            onChange={handleChange}
-                            className="w-full px-4 focus:outline-none"
-                            placeholder=""
+                            name="gardenArea"
                             value={formData.gardenArea || ""}
+                            className="w-full px-4 focus:outline-none "
+                            onChange={handleInputChange}
+                            restrictNumbers={true}
                         />
                     </div>
                     <div className="flex items-center border rounded-md overflow-hidden h-[31px]">
                         <span className="text-custom-gray81 bg-custom-grayFA flex w-[180%] pl-3 py-1 border border-custom-grayF1 font-semibold">
                             Total Area
                         </span>
-                        <input
-                            name="totalArea"
+                        <CustomInput
                             type="number"
-                            onChange={handleChange}
-                            className="w-full px-4 focus:outline-none"
-                            placeholder=""
+                            name="totalArea"
                             value={formData.totalArea || ""}
+                            className="w-full px-4 focus:outline-none "
+                            onChange={handleInputChange}
+                            restrictNumbers={true}
                         />
                     </div>
                 </div>
