@@ -14,7 +14,7 @@ export const usePropertyPricing = (
 ) => {
     const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState({});
-    
+
     /*
      * Payload object for submission with the provided status.
      * The payload includes employee ID, tower phase ID, price list settings, payment scheme, and the specified status.
@@ -29,7 +29,7 @@ export const usePropertyPricing = (
             priceListData?.data?.price_list_master_id ||
             priceListData?.data?.property_commercial_detail
                 ?.price_list_master_id,
-        tower_phase_id: priceListData?.data?.tower_phases[0]?.id ,
+        tower_phase_id: priceListData?.data?.tower_phases[0]?.id,
         priceListPayload: formatPayload.formatPriceListSettingsPayload(
             pricingData.priceListSettings
         ),
@@ -113,7 +113,7 @@ export const usePropertyPricing = (
             }
         } else {
             try {
-                // setIsLoading((prev) => ({ ...prev, [status]: true }));
+                setIsLoading((prev) => ({ ...prev, [status]: true }));
                 const payload = buildSubmissionPayload(status);
                 console.log("payload straight forward add", payload);
                 const response =
