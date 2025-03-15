@@ -1,7 +1,11 @@
 import React, { useState, useEffect, useRef } from "react";
 import "./togglebtn.css";
 import ReactPaginate from "react-paginate";
-import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md";
+import {
+    MdKeyboardArrowLeft,
+    MdKeyboardArrowRight,
+    MdRefresh,
+} from "react-icons/md";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import DateLogo from "../../../../../../public/Images/Date_range.svg";
@@ -12,10 +16,10 @@ import { usePriceListMaster } from "@/context/PropertyPricing/PriceListMasterCon
 import TableSkeleton from "@/component/layout/propertyandpricingpage/component/TableSkeleton";
 import { usePaymentScheme } from "@/context/PropertyPricing/PaymentSchemeContext";
 import { toLowerCaseText } from "@/component/layout/propertyandpricingpage/utils/formatToLowerCase";
-import { useProperty } from "@/context/PropertyPricing/PropertyContext";
 import { showToast } from "@/util/toastUtil";
 import { priceListMasterService } from "@/component/servicesApi/apiCalls/propertyPricing/priceListMaster/priceListMasterService";
 import CustomInput from "@/component/Input/CustomInput";
+import CustomToolTip from "@/component/layout/mainComponent/Tooltip/CustomToolTip";
 
 const PricingMasterList = () => {
     //States
@@ -26,16 +30,14 @@ const PricingMasterList = () => {
         currentPage,
         setCurrentPage,
         isFirstLoad,
+        searchFilters,
+        setSearchFilters,
+        applySearch,
+        refreshPage,
     } = usePriceListMaster();
-    const [searchFilters, setSearchFilters] = useState({
-        property: "",
-        paymentScheme: "",
-        // promo: "",
-        date: null, // or keep new Date() if needed
-        status: "",
-    });
+
     const { fetchPaymentSchemes } = usePaymentScheme();
-    const [startDate, setStartDate] = useState(new Date());
+    // const [startDate, setStartDate] = useState(new Date());
     const [toggled, setToggled] = useState(false);
     const [isFilterVisible, setIsFilterVisible] = useState(false);
     const navigate = useNavigate();
@@ -51,6 +53,7 @@ const PricingMasterList = () => {
         console.log("priceListMaster", priceListMaster);
     }, [fetchPaymentSchemes]);
 
+    //Hide the search filter dropdown when clicking outside of it
     useEffect(() => {
         const handleOutsideClick = (event) => {
             if (
@@ -79,11 +82,15 @@ const PricingMasterList = () => {
 
     //Handle search filter date change
     const handleDateChange = (date) => {
-        setStartDate(moment(date).format("MM-DD-YYYY HH:mm:ss") ?? null);
         setSearchFilters((prevFilters) => ({
             ...prevFilters,
-            date: moment(date).format("YYYY-MM-DD HH:mm:ss") ?? null,
+            date: date ? moment(date).format("YYYY-MM-DD HH:mm:ss") : null,
         }));
+    };
+
+    //Handle filter search button
+    const handleSearch = async () => {
+        applySearch();
     };
 
     //Handle click to open modal
@@ -97,25 +104,11 @@ const PricingMasterList = () => {
     const handlePageChange = (selectedPage) => {
         if (selectedPage !== currentPage) {
             setCurrentPage(selectedPage);
-            fetchPropertyListMasters(false, false, selectedPage, searchFilters);
         }
     };
 
-    //Handle search button
-    const handleSearch = async () => {
-        setCurrentPage(1);
-        await fetchPropertyListMasters(true, false, 1, searchFilters);
-        setSearchFilters({
-            property: "",
-            paymentScheme: "",
-            // promo: "",
-            date: null, // or keep new Date() if needed
-            status: "",
-        });
-    };
-
     //Handle click the price list item
-    const handlePriceListItemClick = async (event, priceListItem) => {
+    const handlePriceListItemClick = async (priceListItem) => {
         const id = priceListItem.price_list_master_id;
         const priceListData = {
             data: priceListItem,
@@ -129,7 +122,7 @@ const PricingMasterList = () => {
         });
     };
 
-    //handle cancel click
+    //handle cancel click if the price list item status is 'Draft'
     const handleCancelClick = async (event, priceListItem, action) => {
         event.stopPropagation();
         const id = priceListItem.price_list_master_id;
@@ -171,7 +164,7 @@ const PricingMasterList = () => {
                     Add Property and Pricing
                 </button>
             </div>
-            <div className="relative flex justify-start gap-3 mt-3">
+            <div className="relative flex justify-start gap-3 mt-3  ">
                 <div className="relative w-[582px]">
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -191,7 +184,7 @@ const PricingMasterList = () => {
                         type="text"
                         readOnly={true}
                         onClick={toggleFilterBox}
-                        className="h-10 w-full rounded-lg pl-9 pr-6 text-sm"
+                        className="h-10 w-full rounded-lg pl-9 pr-6 text-sm border"
                         placeholder="Search"
                     />
                     <svg
@@ -201,7 +194,7 @@ const PricingMasterList = () => {
                         viewBox="0 0 24 24"
                         strokeWidth={1.5}
                         stroke="currentColor"
-                        className="size-[24px] absolute right-3 top-3 text-custom-bluegreen hover:size-[26px]"
+                        className="size-[24px] absolute right-3 top-2 text-custom-bluegreen hover:size-[26px]"
                     >
                         <path
                             strokeLinecap="round"
@@ -210,6 +203,17 @@ const PricingMasterList = () => {
                         />
                     </svg>
                 </div>
+                <div className="ml-4 flex justify-center items-center">
+                    <CustomToolTip text="Refresh" position="top">
+                        <button
+                            className="  hover:bg-custom-grayF1 rounded-full text-custom-bluegreen hover:text-custom-lightblue"
+                            onClick={() => refreshPage()}
+                        >
+                            <MdRefresh className="h-6 w-6" />
+                        </button>
+                    </CustomToolTip>
+                </div>
+
                 {isFilterVisible && (
                     <div
                         className="absolute left-0 mt-12 p-8 bg-white border border-gray-300 shadow-lg rounded-lg z-10 w-[582px]"
@@ -261,7 +265,11 @@ const PricingMasterList = () => {
                                 </label>
                                 <div className="relative">
                                     <DatePicker
-                                        selected={startDate}
+                                        selected={
+                                            searchFilters.date
+                                                ? searchFilters.date
+                                                : null
+                                        }
                                         onChange={(date) =>
                                             handleDateChange(date)
                                         }
@@ -430,10 +438,7 @@ const PricingMasterList = () => {
                                                 event.stopPropagation();
                                                 return;
                                             }
-                                            handlePriceListItemClick(
-                                                event,
-                                                item
-                                            );
+                                            handlePriceListItemClick(item);
                                         }}
                                         key={item.price_list_master_id}
                                         className={`flex gap-4 mt-2 h-[144px] shadow-custom5 rounded-[10px] overflow-hidden px-4 ${

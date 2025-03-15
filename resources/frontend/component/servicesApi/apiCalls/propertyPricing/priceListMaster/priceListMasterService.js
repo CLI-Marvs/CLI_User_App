@@ -13,8 +13,6 @@ export const priceListMasterService = {
                     ([_, v]) => v != null && v !== ""
                 )
             );
-            console.log("cleanFilters", cleanFilters);
-            console.log("filters", filters);
 
             // Convert filters object into query parameters
             const queryParams = new URLSearchParams({
