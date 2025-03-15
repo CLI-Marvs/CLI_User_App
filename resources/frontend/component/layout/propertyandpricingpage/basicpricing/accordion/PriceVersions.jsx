@@ -14,13 +14,12 @@ import "react-datepicker/dist/react-datepicker.css";
 import CustomInput from "@/component/Input/CustomInput";
 
 const PriceVersions = ({
-    priceListMasterData,
+    priceListData,
     action,
     isOpen,
     toggleAccordion,
 }) => {
     //States
-    // const [isOpen, setAccordionOpen] = useState(false);
     const addPaymentSchemeModalRef = useRef(null);
     const editPaymentSchemeModalRef = useRef(null);
     const { pricingData, setPricingData } = usePricing();
@@ -430,21 +429,26 @@ const PriceVersions = ({
                                                                     paymentScheme.length ===
                                                                         0 && (
                                                                         <div className="flex justify-center items-center">
-                                                                            <button
-                                                                                className="gradient-btn5 p-[1px] w-[84px] h-[27px] rounded-[10px] mt-2"
-                                                                                onClick={() =>
-                                                                                    handleShowPaymentSchemeModal(
-                                                                                        index
-                                                                                    )
-                                                                                }
-                                                                            >
-                                                                                <div className="w-full h-full rounded-[9px] bg-white flex justify-center items-center text-sm montserrat-regular">
-                                                                                    <p className="text-base bg-gradient-to-r from-custom-bluegreen via-custom-solidgreen to-custom-solidgreen bg-clip-text text-transparent">
-                                                                                        Add
-                                                                                        +
-                                                                                    </p>
-                                                                                </div>
-                                                                            </button>
+                                                                            {priceListData
+                                                                                .data
+                                                                                .status ===
+                                                                            "Draft" ? (
+                                                                                <button
+                                                                                    className="gradient-btn5 p-[1px] w-[84px] h-[27px] rounded-[10px] mt-2"
+                                                                                    onClick={() =>
+                                                                                        handleShowPaymentSchemeModal(
+                                                                                            index
+                                                                                        )
+                                                                                    }
+                                                                                >
+                                                                                    <div className="w-full h-full rounded-[9px] bg-white flex justify-center items-center text-sm montserrat-regular">
+                                                                                        <p className="text-base bg-gradient-to-r from-custom-bluegreen via-custom-solidgreen to-custom-solidgreen bg-clip-text text-transparent">
+                                                                                            Add
+                                                                                            +
+                                                                                        </p>
+                                                                                    </div>
+                                                                                </button>
+                                                                            ) : null}
                                                                         </div>
                                                                     )}
                                                             </td>
@@ -484,15 +488,18 @@ const PriceVersions = ({
                                         )}
                                 </table>
                                 <div className="flex justify-center mt-4">
-                                    <button
-                                        className="h-[44px] w-[81px] flex gap-2 rounded-[10px] justify-center items-center bg-custom-grayFA text-sm border border-custom-grayF1"
-                                        onClick={handleAddFields}
-                                    >
-                                        <span>Add</span>
-                                        <span>
-                                            <MdFormatListBulletedAdd />
-                                        </span>
-                                    </button>
+                                    {priceListData.data.status ===
+                                    "Draft" ? (
+                                        <button
+                                            className="h-[44px] w-[81px] flex gap-2 rounded-[10px] justify-center items-center bg-custom-grayFA text-sm border border-custom-grayF1"
+                                            onClick={handleAddFields}
+                                        >
+                                            <span>Add</span>
+                                            <span>
+                                                <MdFormatListBulletedAdd />
+                                            </span>
+                                        </button>
+                                    ) : null}
                                 </div>
                             </div>
                         </div>
@@ -502,7 +509,7 @@ const PriceVersions = ({
             <div>
                 <AddPaymentSchemeModal
                     addPaymentSchemeModalRef={addPaymentSchemeModalRef}
-                    priceListMasterData={priceListMasterData}
+                    priceListData={priceListData}
                     action={action}
                     versionIndex={versionIndex}
                 />

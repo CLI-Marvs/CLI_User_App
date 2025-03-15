@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { usePaymentScheme } from "@/context/PropertyPricing/PaymentSchemeContext";
 import { usePricing } from "@/component/layout/propertyandpricingpage/basicpricing/context/BasicPricingContext";
-import paymentScheme from "./../../accordion/PaymentSchemes";
 const AddPaymentSchemeModal = ({
     addPaymentSchemeModalRef,
-    priceListMasterData,
+    priceListData,
     action,
     versionIndex,
 }) => {
@@ -24,21 +23,21 @@ const AddPaymentSchemeModal = ({
     }, []);
 
     useEffect(() => {
-        if (priceListMasterData || action === "Edit") {
-            if (priceListMasterData?.payment_scheme) {
+        if (priceListData || action === "Edit") {
+            if (priceListData?.data.payment_scheme) {
                 setSelectedSchemes((prev) => ({
                     ...prev,
                     paymentSchemes: Array.isArray(
-                        priceListMasterData.payment_scheme
+                        priceListData.data.payment_scheme
                     )
-                        ? priceListMasterData.payment_scheme.map(
+                        ? priceListData.data.payment_scheme.map(
                               (scheme) => scheme.id
                           )
-                        : [priceListMasterData.payment_scheme.id],
+                        : [priceListData.data.payment_scheme.id],
                 }));
             }
         }
-    }, [priceListMasterData, action]);
+    }, [priceListData, action]);
 
     //Event handler
     const handleCancel = () => {

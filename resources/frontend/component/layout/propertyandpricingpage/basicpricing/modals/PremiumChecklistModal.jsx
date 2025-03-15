@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { usePricing } from "@/component/layout/propertyandpricingpage/basicpricing/context/BasicPricingContext";
 
-const PremiumChecklistModal = ({ modalRef2, selectedUnit }) => {
+const PremiumChecklistModal = ({ premiumCheckListModalRef, selectedUnit }) => {
     //States
     const { pricingData, setPricingData } = usePricing();
     const [selectedAdditionalPremiums, setSelectedAdditionalPremiums] =
@@ -101,16 +101,16 @@ const PremiumChecklistModal = ({ modalRef2, selectedUnit }) => {
                 selectedAdditionalPremiums: filteredPremiums,
             };
         });
-        if (modalRef2.current) {
-            modalRef2.current.close();
+        if (premiumCheckListModalRef.current) {
+            premiumCheckListModalRef.current.close();
         }
     };
 
     //Handle close the modal
     const handleCloseModal = () => {
-        if (modalRef2.current) {
+        if (premiumCheckListModalRef.current) {
             // setSelectedAdditionalPremiums([]);
-            modalRef2.current.close();
+            premiumCheckListModalRef.current.close();
         }
     };
 
@@ -136,7 +136,7 @@ const PremiumChecklistModal = ({ modalRef2, selectedUnit }) => {
     return (
         <dialog
             className="modal w-[385px] rounded-lg bg-white backdrop:bg-black/50"
-            ref={modalRef2}
+            ref={premiumCheckListModalRef}
         >
             <div className=" px-[50px] mb-5 rounded-[10px]">
                 <div className="">

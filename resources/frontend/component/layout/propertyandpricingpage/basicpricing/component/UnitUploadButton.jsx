@@ -9,7 +9,7 @@ const UnitUploadButton = ({
     buttonType = "button",
     buttonText = "",
     className = "",
-    propertyData,
+    priceListData,
 }) => {
     //States
     const uploadUnitModalRef = useRef(null);
@@ -25,7 +25,6 @@ const UnitUploadButton = ({
             fileInputRef.current.click();
         }
     };
-
 
     //Handle close the unit upload modal
     const handleCloseModal = () => {
@@ -170,7 +169,7 @@ const UnitUploadButton = ({
                 <UploadUnitDetailsModal
                     excelDataRows={excelDataRows}
                     onClose={handleCloseModal}
-                    propertyData={propertyData}
+                    priceListData={priceListData}
                     handleFileChange={handleFileChange}
                     uploadUnitModalRef={uploadUnitModalRef}
                     fileName={fileName}

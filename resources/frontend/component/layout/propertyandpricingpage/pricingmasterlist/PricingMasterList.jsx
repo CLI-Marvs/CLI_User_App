@@ -49,7 +49,7 @@ const PricingMasterList = () => {
     useEffect(() => {
         fetchPaymentSchemes();
         console.log("priceListMaster", priceListMaster);
-    }, [fetchPaymentSchemes, priceListMaster]);
+    }, [fetchPaymentSchemes]);
 
     useEffect(() => {
         const handleOutsideClick = (event) => {
@@ -86,40 +86,6 @@ const PricingMasterList = () => {
         }));
     };
 
-    /**
-     * Handle to navigate to basic pricing component, only if the Status !== On-going Approval
-     * @param {*} id
-     * @param {*} status
-     */
-    const handleNavigateToBasicPricing = async (item, action) => {
-        const status = item.status;
-        const id = item.price_list_master_id;
-
-        if (status !== "On-going Approval") {
-            try {
-                //Pass the price list master data to the basic pricing component for editing data
-                navigate(`/property-pricing/basic-pricing/${id}`, {
-                    state: {
-                        data: item,
-                        action: action,
-                    },
-                });
-            } catch (error) {
-                console.log("Property not found");
-            }
-        } else {
-            const response =
-                await priceListMasterService.updatePriceListMasterStatus(
-                    id
-                    // Replace with the actual status you want to set
-                );
-            if (response.status === 200) {
-                showToast(response?.data?.message, "success");
-                await fetchPropertyListMasters(true, true);
-            }
-        }
-    };
-
     //Handle click to open modal
     const handleOpenModal = () => {
         if (propertyModalRef.current) {
@@ -146,6 +112,53 @@ const PricingMasterList = () => {
             date: null, // or keep new Date() if needed
             status: "",
         });
+    };
+
+    //Handle click the price list item
+    const handlePriceListItemClick = async (event, priceListItem) => {
+        const id = priceListItem.price_list_master_id;
+        const priceListData = {
+            data: priceListItem,
+        };
+        console.log("priceListData", priceListData);
+        navigate(`/property-pricing/basic-pricing/${id}`, {
+            state: {
+                priceListData: priceListData,
+                action: null,
+            },
+        });
+    };
+
+    //handle cancel click
+    const handleCancelClick = async (event, priceListItem, action) => {
+        event.stopPropagation();
+        const id = priceListItem.price_list_master_id;
+        const priceListData = { data: priceListItem };
+        console.log(priceListData);
+
+        if (action !== "Cancel") {
+            navigate(
+                `/property-pricing/basic-pricing/${priceListItem.price_list_master_id}`,
+                {
+                    state: { priceListData: priceListData, action },
+                }
+            );
+            return;
+        }
+
+        try {
+            const response =
+                await priceListMasterService.updatePriceListMasterStatus(
+                    id
+                    // Replace with the actual status you want to set
+                );
+            if (response.status === 200) {
+                showToast(response?.data?.message, "success");
+                await fetchPropertyListMasters(true, true);
+            }
+        } catch (error) {
+            console.log("error", error);
+        }
     };
 
     return (
@@ -281,7 +294,7 @@ const PricingMasterList = () => {
                                         Approved not Live
                                     </option>
                                     <option value="Approved And Live">
-                                        Approve and Live
+                                        Approved and Live
                                     </option>
                                 </select>
                             </div>
@@ -412,14 +425,32 @@ const PricingMasterList = () => {
                             priceListMaster.data.map((item) => {
                                 return (
                                     <tr
+                                        onClick={(event) => {
+                                            if (item?.status === "Draft") {
+                                                event.stopPropagation();
+                                                return;
+                                            }
+                                            handlePriceListItemClick(
+                                                event,
+                                                item
+                                            );
+                                        }}
                                         key={item.price_list_master_id}
                                         className={`flex gap-4 mt-2 h-[144px] shadow-custom5 rounded-[10px] overflow-hidden px-4 ${
                                             item?.status === "Draft"
-                                                ? "bg-white"
+                                                ? "bg-white cursor-not-allowed"
                                                 : item?.status === "Approved"
                                                 ? "bg-[#F0F3EE]"
                                                 : "bg-[#EBF0F6]"
-                                        } text-custom-bluegreen text-sm`}
+                                        }  ${
+                                            item?.status ===
+                                                "On-going Approval" ||
+                                            item?.status ===
+                                                "Approved not Live" ||
+                                            item?.status === "Approved and Live"
+                                                ? "cursor-pointer"
+                                                : ""
+                                        } text-custom-bluegreen text-sm `}
                                     >
                                         <td className="w-[100px] flex flex-col items-start justify-center gap-2">
                                             <div>
@@ -443,28 +474,33 @@ const PricingMasterList = () => {
                                                 </span>
                                             </div>
                                             <div>
-                                                <p
-                                                    className="underline text-blue-500 cursor-pointer"
-                                                    onClick={() =>
-                                                        handleNavigateToBasicPricing(
-                                                            item,
-                                                            item?.status ===
-                                                                "On-going Approval"
+                                                {item?.status !==
+                                                    "Approved not Live" &&
+                                                    item?.status !==
+                                                        "Approved and Live" && (
+                                                        <p
+                                                            className="underline text-blue-500 cursor-pointer"
+                                                            onClick={(event) =>
+                                                                handleCancelClick(
+                                                                    event,
+                                                                    item,
+                                                                    item?.status ===
+                                                                        "On-going Approval"
+                                                                        ? "Cancel"
+                                                                        : "Edit"
+                                                                )
+                                                            }
+                                                        >
+                                                            {item?.status ===
+                                                            "On-going Approval"
                                                                 ? "Cancel"
-                                                                : "Edit"
-                                                        )
-                                                    }
-                                                >
-                                                    {item?.status ===
-                                                    "On-going Approval"
-                                                        ? "Cancel"
-                                                        : item?.status ===
-                                                          "Approved"
-                                                        ? null
-                                                        : "Edit"}
-                                                    {" - "}
-                                                    {item?.price_list_master_id}
-                                                </p>
+                                                                : "Edit"}{" "}
+                                                            -{" "}
+                                                            {
+                                                                item?.price_list_master_id
+                                                            }
+                                                        </p>
+                                                    )}
                                             </div>
                                             {item?.status === "Approved" && (
                                                 <div className="flex gap-2 items-center">

@@ -16,6 +16,8 @@ export const PriceListMasterProvider = ({ children }) => {
     const [currentPage, setCurrentPage] = useState(1);
     const [isFirstLoad, setIsFirstLoad] = useState(true);
     const [previousFilters, setPreviousFilters] = useState([]);
+    const [propertyMasterId, setPropertyMasterId] = useState(null);
+    const [priceListMasterId, setPriceListMasterId] = useState(null);
 
     const fetchPropertyListMasters = useCallback(
         async (
@@ -85,6 +87,10 @@ export const PriceListMasterProvider = ({ children }) => {
         setCurrentPage,
         isFirstLoad,
         previousFilters,
+        propertyMasterId,
+        setPropertyMasterId,
+        priceListMasterId,
+        setPriceListMasterId,
     };
 
     return (

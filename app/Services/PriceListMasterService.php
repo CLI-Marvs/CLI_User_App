@@ -48,15 +48,15 @@ class PriceListMasterService
     /**
      * Filter price list base on filter 
      */
-    public function filterPriceList($data){
-        return $this->repository->filterPriceList($data);
-    }
+    // public function filterPriceList($data){
+    //     return $this->repository->filterPriceList($data);
+    // }
     /*
     Store price list master data
     */
     public function store(array $data)
     {
-        //    dd($data);
+        // dd($data);
         DB::beginTransaction();
         try {
             $priceListMaster = $this->findPriceListMaster($data['tower_phase_id']);

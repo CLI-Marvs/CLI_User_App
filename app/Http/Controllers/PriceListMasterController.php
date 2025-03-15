@@ -35,7 +35,7 @@ class PriceListMasterController extends Controller
 
         // $priceListMastersResponse = $this->service->index($page, $perPage);
         $priceListMastersResponse = $this->service->index($validatedData);
-       
+
 
         return response()->json([
             'data' => $priceListMastersResponse['data'],
@@ -50,6 +50,7 @@ class PriceListMasterController extends Controller
     {
         try {
             $storeResponse = $this->service->store($request->validated());
+            
             if ($storeResponse['success']) {
                 return response()->json([
                     'message' => $storeResponse['message'],
@@ -78,11 +79,11 @@ class PriceListMasterController extends Controller
     /**
      * Filter the price list base on filter search params
      */
-    public function filterPriceList(FilterPriceListRequest $request)
-    {
-        $filterResponse = $this->service->filterPriceList($request->validated());
-        dd($filterResponse);
-    }
+    // public function filterPriceList(FilterPriceListRequest $request)
+    // {
+    //     $filterResponse = $this->service->filterPriceList($request->validated());
+    //     dd($filterResponse);
+    // }
 
     /*
      * Update the specified resource in storage.

@@ -4,9 +4,9 @@ import { useUnit } from "@/context/PropertyPricing/UnitContext";
 import { usePricing } from "@/component/layout/propertyandpricingpage/basicpricing/context/BasicPricingContext";
 import CircularProgress from "@mui/material/CircularProgress";
 
-const AdditionalPremiumAssignModal = ({ modalRef, propertyData }) => {
+const AdditionalPremiumAssignModal = ({ modalRef, priceListData }) => {
     //States
-    const modalRef2 = useRef(null);
+    const premiumCheckListModalRef = useRef(null);
     const {
         checkExistingUnits,
         excelId,
@@ -20,17 +20,26 @@ const AdditionalPremiumAssignModal = ({ modalRef, propertyData }) => {
 
     //Hooks
     useEffect(() => {
-        const newExcelId = propertyData?.excel_id || excelId;
-        const newTowerPhaseId = propertyData?.tower_phase_id || towerPhaseId;
-        if (!newExcelId || !newTowerPhaseId) return;
-        // console.log("units", units);
+        if (priceListData) {
+            const newExcelId = priceListData.data?.excel_id || excelId;
+            const newTowerPhaseId =
+                (priceListData.tower_phases &&
+                    priceListData?.tower_phases[0].id) ||
+                towerPhaseId;
+            if (!newExcelId || !newTowerPhaseId) return;
 
-        const fetchData = async () => {
-            await checkExistingUnits(newTowerPhaseId, newExcelId,false);
-        };
+            const fetchData = async () => {
+                await checkExistingUnits(
+                    newTowerPhaseId,
+                    newExcelId,
+                    false,
+                    false
+                );
+            };
 
-        fetchData();
-    }, [propertyData, excelId, towerPhaseId, checkExistingUnits]);
+            fetchData();
+        }
+    }, [priceListData, excelId, towerPhaseId, checkExistingUnits]);
 
     /**
      * Groups units by floor using `useMemo` for optimization.
@@ -68,7 +77,7 @@ const AdditionalPremiumAssignModal = ({ modalRef, propertyData }) => {
      */
 
     const handleOpenModal = (id, unit, additional_premium_id) => {
-        if (modalRef2.current) {
+        if (premiumCheckListModalRef.current) {
             setSelectedUnit((prevUnit) => {
                 const existingUnit =
                     pricingData.selectedAdditionalPremiums.find(
@@ -89,7 +98,7 @@ const AdditionalPremiumAssignModal = ({ modalRef, propertyData }) => {
                 };
             });
 
-            modalRef2.current.showModal();
+            premiumCheckListModalRef.current.showModal();
         }
     };
 
@@ -214,43 +223,11 @@ const AdditionalPremiumAssignModal = ({ modalRef, propertyData }) => {
                             }
                         )
                     ) : null}
-
-                    {/* <div className="h-auto flex gap-[20px] pb-[30px] mb-[30px] border-b border-custom-lightestgreen">
-                        <div className="h-full flex justify-start items-start">
-                            <div className="w-[50px] h-[63px] bg-custom-lightestgreen p-[6px] rounded-[15px]">
-                                <div className="flex justify-center items-center bg-white h-full w-full rounded-[10px]">
-                                    <p className="font-bold text-[21px]">2</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="flex flex-wrap gap-3">
-                            <button
-                                onClick={handleOpenModal}
-                                className="h-[63px] w-[95px] p-[6px] rounded-[15px] gradient-btn4"
-                            >
-                                <div className="flex justify-center items-center bg-white h-full w-full  rounded-[10px]">
-                                    <p className="font-bold text-custom-solidgreen">
-                                        38P101
-                                    </p>
-                                </div>
-                            </button>
-                            <button
-                                onClick={handleOpenModal}
-                                className="h-[63px] w-[95px] p-[6px] rounded-[15px] bg-white"
-                            >
-                                <div className="flex justify-center items-center bg-white h-full w-full  rounded-[10px]">
-                                    <p className="font-bold text-custom-gray81">
-                                        38P101
-                                    </p>
-                                </div>
-                            </button>
-                        </div>
-                    </div> */}
                 </div>
                 <div>
                     <PremiumChecklistModal
                         selectedUnit={selectedUnit}
-                        modalRef2={modalRef2}
+                        premiumCheckListModalRef={premiumCheckListModalRef}
                     />
                 </div>
             </dialog>

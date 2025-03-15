@@ -21,81 +21,139 @@ class PropertyMasterRepository
     */
     public function store(array $data)
     {
-
         DB::beginTransaction();
         try {
-            $propertyMaster = $this->model->find($data['property_masters_id']);
+            $propertyMaster = $this->findPropertyMaster($data['property_masters_id']);
+            $towerPhase = $this->createTowerPhase($propertyMaster, $data);
+            $priceListMaster = $this->createPriceListMaster($towerPhase, $data);
 
-            // Create the tower phase
-            $towerPhase = $propertyMaster->towerPhases()->create([
-                'property_masters_id' => $propertyMaster->id,
-                'tower_phase_name' => $data['tower_phase'],
-                'tower_description' => $data['tower_description']
-            ]);
-
-            // Update the tower phase with its own ID
-            $towerPhase->update([
-                'main_towerphase_id' => $towerPhase->id
-            ]);
-            $extractedGoogleMapLink = (!isset($data['google_map_link']) || empty(trim($data['google_map_link'])))
-                ? null
-                :  $this->parseGoogleMapLink($data['google_map_link']);
-
-            // Create the price list master
-            $priceListMaster = $towerPhase->priceListMasters()->create([
-                'tower_phase_id' => $towerPhase->id,
-                'status' => $data['status'],
-            ]);
-
-
-            // Create the commercial details
-            $propertyMaster->propertyCommercialDetail()->create([
-                'type' => $data['type'],
-                'barangay' => $data['barangay'],
-                'city' => $data['city'],
-                'province' => $data['province'],
-                'country' => $data['country'],
-                'latitude'  => $extractedGoogleMapLink['latitude'] ?? null,
-                'longitude' => $extractedGoogleMapLink['longitude'] ?? null,
-                'price_list_master_id' => $priceListMaster->id,
-            ]);
-
+            $this->createCommercialDetails($propertyMaster, $data, $priceListMaster);
 
             DB::commit();
-            // Fetch the property master with specific relationships and fields
-            $result = $this->model
-                ->with([
-                    'towerPhases' => function ($query) {
-                        $query->select('id', 'property_masters_id', 'tower_phase_name', 'tower_description')
-                            ->latest('id')
-                            ->limit(1);
-                    },
-                    'propertyCommercialDetail' => function ($query) {
-                        $query->select('id', 'property_master_id', 'type', 'barangay', 'city', 'province', 'latitude', 'longitude', 'price_list_master_id')
-                            ->latest('id')
-                            ->limit(1);
-                    },
 
-                ])
-                ->select('id', 'property_name')
-                ->find($propertyMaster->id);
-
-            // Return success status and optional message
-            return [
-                'data' => $result,
-                'message' => 'Property and related details added successfully!',
-                'success' => true
-            ];
+            return $this->buildSuccessResponse($propertyMaster);
         } catch (\Exception $e) {
             DB::rollBack();
-            // Return failure status and error message
-            return [
-                'success' => false,
-                'message' => 'Failed to add property: ' . $e->getMessage(),
-            ];
+            return $this->buildErrorResponse($e);
         }
     }
 
+    /**
+     * Find the property master by its ID.
+     *
+     * @param int $propertyMasterId
+     * @return mixed
+     */
+    private function findPropertyMaster($propertyMasterId)
+    {
+        return $this->model->find($propertyMasterId);
+    }
+
+    /**
+     * Create a new tower phase for the given property master.
+     *
+     * @param mixed $propertyMaster
+     * @param array $data
+     * @return mixed
+     */
+    private function createTowerPhase($propertyMaster, array $data)
+    {
+        $towerPhase = $propertyMaster->towerPhases()->create([
+            'property_masters_id' => $propertyMaster->id,
+            'tower_phase_name' => $data['tower_phase'],
+            'tower_description' => $data['tower_description']
+        ]);
+
+        $towerPhase->update(['main_towerphase_id' => $towerPhase->id]);
+
+        return $towerPhase;
+    }
+
+    /**
+     * Create a price list master associated with a tower phase.
+     *
+     * @param mixed $towerPhase
+     * @param array $data
+     * @return mixed
+     */
+    private function createPriceListMaster($towerPhase, array $data)
+    {
+        return $towerPhase->priceListMasters()->create([
+            'tower_phase_id' => $towerPhase->id,
+            'status' => $data['status'],
+        ]);
+    }
+
+    /**
+     * Create commercial details for the property master.
+     *
+     * @param mixed $propertyMaster
+     * @param array $data
+     * @param mixed $priceListMaster
+     * @return void
+     */
+    private function createCommercialDetails($propertyMaster, array $data, $priceListMaster)
+    {
+        $extractedGoogleMapLink = (!isset($data['google_map_link']) || empty(trim($data['google_map_link'])))
+            ? null
+            : $this->parseGoogleMapLink($data['google_map_link']);
+
+        $propertyMaster->propertyCommercialDetail()->create([
+            'type' => $data['type'],
+            'barangay' => $data['barangay'],
+            'city' => $data['city'],
+            'province' => $data['province'],
+            'country' => $data['country'],
+            'latitude' => $extractedGoogleMapLink['latitude'] ?? null,
+            'longitude' => $extractedGoogleMapLink['longitude'] ?? null,
+            'price_list_master_id' => $priceListMaster->id,
+        ]);
+    }
+
+    /**
+     * Build the success response including property details.
+     *
+     * @param mixed $propertyMaster
+     * @return array
+     */
+    private function buildSuccessResponse($propertyMaster)
+    {
+        $result = $this->model
+            ->with([
+                'towerPhases' => function ($query) {
+                    $query->select('id', 'property_masters_id', 'tower_phase_name', 'tower_description')
+                        ->latest('id')
+                        ->limit(1);
+                },
+                'propertyCommercialDetail' => function ($query) {
+                    $query->select('id', 'property_master_id', 'type', 'barangay', 'city', 'province', 'latitude', 'longitude', 'price_list_master_id')
+                        ->latest('id')
+                        ->limit(1);
+                },
+            ])
+            ->select('id', 'property_name', 'status')
+            ->find($propertyMaster->id);
+
+        return [
+            'data' => $result,
+            'message' => 'Property and related details added successfully!',
+            'success' => true
+        ];
+    }
+
+    /**
+     * Build the error response in case of failure.
+     *
+     * @param \Exception $exception
+     * @return array
+     */
+    private function buildErrorResponse($exception)
+    {
+        return [
+            'success' => false,
+            'message' => 'Failed to add property: ' . $exception->getMessage(),
+        ];
+    }
 
     /**
      * Extracts location data from various formats of Google Maps URLs.
@@ -161,7 +219,6 @@ class PropertyMasterRepository
      */
     public function getPropertyNamesWithIds()
     {
-
         return $this->model
             ->orderBy('property_name', 'asc')
             ->pluck('property_name', 'id')

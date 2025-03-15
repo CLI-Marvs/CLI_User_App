@@ -65,8 +65,12 @@ const AddPropertyModal = ({ propertyModalRef }) => {
                 payload
             );
             console.log("response 67 AddPropertyModal", response);
-            const towerPhaseId = response?.data?.data?.tower_phases[0]?.id;
-            const propertyData = response?.data;
+            const priceListData = { data: response.data.data };
+            const propertyCommercialDetail =
+                priceListData?.data?.property_commercial_detail;
+            const priceListId =
+                propertyCommercialDetail?.price_list_master_id ?? null;
+                
 
             if (response.status === 201) {
                 showToast("Data added successfully!", "success");
@@ -78,8 +82,8 @@ const AddPropertyModal = ({ propertyModalRef }) => {
                 }
                 setExcelId(null);
                 setExcelIdFromPriceList(null);
-                navigate(`/property-pricing/basic-pricing/${towerPhaseId}`, {
-                    state: { data: propertyData },
+                navigate(`/property-pricing/basic-pricing/${priceListId}`, {
+                    state: { priceListData: priceListData },
                 });
             }
         } catch (error) {

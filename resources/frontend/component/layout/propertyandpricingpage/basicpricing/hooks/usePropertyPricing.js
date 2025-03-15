@@ -4,7 +4,7 @@ import { priceListMasterService } from "@/component/servicesApi/apiCalls/propert
 
 export const usePropertyPricing = (
     user,
-    data,
+    priceListData,
     formatPayload,
     pricingData,
     resetPricingData,
@@ -14,7 +14,7 @@ export const usePropertyPricing = (
 ) => {
     const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState({});
-
+    
     /*
      * Payload object for submission with the provided status.
      * The payload includes employee ID, tower phase ID, price list settings, payment scheme, and the specified status.
@@ -24,11 +24,12 @@ export const usePropertyPricing = (
     const buildSubmissionPayload = (status) => ({
         emp_id: user?.id,
         property_masters_id:
-            data?.property_commercial_detail?.property_master_id,
+            priceListData?.data?.property_commercial_detail?.property_master_id,
         price_list_master_id:
-            data?.price_list_master_id ||
-            data?.data?.property_commercial_detail?.property_master_id,
-        tower_phase_id: data.data?.tower_phases[0]?.id || data?.tower_phase_id,
+            priceListData?.data?.price_list_master_id ||
+            priceListData?.data?.property_commercial_detail
+                ?.price_list_master_id,
+        tower_phase_id: priceListData?.data?.tower_phases[0]?.id ,
         priceListPayload: formatPayload.formatPriceListSettingsPayload(
             pricingData.priceListSettings
         ),
@@ -68,7 +69,7 @@ export const usePropertyPricing = (
             try {
                 setIsLoading((prev) => ({ ...prev, [status]: true }));
                 const payload = buildSubmissionPayload(status);
-                console.log("payload", payload);
+                console.log("payload Edit", payload);
                 const response =
                     await priceListMasterService.updatePriceListMasters(
                         payload
@@ -81,8 +82,8 @@ export const usePropertyPricing = (
                     );
 
                     await checkExistingUnits(
-                        data.tower_phase_id,
-                        excelId || data?.excelId,
+                        priceListData.tower_phase_id,
+                        excelId || priceListData?.excelId,
                         true,
                         false
                     );
@@ -112,12 +113,12 @@ export const usePropertyPricing = (
             }
         } else {
             try {
-                setIsLoading((prev) => ({ ...prev, [status]: true }));
+                // setIsLoading((prev) => ({ ...prev, [status]: true }));
                 const payload = buildSubmissionPayload(status);
-
+                console.log("payload straight forward add", payload);
                 const response =
                     await priceListMasterService.storePriceListMasters(payload);
-
+                console.log("response straight forward add", response);
                 if (response?.status === 201 || response?.status === 200) {
                     showToast(
                         response?.data?.message || "Data added successfully",
@@ -126,8 +127,8 @@ export const usePropertyPricing = (
 
                     resetPricingData();
                     await checkExistingUnits(
-                        data.tower_phase_id,
-                        excelId || data?.excelId,
+                        priceListData.tower_phase_id,
+                        excelId || priceListData?.excelId,
                         true,
                         false
                     );
@@ -145,6 +146,8 @@ export const usePropertyPricing = (
                 }
             } catch (error) {
                 if (error.response?.data?.message) {
+                    console.log("error straight forward add", error);
+
                     showToast(error.response.data.message, "error");
                 } else {
                     showToast(

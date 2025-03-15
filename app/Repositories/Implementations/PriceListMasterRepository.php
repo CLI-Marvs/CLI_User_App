@@ -169,10 +169,13 @@ class PriceListMasterRepository
             'price_list_master_id' => $priceList->id,
             'updated_at' => $priceList->updated_at,
             'created_at' => $priceList->created_at,
-            'tower_phase_id' => $priceList->towerPhase->id,
-            'tower_phase_name' => $priceList->towerPhase->tower_phase_name,
-            // 'excel_id'=> $priceList->towerPhase->units->property_masters_id
-            'description' => $priceList->towerPhase->tower_description,
+            'tower_phases' => [
+                [
+                    'id' => $priceList->towerPhase->id,
+                    'tower_phase_name' => $priceList->towerPhase->tower_phase_name,
+                    'tower_description' => $priceList->towerPhase->tower_description,
+                ]
+            ],
             'status' => $priceList->status,
             'property_name' => $priceList->towerPhase->propertyMaster->property_name ?? null,
             'pricebasic_details' => $priceList->priceBasicDetail ? $priceList->priceBasicDetail->toArray() : null,

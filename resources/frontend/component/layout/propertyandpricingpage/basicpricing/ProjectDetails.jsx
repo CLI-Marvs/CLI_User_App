@@ -9,31 +9,31 @@ import {
 import CircularProgress from "@mui/material/CircularProgress";
 const mapId = import.meta.env.VITE_APP_GOOGLE_MAP_ID;
 
-const ProjectDetails = ({ propertyData }) => {
+const ProjectDetails = ({ priceListData }) => {
     //States
     const mapRef = useRef(null);
     const markerRef = useRef(null);
     const infoWindowRef = useRef(null);
     const [address, setAddress] = useState("Fetching address...");
- 
+
     // Extract property details with fallback values
     const latitude =
         parseFloat(
-            propertyData?.data?.property_commercial_detail?.latitude ??
-                propertyData?.property_commercial_detail?.latitude
+            priceListData?.data?.property_commercial_detail?.latitude ??
+                priceListData?.property_commercial_detail?.latitude
         ) || 0;
 
     const longitude =
         parseFloat(
-            propertyData?.data?.property_commercial_detail?.longitude ??
-                propertyData?.property_commercial_detail?.longitude
+            priceListData?.data?.property_commercial_detail?.longitude ??
+                priceListData?.property_commercial_detail?.longitude
         ) || 0;
 
     // Map location data
     const location = { lat: latitude, lng: longitude };
     // const googleMapsUrl = `https://www.google.com/maps?q=${latitude},${longitude}`;
 
-    // Function to get address from lat/lng
+    // Function to get address from lat/long
     const fetchAddress = useCallback((lat, lng, callback) => {
         if (!window.google) return;
         const geocoder = new window.google.maps.Geocoder();
@@ -42,7 +42,7 @@ const ProjectDetails = ({ propertyData }) => {
                 const formattedAddress = results[0].formatted_address.replace(
                     /, /g,
                     "<br>"
-                ); //breakline
+                );
 
                 setAddress(formattedAddress);
                 if (callback) callback(formattedAddress);
@@ -73,7 +73,7 @@ const ProjectDetails = ({ propertyData }) => {
                     closeButtonControl: false,
                 });
 
-                // Additional listener to ensure the close button is hidden
+                //Hide the default close button
                 infoWindowRef.current.addListener("domready", () => {
                     const closeButtons = document.querySelectorAll(
                         ".gm-ui-hover-effect"
@@ -145,34 +145,32 @@ const ProjectDetails = ({ propertyData }) => {
             <div className="min-w-full  bg-custom-lightestgreen p-[20px] rounded-[10px] ">
                 <div className="h-full flex  gap-x-4">
                     {/* Map view */}
-                    <div className="max-w-[350px] w-full h-[259px] flex-shrink-0">
-                        {!location.lat || !location.lng ? (
-                            <div className="w-full h-full flex items-center justify-center bg-gray-100 rounded-xl">
-                                <p className="text-gray-500">
-                                    No location data available
-                                </p>
-                            </div>
-                        ) : !isLoaded ? (
-                            <div className="w-full flex items-center justify-center h-full">
-                                <CircularProgress className="spinnerSize" />
-                            </div>
-                        ) : (
-                            <GoogleMap
-                                onLoad={onLoad}
-                                onUnmount={onUnmount}
-                                options={{
-                                    ...DEFAULT_MAP_OPTIONS,
-                                    mapId: mapId,
-                                }}
-                                mapContainerStyle={DEFAULT_MAP_CONTAINER_STYLE}
-                                center={{
-                                    lat: location.lat,
-                                    lng: location.lng,
-                                }}
-                                zoom={16}
-                            ></GoogleMap>
-                        )}
-                    </div>
+                    {location.lat && location.lng ? (
+                        <div className="max-w-[350px] w-full h-[259px] flex-shrink-0">
+                            {!isLoaded ? (
+                                <div className="w-full flex items-center justify-center h-full">
+                                    <CircularProgress className="spinnerSize" />
+                                </div>
+                            ) : (
+                                <GoogleMap
+                                    onLoad={onLoad}
+                                    onUnmount={onUnmount}
+                                    options={{
+                                        ...DEFAULT_MAP_OPTIONS,
+                                        mapId: mapId,
+                                    }}
+                                    mapContainerStyle={
+                                        DEFAULT_MAP_CONTAINER_STYLE
+                                    }
+                                    center={{
+                                        lat: location.lat,
+                                        lng: location.lng,
+                                    }}
+                                    zoom={16}
+                                />
+                            )}
+                        </div>
+                    ) : null}
 
                     {/* Property details */}
                     <div className="mt-5">
@@ -185,8 +183,8 @@ const ProjectDetails = ({ propertyData }) => {
                             <div className="h-[26px] w-auto px-[15px] py-[5px] bg-white rounded-[5px]">
                                 <p className="text-custom-gray81 text-xs">
                                     {toLowerCaseText(
-                                        propertyData?.data?.property_name ||
-                                            propertyData?.property_name
+                                        priceListData?.data?.property_name ||
+                                            priceListData?.property_name
                                     )}
                                 </p>
                             </div>
@@ -201,10 +199,10 @@ const ProjectDetails = ({ propertyData }) => {
                             {/* Type */}
                             <div className="h-[26px] w-auto px-[15px] py-[5px] bg-white rounded-[5px]">
                                 <p className="text-custom-gray81 text-xs">
-                                    {propertyData?.data
+                                    {priceListData?.data
                                         ?.property_commercial_detail?.type ||
-                                        propertyData?.property_commercial_detail
-                                            ?.type}
+                                        priceListData
+                                            ?.property_commercial_detail?.type}
                                 </p>
                             </div>
                         </div>
@@ -217,9 +215,9 @@ const ProjectDetails = ({ propertyData }) => {
                             </div>
                             <div className=" w-auto h-[26px] px-[15px] py-[5px] bg-white rounded-[5px]">
                                 <p className=" text-custom-gray81 text-xs">
-                                    {propertyData?.data?.tower_phases[0]
+                                    {priceListData?.data?.tower_phases?.[0]
                                         ?.tower_phase_name ||
-                                        propertyData?.tower_phase_name}
+                                        priceListData?.tower_phase_name}
                                 </p>
                             </div>
                         </div>
@@ -233,15 +231,20 @@ const ProjectDetails = ({ propertyData }) => {
                             </div>
                             <div className=" w-auto h-auto px-[15px] py-[5px] bg-white rounded-[5px] mr-2">
                                 <p className="text-custom-gray81 text-xs">
-                                    {propertyData?.property_commercial_detail
-                                        ?.barangay ??
-                                        propertyData?.data
+                                    {
+                                        priceListData?.data
                                             ?.property_commercial_detail
-                                            ?.barangay}{" "}
-                                    {propertyData?.property_commercial_detail
-                                        ?.city ??
-                                        propertyData?.data
-                                            ?.property_commercial_detail?.city}
+                                            ?.barangay
+                                    }{" "}
+                                    {
+                                        priceListData?.data
+                                            ?.property_commercial_detail?.city
+                                    }{" "}
+                                    {
+                                        priceListData?.data
+                                            ?.property_commercial_detail
+                                            ?.province
+                                    }
                                 </p>
                             </div>
                         </div>
@@ -254,9 +257,10 @@ const ProjectDetails = ({ propertyData }) => {
                             </div>
                             <div className=" w-auto h-auto px-[15px] py-[5px] bg-white rounded-[5px] mr-2">
                                 <p className=" text-custom-gray81 text-xs">
-                                    {propertyData?.data?.tower_phases[0]
-                                        ?.tower_description ||
-                                        propertyData?.description}
+                                    {
+                                        priceListData?.data?.tower_phases?.[0]
+                                            ?.tower_description
+                                    }
                                 </p>
                             </div>
                         </div>

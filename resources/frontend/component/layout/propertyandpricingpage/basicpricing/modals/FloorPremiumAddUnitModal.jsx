@@ -4,6 +4,7 @@ import { unitService } from "@/component/servicesApi/apiCalls/propertyPricing/un
 import { showToast } from "@/util/toastUtil";
 import CircularProgress from "@mui/material/CircularProgress";
 import CustomInput from "@/component/Input/CustomInput";
+import { usePriceListMaster } from "@/context/PropertyPricing/PriceListMasterContext";
 
 const formDataState = {
     floor: "",
@@ -19,7 +20,6 @@ const formDataState = {
 const FloorPremiumAddUnitModal = ({
     floorPremiumAddUnitModalRef,
     unitsByFloor,
-    propertyData,
     towerPhaseId,
     selectedFloor,
 }) => {
@@ -28,6 +28,7 @@ const FloorPremiumAddUnitModal = ({
     const { checkExistingUnits, excelId, excelIdFromPriceList, setUnits } =
         useUnit();
     const [isLoading, setIsLoading] = useState(false);
+    const { propertyMasterId, priceListMasterId } = usePriceListMaster();
 
     //Hooks
     useEffect(() => {
@@ -65,10 +66,8 @@ const FloorPremiumAddUnitModal = ({
                 total_area: parseFloat(formData.totalArea).toFixed(2),
                 tower_phase_id: towerPhaseId,
                 excel_id: excelId || excelIdFromPriceList,
-                property_masters_id:
-                    propertyData?.property_commercial_detail
-                        ?.property_master_id,
-                price_list_master_id: propertyData?.price_list_master_id,
+                property_masters_id: propertyMasterId,
+                price_list_master_id: priceListMasterId,
             };
             setIsLoading(true);
             const response = await unitService.storeUnitDetails(payload);

@@ -21,16 +21,7 @@ class PropertyMasterController extends Controller
         $this->service = $service;
     }
 
-
-
-    /*
-     * Display a listing of the resource.
-    */
-    public function index()
-    {
-        //
-    }
-
+ 
     /**
      * Store a newly created resource in storage.
      */
@@ -38,7 +29,6 @@ class PropertyMasterController extends Controller
     {
 
         try {
-            //TODO: validate the request to make sure it's valid and match in the request
             $property = $this->service->store($request->validated());
             // dd($property);
             return response()->json($property, 201);
@@ -55,23 +45,7 @@ class PropertyMasterController extends Controller
         }
     }
 
-    /**
-     * Display the specified resource.
-     */
-    // public function show(PropertyMaster $propertyMaster)
-    // {
-    //     $propertyMasterData = $this->service->getPropertyMaster($propertyMaster->id);
-    //     if (!$propertyMasterData) {
-    //         return response()->json(['message' => 'Property not found.'], 404);
-    //     }
-
-    //     try {
-    //         return response()->json($propertyMasterData);
-    //     } catch (\Exception $e) {
-    //         return response()->json(['message' => 'Error retrieving property data.'], 500);
-    //     }
-    // }
-
+   
     /**
      * Update the specified resource in storage.
      */

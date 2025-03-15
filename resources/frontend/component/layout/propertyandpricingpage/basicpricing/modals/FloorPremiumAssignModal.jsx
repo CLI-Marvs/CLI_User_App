@@ -6,19 +6,15 @@ import { usePricing } from "@/component/layout/propertyandpricingpage/basicprici
 const FloorPremiumAssignModal = ({
     floorPremiumAssignModalRef,
     selectedFloor,
-    propertyData,
+    priceListData,
 }) => {
     //State
     const floorPremiumAddUnitModalRef = useRef(null);
     const [excludedUnit, setExcludedUnit] = useState({});
-    const {
-        isFetchingUnits,
-        towerPhaseId,
-        units,
-    } = useUnit();
+    const { isFetchingUnits, towerPhaseId, units } = useUnit();
     const { pricingData, setPricingData } = usePricing();
     const [unitsByFloor, setUnitsByFloor] = useState([]);
-   
+
     //Hooks
     useEffect(() => {
         if (!selectedFloor || !units || units.length === 0) {
@@ -211,7 +207,6 @@ const FloorPremiumAssignModal = ({
             <div>
                 <FloorPremiumAddUnitModal
                     floorPremiumAddUnitModalRef={floorPremiumAddUnitModalRef}
-                    propertyData={propertyData}
                     unitsByFloor={unitsByFloor}
                     towerPhaseId={towerPhaseId}
                     selectedFloor={selectedFloor}

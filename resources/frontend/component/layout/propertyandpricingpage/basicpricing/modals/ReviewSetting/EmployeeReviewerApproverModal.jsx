@@ -367,6 +367,7 @@ const EmployeeReviewerApproverModal = ({
                 </div>
                 <div className="py-4 flex justify-center">
                     {" "}
+                    {/* TODO: Disable the button if there are no employees selected */}
                     <button
                         className="h-[37px] w-[176px] rounded-[10px] text-white montserrat-semibold text-sm gradient-btn5 hover:shadow-custom4"
                         onClick={handleApply}
