@@ -93,10 +93,8 @@ const ReportPage = () => {
         startDateValue,
         setStartDateValue,
         endDateValue,
-        setEndDateValue
+        setEndDateValue,
     } = useStateContext();
-
-
 
     const [searchSummary, setSearchSummary] = useState([]);
 
@@ -418,8 +416,6 @@ const ReportPage = () => {
 
     const currentYear = new Date().getFullYear();
 
-
-
     const defaultData = [{ name: "No Data" }];
     const dataToDisplay = dataCategory.length > 0 ? dataCategory : defaultData;
     const location = useLocation();
@@ -486,64 +482,62 @@ const ReportPage = () => {
         "N/A",
         ...(Array.isArray(propertyNamesList) && propertyNamesList.length > 0
             ? propertyNamesList
-                .filter((item) => !item.toLowerCase().includes("phase"))
-                .map((item) => {
-                    let formattedItem = formatFunc(item);
+                  .filter((item) => !item.toLowerCase().includes("phase"))
+                  .map((item) => {
+                      let formattedItem = formatFunc(item);
 
-                    // Capitalize each word in the string
-                    formattedItem = formattedItem
-                        .split(" ")
-                        .map((word) => {
-                            // Check for specific words that need to be fully capitalized
-                            if (/^(Sjmv|Lpu|Cdo|Dgt)$/i.test(word)) {
-                                return word.toUpperCase();
-                            }
-                            // Capitalize the first letter of all other words
-                            return (
-                                word.charAt(0).toUpperCase() +
-                                word.slice(1).toLowerCase()
-                            );
-                        })
-                        .join(" ");
+                      // Capitalize each word in the string
+                      formattedItem = formattedItem
+                          .split(" ")
+                          .map((word) => {
+                              // Check for specific words that need to be fully capitalized
+                              if (/^(Sjmv|Lpu|Cdo|Dgt)$/i.test(word)) {
+                                  return word.toUpperCase();
+                              }
+                              // Capitalize the first letter of all other words
+                              return (
+                                  word.charAt(0).toUpperCase() +
+                                  word.slice(1).toLowerCase()
+                              );
+                          })
+                          .join(" ");
 
-                    // Replace specific names if needed
-                    if (formattedItem === "Casamira South") {
-                        formattedItem = "Casa Mira South";
-                    }
+                      // Replace specific names if needed
+                      if (formattedItem === "Casamira South") {
+                          formattedItem = "Casa Mira South";
+                      }
 
-                    return formattedItem;
-                })
-                .sort((a, b) => {
-                    if (a === "N/A") return -1;
-                    if (b === "N/A") return 1;
-                    return a.localeCompare(b);
-                })
+                      return formattedItem;
+                  })
+                  .sort((a, b) => {
+                      if (a === "N/A") return -1;
+                      if (b === "N/A") return 1;
+                      return a.localeCompare(b);
+                  })
             : []),
     ];
 
     //Get current year
-
-
 
     const chartHeight = dataProperty.length * (barHeight + 80);
     const chartHeight2 = communicationTypeData.length * (barHeight + 100);
 
     const allDepartment = allEmployees
         ? [
-            "All",
-            ...Array.from(
-                new Set(
-                    allEmployees
-                        .map((employee) => employee.department)
-                        .filter(
-                            (department) =>
-                                department !== null &&
-                                department !== undefined &&
-                                department !== "PM"
-                        )
-                )
-            ),
-        ]
+              "All",
+              ...Array.from(
+                  new Set(
+                      allEmployees
+                          .map((employee) => employee.department)
+                          .filter(
+                              (department) =>
+                                  department !== null &&
+                                  department !== undefined &&
+                                  department !== "PM"
+                          )
+                  )
+              ),
+          ]
         : ["All"];
 
     const handleInputChange = (e) => {
@@ -581,52 +575,60 @@ const ReportPage = () => {
         }
     };
 
-
-
-
     const handleSearchFilter = () => {
-
         const summaryParts = [];
 
-
-        if (yearValue !== "All"){
-            summaryParts.push(`Year: ${yearValue}`)
-        } else{
-            if(startDateValue || endDateValue){
-                
-            }else{
-                summaryParts.push(`Year: All`)
+        if (yearValue !== "All") {
+            summaryParts.push(`Year: ${yearValue}`);
+        } else {
+            if (startDateValue || endDateValue) {
+            } else {
+                summaryParts.push(`Year: All`);
             }
         }
-        if (monthValue !== "All"){
-            summaryParts.push(`Month: ${formatMonth(monthValue)}`)
-        }else{
-            if(startDateValue || endDateValue){
-                    
-            }else{
-                summaryParts.push(`Month: All`)
+        if (monthValue !== "All") {
+            summaryParts.push(`Month: ${formatMonth(monthValue)}`);
+        } else {
+            if (startDateValue || endDateValue) {
+            } else {
+                summaryParts.push(`Month: All`);
             }
         }
 
         if (startDateValue && endDateValue) {
-            summaryParts.push(`Start Date: ${format(startDateValue, "MMM dd, yyyy")}`);
-            summaryParts.push(`End Date: ${format(endDateValue, "MMM dd, yyyy")}`);
+            summaryParts.push(
+                `Start Date: ${format(startDateValue, "MMM dd, yyyy")}`
+            );
+            summaryParts.push(
+                `End Date: ${format(endDateValue, "MMM dd, yyyy")}`
+            );
         } else if (startDateValue) {
-            summaryParts.push(`Start Date: ${format(startDateValue, "MMM dd, yyyy")}`);
+            summaryParts.push(
+                `Start Date: ${format(startDateValue, "MMM dd, yyyy")}`
+            );
         } else if (endDateValue) {
-            summaryParts.push(`End Date: ${format(endDateValue, "MMM dd, yyyy")}`);
+            summaryParts.push(
+                `End Date: ${format(endDateValue, "MMM dd, yyyy")}`
+            );
         }
 
-        if (projectValue !== "All" && projectValue !== "") summaryParts.push(`Project: ${projectValue}`);
-        if (departmentValue !== "All" && departmentValue !== "") summaryParts.push(`Department: ${departmentValue}`);
+        if (projectValue !== "All" && projectValue !== "")
+            summaryParts.push(`Project: ${projectValue}`);
+        if (departmentValue !== "All" && departmentValue !== "")
+            summaryParts.push(`Department: ${departmentValue}`);
 
-     
-        if (!startDateValue && !endDateValue && (yearValue == "All" && monthValue == "All" && projectValue == "All" && departmentValue == "All")) {
+        if (
+            !startDateValue &&
+            !endDateValue &&
+            yearValue == "All" &&
+            monthValue == "All" &&
+            projectValue == "All" &&
+            departmentValue == "All"
+        ) {
             summaryParts.push(`Year: All`);
             summaryParts.push(`Project: All`);
             summaryParts.push(`Department: All`);
         }
-
 
         setSearchSummary(summaryParts);
         setDepartment(departmentValue);
@@ -638,11 +640,10 @@ const ReportPage = () => {
     };
 
     const handleResetFilter = () => {
-
         const summaryParts = [];
 
         summaryParts.push(`Year: 2025`);
-        summaryParts.push('Month: All');
+        summaryParts.push("Month: All");
 
         setSearchSummary(summaryParts);
 
@@ -662,48 +663,59 @@ const ReportPage = () => {
     };
 
     useEffect(() => {
-
         const summaryParts = [];
 
-
-        if (yearValue !== "All"){
-            summaryParts.push(`Year: ${yearValue}`)
-        } else{
-            if(startDateValue || endDateValue){
-                
-            }else{
-                summaryParts.push(`Year: All`)
+        if (yearValue !== "All") {
+            summaryParts.push(`Year: ${yearValue}`);
+        } else {
+            if (startDateValue || endDateValue) {
+            } else {
+                summaryParts.push(`Year: All`);
             }
         }
-        if (monthValue !== "All"){
-            summaryParts.push(`Month: ${formatMonth(monthValue)}`)
-        }else{
-            if(startDateValue || endDateValue){
-                    
-            }else{
-                summaryParts.push(`Month: All`)
+        if (monthValue !== "All") {
+            summaryParts.push(`Month: ${formatMonth(monthValue)}`);
+        } else {
+            if (startDateValue || endDateValue) {
+            } else {
+                summaryParts.push(`Month: All`);
             }
         }
 
         if (startDateValue && endDateValue) {
-            summaryParts.push(`Start Date: ${format(startDateValue, "MMM dd, yyyy")}`);
-            summaryParts.push(`End Date: ${format(endDateValue, "MMM dd, yyyy")}`);
+            summaryParts.push(
+                `Start Date: ${format(startDateValue, "MMM dd, yyyy")}`
+            );
+            summaryParts.push(
+                `End Date: ${format(endDateValue, "MMM dd, yyyy")}`
+            );
         } else if (startDateValue) {
-            summaryParts.push(`Start Date: ${format(startDateValue, "MMM dd, yyyy")}`);
+            summaryParts.push(
+                `Start Date: ${format(startDateValue, "MMM dd, yyyy")}`
+            );
         } else if (endDateValue) {
-            summaryParts.push(`End Date: ${format(endDateValue, "MMM dd, yyyy")}`);
+            summaryParts.push(
+                `End Date: ${format(endDateValue, "MMM dd, yyyy")}`
+            );
         }
 
-        if (projectValue !== "All" && projectValue !== "") summaryParts.push(`Project: ${projectValue}`);
-        if (departmentValue !== "All" && departmentValue !== "") summaryParts.push(`Department: ${departmentValue}`);
+        if (projectValue !== "All" && projectValue !== "")
+            summaryParts.push(`Project: ${projectValue}`);
+        if (departmentValue !== "All" && departmentValue !== "")
+            summaryParts.push(`Department: ${departmentValue}`);
 
-     
-        if (!startDateValue && !endDateValue && (yearValue == "All" && monthValue == "All" && projectValue == "All" && departmentValue == "All")) {
+        if (
+            !startDateValue &&
+            !endDateValue &&
+            yearValue == "All" &&
+            monthValue == "All" &&
+            projectValue == "All" &&
+            departmentValue == "All"
+        ) {
             summaryParts.push(`Year: All`);
             summaryParts.push(`Project: All`);
             summaryParts.push(`Department: All`);
         }
-
 
         setSearchSummary(summaryParts);
         setDepartment(departmentValue);
@@ -712,7 +724,6 @@ const ReportPage = () => {
         setMonth(monthValue);
         setStartDate(startDateValue);
         setEndDate(endDateValue);
-
     }, []);
 
     useEffect(() => {
@@ -778,8 +789,6 @@ const ReportPage = () => {
         (total, category) => total + category.value,
         0
     );
-
-
 
     return (
         <div className="h-screen bg-custom-grayFA p-4 flex flex-col gap-[21px]">
@@ -889,7 +898,6 @@ const ReportPage = () => {
                         <span className="absolute inset-y-0 right-0 flex items-center text-white pr-3 pl-3 bg-custom-lightgreen pointer-events-none cursor-pointer">
                             <MdCalendarToday />
                         </span>
-
                     </div>
                 </div>
                 <div className="flex gap-[10px] flex-wrap">
@@ -902,9 +910,12 @@ const ReportPage = () => {
                                 name="concern"
                                 className="appearance-none w-full px-4 py-1 bg-white focus:outline-none border-0 cursor-pointer"
                                 value={projectValue}
-                                onChange={(e) => setProjectValue(e.target.value || "All")}
+                                onChange={(e) =>
+                                    setProjectValue(e.target.value || "All")
+                                }
                             >
-                                <option value="">Select Project</option> {/* Empty default option */}
+                                <option value="">Select Project</option>{" "}
+                                {/* Empty default option */}
                                 <option value="All">All</option>
                                 {formattedPropertyNames.map((item, index) => (
                                     <option key={index} value={item}>
@@ -926,22 +937,28 @@ const ReportPage = () => {
                                 name="concern"
                                 className="appearance-none w-full px-4 py-1 bg-white focus:outline-none border-0 cursor-pointer"
                                 value={departmentValue}
-                                onChange={(e) => setDepartmentValue(e.target.value || "All")}
+                                onChange={(e) =>
+                                    setDepartmentValue(e.target.value || "All")
+                                }
                             >
-                                <option value="">Select Department</option> {/* Empty default option */}
+                                <option value="">Select Department</option>{" "}
+                                {/* Empty default option */}
                                 <option value="All">All</option>
-                                {user?.department === "Customer Relations - Services"
+                                {user?.department ===
+                                "Customer Relations - Services"
                                     ? allDepartment
-                                        .filter((item) => item !== "All")
-                                        .sort()
-                                        .map((item, index) => (
-                                            <option key={index} value={item}>
-                                                {item}
-                                            </option>
-                                        ))
+                                          .filter((item) => item !== "All")
+                                          .sort()
+                                          .map((item, index) => (
+                                              <option key={index} value={item}>
+                                                  {item}
+                                              </option>
+                                          ))
                                     : user?.department && (
-                                        <option value={user?.department}>{user?.department}</option>
-                                    )}
+                                          <option value={user?.department}>
+                                              {user?.department}
+                                          </option>
+                                      )}
                                 <option value="Unassigned">Unassigned</option>
                             </select>
                             <span className="absolute inset-y-0 right-0 flex items-center text-white pr-3 pl-3 bg-custom-lightgreen pointer-events-none cursor-pointer">
@@ -968,15 +985,18 @@ const ReportPage = () => {
             <div className="flex flex-col gap-1 p-2 bg-white w-max rounded-[8px] shadow-custom7 text-sm">
                 <div className="flex flex-col">
                     <div className="mb-5">
-                        <strong>Search {data?.length > 1 ? 'results for' : 'result for'} &nbsp;</strong>
+                        <strong>
+                            Search{" "}
+                            {data?.length > 1 ? "results for" : "result for"}{" "}
+                            &nbsp;
+                        </strong>
                     </div>
                     <div className="flex flex-col flex-wrap gap-2">
                         {searchSummary.map((part, index) => {
                             const [label, value] = part.split(": ");
                             return (
                                 <div key={index}>
-                                    <strong>{label}:</strong>{" "}
-                                    {value}
+                                    <strong>{label}:</strong> {value}
                                 </div>
                             );
                         })}
@@ -992,15 +1012,26 @@ const ReportPage = () => {
                                 item.Resolved === 0 &&
                                 item.Unresolved === 0 &&
                                 item.Closed === 0
-                        ) && <p>- (No {dataSet.length > 1 ? 'results' : 'result'} found)</p>}
+                        ) && (
+                            <p>
+                                - (No{" "}
+                                {dataSet.length > 1 ? "results" : "result"}{" "}
+                                found)
+                            </p>
+                        )}
                 </div>
                 <div className="overflow-x-auto mt-[40px]">
-                    <div className="min-w-[600px]"> {/* Ensures horizontal scrolling when needed */}
+                    <div className="min-w-[600px]">
+                        {" "}
+                        {/* Ensures horizontal scrolling when needed */}
                         <ResponsiveContainer
-                            width={dataSet.length > 13 ? dataSet.length * 200 : "100%"}
+                            width={
+                                dataSet.length > 13
+                                    ? dataSet.length * 200
+                                    : "100%"
+                            }
                             height={228}
                         >
-
                             <BarChart
                                 data={dataSet}
                                 margin={{
@@ -1010,7 +1041,10 @@ const ReportPage = () => {
                                     bottom: 5,
                                 }}
                             >
-                                <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                                <CartesianGrid
+                                    strokeDasharray="3 3"
+                                    vertical={false}
+                                />
                                 <XAxis
                                     dataKey="name"
                                     tick={{
@@ -1030,14 +1064,38 @@ const ReportPage = () => {
                                     }}
                                 />
                                 <Tooltip content={<CustomTooltip1 />} />
-                                <Bar dataKey="Resolved" fill="#348017" barSize={15} radius={[3, 3, 0, 0]}>
-                                    <LabelList dataKey="Resolved" position="top" />
+                                <Bar
+                                    dataKey="Resolved"
+                                    fill="#348017"
+                                    barSize={15}
+                                    radius={[3, 3, 0, 0]}
+                                >
+                                    <LabelList
+                                        dataKey="Resolved"
+                                        position="top"
+                                    />
                                 </Bar>
-                                <Bar dataKey="Closed" fill="#D6E4D1" barSize={15} radius={[3, 3, 0, 0]}>
-                                    <LabelList dataKey="Closed" position="top" />
+                                <Bar
+                                    dataKey="Closed"
+                                    fill="#D6E4D1"
+                                    barSize={15}
+                                    radius={[3, 3, 0, 0]}
+                                >
+                                    <LabelList
+                                        dataKey="Closed"
+                                        position="top"
+                                    />
                                 </Bar>
-                                <Bar dataKey="Unresolved" fill="#EF4444" barSize={15} radius={[3, 3, 0, 0]}>
-                                    <LabelList dataKey="Unresolved" position="top" />
+                                <Bar
+                                    dataKey="Unresolved"
+                                    fill="#EF4444"
+                                    barSize={15}
+                                    radius={[3, 3, 0, 0]}
+                                >
+                                    <LabelList
+                                        dataKey="Unresolved"
+                                        position="top"
+                                    />
                                 </Bar>
                             </BarChart>
                         </ResponsiveContainer>
@@ -1069,10 +1127,22 @@ const ReportPage = () => {
                                     e.preventDefault();
                                     setSearchFilter({
                                         status: "Resolved",
-                                        selectedYear: yearValue !== "All" ? yearValue : "",
-                                        selectedMonth: monthValue !== "All" ? monthValue : "",
-                                        departments: departmentValue !== "All" ? departmentValue : "",
-                                        selectedProperty: projectValue !== "All" ? projectValue : "",
+                                        selectedYear:
+                                            yearValue !== "All"
+                                                ? yearValue
+                                                : "",
+                                        selectedMonth:
+                                            monthValue !== "All"
+                                                ? monthValue
+                                                : "",
+                                        departments:
+                                            departmentValue !== "All"
+                                                ? departmentValue
+                                                : "",
+                                        selectedProperty:
+                                            projectValue !== "All"
+                                                ? projectValue
+                                                : "",
                                         startDate: startDateValue,
                                         endDate: endDateValue,
                                     });
@@ -1115,10 +1185,22 @@ const ReportPage = () => {
                                     e.preventDefault();
                                     setSearchFilter({
                                         status: "Closed",
-                                        selectedYear: yearValue !== "All" ? yearValue : "",
-                                        selectedMonth: monthValue !== "All" ? monthValue : "",
-                                        departments: departmentValue !== "All" ? departmentValue : "",
-                                        selectedProperty: projectValue !== "All" ? projectValue : "",
+                                        selectedYear:
+                                            yearValue !== "All"
+                                                ? yearValue
+                                                : "",
+                                        selectedMonth:
+                                            monthValue !== "All"
+                                                ? monthValue
+                                                : "",
+                                        departments:
+                                            departmentValue !== "All"
+                                                ? departmentValue
+                                                : "",
+                                        selectedProperty:
+                                            projectValue !== "All"
+                                                ? projectValue
+                                                : "",
                                         startDate: startDateValue,
                                         endDate: endDateValue,
                                     });
@@ -1161,10 +1243,22 @@ const ReportPage = () => {
                                     e.preventDefault();
                                     setSearchFilter({
                                         status: "unresolved",
-                                        selectedYear: yearValue !== "All" ? yearValue : "",
-                                        selectedMonth: monthValue !== "All" ? monthValue : "",
-                                        departments: departmentValue !== "All" ? departmentValue : "",
-                                        selectedProperty: projectValue !== "All" ? projectValue : "",
+                                        selectedYear:
+                                            yearValue !== "All"
+                                                ? yearValue
+                                                : "",
+                                        selectedMonth:
+                                            monthValue !== "All"
+                                                ? monthValue
+                                                : "",
+                                        departments:
+                                            departmentValue !== "All"
+                                                ? departmentValue
+                                                : "",
+                                        selectedProperty:
+                                            projectValue !== "All"
+                                                ? projectValue
+                                                : "",
                                         startDate: startDateValue,
                                         endDate: endDateValue,
                                     });
@@ -1184,7 +1278,15 @@ const ReportPage = () => {
                         {communicationTypeData &&
                             communicationTypeData.every(
                                 (item) => item.value === 0
-                            ) && <p>- (No {communicationTypeData.length > 1 ? 'results' : 'result'} found)</p>}
+                            ) && (
+                                <p>
+                                    - (No{" "}
+                                    {communicationTypeData.length > 1
+                                        ? "results"
+                                        : "result"}{" "}
+                                    found)
+                                </p>
+                            )}
                     </div>
 
                     <div className="border border-t-1"></div>
@@ -1284,10 +1386,23 @@ const ReportPage = () => {
                                                 e.preventDefault();
                                                 setSearchFilter({
                                                     type: "Complaint",
-                                                    selectedYear: yearValue !== "All" ? yearValue : "",
-                                                    selectedMonth: monthValue !== "All" ? monthValue : "",
-                                                    departments: departmentValue !== "All" ? departmentValue : "",
-                                                    selectedProperty: projectValue !== "All" ? projectValue : "",
+                                                    selectedYear:
+                                                        yearValue !== "All"
+                                                            ? yearValue
+                                                            : "",
+                                                    selectedMonth:
+                                                        monthValue !== "All"
+                                                            ? monthValue
+                                                            : "",
+                                                    departments:
+                                                        departmentValue !==
+                                                        "All"
+                                                            ? departmentValue
+                                                            : "",
+                                                    selectedProperty:
+                                                        projectValue !== "All"
+                                                            ? projectValue
+                                                            : "",
                                                     startDate: startDateValue,
                                                     endDate: endDateValue,
                                                 });
@@ -1333,10 +1448,23 @@ const ReportPage = () => {
                                                 e.preventDefault();
                                                 setSearchFilter({
                                                     type: "Request",
-                                                    selectedYear: yearValue !== "All" ? yearValue : "",
-                                                    selectedMonth: monthValue !== "All" ? monthValue : "",
-                                                    departments: departmentValue !== "All" ? departmentValue : "",
-                                                    selectedProperty: projectValue !== "All" ? projectValue : "",
+                                                    selectedYear:
+                                                        yearValue !== "All"
+                                                            ? yearValue
+                                                            : "",
+                                                    selectedMonth:
+                                                        monthValue !== "All"
+                                                            ? monthValue
+                                                            : "",
+                                                    departments:
+                                                        departmentValue !==
+                                                        "All"
+                                                            ? departmentValue
+                                                            : "",
+                                                    selectedProperty:
+                                                        projectValue !== "All"
+                                                            ? projectValue
+                                                            : "",
                                                     startDate: startDateValue,
                                                     endDate: endDateValue,
                                                 });
@@ -1382,10 +1510,23 @@ const ReportPage = () => {
                                                 e.preventDefault();
                                                 setSearchFilter({
                                                     type: "Inquiry",
-                                                    selectedYear: yearValue !== "All" ? yearValue : "",
-                                                    selectedMonth: monthValue !== "All" ? monthValue : "",
-                                                    departments: departmentValue !== "All" ? departmentValue : "",
-                                                    selectedProperty: projectValue !== "All" ? projectValue : "",
+                                                    selectedYear:
+                                                        yearValue !== "All"
+                                                            ? yearValue
+                                                            : "",
+                                                    selectedMonth:
+                                                        monthValue !== "All"
+                                                            ? monthValue
+                                                            : "",
+                                                    departments:
+                                                        departmentValue !==
+                                                        "All"
+                                                            ? departmentValue
+                                                            : "",
+                                                    selectedProperty:
+                                                        projectValue !== "All"
+                                                            ? projectValue
+                                                            : "",
                                                     startDate: startDateValue,
                                                     endDate: endDateValue,
                                                 });
@@ -1431,10 +1572,23 @@ const ReportPage = () => {
                                                 e.preventDefault();
                                                 setSearchFilter({
                                                     type: "Suggestion or Recommendation",
-                                                    selectedYear: yearValue !== "All" ? yearValue : "",
-                                                    selectedMonth: monthValue !== "All" ? monthValue : "",
-                                                    departments: departmentValue !== "All" ? departmentValue : "",
-                                                    selectedProperty: projectValue !== "All" ? projectValue : "",
+                                                    selectedYear:
+                                                        yearValue !== "All"
+                                                            ? yearValue
+                                                            : "",
+                                                    selectedMonth:
+                                                        monthValue !== "All"
+                                                            ? monthValue
+                                                            : "",
+                                                    departments:
+                                                        departmentValue !==
+                                                        "All"
+                                                            ? departmentValue
+                                                            : "",
+                                                    selectedProperty:
+                                                        projectValue !== "All"
+                                                            ? projectValue
+                                                            : "",
                                                     startDate: startDateValue,
                                                     endDate: endDateValue,
                                                 });
@@ -1481,10 +1635,22 @@ const ReportPage = () => {
                                             e.preventDefault();
                                             setSearchFilter({
                                                 type: "No Type",
-                                                selectedYear: yearValue !== "All" ? yearValue : "",
-                                                selectedMonth: monthValue !== "All" ? monthValue : "",
-                                                departments: departmentValue !== "All" ? departmentValue : "",
-                                                selectedProperty: projectValue !== "All" ? projectValue : "",
+                                                selectedYear:
+                                                    yearValue !== "All"
+                                                        ? yearValue
+                                                        : "",
+                                                selectedMonth:
+                                                    monthValue !== "All"
+                                                        ? monthValue
+                                                        : "",
+                                                departments:
+                                                    departmentValue !== "All"
+                                                        ? departmentValue
+                                                        : "",
+                                                selectedProperty:
+                                                    projectValue !== "All"
+                                                        ? projectValue
+                                                        : "",
                                                 startDate: startDateValue,
                                                 endDate: endDateValue,
                                             });
@@ -1506,7 +1672,16 @@ const ReportPage = () => {
                         {inquriesPerChannelData &&
                             inquriesPerChannelData.every(
                                 (item) => item.value === 0
-                            ) && <p> - ({inquriesPerChannelData.length > 1 ? 'No results' : 'No result'} found)</p>}
+                            ) && (
+                                <p>
+                                    {" "}
+                                    - (
+                                    {inquriesPerChannelData.length > 1
+                                        ? "No results"
+                                        : "No result"}{" "}
+                                    found)
+                                </p>
+                            )}
                     </div>
                     <div className="border border-t-1"></div>
                     <div className="mt-4"></div>
@@ -1608,13 +1783,26 @@ const ReportPage = () => {
                                                 e.preventDefault();
                                                 setSearchFilter({
                                                     channels: "Email",
-                                                    selectedYear: yearValue !== "All" ? yearValue : "",
-                                                    selectedMonth: monthValue !== "All" ? monthValue : "",
-                                                    departments: departmentValue !== "All" ? departmentValue : "",
-                                                    selectedProperty: projectValue !== "All" ? projectValue : "",
+                                                    selectedYear:
+                                                        yearValue !== "All"
+                                                            ? yearValue
+                                                            : "",
+                                                    selectedMonth:
+                                                        monthValue !== "All"
+                                                            ? monthValue
+                                                            : "",
+                                                    departments:
+                                                        departmentValue !==
+                                                        "All"
+                                                            ? departmentValue
+                                                            : "",
+                                                    selectedProperty:
+                                                        projectValue !== "All"
+                                                            ? projectValue
+                                                            : "",
                                                     startDate: startDateValue,
                                                     endDate: endDateValue,
-                                                            });
+                                                });
                                                 navigate(
                                                     "/inquirymanagement/inquirylist"
                                                 );
@@ -1657,10 +1845,23 @@ const ReportPage = () => {
                                                 e.preventDefault();
                                                 setSearchFilter({
                                                     channels: "Call",
-                                                    selectedYear: yearValue !== "All" ? yearValue : "",
-                                                    selectedMonth: monthValue !== "All" ? monthValue : "",
-                                                    departments: departmentValue !== "All" ? departmentValue : "",
-                                                    selectedProperty: projectValue !== "All" ? projectValue : "",
+                                                    selectedYear:
+                                                        yearValue !== "All"
+                                                            ? yearValue
+                                                            : "",
+                                                    selectedMonth:
+                                                        monthValue !== "All"
+                                                            ? monthValue
+                                                            : "",
+                                                    departments:
+                                                        departmentValue !==
+                                                        "All"
+                                                            ? departmentValue
+                                                            : "",
+                                                    selectedProperty:
+                                                        projectValue !== "All"
+                                                            ? projectValue
+                                                            : "",
                                                     startDate: startDateValue,
                                                     endDate: endDateValue,
                                                 });
@@ -1706,10 +1907,23 @@ const ReportPage = () => {
                                                 e.preventDefault();
                                                 setSearchFilter({
                                                     channels: "Walk in",
-                                                    selectedYear: yearValue !== "All" ? yearValue : "",
-                                                    selectedMonth: monthValue !== "All" ? monthValue : "",
-                                                    departments: departmentValue !== "All" ? departmentValue : "",
-                                                    selectedProperty: projectValue !== "All" ? projectValue : "",
+                                                    selectedYear:
+                                                        yearValue !== "All"
+                                                            ? yearValue
+                                                            : "",
+                                                    selectedMonth:
+                                                        monthValue !== "All"
+                                                            ? monthValue
+                                                            : "",
+                                                    departments:
+                                                        departmentValue !==
+                                                        "All"
+                                                            ? departmentValue
+                                                            : "",
+                                                    selectedProperty:
+                                                        projectValue !== "All"
+                                                            ? projectValue
+                                                            : "",
                                                     startDate: startDateValue,
                                                     endDate: endDateValue,
                                                 });
@@ -1755,10 +1969,23 @@ const ReportPage = () => {
                                                 e.preventDefault();
                                                 setSearchFilter({
                                                     channels: "Website",
-                                                    selectedYear: yearValue !== "All" ? yearValue : "",
-                                                    selectedMonth: monthValue !== "All" ? monthValue : "",
-                                                    departments: departmentValue !== "All" ? departmentValue : "",
-                                                    selectedProperty: projectValue !== "All" ? projectValue : "",
+                                                    selectedYear:
+                                                        yearValue !== "All"
+                                                            ? yearValue
+                                                            : "",
+                                                    selectedMonth:
+                                                        monthValue !== "All"
+                                                            ? monthValue
+                                                            : "",
+                                                    departments:
+                                                        departmentValue !==
+                                                        "All"
+                                                            ? departmentValue
+                                                            : "",
+                                                    selectedProperty:
+                                                        projectValue !== "All"
+                                                            ? projectValue
+                                                            : "",
                                                     startDate: startDateValue,
                                                     endDate: endDateValue,
                                                 });
@@ -1804,10 +2031,23 @@ const ReportPage = () => {
                                                 e.preventDefault();
                                                 setSearchFilter({
                                                     channels: "Social media",
-                                                    selectedYear: yearValue !== "All" ? yearValue : "",
-                                                    selectedMonth: monthValue !== "All" ? monthValue : "",
-                                                    departments: departmentValue !== "All" ? departmentValue : "",
-                                                    selectedProperty: projectValue !== "All" ? projectValue : "",
+                                                    selectedYear:
+                                                        yearValue !== "All"
+                                                            ? yearValue
+                                                            : "",
+                                                    selectedMonth:
+                                                        monthValue !== "All"
+                                                            ? monthValue
+                                                            : "",
+                                                    departments:
+                                                        departmentValue !==
+                                                        "All"
+                                                            ? departmentValue
+                                                            : "",
+                                                    selectedProperty:
+                                                        projectValue !== "All"
+                                                            ? projectValue
+                                                            : "",
                                                     startDate: startDateValue,
                                                     endDate: endDateValue,
                                                 });
@@ -1853,10 +2093,23 @@ const ReportPage = () => {
                                                 e.preventDefault();
                                                 setSearchFilter({
                                                     channels: "Branch Tablet",
-                                                    selectedYear: yearValue !== "All" ? yearValue : "",
-                                                    selectedMonth: monthValue !== "All" ? monthValue : "",
-                                                    departments: departmentValue !== "All" ? departmentValue : "",
-                                                    selectedProperty: projectValue !== "All" ? projectValue : "",
+                                                    selectedYear:
+                                                        yearValue !== "All"
+                                                            ? yearValue
+                                                            : "",
+                                                    selectedMonth:
+                                                        monthValue !== "All"
+                                                            ? monthValue
+                                                            : "",
+                                                    departments:
+                                                        departmentValue !==
+                                                        "All"
+                                                            ? departmentValue
+                                                            : "",
+                                                    selectedProperty:
+                                                        projectValue !== "All"
+                                                            ? projectValue
+                                                            : "",
                                                     startDate: startDateValue,
                                                     endDate: endDateValue,
                                                 });
@@ -1903,12 +2156,25 @@ const ReportPage = () => {
                                                 setSearchFilter({
                                                     channels:
                                                         "Internal Endorsement",
-                                                        selectedYear: yearValue !== "All" ? yearValue : "",
-                                                        selectedMonth: monthValue !== "All" ? monthValue : "",
-                                                        departments: departmentValue !== "All" ? departmentValue : "",
-                                                        selectedProperty: projectValue !== "All" ? projectValue : "",
-                                                        startDate: startDateValue,
-                                                        endDate: endDateValue,
+                                                    selectedYear:
+                                                        yearValue !== "All"
+                                                            ? yearValue
+                                                            : "",
+                                                    selectedMonth:
+                                                        monthValue !== "All"
+                                                            ? monthValue
+                                                            : "",
+                                                    departments:
+                                                        departmentValue !==
+                                                        "All"
+                                                            ? departmentValue
+                                                            : "",
+                                                    selectedProperty:
+                                                        projectValue !== "All"
+                                                            ? projectValue
+                                                            : "",
+                                                    startDate: startDateValue,
+                                                    endDate: endDateValue,
                                                 });
                                                 navigate(
                                                     "/inquirymanagement/inquirylist"
@@ -1951,14 +2217,26 @@ const ReportPage = () => {
                                             onClick={(e) => {
                                                 e.preventDefault();
                                                 setSearchFilter({
-                                                    channels:
-                                                        "No Channel",
-                                                        selectedYear: yearValue !== "All" ? yearValue : "",
-                                                        selectedMonth: monthValue !== "All" ? monthValue : "",
-                                                        departments: departmentValue !== "All" ? departmentValue : "",
-                                                        selectedProperty: projectValue !== "All" ? projectValue : "",
-                                                        startDate: startDateValue,
-                                                        endDate: endDateValue,
+                                                    channels: "No Channel",
+                                                    selectedYear:
+                                                        yearValue !== "All"
+                                                            ? yearValue
+                                                            : "",
+                                                    selectedMonth:
+                                                        monthValue !== "All"
+                                                            ? monthValue
+                                                            : "",
+                                                    departments:
+                                                        departmentValue !==
+                                                        "All"
+                                                            ? departmentValue
+                                                            : "",
+                                                    selectedProperty:
+                                                        projectValue !== "All"
+                                                            ? projectValue
+                                                            : "",
+                                                    startDate: startDateValue,
+                                                    endDate: endDateValue,
                                                 });
                                                 navigate(
                                                     "/inquirymanagement/inquirylist"
@@ -1985,7 +2263,15 @@ const ReportPage = () => {
                                         item.resolved === 0 &&
                                         item.unresolved === 0 &&
                                         item.closed === 0
-                                ) && <p>- (No {dataProperty.length > 1 ? 'results' : 'result'} found)</p>}
+                                ) && (
+                                    <p>
+                                        - (No{" "}
+                                        {dataProperty.length > 1
+                                            ? "results"
+                                            : "result"}{" "}
+                                        found)
+                                    </p>
+                                )}
                         </div>
 
                         <div className="border border-t-1"></div>
@@ -2039,11 +2325,25 @@ const ReportPage = () => {
                                                             setSearchFilter({
                                                                 selectedProperty:
                                                                     item.name,
-                                                                    selectedYear: yearValue !== "All" ? yearValue : "",
-                                                                    selectedMonth: monthValue !== "All" ? monthValue : "",
-                                                                    departments: departmentValue !== "All" ? departmentValue : "",
-                                                                    startDate: startDateValue,
-                                                                    endDate: endDateValue,
+                                                                selectedYear:
+                                                                    yearValue !==
+                                                                    "All"
+                                                                        ? yearValue
+                                                                        : "",
+                                                                selectedMonth:
+                                                                    monthValue !==
+                                                                    "All"
+                                                                        ? monthValue
+                                                                        : "",
+                                                                departments:
+                                                                    departmentValue !==
+                                                                    "All"
+                                                                        ? departmentValue
+                                                                        : "",
+                                                                startDate:
+                                                                    startDateValue,
+                                                                endDate:
+                                                                    endDateValue,
                                                             });
                                                             navigate(
                                                                 "/inquirymanagement/inquirylist"
@@ -2073,12 +2373,25 @@ const ReportPage = () => {
                                                                 selectedProperty:
                                                                     item.name,
                                                                 status: "Resolved",
-                                                                selectedYear: yearValue !== "All" ? yearValue : "",
-                                                                selectedMonth: monthValue !== "All" ? monthValue : "",
-                                                                departments: departmentValue !== "All" ? departmentValue : "",
-                                                                startDate: startDateValue,
-                                                                endDate: endDateValue,
-
+                                                                selectedYear:
+                                                                    yearValue !==
+                                                                    "All"
+                                                                        ? yearValue
+                                                                        : "",
+                                                                selectedMonth:
+                                                                    monthValue !==
+                                                                    "All"
+                                                                        ? monthValue
+                                                                        : "",
+                                                                departments:
+                                                                    departmentValue !==
+                                                                    "All"
+                                                                        ? departmentValue
+                                                                        : "",
+                                                                startDate:
+                                                                    startDateValue,
+                                                                endDate:
+                                                                    endDateValue,
                                                             });
                                                             navigate(
                                                                 "/inquirymanagement/inquirylist"
@@ -2108,12 +2421,25 @@ const ReportPage = () => {
                                                                 selectedProperty:
                                                                     item.name,
                                                                 status: "Closed",
-                                                                selectedYear: yearValue !== "All" ? yearValue : "",
-                                                                selectedMonth: monthValue !== "All" ? monthValue : "",
-                                                                departments: departmentValue !== "All" ? departmentValue : "",
-                                                                startDate: startDateValue,
-                                                                endDate: endDateValue,
-
+                                                                selectedYear:
+                                                                    yearValue !==
+                                                                    "All"
+                                                                        ? yearValue
+                                                                        : "",
+                                                                selectedMonth:
+                                                                    monthValue !==
+                                                                    "All"
+                                                                        ? monthValue
+                                                                        : "",
+                                                                departments:
+                                                                    departmentValue !==
+                                                                    "All"
+                                                                        ? departmentValue
+                                                                        : "",
+                                                                startDate:
+                                                                    startDateValue,
+                                                                endDate:
+                                                                    endDateValue,
                                                             });
                                                             navigate(
                                                                 "/inquirymanagement/inquirylist"
@@ -2143,11 +2469,25 @@ const ReportPage = () => {
                                                                 selectedProperty:
                                                                     item.name,
                                                                 status: "unresolved",
-                                                                selectedYear: yearValue !== "All" ? yearValue : "",
-                                                                selectedMonth: monthValue !== "All" ? monthValue : "",
-                                                                departments: departmentValue !== "All" ? departmentValue : "",
-                                                                startDate: startDateValue,
-                                                                endDate: endDateValue,
+                                                                selectedYear:
+                                                                    yearValue !==
+                                                                    "All"
+                                                                        ? yearValue
+                                                                        : "",
+                                                                selectedMonth:
+                                                                    monthValue !==
+                                                                    "All"
+                                                                        ? monthValue
+                                                                        : "",
+                                                                departments:
+                                                                    departmentValue !==
+                                                                    "All"
+                                                                        ? departmentValue
+                                                                        : "",
+                                                                startDate:
+                                                                    startDateValue,
+                                                                endDate:
+                                                                    endDateValue,
                                                             });
                                                             navigate(
                                                                 "/inquirymanagement/inquirylist"
@@ -2298,7 +2638,15 @@ const ReportPage = () => {
                                         item.resolved === 0 &&
                                         item.unresolved === 0 &&
                                         item.closed === 0
-                                ) && <p>- (No {dataDepartment.length > 1 ? 'results' : 'result'} found)</p>}
+                                ) && (
+                                    <p>
+                                        - (No{" "}
+                                        {dataDepartment.length > 1
+                                            ? "results"
+                                            : "result"}{" "}
+                                        found)
+                                    </p>
+                                )}
                         </div>
                         <div className="border border-t-1"></div>
                         <div className="flex-grow overflow-x-auto px-[10px] mt-[5px] pb-[50px]">
@@ -2354,14 +2702,28 @@ const ReportPage = () => {
                                                             setSearchFilter({
                                                                 departments:
                                                                     item.name !==
-                                                                        "All"
+                                                                    "All"
                                                                         ? item.name
                                                                         : "",
-                                                                        selectedYear: yearValue !== "All" ? yearValue : "",
-                                                                        selectedMonth: monthValue !== "All" ? monthValue : "",
-                                                                        selectedProperty: projectValue !== "All" ? projectValue : "",
-                                                                        startDate: startDateValue,
-                                                                        endDate: endDateValue,
+                                                                selectedYear:
+                                                                    yearValue !==
+                                                                    "All"
+                                                                        ? yearValue
+                                                                        : "",
+                                                                selectedMonth:
+                                                                    monthValue !==
+                                                                    "All"
+                                                                        ? monthValue
+                                                                        : "",
+                                                                selectedProperty:
+                                                                    projectValue !==
+                                                                    "All"
+                                                                        ? projectValue
+                                                                        : "",
+                                                                startDate:
+                                                                    startDateValue,
+                                                                endDate:
+                                                                    endDateValue,
                                                                 /* department: departmentValue, */
                                                             });
                                                             navigate(
@@ -2395,15 +2757,29 @@ const ReportPage = () => {
                                                             setSearchFilter({
                                                                 departments:
                                                                     item.name !==
-                                                                        "All"
+                                                                    "All"
                                                                         ? item.name
                                                                         : "",
                                                                 status: "Resolved",
-                                                                selectedYear: yearValue !== "All" ? yearValue : "",
-                                                                selectedMonth: monthValue !== "All" ? monthValue : "",
-                                                                selectedProperty: projectValue !== "All" ? projectValue : "",
-                                                                startDate: startDateValue,
-                                                                endDate: endDateValue,
+                                                                selectedYear:
+                                                                    yearValue !==
+                                                                    "All"
+                                                                        ? yearValue
+                                                                        : "",
+                                                                selectedMonth:
+                                                                    monthValue !==
+                                                                    "All"
+                                                                        ? monthValue
+                                                                        : "",
+                                                                selectedProperty:
+                                                                    projectValue !==
+                                                                    "All"
+                                                                        ? projectValue
+                                                                        : "",
+                                                                startDate:
+                                                                    startDateValue,
+                                                                endDate:
+                                                                    endDateValue,
                                                             });
                                                             navigate(
                                                                 "/inquirymanagement/inquirylist"
@@ -2436,15 +2812,29 @@ const ReportPage = () => {
                                                             setSearchFilter({
                                                                 departments:
                                                                     item.name !==
-                                                                        "All"
+                                                                    "All"
                                                                         ? item.name
                                                                         : "",
                                                                 status: "Closed",
-                                                                selectedYear: yearValue !== "All" ? yearValue : "",
-                                                                selectedMonth: monthValue !== "All" ? monthValue : "",
-                                                                selectedProperty: projectValue !== "All" ? projectValue : "",
-                                                                startDate: startDateValue,
-                                                                endDate: endDateValue,
+                                                                selectedYear:
+                                                                    yearValue !==
+                                                                    "All"
+                                                                        ? yearValue
+                                                                        : "",
+                                                                selectedMonth:
+                                                                    monthValue !==
+                                                                    "All"
+                                                                        ? monthValue
+                                                                        : "",
+                                                                selectedProperty:
+                                                                    projectValue !==
+                                                                    "All"
+                                                                        ? projectValue
+                                                                        : "",
+                                                                startDate:
+                                                                    startDateValue,
+                                                                endDate:
+                                                                    endDateValue,
                                                             });
                                                             navigate(
                                                                 "/inquirymanagement/inquirylist"
@@ -2477,15 +2867,29 @@ const ReportPage = () => {
                                                             setSearchFilter({
                                                                 departments:
                                                                     item.name !==
-                                                                        "All"
+                                                                    "All"
                                                                         ? item.name
                                                                         : "",
                                                                 status: "unresolved",
-                                                                selectedYear: yearValue !== "All" ? yearValue : "",
-                                                                selectedMonth: monthValue !== "All" ? monthValue : "",
-                                                                selectedProperty: projectValue !== "All" ? projectValue : "",
-                                                                startDate: startDateValue,
-                                                                endDate: endDateValue,
+                                                                selectedYear:
+                                                                    yearValue !==
+                                                                    "All"
+                                                                        ? yearValue
+                                                                        : "",
+                                                                selectedMonth:
+                                                                    monthValue !==
+                                                                    "All"
+                                                                        ? monthValue
+                                                                        : "",
+                                                                selectedProperty:
+                                                                    projectValue !==
+                                                                    "All"
+                                                                        ? projectValue
+                                                                        : "",
+                                                                startDate:
+                                                                    startDateValue,
+                                                                endDate:
+                                                                    endDateValue,
                                                             });
                                                             navigate(
                                                                 "/inquirymanagement/inquirylist"
@@ -2537,7 +2941,15 @@ const ReportPage = () => {
                             {dataCategory &&
                                 dataCategory.every(
                                     (item) => item.value === 0
-                                ) && <p>- (No {dataCategory.length > 1 ? 'results' : 'result'} found)</p>}
+                                ) && (
+                                    <p>
+                                        - (No{" "}
+                                        {dataCategory.length > 1
+                                            ? "results"
+                                            : "result"}{" "}
+                                        found)
+                                    </p>
+                                )}
                         </div>
                         <div className="border border-t-1"></div>
                         <div className="flex flex-col">
@@ -2576,8 +2988,12 @@ const ReportPage = () => {
                                 </PieChart>
                             </div>
                             <div className="flex w-full justify-center">
-                                <div className="flex w-[150px] py-4 justify-center"> {/* dummy div to align the chart */}
-                                    <p className="font-bold text-[20px]">Total: {totalValueCategory}</p>
+                                <div className="flex w-[150px] py-4 justify-center">
+                                    {" "}
+                                    {/* dummy div to align the chart */}
+                                    <p className="font-bold text-[20px]">
+                                        Total: {totalValueCategory}
+                                    </p>
                                 </div>
                             </div>
                             <div className="flex justify-center w-full">
@@ -2612,12 +3028,30 @@ const ReportPage = () => {
                                                                     {
                                                                         category:
                                                                             category.name,
-                                                                        selectedYear: yearValue !== "All" ? yearValue : "",
-                                                                        selectedMonth: monthValue !== "All" ? monthValue : "",
-                                                                        departments: departmentValue !== "All" ? departmentValue : "",
-                                                                        selectedProperty: projectValue !== "All" ? projectValue : "",
-                                                                        startDate: startDateValue,
-                                                                        endDate: endDateValue,
+                                                                        selectedYear:
+                                                                            yearValue !==
+                                                                            "All"
+                                                                                ? yearValue
+                                                                                : "",
+                                                                        selectedMonth:
+                                                                            monthValue !==
+                                                                            "All"
+                                                                                ? monthValue
+                                                                                : "",
+                                                                        departments:
+                                                                            departmentValue !==
+                                                                            "All"
+                                                                                ? departmentValue
+                                                                                : "",
+                                                                        selectedProperty:
+                                                                            projectValue !==
+                                                                            "All"
+                                                                                ? projectValue
+                                                                                : "",
+                                                                        startDate:
+                                                                            startDateValue,
+                                                                        endDate:
+                                                                            endDateValue,
                                                                     }
                                                                 );
                                                                 navigate(

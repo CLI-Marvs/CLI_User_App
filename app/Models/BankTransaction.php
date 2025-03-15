@@ -9,6 +9,8 @@ class BankTransaction extends Model
 {
     use HasFactory;
 
-    protected $table = 'bank_transactions';
+    protected $table = 'transaction';
+    protected $primaryKey = 'transaction_id'; 
+    public $incrementing = true;
     protected $guarded = array();
 }

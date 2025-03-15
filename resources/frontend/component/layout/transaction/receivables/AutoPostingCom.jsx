@@ -41,6 +41,7 @@ const AutoPostingCom = () => {
     } = useTransactionContext();
     const [selectedRows, setSelectedRows] = useState([]);
     const [statusToPost, setStatusPost] = useState([]);
+    const [isSelectedAll, setIsSelectedAll] = useState(false);
 
     const getPostingList = async () => {
         const response = await transaction.transactionList(
@@ -51,18 +52,32 @@ const AutoPostingCom = () => {
         setTotalPagePosting(response.data.last_page);
     };
 
-    const handleActiveItem = (item) => {    
+    const handleActiveItem = (item) => {
         setActiveItemTransaction((prev) => (prev === item ? "Cleared" : item));
         setCurrentPagePosting(0);
         setSelectedRows([]);
         setStatusPost([]);
+        setIsSelectedAll(false);
     };
 
     const handleUpdateItems = async (item) => {
-        const response = await transaction.transactionUpdate(selectedRows);
-        getPostingList();
+        let payload = [];
 
-        console.log("response",response);
+        const statusRef = labelStatuses
+            .filter((ref) => ref.name === item)
+            .map((item) => item.statusRef);
+
+        if (statusRef.length > 0) {
+            const updatedRows = selectedRows.map((row) => ({
+                ...row,
+                statusRef: statusRef[0],
+            }));
+
+            payload = updatedRows;
+        }
+        const response = await transaction.transactionUpdate(payload);
+        setIsSelectedAll(false);
+        getPostingList();
     };
 
     const handlePageClick = (data) => {
@@ -75,9 +90,9 @@ const AutoPostingCom = () => {
 
     const handleCheckboxChange = (item) => {
         setSelectedRows((prev) =>
-            prev.some((row) => row.id === item.id)
-                ? prev.filter((row) => row.id !== item.id)
-                : [...prev, { id: item.id, status: item.status }]
+            prev.some((row) => row.id === item.transaction_id)
+                ? prev.filter((row) => row.id !== item.transaction_id)
+                : [...prev, { id: item.transaction_id, status: item.status }]
         );
         setStatusPost(
             labelStatuses
@@ -88,10 +103,12 @@ const AutoPostingCom = () => {
 
     const handleSelectAll = (e) => {
         if (e.target.checked) {
+            setIsSelectedAll(true);
             const selectedItems = postingList.map((row) => ({
-                id: row.id,
+                id: row.transaction_id,
                 status: row.status,
             }));
+
             const selectedStatuses = selectedItems.map((item) => item.status);
 
             setSelectedRows(selectedItems);
@@ -101,6 +118,7 @@ const AutoPostingCom = () => {
                     .map((item) => item.name)
             );
         } else {
+            setIsSelectedAll(false);
             setSelectedRows([]);
         }
     };
@@ -113,7 +131,7 @@ const AutoPostingCom = () => {
                         <input
                             type="checkbox"
                             className="w-[15px] h-[15px]"
-                            checked={selectedRows.length === postingList.length}
+                            checked={isSelectedAll}
                             onChange={(e) => handleSelectAll(e)}
                         />
                         <span>Select All</span>
@@ -126,7 +144,7 @@ const AutoPostingCom = () => {
                     <input
                         type="checkbox"
                         checked={selectedRows.some(
-                            (selected) => selected.id === row.id
+                            (selected) => selected.id === row.transaction_id
                         )}
                         onChange={() => handleCheckboxChange(row)}
                     />
@@ -177,8 +195,6 @@ const AutoPostingCom = () => {
         },
     ];
 
-    console.log("selectedRows", selectedRows);
-
     return (
         <div className="overflow-y-hidden px-3 mt-3 space-y-3">
             <div className="flex justify-between px-2">
@@ -208,16 +224,11 @@ const AutoPostingCom = () => {
                         {statusToPost.map((item, index) => {
                             return (
                                 <div
-                                    className={`w-[143px] h-[37px] shadow-custom12 mt-5 rounded-md flex items-center justify-center cursor-pointer ${dynamicClass(
-                                        item
-                                    )} ${
-                                        activeItemTransaction === item
-                                            ? "bg-[#F1F1F1] shadow-custom13"
-                                            : ""
-                                    }`}
+                                    className={`w-[143px] h-[37px] shadow-custom12 mt-5 rounded-md flex items-center justify-center cursor-pointer`}
                                     key={index}
+                                    onClick={() => handleUpdateItems(item)}
                                 >
-                                    <button className="montserrat-medium text-sm" onClick={() => handleUpdateItems(item)}>
+                                    <button className="px-4 py-2 w-[143px] h-[37px] text-white font-semibold rounded-lg bg-gradient-to-r from-[#348017] to-[#175D5F] hover:opacity-90 transition duration-300">
                                         {item}
                                     </button>
                                 </div>
@@ -241,8 +252,8 @@ const AutoPostingCom = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {postingList.map((row, rowIndex) => {
-                            return (
+                        {postingList.length > 0 ? (
+                            postingList.map((row, rowIndex) => (
                                 <tr
                                     key={rowIndex}
                                     className="cursor-pointer border-r-[1px] border-opacity-10 border-[#B9B7B7] shadow-custom11"
@@ -260,8 +271,17 @@ const AutoPostingCom = () => {
                                         </td>
                                     ))}
                                 </tr>
-                            );
-                        })}
+                            ))
+                        ) : (
+                            <tr>
+                                <td
+                                    colSpan={columns.length}
+                                    className="text-center py-4 text-gray-500"
+                                >
+                                    No data to show.
+                                </td>
+                            </tr>
+                        )}
                     </tbody>
                 </table>
             </div>
