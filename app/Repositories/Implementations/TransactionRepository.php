@@ -132,7 +132,8 @@ class TransactionRepository
     {
         $query = $this->transactionModel
             ->join('property_masters', 'property_masters.id', '=', 'transaction.id')
-            ->select('transaction.*', 'property_masters.property_name');
+            ->select('transaction.*', 'property_masters.property_name')
+            ->orderBy('created_at', 'desc');
 
         if (!empty($data['filter'])) {
             $query->where('transaction.status', $data['filter']);

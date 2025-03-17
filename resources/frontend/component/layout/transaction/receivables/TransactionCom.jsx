@@ -5,6 +5,7 @@ import { useTransactionContext } from "@/context/Transaction/TransactionContext"
 import { transaction } from "@/component/servicesApi/apiCalls/transactions";
 import ReactPaginate from "react-paginate";
 import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md";
+import TransactionSearchBar from "@/component/layout/transaction/TransactionSearchBar";
 
 const TransactionCom = () => {
     const {
@@ -17,7 +18,9 @@ const TransactionCom = () => {
     } = useTransactionContext();
 
     const getTransactionList = async () => {
-        const response = await transaction.transactionList(currentPageTransaction);
+        const response = await transaction.transactionList(
+            currentPageTransaction
+        );
         setTransactionList(response.data.data);
         setTotalPageTransaction(response.data.last_page);
     };
@@ -29,7 +32,6 @@ const TransactionCom = () => {
     useEffect(() => {
         getTransactionList();
     }, [currentPageTransaction]);
-
 
     /*  const data = [
         {
@@ -74,6 +76,45 @@ const TransactionCom = () => {
         },
     ]; */
 
+    const fields = [
+        { name: "transaction_customer_name", label: "Name" },
+        { name: "transaction_email", label: "Email" },
+        { 
+            name: "transaction_bank", 
+            label: "Bank",
+            type: "select",
+            options: [
+                { label: "Select Bank", value: "" }, 
+                { label: "BDO", value: "bdo" },
+                { label: "BPI", value: "bpi" },
+                { label: "LANDBANK", value: "landbank" },
+            ]
+        }, 
+        { 
+            name: "project_name", 
+            label: "Project Name",
+            type: "select",
+            options: [
+                { label: "Select Project", value: "" }, 
+                { label: "Casa Mira", value: "Casa Mira" },
+                { label: "38th Park", value: "38th Park" },
+            ]
+        }, 
+        { name: "transaction_invoice_number", label: "Invoice Number" },
+        { name: "transaction_document_number", label: "Document Number" },
+        { name: "transaction_reference_number", label: "Reference Number" },
+        { 
+            name: "transaction_status", 
+            label: "Status",
+            type: "select",
+            options: [
+                { label: "Select Status", value: "" },
+                { label: "Not Posted", value: "not_posted" },
+                { label: "Posted", value: "posted" },
+                { label: "Floating", value: "floating" },
+            ]
+        } 
+    ];
 
     const columns = [
         {
@@ -136,7 +177,10 @@ const TransactionCom = () => {
 
     return (
         <>
-            <div className="overflow-y-hidden px-3 mt-3">
+            <div className="overflow-y-hidden px-3 space-y-2">
+                <div className="px-2">
+                    <TransactionSearchBar fields={fields}/>
+                </div>
                 <GlobalTable columns={columns} data={transactionList} />
                 <div className="flex justify-end mt-4">
                     <div className="flex w-full justify-end mt-3 mb-10">

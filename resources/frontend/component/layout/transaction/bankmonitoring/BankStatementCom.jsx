@@ -15,24 +15,11 @@ import apiServiceSap from "../../../servicesApi/apiServiceSap";
 import { data } from "autoprefixer";
 import GlobalTable from "@/component/layout/transaction/GlobalTable";
 import BankTableCell from "./BankTableCell";
+import TransactionSearchBar from "@/component/layout/transaction/TransactionSearchBar";
+
+
 
 const BankStatementCom = () => {
-    const {
-        transactions,
-        setCurrentPageTransaction,
-        currentPageTransations,
-        transactionsPageCount,
-        getTransactions,
-        getMatches,
-        matchesData,
-        bankNames,
-        setBankNames,
-        bankList,
-    } = useStateContext();
-    const [files, setFiles] = useState([]);
-    const modalRef = useRef(null);
-    const [loading, setLoading] = useState(false);
-
     const data = [
         {
             bank_name: "Bank of America",
@@ -61,7 +48,36 @@ const BankStatementCom = () => {
             transaction_code: "123456789",
         },
     ];
-
+    const fields = [
+        { 
+            name: "bank_name", 
+            label: "Bank",
+            type: "select",
+            options: [
+                { label: "Select Bank", value: "" }, 
+                { label: "BDO", value: "bdo" },
+                { label: "BPI", value: "bpi" },
+                { label: "LANDBANK", value: "landbank" },
+            ]
+        }, 
+        { name: "bank_transaction_number", label: "Transaction Number" },
+        { name: "bank_document_number", label: "Document Number" },
+        { name: "bank_transaction_code", label: "Transaction Code" },
+        { name: "bank_reference_number", label: "Reference Number" },
+        { 
+            name: "bank_status", 
+            label: "Status",
+            type: "select",
+            options: [
+                { label: "Select Status", value: "" },
+                { label: "Not Posted", value: "not_posted" },
+                { label: "Posted", value: "posted" },
+                { label: "Floating", value: "floating" },
+            ]
+        } 
+    ];
+    
+    
     const columns = [
         {
             header: "Bank",
@@ -107,71 +123,8 @@ const BankStatementCom = () => {
         },
     ];
 
-    useEffect(() => {
-        if (files.length > 0 && modalRef.current) {
-            modalRef.current.showModal();
-        }
-        getMatches();
-    }, [files]);
-    useEffect(() => {
-        getTransactions();
-    }, []);
 
-    const handleFileChange = (e) => {
-        setFiles(Array.from(e.target.files));
-        e.target.value = null;
-    };
-
-    const handlePageChange = (data) => {
-        const selectedPage = data.selected;
-        setCurrentPageTransaction(selectedPage);
-    };
-
-    const handleRemoveFile = (index) => {
-        const newFiles = files.filter((_, i) => i !== index);
-        setFiles(newFiles);
-    };
-
-    const handleCancel = () => {
-        if (modalRef.current) {
-            modalRef.current.close();
-        }
-        setFiles([]);
-    };
-
-    const handleSubmit = async (event) => {
-        event.preventDefault();
-
-        const formData = new FormData(); // Use FormData for file uploads
-        files.forEach((file) => formData.append("notepadFile[]", file));
-        setLoading(true);
-        try {
-            const response = await apiService.post("upload-notepad", formData, {
-                headers: {
-                    "Content-Type": "multipart/form-data",
-                },
-            });
-            setLoading(false);
-            if (modalRef.current) {
-                modalRef.current.close();
-            }
-            setFiles([]);
-            getTransactions();
-        } catch (error) {
-            console.log("error uploading data", error);
-        }
-    };
-
-    const updateRecords = async () => {
-        try {
-            const response = await apiService.post("update-transaction");
-        } catch (error) {
-            console.log("error updating", error);
-        }
-    };
-
-    const handleSubmitSap = async () => {
-        setLoading(true);
+   /*  const handleSubmitSap = async () => {
         try {
             for (const item of matchesData) {
                 let soapBody = `
@@ -201,289 +154,27 @@ const BankStatementCom = () => {
                 );
             }
 
-            getMatches();
-            getTransactions();
-
             if (modalRef.current) {
                 modalRef.current.close();
             }
-            setLoading(false); // End loading
-
             toast.success("All Data Posted Successfully!");
         } catch (error) {
             console.error(
                 "Error:",
                 error.response ? error.response.data : error.message
             );
-            if (modalRef.current) {
-                modalRef.current.close();
-            }
-            setLoading(false);
             toast.error("Sometine went wrong. Please refresh the page");
         }
-    };
+    }; */
 
-    const handleBankChange = (e) => {
-        setBankNames(e.target.value);
-    };
-
-    const openPostingModal = () => {
-        if (modalRef.current) {
-            modalRef.current.showModal();
-        }
-    };
+    
 
     return (
         <>
-            {/* <div className="px-4">
-                <ToastContainer position="top-center" />
-                <div className="flex mb-4 gap-10">
-                    <input
-                        type="file"
-                        id="fileInput"
-                        multiple
-                        className="hidden"
-                        onChange={(e) => handleFileChange(e)}
-                    />
-                    <button
-                        onClick={() =>
-                            document.getElementById("fileInput").click()
-                        }
-                        className="px-10 gradient-btn5 text-white text-sm rounded-[10px]"
-                    >
-                        Upload Transaction Report
-                    </button>
-                    <button
-                        className="h-[38px] w-[121px] outline-none gradient-btn5 text-white  text-xs rounded-[10px]"
-                        onClick={openPostingModal}
-                    >
-                        {" "}
-                        Run Auto Posting
-                    </button>
+            <div className="overflow-y-hidden px-3">
+                <div className="px-2">
+                    <TransactionSearchBar fields={fields} />
                 </div>
-
-                <table className="min-w-full bg-white border border-gray-500 border-collapse">
-                    <thead>
-                        <tr>
-                            <th className=" px-4 border border-gray-500">
-                                Date
-                            </th>
-                            <th className=" px-4 border border-gray-500">
-                                Bank
-                            </th>
-                            <th className=" px-4 border border-gray-500">
-                                Payment Channel
-                            </th>
-                            <th className=" px-4 border border-gray-500">
-                                Transact By
-                            </th>
-                            <th className=" px-4 border border-gray-500">
-                                Contract No/ Reference No.
-                            </th>
-                            <th className=" px-4 border border-gray-500">
-                                Status
-                            </th>
-                            <th className=" px-4 border border-gray-500">
-                                Invoice Amount
-                            </th>
-                            <th className=" px-4 border border-gray-500">
-                                Document Number
-                            </th>
-
-                            <th className=" px-4 border border-gray-500">
-                                Collection Receipt Link
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {transactions.length > 0 ? (
-                          transactions.map((item, index) => (
-                            <tr key={index}>
-                            <td className=" px-4 border border-gray-500">
-                                {item.transaction_date}
-                            </td>
-                            <td className=" px-4 border border-gray-500">
-                                {item.bank_name}
-                            </td>
-                            <td className=" px-4 border border-gray-500">
-                                {item.payment_channel}
-                            </td>
-                            <td className=" px-4 border border-gray-500">
-                                {item.payor_name}
-                            </td>
-                            <td className=" px-4 border border-gray-500">
-                                {item.reference_number}
-                            </td>
-                            <td className=" px-4 border border-gray-500">
-                                {item.status === "not_posted"
-                                    ? "Not Posted"
-                                    : "Posted"}
-                            </td>
-                            <td className=" px-4 border border-gray-500">
-                                {item.invoice_amount
-                                    ? new Intl.NumberFormat("en-US", {
-                                          style: "decimal",
-                                          minimumFractionDigits: 2,
-                                      }).format(item.invoice_amount)
-                                    : null}
-                            </td>
-                            <td className=" px-4 border border-gray-500">
-                                {item.document_number}
-                            </td>
-                           
-                            <td className="px-4 border border-gray-500">
-                                {item.collection_receipt_link ? (
-                                    <a
-                                        href={item.collection_receipt_link}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="cursor-pointer underline"
-                                    >
-                                        View Document
-                                    </a>
-                                ) : null}
-                            </td>
-                        </tr>
-                          ))
-                        ) : (
-                            <tr>
-                                <td
-                                    className="text-md px-4 py-2 text-center"
-                                    colSpan={9}
-                                >
-                                    No data to show
-                                </td>
-                            </tr>
-                        )}
-                    </tbody>
-                </table>
-
-                <div className="flex justify-end mt-4">
-                    <div className="flex w-full justify-end mt-3 mb-10">
-                        <ReactPaginate
-                            previousLabel={
-                                <MdKeyboardArrowLeft className="text-[#404B52]" />
-                            }
-                            nextLabel={
-                                <MdKeyboardArrowRight className="text-[#404B52]" />
-                            }
-                            breakLabel={"..."}
-                            pageCount={transactionsPageCount}
-                            marginPagesDisplayed={2}
-                            pageRangeDisplayed={1}
-                            onPageChange={handlePageChange}
-                            containerClassName={"flex gap-2"}
-                            previousClassName="border border-[#EEEEEE] text-custom-bluegreen font-semibold w-[26px] h-[24px] rounded-[4px] flex justify-center items-center hover:text-white hover:bg-custom-lightgreen hover:text-white"
-                            nextClassName="border border-[#EEEEEE] text-custom-bluegreen font-semibold w-[26px] h-[24px] rounded-[4px] flex justify-center items-center hover:text-white hover:bg-custom-lightgreen hover:text-white"
-                            pageClassName=" border border-[#EEEEEE] bg- text-black w-[26px] h-[24px] rounded-[4px] flex justify-center items-center hover:bg-custom-lightgreen text-[12px]"
-                            activeClassName="w-[26px] h-[24px] border border-[#EEEEEE] bg-custom-lightgreen text-[#404B52] rounded-[4px] text-white text-[12px]"
-                            pageLinkClassName="w-full h-full flex justify-center items-center"
-                            activeLinkClassName="w-full h-full flex justify-center items-center"
-                            disabledLinkClassName={
-                                "text-gray-300 cursor-not-allowed"
-                            }
-                            forcePage={currentPageTransations}
-                        />
-                    </div>
-                </div>
-            </div>
-            <dialog
-                id="Employment"
-                className="modal w-[589px] rounded-[10px] shadow-custom5 backdrop:bg-black/50 px-4 py-4"
-                ref={modalRef}
-            >
-                {files && files.length > 0 ? (
-                    <>
-                        <div className="flex flex-col text-md mb-4">
-                            <div>These are files to be uploaded</div>
-                            {files.length > 0 && (
-                                <div className="mt-4">
-                                    <ul>
-                                        {files.map((file, index) => (
-                                            <li
-                                                key={index}
-                                                className="flex justify-between"
-                                            >
-                                                {file.name}
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </div>
-                            )}
-                        </div>
-
-                        <div className="flex justify-end gap-3">
-                            <button
-                                className="h-[38px] w-[121px] gradient-btn5 text-white  text-xs rounded-[10px]"
-                                onClick={handleCancel}
-                            >
-                                {" "}
-                                Cancel
-                            </button>
-                            <button
-                                onClick={(e) => handleSubmit(e)}
-                                disabled={loading}
-                                type="submit"
-                                className={`w-[133px] text-sm montserrat-semibold text-white h-[40px] rounded-[10px] gradient-btn2 flex justify-center items-center gap-2 tablet:w-full hover:shadow-custom4
-                                                ${
-                                                    loading
-                                                        ? "cursor-not-allowed"
-                                                        : ""
-                                                }
-                                                `}
-                            >
-                                {loading ? (
-                                    <CircularProgress className="spinnerSize" />
-                                ) : (
-                                    <>
-                                        Submit
-                                        <IoIosSend />
-                                    </>
-                                )}
-                            </button>
-                        </div>
-                    </>
-                ) : (
-                    <>
-                        <div className="flex flex-col text-md mb-4">
-                            <DataMatchTable matchesData={matchesData} />
-                        </div>
-
-                        <div className="flex justify-end gap-3">
-                            <button
-                                className="h-[38px] outline-none w-[121px] gradient-btn5 text-white  text-xs rounded-[10px]"
-                                onClick={handleCancel}
-                            >
-                                {" "}
-                                Cancel
-                            </button>
-                            <button
-                                onClick={(e) => handleSubmitSap(e)}
-                                disabled={loading}
-                                type="submit"
-                                className={`w-[133px] text-sm montserrat-semibold text-white h-[40px] rounded-[10px] gradient-btn2 flex justify-center items-center gap-2 tablet:w-full hover:shadow-custom4
-                                                ${
-                                                    loading
-                                                        ? "cursor-not-allowed"
-                                                        : ""
-                                                }
-                                                `}
-                            >
-                                {loading ? (
-                                    <CircularProgress className="spinnerSize" />
-                                ) : (
-                                    <>
-                                        Post
-                                        <IoIosSend />
-                                    </>
-                                )}
-                            </button>
-                        </div>
-                    </>
-                )}
-            </dialog>   */}
-
-            <div className="overflow-y-hidden px-3 mt-3">
                 <GlobalTable columns={columns} data={data} />
             </div>
         </>
