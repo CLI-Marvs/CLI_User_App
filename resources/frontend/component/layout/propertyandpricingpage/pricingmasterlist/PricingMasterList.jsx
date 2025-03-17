@@ -204,12 +204,12 @@ const PricingMasterList = () => {
                     </svg>
                 </div>
                 <div className="ml-4 flex justify-center items-center">
-                    <CustomToolTip text="Refresh" position="top">
+                    <CustomToolTip text="Refresh page" position="top">
                         <button
                             className="  hover:bg-custom-grayF1 rounded-full text-custom-bluegreen hover:text-custom-lightblue"
                             onClick={() => refreshPage()}
                         >
-                            <MdRefresh className="h-6 w-6" />
+                            <MdRefresh className="h-6 w-6 mt-1" />
                         </button>
                     </CustomToolTip>
                 </div>

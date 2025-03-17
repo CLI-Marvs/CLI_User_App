@@ -114,7 +114,7 @@ const UnitUploadButton = ({
                 };
             }); //Reorder filtered headers based on expected headers order
 
-            // Now we need to reorder data rows based on this mapping
+            // Reorder data rows based on this mapping
             const reorderedData = dataRows.map((row) => {
                 const reorderedRow = {};
                 reorderedHeaders.forEach((headerMapping) => {

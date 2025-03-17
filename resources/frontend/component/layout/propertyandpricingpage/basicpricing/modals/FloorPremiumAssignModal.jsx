@@ -178,29 +178,39 @@ const FloorPremiumAssignModal = ({
                                                 !isExcluded
                                                     ? "gradient-btn4"
                                                     : ""
-                                            } rounded-[15px]  cursor-pointer`}
+                                            } rounded-[15px] `}
                                             key={key}
                                         >
-                                            <div className="flex justify-center items-center bg-white h-full w-full text-custom-solidgreen rounded-[10px]">
-                                                <p className="font-bold">
-                                                    {item?.unit}
-                                                </p>
-                                            </div>
+                                            <button
+                                                className={`flex justify-center items-center bg-white h-full w-full text-custom-solidgreen rounded-[10px] font-bold   ${
+                                                    priceListData.data
+                                                        .status !== "Draft"
+                                                        ? "cursor-not-allowed "
+                                                        : "cursor-pointer"
+                                                }`}
+                                                disabled={
+                                                    priceListData.data
+                                                        .status !== "Draft"
+                                                }
+                                            >
+                                                {item?.unit}
+                                            </button>
                                         </div>
                                     );
                                 })
                         )}
-
-                        <div>
-                            <button
-                                onClick={handleOpenModal}
-                                className="flex justify-center items-center h-[63px] w-[89px] bg-white rounded-[10px] hover:shadow-custom4"
-                            >
-                                <p className="text-custom-gray81 font-bold">
-                                    + Add
-                                </p>
-                            </button>
-                        </div>
+                        {priceListData.data.status === "Draft" && (
+                            <div>
+                                <button
+                                    onClick={handleOpenModal}
+                                    className="flex justify-center items-center h-[63px] w-[89px] bg-white rounded-[10px] hover:shadow-custom4"
+                                >
+                                    <p className="text-custom-gray81 font-bold">
+                                        + Add
+                                    </p>
+                                </button>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>

@@ -21,15 +21,15 @@ const UploadUnitDetailsModal = ({
         uploadUnits,
         towerPhaseId,
         isUploadingUnits,
-        setIsUploadingUnits,
         fetchFloorCount,
+        excelId,
+        excelIdFromPriceList,
         setFloors,
         setUnits,
         setExcelId,
         setExcelIdFromPriceList,
         setFloorPremiumsAccordionOpen,
-        excelId,
-        excelIdFromPriceList,
+        setIsUploadingUnits,
     } = useUnit();
     const { setPricingData } = usePricing();
     const { propertyMasterId, priceListMasterId } = usePriceListMaster();
@@ -69,9 +69,8 @@ const UploadUnitDetailsModal = ({
         setIsUploadingUnits(true);
 
         try {
-            // Clear related data if we're uploading a new Excel to replace existing one
+            // Clear related data if uploading a new Excel to replace existing one
             if (excelId || excelIdFromPriceList) {
-                // Reset units array
                 setUnits([]);
                 setExcelId("");
                 setExcelIdFromPriceList("");
@@ -90,7 +89,6 @@ const UploadUnitDetailsModal = ({
                 );
             }
 
-            // Prepare the payload for API
             const payload = {
                 excelDataRows: excelDataRows,
                 tower_phase_id: towerPhaseId,
@@ -110,9 +108,10 @@ const UploadUnitDetailsModal = ({
                 setFloors([]);
                 const floors = await fetchFloorCount(
                     towerPhaseId,
-                    response?.excelId
+                    response?.excelId,
+                    true
                 );
-                console.log("Fetched floors:", floors);
+                console.log("Fetched floors after uploading units:", floors);
                 setFloors(floors);
 
                 // Show success message and update UI

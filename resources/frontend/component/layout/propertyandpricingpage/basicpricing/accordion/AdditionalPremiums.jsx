@@ -312,9 +312,8 @@ const AdditionalPremiums = ({ priceListData, isOpen, toggleAccordion }) => {
                             </div>
                         </div>
                         <div className="flex justify-center">
-                            {(excelId ? true : excelIdFromPriceList) &&
-                                (priceListData &&
-                                priceListData.data.status === "Draft" ? (
+                            {(excelId || excelIdFromPriceList) &&
+                                (priceListData?.data?.status === "Draft" ? (
                                     <button
                                         onClick={handleOpenModal}
                                         className="w-[137px] h-[37px] rounded-[7px] gradient-btn2 p-[4px] text-custom-solidgreen hover:shadow-custom4 text-sm"
@@ -323,7 +322,16 @@ const AdditionalPremiums = ({ priceListData, isOpen, toggleAccordion }) => {
                                             Assign to units
                                         </div>
                                     </button>
-                                ) : null)}
+                                ) : (
+                                    <button
+                                        onClick={handleOpenModal}
+                                        className="w-[137px] h-[37px] rounded-[7px] gradient-btn2 p-[4px] text-custom-solidgreen hover:shadow-custom4 text-sm"
+                                    >
+                                        <div className="flex justify-center items-center bg-white montserrat-semibold h-full w-full rounded-[4px] p-[4px] text-sm">
+                                            View
+                                        </div>
+                                    </button>
+                                ))}
                         </div>
                     </div>
                 </div>

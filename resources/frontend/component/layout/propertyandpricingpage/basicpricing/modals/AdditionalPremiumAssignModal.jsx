@@ -17,7 +17,7 @@ const AdditionalPremiumAssignModal = ({ modalRef, priceListData }) => {
     const [formattedUnits, setFormattedUnits] = useState([]);
     const [selectedUnit, setSelectedUnit] = useState({});
     const { pricingData } = usePricing();
-
+  
     //Hooks
     useEffect(() => {
         if (priceListData) {
@@ -226,6 +226,7 @@ const AdditionalPremiumAssignModal = ({ modalRef, priceListData }) => {
                 </div>
                 <div>
                     <PremiumChecklistModal
+                        priceListData={priceListData}
                         selectedUnit={selectedUnit}
                         premiumCheckListModalRef={premiumCheckListModalRef}
                     />

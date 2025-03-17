@@ -29,8 +29,11 @@ export const UnitProvider = ({ children }) => {
      * Handles loading and error states during the API call.
      * Returns the floor data if successful.
      */
-    const fetchFloorCount = useCallback(async (towerPhaseId, excelId) => {
-        if (towerPhaseId && excelId) {
+    const fetchFloorCount = useCallback(
+        async (towerPhaseId, excelId, forceFetch = false) => {
+            if (!towerPhaseId || !excelId) return;
+            if (!forceFetch && floors.length > 0) return;
+
             try {
                 setIsFloorCountLoading(true);
                 const response = await unitService.countFloor(
@@ -48,8 +51,9 @@ export const UnitProvider = ({ children }) => {
             } finally {
                 setIsFloorCountLoading(false);
             }
-        }
-    }, []);
+        },
+        [floors]
+    );
 
     /**
      * Checks for existing units based on tower phase and excel ID.
@@ -63,7 +67,12 @@ export const UnitProvider = ({ children }) => {
      * Handles loading and error states during the API call.
      */
     const checkExistingUnits = useCallback(
-        async (towerPhaseId, excelId, forceFetch = false, skipFloorCount = false) => {
+        async (
+            towerPhaseId,
+            excelId,
+            forceFetch = false,
+            skipFloorCount = false
+        ) => {
             if (!towerPhaseId || !excelId) {
                 setFloors([]);
                 setUnits([]);
@@ -89,19 +98,20 @@ export const UnitProvider = ({ children }) => {
                     towerPhaseId,
                     excelId
                 );
-
+                
                 const unitsData = response?.data?.data || [];
                 setUnits(unitsData);
                 setLastFetchedExcelId(excelId);
 
                 // Fetch floor count only if units exist
-               if (
-                   !skipFloorCount &&
-                   unitsData.length > 0 &&
-                   unitsData[0]?.excel_id
-               ) {
-                   await fetchFloorCount(towerPhaseId, unitsData[0].excel_id);
-               }
+                if (
+                    !skipFloorCount &&
+                    unitsData &&
+                    unitsData.length > 0 &&
+                    unitsData[0]?.excel_id
+                ) {
+                    await fetchFloorCount(towerPhaseId, unitsData[0].excel_id);
+                }
             } catch (err) {
                 setError(err);
                 console.error("Error in checkExistingUnits:", err);
@@ -201,15 +211,15 @@ export const UnitProvider = ({ children }) => {
     const updateUnitComputedPrices = useCallback(
         (newPrices) => {
             // setComputedUnitPrices(newPrices);
-             setComputedUnitPrices((prevPrices) => {
-                 if (JSON.stringify(prevPrices) !== JSON.stringify(newPrices)) {
-                     // Only trigger save if prices actually changed
-                     saveComputedUnitPricingData(newPrices);
-                 }
-                 return newPrices;
-             });
+            setComputedUnitPrices((prevPrices) => {
+                if (JSON.stringify(prevPrices) !== JSON.stringify(newPrices)) {
+                    // Only trigger save if prices actually changed
+                    saveComputedUnitPricingData(newPrices);
+                }
+                return newPrices;
+            });
             //TODO: uncomment this line to save the computed prices
-             saveComputedUnitPricingData(newPrices);
+           // saveComputedUnitPricingData(newPrices);
         },
         [saveComputedUnitPricingData]
     );

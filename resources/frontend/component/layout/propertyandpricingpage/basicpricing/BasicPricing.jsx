@@ -4,9 +4,10 @@ import PriceListSettings from "./accordion/PriceListSettings";
 import AdditionalPremiums from "./accordion/AdditionalPremiums";
 import PriceVersions from "./accordion/PriceVersions";
 import moment from "moment";
+import { unstable_usePrompt } from "react-router-dom";
 import ReviewsandApprovalRouting from "./accordion/ReviewsandApprovalRouting";
 import FloorPremiums from "./accordion/FloorPremiums";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useStateContext } from "../../../../context/contextprovider";
 import { usePricing } from "@/component/layout/propertyandpricingpage/basicpricing/context/BasicPricingContext";
 import { formatPayload } from "@/component/layout/propertyandpricingpage/basicpricing/utils/payloadFormatter";
@@ -55,17 +56,18 @@ const BasicPricing = () => {
     const {
         checkExistingUnits,
         units,
-        setFloorPremiumsAccordionOpen,
         excelId,
+        excelIdFromPriceList,
         lastFetchedExcelId,
+        floorPremiumsAccordionOpen,
         setLastFetchedExcelId,
         setTowerPhaseId,
         setExcelIdFromPriceList,
         updateUnitComputedPrices,
         computedUnitPrices,
-        excelIdFromPriceList,
         saveComputedUnitPricingData,
-        floorPremiumsAccordionOpen,
+        setFloorPremiumsAccordionOpen,
+        setExcelId,
     } = useUnit();
     const [accordionStates, setAccordionStates] = useState({
         priceListSettings: false,
@@ -96,7 +98,13 @@ const BasicPricing = () => {
     useEffect(() => {
         if (priceListData) {
             setTowerPhaseId(priceListData?.data?.tower_phases[0]?.id);
-            setExcelIdFromPriceList(priceListData?.data.excel_id);
+            if (priceListData?.data?.excel_id) {
+                setExcelIdFromPriceList(priceListData?.data.excel_id);
+            } else {
+                setExcelIdFromPriceList(null);
+                setExcelId(null);
+            }
+
             setPropertyMasterId(
                 priceListData?.data?.property_commercial_detail
                     ?.property_master_id
@@ -224,7 +232,7 @@ const BasicPricing = () => {
                 }));
             }
         }
-    }, [priceListData]);
+    }, [priceListData.data]);
 
     /**
      * Hook to handle fetching and clearing of floor and pricing data based on the excel_id.
@@ -232,21 +240,7 @@ const BasicPricing = () => {
      * It also handles setting the additionalPremiums if it's currently empty.
      */
     useEffect(() => {
-        if (
-            excelId &&
-            priceListData?.excel_id &&
-            priceListData?.excel_id !== lastFetchedExcelId
-        ) {
-            checkExistingUnits(
-                priceListData.data?.tower_phases[0].tower_phase_id,
-                priceListData.excel_id,
-                false,
-                false
-            );
-            setLastFetchedExcelId(priceListData?.excel_id);
-        }
-
-        if (excelId || priceListData?.excel_id) {
+        if (!!excelId || !!priceListData?.data.excel_id) {
             setPricingData((prev) => ({
                 ...prev,
                 additionalPremiums: prev.additionalPremiums.length
@@ -266,6 +260,12 @@ const BasicPricing = () => {
                           }
                       }),
             }));
+        } else {
+            setPricingData((prev) => ({
+                ...prev,
+                floorPremiums: [],
+                additionalPremiums: [],
+            }));
         }
 
         // Function to generate random Id
@@ -277,8 +277,8 @@ const BasicPricing = () => {
         };
     }, [
         excelId,
-        priceListData?.excel_id,
-        priceListData.data?.tower_phases[0].tower_phase_id,
+        priceListData?.data.excel_id,
+        priceListData.data?.tower_phases[0].id,
         additionalPremiums,
         lastFetchedExcelId,
     ]);
@@ -287,13 +287,13 @@ const BasicPricing = () => {
         return () => {
             setAccordionStates({
                 priceListSettings: false,
-                floorPremium: false,
+                floorPremium: floorPremiumsAccordionOpen,
                 additionalPremiums: false,
                 priceVersions: false,
                 reviewAndApprovalSetting: false,
             });
         };
-    }, [location]);
+    }, [location, floorPremiumsAccordionOpen]);
 
     //Compute the effective balcony base
     const computeEffectiveBalconyBase = useMemo(() => {
@@ -436,6 +436,10 @@ const BasicPricing = () => {
             ...prev,
             [name]: !prev[name],
         }));
+        // console.log("name", name);
+        if (name === "floorPremium") {
+            setFloorPremiumsAccordionOpen((prev) => prev);
+        }
     };
 
     //Handle price list submit

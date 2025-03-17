@@ -31,11 +31,6 @@ const FloorPremiums = ({ isOpen, toggleAccordion, priceListData }) => {
     const { pricingData, setPricingData } = usePricing();
 
     //Hooks
-    /*
-     * Initializes tower phase ID, local Excel ID, and floor premiums when floors or property data change.
-     *If floor premiums are not set, it generates initial floor premiums based on the available floor numbers
-     *
-     */
     useEffect(() => {
         if (!floors || Object.keys(floors).length === 0) return;
         if (
@@ -110,13 +105,13 @@ const FloorPremiums = ({ isOpen, toggleAccordion, priceListData }) => {
     };
 
     //Handle input change for adding  new floor
-    function handleNewFloorChange(e) {
+    const handleNewFloorChange = (e) => {
         const { name, value } = e.target;
         setNewFloorPremiumData((prevData) => ({
             ...prevData,
             [name]: value,
         }));
-    }
+    };
 
     /**
      * Handles the button click for adding a new floor premium configuration.
@@ -334,7 +329,8 @@ const FloorPremiums = ({ isOpen, toggleAccordion, priceListData }) => {
                                         </tr>
                                     </thead>
                                     <tbody className="">
-                                        {isFloorCountLoading ? (
+                                        {isFloorCountLoading &&
+                                        floors.length === 0 ? (
                                             <tr className="ml-4">
                                                 <td
                                                     colSpan="5"
@@ -407,10 +403,9 @@ const FloorPremiums = ({ isOpen, toggleAccordion, priceListData }) => {
                                                                     className="h-[16px] w-[16px] ml-[16px] rounded-[2px] appearance-none border border-gray-400 checked:bg-transparent flex items-center justify-center checked:before:bg-black checked:before:w-[12px] checked:before:h-[12px] checked:before:block checked:before:content-['']"
                                                                 />
                                                             </td>
-                                                            {priceListData &&
-                                                            priceListData.data
+                                                            {priceListData.data
                                                                 .status ===
-                                                                "Draft" ? (
+                                                            "Draft" ? (
                                                                 <td
                                                                     onClick={() =>
                                                                         handleOpenModal(
@@ -422,8 +417,18 @@ const FloorPremiums = ({ isOpen, toggleAccordion, priceListData }) => {
                                                                     Assign
                                                                 </td>
                                                             ) : (
-                                                                <div></div>
+                                                                <td
+                                                                    onClick={() =>
+                                                                        handleOpenModal(
+                                                                            floorNumber
+                                                                        )
+                                                                    }
+                                                                    className="text-blue-500 underline cursor-pointer"
+                                                                >
+                                                                    View
+                                                                </td>
                                                             )}
+
                                                             {priceListData &&
                                                                 priceListData
                                                                     .data

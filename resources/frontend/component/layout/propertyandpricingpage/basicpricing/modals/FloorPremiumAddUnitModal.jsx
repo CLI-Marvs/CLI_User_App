@@ -69,6 +69,7 @@ const FloorPremiumAddUnitModal = ({
                 property_masters_id: propertyMasterId,
                 price_list_master_id: priceListMasterId,
             };
+            console.log("payload",payload)
             setIsLoading(true);
             const response = await unitService.storeUnitDetails(payload);
 
@@ -78,13 +79,8 @@ const FloorPremiumAddUnitModal = ({
                     "success"
                 );
                 setFormData(formDataState);
-                // setUnits(response?.data?.data);
                 setUnits((prevUnits) => {
                     const newUnits = [...prevUnits, response?.data?.data];
-                    // Sort units in ascending order based on 'unit' property
-                    // return newUnits.sort((a, b) =>
-                    //     a.unit.localeCompare(b.unit)
-                    // );
                     return newUnits;
                 });
                 await Promise.all([

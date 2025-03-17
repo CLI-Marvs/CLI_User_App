@@ -2,7 +2,6 @@ import { createContext, useContext, useState } from "react";
 import moment from "moment";
 const BasicPricingContext = createContext();
 
- 
 const initialState = () => ({
     priceListSettings: {
         base_price: "",
@@ -32,7 +31,8 @@ const initialState = () => ({
     reviewedByEmployees: [],
     approvedByEmployees: [],
 });
-export default function BasicPricingProvider({ children }) {
+
+export const BasicPricingProvider = ({ children }) => {
     const [pricingData, setPricingData] = useState(initialState());
 
     const updatePricingSection = (section, newData) => {
@@ -59,7 +59,7 @@ export default function BasicPricingProvider({ children }) {
             {children}
         </BasicPricingContext.Provider>
     );
-}
+};
 
 export const usePricing = () => {
     const context = useContext(BasicPricingContext);
