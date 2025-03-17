@@ -13,12 +13,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import CustomInput from "@/component/Input/CustomInput";
 
-const PriceVersions = ({
-    priceListData,
-    action,
-    isOpen,
-    toggleAccordion,
-}) => {
+const PriceVersions = ({ priceListData, action, isOpen, toggleAccordion }) => {
     //States
     const addPaymentSchemeModalRef = useRef(null);
     const editPaymentSchemeModalRef = useRef(null);
@@ -281,6 +276,12 @@ const PriceVersions = ({
                                                                             index
                                                                         )
                                                                     }
+                                                                    disabled={
+                                                                        priceListData
+                                                                            .data
+                                                                            .status !==
+                                                                        "Draft"
+                                                                    }
                                                                 />
                                                             </td>
                                                             <td className="px-[10px]">
@@ -302,6 +303,12 @@ const PriceVersions = ({
                                                                     }
                                                                     restrictNumbers={
                                                                         true
+                                                                    }
+                                                                    disabled={
+                                                                        priceListData
+                                                                            .data
+                                                                            .status !==
+                                                                        "Draft"
                                                                     }
                                                                 />
                                                             </td>
@@ -326,6 +333,12 @@ const PriceVersions = ({
                                                                     restrictNumbers={
                                                                         true
                                                                     }
+                                                                    disabled={
+                                                                        priceListData
+                                                                            .data
+                                                                            .status !==
+                                                                        "Draft"
+                                                                    }
                                                                 />
                                                             </td>
                                                             <td className="px-[10px] flex items-center mt-4 gap-x-1">
@@ -340,7 +353,12 @@ const PriceVersions = ({
                                                                                   ).toDate()
                                                                                 : null
                                                                         }
-                                                                        // minDate={moment().toDate()}
+                                                                        disabled={
+                                                                            priceListData
+                                                                                .data
+                                                                                .status !==
+                                                                            "Draft"
+                                                                        }
                                                                         onChange={(
                                                                             date
                                                                         ) =>
@@ -360,7 +378,7 @@ const PriceVersions = ({
                                                             </td>
                                                             <td className="">
                                                                 <div className="flex items-center">
-                                                                    <div className="flex flex-1">
+                                                                    <div className="flex flex-1  ">
                                                                         {paymentScheme &&
                                                                         paymentScheme.length >
                                                                             1 ? (
@@ -372,7 +390,7 @@ const PriceVersions = ({
                                                                                             schemeIndex
                                                                                         ) => (
                                                                                             <span
-                                                                                                className="h-auto bg-custom-lightestgreen rounded-lg px-1"
+                                                                                                className="h-auto bg-custom-lightestgreen rounded-lg ml-1"
                                                                                                 key={
                                                                                                     schemeIndex
                                                                                                 }
@@ -402,7 +420,11 @@ const PriceVersions = ({
                                                                     <div>
                                                                         {paymentScheme &&
                                                                             paymentScheme.length >
-                                                                                0 && (
+                                                                                0 &&
+                                                                            priceListData
+                                                                                .data
+                                                                                ?.status ===
+                                                                                "Draft" && (
                                                                                 <div className="flex items-center">
                                                                                     <HiPencil
                                                                                         onClick={() =>
@@ -454,23 +476,22 @@ const PriceVersions = ({
                                                             </td>
 
                                                             <td className="px-[10px]">
-                                                                {/**
-                                                                 * Show the remove button if there is more than one priceVersion
-                                                                 * Show the remove button if at least one priceVersion has data from db
-                                                                 * Hide the remove button if there is only one default empty priceVersion
-                                                                 */}
-                                                                {(pricingData &&
+                                                                {priceListData
+                                                                    .data
+                                                                    .status ===
+                                                                    "Draft" &&
+                                                                ((pricingData &&
                                                                     pricingData
                                                                         .priceVersions
                                                                         .length >
                                                                         1) ||
-                                                                pricingData.priceVersions.some(
-                                                                    (pv) =>
-                                                                        pv.id !==
-                                                                            0 ||
-                                                                        pv.name.trim() !==
-                                                                            ""
-                                                                ) ? (
+                                                                    pricingData.priceVersions.some(
+                                                                        (pv) =>
+                                                                            pv.id !==
+                                                                                0 ||
+                                                                            pv.name.trim() !==
+                                                                                ""
+                                                                    )) ? (
                                                                     <IoIosCloseCircle
                                                                         onClick={() =>
                                                                             handleRemovePriceVersions(
@@ -479,7 +500,7 @@ const PriceVersions = ({
                                                                         }
                                                                         className="text-custom-gray h-6 w-6 cursor-pointer hover:text-red-500"
                                                                     />
-                                                                ) : null}{" "}
+                                                                ) : null}
                                                             </td>
                                                         </tr>
                                                     </tbody>
@@ -488,8 +509,7 @@ const PriceVersions = ({
                                         )}
                                 </table>
                                 <div className="flex justify-center mt-4">
-                                    {priceListData.data.status ===
-                                    "Draft" ? (
+                                    {priceListData.data.status === "Draft" ? (
                                         <button
                                             className="h-[44px] w-[81px] flex gap-2 rounded-[10px] justify-center items-center bg-custom-grayFA text-sm border border-custom-grayF1"
                                             onClick={handleAddFields}

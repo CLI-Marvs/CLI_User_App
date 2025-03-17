@@ -380,6 +380,12 @@ const FloorPremiums = ({ isOpen, toggleAccordion, priceListData }) => {
                                                                         restrictNumbers={
                                                                             true
                                                                         }
+                                                                        disabled={
+                                                                            priceListData
+                                                                                .data
+                                                                                .status !==
+                                                                            "Draft"
+                                                                        }
                                                                     />
                                                                 </div>
                                                             </td>
@@ -401,6 +407,12 @@ const FloorPremiums = ({ isOpen, toggleAccordion, priceListData }) => {
                                                                     id="luckyNumber"
                                                                     type="checkbox"
                                                                     className="h-[16px] w-[16px] ml-[16px] rounded-[2px] appearance-none border border-gray-400 checked:bg-transparent flex items-center justify-center checked:before:bg-black checked:before:w-[12px] checked:before:h-[12px] checked:before:block checked:before:content-['']"
+                                                                    disabled={
+                                                                        priceListData
+                                                                            ?.data
+                                                                            ?.status !==
+                                                                        "Draft"
+                                                                    }
                                                                 />
                                                             </td>
                                                             {priceListData.data

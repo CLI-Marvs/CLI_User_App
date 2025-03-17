@@ -7,6 +7,7 @@ import { useUnit } from "@/context/PropertyPricing/UnitContext";
 import { showToast } from "@/util/toastUtil";
 import UnitUploadButton from "@/component/layout/propertyandpricingpage/basicpricing/component/UnitUploadButton";
 import CustomInput from "@/component/Input/CustomInput";
+import generateBigIntId from "@/component/layout/propertyandpricingpage/utils/generateId";
 
 const AdditionalPremiums = ({ priceListData, isOpen, toggleAccordion }) => {
     //States
@@ -68,13 +69,6 @@ const AdditionalPremiums = ({ priceListData, isOpen, toggleAccordion }) => {
             showToast(`Premium ${viewName} already exists.`, "error");
             return;
         }
-        // Function to generate random Id
-        const generateBigIntId = () => {
-            return (
-                BigInt(Date.now()) * BigInt(1000) +
-                BigInt(Math.floor(Math.random() * 1000))
-            ).toString();
-        };
         const generatedId = generateBigIntId();
         setPricingData((prevState) => ({
             ...prevState,
@@ -183,6 +177,7 @@ const AdditionalPremiums = ({ priceListData, isOpen, toggleAccordion }) => {
                                                 onChange={
                                                     onChangeNewAdditionalPremium
                                                 }
+                                               
                                             />
                                         </div>
                                     </div>
@@ -274,6 +269,12 @@ const AdditionalPremiums = ({ priceListData, isOpen, toggleAccordion }) => {
                                                                         className="bg-white h-[29px] w-[120px] border border-[#D9D9D9] rounded-[5px] px-2 outline-none text-center"
                                                                         restrictNumbers={
                                                                             true
+                                                                        }
+                                                                        disabled={
+                                                                            priceListData
+                                                                                .data
+                                                                                .status !==
+                                                                            "Draft"
                                                                         }
                                                                     />
                                                                 </div>

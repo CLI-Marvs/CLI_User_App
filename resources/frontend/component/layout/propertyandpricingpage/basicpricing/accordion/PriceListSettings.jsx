@@ -3,7 +3,7 @@ import { IoIosArrowDown } from "react-icons/io";
 import { usePricing } from "@/component/layout/propertyandpricingpage/basicpricing/context/BasicPricingContext";
 import CustomInput from "@/component/Input/CustomInput";
 
-const PriceListSettings = ({ isOpen, toggleAccordion }) => {
+const PriceListSettings = ({ isOpen, toggleAccordion, priceListData }) => {
     //State
     const { pricingData, updatePricingSection } = usePricing();
 
@@ -77,6 +77,9 @@ const PriceListSettings = ({ isOpen, toggleAccordion }) => {
                                     className="w-full px-4 focus:outline-none "
                                     onChange={handleInputChange}
                                     restrictNumbers={true}
+                                    disabled={
+                                        priceListData.data.status !== "Draft"
+                                    }
                                 />
 
                                 {/* TODO: add percent % suffix here */}
@@ -94,6 +97,9 @@ const PriceListSettings = ({ isOpen, toggleAccordion }) => {
                                     className="w-full px-4 focus:outline-none "
                                     onChange={handleInputChange}
                                     restrictNumbers={true}
+                                    disabled={
+                                        priceListData.data.status !== "Draft"
+                                    }
                                 />
                             </div>
                         </div>
@@ -103,7 +109,6 @@ const PriceListSettings = ({ isOpen, toggleAccordion }) => {
                                     Effective Balcony Base
                                 </span>
                                 <input
-                                    disabled
                                     name="effective_balcony_base"
                                     type="number"
                                     onChange={handleInputChange}
@@ -112,6 +117,10 @@ const PriceListSettings = ({ isOpen, toggleAccordion }) => {
                                             ?.effective_balcony_base
                                     }
                                     className="w-full px-4 focus:outline-none"
+                                    disabled={
+                                        priceListData.data.status !== "Draft" ||
+                                        true
+                                    }
                                 />
                             </div>
                             <div className="flex items-center border border-custom-grayF1 rounded-[5px] overflow-hidden w-[375px] text-sm">
@@ -127,6 +136,9 @@ const PriceListSettings = ({ isOpen, toggleAccordion }) => {
                                     className="w-full px-4 focus:outline-none "
                                     onChange={handleInputChange}
                                     restrictNumbers={true}
+                                    disabled={
+                                        priceListData.data.status !== "Draft"
+                                    }
                                 />
                             </div>
                         </div>
@@ -147,6 +159,9 @@ const PriceListSettings = ({ isOpen, toggleAccordion }) => {
                                     className="w-full px-4 focus:outline-none "
                                     onChange={handleInputChange}
                                     restrictNumbers={true}
+                                    disabled={
+                                        priceListData.data.status !== "Draft"
+                                    }
                                 />
                             </div>
                             <div className="flex items-center border border-custom-grayF1 rounded-[5px] overflow-hidden w-[375px] text-sm">
@@ -162,6 +177,9 @@ const PriceListSettings = ({ isOpen, toggleAccordion }) => {
                                     className="w-full px-4 focus:outline-none "
                                     onChange={handleInputChange}
                                     restrictNumbers={true}
+                                    disabled={
+                                        priceListData.data.status !== "Draft"
+                                    }
                                 />
                             </div>
                         </div>

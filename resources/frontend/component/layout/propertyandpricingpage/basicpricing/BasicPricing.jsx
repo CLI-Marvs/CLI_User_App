@@ -4,10 +4,9 @@ import PriceListSettings from "./accordion/PriceListSettings";
 import AdditionalPremiums from "./accordion/AdditionalPremiums";
 import PriceVersions from "./accordion/PriceVersions";
 import moment from "moment";
-import { unstable_usePrompt } from "react-router-dom";
 import ReviewsandApprovalRouting from "./accordion/ReviewsandApprovalRouting";
 import FloorPremiums from "./accordion/FloorPremiums";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { useStateContext } from "../../../../context/contextprovider";
 import { usePricing } from "@/component/layout/propertyandpricingpage/basicpricing/context/BasicPricingContext";
 import { formatPayload } from "@/component/layout/propertyandpricingpage/basicpricing/utils/payloadFormatter";
@@ -17,6 +16,8 @@ import { useUnit } from "@/context/PropertyPricing/UnitContext";
 import CircularProgress from "@mui/material/CircularProgress";
 import { usePropertyPricing } from "@/component/layout/propertyandpricingpage/basicpricing/hooks/usePropertyPricing";
 import UnitUploadButton from "@/component/layout/propertyandpricingpage/basicpricing/component/UnitUploadButton";
+import generateBigIntId from "@/component/layout/propertyandpricingpage/utils/generateId";
+import { priceListInitialState } from "@/component/layout/propertyandpricingpage/basicpricing/context/BasicPricingContext";
 
 const additionalPremiums = [
     {
@@ -60,7 +61,6 @@ const BasicPricing = () => {
         excelIdFromPriceList,
         lastFetchedExcelId,
         floorPremiumsAccordionOpen,
-        setLastFetchedExcelId,
         setTowerPhaseId,
         setExcelIdFromPriceList,
         updateUnitComputedPrices,
@@ -97,6 +97,7 @@ const BasicPricing = () => {
      */
     useEffect(() => {
         if (priceListData) {
+ 
             setTowerPhaseId(priceListData?.data?.tower_phases[0]?.id);
             if (priceListData?.data?.excel_id) {
                 setExcelIdFromPriceList(priceListData?.data.excel_id);
@@ -119,9 +120,16 @@ const BasicPricing = () => {
                 setPricingData((prev) => ({
                     ...prev,
                     priceListSettings: {
-                        ...prev.pricebasic_details,
-                        ...priceListData.data?.pricebasic_details,
+                        ...prev.priceListSettings, // ✅ Use correct previous state key
+                        ...priceListData.data.pricebasic_details,
                     },
+                }));
+            }
+            else {
+                console.log("priceListData.data.pricebasic_details is undefined");
+                setPricingData((prev) => ({
+                    ...prev,
+                    priceListSettings: priceListInitialState,
                 }));
             }
             // Update the price versions
@@ -267,18 +275,9 @@ const BasicPricing = () => {
                 additionalPremiums: [],
             }));
         }
-
-        // Function to generate random Id
-        const generateBigIntId = () => {
-            return (
-                BigInt(Date.now()) * BigInt(1000) +
-                BigInt(Math.floor(Math.random() * 1000))
-            ).toString();
-        };
     }, [
         excelId,
         priceListData?.data.excel_id,
-        priceListData.data?.tower_phases[0].id,
         additionalPremiums,
         lastFetchedExcelId,
     ]);
@@ -517,6 +516,7 @@ const BasicPricing = () => {
                 <PriceListSettings
                     isOpen={accordionStates.priceListSettings}
                     toggleAccordion={() => toggleAccordion("priceListSettings")}
+                    priceListData={priceListData}
                 />
                 <FloorPremiums
                     isOpen={accordionStates.floorPremium}

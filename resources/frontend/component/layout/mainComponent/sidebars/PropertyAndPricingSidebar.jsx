@@ -22,7 +22,12 @@ const PropertyAndPricingSidebar = () => {
     const { pricingData } = usePricing();
     const { excelId } = useUnit();
     const shouldBlockNavigation =
-        !!excelId && Object.keys(pricingData?.floorPremiums).length > 0;
+        !!excelId &&
+        Object.keys(pricingData?.floorPremiums).length > 0 &&
+        pricingData?.additionalPremiums.length > 0 && // Ensure it exists and isn't empty
+        pricingData.additionalPremiums.every(
+            (additionalPrem) => Number(additionalPrem.premiumCost) === 0
+        );
 
     // Check if all premiumCost values are empty
     const allEmptyFloorPremium =
@@ -45,7 +50,10 @@ const PropertyAndPricingSidebar = () => {
     const handleNavigation = (event) => {
         if (allEmptyFloorPremium && allEmptyAdditionalPremium) {
             event.preventDefault();
-            showToast("Please save before moving to another tab.", "warning");
+            showToast(
+                "You have unsaved changes. Please save before switching page.",
+                "warning"
+            );
         }
     };
 

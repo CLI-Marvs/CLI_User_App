@@ -1,16 +1,17 @@
 import { createContext, useContext, useState } from "react";
 import moment from "moment";
 const BasicPricingContext = createContext();
+export const priceListInitialState = {
+    base_price: "",
+    transfer_charge: 8 || "",
+    effective_balcony_base: 50 || "",
+    vat: 12 || "",
+    vatable_less_price: 3600000 || "",
+    reservation_fee: "",
+};
 
 const initialState = () => ({
-    priceListSettings: {
-        base_price: "",
-        transfer_charge: 8 || "",
-        effective_balcony_base: 50 || "",
-        vat: 12 || "",
-        vatable_less_price: 3600000 || "",
-        reservation_fee: "",
-    },
+    priceListSettings:  priceListInitialState,
     floorPremiums: {},
     additionalPremiums: [],
     selectedAdditionalPremiums: [],
