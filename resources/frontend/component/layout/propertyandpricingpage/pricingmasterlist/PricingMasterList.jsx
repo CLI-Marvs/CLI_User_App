@@ -298,10 +298,10 @@ const PricingMasterList = () => {
                                     <option value="On-going Approval">
                                         On-going Approval
                                     </option>
-                                    <option value="Approved Not Live">
+                                    <option value="Approved not Live">
                                         Approved not Live
                                     </option>
-                                    <option value="Approved And Live">
+                                    <option value="Approved and Live">
                                         Approved and Live
                                     </option>
                                 </select>

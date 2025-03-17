@@ -47,15 +47,16 @@ class PriceListMasterRepository
      */
     public function index(array $validatedData)
     {
+
         $query = $this->getPriceListMastersWithRelations();
         $query = $this->filterPriceList($validatedData, $query);
-
         $priceListMasters = $query->paginate(
             $validatedData['per_page'],
             ['*'],
             'page',
             $validatedData['page']
         );
+
 
         return [
             'data' => $priceListMasters->getCollection()->map(
@@ -78,32 +79,46 @@ class PriceListMasterRepository
      */
     public function filterPriceList($validatedData, $query)
     {
+
         return $query
+            //  Filter by Property Name
             ->when(!empty($validatedData['property']), function ($q) use ($validatedData) {
                 $q->whereHas('towerPhase.propertyMaster', function ($q) use ($validatedData) {
-                    $q->where(
-                        'property_name',
-                        'ILIKE',
-                        '%'
-                            . $validatedData['property'] . '%'
-                    );
+                    $q->where('property_name', 'ILIKE', "%{$validatedData['property']}%");
                 });
             })
 
-            ->when(!empty($validatedData['status']), function ($q) use ($validatedData) {
-                $q->where(
-                    'status',
-                    $validatedData['status']
-                );
+            //  Filter by Payment Scheme Name
+            ->when(!empty($validatedData['paymentScheme']), function ($q) use ($validatedData) {
+                $paymentSchemes = is_array($validatedData['paymentScheme'])
+                    ? $validatedData['paymentScheme']
+                    : json_decode($validatedData['paymentScheme'], true) ?? [];
+
+                $paymentSchemeIds = PaymentScheme::where(function ($query) use ($paymentSchemes) {
+                    foreach ($paymentSchemes as $scheme) {
+                        $query->orWhere('payment_scheme_name', 'ILIKE', "%{$scheme}%");
+                    }
+                })->pluck('id');
+                dd($paymentSchemeIds);
+
+                // $priceVersionIds = PriceVersion::whereJsonContains('payment_scheme_id', $paymentSchemeIds)
+                //     ->pluck('id');
+
+                // $q->whereJsonContains('price_versions_id', $priceVersionIds);
             })
 
+            //  Filter by Status
+            ->when(!empty($validatedData['status']), function ($q) use ($validatedData) {
+                $q->where('status', $validatedData['status']);
+            })
+
+            //  Filter by Date
             ->when(!empty($validatedData['date']), function ($q) use ($validatedData) {
-                $q->whereDate(
-                    'created_at',
-                    $validatedData['date']
-                );
+                $q->whereDate('created_at', $validatedData['date']);
             });
     }
+
+
 
     /**
      * Update the price list master status to inactive
