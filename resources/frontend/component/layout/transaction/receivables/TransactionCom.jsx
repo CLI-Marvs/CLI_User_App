@@ -8,74 +8,6 @@ import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md";
 import TransactionSearchBar from "@/component/layout/transaction/TransactionSearchBar";
 
 const TransactionCom = () => {
-    const {
-        transactionList,
-        setTransactionList,
-        currentPageTransaction,
-        setCurrentPageTransaction,
-        totalPageTransaction,
-        setTotalPageTransaction,
-    } = useTransactionContext();
-
-    const getTransactionList = async () => {
-        const response = await transaction.transactionList(
-            currentPageTransaction
-        );
-        setTransactionList(response.data.data);
-        setTotalPageTransaction(response.data.last_page);
-    };
-
-    const handlePageClick = (data) => {
-        setCurrentPageTransaction(data.selected);
-    };
-
-    useEffect(() => {
-        getTransactionList();
-    }, [currentPageTransaction]);
-
-    /*  const data = [
-        {
-            transaction_id: "TXN123456",
-            payment_method: "Credit Card",
-            transaction_type: "Online Payment",
-            transaction_reference_number: "REF987654",
-            project_name: "Greenwood Residences",
-            amount: 15000.75,
-            email: "customer@example.com",
-            remarks: "Payment for reservation",
-            payment_option: "Full Payment",
-            aggregator: "PayPal",
-            destination_bank: "ABC Bank",
-            settlement_bank: "XYZ Bank",
-            transaction_date: "2024-03-08",
-            transaction_time: "14:30:00",
-            collection_receipt_link: "https://example.com/receipt/123456",
-            transaction_invoice_number: "INV-20240308-001",
-            document_number: "DOC-987654",
-            transaction_status: "Completed",
-        },
-        {
-            transaction_id: "TXN789012",
-            payment_method: "Debit",
-            transaction_type: "Direct Deposit",
-            transaction_reference_number: "REF654321",
-            project_name: "Sunrise Villas",
-            amount: 25000.0,
-            email: "buyer@example.com",
-            remarks: "Down payment",
-            payment_option: "Partial Payment",
-            aggregator: "Stripe",
-            destination_bank: "DEF Bank",
-            settlement_bank: "LMN Bank",
-            transaction_date: "2024-03-07",
-            transaction_time: "10:15:00",
-            collection_receipt_link: "https://example.com/receipt/789012",
-            transaction_invoice_number: "INV-20240307-002",
-            document_number: "DOC-654321",
-            transaction_status: "Pending",
-        },
-    ]; */
-
     const fields = [
         { name: "transaction_customer_name", label: "Name" },
         { name: "transaction_email", label: "Email" },
@@ -174,6 +106,76 @@ const TransactionCom = () => {
             ),
         },
     ];
+    
+    const {
+        transactionList,
+        setTransactionList,
+        currentPageTransaction,
+        setCurrentPageTransaction,
+        totalPageTransaction,
+        setTotalPageTransaction,
+    } = useTransactionContext();
+
+    const getTransactionList = async () => {
+        const response = await transaction.transactionList(
+            currentPageTransaction
+        );
+        setTransactionList(response.data.data);
+        setTotalPageTransaction(response.data.last_page);
+    };
+
+    const handlePageClick = (data) => {
+        setCurrentPageTransaction(data.selected);
+    };
+
+    useEffect(() => {
+        getTransactionList();
+    }, [currentPageTransaction]);
+
+    /*  const data = [
+        {
+            transaction_id: "TXN123456",
+            payment_method: "Credit Card",
+            transaction_type: "Online Payment",
+            transaction_reference_number: "REF987654",
+            project_name: "Greenwood Residences",
+            amount: 15000.75,
+            email: "customer@example.com",
+            remarks: "Payment for reservation",
+            payment_option: "Full Payment",
+            aggregator: "PayPal",
+            destination_bank: "ABC Bank",
+            settlement_bank: "XYZ Bank",
+            transaction_date: "2024-03-08",
+            transaction_time: "14:30:00",
+            collection_receipt_link: "https://example.com/receipt/123456",
+            transaction_invoice_number: "INV-20240308-001",
+            document_number: "DOC-987654",
+            transaction_status: "Completed",
+        },
+        {
+            transaction_id: "TXN789012",
+            payment_method: "Debit",
+            transaction_type: "Direct Deposit",
+            transaction_reference_number: "REF654321",
+            project_name: "Sunrise Villas",
+            amount: 25000.0,
+            email: "buyer@example.com",
+            remarks: "Down payment",
+            payment_option: "Partial Payment",
+            aggregator: "Stripe",
+            destination_bank: "DEF Bank",
+            settlement_bank: "LMN Bank",
+            transaction_date: "2024-03-07",
+            transaction_time: "10:15:00",
+            collection_receipt_link: "https://example.com/receipt/789012",
+            transaction_invoice_number: "INV-20240307-002",
+            document_number: "DOC-654321",
+            transaction_status: "Pending",
+        },
+    ]; */
+
+ 
 
     return (
         <>

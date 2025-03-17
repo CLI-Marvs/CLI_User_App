@@ -94,6 +94,13 @@ const TransactionSearchBar = ({ fields }) => {
 
                                     {item.type === "select" ? (
                                         renderSelect(item.options || [])
+                                    ) : item.type === "date" ? (
+                                        <DatePicker
+                                           /*  selected={startDate}
+                                            onChange={handleDateChange} */
+                                            className="outline-none "
+                                            calendarClassName="custom-calendar"
+                                        />
                                     ) : (
                                         <input
                                             type="text"
