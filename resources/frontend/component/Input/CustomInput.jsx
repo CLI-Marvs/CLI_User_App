@@ -32,6 +32,7 @@ const CustomInput = ({
     className = "",
     restrictNumbers,
     inputRef,
+    placeholder,
     ...rest
 }) => {
     // Handle input to validate against patterns
@@ -75,6 +76,7 @@ const CustomInput = ({
             type={type}
             className={className}
             ref={inputRef}
+            placeholder={placeholder}
             {...rest}
         />
     );

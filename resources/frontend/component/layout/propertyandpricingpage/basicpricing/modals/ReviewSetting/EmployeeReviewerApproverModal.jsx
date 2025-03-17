@@ -23,13 +23,13 @@ const EmployeeReviewerApproverModal = ({
     const dropdownRef = useRef(null);
     const { setPricingData, pricingData } = usePricing();
     const {
+        handleRemoveEmployee,
         reviewedByEmployees,
-        setReviewedByEmployees,
         approvedByEmployees,
         setApprovedByEmployees,
-        handleRemoveEmployee,
+        setReviewedByEmployees,
     } = usePriceListEmployees();
-
+    
     //Hooks
     useEffect(() => {
         if (type === "reviewedByEmployees") {
@@ -226,6 +226,7 @@ const EmployeeReviewerApproverModal = ({
                         className={` 
                                  h-[40px] px-[20px] pr-[40px] rounded-[10px]  w-full outline-none`}
                         onChange={(e) => handleSearchOnChange(e.target.value)}
+                        placeholder="Search by employee name"
                     />
                 </div>
                 {/*Selected Employee  */}

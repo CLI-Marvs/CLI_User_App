@@ -97,7 +97,6 @@ const BasicPricing = () => {
      */
     useEffect(() => {
         if (priceListData) {
- 
             setTowerPhaseId(priceListData?.data?.tower_phases[0]?.id);
             if (priceListData?.data?.excel_id) {
                 setExcelIdFromPriceList(priceListData?.data.excel_id);
@@ -105,7 +104,6 @@ const BasicPricing = () => {
                 setExcelIdFromPriceList(null);
                 setExcelId(null);
             }
-
             setPropertyMasterId(
                 priceListData?.data?.property_commercial_detail
                     ?.property_master_id
@@ -115,6 +113,7 @@ const BasicPricing = () => {
                     priceListData?.data.property_commercial_detail
                         ?.price_list_master_id
             );
+
             // Update the priceListSettings
             if (priceListData?.data?.pricebasic_details) {
                 setPricingData((prev) => ({
@@ -124,14 +123,13 @@ const BasicPricing = () => {
                         ...priceListData.data.pricebasic_details,
                     },
                 }));
-            }
-            else {
-                console.log("priceListData.data.pricebasic_details is undefined");
+            } else {
                 setPricingData((prev) => ({
                     ...prev,
                     priceListSettings: priceListInitialState,
                 }));
             }
+
             // Update the price versions
             if (priceListData?.data?.price_versions) {
                 setPricingData((prev) => ({
@@ -166,6 +164,8 @@ const BasicPricing = () => {
                               },
                           ],
                 }));
+            } else {
+                console.log("priceVersions is empty");
             }
 
             // Update the floor premiums
@@ -226,6 +226,11 @@ const BasicPricing = () => {
                     reviewedByEmployees:
                         priceListData?.data.reviewedByEmployees,
                 }));
+            } else {
+                setPricingData((prev) => ({
+                    ...prev,
+                    reviewedByEmployees: [],
+                }));
             }
 
             // Update the approvedByEmployees
@@ -237,6 +242,11 @@ const BasicPricing = () => {
                     ...prev,
                     approvedByEmployees:
                         priceListData.data?.approvedByEmployees,
+                }));
+            } else {
+                setPricingData((prev) => ({
+                    ...prev,
+                    approvedByEmployees: [],
                 }));
             }
         }
@@ -263,7 +273,7 @@ const BasicPricing = () => {
                           } else {
                               return {
                                   ...item,
-                                  id: null, // or some default value
+                                  id: null,
                               };
                           }
                       }),
