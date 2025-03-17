@@ -2,12 +2,15 @@ import moment from "moment";
 import React from "react";
 
 const TransactionTableCell = ({ type, row }) => {
+    console.log("")
     switch (type) {
         case "transaction_date":
             return (
                 <div className="w-[200px]">
                     <span className="montserrat-medium text-[13px]">
-                        {moment(row.transaction_date).format("LLL")}
+                        {moment(
+                            `${row.transaction_date} ${row.transaction_time}`
+                        ).format("LLL")}
                     </span>
                 </div>
             );
@@ -26,8 +29,8 @@ const TransactionTableCell = ({ type, row }) => {
                         <span className="montserrat-medium text-[13px] break-all whitespace-normal overflow-hidden">
                             {row.transaction_type}
                         </span>
-                        <span className="montserrat-medium text-[13px] break-all whitespace-normal overflow-hidden">
-                            {row.processor_response_id}
+                        <span className="montserrat-medium text-[13px] break-all whitespace-normal overflow-hidden text-[#1A73E8]">
+                            {row.processor_response_id} 
                         </span>
                     </div>
                 </div>

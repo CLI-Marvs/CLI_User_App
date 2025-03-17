@@ -4,6 +4,7 @@ import { useTransactionContext } from "@/context/Transaction/TransactionContext"
 import ReactPaginate from "react-paginate";
 import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md";
 import { transaction } from "@/component/servicesApi/apiCalls/transactions";
+import TransactionSearchBar from "@/component/layout/transaction/TransactionSearchBar";
 
 const AutoPostingCom = () => {
     const statuses = ["Cleared", "Posted", "Floating"];
@@ -20,6 +21,46 @@ const AutoPostingCom = () => {
             statusRef: "Floating",
             name: "For Floating",
         },
+    ];
+
+    const fields = [
+        { name: "transaction_customer_name", label: "Name" },
+        { name: "transaction_email", label: "Email" },
+        { 
+            name: "transaction_bank", 
+            label: "Bank",
+            type: "select",
+            options: [
+                { label: "Select Bank", value: "" }, 
+                { label: "BDO", value: "bdo" },
+                { label: "BPI", value: "bpi" },
+                { label: "LANDBANK", value: "landbank" },
+            ]
+        }, 
+        { 
+            name: "project_name", 
+            label: "Project Name",
+            type: "select",
+            options: [
+                { label: "Select Project", value: "" }, 
+                { label: "Casa Mira", value: "Casa Mira" },
+                { label: "38th Park", value: "38th Park" },
+            ]
+        }, 
+        { name: "transaction_invoice_number", label: "Invoice Number" },
+        { name: "transaction_document_number", label: "Document Number" },
+        { name: "transaction_reference_number", label: "Reference Number" },
+        { 
+            name: "transaction_status", 
+            label: "Status",
+            type: "select",
+            options: [
+                { label: "Select Status", value: "" },
+                { label: "Not Posted", value: "not_posted" },
+                { label: "Posted", value: "posted" },
+                { label: "Floating", value: "floating" },
+            ]
+        } 
     ];
 
     const dynamicClass = (item) =>
@@ -196,7 +237,10 @@ const AutoPostingCom = () => {
     ];
 
     return (
-        <div className="overflow-y-hidden px-3 mt-3 space-y-3">
+        <div className="overflow-y-hidden px-3 flex flex-col space-y-1">
+            <div className="px-2">
+                <TransactionSearchBar fields={fields}/>
+            </div>
             <div className="flex justify-between px-2">
                 <div className="flex gap-[21px]">
                     {statuses.map((item, index) => {
@@ -256,7 +300,7 @@ const AutoPostingCom = () => {
                             postingList.map((row, rowIndex) => (
                                 <tr
                                     key={rowIndex}
-                                    className="cursor-pointer border-r-[1px] border-opacity-10 border-[#B9B7B7] shadow-custom11"
+                                    className="border-r-[1px] border-opacity-10 border-[#B9B7B7] shadow-custom11"
                                 >
                                     {columns.map((col, colIndex) => (
                                         <td

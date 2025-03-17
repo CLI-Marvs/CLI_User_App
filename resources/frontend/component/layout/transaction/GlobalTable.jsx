@@ -21,7 +21,7 @@ const GlobalTable = ({ columns, data }) => {
                         return (
                             <tr
                                 key={rowIndex}
-                                className="cursor-pointer border-r-[1px] border-opacity-10 border-[#B9B7B7] shadow-custom11"
+                                className="border-r-[1px] border-opacity-10 border-[#B9B7B7] shadow-custom11"
                             >
                                 {columns.map((col, colIndex) => (
                                     <td
