@@ -60,7 +60,7 @@ const TransactionTableCell = ({ type, row }) => {
                                 Contract No.:
                             </span>
                             <span className="montserrat-semibold text-[13px] break-all whitespace-normal overflow-hidden">
-                                {row.transaction_type}
+                                {row.reference_number}
                             </span>
                         </div>
                         <span className="text-xs text-custom-lightgreen">
