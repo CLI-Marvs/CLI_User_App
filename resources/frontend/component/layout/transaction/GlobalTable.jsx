@@ -17,25 +17,36 @@ const GlobalTable = ({ columns, data }) => {
                     </tr>
                 </thead>
                 <tbody>
-                    {data.map((row, rowIndex) => {
-                        return (
-                            <tr
-                                key={rowIndex}
-                                className="border-r-[1px] border-opacity-10 border-[#B9B7B7] shadow-custom11"
+                    {data.length > 0 ? (
+                        <>
+                            {data.map((row, rowIndex) => (
+                                <tr
+                                    key={rowIndex}
+                                    className="border-r-[1px] border-opacity-10 border-[#B9B7B7] shadow-custom11"
+                                >
+                                    {columns.map((col, colIndex) => (
+                                        <td
+                                            className="px-3 py-3 cursor-pointer w-[208px] text-xs border-r-[1px] border-opacity-50 border-[#B9B7B7] relative"
+                                            key={colIndex}
+                                        >
+                                            {col.render
+                                                ? col.render(row)
+                                                : row[col.accessor]}
+                                        </td>
+                                    ))}
+                                </tr>
+                            ))}
+                        </>
+                    ) : (
+                        <tr>
+                            <td
+                                colSpan={columns.length}
+                                className="text-center py-4 text-gray-500"
                             >
-                                {columns.map((col, colIndex) => (
-                                    <td
-                                        className={`px-3 py-3 cursor-pointer w-[208px] text-xs border-r-[1px] border-opacity-50 border-[#B9B7B7] relative`}
-                                        key={colIndex}
-                                    >
-                                        {col.render
-                                            ? col.render(row)
-                                            : row[col.accessor]}
-                                    </td>
-                                ))}
-                            </tr>
-                        );
-                    })}
+                                No data to show.
+                            </td>
+                        </tr>
+                    )}
                 </tbody>
             </table>
         </div>
