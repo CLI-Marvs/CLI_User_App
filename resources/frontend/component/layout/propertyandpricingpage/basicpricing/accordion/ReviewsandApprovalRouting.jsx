@@ -20,17 +20,7 @@ import { showToast } from "@/util/toastUtil";
 import { usePriceListMaster } from "@/context/PropertyPricing/PriceListMasterContext";
 import CustomToolTip from "@/component/layout/mainComponent/Tooltip/CustomToolTip";
 import UnitTableComponent from "@/component/layout/propertyandpricingpage/component/UnitTableComponent";
-
-const staticHeaders = [
-    "Floor",
-    "Room",
-    "Unit",
-    "Type",
-    "Indoor Area",
-    "Balcony Area",
-    "Garden Area",
-    "Total Area",
-];
+import { staticHeaders } from "@/constant/data/staticHeaders";
 
 const ReviewsandApprovalRouting = ({
     isOpen,
