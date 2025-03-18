@@ -90,7 +90,7 @@ class SapController extends Controller
             if (!$existingInvoice) {
                 $invoice = new Invoices();
                 $invoice->contract_number = $request->input('D_RECNNR');
-                $invoice->document_number = $request->input('D_BELNR');
+                $invoice->invoice_number = $request->input('D_BELNR');
                 $invoice->customer_bp_number = $request->input('D_KUNNR');
                 $invoice->sap_unique_id = $request->input('D_BUZEI');
                 $invoice->company_code = $request->input('D_BUKRS');
