@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import "./togglebtn.css";
 import ReactPaginate from "react-paginate";
 import {
@@ -13,7 +13,7 @@ import AddPropertyModal from "@/component/layout/propertyandpricingpage/basicpri
 import moment from "moment";
 import { useNavigate } from "react-router-dom";
 import { usePriceListMaster } from "@/context/PropertyPricing/PriceListMasterContext";
-import TableSkeleton from "@/component/layout/propertyandpricingpage/component/TableSkeleton";
+import Skeleton from "@/component/layout/mainComponent/Skeletons";
 import { usePaymentScheme } from "@/context/PropertyPricing/PaymentSchemeContext";
 import { toLowerCaseText } from "@/util/formatToLowerCase";
 import { showToast } from "@/util/toastUtil";
@@ -439,7 +439,9 @@ const PricingMasterList = () => {
                         {isLoading && isFirstLoad ? (
                             <tr>
                                 <td className="w-full mt-1">
-                                    <TableSkeleton />
+                                    <Skeleton height={140} />
+                                    <Skeleton height={140} />
+                                    <Skeleton height={140} />
                                 </td>
                             </tr>
                         ) : priceListMaster &&
