@@ -93,7 +93,7 @@ Route::get('/get-matches', [SapController::class, 'runAutoPosting']);
 Route::post('paygate-webhook', [TransactionController::class, 'paygateWebHook']);
 Route::post('bank/statement', [TransactionController::class, 'clearedBankStatements']);
 //*Retrieve invoice from sap upon trigger the date
-Route::post('/posting-invoices', [TransactionController::class, 'retrieveInvoicesFromSap']);
+Route::post('/posting-invoices', [SapController::class, 'retrieveInvoicesFromSap']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/get-transaction-bank', [SapController::class, 'getTransactionByBankName']);

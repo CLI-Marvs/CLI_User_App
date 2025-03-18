@@ -86,6 +86,7 @@ class SapController extends Controller
                 ->first();
             $attachment = $request->input('D_INVDOC');
             $fileLink = $this->uploadToFile($attachment);
+            $soaLink = $this->uploadToFile($request->input('D_SOADOC'));
             if (!$existingInvoice) {
                 $invoice = new Invoices();
                 $invoice->contract_number = $request->input('D_RECNNR');
@@ -103,6 +104,7 @@ class SapController extends Controller
                 $invoice->flow_type = $request->input('D_VBEWA');
                 $invoice->invoice_status = $request->input('D_STATS');
                 $invoice->invoice_link = $fileLink;
+                $invoice->soa_link = $soaLink;
                 /*  $invoice->invoice_status = $request->input('invoice_status'); 
                 $invoice->status = $request->input('status');
                 $invoice->posting_response = $request->input('posting_response'); */
