@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { paymentSchemeService } from "@/component/servicesApi/apiCalls/propertyPricing/paymentScheme/paymentSchemeService";
 import { showToast } from "@/util/toastUtil";
 import CircularProgress from "@mui/material/CircularProgress";
-import { isButtonDisabled } from "@/component/layout/propertyandpricingpage/paymentscheme/utils/isButtonDisabled";
+import isButtonDisabled from "@/util/isFormButtonDisabled";
 import { usePaymentScheme } from "@/context/PropertyPricing/PaymentSchemeContext";
 
 const formDataState = {
@@ -20,7 +20,10 @@ const AddPaymentSchemeModal = ({ modalRef }) => {
     const [formData, setFormData] = useState(formDataState);
     const [isLoading, setIsLoading] = useState({});
     const { fetchPaymentSchemes } = usePaymentScheme();
-
+    const isPaymentSchemeButtonDisabled = isButtonDisabled(
+        formData,
+        Object.keys(formDataState)
+    );
     //Event Handler
     //Handle change in the input field
     const handleChange = (e) => {
@@ -258,13 +261,13 @@ const AddPaymentSchemeModal = ({ modalRef }) => {
                     <div className="flex justify-center gap-[10px] my-3">
                         <button
                             className={`w-[173px] h-[37px] text-white montserrat-semibold text-sm gradient-btn2 rounded-[10px] hover:shadow-custom4  ${
-                                isButtonDisabled(formData) ||
+                                isPaymentSchemeButtonDisabled ||
                                 isLoading["On-going Approval"]
                                     ? "cursor-not-allowed opacity-50"
                                     : ""
                             }`}
                             disabled={
-                                isButtonDisabled(formData) ||
+                                isPaymentSchemeButtonDisabled ||
                                 isLoading["On-going Approval"]
                             }
                             type="submit"
@@ -284,13 +287,14 @@ const AddPaymentSchemeModal = ({ modalRef }) => {
                         <button
                             className={`h-[37px] w-[117px] rounded-[10px] text-custom-solidgreen montserrat-semibold text-sm gradient-btn2 hover:shadow-custom4 p-[3px] 
                                 ${
-                                    isButtonDisabled(formData) ||
+                                    isPaymentSchemeButtonDisabled ||
                                     isLoading["Draft"]
                                         ? "cursor-not-allowed opacity-50"
                                         : ""
                                 }`}
                             disabled={
-                                isButtonDisabled(formData) || isLoading["Draft"]
+                                isPaymentSchemeButtonDisabled ||
+                                isLoading["Draft"]
                             }
                             type="submit"
                             onClick={(e) => handleSubmit(e, "Draft")}

@@ -29,7 +29,7 @@ const EmployeeReviewerApproverModal = ({
         setApprovedByEmployees,
         setReviewedByEmployees,
     } = usePriceListEmployees();
-    
+
     //Hooks
     useEffect(() => {
         if (type === "reviewedByEmployees") {

@@ -13,7 +13,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 import { useStateContext } from "@/context/contextprovider";
 import EmployeeReviewerApproverModal from "@/component/layout/propertyandpricingpage/basicpricing/modals/ReviewSetting/EmployeeReviewerApproverModal";
 import ExpandableDataTable from "@/component/layout/propertyandpricingpage/basicpricing/modals/ReviewSetting/ExpandableDataTable";
-import { toLowerCaseText } from "@/component/layout/propertyandpricingpage/utils/formatToLowerCase";
+import { toLowerCaseText } from "@/util/formatToLowerCase";
 import { usePropertyPricing } from "@/component/layout/propertyandpricingpage/basicpricing/hooks/usePropertyPricing";
 import { formatPayload } from "@/component/layout/propertyandpricingpage/basicpricing/utils/payloadFormatter";
 import { showToast } from "@/util/toastUtil";

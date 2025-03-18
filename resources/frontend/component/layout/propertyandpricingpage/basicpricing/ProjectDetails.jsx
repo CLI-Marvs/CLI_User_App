@@ -1,5 +1,5 @@
 import React, { useRef, useState, useCallback } from "react";
-import { toLowerCaseText } from "@/component/layout/propertyandpricingpage/utils/formatToLowerCase";
+import { toLowerCaseText } from "@/util/formatToLowerCase";
 import { GoogleMap, useLoadScript } from "@react-google-maps/api";
 import {
     GOOGLE_MAPS_LIBRARIES,

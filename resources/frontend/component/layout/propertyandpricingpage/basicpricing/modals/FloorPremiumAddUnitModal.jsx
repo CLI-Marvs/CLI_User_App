@@ -5,6 +5,7 @@ import { showToast } from "@/util/toastUtil";
 import CircularProgress from "@mui/material/CircularProgress";
 import CustomInput from "@/component/Input/CustomInput";
 import { usePriceListMaster } from "@/context/PropertyPricing/PriceListMasterContext";
+import isButtonDisabled from "@/util/isFormButtonDisabled";
 
 const formDataState = {
     floor: "",
@@ -29,6 +30,10 @@ const FloorPremiumAddUnitModal = ({
         useUnit();
     const [isLoading, setIsLoading] = useState(false);
     const { propertyMasterId, priceListMasterId } = usePriceListMaster();
+    const isFloorAssignButtonDisabled = isButtonDisabled(
+        formData,
+        Object.keys(formDataState)
+    );
 
     //Hooks
     useEffect(() => {
@@ -69,7 +74,7 @@ const FloorPremiumAddUnitModal = ({
                 property_masters_id: propertyMasterId,
                 price_list_master_id: priceListMasterId,
             };
-            console.log("payload",payload)
+            console.log("payload", payload);
             setIsLoading(true);
             const response = await unitService.storeUnitDetails(payload);
 
@@ -105,7 +110,7 @@ const FloorPremiumAddUnitModal = ({
 
     //Utility to disable the  button if form is empty
     // Function to check if all fields are empty
-    const isDisabled = Object.values(formData).some((value) => value === "");
+    // const isFloorAssignButtonDisabled  = Object.values(formData).some((value) => value === "");
 
     //Handle close the modal and reset all state
     const handleCloseModal = () => {
@@ -248,9 +253,9 @@ const FloorPremiumAddUnitModal = ({
                     <button
                         type="submit"
                         onClick={handleSubmit}
-                        disabled={isLoading || isDisabled}
+                        disabled={isLoading || isFloorAssignButtonDisabled}
                         className={`w-[95px] h-[37px] text-white montserrat-semibold text-sm gradient-btn2 rounded-[10px] ${
-                            isLoading || isDisabled
+                            isLoading || isFloorAssignButtonDisabled
                                 ? "opacity-50 cursor-not-allowed"
                                 : ""
                         }`}

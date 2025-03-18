@@ -4,10 +4,10 @@ import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import DateLogo from "../../../../../../public/Images/Date_range.svg";
-import AddPriceVersionModal from "./AddPriceVersionModal";
+import AddPriceVersionModal from "@/component/layout/propertyandpricingpage/priceversioning/AddPriceVersionModal";
 import { usePriceVersion } from "@/context/PropertyPricing/PriceVersionContext";
 import TableSkeleton from "@/component/layout/propertyandpricingpage/component/TableSkeleton";
-import { toLowerCaseText } from "@/component/layout/propertyandpricingpage/utils/formatToLowerCase";
+import { toLowerCaseText } from "@/util/formatToLowerCase";
 
 const PriceVersioning = () => {
     //States

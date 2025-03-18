@@ -15,7 +15,7 @@ import { useNavigate } from "react-router-dom";
 import { usePriceListMaster } from "@/context/PropertyPricing/PriceListMasterContext";
 import TableSkeleton from "@/component/layout/propertyandpricingpage/component/TableSkeleton";
 import { usePaymentScheme } from "@/context/PropertyPricing/PaymentSchemeContext";
-import { toLowerCaseText } from "@/component/layout/propertyandpricingpage/utils/formatToLowerCase";
+import { toLowerCaseText } from "@/util/formatToLowerCase";
 import { showToast } from "@/util/toastUtil";
 import { priceListMasterService } from "@/component/servicesApi/apiCalls/propertyPricing/priceListMaster/priceListMasterService";
 import CustomInput from "@/component/Input/CustomInput";
