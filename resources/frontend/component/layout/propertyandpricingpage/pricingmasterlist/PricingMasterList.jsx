@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import "./togglebtn.css";
 import ReactPaginate from "react-paginate";
 import {
@@ -45,6 +45,15 @@ const PricingMasterList = () => {
     const propertyModalRef = useRef(null);
     const toggleFilterBox = () => {
         setIsFilterVisible(!isFilterVisible);
+    };
+    const isButtonDisabled = (searchFilters) => {
+        const allEmpty =
+            !searchFilters.property &&
+            !searchFilters.paymentScheme &&
+            !searchFilters.status &&
+            !searchFilters.date;
+
+        return allEmpty; // Disable button if all fields are empty, enable otherwise
     };
 
     //Hooks
@@ -308,7 +317,12 @@ const PricingMasterList = () => {
                             </div>
                             <div className="mt-3 flex justify-end">
                                 <button
-                                    className="h-[37px] w-[88px] gradient-btn rounded-[10px] text-white text-sm"
+                                    disabled={isButtonDisabled(searchFilters)}
+                                    className={`h-[37px] w-[88px] gradient-btn rounded-[10px] text-white text-sm ${
+                                        isButtonDisabled(searchFilters)
+                                            ? "cursor-not-allowed opacity-50"
+                                            : ""
+                                    }`}
                                     onClick={handleSearch}
                                 >
                                     Search

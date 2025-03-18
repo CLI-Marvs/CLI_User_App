@@ -533,60 +533,14 @@ class PriceListMasterService
     }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     /**
      * Update price list master data
-     */
-    // public function update(array $data,int $tower_phase_id)
-    // {   
-    //     return $this->repository->update($data, $tower_phase_id);
-    // }
-
-    /**
-     * Update price list master data
-     * This will update the price list master data (Ids)
-     * User can update either price basic detail or price version or floor premium 
+     * 
      */
     //TODO: refactor this and apply SOC
     public function update(array $data)
     {
-        //  dd($data);
+        // dd($data);
         DB::beginTransaction();
         try {
             $priceListMaster = $this->model->where('id', $data['price_list_master_id'])->first();
@@ -601,16 +555,11 @@ class PriceListMasterService
 
             // Fetch the current price version IDs in the PriceListMaster table
             $currentPriceVersionIds = json_decode($priceListMaster->price_versions_id, true) ?? [];
-
+            $newPriceVersionIds = [];
             if (!empty($data['priceVersionsPayload']) && is_array($data['priceVersionsPayload'])) {
-                $newPriceVersionIds = []; // Track new/updated versions
+                // Track new/updated versions
 
                 foreach ($data['priceVersionsPayload'] as $priceVersionData) {
-                    // dd($priceVersionData['priority_number']);
-                    // Ensure expiry_date is formatted properly
-                    // $expiryDate = !empty($priceVersionData['expiry_date'])
-                    //     ? \DateTime::createFromFormat('m-d-Y H:i:s', $priceVersionData['expiry_date'])->format('Y-m-d H:i:s')
-                    //     : null;
 
                     $versionId = $priceVersionData['version_id'] ?? null;
 
@@ -658,17 +607,15 @@ class PriceListMasterService
                         $newPriceVersionIds[] = $newPriceVersion->id;
                     }
                 }
-
-                // Find and deactivate removed PriceVersions
-                $removedPriceVersionIds = array_diff($currentPriceVersionIds, $newPriceVersionIds);
-                if (!empty($removedPriceVersionIds)) {
-                    $this->priceVersionModel->whereIn('id', $removedPriceVersionIds)->update([
-                        'status' => 'InActive',
-                        'price_list_masters_id' => null,
-                    ]);
-                }
             }
-
+            // Find and deactivate removed PriceVersions
+            $removedPriceVersionIds = array_diff($currentPriceVersionIds, $newPriceVersionIds);
+            if (!empty($removedPriceVersionIds)) {
+                $this->priceVersionModel->whereIn('id', $removedPriceVersionIds)->update([
+                    'status' => 'InActive',
+                    'price_list_masters_id' => null,
+                ]);
+            }
 
             //Fetch the current Floor Premiums ID in the Price List Master table
             $floorPremiumIdsFromDatabase = json_decode($priceListMaster->floor_premiums_id, true);

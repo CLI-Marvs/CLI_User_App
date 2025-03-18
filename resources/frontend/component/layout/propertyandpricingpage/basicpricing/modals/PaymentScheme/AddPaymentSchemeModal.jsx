@@ -199,6 +199,7 @@ const AddPaymentSchemeModal = ({
             });
         }
     };
+    
     return (
         <dialog
             id="Resolved"

@@ -79,33 +79,35 @@ class PriceListMasterRepository
      */
     public function filterPriceList($validatedData, $query)
     {
-
         return $query
-            //  Filter by Property Name
+            //Filter by Property Name
             ->when(!empty($validatedData['property']), function ($q) use ($validatedData) {
                 $q->whereHas('towerPhase.propertyMaster', function ($q) use ($validatedData) {
                     $q->where('property_name', 'ILIKE', "%{$validatedData['property']}%");
                 });
             })
 
-            //  Filter by Payment Scheme Name
+            //Filter by Payment Scheme Name
             ->when(!empty($validatedData['paymentScheme']), function ($q) use ($validatedData) {
-                $paymentSchemes = is_array($validatedData['paymentScheme'])
-                    ? $validatedData['paymentScheme']
-                    : json_decode($validatedData['paymentScheme'], true) ?? [];
+                // Get all matching PaymentScheme IDs
+                $paymentSchemeIds = PaymentScheme::where('payment_scheme_name', 'ILIKE', "%{$validatedData['paymentScheme']}%")
+                    ->pluck('id')
+                    ->toArray();
 
-                $paymentSchemeIds = PaymentScheme::where(function ($query) use ($paymentSchemes) {
-                    foreach ($paymentSchemes as $scheme) {
-                        $query->orWhere('payment_scheme_name', 'ILIKE', "%{$scheme}%");
+                // Get matching PriceVersion IDs based on payment_scheme_id
+                $priceVersionIds = PriceVersion::where(function ($query) use ($paymentSchemeIds) {
+                    foreach ($paymentSchemeIds as $id) {
+                        $query->orWhereJsonContains('payment_scheme_id', $id);
                     }
-                })->pluck('id');
-                dd($paymentSchemeIds);
-
-                // $priceVersionIds = PriceVersion::whereJsonContains('payment_scheme_id', $paymentSchemeIds)
-                //     ->pluck('id');
-
-                // $q->whereJsonContains('price_versions_id', $priceVersionIds);
+                })->pluck('id')->toArray();
+             
+                $q->where(function ($query) use ($priceVersionIds) {
+                    foreach ($priceVersionIds as $id) {
+                        $query->orWhereJsonContains('price_versions_id', $id);
+                    }
+                });
             })
+
 
             //  Filter by Status
             ->when(!empty($validatedData['status']), function ($q) use ($validatedData) {
