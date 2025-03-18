@@ -30,6 +30,7 @@ export const ContextProvider = ({ children }) => {
     const [specificAssigneeCsr, setSpecificAssigneeCsr] = useState("");
     const [currentPage, setCurrentPage] = useState(0);
     const [selectedOption, setSelectedOption] = useState("All");
+    const [assignedToMeActive, setAssignedToMeActive] = useState(false);
 
     const [notifCurrentPage, setNotifCurrentPage] = useState(0);
     const [searchFilter, setSearchFilter] = useState({});
@@ -106,6 +107,7 @@ export const ContextProvider = ({ children }) => {
     const [permissions, setPermissions] = useState({});
     const [searchSummary, setSearchSummary] = useState("");
     const [resultSearchActive, setResultSearchActive] = useState(false);
+    const [daysActive, setDaysActive] = useState(false);
     const [departmentValue, setDepartmentValue] = useState("All");
     const [projectValue, setProjectValue] = useState("All");
     const [yearValue, setYearValue] = useState(new Date().getFullYear());
@@ -1056,6 +1058,8 @@ export const ContextProvider = ({ children }) => {
                 setSearchSummary,
                 resultSearchActive,
                 setResultSearchActive,
+                daysActive,
+                setDaysActive,
                 setDepartmentValue,
                 departmentValue,
                 setProjectValue,
@@ -1071,8 +1075,11 @@ export const ContextProvider = ({ children }) => {
                 startDate,
                 setStartDate,
                 endDate,
-                setEndDate
-
+                setEndDate,
+                setAssignedToMeActive,
+                assignedToMeActive,
+                setSpecificAssigneeCsr,
+                specificAssigneeCsr,
             }}
         >
             {children}

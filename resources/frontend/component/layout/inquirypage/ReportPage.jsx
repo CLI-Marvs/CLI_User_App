@@ -94,6 +94,10 @@ const ReportPage = () => {
         setStartDateValue,
         endDateValue,
         setEndDateValue,
+        setDaysFilter,
+        setActiveDayButton,
+        setSpecificAssigneeCsr,
+        setAssignedToMeActive,
     } = useStateContext();
 
     const [searchSummary, setSearchSummary] = useState([]);
@@ -1146,6 +1150,10 @@ const ReportPage = () => {
                                         startDate: startDateValue,
                                         endDate: endDateValue,
                                     });
+                                    setDaysFilter(null);
+                                    setActiveDayButton(null);
+                                    setSpecificAssigneeCsr("");
+                                    setAssignedToMeActive(false);
                                     navigate("/inquirymanagement/inquirylist");
                                 }}
                             >
@@ -1204,6 +1212,10 @@ const ReportPage = () => {
                                         startDate: startDateValue,
                                         endDate: endDateValue,
                                     });
+                                    setDaysFilter(null);
+                                    setActiveDayButton(null);
+                                    setSpecificAssigneeCsr("");
+                                    setAssignedToMeActive(false);
                                     navigate("/inquirymanagement/inquirylist");
                                 }}
                             >
@@ -1262,6 +1274,10 @@ const ReportPage = () => {
                                         startDate: startDateValue,
                                         endDate: endDateValue,
                                     });
+                                    setDaysFilter(null);
+                                    setActiveDayButton(null);
+                                    setSpecificAssigneeCsr("");
+                                    setAssignedToMeActive(false);
                                     navigate("/inquirymanagement/inquirylist");
                                 }}
                             >
@@ -1406,6 +1422,10 @@ const ReportPage = () => {
                                                     startDate: startDateValue,
                                                     endDate: endDateValue,
                                                 });
+                                                setDaysFilter(null);
+                                                setActiveDayButton(null);
+                                                setSpecificAssigneeCsr("");
+                                                setAssignedToMeActive(false);
                                                 navigate(
                                                     "/inquirymanagement/inquirylist"
                                                 );
@@ -1468,6 +1488,10 @@ const ReportPage = () => {
                                                     startDate: startDateValue,
                                                     endDate: endDateValue,
                                                 });
+                                                setDaysFilter(null);
+                                                setActiveDayButton(null);
+                                                setSpecificAssigneeCsr("");
+                                                setAssignedToMeActive(false);
                                                 navigate(
                                                     "/inquirymanagement/inquirylist"
                                                 );
@@ -1530,6 +1554,10 @@ const ReportPage = () => {
                                                     startDate: startDateValue,
                                                     endDate: endDateValue,
                                                 });
+                                                setDaysFilter(null);
+                                                setActiveDayButton(null);
+                                                setSpecificAssigneeCsr("");
+                                                setAssignedToMeActive(false);
                                                 navigate(
                                                     "/inquirymanagement/inquirylist"
                                                 );
@@ -1592,6 +1620,10 @@ const ReportPage = () => {
                                                     startDate: startDateValue,
                                                     endDate: endDateValue,
                                                 });
+                                                setDaysFilter(null);
+                                                setActiveDayButton(null);
+                                                setSpecificAssigneeCsr("");
+                                                setAssignedToMeActive(false);
                                                 navigate(
                                                     "/inquirymanagement/inquirylist"
                                                 );
@@ -1654,6 +1686,10 @@ const ReportPage = () => {
                                                 startDate: startDateValue,
                                                 endDate: endDateValue,
                                             });
+                                            setDaysFilter(null);
+                                            setActiveDayButton(null);
+                                            setSpecificAssigneeCsr("");
+                                            setAssignedToMeActive(false);
                                             navigate(
                                                 "/inquirymanagement/inquirylist"
                                             );
@@ -1802,7 +1838,11 @@ const ReportPage = () => {
                                                             : "",
                                                     startDate: startDateValue,
                                                     endDate: endDateValue,
-                                                });
+                                                    });
+                                                    setDaysFilter(null);
+                                                    setActiveDayButton(null);
+                                                    setSpecificAssigneeCsr("");
+                                                    setAssignedToMeActive(false);
                                                 navigate(
                                                     "/inquirymanagement/inquirylist"
                                                 );
@@ -1865,6 +1905,10 @@ const ReportPage = () => {
                                                     startDate: startDateValue,
                                                     endDate: endDateValue,
                                                 });
+                                                setDaysFilter(null);
+                                                setActiveDayButton(null);
+                                                setSpecificAssigneeCsr("");
+                                                setAssignedToMeActive(false);
                                                 navigate(
                                                     "/inquirymanagement/inquirylist"
                                                 );
@@ -1927,6 +1971,10 @@ const ReportPage = () => {
                                                     startDate: startDateValue,
                                                     endDate: endDateValue,
                                                 });
+                                                setDaysFilter(null);
+                                                setActiveDayButton(null);
+                                                setSpecificAssigneeCsr("");
+                                                setAssignedToMeActive(false);
                                                 navigate(
                                                     "/inquirymanagement/inquirylist"
                                                 );
@@ -1989,6 +2037,10 @@ const ReportPage = () => {
                                                     startDate: startDateValue,
                                                     endDate: endDateValue,
                                                 });
+                                                setDaysFilter(null);
+                                                setActiveDayButton(null);
+                                                setSpecificAssigneeCsr("");
+                                                setAssignedToMeActive(false);
                                                 navigate(
                                                     "/inquirymanagement/inquirylist"
                                                 );
@@ -2051,6 +2103,10 @@ const ReportPage = () => {
                                                     startDate: startDateValue,
                                                     endDate: endDateValue,
                                                 });
+                                                setDaysFilter(null);
+                                                setActiveDayButton(null);
+                                                setSpecificAssigneeCsr("");
+                                                setAssignedToMeActive(false);
                                                 navigate(
                                                     "/inquirymanagement/inquirylist"
                                                 );
@@ -2113,6 +2169,10 @@ const ReportPage = () => {
                                                     startDate: startDateValue,
                                                     endDate: endDateValue,
                                                 });
+                                                setDaysFilter(null);
+                                                setActiveDayButton(null);
+                                                setSpecificAssigneeCsr("");
+                                                setAssignedToMeActive(false);
                                                 navigate(
                                                     "/inquirymanagement/inquirylist"
                                                 );
@@ -2176,6 +2236,10 @@ const ReportPage = () => {
                                                     startDate: startDateValue,
                                                     endDate: endDateValue,
                                                 });
+                                                setDaysFilter(null);
+                                                setActiveDayButton(null);
+                                                setSpecificAssigneeCsr("");
+                                                setAssignedToMeActive(false);
                                                 navigate(
                                                     "/inquirymanagement/inquirylist"
                                                 );
@@ -2238,6 +2302,10 @@ const ReportPage = () => {
                                                     startDate: startDateValue,
                                                     endDate: endDateValue,
                                                 });
+                                                setDaysFilter(null);
+                                                setActiveDayButton(null);
+                                                setSpecificAssigneeCsr("");
+                                                setAssignedToMeActive(false);
                                                 navigate(
                                                     "/inquirymanagement/inquirylist"
                                                 );
@@ -2345,6 +2413,10 @@ const ReportPage = () => {
                                                                 endDate:
                                                                     endDateValue,
                                                             });
+                                                            setDaysFilter(null);
+                                                            setActiveDayButton(null);
+                                                            setSpecificAssigneeCsr("");
+                                                            setAssignedToMeActive(false);
                                                             navigate(
                                                                 "/inquirymanagement/inquirylist"
                                                             );
@@ -2393,6 +2465,10 @@ const ReportPage = () => {
                                                                 endDate:
                                                                     endDateValue,
                                                             });
+                                                            setDaysFilter(null);
+                                                            setActiveDayButton(null);
+                                                            setSpecificAssigneeCsr("");
+                                                            setAssignedToMeActive(false);
                                                             navigate(
                                                                 "/inquirymanagement/inquirylist"
                                                             );
@@ -2441,6 +2517,10 @@ const ReportPage = () => {
                                                                 endDate:
                                                                     endDateValue,
                                                             });
+                                                            setDaysFilter(null);
+                                                            setActiveDayButton(null);
+                                                            setSpecificAssigneeCsr("");
+                                                            setAssignedToMeActive(false);
                                                             navigate(
                                                                 "/inquirymanagement/inquirylist"
                                                             );
@@ -2489,6 +2569,10 @@ const ReportPage = () => {
                                                                 endDate:
                                                                     endDateValue,
                                                             });
+                                                            setDaysFilter(null);
+                                                            setActiveDayButton(null);
+                                                            setSpecificAssigneeCsr("");
+                                                            setAssignedToMeActive(false);
                                                             navigate(
                                                                 "/inquirymanagement/inquirylist"
                                                             );
@@ -2726,6 +2810,10 @@ const ReportPage = () => {
                                                                     endDateValue,
                                                                 /* department: departmentValue, */
                                                             });
+                                                            setDaysFilter(null);
+                                                            setActiveDayButton(null);
+                                                            setSpecificAssigneeCsr("");
+                                                            setAssignedToMeActive(false);
                                                             navigate(
                                                                 "/inquirymanagement/inquirylist"
                                                             );
@@ -2781,6 +2869,10 @@ const ReportPage = () => {
                                                                 endDate:
                                                                     endDateValue,
                                                             });
+                                                            setDaysFilter(null);
+                                                            setActiveDayButton(null);
+                                                            setSpecificAssigneeCsr("");
+                                                            setAssignedToMeActive(false);
                                                             navigate(
                                                                 "/inquirymanagement/inquirylist"
                                                             );
@@ -2836,6 +2928,10 @@ const ReportPage = () => {
                                                                 endDate:
                                                                     endDateValue,
                                                             });
+                                                            setDaysFilter(null);
+                                                            setActiveDayButton(null);
+                                                            setSpecificAssigneeCsr("");
+                                                            setAssignedToMeActive(false);
                                                             navigate(
                                                                 "/inquirymanagement/inquirylist"
                                                             );
@@ -2891,6 +2987,10 @@ const ReportPage = () => {
                                                                 endDate:
                                                                     endDateValue,
                                                             });
+                                                            setDaysFilter(null);
+                                                            setActiveDayButton(null);
+                                                            setSpecificAssigneeCsr("");
+                                                            setAssignedToMeActive(false);
                                                             navigate(
                                                                 "/inquirymanagement/inquirylist"
                                                             );
@@ -3054,6 +3154,10 @@ const ReportPage = () => {
                                                                             endDateValue,
                                                                     }
                                                                 );
+                                                                setDaysFilter(null);
+                                                                setActiveDayButton(null);
+                                                                setSpecificAssigneeCsr("");
+                                                                setAssignedToMeActive(false);
                                                                 navigate(
                                                                     "/inquirymanagement/inquirylist"
                                                                 );
