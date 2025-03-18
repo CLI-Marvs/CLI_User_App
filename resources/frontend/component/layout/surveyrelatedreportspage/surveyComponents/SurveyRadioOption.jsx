@@ -1,7 +1,21 @@
-import React, { useState } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { RxCross2 } from "react-icons/rx";
 
-export const SurveyRadioOption = () => {
+export const SurveyRadioOption = ({ option, onDelete, onUpdate, optionIndex }) => {
+    const textareaRef = useRef(null);
+    
+    const adjustHeight = (element) => {
+        element.style.height = "auto"; // Reset height to recalculate
+        element.style.height = `${element.scrollHeight}px`; // Set new height
+    };
+
+    useEffect(() => {
+        if (textareaRef.current) {
+          adjustHeight(textareaRef.current);
+        }
+      }, [option.text]);
+
+
     return (
         <div>
             <div className="flex items-center gap-2">
@@ -20,13 +34,22 @@ export const SurveyRadioOption = () => {
                         className="w-full h-full resize-none overflow-hidden leading-tight text-[16px] p-[6px]"
                         rows="1"
                         placeholder="Option"
-                        onInput={(e) => {
-                            e.target.style.height = "auto"; // Reset height to min
-                            e.target.style.height = `${e.target.scrollHeight}px`; // Expand dynamically
+                        value={option.text}
+                        onChange={(e) => {
+                            onUpdate(option.id, e.target.value); // Update the text value
+                            adjustHeight(e.target);   // Adjust height dynamically
                         }}
+                        ref={textareaRef}
                     />
                 </div>
-                <button><RxCross2 className='size-[24px]' /></button>
+                {optionIndex !== 0 ?  (
+                    <button onClick={onDelete}>
+                        <RxCross2 className="size-[24px] hover:text-red-500" />
+                    </button>
+                ) : (
+                   <div className='size-[24px]'></div>
+                )
+                }
             </div>
         </div>
     )
