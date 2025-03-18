@@ -14,6 +14,8 @@ export const TransactionProvider = ({ children }) => {
     const [currentPagePosting, setCurrentPagePosting] = useState(0);
     const [totalPagePosting, setTotalPagePosting] = useState(0);
     const [activeItemTransaction, setActiveItemTransaction] = useState("Cleared");
+    const [dataToSubmit, setDataToSubmit] = useState({});
+
 
     return (
         <TransactionContext.Provider
@@ -31,7 +33,9 @@ export const TransactionProvider = ({ children }) => {
                 totalPagePosting,
                 setTotalPagePosting,
                 activeItemTransaction,
-                setActiveItemTransaction
+                setActiveItemTransaction,
+                dataToSubmit,
+                setDataToSubmit
             }}
         >
             {children}

@@ -2,7 +2,6 @@ import moment from "moment";
 import React from "react";
 
 const TransactionTableCell = ({ type, row }) => {
-    console.log("");
     switch (type) {
         case "transaction_date":
             return (

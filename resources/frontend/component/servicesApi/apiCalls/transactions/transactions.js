@@ -1,13 +1,12 @@
 import apiService from "@/component/servicesApi/apiService";
 
 export const transaction = {
-    transactionList: async (currentPage, filter = null) => {
+    transactionList: async (currentPage, filter = {}) => {
         try {
-            const params = { page: currentPage + 1 };
+            const params = { page: currentPage + 1, ...filter };
 
-            if (filter) {
-                params.filter = filter;
-            }
+           
+            console.log("params", params);
 
             const response = await apiService.get("transaction-list", {
                 params,
