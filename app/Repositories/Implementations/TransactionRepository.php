@@ -7,6 +7,7 @@ use App\Models\BankTransaction;
 use App\Models\Invoices;
 use App\Models\PreSubmissionOnlinePayments;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class TransactionRepository
 {
@@ -101,7 +102,8 @@ class TransactionRepository
 
             $this->transactionModel->create([
                 'reference_number' => $preSubmissionData->reference_number,
-                'transaction_date' => "{$preSubmissionData->transaction_date} {$preSubmissionData->transaction_time}",
+                'transaction_date' => $preSubmissionData->transaction_date,
+                'transaction_time' => $preSubmissionData->transaction_time,
                 'payment_method_transaction_id' => $preSubmissionData->payment_transaction_id,
                 'transaction_type' => $preSubmissionData->transaction_type,
                 'amount' => $preSubmissionData->amount,
@@ -130,20 +132,28 @@ class TransactionRepository
 
     public function retrieveTransactions(array $data)
     {
+        $startDate = $data['start_date'] ?? null;
+        $endDate = $data['end_date'] ?? null;
+    
         $query = $this->transactionModel
             ->join('property_masters', 'property_masters.id', '=', 'transaction.id')
             ->select('transaction.*', 'property_masters.property_name')
-            ->orderBy('created_at', 'desc');
-
-        if (!empty($data['filter'])) {
-            $query->where('transaction.status', $data['filter']);
-        }
-
-
-        $transactionData = $query->paginate(10);
-
-        return $transactionData;
+            ->orderBy('transaction.created_at', 'desc')
+            ->when(!empty($data['status']), fn($q) => $q->where('transaction.status', $data['status']))
+            ->when(!empty($data['email']), fn($q) => $q->where('transaction.email', $data['email']))
+            ->when(!empty($data['destination_bank']), fn($q) => $q->where('transaction.destination_bank', $data['destination_bank']))
+            ->when(!empty($data['property_name']), fn($q) => $q->where('property_masters.property_name', $data['property_name']))
+            ->when(!empty($data['invoice_number']), fn($q) => $q->where('transaction.invoice_number', $data['invoice_number']))
+            ->when(!empty($data['document_number']), fn($q) => $q->where('transaction.document_number', $data['document_number']))
+            ->when(!empty($data['reference_number']), fn($q) => $q->where('transaction.reference_number', $data['reference_number']))
+            ->when($startDate && $endDate, fn($q) => $q->whereBetween('transaction.transaction_date', [$startDate, $endDate]))
+            ->when($startDate && !$endDate, fn($q) => $q->whereDate('transaction.transaction_date', $startDate))
+            ->when($endDate && !$startDate, fn($q) => $q->whereDate('transaction.transaction_date', $endDate))
+            ->paginate(10);
+    
+        return $query;
     }
+    
 
     public function updateTransactionStatus(array $data)
     {

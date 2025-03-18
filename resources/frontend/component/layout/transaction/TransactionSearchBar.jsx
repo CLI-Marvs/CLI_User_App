@@ -1,8 +1,16 @@
 import React, { useEffect, useRef, useState } from "react";
 import DateLogo from "../../../../../public/Images/Date_range.svg";
 import DatePicker from "react-datepicker";
+import { MdCalendarToday } from "react-icons/md";
+import moment from "moment";
 
-const TransactionSearchBar = ({ fields }) => {
+const TransactionSearchBar = ({
+    fields,
+    searchValues,
+    onChangeSearch,
+    onSubmit,
+    setSearchValues,
+}) => {
     const [openSearch, setOpenSearch] = useState(false);
     const [startDate, setStartDate] = useState(null);
     const dropdownRef = useRef(null);
@@ -20,23 +28,37 @@ const TransactionSearchBar = ({ fields }) => {
             !dropdownRef.current.contains(event.target)
         ) {
             setOpenSearch(false);
+            if (setSearchValues) {
+                setSearchValues({});
+            }
         }
     };
 
+    console.log("sesarchValues", searchValues);
     const handleDateChange = (date) => {
         setStartDate(date);
     };
 
-    const renderSelect = (options) => (
-        <select className="w-full h-full border-b border-opacity-30 border-custom-gray outline-none text-xs">
-            {options.map((option, idx) => (
-                <option key={idx} value={option.value} disabled={option.value === ""} selected={option.value === ""}>
-                    {option.label}
-                </option>
-            ))}
-        </select>
-    );
-    
+    const renderSelect = (options, name) => {
+        return (
+            <select
+                className="w-full h-full border-b border-opacity-30 border-custom-gray outline-none text-xs"
+                name={name || ""}
+                onChange={onChangeSearch}
+            >
+                {options.map((option, idx) => (
+                    <option
+                        key={idx}
+                        value={option.value}
+                        disabled={option.value === ""}
+                        selected={option.value === ""}
+                    >
+                        {option.label}
+                    </option>
+                ))}
+            </select>
+        );
+    };
 
     return (
         <div className="bg-custom-grayF1 rounded-[10px] p-[12px] w-[604px] h-[47px]  relative z-50">
@@ -93,18 +115,68 @@ const TransactionSearchBar = ({ fields }) => {
                                     </span>
 
                                     {item.type === "select" ? (
-                                        renderSelect(item.options || [])
-                                    ) : item.type === "date" ? (
-                                        <DatePicker
-                                           /*  selected={startDate}
-                                            onChange={handleDateChange} */
-                                            className="outline-none "
-                                            calendarClassName="custom-calendar"
-                                        />
+                                        renderSelect(item.options, item.name)
+                                    ) : item.type === "date_range" ? (
+                                        <div className="relative flex border w-max border-[#3A3A3A] rounded-[5px] z-10 mt-3">
+                                            <span className="border-white text-white bg-[#3A3A3A] text-sm flex items-center w-max px-[15px] pl-3 py-1 shrink-0 cursor-default">
+                                                From
+                                            </span>
+                                            <div className="relative flex items-center bg-white">
+                                                <DatePicker
+                                                    className="outline-none h-full text-sm px-2 cursor-pointer"
+                                                    calendarClassName="custom-calendar"
+                                                    name="start_date"
+                                                    onChange={(date) => {
+                                                        if (date) {
+                                                            const formattedDate = moment(date).format("YYYY-MM-DD");
+                                                
+                                                            setSearchValues((prev) => ({
+                                                                ...prev,
+                                                                start_date: formattedDate 
+                                                            }));
+                                                        }
+                                                    }}
+                                                    selected={searchValues.start_date ? moment(searchValues.start_date).toDate() : null}
+                                                />
+                                            </div>
+                                            <span className="absolute inset-y-0 right-0 flex items-center text-white pr-3 pl-3 bg-[#3A3A3A] pointer-events-none">
+                                                <MdCalendarToday />
+                                            </span>
+
+                                            <span className="text-white bg-[#3A3A3A] text-sm flex items-center w-max px-[15px] pl-3 py-1 shrink-0 cursor-default">
+                                                To
+                                            </span>
+                                            <div className="relative flex items-center bg-white">
+                                                <DatePicker
+                                                    className="outline-none h-full text-sm px-2 cursor-pointer"
+                                                    calendarClassName="custom-calendar"
+                                                    name="end_date"
+                                                    onChange={(date) => {
+                                                        if (date) {
+                                                            const formattedDate = moment(date).format("YYYY-MM-DD");
+                                                            
+                                                            setSearchValues((prev) => ({
+                                                                ...prev,
+                                                                end_date: formattedDate 
+                                                            }));
+                                                        }
+                                                    }}
+                                                    selected={searchValues.end_date ? moment(searchValues.end_date).toDate() : null}
+                                                />
+                                            </div>
+                                            <span className="absolute inset-y-0 right-0 flex items-center text-white pr-3 pl-3 bg-[#3A3A3A] pointer-events-none cursor-pointer">
+                                                <MdCalendarToday />
+                                            </span>
+                                        </div>
                                     ) : (
                                         <input
                                             type="text"
                                             className="w-full h-full border-b border-custom-gray outline-none text-xs border-opacity-30"
+                                            name={item.name}
+                                            onChange={onChangeSearch}
+                                            value={
+                                                searchValues[item.name] || ""
+                                            }
                                         />
                                     )}
                                 </div>
@@ -148,6 +220,17 @@ const TransactionSearchBar = ({ fields }) => {
                                 </select>
                             </div>
                         </div> */}
+                        <div className="mt-7 flex justify-end">
+                            <button
+                                className="h-[37px] w-[88px] gradient-btn rounded-[10px] text-white text-sm"
+                                onClick={() => {
+                                    onSubmit();
+                                    setOpenSearch(false);
+                                }}
+                            >
+                                Search
+                            </button>
+                        </div>
                     </div>
                 )}
             </div>

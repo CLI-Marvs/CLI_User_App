@@ -74,7 +74,8 @@ const BankStatementCom = () => {
                 { label: "Posted", value: "posted" },
                 { label: "Floating", value: "floating" },
             ]
-        } 
+        }, 
+        { name: "bank_start_date", type: "date", label: "Date"} 
     ];
     
     
