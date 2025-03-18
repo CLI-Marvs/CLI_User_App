@@ -81,6 +81,7 @@ class SapController extends Controller
     public function retrieveInvoicesFromSap(Request $request)
     {
         try {
+            \Log::info("request all", $request->all());
             $existingInvoice = Invoices::where('invoice_number', $request->input('D_BELNR'))
                 ->where('flow_type', $request->input('D_VBEWA'))
                 ->first();
