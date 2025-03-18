@@ -17,7 +17,10 @@ import CircularProgress from "@mui/material/CircularProgress";
 import { usePropertyPricing } from "@/component/layout/propertyandpricingpage/basicpricing/hooks/usePropertyPricing";
 import UnitUploadButton from "@/component/layout/propertyandpricingpage/basicpricing/component/UnitUploadButton";
 import generateBigIntId from "@/component/layout/propertyandpricingpage/utils/generateId";
-import { priceListInitialState } from "@/component/layout/propertyandpricingpage/basicpricing/context/BasicPricingContext";
+import {
+    priceListInitialState,
+    priceVersionInitialState,
+} from "@/component/layout/propertyandpricingpage/basicpricing/context/BasicPricingContext";
 
 const additionalPremiums = [
     {
@@ -88,6 +91,7 @@ const BasicPricing = () => {
         currentPage
     );
 
+ 
     //Hooks
     /**
      * Hook to update pricing data based on incoming 'data' prop.
@@ -166,6 +170,10 @@ const BasicPricing = () => {
                 }));
             } else {
                 console.log("priceVersions is empty");
+                setPricingData((prev) => ({
+                    ...prev,
+                    priceVersions: priceVersionInitialState,
+                }));
             }
 
             // Update the floor premiums
