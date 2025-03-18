@@ -45,17 +45,17 @@ const InvoicesCom = () => {
         { name: "name", label: "Name" },
         { name: "contract_number", label: "Contract Number" },
         { name: "invoice_number", label: "Invoice Number" },
-        { 
-            name: "invoice_status", 
+        {
+            name: "status",
             label: "Status",
             type: "select",
             options: [
                 { label: "Select Status", value: "" },
-                { label: "Not Posted", value: "not_posted" },
-                { label: "Posted", value: "posted" },
-                { label: "Floating", value: "floating" },
-            ]
-        } 
+                { label: "Cleared", value: "Cleared" },
+                { label: "Posted", value: "Posted" },
+                { label: "Floating", value: "Floating" },
+            ],
+        },
     ];
 
     const columns = [
@@ -89,6 +89,8 @@ const InvoicesCom = () => {
             ),
         },
     ];
+    const [searchValues, setSearchValues] = useState({});
+
 
    /*  const sendSoapRequest = async () => {
         setSapLoader(true);
@@ -122,7 +124,7 @@ const InvoicesCom = () => {
         <>
             <div className="overflow-y-hidden px-3 flex flex-col space-y-2">
                 <div className="px-2">
-                    <TransactionSearchBar fields={fields}/>
+                    <TransactionSearchBar fields={fields} searchValues={searchValues} setSearchValues={setSearchValues}/>
                 </div>
                 <div className="flex gap-[15px] flex-wrap mb-[16px] px-2">
                     <div className="relative flex border w-max border-custom-lightgreen rounded-[5px] shrink-0 z-10">

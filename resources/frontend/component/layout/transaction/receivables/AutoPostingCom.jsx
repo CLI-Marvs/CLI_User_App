@@ -85,9 +85,10 @@ const AutoPostingCom = () => {
     const [isSelectedAll, setIsSelectedAll] = useState(false);
 
     const getPostingList = async () => {
+        const filter = activeItemTransaction ? { status: activeItemTransaction } : {};
         const response = await transaction.transactionList(
             currentPagePosting,
-            activeItemTransaction
+            filter
         );
         setPostingList(response.data.data);
         setTotalPagePosting(response.data.last_page);

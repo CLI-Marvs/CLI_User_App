@@ -61,10 +61,16 @@ const InquiryList = () => {
         setSearchSummary,
         resultSearchActive,
         setResultSearchActive,
+        daysActive,
+        setDaysActive,
         startDate,
         setStartDate,
         endDate,
         setEndDate,
+        setAssignedToMeActive,
+        assignedToMeActive,
+        
+
         /*  setHasAttachments,
         hasAttachments */
         userAccessData
@@ -95,7 +101,7 @@ const InquiryList = () => {
     const [selectedMonth, setSelectedMonth] = useState("");
     const [hasAttachments, setHasAttachments] = useState(false);
     const { propertyNamesList } = useStateContext();
-    const [assignedToMeActive, setAssignedToMeActive] = useState(false);
+    
     const [isFilterVisible, setIsFilterVisible] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
     const [lastActivity, setLastActivity] = useState(null);
@@ -242,8 +248,10 @@ const InquiryList = () => {
     // };
 
     const handleDayClick = (day) => {
+        setDaysActive(true);
         setActiveDayButton((prev) => {
             if (prev === day) {
+                setDaysActive(!daysActive);
                 setDaysFilter("");
                 return null;
             }
@@ -265,6 +273,7 @@ const InquiryList = () => {
 
     const handleAssignedToMeClick = () => {
         setAssignedToMeActive(!assignedToMeActive);
+        setDaysActive(!daysActive);
         if (assignedToMeActive) {
             setSpecificAssigneeCsr("");
             setCurrentPage(0);
@@ -1174,7 +1183,7 @@ const InquiryList = () => {
                                 onClick={toggleDropdown}
                             >
                                 {isOpen ? <IoIosArrowUp /> : <IoIosArrowDown />}{" "}
-                                {resultSearchActive ? (
+                                {resultSearchActive || daysActive || assignedToMeActive ? ( 
                                     dataCount && dataCount === 0 ? (
                                         <p>No Records Found</p>
                                     ) : (
