@@ -2,7 +2,7 @@ import moment from "moment";
 import React from "react";
 
 const TransactionTableCell = ({ type, row }) => {
-    console.log("")
+    console.log("");
     switch (type) {
         case "transaction_date":
             return (
@@ -18,29 +18,51 @@ const TransactionTableCell = ({ type, row }) => {
             return (
                 <div className="flex justify-between w-[400px]">
                     <div className="flex flex-col">
-                        <span className="montserrat-semibold text-[13px] break-all whitespace-normal overflow-hidden">
-                            {row.payment_method_transaction_id}
-                        </span>
-                        <span className="montserrat-medium text-[13px] break-all whitespace-normal overflow-hidden">
-                            {row.reference_number}
-                        </span>
+                        <div className="flex gap-2">
+                            <span className="monterrat-regular text-[14px]">
+                                Transaction Number:
+                            </span>
+                            <span className="montserrat-semibold text-[13px] break-all whitespace-normal overflow-hidden">
+                                {row.processor_response_id}
+                            </span>
+                        </div>
+                        <div className="flex gap-2">
+                            <span className="monterrat-regular text-[14px]">
+                                Transaction Type:
+                            </span>
+                            <span className="montserrat-semibold text-[13px] break-all whitespace-normal overflow-hidden">
+                                {row.transaction_type}
+                            </span>
+                        </div>
                     </div>
-                    <div className="flex flex-col">
+                    {/*  <div className="flex flex-col">
                         <span className="montserrat-medium text-[13px] break-all whitespace-normal overflow-hidden">
                             {row.transaction_type}
                         </span>
-                        <span className="montserrat-medium text-[13px] break-all whitespace-normal overflow-hidden text-[#1A73E8]">
-                            {row.processor_response_id} 
-                        </span>
-                    </div>
+                        <div className="flex gap-3">
+                            <span className="monterrat-regular">
+                                Transaction Number:
+                            </span>
+                            <span className="montserrat-medium text-[13px] break-all whitespace-normal overflow-hidden">
+                                {row.processor_response_id}
+                            </span>
+                        </div>
+                    </div> */}
                 </div>
             );
 
         case "details":
             return (
-                <div className="flex gap-8 items-center w-[370px]">
-                    <div className="flex flex-col flex-1 montserrat-regular">
-                        <span className="text-[13px]">Rodfil T. Tayong</span>
+                <div className="flex gap-8 items-center w-[450px]">
+                    <div className="flex flex-col montserrat-regular">
+                        <div className="flex gap-2">
+                            <span className="monterrat-regular text-[14px]">
+                                Contract No.:
+                            </span>
+                            <span className="montserrat-semibold text-[13px] break-all whitespace-normal overflow-hidden">
+                                {row.reference_number}
+                            </span>
+                        </div>
                         <span className="text-xs text-custom-lightgreen">
                             {row.email}
                         </span>
