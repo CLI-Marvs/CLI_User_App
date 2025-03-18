@@ -10,6 +10,40 @@ import { debounce } from "lodash";
 import highlightText from "@/util/hightlightText";
 import { usePricing } from "@/component/layout/propertyandpricingpage/basicpricing/context/BasicPricingContext";
 import usePriceListEmployees from "@/component/layout/propertyandpricingpage/basicpricing/hooks/usePriceListEmployees";
+import CustomInput from "@/component/Input/CustomInput";
+import _ from "lodash";
+
+//Utility function
+const isButtonDisabled = (
+    type,
+    oldData,
+    reviewedByEmployees,
+    approvedByEmployees
+) => {
+    const dataMap = {
+        reviewedByEmployees,
+        approvedByEmployees,
+    };
+
+    const oldDataKey =
+        type === "reviewedByEmployees"
+            ? "reviewedByEmployees"
+            : "approvedByEmployees";
+    const newData = dataMap[oldDataKey];
+
+    if (!Array.isArray(newData) || !newData.length) return true;
+
+    if (
+        oldData?.[oldDataKey] &&
+        Array.isArray(oldData[oldDataKey]) &&
+        oldData[oldDataKey].length === newData.length &&
+        _.isEqual(oldData[oldDataKey], newData)
+    ) {
+        return true; // Disable if data is unchanged
+    }
+
+    return false;
+};
 
 const EmployeeReviewerApproverModal = ({
     reviewerApproverModalRef,
@@ -22,15 +56,30 @@ const EmployeeReviewerApproverModal = ({
     const dropdownRef = useRef(null);
     const { setPricingData, pricingData } = usePricing();
     const {
+        handleRemoveEmployee,
         reviewedByEmployees,
-        setReviewedByEmployees,
         approvedByEmployees,
         setApprovedByEmployees,
-        handleRemoveEmployee,
+        setReviewedByEmployees,
     } = usePriceListEmployees();
+    const [oldData, setOldData] = useState({
+        reviewedByEmployees: reviewedByEmployees || [],
+        approvedByEmployees: approvedByEmployees || [],
+    });
+    const isDisabled = isButtonDisabled(
+        type,
+        oldData,
+        reviewedByEmployees,
+        approvedByEmployees
+    );
 
     //Hooks
     useEffect(() => {
+        setOldData({
+            reviewedByEmployees: pricingData.reviewedByEmployees || [],
+            approvedByEmployees: pricingData.approvedByEmployees || [],
+        });
+
         if (type === "reviewedByEmployees") {
             setReviewedByEmployees(pricingData.reviewedByEmployees || []);
         } else {
@@ -197,6 +246,35 @@ const EmployeeReviewerApproverModal = ({
         setTimeout(() => onClose(), 0);
     };
 
+    // //Utility function to handle button disable state
+    // const isButtonDisabled = (reviewedByEmployees, approvedByEmployees) => {
+    //     if (type === "reviewedByEmployees") {
+    //         if (
+    //             oldData &&
+    //             Array.isArray(oldData.reviewedByEmployees) &&
+    //             Array.isArray(reviewedByEmployees) &&
+    //             oldData.reviewedByEmployees.length ===
+    //                 reviewedByEmployees.length &&
+    //             _.isEqual(oldData.reviewedByEmployees, reviewedByEmployees)
+    //         ) {
+    //             return true;
+    //         }
+    //         return !reviewedByEmployees?.length; // Disable if empty
+    //     } else {
+    //         if (
+    //             oldData &&
+    //             Array.isArray(oldData.approvedByEmployees) &&
+    //             Array.isArray(approvedByEmployees) &&
+    //             oldData.approvedByEmployees.length ===
+    //                 approvedByEmployees.length &&
+    //             _.isEqual(oldData.approvedByEmployees, approvedByEmployees)
+    //         ) {
+    //             return true;
+    //         }
+    //         return !approvedByEmployees?.length; // Disable if empty
+    //     }
+    // };
+
     return (
         <dialog
             className="modal w-[623px] rounded-lg h-[700px] backdrop:bg-black/50 backdrop-blur-md"
@@ -218,13 +296,14 @@ const EmployeeReviewerApproverModal = ({
                 <div
                     className={`flex items-center border  rounded-[5px] overflow-hidden `}
                 >
-                    <input
+                    <CustomInput
                         type="text"
-                        value={searchEmployee}
-                        onChange={(e) => handleSearchOnChange(e.target.value)}
-                        placeholder="Name"
+                        name="no_of_allowed_buyers"
+                        value={searchEmployee || ""}
                         className={` 
                                  h-[40px] px-[20px] pr-[40px] rounded-[10px]  w-full outline-none`}
+                        onChange={(e) => handleSearchOnChange(e.target.value)}
+                        placeholder="Search by employee name"
                     />
                 </div>
                 {/*Selected Employee  */}
@@ -365,9 +444,11 @@ const EmployeeReviewerApproverModal = ({
                     </>
                 </div>
                 <div className="py-4 flex justify-center">
-                    {" "}
                     <button
-                        className="h-[37px] w-[176px] rounded-[10px] text-white montserrat-semibold text-sm gradient-btn5 hover:shadow-custom4"
+                        disabled={isDisabled}
+                        className={`h-[37px] w-[176px] rounded-[10px] text-white montserrat-semibold text-sm gradient-btn5 hover:shadow-custom4 ${
+                            isDisabled ? "cursor-not-allowed opacity-50" : ""
+                        }`}
                         onClick={handleApply}
                     >
                         Apply

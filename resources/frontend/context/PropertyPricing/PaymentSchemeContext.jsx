@@ -5,7 +5,7 @@ const PaymentSchemeContext = createContext();
 
 export const PaymentSchemeProvider = ({ children }) => {
     const [paymentScheme, setPaymentScheme] = useState(null);
-    const [isLoading, setIsLoading] = useState(false);
+    const [isFetchingPaymentScheme, setIsFetchingPaymentScheme] = useState(false);
     const [error, setError] = useState(null);
 
     // This function does the actual database fetch
@@ -14,7 +14,7 @@ export const PaymentSchemeProvider = ({ children }) => {
             return paymentScheme;
         }
 
-        setIsLoading(true);
+        setIsFetchingPaymentScheme(true);
         try {
             const response = await paymentSchemeService.getPaymentSchemes();
             setPaymentScheme(response.data);
@@ -24,14 +24,14 @@ export const PaymentSchemeProvider = ({ children }) => {
             setError(error.message);
             console.error("Error fetching payment scheme list:", error);
         } finally {
-            setIsLoading(false);
+            setIsFetchingPaymentScheme(false);
         }
     }, [paymentScheme]);
 
 
     const value = {
         paymentScheme,
-        isLoading,
+        isFetchingPaymentScheme,
         error,
         fetchPaymentSchemes
     };

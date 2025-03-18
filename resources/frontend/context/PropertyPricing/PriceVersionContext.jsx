@@ -9,7 +9,7 @@ import { priceVersionService } from "@/component/servicesApi/apiCalls/propertyPr
 const PriceVersionContext = createContext();
 
 export const PriceVersionProvider = ({ children }) => {
-    const [isFetchingpriceVersions, setIsFetchingpriceVersions] =
+    const [isFetchingPriceVersions, setIsFetchingPriceVersions] =
         useState(false);
     const [priceVersion, setPriceVersion] = useState([]);
 
@@ -20,7 +20,7 @@ export const PriceVersionProvider = ({ children }) => {
             }
 
             try {
-                if (setLoading) setIsFetchingpriceVersions(true);
+                if (setLoading) setIsFetchingPriceVersions(true);
                 const response = await priceVersionService.getPriceVersions();
                 setPriceVersion(response?.data.data);
                 
@@ -29,7 +29,7 @@ export const PriceVersionProvider = ({ children }) => {
                 console.error("Error getting price versions:", error);
                 throw error;
             } finally {
-                if (setLoading) setIsFetchingpriceVersions(false);
+                if (setLoading) setIsFetchingPriceVersions(false);
             }
         },
         [priceVersion]
@@ -37,7 +37,7 @@ export const PriceVersionProvider = ({ children }) => {
     
  
     const value = {
-        isFetchingpriceVersions,
+        isFetchingPriceVersions,
         getPriceVersions,
         priceVersion,
     };

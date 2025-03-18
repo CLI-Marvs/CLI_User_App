@@ -4,10 +4,10 @@ import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import DateLogo from "../../../../../../public/Images/Date_range.svg";
-import AddPriceVersionModal from "./AddPriceVersionModal";
+import AddPriceVersionModal from "@/component/layout/propertyandpricingpage/priceversioning/AddPriceVersionModal";
 import { usePriceVersion } from "@/context/PropertyPricing/PriceVersionContext";
-import TableSkeleton from "@/component/layout/propertyandpricingpage/component/TableSkeleton";
-import { toLowerCaseText } from "@/component/layout/propertyandpricingpage/utils/formatToLowerCase";
+import Skeleton from "@/component/layout/mainComponent/Skeletons";
+import { toLowerCaseText } from "@/util/formatToLowerCase";
 
 const PriceVersioning = () => {
     //States
@@ -15,7 +15,7 @@ const PriceVersioning = () => {
     const [toggled, setToggled] = useState(false);
     const [isFilterVisible, setIsFilterVisible] = useState(false);
     const modalRef = useRef(null);
-    const { priceVersion, isFetchingpriceVersions, getPriceVersions } =
+    const { priceVersion, isFetchingPriceVersions, getPriceVersions } =
         usePriceVersion();
 
     //Hooks
@@ -188,9 +188,11 @@ const PriceVersioning = () => {
                         </tr>
                     </thead>
                     <tbody className="flex flex-col gap-[20px]">
-                        {isFetchingpriceVersions ? (
+                        {isFetchingPriceVersions ? (
                             <div>
-                                <TableSkeleton />
+                                <Skeleton height={140} />
+                                <Skeleton height={140} />
+                                <Skeleton height={140} />
                             </div>
                         ) : (
                             priceVersion &&

@@ -2,8 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\PaymentScheme;
+use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
 use App\Services\PaymentSchemeService;
 use Dotenv\Exception\ValidationException;
@@ -24,8 +23,8 @@ class PaymentSchemeController extends Controller
      */
     public function index()
     {
-       $paymentSchemeData=$this->service->index();
-       return response()->json($paymentSchemeData);
+        $paymentSchemeData = $this->service->index();
+        return response()->json($paymentSchemeData);
     }
 
 
@@ -34,15 +33,15 @@ class PaymentSchemeController extends Controller
      *
      * @param  \Illuminate\Http\Request  $request
      */
-    public function store(StorePaymentSchemeRequest $request)
+    public function store(StorePaymentSchemeRequest $request): JsonResponse
     {
         try {
-            //TODO: validate the request to make sure it's valid and match in the request
+
             $paymentScheme = $this->service->store($request->validated());
             return response()->json([
                 'message' => 'Payment scheme created successfully',
                 'data' => $paymentScheme,
-            ], 201);
+            ], 201);    
         } catch (ValidationException $e) {
             return response()->json([
                 'error' => 'Validation failed',

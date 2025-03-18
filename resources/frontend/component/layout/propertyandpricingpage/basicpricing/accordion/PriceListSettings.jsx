@@ -1,15 +1,11 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { IoIosArrowDown } from "react-icons/io";
 import { usePricing } from "@/component/layout/propertyandpricingpage/basicpricing/context/BasicPricingContext";
+import CustomInput from "@/component/Input/CustomInput";
 
-const PriceListSettings = ({ isOpen, toggleAccordion }) => {
+const PriceListSettings = ({ isOpen, toggleAccordion, priceListData }) => {
     //State
-    const { pricingData, updatePricingSection ,setPricingData} = usePricing();
-
-    //Hooks
-
-    // const computeEffectBasePrice
-
+    const { pricingData, updatePricingSection } = usePricing();
 
     //Event Handler
     const handleInputChange = (e) => {
@@ -72,31 +68,38 @@ const PriceListSettings = ({ isOpen, toggleAccordion }) => {
                                 <span className="text-custom-gray81 bg-custom-grayFA font-semibold flex w-[180%] pl-3 py-1">
                                     Base Price Per Sq. M.
                                 </span>
-                                <input
+                                <CustomInput
                                     name="base_price"
-                                    type="number"
-                                    onChange={handleInputChange}
                                     value={
                                         pricingData?.priceListSettings
-                                            ?.base_price
+                                            ?.base_price || ""
                                     }
                                     className="w-full px-4 focus:outline-none "
+                                    onChange={handleInputChange}
+                                    restrictNumbers={true}
+                                    disabled={
+                                        priceListData.data.status !== "Draft"
+                                    }
                                 />
+
                                 {/* TODO: add percent % suffix here */}
                             </div>
                             <div className="flex items-center border border-custom-grayF1 rounded-[5px] overflow-hidden w-[375px] text-sm">
                                 <span className="text-custom-gray81 bg-custom-grayFA font-semibold flex w-[180%] pl-3 py-1 ">
                                     Transfer charge
                                 </span>
-                                <input
-                                    onChange={handleInputChange}
+                                <CustomInput
+                                    name="transfer_charge"
                                     value={
                                         pricingData?.priceListSettings
-                                            ?.transfer_charge
+                                            ?.transfer_charge || ""
                                     }
-                                    name="transfer_charge"
-                                    type="number"
-                                    className="w-full px-4 focus:outline-none"
+                                    className="w-full px-4 focus:outline-none "
+                                    onChange={handleInputChange}
+                                    restrictNumbers={true}
+                                    disabled={
+                                        priceListData.data.status !== "Draft"
+                                    }
                                 />
                             </div>
                         </div>
@@ -114,18 +117,28 @@ const PriceListSettings = ({ isOpen, toggleAccordion }) => {
                                             ?.effective_balcony_base
                                     }
                                     className="w-full px-4 focus:outline-none"
+                                    disabled={
+                                        priceListData.data.status !== "Draft" ||
+                                        true
+                                    }
                                 />
                             </div>
                             <div className="flex items-center border border-custom-grayF1 rounded-[5px] overflow-hidden w-[375px] text-sm">
                                 <span className="text-custom-gray81 bg-custom-grayFA font-semibold flex w-[180%] pl-3 py-1 ">
                                     VAT
                                 </span>
-                                <input
+                                <CustomInput
                                     name="vat"
+                                    value={
+                                        pricingData?.priceListSettings?.vat ||
+                                        ""
+                                    }
+                                    className="w-full px-4 focus:outline-none "
                                     onChange={handleInputChange}
-                                    value={pricingData?.priceListSettings?.vat}
-                                    type="number"
-                                    className="w-full px-4 focus:outline-none"
+                                    restrictNumbers={true}
+                                    disabled={
+                                        priceListData.data.status !== "Draft"
+                                    }
                                 />
                             </div>
                         </div>
@@ -137,31 +150,36 @@ const PriceListSettings = ({ isOpen, toggleAccordion }) => {
                                         (greater than)
                                     </span>
                                 </span>
-                                <input
+                                <CustomInput
                                     name="vatable_less_price"
-                                    type="number"
-                                    onChange={handleInputChange}
                                     value={
                                         pricingData?.priceListSettings
-                                            ?.vatable_less_price
+                                            ?.vatable_less_price || ""
                                     }
-                                    className="w-full px-4 focus:outline-none"
+                                    className="w-full px-4 focus:outline-none "
+                                    onChange={handleInputChange}
+                                    restrictNumbers={true}
+                                    disabled={
+                                        priceListData.data.status !== "Draft"
+                                    }
                                 />
                             </div>
                             <div className="flex items-center border border-custom-grayF1 rounded-[5px] overflow-hidden w-[375px] text-sm">
                                 <span className="text-custom-gray81 bg-custom-grayFA font-semibold flex w-[180%] pl-3 py-1 text-sm">
                                     Reservation Fee
                                 </span>
-                                <input
+                                <CustomInput
                                     name="reservation_fee"
-                                    type="number"
-                                    onChange={handleInputChange}
                                     value={
                                         pricingData?.priceListSettings
-                                            ?.reservation_fee
+                                            ?.reservation_fee || ""
                                     }
-                                    className="w-full px-4 focus:outline-none"
-                                    placeholder=""
+                                    className="w-full px-4 focus:outline-none "
+                                    onChange={handleInputChange}
+                                    restrictNumbers={true}
+                                    disabled={
+                                        priceListData.data.status !== "Draft"
+                                    }
                                 />
                             </div>
                         </div>

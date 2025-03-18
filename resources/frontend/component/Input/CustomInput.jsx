@@ -1,35 +1,85 @@
-import React from "react";
-
 /**
- * A flexible custom input component that supports different input types.
- * It includes an optional "onlyNumbers" prop to restrict text inputs to numbers.
+ * CustomInput Component
  *
- * @param {Object} props - The properties passed to the input component.
- * @param {string} props.type - The type of the input (e.g., "text", "email", "password").
- * @param {boolean} [props.onlyNumbers] - If true, restricts text input to numbers only.
- * @param {Function} props.onChange - The function to handle input changes.
- * @returns {JSX.Element} A customizable input field.
+ * A reusable input component that supports different input types and includes
+ * an optional number restriction feature.
+ *
+ * Props:
+ * - `name` (string)        : The name of the input field.
+ * - `value` (string)       : The current value of the input field.
+ * - `onChange` (function)  : Callback function to handle value changes.
+ * - `type` (string)        : Defines the input type (default: "text").
+ * - `className` (string)   : Custom CSS classes for styling.
+ * - `restrictNumbers` (bool): If `true`, allows only numbers and a single decimal point.
+ * - `inputRef` (ref)       : Reference for the input element.
+ * - `...rest`              : Spreads additional props to the input element.
+ *
+ * Features:
+ * - Restricts numeric inputs to only digits and a single decimal point.
+ * - Blocks invalid characters like `e`, `E`, `+`, and `-` for number inputs.
+ * - Prevents multiple decimal points from being entered.
+ *
+ * **Usage Instructions for Developers:**
+ * - For **text inputs**, make sure `restrictNumbers` is **removed** or set to `false`.
+ * - For **number inputs**, set `restrictNumbers` to **true** to enforce validation.
  */
-const CustomInput = (props) => {
-    /**
-     * Handles the input event and filters out non-numeric values
-     * if "onlyNumbers" is enabled.
-     *
-     * @param {Event} e - The input event object.
-     */
-    //Event handler
-    const handleInput = (e) => {
-        let { value } = e.target;
 
-        // If input type is "text" and only numbers are allowed
-        if (props.type === "text" && props.onlyNumbers) {
-            value = value.replace(/[^0-9]/g, ""); // Allow only numbers
+const CustomInput = ({
+    name = "",
+    value = "",
+    onChange,
+    type = "text",
+    className = "",
+    restrictNumbers,
+    inputRef,
+    placeholder,
+    ...rest
+}) => {
+    // Handle input to validate against patterns
+    const handleInput = (e) => {
+        let inputValue = e.target.value;
+
+        // Apply number restriction if enabled
+        if (restrictNumbers) {
+            // Allow only numbers but prevent `e`, `+`, and `-`
+            if (!/^\d*\.?\d*$/.test(inputValue)) {
+                return; // Ignore invalid input
+            }
         }
 
-        props.onChange({ ...e, target: { ...e.target, value } });
+        // Call the onChange handler
+        if (onChange) {
+            onChange({ target: { name, value: inputValue } });
+        }
     };
 
-    return <input {...props} onChange={handleInput} />;
+    // Prevent invalid key inputs when restricting numbers
+    const handleKeyDown = (e) => {
+        if (restrictNumbers) {
+            if (["e", "E", "+", "-"].includes(e.key)) {
+                e.preventDefault(); // Block invalid keys
+            }
+
+            if (e.key === "." && e.target.value.includes(".")) {
+                e.preventDefault(); // Prevent multiple dots
+            }
+        }
+    };
+
+    
+    return (
+        <input
+            name={name}
+            value={value || ""}
+            onChange={handleInput}
+            onKeyDown={handleKeyDown}
+            type={type}
+            className={className}
+            ref={inputRef}
+            placeholder={placeholder}
+            {...rest}
+        />
+    );
 };
 
 export default CustomInput;

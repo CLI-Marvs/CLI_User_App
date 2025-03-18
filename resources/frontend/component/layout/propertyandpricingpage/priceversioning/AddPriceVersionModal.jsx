@@ -11,7 +11,7 @@ import { showToast } from "@/util/toastUtil";
 import { usePriceVersion } from "@/context/PropertyPricing/PriceVersionContext";
 import CircularProgress from "@mui/material/CircularProgress";
 import { IoIosCloseCircle } from "react-icons/io";
-import { toLowerCaseText } from "@/component/layout/propertyandpricingpage/utils/formatToLowerCase";
+import { toLowerCaseText } from "@/util/formatToLowerCase";
 
 const formDataState = {
     name: "",

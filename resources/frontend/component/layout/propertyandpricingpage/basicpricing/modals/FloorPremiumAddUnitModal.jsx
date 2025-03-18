@@ -3,6 +3,9 @@ import { useUnit } from "@/context/PropertyPricing/UnitContext";
 import { unitService } from "@/component/servicesApi/apiCalls/propertyPricing/unit/unitService";
 import { showToast } from "@/util/toastUtil";
 import CircularProgress from "@mui/material/CircularProgress";
+import CustomInput from "@/component/Input/CustomInput";
+import { usePriceListMaster } from "@/context/PropertyPricing/PriceListMasterContext";
+import isButtonDisabled from "@/util/isFormButtonDisabled";
 
 const formDataState = {
     floor: "",
@@ -18,19 +21,19 @@ const formDataState = {
 const FloorPremiumAddUnitModal = ({
     floorPremiumAddUnitModalRef,
     unitsByFloor,
-    propertyData,
     towerPhaseId,
     selectedFloor,
 }) => {
     //States
     const [formData, setFormData] = useState(formDataState);
-    const {
-        checkExistingUnits,
-        excelId,
-        excelIdFromPriceList,
-        setUnits,
-    } = useUnit();
+    const { checkExistingUnits, excelId, excelIdFromPriceList, setUnits } =
+        useUnit();
     const [isLoading, setIsLoading] = useState(false);
+    const { propertyMasterId, priceListMasterId } = usePriceListMaster();
+    const isFloorAssignButtonDisabled = isButtonDisabled(
+        formData,
+        Object.keys(formDataState)
+    );
 
     //Hooks
     useEffect(() => {
@@ -45,7 +48,7 @@ const FloorPremiumAddUnitModal = ({
 
     //Event handler
     //Handle input field change
-    const handleChange = (e) => {
+    const handleInputChange = (e) => {
         const { name, value } = e.target;
         setFormData((prevData) => ({
             ...prevData,
@@ -68,11 +71,10 @@ const FloorPremiumAddUnitModal = ({
                 total_area: parseFloat(formData.totalArea).toFixed(2),
                 tower_phase_id: towerPhaseId,
                 excel_id: excelId || excelIdFromPriceList,
-                property_masters_id:
-                    propertyData?.property_commercial_detail
-                        ?.property_master_id,
-                price_list_master_id: propertyData?.price_list_master_id,
+                property_masters_id: propertyMasterId,
+                price_list_master_id: priceListMasterId,
             };
+            console.log("payload", payload);
             setIsLoading(true);
             const response = await unitService.storeUnitDetails(payload);
 
@@ -82,13 +84,8 @@ const FloorPremiumAddUnitModal = ({
                     "success"
                 );
                 setFormData(formDataState);
-                // setUnits(response?.data?.data);
                 setUnits((prevUnits) => {
                     const newUnits = [...prevUnits, response?.data?.data];
-                    // Sort units in ascending order based on 'unit' property
-                    // return newUnits.sort((a, b) =>
-                    //     a.unit.localeCompare(b.unit)
-                    // );
                     return newUnits;
                 });
                 await Promise.all([
@@ -113,7 +110,7 @@ const FloorPremiumAddUnitModal = ({
 
     //Utility to disable the  button if form is empty
     // Function to check if all fields are empty
-    const isDisabled = Object.values(formData).some((value) => value === "");
+    // const isFloorAssignButtonDisabled  = Object.values(formData).some((value) => value === "");
 
     //Handle close the modal and reset all state
     const handleCloseModal = () => {
@@ -166,91 +163,89 @@ const FloorPremiumAddUnitModal = ({
                         <span className="text-custom-gray81 bg-custom-grayFA flex w-[180%] pl-3 py-1 border border-custom-grayF1 font-semibold">
                             Room Number
                         </span>
-                        <input
-                            name="roomNumber"
+                        <CustomInput
                             type="number"
-                            onChange={handleChange}
-                            className="w-full px-4 focus:outline-none"
-                            placeholder=""
+                            name="roomNumber"
                             value={formData.roomNumber || ""}
+                            className="w-full px-4 focus:outline-none "
+                            onChange={handleInputChange}
+                            restrictNumbers={true}
                         />
                     </div>
                     <div className="flex items-center border rounded-md overflow-hidden h-[31px]">
                         <span className="text-custom-gray81 bg-custom-grayFA flex w-[180%] pl-3 py-1 border border-custom-grayF1 font-semibold">
                             Unit
                         </span>
-                        <input
-                            name="unit"
+                        <CustomInput
                             type="text"
-                            onChange={handleChange}
-                            className="w-full px-4 focus:outline-none"
-                            placeholder=""
+                            name="unit"
                             value={formData.unit || ""}
+                            className="w-full px-4 focus:outline-none "
+                            onChange={handleInputChange}
                         />
                     </div>
                     <div className="flex items-center border rounded-md overflow-hidden h-[31px]">
                         <span className="text-custom-gray81 bg-custom-grayFA flex w-[180%] pl-3 py-1 border border-custom-grayF1 font-semibold">
                             Type
                         </span>
-                        <input
-                            name="type"
+                        <CustomInput
                             type="text"
-                            onChange={handleChange}
-                            className="w-full px-4 focus:outline-none"
-                            placeholder=""
+                            name="type"
                             value={formData.type || ""}
+                            className="w-full px-4 focus:outline-none "
+                            onChange={handleInputChange}
                         />
                     </div>
                     <div className="flex items-center border rounded-md overflow-hidden h-[31px]">
                         <span className="text-custom-gray81 bg-custom-grayFA flex w-[180%] pl-3 py-1 border border-custom-grayF1 font-semibold">
                             Indoor Area
                         </span>
-                        <input
-                            name="indoorArea"
+                        <CustomInput
                             type="number"
-                            onChange={handleChange}
-                            className="w-full px-4 focus:outline-none"
-                            placeholder=""
+                            name="indoorArea"
                             value={formData.indoorArea || ""}
+                            className="w-full px-4 focus:outline-none "
+                            onChange={handleInputChange}
+                            restrictNumbers={true}
                         />
                     </div>
                     <div className="flex items-center border rounded-md overflow-hidden h-[31px]">
                         <span className="text-custom-gray81 bg-custom-grayFA flex w-[180%] pl-3 py-1 border border-custom-grayF1 font-semibold">
                             Balcony Area
                         </span>
-                        <input
-                            name="balconyArea"
+                        <CustomInput
                             type="number"
-                            onChange={handleChange}
-                            className="w-full px-4 focus:outline-none"
-                            placeholder=""
+                            name="balconyArea"
                             value={formData.balconyArea || ""}
+                            className="w-full px-4 focus:outline-none "
+                            onChange={handleInputChange}
+                            restrictNumbers={true}
                         />
                     </div>
                     <div className="flex items-center border rounded-md overflow-hidden h-[31px]">
                         <span className="text-custom-gray81 bg-custom-grayFA flex w-[180%] pl-3 py-1 border border-custom-grayF1 font-semibold">
                             Garden Area
                         </span>
-                        <input
-                            name="gardenArea"
+                        <CustomInput
                             type="number"
-                            onChange={handleChange}
-                            className="w-full px-4 focus:outline-none"
-                            placeholder=""
+                            name="gardenArea"
                             value={formData.gardenArea || ""}
+                            className="w-full px-4 focus:outline-none "
+                            onChange={handleInputChange}
+                            restrictNumbers={true}
                         />
                     </div>
                     <div className="flex items-center border rounded-md overflow-hidden h-[31px]">
                         <span className="text-custom-gray81 bg-custom-grayFA flex w-[180%] pl-3 py-1 border border-custom-grayF1 font-semibold">
                             Total Area
                         </span>
-                        <input
-                            name="totalArea"
+                        <CustomInput
                             type="number"
-                            onChange={handleChange}
-                            className="w-full px-4 focus:outline-none"
-                            placeholder=""
+                            name="totalArea"
                             value={formData.totalArea || ""}
+                            className="w-full px-4 focus:outline-none "
+                            onChange={handleInputChange}
+                            restrictNumbers={true}
                         />
                     </div>
                 </div>
@@ -258,9 +253,9 @@ const FloorPremiumAddUnitModal = ({
                     <button
                         type="submit"
                         onClick={handleSubmit}
-                        disabled={isLoading || isDisabled}
+                        disabled={isLoading || isFloorAssignButtonDisabled}
                         className={`w-[95px] h-[37px] text-white montserrat-semibold text-sm gradient-btn2 rounded-[10px] ${
-                            isLoading || isDisabled
+                            isLoading || isFloorAssignButtonDisabled
                                 ? "opacity-50 cursor-not-allowed"
                                 : ""
                         }`}

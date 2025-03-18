@@ -1,38 +1,39 @@
 import { createContext, useContext, useState } from "react";
-import moment from "moment";
-const BasicPricingContext = createContext();
 
- 
+const BasicPricingContext = createContext();
+export const priceListInitialState = {
+    base_price: "",
+    transfer_charge: 8 || "",
+    effective_balcony_base: 50 || "",
+    vat: 12 || "",
+    vatable_less_price: 3600000 || "",
+    reservation_fee: "",
+};
+
+export const priceVersionInitialState = {
+    id: 0,
+    priority_number: 1,
+    name: "",
+    percent_increase: 0,
+    no_of_allowed_buyers: 0,
+    status: "Active",
+    expiry_date: "N/A",
+    payment_scheme: [],
+};
+
 const initialState = () => ({
-    priceListSettings: {
-        base_price: "",
-        transfer_charge: 8 || "",
-        effective_balcony_base: 50 || "",
-        vat: 12 || "",
-        vatable_less_price: 3600000 || "",
-        reservation_fee: "",
-    },
+    priceListSettings: priceListInitialState,
     floorPremiums: {},
     additionalPremiums: [],
     selectedAdditionalPremiums: [],
-    priceVersions: [
-        {
-            id: 0,
-            priority_number: 1,
-            name: "",
-            percent_increase: 0,
-            no_of_allowed_buyers: 0,
-            status: "Active",
-            expiry_date: "N/A",
-            payment_scheme: [],
-        },
-    ],
+    priceVersions: [priceVersionInitialState],
     reviewsAndApproval: {},
     computedListPrice: [],
     reviewedByEmployees: [],
     approvedByEmployees: [],
 });
-export default function BasicPricingProvider({ children }) {
+
+export const BasicPricingProvider = ({ children }) => {
     const [pricingData, setPricingData] = useState(initialState());
 
     const updatePricingSection = (section, newData) => {
@@ -59,7 +60,7 @@ export default function BasicPricingProvider({ children }) {
             {children}
         </BasicPricingContext.Provider>
     );
-}
+};
 
 export const usePricing = () => {
     const context = useContext(BasicPricingContext);

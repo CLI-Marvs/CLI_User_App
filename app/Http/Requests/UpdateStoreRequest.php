@@ -23,14 +23,14 @@ class UpdateStoreRequest extends FormRequest
     {
         return [
             'payload' => ' array',
-            'payload.*.floor' => '  nullable |integer',
-            'payload.*.room_number' => 'nullable | integer',
-            'payload.*.unit' => 'nullable | string',
-            'payload.*.type' => ' nullable |string',
-            'payload.*.indoor_area' => ' string',
-            'payload.*.balcony_area' => 'nullable | string',
-            'payload.*.garden_area' => ' nullable |string',
-            'payload.*.total_area' => ' nullable |string',
+            'payload.*.floor' => '  nullable|integer',
+            'payload.*.room_number' => 'nullable|integer',
+            'payload.*.unit' => 'nullable|string',
+            'payload.*.type' => ' nullable|string',
+            'payload.*.indoor_area' => 'nullable|string',
+            'payload.*.balcony_area' => 'nullable|string',
+            'payload.*.garden_area' => ' nullable|string',
+            'payload.*.total_area' => ' nullable|string',
 
             'tower_phase_id' => ' integer',
             'property_masters_id' => ' integer',

@@ -9,7 +9,7 @@ const UnitUploadButton = ({
     buttonType = "button",
     buttonText = "",
     className = "",
-    propertyData,
+    priceListData,
 }) => {
     //States
     const uploadUnitModalRef = useRef(null);
@@ -25,7 +25,6 @@ const UnitUploadButton = ({
             fileInputRef.current.click();
         }
     };
-
 
     //Handle close the unit upload modal
     const handleCloseModal = () => {
@@ -115,7 +114,7 @@ const UnitUploadButton = ({
                 };
             }); //Reorder filtered headers based on expected headers order
 
-            // Now we need to reorder data rows based on this mapping
+            // Reorder data rows based on this mapping
             const reorderedData = dataRows.map((row) => {
                 const reorderedRow = {};
                 reorderedHeaders.forEach((headerMapping) => {
@@ -170,7 +169,7 @@ const UnitUploadButton = ({
                 <UploadUnitDetailsModal
                     excelDataRows={excelDataRows}
                     onClose={handleCloseModal}
-                    propertyData={propertyData}
+                    priceListData={priceListData}
                     handleFileChange={handleFileChange}
                     uploadUnitModalRef={uploadUnitModalRef}
                     fileName={fileName}

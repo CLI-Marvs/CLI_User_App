@@ -34,7 +34,7 @@ export const formatPayload = {
             };
             return formattedPriceVersion;
         });
-        console.log("formattedPriceVersions", formattedPriceVersions);
+
         return formattedPriceVersions;
     },
 
@@ -49,10 +49,6 @@ export const formatPayload = {
                 };
                 return formattedPremium;
             });
-        console.log(
-            "formattedSelectedAdditionalPremiums",
-            formattedSelectedAdditionalPremiums
-        );
         return formattedSelectedAdditionalPremiums;
     },
     formatMultipleFloorPremiums: (floorPremiums = {}) => {
@@ -92,21 +88,6 @@ export const formatPayload = {
                 return formattedPremium;
             }
         );
-        console.log("formattedAdditionalPremiums", formattedAdditionalPremiums);
         return formattedAdditionalPremiums;
     },
-    // formatPaymentSchemePayload: (paymentScheme) => {
-    //     const formattedPaymentScheme = {
-    //         payment_scheme_name: paymentScheme.paymentSchemeName,
-    //         description: paymentScheme.description,
-    //         spot: paymentScheme.spot,
-    //         downpayment_installment: paymentScheme.downpaymentInstallment,
-    //         number_months_downpayment: paymentScheme.numberMonthsDownpayment,
-    //         discount: paymentScheme.discount,
-    //         bank_financing: paymentScheme.bankFinancing,
-    //         status: paymentScheme.status,
-    //     };
-
-    //     return formattedPaymentScheme;
-    // },
 };

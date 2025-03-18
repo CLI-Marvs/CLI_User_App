@@ -1,19 +1,17 @@
-import React, { useRef, useState, useEffect } from 'react'
-import { AiFillInfoCircle } from 'react-icons/ai'
-import { useStateContext } from '@/context/contextprovider';
-import highlightText from '@/util/hightlightText';
-import { isButtonDisabled } from '@/component/layout/superadminpage/modals/UserModal/utils/isButtonDisabled'
+import React, { useRef, useState, useEffect } from "react";
+import { AiFillInfoCircle } from "react-icons/ai";
+import { useStateContext } from "@/context/contextprovider";
+import highlightText from "@/util/hightlightText";
+import { isButtonDisabled } from "@/component/layout/superadminpage/modals/UserModal/utils/isButtonDisabled";
 import CircularProgress from "@mui/material/CircularProgress";
 import { showToast } from "@/util/toastUtil";
-import { getFilteredEmployeeOptions } from '@/component/layout/superadminpage/modals/UserModal/utils/employeeUtils';
-import Feature from '@/component/layout/superadminpage/component/Feature';
-import useFeature from '@/context/RoleManagement/FeatureContext';
-import { employeePermissionService } from '@/component/servicesApi/apiCalls/roleManagement';
-import useEmployeePermission from '@/context/RoleManagement/EmployeePermissionContext';
-
+import { getFilteredEmployeeOptions } from "@/component/layout/superadminpage/modals/UserModal/utils/employeeUtils";
+import Feature from "@/component/layout/superadminpage/component/Feature";
+import useFeature from "@/context/RoleManagement/FeatureContext";
+import { employeePermissionService } from "@/component/servicesApi/apiCalls/roleManagement";
+import useEmployeePermission from "@/context/RoleManagement/EmployeePermissionContext";
 
 const AddUserModals = ({ userModalRef, employeesWithPermissions }) => {
-
     //States
     const { allEmployees } = useStateContext();
     const { fetchEmployeeWithPermissions } = useEmployeePermission();
@@ -33,7 +31,6 @@ const AddUserModals = ({ userModalRef, employeesWithPermissions }) => {
         employeesWithPermissions,
         search
     ); // Use the utility function
-
 
     //Hooks
     //Get all feature
@@ -70,7 +67,7 @@ const AddUserModals = ({ userModalRef, employeesWithPermissions }) => {
 
     //     return () => {
     //         // Clear interval if component unmounts
-    //         clearInterval(checkBrowserReady); 
+    //         clearInterval(checkBrowserReady);
     //         // Cleanup permission update channel
     //         if (permissionUpdateChannel) {
     //             permissionUpdateChannel.stopListening(".PermissionUpdate");
@@ -82,7 +79,10 @@ const AddUserModals = ({ userModalRef, employeesWithPermissions }) => {
     // Close dropdown on outside click
     useEffect(() => {
         const handleOutsideClick = (event) => {
-            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+            if (
+                dropdownRef.current &&
+                !dropdownRef.current.contains(event.target)
+            ) {
                 setIsDropdownOpen(false);
             }
         };
@@ -110,17 +110,24 @@ const AddUserModals = ({ userModalRef, employeesWithPermissions }) => {
         const featureId = item.id;
         // Update the formData with the new permissions
         setFormData((prevState) => {
-            const updatedFeatures = prevState.features.map((feature) => {
-                if (feature.featureId === item.id) {
-                    return { ...feature, [permission.value]: value };
-                }
-                return feature;
-            }).filter((feature) => {
-                // Keep the feature if it has any of the permissions (R or W), otherwise remove it
-                return feature.can_read || feature.can_write;  // Ensure you are checking for permission keys
-            });
+            const updatedFeatures = prevState.features
+                .map((feature) => {
+                    if (feature.featureId === item.id) {
+                        return { ...feature, [permission.value]: value };
+                    }
+                    return feature;
+                })
+                .filter((feature) => {
+                    // Keep the feature if it has any of the permissions (R or W), otherwise remove it
+                    return feature.can_read || feature.can_write; // Ensure you are checking for permission keys
+                });
             // If the feature doesn't exist and the permission value is true, add it
-            if (!updatedFeatures.find((feature) => feature.featureId === featureId) && value === true) {
+            if (
+                !updatedFeatures.find(
+                    (feature) => feature.featureId === featureId
+                ) &&
+                value === true
+            ) {
                 updatedFeatures.push({ featureId, [permission.value]: value });
             }
             // Return updated state
@@ -132,12 +139,15 @@ const AddUserModals = ({ userModalRef, employeesWithPermissions }) => {
     const handleSubmit = async () => {
         const payload = {
             employee_id: formData?.employee_id,
-            features: formData.features
+            features: formData.features,
         };
 
         try {
             setIsLoading(true);
-            const response = await employeePermissionService.storeEmployeesWithPermissions(payload);
+            const response =
+                await employeePermissionService.storeEmployeesWithPermissions(
+                    payload
+                );
             if (response.data?.statusCode === 200) {
                 showToast("Data added successfully!", "success");
                 setFormData({
@@ -146,18 +156,18 @@ const AddUserModals = ({ userModalRef, employeesWithPermissions }) => {
                 });
                 setSearch("");
                 setSelectedEmployee(null);
-               
+
                 if (userModalRef.current) {
                     userModalRef.current.close();
                 }
             }
-            await fetchEmployeeWithPermissions(true,false);
+            await fetchEmployeeWithPermissions(true, false);
         } catch (error) {
             console.log("Error saving add user modal:", error);
         } finally {
             setIsLoading(false);
         }
-    }
+    };
 
     //Handle close the modal and reset all state
     const handleCloseModal = () => {
@@ -179,11 +189,13 @@ const AddUserModals = ({ userModalRef, employeesWithPermissions }) => {
             className="modal w-[683px] rounded-[10px] shadow-custom5 backdrop:bg-black/50  "
             ref={userModalRef}
         >
-            <div className='relative p-[20px] mb-5 rounded-lg'>
-                <div className=''>
+            <div className="relative p-[20px] mb-5 rounded-lg">
+                <div className="">
                     <div>
-                        <button className="absolute top-3 right-3 w-10 h-10 items-center rounded-full bg-custombg3 text-custom-bluegreen hover:bg-custombg"
-                            onClick={handleCloseModal}>
+                        <button
+                            className="absolute top-3 right-3 w-10 h-10 items-center rounded-full bg-custombg3 text-custom-bluegreen hover:bg-custombg"
+                            onClick={handleCloseModal}
+                        >
                             ✕
                         </button>
                     </div>
@@ -191,9 +203,9 @@ const AddUserModals = ({ userModalRef, employeesWithPermissions }) => {
                 <div className="flex justify-center items-center mt-[14px] ">
                     <AiFillInfoCircle className="size-[37px] text-[#5B9BD5]" />
                 </div>
-                <div className='flex flex-col gap-[36px] mt-[24px]'>
-                    <div className='w-full p-[10px] flex flex-col gap-[10px] relative mb-2'>
-                        <p className='text-sm font-semibold'>User</p>
+                <div className="flex flex-col gap-[36px] mt-[24px]">
+                    <div className="w-full p-[10px] flex flex-col gap-[10px] relative mb-2">
+                        <p className="text-sm font-semibold">User</p>
                         <div
                             className={`flex items-center border  rounded-[5px] overflow-hidden border-custom-bluegreen`}
                         >
@@ -206,12 +218,12 @@ const AddUserModals = ({ userModalRef, employeesWithPermissions }) => {
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
                                 className={` 
-                                    ${isDropdownOpen
-                                        ? "rounded-[10px] rounded-b-none"
-                                        : "rounded-[10px]"
+                                    ${
+                                        isDropdownOpen
+                                            ? "rounded-[10px] rounded-b-none"
+                                            : "rounded-[10px]"
                                     }
-                                     w-full px-4 text-sm focus:outline-none mobile:text-xs`
-                                }
+                                     w-full px-4 text-sm focus:outline-none mobile:text-xs`}
                                 onFocus={() => setIsDropdownOpen(true)}
                             />
                         </div>
@@ -225,46 +237,59 @@ const AddUserModals = ({ userModalRef, employeesWithPermissions }) => {
                                 name="department"
                                 type="text"
                                 disabled
-                                value={selectedEmployee?.department || ''}
+                                value={selectedEmployee?.department || ""}
                                 className="w-full px-4 text-sm focus:outline-none mobile:text-xs"
                                 placeholder=""
                             />
                         </div>
-                        <div className='absolute mt-[100px]'>
+                        <div className="absolute mt-[100px]">
                             {/* Absolute button inside the input, aligned to the right */}
                             {isDropdownOpen && (
                                 <>
-                                    <div className="absolute w-[610px] space-y-2 border-t-0 border-gray-300 p-2 py-[20px] shadow-custom6 rounded-[10px] bg-white z-20 mt-1" ref={dropdownRef}>
+                                    <div
+                                        className="absolute w-[610px] space-y-2 border-t-0 border-gray-300 p-2 py-[20px] shadow-custom6 rounded-[10px] bg-white z-20 mt-1"
+                                        ref={dropdownRef}
+                                    >
                                         <ul className="flex flex-col space-y-2 max-h-[500px] overflow-auto ">
-                                            {filteredOptions && filteredOptions.map((option, index) => {
-                                                return (
-                                                    <li
-                                                        key={index}
-                                                        className="flex h-[110px] w-full py-[20px] px-[30px] gap-[18px] bg-custom-lightestgreen rounded-[10px] cursor-pointer"
-                                                        onClick={() => handleSelectEmployee(option)}
-                                                    >
-                                                        <div>
-                                                            <span>
-                                                                {highlightText(
-                                                                    option.name, search
-                                                                )}
-                                                            </span>
-                                                            <br />
-                                                            <span className="text-sm">
-                                                                {highlightText(
-                                                                    option.email, search
-                                                                )}
-                                                            </span>
-                                                            <br />
-                                                            <span className="text-sm">
-                                                                {highlightText(
-                                                                    option.department, search
-                                                                )}
-                                                            </span>
-                                                        </div>
-                                                    </li>
-                                                );
-                                            })}
+                                            {filteredOptions &&
+                                                filteredOptions.map(
+                                                    (option, index) => {
+                                                        return (
+                                                            <li
+                                                                key={index}
+                                                                className="flex h-[110px] w-full py-[20px] px-[30px] gap-[18px] bg-custom-lightestgreen rounded-[10px] cursor-pointer"
+                                                                onClick={() =>
+                                                                    handleSelectEmployee(
+                                                                        option
+                                                                    )
+                                                                }
+                                                            >
+                                                                <div>
+                                                                    <span>
+                                                                        {highlightText(
+                                                                            option.name,
+                                                                            search
+                                                                        )}
+                                                                    </span>
+                                                                    <br />
+                                                                    <span className="text-sm">
+                                                                        {highlightText(
+                                                                            option.email,
+                                                                            search
+                                                                        )}
+                                                                    </span>
+                                                                    <br />
+                                                                    <span className="text-sm">
+                                                                        {highlightText(
+                                                                            option.department,
+                                                                            search
+                                                                        )}
+                                                                    </span>
+                                                                </div>
+                                                            </li>
+                                                        );
+                                                    }
+                                                )}
                                             {filteredOptions.length == 0 && (
                                                 <div>
                                                     <p>No results found</p>
@@ -276,17 +301,20 @@ const AddUserModals = ({ userModalRef, employeesWithPermissions }) => {
                             )}
                         </div>
                     </div>
-                    <div className='w-full p-[10px] flex flex-col gap-[10px]'>
-                        <p className='text-sm font-semibold'>Permissions</p>
-                        {features && features.map((item, index) => (
-                            <Feature
-                                key={item.id}
-                                index={index}
-                                item={item}
-                                formData={formData}
-                                handleFeaturePermissionChange={handleFeaturePermissionChange}
-                            />
-                        ))}
+                    <div className="w-full p-[10px] flex flex-col gap-[10px]">
+                        <p className="text-sm font-semibold">Permissions</p>
+                        {features &&
+                            features.map((item, index) => (
+                                <Feature
+                                    key={item.id}
+                                    index={index}
+                                    item={item}
+                                    formData={formData}
+                                    handleFeaturePermissionChange={
+                                        handleFeaturePermissionChange
+                                    }
+                                />
+                            ))}
                     </div>
                 </div>
                 <div>
@@ -305,10 +333,11 @@ const AddUserModals = ({ userModalRef, employeesWithPermissions }) => {
                             type="submit"
                             onClick={handleSubmit}
                             disabled={isButtonDisabled(formData) || isLoading}
-                            className={`gradient-btn5 w-[100px] h-[35px] rounded-[10px] text-sm text-white montserrat-semibold ${isLoading || isButtonDisabled(formData)
-                                ? "opacity-50 cursor-not-allowed"
-                                : ""
-                                }`}
+                            className={`gradient-btn5 w-[100px] h-[35px] rounded-[10px] text-sm text-white montserrat-semibold ${
+                                isLoading || isButtonDisabled(formData)
+                                    ? "opacity-50 cursor-not-allowed"
+                                    : ""
+                            }`}
                         >
                             {isLoading ? (
                                 <CircularProgress className="spinnerSize" />
@@ -320,6 +349,6 @@ const AddUserModals = ({ userModalRef, employeesWithPermissions }) => {
                 </div>
             </div>
         </dialog>
-    )
-}
-export default AddUserModals
+    );
+};
+export default AddUserModals;

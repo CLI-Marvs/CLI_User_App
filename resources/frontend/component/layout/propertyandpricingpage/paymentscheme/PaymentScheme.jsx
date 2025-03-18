@@ -4,12 +4,13 @@ import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md";
 import AddPaymentSchemeModal from "./AddPaymentSchemeModal";
 import { usePaymentScheme } from "@/context/PropertyPricing/PaymentSchemeContext";
 import moment from "moment";
-
+import Skeleton from "@/component/layout/mainComponent/Skeletons";
 
 const PaymentScheme = () => {
     //State
     const modalRef = useRef(null);
-    const { paymentScheme, fetchPaymentSchemes } = usePaymentScheme();
+    const { paymentScheme, fetchPaymentSchemes, isFetchingPaymentScheme } =
+        usePaymentScheme();
 
     //Hooks
     useEffect(() => {
@@ -23,7 +24,6 @@ const PaymentScheme = () => {
             modalRef.current.showModal();
         }
     };
-
 
     return (
         <div className="h-screen max-w-[1800px] bg-custom-grayFA px-4">
@@ -64,15 +64,23 @@ const PaymentScheme = () => {
                         </tr>
                     </thead>
                     <tbody className="mt-{10px} rounded-[10px] shadow-md">
-                        {/* TODO: add skeleton here */}
-                        {paymentScheme &&
+                        {isFetchingPaymentScheme ? (
+                            <div>
+                                <Skeleton height={140} />
+                                <Skeleton height={140} />
+                                <Skeleton height={140} />
+                            </div>
+                        ) : paymentScheme && paymentScheme.length > 0 ? (
                             paymentScheme.map((item, index) => (
                                 <tr
-                                    className="flex min-h-[68px]  text-sm justify-start gap-[30px] px-[12px] even:bg-custombg3"
+                                    className="flex min-h-[68px] text-sm justify-start gap-[30px] px-[12px] even:bg-custombg3"
                                     key={index}
                                 >
-                                    <td className="flex flex-col justify-center w-[100px] pr-3 py-3 " colSpan="100%">
-                                        <p className="font-bold text-custom-solidgreen ">
+                                    <td
+                                        className="flex flex-col justify-center w-[100px] pr-3 py-3"
+                                        colSpan="100%"
+                                    >
+                                        <p className="font-bold text-custom-solidgreen">
                                             {item?.status}
                                         </p>
                                         <p>
@@ -82,7 +90,7 @@ const PaymentScheme = () => {
                                         </p>
                                     </td>
                                     <td className="flex items-center w-[150px]">
-                                        <p> {item?.payment_scheme_name}</p>
+                                        <p>{item?.payment_scheme_name}</p>
                                     </td>
                                     <td className="flex items-center w-[200px] pr-3 py-3">
                                         <p>{item?.description}</p>
@@ -90,18 +98,17 @@ const PaymentScheme = () => {
                                     <td className="flex items-center w-[100px]">
                                         <p>{item?.spot}%</p>
                                     </td>
-                                    <td className="flex items-center w-[100px]  space-x-1">
+                                    <td className="flex items-center w-[100px] space-x-1">
                                         <p>{item?.downpayment_installment}%</p>
                                         {item?.number_months_downpayment >
                                             0 && (
-                                                <p>
-                                                    (
-                                                    {item.number_months_downpayment}
-                                                    mos)
-                                                </p>
-                                            )}
+                                            <p>
+                                                (
+                                                {item.number_months_downpayment}{" "}
+                                                mos)
+                                            </p>
+                                        )}
                                     </td>
-
                                     <td className="flex items-center w-[120px]">
                                         <p>
                                             {item?.bank_financing}% (100% LP -
@@ -112,100 +119,14 @@ const PaymentScheme = () => {
                                         <p>{item?.discount}%</p>
                                     </td>
                                 </tr>
-                            ))}
-                        {/* <tr className="flex min-h-[68px]  shadow-custom4 text-sm justify-start gap-[30px] px-[12px] bg-custom-grayFA">
-                            <td className="flex flex-col justify-center w-[100px] pr-3 py-3">
-                                <p className="font-bold text-custom-gray81 ">
-                                    Draft
-                                </p>
-                                <p>3/3/2024</p>
-                                <div className="">
-                                    <p className="underline cursor-pointer text-blue-500">
-                                        Edit
-                                    </p>
-                                </div>
-                            </td>
-                            <td className="flex items-center w-[150px]">
-                                <p>Spot 12% DP</p>
-                            </td>
-                            <td className="flex items-center w-[200px] pr-3 py-3">
-                                <p>
-                                    Spot 12% DP on TCP with 5% Discount on LP
-                                    (net of RF)
-                                </p>
-                            </td>
-                            <td className="flex items-center w-[100px]">
-                                <p>12%</p>
-                            </td>
-                            <td className="flex items-center w-[100px]">
-                                <p>0%</p>
-                            </td>
-                            <td className="flex items-center w-[100px]">
-                                <p>88%</p>
-                            </td>
-                            <td className="flex items-center w-[120px]">
-                                <p>5% (100% LP - RF)</p>
-                            </td>
-                        </tr>
-                        <tr className="flex min-h-[68px]  shadow-custom4 text-sm justify-start gap-[30px] px-[12px] bg-white">
-                            <td className="flex flex-col justify-center w-[100px] pr-3 py-3">
-                                <p className="font-bold text-[#5B9BD5]">
-                                    On-going Approval
-                                </p>
-                                <p>3/3/2024</p>
-                                <div className="">
-                                    <p className="underline cursor-pointer text-blue-500">
-                                        Cancel
-                                    </p>
-                                </div>
-                            </td>
-                            <td className="flex items-center w-[150px]">
-                                <p>Spot 2% DP</p>
-                            </td>
-                            <td className="flex items-center w-[200px] pr-3 py-3">
-                                <p>
-                                    Spot 2% DP on TCP with 10% Discount on 2% LP
-                                </p>
-                            </td>
-                            <td className="flex items-center w-[100px]">
-                                <p>2%</p>
-                            </td>
-                            <td className="flex items-center w-[100px]">
-                                <p>10% (59 mos)</p>
-                            </td>
-                            <td className="flex items-center w-[100px]">
-                                <p>88%</p>
-                            </td>
-                            <td className="flex items-center w-[120px]">
-                                <p>2% (2% LP)</p>
-                            </td>
-                        </tr>
-                        <tr className="flex min-h-[68px] shadow-custom4 text-sm justify-start gap-[30px] px-[12px] bg-custom-grayFA  rounded-b-[10px]">
-                            <td className="flex flex-col justify-center w-[100px] pr-3 py-3">
-                                <p className="font-bold text-custom-solidgreen">
-                                    Approved
-                                </p>
-                                <p>3/3/2024</p>
-                            </td>
-                            <td className="flex items-center w-[150px]">
-                                <p>Installment</p>
-                            </td>
-                            <td className="flex items-center w-[200px] pr-3 py-3">
-                                <p>12% DP with 10% Discount</p>
-                            </td>
-                            <td className="flex items-center w-[100px]">
-                                <p>2%</p>
-                            </td>
-                            <td className="flex items-center w-[100px]">
-                                <p>12% (60 mos)</p>
-                            </td>
-                            <td className="flex items-center w-[100px]">
-                                <p>88%</p>
-                            </td>
-                            <td className="flex items-center w-[120px]">
-                                <p>-</p>
-                            </td>
-                        </tr> */}
+                            ))
+                        ) : (
+                            <tr>
+                                <td colSpan="7" className="text-center py-3">
+                                    No payment schemes available.
+                                </td>
+                            </tr>
+                        )}
                     </tbody>
                 </table>
             </div>
@@ -230,13 +151,11 @@ const PaymentScheme = () => {
                     pageLinkClassName="w-full h-full flex justify-center items-center"
                     activeLinkClassName="w-full h-full flex justify-center items-center"
                     disabledLinkClassName={"text-gray-300 cursor-not-allowed"}
-                /* forcePage={currentPage} */
+                    /* forcePage={currentPage} */
                 />
             </div>
             <div>
-                <AddPaymentSchemeModal
-                    modalRef={modalRef}
-                />
+                <AddPaymentSchemeModal modalRef={modalRef} />
             </div>
         </div>
     );

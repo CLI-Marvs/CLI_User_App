@@ -16,6 +16,11 @@ import { useUnit } from "@/context/PropertyPricing/UnitContext";
 import CircularProgress from "@mui/material/CircularProgress";
 import { usePropertyPricing } from "@/component/layout/propertyandpricingpage/basicpricing/hooks/usePropertyPricing";
 import UnitUploadButton from "@/component/layout/propertyandpricingpage/basicpricing/component/UnitUploadButton";
+import generateBigIntId from "@/component/layout/propertyandpricingpage/utils/generateId";
+import {
+    priceListInitialState,
+    priceVersionInitialState,
+} from "@/component/layout/propertyandpricingpage/basicpricing/context/BasicPricingContext";
 
 const additionalPremiums = [
     {
@@ -44,24 +49,28 @@ const BasicPricing = () => {
     //State
     const { user } = useStateContext();
     const location = useLocation();
-    const { data = {}, action = null } = location.state || {};
-    const [propertyData, setPropertyData] = useState();
+    const { priceListData = {}, action = null } = location.state || {};
     const { pricingData, resetPricingData, setPricingData } = usePricing();
-    const { fetchPropertyListMasters } = usePriceListMaster();
+    const {
+        fetchPropertyListMasters,
+        currentPage,
+        setPropertyMasterId,
+        setPriceListMasterId,
+    } = usePriceListMaster();
     const {
         checkExistingUnits,
         units,
-        setFloorPremiumsAccordionOpen,
         excelId,
+        excelIdFromPriceList,
         lastFetchedExcelId,
-        setLastFetchedExcelId,
+        floorPremiumsAccordionOpen,
         setTowerPhaseId,
         setExcelIdFromPriceList,
         updateUnitComputedPrices,
         computedUnitPrices,
-        excelIdFromPriceList,
         saveComputedUnitPricingData,
-        floorPremiumsAccordionOpen
+        setFloorPremiumsAccordionOpen,
+        setExcelId,
     } = useUnit();
     const [accordionStates, setAccordionStates] = useState({
         priceListSettings: false,
@@ -72,15 +81,17 @@ const BasicPricing = () => {
     });
     const { isLoading, handleSubmit } = usePropertyPricing(
         user,
-        data,
+        priceListData,
         formatPayload,
         pricingData,
         resetPricingData,
         showToast,
         fetchPropertyListMasters,
-        checkExistingUnits
+        checkExistingUnits,
+        currentPage
     );
 
+ 
     //Hooks
     /**
      * Hook to update pricing data based on incoming 'data' prop.
@@ -89,28 +100,46 @@ const BasicPricing = () => {
      * It also provides default values for priceVersions if none are available in the incoming data.  Uses moment.js for date formatting.
      */
     useEffect(() => {
-        if (data) {
-            setPropertyData(data);
-            setTowerPhaseId(
-                data?.tower_phase_id || data?.data?.tower_phases[0]?.id
+        if (priceListData) {
+            setTowerPhaseId(priceListData?.data?.tower_phases[0]?.id);
+            if (priceListData?.data?.excel_id) {
+                setExcelIdFromPriceList(priceListData?.data.excel_id);
+            } else {
+                setExcelIdFromPriceList(null);
+                setExcelId(null);
+            }
+            setPropertyMasterId(
+                priceListData?.data?.property_commercial_detail
+                    ?.property_master_id
             );
-            setExcelIdFromPriceList(data?.excel_id);
+            setPriceListMasterId(
+                priceListData?.data?.price_list_master_id ||
+                    priceListData?.data.property_commercial_detail
+                        ?.price_list_master_id
+            );
+
             // Update the priceListSettings
-            if (data?.pricebasic_details) {
+            if (priceListData?.data?.pricebasic_details) {
                 setPricingData((prev) => ({
                     ...prev,
                     priceListSettings: {
-                        ...prev.pricebasic_details,
-                        ...data.pricebasic_details,
+                        ...prev.priceListSettings, // ✅ Use correct previous state key
+                        ...priceListData.data.pricebasic_details,
                     },
                 }));
-            }
-            // Update the price versions
-            if (data?.price_versions) {
+            } else {
                 setPricingData((prev) => ({
                     ...prev,
-                    priceVersions: data.price_versions.length
-                        ? data.price_versions.map((version) => ({
+                    priceListSettings: priceListInitialState,
+                }));
+            }
+
+            // Update the price versions
+            if (priceListData?.data?.price_versions) {
+                setPricingData((prev) => ({
+                    ...prev,
+                    priceVersions: priceListData.data?.price_versions.length
+                        ? priceListData.data?.price_versions.map((version) => ({
                               id: version.version_id || "",
                               priority_number: version.priority_number,
                               name: version.version_name || "",
@@ -139,25 +168,35 @@ const BasicPricing = () => {
                               },
                           ],
                 }));
+            } else {
+                console.log("priceVersions is empty");
+                setPricingData((prev) => ({
+                    ...prev,
+                    priceVersions: priceVersionInitialState,
+                }));
             }
 
             // Update the floor premiums
-            if (data?.floor_premiums && data?.floor_premiums.length > 0) {
-                const floorPremiumData = data?.floor_premiums.reduce(
-                    (acc, premium) => {
-                        acc[premium.floor] = {
-                            id: premium.id,
-                            premiumCost:
-                                premium.premium_cost === "0.00"
-                                    ? 0
-                                    : premium.premium_cost,
-                            luckyNumber: premium.lucky_number,
-                            excludedUnits: premium.excluded_units,
-                        };
-                        return acc;
-                    },
-                    {}
-                );
+            if (
+                priceListData?.data?.floor_premiums &&
+                priceListData?.data?.floor_premiums.length > 0
+            ) {
+                const floorPremiumData =
+                    priceListData?.data?.floor_premiums.reduce(
+                        (acc, premium) => {
+                            acc[premium.floor] = {
+                                id: premium.id,
+                                premiumCost:
+                                    premium.premium_cost === "0.00"
+                                        ? 0
+                                        : premium.premium_cost,
+                                luckyNumber: premium.lucky_number,
+                                excludedUnits: premium.excluded_units,
+                            };
+                            return acc;
+                        },
+                        {}
+                    );
                 setPricingData((prev) => ({
                     ...prev,
                     floorPremiums: floorPremiumData,
@@ -166,19 +205,18 @@ const BasicPricing = () => {
 
             //Update the additional premiums
             if (
-                data?.additional_premiums &&
-                data?.additional_premiums.length > 0
+                priceListData?.data?.additional_premiums &&
+                priceListData?.data?.additional_premiums.length > 0
             ) {
-                const updatedPremiums = data?.additional_premiums.map(
-                    (item) => ({
+                const updatedPremiums =
+                    priceListData?.data?.additional_premiums.map((item) => ({
                         ...item,
                         premiumCost:
                             item.premiumCost === "0.00" ||
                             item.premiumCost === 0
                                 ? 0
                                 : item.premiumCost,
-                    })
-                );
+                    }));
 
                 setPricingData((prev) => ({
                     ...prev,
@@ -188,27 +226,39 @@ const BasicPricing = () => {
 
             // Update the reviewedByEmployees
             if (
-                data?.reviewedByEmployees &&
-                data?.reviewedByEmployees.length > 0
+                priceListData?.data?.reviewedByEmployees &&
+                priceListData?.data?.reviewedByEmployees.length > 0
             ) {
                 setPricingData((prev) => ({
                     ...prev,
-                    reviewedByEmployees: data.reviewedByEmployees,
+                    reviewedByEmployees:
+                        priceListData?.data.reviewedByEmployees,
+                }));
+            } else {
+                setPricingData((prev) => ({
+                    ...prev,
+                    reviewedByEmployees: [],
                 }));
             }
 
             // Update the approvedByEmployees
             if (
-                data?.approvedByEmployees &&
-                data?.approvedByEmployees.length > 0
+                priceListData?.data?.approvedByEmployees &&
+                priceListData?.data?.approvedByEmployees.length > 0
             ) {
                 setPricingData((prev) => ({
                     ...prev,
-                    approvedByEmployees: data.approvedByEmployees,
+                    approvedByEmployees:
+                        priceListData.data?.approvedByEmployees,
+                }));
+            } else {
+                setPricingData((prev) => ({
+                    ...prev,
+                    approvedByEmployees: [],
                 }));
             }
         }
-    }, [data]);
+    }, [priceListData.data]);
 
     /**
      * Hook to handle fetching and clearing of floor and pricing data based on the excel_id.
@@ -216,54 +266,36 @@ const BasicPricing = () => {
      * It also handles setting the additionalPremiums if it's currently empty.
      */
     useEffect(() => {
-        if (
-            excelId &&
-            data?.excel_id &&
-            data?.excel_id !== lastFetchedExcelId
-        ) {
-            checkExistingUnits(data.tower_phase_id, data.excel_id);
-            setLastFetchedExcelId(data?.excel_id);
-        }
-
-        if (excelId || data?.excel_id) {
+        if (!!excelId || !!priceListData?.data.excel_id) {
             setPricingData((prev) => ({
                 ...prev,
                 additionalPremiums: prev.additionalPremiums.length
-                    ? prev.additionalPremiums // Keep existing if not empty
+                    ? prev.additionalPremiums
                     : additionalPremiums.map((item) => {
                           const generatedId = generateBigIntId();
-                          // Validate if the generated ID is numeric
                           if (!isNaN(Number(generatedId))) {
                               return {
                                   ...item,
-                                  id: parseInt(generatedId), // Convert to integer if needed
+                                  id: parseInt(generatedId),
                               };
                           } else {
-                              // Handle the case where the ID is not numeric
-                              console.error(
-                                  "Generated ID is not numeric:",
-                                  generatedId
-                              );
                               return {
                                   ...item,
-                                  id: null, // or some default value
+                                  id: null,
                               };
                           }
                       }),
             }));
+        } else {
+            setPricingData((prev) => ({
+                ...prev,
+                floorPremiums: [],
+                additionalPremiums: [],
+            }));
         }
-
-        // Function to generate random Id
-        const generateBigIntId = () => {
-            return (
-                BigInt(Date.now()) * BigInt(1000) +
-                BigInt(Math.floor(Math.random() * 1000))
-            ).toString();
-        };
     }, [
         excelId,
-        data?.excel_id,
-        data?.tower_phase_id,
+        priceListData?.data.excel_id,
         additionalPremiums,
         lastFetchedExcelId,
     ]);
@@ -272,13 +304,13 @@ const BasicPricing = () => {
         return () => {
             setAccordionStates({
                 priceListSettings: false,
-                floorPremium: false,
+                floorPremium: floorPremiumsAccordionOpen,
                 additionalPremiums: false,
                 priceVersions: false,
                 reviewAndApprovalSetting: false,
             });
         };
-    }, [location]);
+    }, [location, floorPremiumsAccordionOpen]);
 
     //Compute the effective balcony base
     const computeEffectiveBalconyBase = useMemo(() => {
@@ -292,12 +324,18 @@ const BasicPricing = () => {
             // Get Base Price
             const basePrice =
                 parseFloat(pricingData.priceListSettings?.base_price) || 0;
-
             // Get Floor Premium for the unit’s floor
             const floorPremium = pricingData.floorPremiums[unit.floor];
-            const floorPremiumCost = floorPremium
-                ? parseFloat(floorPremium.premiumCost) || 0
-                : 0;
+            // Check if the unit is excluded from the floor premium
+            const isUnitExcluded =
+                floorPremium?.excludedUnits?.some(
+                    (excludedId) => excludedId === unit.id
+                ) || false;
+
+            const floorPremiumCost =
+                floorPremium && !isUnitExcluded
+                    ? parseFloat(floorPremium.premiumCost) || 0
+                    : 0;
 
             const additionalPremiumCost = [
                 ...(pricingData.selectedAdditionalPremiums || []),
@@ -309,11 +347,11 @@ const BasicPricing = () => {
 
                 // Find all matching additional premiums
                 const matchingPremiums =
-                    pricingData?.additionalPremiums?.filter((ap) =>
+                    pricingData?.additionalPremiums?.filter((additionalPrem) =>
                         (Array.isArray(selectedPremiumId)
                             ? selectedPremiumId
                             : [selectedPremiumId]
-                        ).includes(ap.id)
+                        ).includes(additionalPrem.id)
                     ) || [];
 
                 // Sum up all matching premium costs
@@ -415,95 +453,112 @@ const BasicPricing = () => {
             ...prev,
             [name]: !prev[name],
         }));
+        // console.log("name", name);
+        if (name === "floorPremium") {
+            setFloorPremiumsAccordionOpen((prev) => prev);
+        }
     };
 
     //Handle price list submit
     const handleFormSubmit = (e, status) => {
-        handleSubmit(e, status, action, excelId, setFloorPremiumsAccordionOpen);
+        handleSubmit(
+            e,
+            status,
+            action,
+            excelId,
+            setFloorPremiumsAccordionOpen,
+            currentPage
+        );
     };
 
     return (
         <div className="h-screen max-w-[957px] min-w-[897px] bg-custom-grayFA px-[30px] ">
-            {propertyData && Object.keys(propertyData).length > 0 && (
-                <ProjectDetails propertyData={propertyData} />
+            {priceListData && Object.keys(priceListData).length > 0 && (
+                <ProjectDetails priceListData={priceListData} />
             )}
 
-            <div className="flex gap-[15px] py-5">
-                <UnitUploadButton
-                    buttonText={
-                        excelId || excelIdFromPriceList
-                            ? "Change Uploaded Units"
-                            : "Upload Unit Details"
-                    }
-                    className={`h-[37px] w-[176px] rounded-[10px] text-white montserrat-semibold text-sm gradient-btn2 hover:shadow-custom4 ${
-                        isLoading["On-going Approval"]
-                            ? "cursor-not-allowed opacity-50"
-                            : ""
-                    }`}
-                    propertyData={propertyData}
-                />
+            {priceListData && priceListData.data.status === "Draft" && (
+                <div className="flex gap-[15px] py-5">
+                    <UnitUploadButton
+                        buttonText={
+                            excelId || excelIdFromPriceList
+                                ? "Change Uploaded Units"
+                                : "Upload Unit Details"
+                        }
+                        className={`h-[37px] w-[176px] rounded-[10px] text-white montserrat-semibold text-sm gradient-btn2 hover:shadow-custom4 ${
+                            isLoading["On-going Approval"]
+                                ? "cursor-not-allowed opacity-50"
+                                : ""
+                        }`}
+                        propertyData={priceListData}
+                    />
 
-                <button
-                    className={`h-[37px] w-[176px] rounded-[10px] text-white montserrat-semibold text-sm gradient-btn2 hover:shadow-custom4 ${
-                        isLoading["On-going Approval"]
-                            ? "cursor-not-allowed opacity-50"
-                            : ""
-                    }`}
-                    type="submit"
-                    onClick={(e) => handleFormSubmit(e, "On-going Approval")}
-                >
-                    {isLoading["On-going Approval"] ? (
-                        <CircularProgress className="spinnerSize" />
-                    ) : (
-                        <> Submit for Approval </>
-                    )}
-                </button>
-                <button
-                    className={`h-[37px] w-[117px] rounded-[10px] text-custom-solidgreen montserrat-semibold text-sm gradient-btn2 hover:shadow-custom4 p-[3px] ${
-                        isLoading["On-going Approval"]
-                            ? "cursor-not-allowed opacity-50"
-                            : ""
-                    }`}
-                    type="submit"
-                    onClick={(e) => handleFormSubmit(e, "Draft")}
-                >
-                    <div className="flex justify-center items-center h-full w-full rounded-[8px] bg-white">
-                        {isLoading["Draft"] ? (
+                    <button
+                        className={`h-[37px] w-[176px] rounded-[10px] text-white montserrat-semibold text-sm gradient-btn2 hover:shadow-custom4 ${
+                            isLoading["On-going Approval"]
+                                ? "cursor-not-allowed opacity-50"
+                                : ""
+                        }`}
+                        type="submit"
+                        onClick={(e) =>
+                            handleFormSubmit(e, "On-going Approval")
+                        }
+                    >
+                        {isLoading["On-going Approval"] ? (
                             <CircularProgress className="spinnerSize" />
                         ) : (
-                            <>Save as Draft</>
+                            <> Submit for Approval </>
                         )}
-                    </div>
-                </button>
-            </div>
+                    </button>
+                    <button
+                        className={`h-[37px] w-[117px] rounded-[10px] text-custom-solidgreen montserrat-semibold text-sm gradient-btn2 hover:shadow-custom4 p-[3px] ${
+                            isLoading["On-going Approval"]
+                                ? "cursor-not-allowed opacity-50"
+                                : ""
+                        }`}
+                        type="submit"
+                        onClick={(e) => handleFormSubmit(e, "Draft")}
+                    >
+                        <div className="flex justify-center items-center h-full w-full rounded-[8px] bg-white">
+                            {isLoading["Draft"] ? (
+                                <CircularProgress className="spinnerSize" />
+                            ) : (
+                                <>Save as Draft</>
+                            )}
+                        </div>
+                    </button>
+                </div>
+            )}
+
             <div className="flex flex-col gap-1 w-full border-t-1 border-custom-lightestgreen py-4  ">
                 <PriceListSettings
                     isOpen={accordionStates.priceListSettings}
                     toggleAccordion={() => toggleAccordion("priceListSettings")}
+                    priceListData={priceListData}
                 />
                 <FloorPremiums
                     isOpen={accordionStates.floorPremium}
                     toggleAccordion={() => toggleAccordion("floorPremium")}
-                    propertyData={propertyData}
+                    priceListData={priceListData}
                 />
                 <AdditionalPremiums
                     isOpen={accordionStates.additionalPremiums}
                     toggleAccordion={() =>
                         toggleAccordion("additionalPremiums")
                     }
-                    propertyData={propertyData}
+                    priceListData={priceListData}
                 />
                 <PriceVersions
                     isOpen={accordionStates.priceVersions}
                     toggleAccordion={() => toggleAccordion("priceVersions")}
-                    priceListMasterData={data}
+                    priceListData={priceListData}
                     action={action}
                 />
 
                 <ReviewsandApprovalRouting
                     action={action}
-                    propertyData={propertyData}
-                    data={data}
+                    priceListData={priceListData}
+                    data={priceListData}
                     isOpen={accordionStates.reviewAndApprovalSetting}
                     toggleAccordion={() =>
                         toggleAccordion("reviewAndApprovalSetting")

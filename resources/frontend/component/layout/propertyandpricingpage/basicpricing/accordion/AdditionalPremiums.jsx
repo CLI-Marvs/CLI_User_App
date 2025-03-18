@@ -6,8 +6,10 @@ import { usePricing } from "@/component/layout/propertyandpricingpage/basicprici
 import { useUnit } from "@/context/PropertyPricing/UnitContext";
 import { showToast } from "@/util/toastUtil";
 import UnitUploadButton from "@/component/layout/propertyandpricingpage/basicpricing/component/UnitUploadButton";
+import CustomInput from "@/component/Input/CustomInput";
+import generateBigIntId from "@/component/layout/propertyandpricingpage/utils/generateId";
 
-const AdditionalPremiums = ({ propertyData, isOpen, toggleAccordion }) => {
+const AdditionalPremiums = ({ priceListData, isOpen, toggleAccordion }) => {
     //States
     const { excelId, excelIdFromPriceList } = useUnit();
     const [newAdditionalPremium, setNewAdditionalPremium] = useState({
@@ -67,13 +69,6 @@ const AdditionalPremiums = ({ propertyData, isOpen, toggleAccordion }) => {
             showToast(`Premium ${viewName} already exists.`, "error");
             return;
         }
-        // Function to generate random Id
-        const generateBigIntId = () => {
-            return (
-                BigInt(Date.now()) * BigInt(1000) +
-                BigInt(Math.floor(Math.random() * 1000))
-            ).toString();
-        };
         const generatedId = generateBigIntId();
         setPricingData((prevState) => ({
             ...prevState,
@@ -163,58 +158,64 @@ const AdditionalPremiums = ({ propertyData, isOpen, toggleAccordion }) => {
                         {(excelIdFromPriceList !== null &&
                             excelIdFromPriceList !== undefined) ||
                         (excelId !== null && excelId !== undefined) ? (
-                            <div className="flex justify-center w-full h-[31px] gap-3 mb-4">
-                                <div className="flex items-center border border-custom-grayF1 rounded-[5px] overflow-hidden w-[375px] text-sm">
-                                    <span className="text-custom-gray81 bg-custombg3 flex items-center w-[100%] font-semibold -mr-3 pl-3 py-1">
-                                        Additional Premium
-                                    </span>
-                                    <div className="relative w-full">
-                                        <input
-                                            name="viewName"
-                                            type="text"
+                            priceListData &&
+                            priceListData.data.status === "Draft" ? (
+                                <div className="flex justify-center w-full h-[31px] gap-3 mb-4">
+                                    <div className="flex items-center border border-custom-grayF1 rounded-[5px] overflow-hidden w-[375px] text-sm">
+                                        <span className="text-custom-gray81 bg-custombg3 flex items-center w-[100%] font-semibold -mr-3 pl-3 py-1">
+                                            Additional Premium
+                                        </span>
+                                        <div className="relative w-full">
+                                            <CustomInput
+                                                type="text"
+                                                name="viewName"
+                                                value={
+                                                    newAdditionalPremium.viewName ||
+                                                    ""
+                                                }
+                                                className="outline-none  -mr-3 pl-3 py-1 bg-custom-grayFA   w-full "
+                                                onChange={
+                                                    onChangeNewAdditionalPremium
+                                                }
+                                               
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center border border-custom-grayF1 rounded-[5px] overflow-hidden w-[204px] text-sm">
+                                        <span className="text-custom-gray81 bg-custombg3 font-semibold flex w-[250px] pl-3 py-1">
+                                            Cost (Sq.m)
+                                        </span>
+                                        <CustomInput
+                                            type="number"
+                                            name="premiumCost"
                                             value={
-                                                newAdditionalPremium.viewName ||
+                                                newAdditionalPremium.premiumCost ||
                                                 ""
                                             }
+                                            className="outline-none  -mr-3 pl-3 py-1 bg-custom-grayFA   w-full "
                                             onChange={
                                                 onChangeNewAdditionalPremium
                                             }
-                                            className="outline-none  -mr-3 pl-3 py-1 bg-custom-grayFA   w-full "
+                                            restrictNumbers={true}
                                         />
                                     </div>
+                                    <div>
+                                        <button
+                                            className="w-[60px] h-[31px] rounded-[7px] gradient-btn2 p-[4px]  text-custom-solidgreen hover:shadow-custom4"
+                                            onClick={handleAddNewPremium}
+                                        >
+                                            <div className="flex justify-center items-center  bg-white montserrat-bold h-full w-full rounded-[4px] p-[4px] text-sm">
+                                                ADD
+                                            </div>
+                                        </button>
+                                    </div>
                                 </div>
-                                <div className="flex items-center border border-custom-grayF1 rounded-[5px] overflow-hidden w-[204px] text-sm">
-                                    <span className="text-custom-gray81 bg-custombg3 font-semibold flex w-[250px] pl-3 py-1">
-                                        Cost (Sq.m)
-                                    </span>
-                                    <input
-                                        onChange={onChangeNewAdditionalPremium}
-                                        name="premiumCost"
-                                        value={
-                                            newAdditionalPremium.premiumCost ||
-                                            ""
-                                        }
-                                        type="number"
-                                        className="w-full px-4 focus:outline-none"
-                                        placeholder=""
-                                    />
-                                </div>
-                                <div>
-                                    <button
-                                        className="w-[60px] h-[31px] rounded-[7px] gradient-btn2 p-[4px]  text-custom-solidgreen hover:shadow-custom4"
-                                        onClick={handleAddNewPremium}
-                                    >
-                                        <div className="flex justify-center items-center  bg-white montserrat-bold h-full w-full rounded-[4px] p-[4px] text-sm">
-                                            ADD
-                                        </div>
-                                    </button>
-                                </div>
-                            </div>
+                            ) : null
                         ) : (
                             <div className="w-auto">
                                 <UnitUploadButton
                                     buttonType="link"
-                                    propertyData={propertyData}
+                                    priceListData={priceListData}
                                 />
                             </div>
                         )}
@@ -249,12 +250,13 @@ const AdditionalPremiums = ({ propertyData, isOpen, toggleAccordion }) => {
                                                             </td>
                                                             <td>
                                                                 <div>
-                                                                    <input
+                                                                    <CustomInput
                                                                         type="number"
-                                                                        name="premiumCost"
                                                                         id={`premiumCost-${index}`}
+                                                                        name="premiumCost"
                                                                         value={
-                                                                            item.premiumCost
+                                                                            item.premiumCost ||
+                                                                            ""
                                                                         }
                                                                         onChange={(
                                                                             e
@@ -265,19 +267,33 @@ const AdditionalPremiums = ({ propertyData, isOpen, toggleAccordion }) => {
                                                                             )
                                                                         }
                                                                         className="bg-white h-[29px] w-[120px] border border-[#D9D9D9] rounded-[5px] px-2 outline-none text-center"
+                                                                        restrictNumbers={
+                                                                            true
+                                                                        }
+                                                                        disabled={
+                                                                            priceListData
+                                                                                .data
+                                                                                .status !==
+                                                                            "Draft"
+                                                                        }
                                                                     />
                                                                 </div>
                                                             </td>
-                                                            <td>
-                                                                <FaRegTrashAlt
-                                                                    className="size-5 text-custom-gray81 hover:text-red-500 cursor-pointer"
-                                                                    onClick={() =>
-                                                                        handleRemovePremium(
-                                                                            index
-                                                                        )
-                                                                    }
-                                                                />
-                                                            </td>
+                                                            {priceListData &&
+                                                            priceListData.data
+                                                                .status ===
+                                                                "Draft" ? (
+                                                                <td>
+                                                                    <FaRegTrashAlt
+                                                                        className="size-5 text-custom-gray81 hover:text-red-500 cursor-pointer"
+                                                                        onClick={() =>
+                                                                            handleRemovePremium(
+                                                                                index
+                                                                            )
+                                                                        }
+                                                                    />
+                                                                </td>
+                                                            ) : null}
                                                         </tr>
                                                     );
                                                 }
@@ -297,22 +313,32 @@ const AdditionalPremiums = ({ propertyData, isOpen, toggleAccordion }) => {
                             </div>
                         </div>
                         <div className="flex justify-center">
-                            {(excelId ? true : excelIdFromPriceList) && (
-                                <button
-                                    onClick={handleOpenModal}
-                                    className="w-[137px] h-[37px] rounded-[7px] gradient-btn2 p-[4px] text-custom-solidgreen hover:shadow-custom4 text-sm"
-                                >
-                                    <div className="flex justify-center items-center bg-white montserrat-semibold h-full w-full rounded-[4px] p-[4px] text-sm">
-                                        Assign to units
-                                    </div>
-                                </button>
-                            )}
+                            {(excelId || excelIdFromPriceList) &&
+                                (priceListData?.data?.status === "Draft" ? (
+                                    <button
+                                        onClick={handleOpenModal}
+                                        className="w-[137px] h-[37px] rounded-[7px] gradient-btn2 p-[4px] text-custom-solidgreen hover:shadow-custom4 text-sm"
+                                    >
+                                        <div className="flex justify-center items-center bg-white montserrat-semibold h-full w-full rounded-[4px] p-[4px] text-sm">
+                                            Assign to units
+                                        </div>
+                                    </button>
+                                ) : (
+                                    <button
+                                        onClick={handleOpenModal}
+                                        className="w-[137px] h-[37px] rounded-[7px] gradient-btn2 p-[4px] text-custom-solidgreen hover:shadow-custom4 text-sm"
+                                    >
+                                        <div className="flex justify-center items-center bg-white montserrat-semibold h-full w-full rounded-[4px] p-[4px] text-sm">
+                                            View
+                                        </div>
+                                    </button>
+                                ))}
                         </div>
                     </div>
                 </div>
                 <div>
                     <AdditionalPremiumAssignModal
-                        propertyData={propertyData}
+                        priceListData={priceListData}
                         modalRef={modalRef}
                     />
                 </div>

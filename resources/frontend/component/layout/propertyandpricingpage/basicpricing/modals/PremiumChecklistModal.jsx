@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { usePricing } from "@/component/layout/propertyandpricingpage/basicpricing/context/BasicPricingContext";
 
-const PremiumChecklistModal = ({ modalRef2, selectedUnit }) => {
+const PremiumChecklistModal = ({
+    premiumCheckListModalRef,
+    selectedUnit,
+    priceListData,
+}) => {
     //States
     const { pricingData, setPricingData } = usePricing();
     const [selectedAdditionalPremiums, setSelectedAdditionalPremiums] =
@@ -9,7 +13,7 @@ const PremiumChecklistModal = ({ modalRef2, selectedUnit }) => {
     const [initialAdditionalPremiums, setInitialAdditionalPremiums] = useState(
         []
     );
- 
+
     //Hooks
     useEffect(() => {
         if (selectedUnit) {
@@ -101,16 +105,16 @@ const PremiumChecklistModal = ({ modalRef2, selectedUnit }) => {
                 selectedAdditionalPremiums: filteredPremiums,
             };
         });
-        if (modalRef2.current) {
-            modalRef2.current.close();
+        if (premiumCheckListModalRef.current) {
+            premiumCheckListModalRef.current.close();
         }
     };
 
     //Handle close the modal
     const handleCloseModal = () => {
-        if (modalRef2.current) {
+        if (premiumCheckListModalRef.current) {
             // setSelectedAdditionalPremiums([]);
-            modalRef2.current.close();
+            premiumCheckListModalRef.current.close();
         }
     };
 
@@ -136,7 +140,7 @@ const PremiumChecklistModal = ({ modalRef2, selectedUnit }) => {
     return (
         <dialog
             className="modal w-[385px] rounded-lg bg-white backdrop:bg-black/50"
-            ref={modalRef2}
+            ref={premiumCheckListModalRef}
         >
             <div className=" px-[50px] mb-5 rounded-[10px]">
                 <div className="">
@@ -170,6 +174,10 @@ const PremiumChecklistModal = ({ modalRef2, selectedUnit }) => {
                                     className="h-[56px] w-full bg-custom-grayFA rounded-[10px] p-[10px] flex items-center gap-[15px]"
                                 >
                                     <input
+                                        disabled={
+                                            priceListData.data.status !==
+                                            "Draft"
+                                        }
                                         onChange={(e) =>
                                             handleCheckboxChange(e, premium)
                                         }
@@ -182,26 +190,28 @@ const PremiumChecklistModal = ({ modalRef2, selectedUnit }) => {
                                                 )
                                         )}
                                         type="checkbox"
-                                        className="h-[16px] w-[16px] ml-[16px] rounded-[2px] appearance-none border border-gray-400 checked:bg-transparent flex items-center justify-center checked:before:bg-black checked:before:w-[12px] checked:before:h-[12px] checked:before:block checked:before:content-['']"
+                                        className={`h-[16px] w-[16px] ml-[16px] rounded-[2px] appearance-none border border-gray-400 checked:bg-transparent flex items-center justify-center checked:before:bg-black checked:before:w-[12px] checked:before:h-[12px] checked:before:block checked:before:content-[''] ${priceListData.data.status !== "Draft" ? "cursor-not-allowed" : "cursor-pointer"}`}
                                     />
-                                    <p>
-                                        {premium.viewName}  
-                                    </p>
+                                    <p>{premium.viewName}</p>
                                 </div>
                             );
                         })}
                 </div>
-                <div className="flex justify-start mt-4 mb-8">
-                    <button
-                        disabled={!hasChanges()}
-                        className={`w-[151px] h-[37px] text-white montserrat-semibold text-sm gradient-btn5 rounded-[10px] hover:shadow-custom4 ${
-                            !hasChanges() ? "opacity-50 cursor-not-allowed" : ""
-                        }`}
-                        onClick={handleApplyPremiums}
-                    >
-                        Apply Premiums
-                    </button>
-                </div>
+                {priceListData && priceListData.data.status === "Draft" && (
+                    <div className="flex justify-start mt-4 mb-8">
+                        <button
+                            disabled={!hasChanges()}
+                            className={`w-[151px] h-[37px] text-white montserrat-semibold text-sm gradient-btn5 rounded-[10px] hover:shadow-custom4 ${
+                                !hasChanges()
+                                    ? "opacity-50 cursor-not-allowed"
+                                    : ""
+                            }`}
+                            onClick={handleApplyPremiums}
+                        >
+                            Apply Premiums
+                        </button>
+                    </div>
+                )}
             </div>
         </dialog>
     );

@@ -1,4 +1,4 @@
-import React, {
+import {
     createContext,
     useContext,
     useState,
@@ -6,8 +6,16 @@ import React, {
     useEffect,
 } from "react";
 import { priceListMasterService } from "@/component/servicesApi/apiCalls/propertyPricing/priceListMaster/priceListMasterService";
+import _ from "lodash";
 
 const PropertyMasterContext = createContext();
+
+const defaultFilters = {
+    property: "",
+    paymentScheme: "",
+    date: null,
+    status: "",
+};
 
 export const PriceListMasterProvider = ({ children }) => {
     const [priceListMaster, setPriceListMaster] = useState(null);
@@ -15,34 +23,41 @@ export const PriceListMasterProvider = ({ children }) => {
     const [error, setError] = useState(null);
     const [currentPage, setCurrentPage] = useState(1);
     const [isFirstLoad, setIsFirstLoad] = useState(true);
-    
-    // This function does the actual database fetch
+    const [previousFilters, setPreviousFilters] = useState([]);
+    const [propertyMasterId, setPropertyMasterId] = useState(null);
+    const [priceListMasterId, setPriceListMasterId] = useState(null);
+    const [searchFilters, setSearchFilters] = useState(defaultFilters);
+    const [appliedFilters, setAppliedFilters] = useState(defaultFilters);
+
     const fetchPropertyListMasters = useCallback(
         async (forceFetch = false, silentFetch = false, page) => {
-            if (priceListMaster && !forceFetch) {
+            const isFilterChanged = !_.isEqual(appliedFilters, previousFilters);
+            const isSamePage = page === currentPage;
+            if (
+                priceListMaster &&
+                !forceFetch &&
+                !isFilterChanged &&
+                isSamePage
+            ) {
+                // Prevents unnecessary fetching
                 return priceListMaster;
             }
 
             try {
-                
-                if (!silentFetch) {
-                    if (isFirstLoad) {
-                        setIsLoading(true); 
-                    }
+                if (!silentFetch && isFirstLoad) {
+                    setIsLoading(true);
                 }
                 const response =
-                    await priceListMasterService.getPriceListMasters(page, 10);
+                    await priceListMasterService.getPriceListMasters(
+                        page,
+                        10,
+                        appliedFilters
+                    );
                 const { data, pagination } = response.data;
-                setPriceListMaster((prev) => ({
-                    data: prev?.data || [],
-                    pagination: prev?.pagination || pagination,
-                }));
-
-                setTimeout(() => {
-                    setPriceListMaster({ data, pagination });
-                }, 200); 
+                setPriceListMaster({ data, pagination });
                 setCurrentPage(pagination?.current_page);
                 setError(null);
+                setPreviousFilters(appliedFilters);
 
                 if (isFirstLoad) {
                     setIsFirstLoad(false);
@@ -50,18 +65,37 @@ export const PriceListMasterProvider = ({ children }) => {
 
                 return { data, pagination };
             } catch (error) {
+                setPriceListMaster({ data: [], pagination: null });
                 setError(error.message);
                 console.error("Error fetching property master list:", error);
             } finally {
                 if (!silentFetch) setIsLoading(false);
             }
         },
-        [priceListMaster, currentPage, isFirstLoad]
+        [
+            priceListMaster,
+            currentPage,
+            isFirstLoad,
+            previousFilters,
+            appliedFilters,
+        ]
     );
 
+    //Automatically fetch when `appliedFilters` or 'currentPage' changes
     useEffect(() => {
         fetchPropertyListMasters(true, false, currentPage);
-    }, [currentPage]);
+    }, [currentPage, appliedFilters]);
+
+    const applySearch = () => {
+        setAppliedFilters(searchFilters);
+        setCurrentPage(1);
+    };
+
+    const refreshPage = () => {
+        setSearchFilters(defaultFilters);
+        setAppliedFilters(defaultFilters);
+        setCurrentPage(1);
+    };
 
     const value = {
         priceListMaster,
@@ -71,7 +105,16 @@ export const PriceListMasterProvider = ({ children }) => {
         setPriceListMaster,
         currentPage,
         setCurrentPage,
-        isFirstLoad
+        isFirstLoad,
+        previousFilters,
+        propertyMasterId,
+        setPropertyMasterId,
+        priceListMasterId,
+        setPriceListMasterId,
+        searchFilters,
+        setSearchFilters,
+        applySearch,
+        refreshPage,
     };
 
     return (

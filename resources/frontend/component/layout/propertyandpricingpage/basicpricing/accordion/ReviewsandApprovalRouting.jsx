@@ -13,29 +13,19 @@ import CircularProgress from "@mui/material/CircularProgress";
 import { useStateContext } from "@/context/contextprovider";
 import EmployeeReviewerApproverModal from "@/component/layout/propertyandpricingpage/basicpricing/modals/ReviewSetting/EmployeeReviewerApproverModal";
 import ExpandableDataTable from "@/component/layout/propertyandpricingpage/basicpricing/modals/ReviewSetting/ExpandableDataTable";
-import { toLowerCaseText } from "@/component/layout/propertyandpricingpage/utils/formatToLowerCase";
+import { toLowerCaseText } from "@/util/formatToLowerCase";
 import { usePropertyPricing } from "@/component/layout/propertyandpricingpage/basicpricing/hooks/usePropertyPricing";
 import { formatPayload } from "@/component/layout/propertyandpricingpage/basicpricing/utils/payloadFormatter";
 import { showToast } from "@/util/toastUtil";
 import { usePriceListMaster } from "@/context/PropertyPricing/PriceListMasterContext";
 import CustomToolTip from "@/component/layout/mainComponent/Tooltip/CustomToolTip";
 import UnitTableComponent from "@/component/layout/propertyandpricingpage/component/UnitTableComponent";
-import { property } from "lodash";
-const staticHeaders = [
-    "Floor",
-    "Room",
-    "Unit",
-    "Type",
-    "Indoor Area",
-    "Balcony Area",
-    "Garden Area",
-    "Total Area",
-];
+import { staticHeaders } from "@/constant/data/staticHeaders";
 
 const ReviewsandApprovalRouting = ({
     isOpen,
     toggleAccordion,
-    propertyData,
+    priceListData,
     data,
     action,
 }) => {
@@ -88,7 +78,7 @@ const ReviewsandApprovalRouting = ({
      * This effect maps the price_versions from propertyData to subHeaders and priceVersions.
      * It also initializes selectedVersion, pricing headers, and employee selections.
      */
-    
+
     useEffect(() => {
         // If no version is selected, set the default to the one with priority_number === 1
         // setSelectedVersion((prev) => {
@@ -117,7 +107,8 @@ const ReviewsandApprovalRouting = ({
         //     );
 
         const priceDetails =
-            propertyData?.pricebasic_details || pricingData?.priceListSettings;
+            priceListData?.data.pricebasic_details ||
+            pricingData?.priceListSettings;
         let pricingHeaders = [];
         if (priceDetails && priceDetails.base_price !== 0) {
             const excludedKeys = new Set([
@@ -173,14 +164,14 @@ const ReviewsandApprovalRouting = ({
         //Initialize selected employees, ensuring the state never holds null values
         setReviewedByEmployees(pricingData.reviewedByEmployees || []);
         setApprovedByEmployees(pricingData.approvedByEmployees || []);
-    }, [propertyData, units, selectedVersion, pricingData]);
+    }, [priceListData, units, selectedVersion, pricingData]);
 
     //Event handlers
     const handleDownloadExcel = async () => {
         try {
             const payload = {
-                project_name: propertyData?.property_name,
-                building: propertyData?.tower_phase_name,
+                project_name: priceListData?.data.property_name,
+                building: priceListData?.data.tower_phases[0].tower_phase_name,
                 exportPricingData: exportPricingData,
                 selectedVersion: selectedVersion,
             };
@@ -344,9 +335,10 @@ const ReviewsandApprovalRouting = ({
                                         <h6 className="w-1/3">PROJECT</h6>
                                         <div className="border border-black px-6 flex-1 ml-10">
                                             <p>
-                                                {propertyData?.property_name ||
-                                                    propertyData?.data
-                                                        ?.property_name}
+                                                {
+                                                    priceListData?.data
+                                                        ?.property_name
+                                                }
                                             </p>
                                         </div>
                                     </div>
@@ -354,10 +346,11 @@ const ReviewsandApprovalRouting = ({
                                         <h6 className="w-1/3">BUILDING</h6>
                                         <div className="border border-black px-6 flex-1  ml-10">
                                             <p>
-                                                {propertyData?.tower_phase_name ||
-                                                    propertyData?.data
+                                                {
+                                                    priceListData?.data
                                                         ?.tower_phases[0]
-                                                        ?.tower_phase_name}
+                                                        ?.tower_phase_name
+                                                }
                                             </p>
                                         </div>
                                     </div>
@@ -467,37 +460,44 @@ const ReviewsandApprovalRouting = ({
                                                             <p className="montserrat-regular p-2">
                                                                 {emp?.name}
                                                             </p>
-                                                            <IoIosCloseCircle
-                                                                onClick={() =>
-                                                                    handleRemoveEmployee(
-                                                                        emp.id,
-                                                                        "reviewedByEmployees"
-                                                                    )
-                                                                }
-                                                                className="h-6 w-6 cursor-pointer  text-red-500"
-                                                            />
+                                                            {priceListData?.data
+                                                                .status ===
+                                                                "Draft" && (
+                                                                <IoIosCloseCircle
+                                                                    onClick={() =>
+                                                                        handleRemoveEmployee(
+                                                                            emp.id,
+                                                                            "reviewedByEmployees"
+                                                                        )
+                                                                    }
+                                                                    className="h-6 w-6 cursor-pointer  text-red-500"
+                                                                />
+                                                            )}
                                                         </div>
                                                     );
                                                 }
                                             )}
                                     </div>
-
-                                    <div className="mt-auto py-2">
-                                        <button
-                                            className="gradient-btn5 p-[1px] w-[75px] h-[30px] rounded-[10px]"
-                                            onClick={() =>
-                                                handleOpenEmployeeReviewerApproverModal(
-                                                    "reviewedByEmployees"
-                                                )
-                                            }
-                                        >
-                                            <div className="w-full h-full rounded-[8px] bg-white flex justify-center items-center montserrat-regular text-sm">
-                                                <p className="text-base  bg-gradient-to-r from-custom-bluegreen via-custom-solidgreen to-custom-solidgreen bg-clip-text text-transparent">
-                                                    Add +
-                                                </p>
+                                    {priceListData &&
+                                        priceListData.data.status ===
+                                            "Draft" && (
+                                            <div className="mt-auto py-2">
+                                                <button
+                                                    className="gradient-btn5 p-[1px] w-[75px] h-[30px] rounded-[10px]"
+                                                    onClick={() =>
+                                                        handleOpenEmployeeReviewerApproverModal(
+                                                            "reviewedByEmployees"
+                                                        )
+                                                    }
+                                                >
+                                                    <div className="w-full h-full rounded-[8px] bg-white flex justify-center items-center montserrat-regular text-sm">
+                                                        <p className="text-base  bg-gradient-to-r from-custom-bluegreen via-custom-solidgreen to-custom-solidgreen bg-clip-text text-transparent">
+                                                            Add +
+                                                        </p>
+                                                    </div>
+                                                </button>
                                             </div>
-                                        </button>
-                                    </div>
+                                        )}
                                 </div>
 
                                 {/*  Approved By */}
@@ -514,67 +514,82 @@ const ReviewsandApprovalRouting = ({
                                                             <p className="montserrat-regular p-2">
                                                                 {emp?.name}
                                                             </p>
-                                                            <IoIosCloseCircle
-                                                                onClick={() =>
-                                                                    handleRemoveEmployee(
-                                                                        emp.id,
-                                                                        "approvedByEmployees"
-                                                                    )
-                                                                }
-                                                                className="h-6 w-6 cursor-pointer  text-red-500"
-                                                            />
+                                                            {priceListData?.data
+                                                                .status ===
+                                                                "Draft" && (
+                                                                <IoIosCloseCircle
+                                                                    onClick={() =>
+                                                                        handleRemoveEmployee(
+                                                                            emp.id,
+                                                                            "approvedByEmployees"
+                                                                        )
+                                                                    }
+                                                                    className="h-6 w-6 cursor-pointer  text-red-500"
+                                                                />
+                                                            )}
                                                         </div>
                                                     );
                                                 }
                                             )}
                                     </div>
                                     {/* Button */}
-                                    <div className="mt-auto py-2">
-                                        <button
-                                            className="gradient-btn5 p-[1px] w-[75px] h-[30px] rounded-[10px]"
-                                            onClick={() =>
-                                                handleOpenEmployeeReviewerApproverModal(
-                                                    "approvedByEmployees"
-                                                )
-                                            }
-                                        >
-                                            <div className="w-full h-full rounded-[8px] bg-white flex justify-center items-center montserrat-regular text-sm">
-                                                <p className="text-base bg-gradient-to-r from-custom-bluegreen via-custom-solidgreen to-custom-solidgreen bg-clip-text text-transparent">
-                                                    Add +
-                                                </p>
+                                    {priceListData &&
+                                        priceListData.data.status ===
+                                            "Draft" && (
+                                            <div className="mt-auto py-2">
+                                                <button
+                                                    className="gradient-btn5 p-[1px] w-[75px] h-[30px] rounded-[10px]"
+                                                    onClick={() =>
+                                                        handleOpenEmployeeReviewerApproverModal(
+                                                            "approvedByEmployees"
+                                                        )
+                                                    }
+                                                >
+                                                    <div className="w-full h-full rounded-[8px] bg-white flex justify-center items-center montserrat-regular text-sm">
+                                                        <p className="text-base bg-gradient-to-r from-custom-bluegreen via-custom-solidgreen to-custom-solidgreen bg-clip-text text-transparent">
+                                                            Add +
+                                                        </p>
+                                                    </div>
+                                                </button>
                                             </div>
-                                        </button>
-                                    </div>
+                                        )}
                                 </div>
                             </div>
                         </div>
-
-                        <div className="flex gap-1 justify-center  py-3">
-                            <button
-                                className="h-[37px] w-[176px] rounded-[10px] text-white montserrat-semibold text-sm gradient-btn5 hover:shadow-custom4"
-                                onClick={(e) =>
-                                    handleFormSubmit(e, "On-going Approval")
-                                }
-                            >
-                                {isLoading["On-going Approval"] ? (
-                                    <CircularProgress className="spinnerSize" />
-                                ) : (
-                                    <> Submit for Approval </>
-                                )}
-                            </button>
-                            <button
-                                className="h-[37px] w-[117px] rounded-[10px] text-custom-solidgreen montserrat-semibold text-sm gradient-btn5 hover:shadow-custom4 p-[3px]"
-                                onClick={(e) => handleFormSubmit(e, "Draft")}
-                            >
-                                <div className="flex justify-center items-center h-full w-full rounded-[8px] bg-white">
-                                    {isLoading["Draft"] ? (
-                                        <CircularProgress className="spinnerSize" />
-                                    ) : (
-                                        <>Save as Draft</>
-                                    )}
+                        {priceListData &&
+                            priceListData.data.status === "Draft" && (
+                                <div className="flex gap-1 justify-center  py-3">
+                                    <button
+                                        className="h-[37px] w-[176px] rounded-[10px] text-white montserrat-semibold text-sm gradient-btn5 hover:shadow-custom4"
+                                        onClick={(e) =>
+                                            handleFormSubmit(
+                                                e,
+                                                "On-going Approval"
+                                            )
+                                        }
+                                    >
+                                        {isLoading["On-going Approval"] ? (
+                                            <CircularProgress className="spinnerSize" />
+                                        ) : (
+                                            <> Submit for Approval </>
+                                        )}
+                                    </button>
+                                    <button
+                                        className="h-[37px] w-[117px] rounded-[10px] text-custom-solidgreen montserrat-semibold text-sm gradient-btn5 hover:shadow-custom4 p-[3px]"
+                                        onClick={(e) =>
+                                            handleFormSubmit(e, "Draft")
+                                        }
+                                    >
+                                        <div className="flex justify-center items-center h-full w-full rounded-[8px] bg-white">
+                                            {isLoading["Draft"] ? (
+                                                <CircularProgress className="spinnerSize" />
+                                            ) : (
+                                                <>Save as Draft</>
+                                            )}
+                                        </div>
+                                    </button>
                                 </div>
-                            </button>
-                        </div>
+                            )}
                     </div>
                 </div>
             </div>

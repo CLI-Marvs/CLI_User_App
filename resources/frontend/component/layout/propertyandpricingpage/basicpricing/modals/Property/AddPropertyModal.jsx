@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { IoMdArrowDropdown } from "react-icons/io";
-import { isButtonDisabled } from "@/component/layout/propertyandpricingpage/basicpricing/modals/Property/utils/isButtonDisabled";
+import isButtonDisabled from "@/util/isFormButtonDisabled";
 import { useNavigate } from "react-router-dom";
 import CircularProgress from "@mui/material/CircularProgress";
 import { useStateContext } from "@/context/contextprovider";
@@ -9,7 +9,7 @@ import { propertyMasterService } from "@/component/servicesApi/apiCalls/property
 import { usePriceListMaster } from "@/context/PropertyPricing/PriceListMasterContext";
 import { useProperty } from "@/context/PropertyPricing/PropertyContext";
 import { useUnit } from "@/context/PropertyPricing/UnitContext";
-import { toLowerCaseText } from "@/component/layout/propertyandpricingpage/utils/formatToLowerCase";
+import { toLowerCaseText } from "@/util/formatToLowerCase";
 
 const formDataState = {
     propertyName: "",
@@ -32,6 +32,10 @@ const AddPropertyModal = ({ propertyModalRef }) => {
     const { propertyNamesList } = useProperty();
     const { fetchPropertyListMasters } = usePriceListMaster();
     const { setExcelId, setExcelIdFromPriceList } = useUnit();
+    const isPropertyButtonDisabled = isButtonDisabled(
+        formData,
+        Object.keys(formDataState).filter((key) => key !== "google_map_link")
+    );
 
     //Event Handler
     const handleInputChange = (e) => {
@@ -65,8 +69,11 @@ const AddPropertyModal = ({ propertyModalRef }) => {
                 payload
             );
             console.log("response 67 AddPropertyModal", response);
-            const towerPhaseId = response?.data?.data?.tower_phases[0]?.id;
-            const propertyData = response?.data;
+            const priceListData = { data: response.data.data };
+            const propertyCommercialDetail =
+                priceListData?.data?.property_commercial_detail;
+            const priceListId =
+                propertyCommercialDetail?.price_list_master_id ?? null;
 
             if (response.status === 201) {
                 showToast("Data added successfully!", "success");
@@ -78,8 +85,8 @@ const AddPropertyModal = ({ propertyModalRef }) => {
                 }
                 setExcelId(null);
                 setExcelIdFromPriceList(null);
-                navigate(`/property-pricing/basic-pricing/${towerPhaseId}`, {
-                    state: { data: propertyData },
+                navigate(`/property-pricing/basic-pricing/${priceListId}`, {
+                    state: { priceListData: priceListData },
                 });
             }
         } catch (error) {
@@ -313,14 +320,12 @@ const AddPropertyModal = ({ propertyModalRef }) => {
                         <div className="flex justify-center my-3">
                             <button
                                 className={`w-[173px] h-[37px] text-white montserrat-semibold text-sm gradient-btn rounded-[10px] hover:shadow-custom4 ${
-                                    isLoading || isButtonDisabled(formData)
+                                    isLoading || isPropertyButtonDisabled
                                         ? "cursor-not-allowed opacity-50"
                                         : ""
                                 }`}
                                 onClick={(e) => handleSubmit(e, "Draft")}
-                                disabled={
-                                    isButtonDisabled(formData) || isLoading
-                                }
+                                disabled={isPropertyButtonDisabled || isLoading}
                             >
                                 {isLoading ? (
                                     <CircularProgress className="spinnerSize" />

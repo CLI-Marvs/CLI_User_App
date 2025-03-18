@@ -12,35 +12,31 @@ const UploadUnitDetailsModal = ({
     fileName,
     selectedExcelHeader,
     handleFileChange,
-    propertyData,
     onClose,
 }) => {
     //State
     const [formData, setFormData] = useState({});
     const newFileInputRef = useRef();
-    const [propertyMasterId, setPropertyMasterId] = useState();
-    const [priceListMasterId, setPriceListMasterId] = useState();
     const {
         uploadUnits,
         towerPhaseId,
         isUploadingUnits,
-        setIsUploadingUnits,
         fetchFloorCount,
+        excelId,
+        excelIdFromPriceList,
         setFloors,
         setUnits,
         setExcelId,
         setExcelIdFromPriceList,
         setFloorPremiumsAccordionOpen,
-        excelId,
-        excelIdFromPriceList,
+        setIsUploadingUnits,
     } = useUnit();
     const { setPricingData } = usePricing();
-    const { priceListMaster } = usePriceListMaster();
+    const { propertyMasterId, priceListMasterId } = usePriceListMaster();
 
     //Hooks
     useEffect(() => {
-    
-        if (selectedExcelHeader || propertyData) {
+        if (selectedExcelHeader) {
             const initialFormData = selectedExcelHeader.reduce((acc, item) => {
                 acc[item.rowHeader] = {
                     rowHeader: item.rowHeader,
@@ -48,24 +44,9 @@ const UploadUnitDetailsModal = ({
                 };
                 return acc;
             }, {});
-            const priceListMasterId =
-                priceListMaster && priceListMaster.length > 0
-                    ? priceListMaster.find(
-                          (master) => master.tower_phase_id === towerPhaseId
-                      )?.price_list_master_id
-                    : null;
             setFormData(initialFormData);
-            setPropertyMasterId(
-                propertyData?.property_commercial_detail?.property_master_id ||
-                    propertyData?.data?.property_commercial_detail
-                        ?.property_master_id
-            );
-            //If the mode is straight forward Add
-            setPriceListMasterId(
-                propertyData?.price_list_master_id || priceListMasterId
-            );
         }
-    }, [selectedExcelHeader, propertyData]);
+    }, [selectedExcelHeader]);
 
     //Event hander
     // Handle change in column selection
@@ -88,13 +69,12 @@ const UploadUnitDetailsModal = ({
         setIsUploadingUnits(true);
 
         try {
-            // Clear related data if we're uploading a new Excel to replace existing one
+            // Clear related data if uploading a new Excel to replace existing one
             if (excelId || excelIdFromPriceList) {
-                // Reset units array
                 setUnits([]);
                 setExcelId("");
                 setExcelIdFromPriceList("");
-                
+
                 // Reset specific pricing data fields while preserving other fields
                 setPricingData((prev) => ({
                     ...prev,
@@ -109,7 +89,6 @@ const UploadUnitDetailsModal = ({
                 );
             }
 
-            // Prepare the payload for API
             const payload = {
                 excelDataRows: excelDataRows,
                 tower_phase_id: towerPhaseId,
@@ -129,9 +108,10 @@ const UploadUnitDetailsModal = ({
                 setFloors([]);
                 const floors = await fetchFloorCount(
                     towerPhaseId,
-                    response?.excelId
+                    response?.excelId,
+                    true
                 );
-                console.log("Fetched floors:", floors);
+                console.log("Fetched floors after uploading units:", floors);
                 setFloors(floors);
 
                 // Show success message and update UI

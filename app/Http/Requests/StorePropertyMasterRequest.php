@@ -29,7 +29,7 @@ class StorePropertyMasterRequest extends FormRequest
             'tower_phase' =>
             'required|string|max:255',
             'tower_description' =>
-            'required',
+            'required|string|max:350',
             'regex:/^(?=.*[a-zA-Z])[\pL\pN\s\-\.\']+$/u',
             'max:255',
             'barangay' =>

@@ -7,6 +7,7 @@ import { useUnit } from "@/context/PropertyPricing/UnitContext";
 import { usePricing } from "@/component/layout/propertyandpricingpage/basicpricing/context/BasicPricingContext";
 import { showToast } from "@/util/toastUtil";
 import UnitUploadButton from "@/component/layout/propertyandpricingpage/basicpricing/component/UnitUploadButton";
+import CustomInput from "@/component/Input/CustomInput";
 
 const newFloorState = {
     floor: null,
@@ -14,11 +15,10 @@ const newFloorState = {
     excludedUnits: [],
 };
 
-const FloorPremiums = ({ isOpen, toggleAccordion, propertyData }) => {
+const FloorPremiums = ({ isOpen, toggleAccordion, priceListData }) => {
     //States
     const [newFloorPremiumData, setNewFloorPremiumData] =
         useState(newFloorState);
-
     const floorPremiumAssignModalRef = useRef(null);
     const {
         floors,
@@ -31,11 +31,6 @@ const FloorPremiums = ({ isOpen, toggleAccordion, propertyData }) => {
     const { pricingData, setPricingData } = usePricing();
 
     //Hooks
-    /*
-     * Initializes tower phase ID, local Excel ID, and floor premiums when floors or property data change.
-     *If floor premiums are not set, it generates initial floor premiums based on the available floor numbers
-     *
-     */
     useEffect(() => {
         if (!floors || Object.keys(floors).length === 0) return;
         if (
@@ -46,7 +41,7 @@ const FloorPremiums = ({ isOpen, toggleAccordion, propertyData }) => {
             return;
         }
 
-        if (propertyData?.excelId || excelId) {
+        if (priceListData?.excelId || excelId) {
             const floorNumbers = floors[Object.keys(floors)[0]];
             if (Array.isArray(floorNumbers) && floorNumbers.length > 0) {
                 const initialFloorPremiums = floorNumbers.reduce(
@@ -110,13 +105,13 @@ const FloorPremiums = ({ isOpen, toggleAccordion, propertyData }) => {
     };
 
     //Handle input change for adding  new floor
-    function handleNewFloorChange(e) {
+    const handleNewFloorChange = (e) => {
         const { name, value } = e.target;
         setNewFloorPremiumData((prevData) => ({
             ...prevData,
             [name]: value,
         }));
-    }
+    };
 
     /**
      * Handles the button click for adding a new floor premium configuration.
@@ -258,57 +253,57 @@ const FloorPremiums = ({ isOpen, toggleAccordion, propertyData }) => {
                 <div className="bg-white overflow-hidden">
                     <div className="w-full p-5 h-[370px]">
                         {excelId || excelIdFromPriceList ? (
-                            <div className="flex justify-center w-full h-[31px] gap-3 mb-4">
-                                <div className="flex items-center border border-custom-grayF1 rounded-[5px] overflow-hidden w-[204px] text-sm  ">
-                                    <span className="text-custom-gray81 bg-custom-grayFA  flex items-center w-[120%] font-semibold -mr-3 pl-3 py-1">
-                                        Floor
-                                    </span>
-                                    <input
-                                        onChange={handleNewFloorChange}
-                                        name="floor"
-                                        value={newFloorPremiumData.floor || ""}
-                                        className="outline-none  -mr-3 pl-3 py-1 bg-custom-grayFA   w-full "
-                                        onInput={(e) =>
-                                            (e.target.value =
-                                                e.target.value.replace(
-                                                    /[^0-9]/g,
-                                                    ""
-                                                ))
-                                        }
-                                    />
-                                </div>
-                                <div className="flex items-center border border-custom-grayF1 rounded-[5px] overflow-hidden w-[204px] text-sm">
-                                    <span className="text-custom-gray81 bg-custom-grayFA font-semibold flex w-[250px] pl-3 py-1">
-                                        Cost (Sq.m)
-                                    </span>
-                                    <input
-                                        onChange={handleNewFloorChange}
-                                        name="premiumCost"
-                                        className="w-full px-4 focus:outline-none "
-                                        placeholder=""
-                                        type="number"
-                                        value={
-                                            newFloorPremiumData.premiumCost ||
-                                            ""
-                                        }
-                                    />
-                                </div>
-                                <div>
-                                    <button className="w-[60px] h-[31px] rounded-[7px] gradient-btn2 p-[4px]  text-custom-solidgreen hover:shadow-custom4 text-sm">
-                                        <div
-                                            className="flex justify-center items-center  bg-white montserrat-bold h-full w-full rounded-[4px] p-[4px]"
-                                            onClick={handleAddNewFloor}
+                            priceListData &&
+                            priceListData.data.status === "Draft" ? (
+                                <div className="flex justify-center w-full h-[31px] gap-3 mb-4">
+                                    <div className="flex items-center border border-custom-grayF1 rounded-[5px] overflow-hidden w-[204px] text-sm">
+                                        <span className="text-custom-gray81 bg-custom-grayFA flex items-center w-[120%] font-semibold -mr-3 pl-3 py-1">
+                                            Floor
+                                        </span>
+                                        <CustomInput
+                                            type="number"
+                                            name="floor"
+                                            value={
+                                                newFloorPremiumData.floor || ""
+                                            }
+                                            className="w-full px-4 focus:outline-none"
+                                            onChange={handleNewFloorChange}
+                                            restrictNumbers={true}
+                                        />
+                                    </div>
+                                    <div className="flex items-center border border-custom-grayF1 rounded-[5px] overflow-hidden w-[204px] text-sm">
+                                        <span className="text-custom-gray81 bg-custom-grayFA font-semibold flex w-[250px] pl-3 py-1">
+                                            Cost (Sq.m)
+                                        </span>
+                                        <CustomInput
+                                            type="number"
+                                            name="premiumCost"
+                                            value={
+                                                newFloorPremiumData.premiumCost ||
+                                                ""
+                                            }
+                                            className="w-full px-4 focus:outline-none"
+                                            onChange={handleNewFloorChange}
+                                            restrictNumbers={true}
+                                        />
+                                    </div>
+                                    <div>
+                                        <button
+                                            className="w-[60px] h-[31px] rounded-[7px] gradient-btn2 p-[4px] text-custom-solidgreen hover:shadow-custom4 text-sm"
+                                            onClick={handleAddNewFloor} // Move onClick to the button tag
                                         >
-                                            ADD
-                                        </div>
-                                    </button>
+                                            <div className="flex justify-center items-center bg-white montserrat-bold h-full w-full rounded-[4px] p-[4px]">
+                                                ADD
+                                            </div>
+                                        </button>
+                                    </div>
                                 </div>
-                            </div>
+                            ) : null
                         ) : (
                             <div className="w-auto">
                                 <UnitUploadButton
                                     buttonType="link"
-                                    propertyData={propertyData}
+                                    priceListData={priceListData}
                                 />
                             </div>
                         )}
@@ -334,7 +329,8 @@ const FloorPremiums = ({ isOpen, toggleAccordion, propertyData }) => {
                                         </tr>
                                     </thead>
                                     <tbody className="">
-                                        {isFloorCountLoading ? (
+                                        {isFloorCountLoading &&
+                                        floors.length === 0 ? (
                                             <tr className="ml-4">
                                                 <td
                                                     colSpan="5"
@@ -364,13 +360,15 @@ const FloorPremiums = ({ isOpen, toggleAccordion, propertyData }) => {
                                                             </td>
                                                             <td>
                                                                 <div className="">
-                                                                    <input
+                                                                    <CustomInput
                                                                         type="number"
                                                                         name="premiumCost"
                                                                         id="premiumCost"
                                                                         value={
-                                                                            floorData.premiumCost
+                                                                            floorData.premiumCost ||
+                                                                            ""
                                                                         }
+                                                                        className="bg-white h-[29px] w-[120px] border border-[#D9D9D9] rounded-[5px] px-2 outline-none text-center"
                                                                         onChange={(
                                                                             e
                                                                         ) =>
@@ -379,7 +377,15 @@ const FloorPremiums = ({ isOpen, toggleAccordion, propertyData }) => {
                                                                                 e
                                                                             )
                                                                         }
-                                                                        className="bg-white h-[29px] w-[120px] border border-[#D9D9D9] rounded-[5px] px-2 outline-none text-center"
+                                                                        restrictNumbers={
+                                                                            true
+                                                                        }
+                                                                        disabled={
+                                                                            priceListData
+                                                                                .data
+                                                                                .status !==
+                                                                            "Draft"
+                                                                        }
                                                                     />
                                                                 </div>
                                                             </td>
@@ -401,28 +407,56 @@ const FloorPremiums = ({ isOpen, toggleAccordion, propertyData }) => {
                                                                     id="luckyNumber"
                                                                     type="checkbox"
                                                                     className="h-[16px] w-[16px] ml-[16px] rounded-[2px] appearance-none border border-gray-400 checked:bg-transparent flex items-center justify-center checked:before:bg-black checked:before:w-[12px] checked:before:h-[12px] checked:before:block checked:before:content-['']"
+                                                                    disabled={
+                                                                        priceListData
+                                                                            ?.data
+                                                                            ?.status !==
+                                                                        "Draft"
+                                                                    }
                                                                 />
                                                             </td>
-                                                            <td
-                                                                onClick={() =>
-                                                                    handleOpenModal(
-                                                                        floorNumber
-                                                                    )
-                                                                }
-                                                                className="text-blue-500 underline cursor-pointer"
-                                                            >
-                                                                Assign
-                                                            </td>
-                                                            <td>
-                                                                <FaRegTrashAlt
+                                                            {priceListData.data
+                                                                .status ===
+                                                            "Draft" ? (
+                                                                <td
                                                                     onClick={() =>
-                                                                        handleRemoveFloorPremium(
+                                                                        handleOpenModal(
                                                                             floorNumber
                                                                         )
                                                                     }
-                                                                    className="size-5 text-custom-gray81 hover:text-red-500 cursor-pointer"
-                                                                />
-                                                            </td>
+                                                                    className="text-blue-500 underline cursor-pointer"
+                                                                >
+                                                                    Assign
+                                                                </td>
+                                                            ) : (
+                                                                <td
+                                                                    onClick={() =>
+                                                                        handleOpenModal(
+                                                                            floorNumber
+                                                                        )
+                                                                    }
+                                                                    className="text-blue-500 underline cursor-pointer"
+                                                                >
+                                                                    View
+                                                                </td>
+                                                            )}
+
+                                                            {priceListData &&
+                                                                priceListData
+                                                                    .data
+                                                                    .status ===
+                                                                    "Draft" && (
+                                                                    <td>
+                                                                        <FaRegTrashAlt
+                                                                            onClick={() =>
+                                                                                handleRemoveFloorPremium(
+                                                                                    floorNumber
+                                                                                )
+                                                                            }
+                                                                            className="size-5 text-custom-gray81 hover:text-red-500 cursor-pointer"
+                                                                        />
+                                                                    </td>
+                                                                )}
                                                         </tr>
                                                     );
                                                 }
@@ -446,7 +480,7 @@ const FloorPremiums = ({ isOpen, toggleAccordion, propertyData }) => {
             </div>
             <div>
                 <FloorPremiumAssignModal
-                    propertyData={propertyData}
+                    priceListData={priceListData}
                     floorPremiumAssignModalRef={floorPremiumAssignModalRef}
                     selectedFloor={selectedFloor}
                 />
