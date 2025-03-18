@@ -6,50 +6,10 @@ import { transaction } from "@/component/servicesApi/apiCalls/transactions";
 import ReactPaginate from "react-paginate";
 import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md";
 import TransactionSearchBar from "@/component/layout/transaction/TransactionSearchBar";
+import { useStateContext } from "@/context/contextprovider";
+import { toLowerCaseText } from "../../propertyandpricingpage/utils/formatToLowerCase";
 
 const TransactionCom = () => {
-    const fields = [
-        { name: "customer_name", label: "Name" },
-        { name: "email", label: "Email" },
-        {
-            name: "destination_bank",
-            label: "Bank",
-            type: "select",
-            options: [
-                { label: "Select Bank", value: "" },
-                { label: "BDO", value: "BDO" },
-                { label: "BPI", value: "BPI" },
-                { label: "LANDBANK", value: "LANDBANK" },
-            ],
-        },
-        {
-            name: "property_name",
-            label: "Project Name",
-            type: "select",
-            options: [
-                { label: "Select Project", value: "" },
-                { label: "Casa Mira", value: "Casa Mira" },
-                { label: "CASA MIRA TOWERS LABANGON", value: "CASA MIRA TOWERS LABANGON" },
-            ],
-        },
-        { name: "invoice_number", label: "Invoice Number" },
-        { name: "document_number", label: "Document Number" },
-        { name: "reference_number", label: "Reference Number" },
-        {
-            name: "status",
-            label: "Status",
-            type: "select",
-            options: [
-                { label: "Select Status", value: "" },
-                { label: "Cleared", value: "Cleared" },
-                { label: "Posted", value: "Posted" },
-                { label: "Floating", value: "Floating" },
-            ],
-        },
-        { name: "date_range", type: "date_range", label: "Date" },
-
-    ];
-
     const columns = [
         {
             header: "Date & Time",
@@ -121,7 +81,51 @@ const TransactionCom = () => {
         
     } = useTransactionContext();
 
+    const {propertyNamesList} = useStateContext();
     const [searchValues, setSearchValues] = useState({});
+
+    const fields = [
+        { name: "customer_name", label: "Name" },
+        { name: "email", label: "Email" },
+        {
+            name: "destination_bank",
+            label: "Bank",
+            type: "select",
+            options: [
+                { label: "Select Bank", value: "" },
+                { label: "BDO", value: "BDO" },
+                { label: "BPI", value: "BPI" },
+                { label: "LANDBANK", value: "LANDBANK" },
+            ],
+        },
+        {
+            name: "property_name",
+            label: "Project Name",
+            type: "select",
+            options: [
+                { label: "Select Project", value: "" },
+                ...propertyNamesList.map((item) => {
+                    return {label: toLowerCaseText(item), value: item};
+                })
+            ],
+        },
+        { name: "invoice_number", label: "Invoice Number" },
+        { name: "document_number", label: "Document Number" },
+        { name: "reference_number", label: "Reference Number" },
+        {
+            name: "status",
+            label: "Status",
+            type: "select",
+            options: [
+                { label: "Select Status", value: "" },
+                { label: "Cleared", value: "Cleared" },
+                { label: "Posted", value: "Posted" },
+                { label: "Floating", value: "Floating" },
+            ],
+        },
+        { name: "date_range", type: "date_range", label: "Date" },
+
+    ];
 
     const handleSearchValue = (e) => {
         const { name, value } = e.target;

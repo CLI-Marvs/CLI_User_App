@@ -13,9 +13,11 @@ export const TransactionProvider = ({ children }) => {
     const [postingList, setPostingList] = useState([]);
     const [currentPagePosting, setCurrentPagePosting] = useState(0);
     const [totalPagePosting, setTotalPagePosting] = useState(0);
+    const [invoicesList, setInvoicesList] = useState([]);
+    const [currentPageInvoices, setCurrentPageInvoices] = useState(0);
+    const [totalPageInvoices, setTotalPageInvoices] = useState(0);
     const [activeItemTransaction, setActiveItemTransaction] = useState("Cleared");
     const [dataToSubmit, setDataToSubmit] = useState({});
-
 
     return (
         <TransactionContext.Provider
@@ -35,7 +37,13 @@ export const TransactionProvider = ({ children }) => {
                 activeItemTransaction,
                 setActiveItemTransaction,
                 dataToSubmit,
-                setDataToSubmit
+                setDataToSubmit,
+                invoicesList,
+                setInvoicesList,
+                currentPageInvoices,
+                setCurrentPageInvoices,
+                totalPageInvoices,
+                setTotalPageInvoices
             }}
         >
             {children}

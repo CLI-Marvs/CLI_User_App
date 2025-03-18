@@ -5,9 +5,6 @@ export const transaction = {
         try {
             const params = { page: currentPage + 1, ...filter };
 
-           
-            console.log("params", params);
-
             const response = await apiService.get("transaction-list", {
                 params,
             });
@@ -28,4 +25,19 @@ export const transaction = {
             console.log("error", error);
         }
     },
+
+    invoicesList: async (currentPage, filter = {}) => {
+        try {
+            const params = { page: currentPage + 1, ...filter };
+
+            const response = await apiService.get("get-invoices", {
+                params,
+            });
+
+            return response?.data;
+        } catch (error) {
+            console.log("error", error);
+        }
+    },
+
 };
