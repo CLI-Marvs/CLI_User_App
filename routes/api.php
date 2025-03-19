@@ -76,8 +76,7 @@ Route::post('/proxy-sap', [SapController::class, 'postDateToSap']);
 Route::post('/test-api', [ConcernController::class, 'testApi']);
 
 
-//*Retrieve invoice from sap upon trigger the date
-Route::post('/posting-invoices', [SapController::class, 'retrieveInvoicesFromSap']);
+
 
 //*Post document number and other fields to sap
 Route::post('/post-data-sap', [SapController::class, 'postFromAppToSap']);
@@ -87,24 +86,16 @@ Route::post('/data-posted', [SapController::class, 'postRecordsFromSap']);
 
 
 //*Display in frontend 
-Route::get('/get-invoices', [SapController::class, 'getInvoices']);
 Route::get('/get-transactions', [SapController::class, 'retrieveTransactions']);
 Route::get('/get-matches', [SapController::class, 'runAutoPosting']);
 
 
 Route::post('paygate-webhook', [TransactionController::class, 'paygateWebHook']);
 Route::post('bank/statement', [TransactionController::class, 'clearedBankStatements']);
-
-
-
-
-
-
+//*Retrieve invoice from sap upon trigger the date
+Route::post('/posting-invoices', [SapController::class, 'retrieveInvoicesFromSap']);
 
 Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/customer/inquiries', [TransactionController::class, 'getCustomerInquiries']);
-    Route::get('/customer/data', [TransactionController::class, 'getCustomerData']);
-    Route::get('/customer/details', [TransactionController::class, 'getCustomerDetailsByEmail']);
     Route::get('/get-transaction-bank', [SapController::class, 'getTransactionByBankName']);
     Route::post('/upload-notepad', [SapController::class, 'uploadNotepad']);
 
@@ -113,6 +104,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/customer/data', 'getCustomerData');
         Route::get('/customer/details', 'getCustomerDetailsByEmail');
         Route::get('/transaction-list', 'retrieveTransactions');
+        Route::get('/get-invoices','retrieveInvoices');
         Route::patch('/transaction-update', 'updateTransactionStatus');
     });
 

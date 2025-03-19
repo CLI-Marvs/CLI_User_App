@@ -89,4 +89,8 @@ class TransactionService
     {
         return $this->repository->updateTransactionStatus($data);
     }
+    public function retrieveInvoices(array $data)
+    {
+        return $this->repository->retrieveInvoices($data);
+    }
 }
