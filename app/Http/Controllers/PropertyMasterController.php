@@ -21,7 +21,7 @@ class PropertyMasterController extends Controller
         $this->service = $service;
     }
 
- 
+
     /**
      * Store a newly created resource in storage.
      */
@@ -30,7 +30,7 @@ class PropertyMasterController extends Controller
 
         try {
             $property = $this->service->store($request->validated());
-            // dd($property);
+
             return response()->json($property, 201);
         } catch (ValidationException $e) {
             return response()->json([
@@ -45,7 +45,7 @@ class PropertyMasterController extends Controller
         }
     }
 
-   
+
     /**
      * Update the specified resource in storage.
      */

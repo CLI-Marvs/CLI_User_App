@@ -207,7 +207,7 @@ export const ContextProvider = ({ children }) => {
     };
 
     const getBankName = async () => {
-       /*  if (token) {
+        /*  if (token) {
             try {
                 const response = await apiService.get("get-transaction-bank");
                 setBankList(response.data);
@@ -218,7 +218,7 @@ export const ContextProvider = ({ children }) => {
     };
 
     const getTransactions = async () => {
-       /*  try {
+        /*  try {
             const searchParams = new URLSearchParams({
                 page: currentPageTransaction + 1,
                 bank_name: bankNames ? bankNames : null,
@@ -234,7 +234,7 @@ export const ContextProvider = ({ children }) => {
     };
 
     const getMatches = async () => {
-       /*  if (token) {
+        /*  if (token) {
             try {
                 const response = await apiService.get("get-matches");
                 setMatchesData(response.data);
@@ -334,7 +334,9 @@ export const ContextProvider = ({ children }) => {
             );
 
             const formattedData = filteredResult.map((item) => ({
-                name: `${item.month.toString().padStart(2, "0")}/${item.year.toString().slice(-2)}`,
+                name: `${item.month.toString().padStart(2, "0")}/${item.year
+                    .toString()
+                    .slice(-2)}`,
                 Resolved: item.resolved,
                 Unresolved: item.unresolved,
                 Closed: item.closed,
@@ -395,7 +397,7 @@ export const ContextProvider = ({ children }) => {
                     year: year,
                     startDate: startDate,
                     endDate: endDate,
-                },  
+                },
             });
 
             const departments = response.data.departments;
@@ -957,8 +959,6 @@ export const ContextProvider = ({ children }) => {
                 searchFilter,
                 statusFilter,
                 specificInquiry,
-                setSpecificAssigneeCsr,
-                specificAssigneeCsr,
                 getCount,
                 department,
                 setDepartment,

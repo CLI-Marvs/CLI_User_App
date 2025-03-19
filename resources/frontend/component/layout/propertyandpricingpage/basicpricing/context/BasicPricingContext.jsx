@@ -10,23 +10,25 @@ export const priceListInitialState = {
     reservation_fee: "",
 };
 
-export const priceVersionInitialState = {
-    id: 0,
-    priority_number: 1,
-    name: "",
-    percent_increase: 0,
-    no_of_allowed_buyers: 0,
-    status: "Active",
-    expiry_date: "N/A",
-    payment_scheme: [],
-};
+export const priceVersionInitialState = [
+    {
+        id: 0,
+        priority_number: 1,
+        name: "",
+        percent_increase: 0,
+        no_of_allowed_buyers: 0,
+        status: "Active",
+        expiry_date: "N/A",
+        payment_scheme: [],
+    },
+];
 
 const initialState = () => ({
     priceListSettings: priceListInitialState,
     floorPremiums: {},
     additionalPremiums: [],
     selectedAdditionalPremiums: [],
-    priceVersions: [priceVersionInitialState],
+    priceVersions: priceVersionInitialState,
     reviewsAndApproval: {},
     computedListPrice: [],
     reviewedByEmployees: [],
