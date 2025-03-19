@@ -90,8 +90,8 @@ const AutoPostingCom = () => {
             currentPagePosting,
             filter
         );
-        setPostingList(response.data.data);
-        setTotalPagePosting(response.data.last_page);
+        setPostingList(response.data);
+        setTotalPagePosting(response.last_page);
     };
 
     const handleActiveItem = (item) => {

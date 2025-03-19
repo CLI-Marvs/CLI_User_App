@@ -9,7 +9,7 @@ export const transaction = {
                 params,
             });
 
-            return response?.data;
+            return response?.data.data;
         } catch (error) {
             console.log("error", error);
         }
@@ -34,7 +34,7 @@ export const transaction = {
                 params,
             });
 
-            return response?.data;
+            return response?.data.data;
         } catch (error) {
             console.log("error", error);
         }

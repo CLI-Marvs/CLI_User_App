@@ -158,8 +158,9 @@ class TransactionRepository
     {
         $query = $this->invoicesModel
             ->when(!empty($data['status']), fn($q) => $q->where('transaction.status', $data['status']))
-            ->when(!empty($data['invoice_number']), fn($q) => $q->where('document_number', $data['invoice_number']))
-            ->when(!empty($data['reference_number']), fn($q) => $q->where('reference_number', $data['reference_number']))
+            ->when(!empty($data['invoice_number']), fn($q) => $q->where('invoice_number', $data['invoice_number']))
+            ->when(!empty($data['customer_name']), fn($q) => $q->whereRaw('customer_name ILIKE ?', ["%{$data['customer_name']}%"]))
+            ->when(!empty($data['contract_number']), fn($q) => $q->where('contract_number', $data['contract_number']))
             ->paginate(2);
 
         return $query;

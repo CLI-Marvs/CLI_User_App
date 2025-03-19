@@ -11,7 +11,6 @@ const rootElement = document.getElementById("root");
 
 if (rootElement) {
     ReactDOM.createRoot(rootElement).render(
-        <React.StrictMode>
             <ContextProvider>
                 <PropertyPricingProvider>
                     <RoleManagementProvider>
@@ -34,6 +33,5 @@ if (rootElement) {
                     </RoleManagementProvider>
                 </PropertyPricingProvider>
             </ContextProvider>
-        </React.StrictMode>
     );
 }

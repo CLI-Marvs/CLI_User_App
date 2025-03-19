@@ -8,6 +8,8 @@ import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md";
 import TransactionSearchBar from "@/component/layout/transaction/TransactionSearchBar";
 import { useStateContext } from "@/context/contextprovider";
 import { toLowerCaseText } from "../../propertyandpricingpage/utils/formatToLowerCase";
+import Pagination from "@/component/layout/transaction/Pagination";
+import usePagination from "@/hooks/usePagination";
 
 const TransactionCom = () => {
     const columns = [
@@ -68,22 +70,15 @@ const TransactionCom = () => {
             ),
         },
     ];
-
-    const {
-        transactionList,
-        setTransactionList,
-        currentPageTransaction,
-        setCurrentPageTransaction,
-        totalPageTransaction,
-        setTotalPageTransaction,
-        dataToSubmit,
-        setDataToSubmit
-        
-    } = useTransactionContext();
-
-    const {propertyNamesList} = useStateContext();
+    const { propertyNamesList } = useStateContext();
     const [searchValues, setSearchValues] = useState({});
-
+    const { transactions, setTransactions } = useTransactionContext();
+    const { handlePageClick, setFilters } = usePagination(
+        transaction.transactionList,
+        transactions,
+        setTransactions
+    );
+    
     const fields = [
         { name: "customer_name", label: "Name" },
         { name: "email", label: "Email" },
@@ -105,8 +100,8 @@ const TransactionCom = () => {
             options: [
                 { label: "Select Project", value: "" },
                 ...propertyNamesList.map((item) => {
-                    return {label: toLowerCaseText(item), value: item};
-                })
+                    return { label: toLowerCaseText(item), value: item };
+                }),
             ],
         },
         { name: "invoice_number", label: "Invoice Number" },
@@ -124,7 +119,6 @@ const TransactionCom = () => {
             ],
         },
         { name: "date_range", type: "date_range", label: "Date" },
-
     ];
 
     const handleSearchValue = (e) => {
@@ -136,27 +130,8 @@ const TransactionCom = () => {
     };
 
     const onSubmit = () => {
-        setDataToSubmit(searchValues);
-        setSearchValues({});
-    }; 
-
-    const getTransactionList = async () => {
-        const response = await transaction.transactionList(
-            currentPageTransaction,
-            dataToSubmit
-        );
-        setTransactionList(response.data.data);
-        setTotalPageTransaction(response.data.last_page);
+        setFilters(searchValues);
     };
-
-    const handlePageClick = (data) => {
-        setCurrentPageTransaction(data.selected);
-    };
-
-    useEffect(() => {
-        getTransactionList();
-    }, [currentPageTransaction, dataToSubmit]);
-
 
     return (
         <>
@@ -170,32 +145,13 @@ const TransactionCom = () => {
                         onSubmit={onSubmit}
                     />
                 </div>
-                <GlobalTable columns={columns} data={transactionList} />
+                <GlobalTable columns={columns} data={transactions.data} />
                 <div className="flex justify-end mt-4">
                     <div className="flex w-full justify-end mt-3 mb-10">
-                        <ReactPaginate
-                            previousLabel={
-                                <MdKeyboardArrowLeft className="text-[#404B52]" />
-                            }
-                            nextLabel={
-                                <MdKeyboardArrowRight className="text-[#404B52]" />
-                            }
-                            breakLabel={"..."}
-                            pageCount={totalPageTransaction}
-                            marginPagesDisplayed={2}
-                            pageRangeDisplayed={1}
-                            onPageChange={handlePageClick}
-                            containerClassName={"flex gap-2"}
-                            previousClassName="border border-[#EEEEEE] text-custom-bluegreen font-semibold w-[26px] h-[24px] rounded-[4px] flex justify-center items-center hover:text-white hover:bg-custom-lightgreen hover:text-white"
-                            nextClassName="border border-[#EEEEEE] text-custom-bluegreen font-semibold w-[26px] h-[24px] rounded-[4px] flex justify-center items-center hover:text-white hover:bg-custom-lightgreen hover:text-white"
-                            pageClassName="border border-[#EEEEEE] text-black w-[26px] h-[24px] rounded-[4px] flex justify-center items-center hover:bg-custom-lightgreen text-[12px]"
-                            activeClassName="w-[26px] h-[24px] border border-[#EEEEEE] bg-custom-lightgreen text-[#404B52] rounded-[4px] text-white text-[12px]"
-                            pageLinkClassName="w-full h-full flex justify-center items-center"
-                            activeLinkClassName="w-full h-full flex justify-center items-center"
-                            disabledLinkClassName={
-                                "text-gray-300 cursor-not-allowed"
-                            }
-                            forcePage={currentPageTransaction}
+                        <Pagination
+                            currentPage={transactions.currentPage}
+                            totalPages={transactions.totalPages}
+                            onPageChange={(page) => handlePageClick(page)}
                         />
                     </div>
                 </div>

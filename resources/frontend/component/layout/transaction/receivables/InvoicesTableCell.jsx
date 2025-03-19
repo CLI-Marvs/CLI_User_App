@@ -1,4 +1,5 @@
 import React from "react";
+import { toLowerCaseText } from "../../propertyandpricingpage/utils/formatToLowerCase";
 
 const InvoicesTableCell = ({ type, row }) => {
     switch (type) {
@@ -6,7 +7,7 @@ const InvoicesTableCell = ({ type, row }) => {
             return (
                 <div className="flex flex-col w-[330px]">
                     <span className="montserrat-regular text-[13px]">
-                        {row.customer_name}
+                        {toLowerCaseText(row.customer_name)}
                     </span>
                     <span className="montserrat-medium text-[13px]">
                         {row.contract_number}
