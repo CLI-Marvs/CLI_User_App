@@ -91,7 +91,6 @@ const BasicPricing = () => {
         currentPage
     );
 
- 
     //Hooks
     /**
      * Hook to update pricing data based on incoming 'data' prop.
@@ -169,7 +168,6 @@ const BasicPricing = () => {
                           ],
                 }));
             } else {
-                console.log("priceVersions is empty");
                 setPricingData((prev) => ({
                     ...prev,
                     priceVersions: priceVersionInitialState,

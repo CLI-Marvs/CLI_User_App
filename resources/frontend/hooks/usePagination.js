@@ -2,6 +2,8 @@ import { useEffect } from "react";
 
 const usePagination = (fetchData, contextState, contextSetter) => {
     const { currentPage, filters } = contextState;
+    console.log("contextState", contextState);
+    console.log("fetchData", fetchData);
 
     const getData = async () => {
         try {
