@@ -1,5 +1,5 @@
 import React from "react";
-import CustomToolTip from "@/component/layout/mainComponent/Tooltip/CustomToolTip";
+import CustomToolTip from "@/component/CustomToolTip";
 
 const PermissionCheckbox = ({
     permission,

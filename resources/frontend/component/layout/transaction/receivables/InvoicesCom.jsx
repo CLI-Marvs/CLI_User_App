@@ -15,34 +15,14 @@ import GlobalTable from "../GlobalTable";
 import InvoicesTableCell from "./InvoicesTableCell";
 import { MdCalendarToday } from "react-icons/md";
 import TransactionSearchBar from "@/component/layout/transaction/TransactionSearchBar";
+import usePagination from "@/hooks/usePagination";
+import { useTransactionContext } from "@/context/Transaction/TransactionContext";
+import { transaction } from "@/component/servicesApi/apiCalls/transactions";
+import Pagination from "@/component/Pagination";
 
 const InvoicesCom = () => {
-    const data = [
-        {
-            customer_name: "Mr. Ira Klark T. Fischer",
-            contract_number: "10000023345",
-            invoice_number: "10000023345",
-            invoice_status: "Paid",
-            invoice_amount: 10000,
-            invoice_details: "Payment for the month",
-            invoice_due_date: "2025-01-31",
-            invoice_link: "https://www.google.com",
-        },
-
-        {
-            customer_name: "Mr. Ira Klark T. Fischer",
-            contract_number: "10000023345",
-            invoice_number: "10000023345",
-            invoice_status: "Unpaid",
-            invoice_amount: 10000,
-            invoice_details: "Payment for the month",
-            invoice_due_date: "2025-01-31",
-            invoice_link: "https://www.google.com",
-        },
-    ];
-
     const fields = [
-        { name: "name", label: "Name" },
+        { name: "customer_name", label: "Name" },
         { name: "contract_number", label: "Contract Number" },
         { name: "invoice_number", label: "Invoice Number" },
         {
@@ -90,9 +70,26 @@ const InvoicesCom = () => {
         },
     ];
     const [searchValues, setSearchValues] = useState({});
+    const { invoices, setInvoices } = useTransactionContext();
+    const { handlePageClick, setFilters } = usePagination(
+        transaction.invoicesList,
+        invoices,
+        setInvoices
+    );
 
+    const handleSearchValue = (e) => {
+        const { name, value } = e.target;
+        setSearchValues((prev) => ({
+            ...prev,
+            [name]: value,
+        }));
+    };
 
-   /*  const sendSoapRequest = async () => {
+    const onSubmit = () => {
+        setFilters(searchValues);
+    };
+
+    /*  const sendSoapRequest = async () => {
         setSapLoader(true);
         const soapBody = `
       <soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:urn="urn:sap-com:document:sap:soap:functions:mc-style">
@@ -119,12 +116,17 @@ const InvoicesCom = () => {
         }
     }; */
 
-
     return (
         <>
             <div className="overflow-y-hidden px-3 flex flex-col space-y-2">
                 <div className="px-2">
-                    <TransactionSearchBar fields={fields} searchValues={searchValues} setSearchValues={setSearchValues}/>
+                    <TransactionSearchBar
+                        fields={fields}
+                        searchValues={searchValues}
+                        setSearchValues={setSearchValues}
+                        onChangeSearch={handleSearchValue}
+                        onSubmit={onSubmit}
+                    />
                 </div>
                 <div className="flex gap-[15px] flex-wrap mb-[16px] px-2">
                     <div className="relative flex border w-max border-custom-lightgreen rounded-[5px] shrink-0 z-10">
@@ -160,7 +162,16 @@ const InvoicesCom = () => {
                         </button>
                     </div>
                 </div>
-                <GlobalTable columns={columns} data={data} />
+                <GlobalTable columns={columns} data={invoices.data} />
+                <div className="flex justify-end mt-4">
+                    <div className="flex w-full justify-end mt-3 mb-10">
+                        <Pagination
+                            currentPage={invoices.currentPage}
+                            totalPages={invoices.totalPages}
+                            onPageChange={(page) => handlePageClick(page)}
+                        />
+                    </div>
+                </div>
             </div>
         </>
     );

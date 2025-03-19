@@ -13,13 +13,13 @@ import AddPropertyModal from "@/component/layout/propertyandpricingpage/basicpri
 import moment from "moment";
 import { useNavigate } from "react-router-dom";
 import { usePriceListMaster } from "@/context/PropertyPricing/PriceListMasterContext";
-import Skeleton from "@/component/layout/mainComponent/Skeletons";
+import Skeleton from "@/component/Skeletons";
 import { usePaymentScheme } from "@/context/PropertyPricing/PaymentSchemeContext";
 import { toLowerCaseText } from "@/util/formatToLowerCase";
 import { showToast } from "@/util/toastUtil";
 import { priceListMasterService } from "@/component/servicesApi/apiCalls/propertyPricing/priceListMaster/priceListMasterService";
 import CustomInput from "@/component/Input/CustomInput";
-import CustomToolTip from "@/component/layout/mainComponent/Tooltip/CustomToolTip";
+import CustomToolTip from "@/component/CustomToolTip";
 
 const PricingMasterList = () => {
     //States

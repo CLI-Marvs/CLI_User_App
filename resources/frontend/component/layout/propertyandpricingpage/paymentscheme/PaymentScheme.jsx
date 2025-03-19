@@ -4,7 +4,7 @@ import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md";
 import AddPaymentSchemeModal from "./AddPaymentSchemeModal";
 import { usePaymentScheme } from "@/context/PropertyPricing/PaymentSchemeContext";
 import moment from "moment";
-import Skeleton from "@/component/layout/mainComponent/Skeletons";
+import Skeleton from "@/component/Skeletons";
 
 const PaymentScheme = () => {
     //State

@@ -27,14 +27,14 @@ class TransactionRepository
     public function retrieveInvoicesFromSap(array $data)
     {
         $existingInvoice = $this->invoicesModel
-            ->where('document_number', $data['D_BELNR'])
+            ->where('invoice_number', $data['D_BELNR'])
             ->where('flow_type', $data['D_VBEWA'])
             ->first();
 
         if (!$existingInvoice) {
             $invoice = new $this->invoicesModel;
             $invoice->contract_number = $data['D_RECNNR'];
-            $invoice->document_number = $data['D_BELNR'];
+            $invoice->invoice_number = $data['D_BELNR'];
             $invoice->customer_bp_number = $data['D_KUNNR'];
             $invoice->sap_unique_id = $data['D_BUZEI'];
             $invoice->company_code = $data['D_BUKRS'];
@@ -134,7 +134,7 @@ class TransactionRepository
     {
         $startDate = $data['start_date'] ?? null;
         $endDate = $data['end_date'] ?? null;
-    
+
         $query = $this->transactionModel
             ->join('property_masters', 'property_masters.id', '=', 'transaction.id')
             ->select('transaction.*', 'property_masters.property_name')
@@ -149,11 +149,23 @@ class TransactionRepository
             ->when($startDate && $endDate, fn($q) => $q->whereBetween('transaction.transaction_date', [$startDate, $endDate]))
             ->when($startDate && !$endDate, fn($q) => $q->whereDate('transaction.transaction_date', $startDate))
             ->when($endDate && !$startDate, fn($q) => $q->whereDate('transaction.transaction_date', $endDate))
-            ->paginate(10);
-    
+            ->paginate(2);
+
         return $query;
     }
-    
+
+    public function retrieveInvoices(array $data)
+    {
+        $query = $this->invoicesModel
+            ->when(!empty($data['status']), fn($q) => $q->where('transaction.status', $data['status']))
+            ->when(!empty($data['invoice_number']), fn($q) => $q->where('invoice_number', $data['invoice_number']))
+            ->when(!empty($data['customer_name']), fn($q) => $q->whereRaw('customer_name ILIKE ?', ["%{$data['customer_name']}%"]))
+            ->when(!empty($data['contract_number']), fn($q) => $q->where('contract_number', $data['contract_number']))
+            ->paginate(2);
+
+        return $query;
+    }
+
 
     public function updateTransactionStatus(array $data)
     {

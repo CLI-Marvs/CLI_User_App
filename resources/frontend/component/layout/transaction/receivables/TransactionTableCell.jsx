@@ -1,5 +1,7 @@
 import moment from "moment";
 import React from "react";
+import { toLowerCaseText } from "@/util/formatToLowerCase";
+
 
 const TransactionTableCell = ({ type, row }) => {
     switch (type) {
@@ -67,7 +69,7 @@ const TransactionTableCell = ({ type, row }) => {
                         </span>
                     </div>
                     <div className="flex flex-col flex-1 montserrat-regular">
-                        <span className="text-[13px]">{row.property_name}</span>
+                        <span className="text-[13px]">{toLowerCaseText(row.property_name)}</span>
                         <span className="text-xs text-custom-lightgreen">
                             {row.remarks}
                         </span>

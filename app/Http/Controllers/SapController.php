@@ -81,15 +81,17 @@ class SapController extends Controller
     public function retrieveInvoicesFromSap(Request $request)
     {
         try {
-            $existingInvoice = Invoices::where('document_number', $request->input('D_BELNR'))
+            \Log::info("request all", $request->all());
+            $existingInvoice = Invoices::where('invoice_number', $request->input('D_BELNR'))
                 ->where('flow_type', $request->input('D_VBEWA'))
                 ->first();
             $attachment = $request->input('D_INVDOC');
             $fileLink = $this->uploadToFile($attachment);
+            $soaLink = $this->uploadToFile($request->input('D_SOADOC'));
             if (!$existingInvoice) {
                 $invoice = new Invoices();
                 $invoice->contract_number = $request->input('D_RECNNR');
-                $invoice->document_number = $request->input('D_BELNR');
+                $invoice->invoice_number = $request->input('D_BELNR');
                 $invoice->customer_bp_number = $request->input('D_KUNNR');
                 $invoice->sap_unique_id = $request->input('D_BUZEI');
                 $invoice->company_code = $request->input('D_BUKRS');
@@ -103,6 +105,7 @@ class SapController extends Controller
                 $invoice->flow_type = $request->input('D_VBEWA');
                 $invoice->invoice_status = $request->input('D_STATS');
                 $invoice->invoice_link = $fileLink;
+                $invoice->soa_link = $soaLink;
                 /*  $invoice->invoice_status = $request->input('invoice_status'); 
                 $invoice->status = $request->input('status');
                 $invoice->posting_response = $request->input('posting_response'); */

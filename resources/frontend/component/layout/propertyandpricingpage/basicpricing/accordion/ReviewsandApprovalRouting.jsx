@@ -18,7 +18,7 @@ import { usePropertyPricing } from "@/component/layout/propertyandpricingpage/ba
 import { formatPayload } from "@/component/layout/propertyandpricingpage/basicpricing/utils/payloadFormatter";
 import { showToast } from "@/util/toastUtil";
 import { usePriceListMaster } from "@/context/PropertyPricing/PriceListMasterContext";
-import CustomToolTip from "@/component/layout/mainComponent/Tooltip/CustomToolTip";
+import CustomToolTip from "@/component/CustomToolTip";
 import UnitTableComponent from "@/component/layout/propertyandpricingpage/component/UnitTableComponent";
 import { staticHeaders } from "@/constant/data/staticHeaders";
 

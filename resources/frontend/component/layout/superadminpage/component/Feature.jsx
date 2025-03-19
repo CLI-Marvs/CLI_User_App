@@ -1,7 +1,7 @@
 import React from "react";
 import { PERMISSIONS } from "@/constant/data/permissions";
 import PermissionCheckbox from "@/component/layout/superadminpage/component/PermissionCheckbox";
-import CustomToolTip from "../../mainComponent/Tooltip/CustomToolTip";
+import CustomToolTip from "../../../CustomToolTip";
 
 const Feature = ({
     item,
