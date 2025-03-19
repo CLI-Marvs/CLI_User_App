@@ -6,6 +6,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class BankStatement extends Model
 {
-    protected $table = 'bank_statement';
+    protected $table = 'bank_statements';
     protected $guarded = array();
 }

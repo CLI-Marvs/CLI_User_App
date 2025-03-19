@@ -30,7 +30,22 @@ export const transaction = {
         try {
             const params = { page: currentPage + 1, ...filter };
 
-            const response = await apiService.get("get-invoices", {
+            const response = await apiService.get("invoices-list", {
+                params,
+            });
+
+            return response?.data.data;
+        } catch (error) {
+            console.log("error", error);
+        }
+    },
+
+
+    bankStatementsList: async (currentPage, filter = {}) => {
+        try {
+            const params = { page: currentPage + 1, ...filter };
+
+            const response = await apiService.get("bank-statements-list", {
                 params,
             });
 

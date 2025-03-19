@@ -93,4 +93,9 @@ class TransactionService
     {
         return $this->repository->retrieveInvoices($data);
     }
+
+    public function retrieveBankStatements(array $data)
+    {
+        return $this->repository->retrieveInvoices($data);
+    }
 }

@@ -149,7 +149,7 @@ class TransactionRepository
             ->when($startDate && $endDate, fn($q) => $q->whereBetween('transaction.transaction_date', [$startDate, $endDate]))
             ->when($startDate && !$endDate, fn($q) => $q->whereDate('transaction.transaction_date', $startDate))
             ->when($endDate && !$startDate, fn($q) => $q->whereDate('transaction.transaction_date', $endDate))
-            ->paginate(2);
+            ->paginate(20);
 
         return $query;
     }
@@ -157,11 +157,31 @@ class TransactionRepository
     public function retrieveInvoices(array $data)
     {
         $query = $this->invoicesModel
-            ->when(!empty($data['status']), fn($q) => $q->where('transaction.status', $data['status']))
+            ->when(!empty($data['status']), fn($q) => $q->where('status', $data['status']))
             ->when(!empty($data['invoice_number']), fn($q) => $q->where('invoice_number', $data['invoice_number']))
             ->when(!empty($data['customer_name']), fn($q) => $q->whereRaw('customer_name ILIKE ?', ["%{$data['customer_name']}%"]))
             ->when(!empty($data['contract_number']), fn($q) => $q->where('contract_number', $data['contract_number']))
-            ->paginate(2);
+            ->paginate(20);
+
+        return $query;
+    }
+
+    public function retrieveBankStatements(array $data)
+    {
+        $startDate = $data['start_date'] ?? null;
+        $endDate = $data['end_date'] ?? null;
+
+        $query = $this->bankStatementModel
+            ->when(!empty($data['status']), fn($q) => $q->where('status_of_posting', $data['status']))
+            ->when(!empty($data['bank_name']), fn($q) => $q->where('bank_name', $data['bank_name']))
+            ->when(!empty($data['transaction_number']), fn($q) => $q->where('transaction_number', $data['transaction_number']))
+            ->when(!empty($data['document_number']), fn($q) => $q->where('document_number', $data['document_number']))
+            ->when(!empty($data['transaction_code']), fn($q) => $q->where('transaction_code', $data['transaction_code']))
+            ->when(!empty($data['reference_number']), fn($q) => $q->where('reference_number', $data['reference_number']))
+            ->when($startDate && $endDate, fn($q) => $q->whereBetween('transaction_date', [$startDate, $endDate]))
+            ->when($startDate && !$endDate, fn($q) => $q->whereDate('transaction_date', $startDate))
+            ->when($endDate && !$startDate, fn($q) => $q->whereDate('transaction_date', $endDate))
+            ->paginate(20);
 
         return $query;
     }

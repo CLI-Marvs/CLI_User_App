@@ -19,12 +19,12 @@ export const TransactionProvider = ({ children }) => {
         filters: {}
     });
 
-   /*  const [postings, setPostings] = useState({
+    const [bankStatementsList, setBankStatementsList] = useState({
         data: [],
         currentPage: 0,
         totalPages: 0,
         filters: {}
-    }); */
+    });
 
     const [invoices, setInvoices] = useState({
         data: [],
@@ -47,7 +47,9 @@ export const TransactionProvider = ({ children }) => {
                 transactions, 
                 setTransactions,
                 invoices, 
-                setInvoices
+                setInvoices,
+                bankStatementsList,
+                setBankStatementsList
             }}
         >
             {children}

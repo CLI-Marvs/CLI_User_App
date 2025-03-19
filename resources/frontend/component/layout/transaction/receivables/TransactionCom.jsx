@@ -131,6 +131,7 @@ const TransactionCom = () => {
 
     const onSubmit = () => {
         setFilters(searchValues);
+        setSearchValues({});
     };
 
     return (

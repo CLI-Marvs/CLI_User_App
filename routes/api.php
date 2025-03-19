@@ -77,7 +77,6 @@ Route::post('/test-api', [ConcernController::class, 'testApi']);
 
 
 
-
 //*Post document number and other fields to sap
 Route::post('/post-data-sap', [SapController::class, 'postFromAppToSap']);
 
@@ -104,8 +103,10 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/customer/data', 'getCustomerData');
         Route::get('/customer/details', 'getCustomerDetailsByEmail');
         Route::get('/transaction-list', 'retrieveTransactions');
-        Route::get('/get-invoices','retrieveInvoices');
+        Route::get('/invoices-list','retrieveInvoices');
+        Route::get('/bank-statements-list','retrieveInvoices');
         Route::patch('/transaction-update', 'updateTransactionStatus');
+        
     });
 
     Route::controller(ConcernController::class)->group(function () {

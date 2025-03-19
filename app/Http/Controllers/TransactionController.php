@@ -199,6 +199,27 @@ class TransactionController extends Controller
         }
     }
 
+    public function retrieveBankStatements(Request $request)
+    {   
+        try {
+            $data = $request->all();
+            $response = $this->transactionService->retrieveBankStatements($data);
+            
+
+            return response()->json([
+                'response_message' => 'Data Retrieved Successfully',
+                'data' => $response
+            ]);
+            
+        } catch (\Throwable $e) {
+            return response()->json([
+                'message' => 'Error occurred.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+    
+
  /*    public function postBpiBank(Request $request) {
         $username = config('services.paynamics.username');
         $password = config('services.paynamics.password');
