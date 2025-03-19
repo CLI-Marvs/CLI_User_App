@@ -17,7 +17,7 @@ const GlobalTable = ({ columns, data }) => {
                     </tr>
                 </thead>
                 <tbody>
-                    {data.length > 0 ? (
+                    {data && data.length > 0 ? (
                         <>
                             {data.map((row, rowIndex) => (
                                 <tr

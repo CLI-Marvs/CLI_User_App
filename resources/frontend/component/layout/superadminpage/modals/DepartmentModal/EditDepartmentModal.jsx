@@ -7,7 +7,7 @@ import Feature from "@/component/layout/superadminpage/component/Feature";
 import useFeature from "@/context/RoleManagement/FeatureContext";
 import { departmentPermissionService } from "@/component/servicesApi/apiCalls/roleManagement";
 import useDepartmentPermission from "@/context/RoleManagement/DepartmentPermissionContext";
-import Alert from "@/component/layout/mainComponent/Alert";
+import Alert from "@/component/Alert";
 
 const EditDepartmentModal = ({
     editDepartmentModalRef,

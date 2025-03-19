@@ -7,7 +7,7 @@ import Feature from "@/component/layout/superadminpage/component/Feature";
 import useFeature from "@/context/RoleManagement/FeatureContext";
 import useEmployeePermission from "@/context/RoleManagement/EmployeePermissionContext";
 import { employeePermissionService } from "@/component/servicesApi/apiCalls/roleManagement";
-import Alert from "@/component/layout/mainComponent/Alert";
+import Alert from "@/component/Alert";
 
 const EditUserModal = ({ editEmployeeModalRef, selectedEmployee }) => {
     //States

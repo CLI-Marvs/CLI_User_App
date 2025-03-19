@@ -7,8 +7,8 @@ import ReactPaginate from "react-paginate";
 import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md";
 import TransactionSearchBar from "@/component/layout/transaction/TransactionSearchBar";
 import { useStateContext } from "@/context/contextprovider";
-import { toLowerCaseText } from "../../propertyandpricingpage/utils/formatToLowerCase";
-import Pagination from "@/component/layout/transaction/Pagination";
+import { toLowerCaseText } from "@/util/formatToLowerCase";
+import Pagination from "@/component/Pagination";
 import usePagination from "@/hooks/usePagination";
 
 const TransactionCom = () => {
@@ -78,7 +78,7 @@ const TransactionCom = () => {
         transactions,
         setTransactions
     );
-    
+
     const fields = [
         { name: "customer_name", label: "Name" },
         { name: "email", label: "Email" },

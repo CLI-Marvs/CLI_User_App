@@ -1,5 +1,5 @@
 import React from "react";
-import { toLowerCaseText } from "../../propertyandpricingpage/utils/formatToLowerCase";
+import { toLowerCaseText } from "@/util/formatToLowerCase";
 
 const InvoicesTableCell = ({ type, row }) => {
     switch (type) {

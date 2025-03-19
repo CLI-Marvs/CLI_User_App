@@ -6,7 +6,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import DateLogo from "../../../../../../public/Images/Date_range.svg";
 import AddPriceVersionModal from "@/component/layout/propertyandpricingpage/priceversioning/AddPriceVersionModal";
 import { usePriceVersion } from "@/context/PropertyPricing/PriceVersionContext";
-import Skeleton from "@/component/layout/mainComponent/Skeletons";
+import Skeleton from "@/component/Skeletons";
 import { toLowerCaseText } from "@/util/formatToLowerCase";
 
 const PriceVersioning = () => {

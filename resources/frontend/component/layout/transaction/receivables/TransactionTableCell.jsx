@@ -1,6 +1,7 @@
 import moment from "moment";
 import React from "react";
-import { toLowerCaseText } from "@/component/layout/propertyandpricingpage/utils/formatToLowerCase";
+import { toLowerCaseText } from "@/util/formatToLowerCase";
+
 
 const TransactionTableCell = ({ type, row }) => {
     switch (type) {

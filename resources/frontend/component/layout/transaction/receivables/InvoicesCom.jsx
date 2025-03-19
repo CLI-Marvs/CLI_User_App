@@ -18,7 +18,7 @@ import TransactionSearchBar from "@/component/layout/transaction/TransactionSear
 import usePagination from "@/hooks/usePagination";
 import { useTransactionContext } from "@/context/Transaction/TransactionContext";
 import { transaction } from "@/component/servicesApi/apiCalls/transactions";
-import Pagination from "@/component/layout/transaction/Pagination";
+import Pagination from "@/component/Pagination";
 
 const InvoicesCom = () => {
     const fields = [

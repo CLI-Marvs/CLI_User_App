@@ -13,7 +13,7 @@ import { PERMISSIONS } from "@/constant/data/permissions";
 import { HiPencil } from "react-icons/hi";
 import { MdDelete } from "react-icons/md";
 import { showToast } from "@/util/toastUtil";
-import Alert from "@/component/layout/mainComponent/Alert";
+import Alert from "@/component/Alert";
 import CircularProgress from "@mui/material/CircularProgress";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
@@ -25,7 +25,7 @@ import {
 import useDepartmentPermission from "@/context/RoleManagement/DepartmentPermissionContext";
 import useEmployeePermission from "@/context/RoleManagement/EmployeePermissionContext";
 import useDepartment from "@/context/RoleManagement/DepartmentContext";
-import CustomToolTip from "@/component/layout/mainComponent/Tooltip/CustomToolTip";
+import CustomToolTip from "@/component/CustomToolTip";
 import { debounce } from "lodash";
 import highlightText from "@/util/hightlightText";
 
