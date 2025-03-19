@@ -297,7 +297,7 @@ const AutoPostingCom = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {postingList.length > 0 ? (
+                        {postingList && postingList.length > 0 ? (
                             postingList.map((row, rowIndex) => (
                                 <tr
                                     key={rowIndex}

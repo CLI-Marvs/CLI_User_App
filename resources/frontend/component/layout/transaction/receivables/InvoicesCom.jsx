@@ -87,6 +87,7 @@ const InvoicesCom = () => {
 
     const onSubmit = () => {
         setFilters(searchValues);
+        setSearchValues({});
     };
 
     /*  const sendSoapRequest = async () => {

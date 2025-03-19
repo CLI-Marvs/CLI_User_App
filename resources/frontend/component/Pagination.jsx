@@ -19,9 +19,13 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
                 activeClassName="w-[26px] h-[24px] border border-[#EEEEEE] bg-custom-lightgreen text-white rounded-[4px] text-[12px]"
                 pageLinkClassName="w-full h-full flex justify-center items-center"
                 activeLinkClassName="w-full h-full flex justify-center items-center"
+                disabledLinkClassName={
+                    "text-gray-300 cursor-not-allowed"
+                }
                 forcePage={currentPage}
             />
     );
 };
 
 export default Pagination;
+
