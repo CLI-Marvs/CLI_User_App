@@ -1,4 +1,3 @@
-import React, { useState, useMemo, useEffect } from "react";
 import { IoIosArrowDown } from "react-icons/io";
 import { usePricing } from "@/component/layout/propertyandpricingpage/context/BasicPricingContext";
 import CustomInput from "@/component/Input/CustomInput";
@@ -29,7 +28,7 @@ const PriceListSettings = ({ isOpen, toggleAccordion, priceListData }) => {
           ${
               isOpen
                   ? "flex justify-between items-center h-full w-full bg-white rounded-[9px] px-[15px]"
-                  : "flex justify-between items-center h-full w-full bg-custom-grayFA rounded-[9px] px-[15px]"
+                  : "flex justify-between items-center h-full w-full bg-custombg3 rounded-[9px] px-[15px]"
           } `}
                 >
                     <span
@@ -64,8 +63,9 @@ const PriceListSettings = ({ isOpen, toggleAccordion, priceListData }) => {
                 <div className="overflow-hidden bg-white">
                     <div className="flex flex-col justify-between w-full h-[153px] p-5">
                         <div className="flex gap-2 h-[31px]">
+                            {/* Base price */}
                             <div className="flex items-center border border-custom-grayF1 rounded-[5px] overflow-hidden w-[375px] text-sm">
-                                <span className="text-custom-gray81 bg-custom-grayFA font-semibold flex w-[180%] pl-3 py-1">
+                                <span className="text-custom-gray81 bg-custombg3 font-semibold flex w-[250px] pl-3 py-1">
                                     Base Price Per Sq. M.
                                 </span>
                                 <CustomInput
@@ -74,81 +74,102 @@ const PriceListSettings = ({ isOpen, toggleAccordion, priceListData }) => {
                                         pricingData?.priceListSettings
                                             ?.base_price || ""
                                     }
-                                    className="w-full px-4 focus:outline-none "
+                                    className="w-[150px] px-4 focus:outline-none "
                                     onChange={handleInputChange}
                                     restrictNumbers={true}
                                     disabled={
                                         priceListData.data.status !== "Draft"
                                     }
                                 />
-
-                                {/* TODO: add percent % suffix here */}
                             </div>
-                            <div className="flex items-center border border-custom-grayF1 rounded-[5px] overflow-hidden w-[375px] text-sm">
-                                <span className="text-custom-gray81 bg-custom-grayFA font-semibold flex w-[180%] pl-3 py-1 ">
+
+                            {/* Transfer charge */}
+                            <div className="flex items-center border border-custom-grayF1 rounded-[5px] overflow-hidden w-[375px] text-sm justify-between">
+                                <span className="text-custom-gray81 bg-custombg3 font-semibold   w-[200px] pl-3 py-1 ">
                                     Transfer charge
                                 </span>
-                                <CustomInput
-                                    name="transfer_charge"
-                                    value={
-                                        pricingData?.priceListSettings
-                                            ?.transfer_charge || ""
-                                    }
-                                    className="w-full px-4 focus:outline-none "
-                                    onChange={handleInputChange}
-                                    restrictNumbers={true}
-                                    disabled={
-                                        priceListData.data.status !== "Draft"
-                                    }
-                                />
+                                <div className="flex  h-full justify-between">
+                                    <CustomInput
+                                        name="transfer_charge"
+                                        value={
+                                            pricingData?.priceListSettings
+                                                ?.transfer_charge || ""
+                                        }
+                                        className="w-[120px] px-4 focus:outline-none bg-white"
+                                        onChange={handleInputChange}
+                                        restrictNumbers={true}
+                                        disabled={
+                                            priceListData.data.status !==
+                                            "Draft"
+                                        }
+                                    />
+                                    <div className="w-[56px]  bg-custombg3  flex items-center justify-center rounded-r-[5px] h-full">
+                                        %
+                                    </div>
+                                </div>
                             </div>
                         </div>
+
                         <div className="flex gap-2 h-[31px]">
+                            {/* Effective balcony base */}
                             <div className="flex items-center border border-custom-grayF1 rounded-[5px] overflow-hidden w-[375px] text-sm">
-                                <span className="text-custom-gray81 bg-custom-grayFA font-semibold flex w-[180%] pl-3 py-1">
+                                <span className="text-custom-gray81 bg-custombg3 font-semibold flex w-[250px] pl-3 py-1">
                                     Effective Balcony Base
                                 </span>
-                                <input
-                                    name="effective_balcony_base"
-                                    type="number"
-                                    onChange={handleInputChange}
-                                    value={
-                                        pricingData?.priceListSettings
-                                            ?.effective_balcony_base
-                                    }
-                                    className="w-full px-4 focus:outline-none"
-                                    disabled={
-                                        priceListData.data.status !== "Draft" ||
-                                        true
-                                    }
-                                />
+                                <div className="flex  h-full justify-between">
+                                    <CustomInput
+                                        type="number"
+                                        name="effective_balcony_base"
+                                        value={
+                                            pricingData?.priceListSettings
+                                                ?.effective_balcony_base || ""
+                                        }
+                                        className="w-[95px] px-4 focus:outline-none "
+                                        onChange={handleInputChange}
+                                        restrictNumbers={true}
+                                        disabled={
+                                            priceListData.data.status !==
+                                            "Draft"
+                                        }
+                                    />
+                                    <div className="w-[56px]  bg-custombg3  flex items-center justify-center rounded-r-[5px] h-full">
+                                        %
+                                    </div>
+                                </div>
                             </div>
+
+                            {/* VAT */}
                             <div className="flex items-center border border-custom-grayF1 rounded-[5px] overflow-hidden w-[375px] text-sm">
-                                <span className="text-custom-gray81 bg-custom-grayFA font-semibold flex w-[180%] pl-3 py-1 ">
+                                <span className="text-custom-gray81 bg-custombg3 font-semibold flex w-[200px] pl-3 py-1 ">
                                     VAT
                                 </span>
-                                <CustomInput
-                                    name="vat"
-                                    value={
-                                        pricingData?.priceListSettings?.vat ||
-                                        ""
-                                    }
-                                    className="w-full px-4 focus:outline-none "
-                                    onChange={handleInputChange}
-                                    restrictNumbers={true}
-                                    disabled={
-                                        priceListData.data.status !== "Draft"
-                                    }
-                                />
+                                <div className="flex  h-full justify-between">
+                                    <CustomInput
+                                        name="vat"
+                                        value={
+                                            pricingData?.priceListSettings
+                                                ?.vat || ""
+                                        }
+                                        className="w-[120px] px-4 focus:outline-none "
+                                        onChange={handleInputChange}
+                                        restrictNumbers={true}
+                                        disabled={
+                                            priceListData.data.status !==
+                                            "Draft"
+                                        }
+                                    />
+                                    <div className="w-[56px]  bg-custombg3  flex items-center justify-center rounded-r-[5px] h-full">
+                                        %
+                                    </div>
+                                </div>
                             </div>
                         </div>
+
                         <div className="flex gap-2 h-[31px]">
+                            {/* VATable List Price */}
                             <div className="flex items-center border border-custom-grayF1 rounded-[5px] overflow-hidden w-[375px] text-sm">
-                                <span className="text-custom-gray81 bg-custom-grayFA font-semibold flex w-[180%] pl-3 py-1 ">
-                                    VATable List Price&nbsp;
-                                    <span className="flex items-center font-semibold text-xs">
-                                        (greater than)
-                                    </span>
+                                <span className="text-custom-gray81 bg-custombg3  font-semibold flex w-[250px] pl-3 py-1 ">
+                                    VATable List Price&nbsp; (greater than)
                                 </span>
                                 <CustomInput
                                     name="vatable_less_price"
@@ -156,7 +177,7 @@ const PriceListSettings = ({ isOpen, toggleAccordion, priceListData }) => {
                                         pricingData?.priceListSettings
                                             ?.vatable_less_price || ""
                                     }
-                                    className="w-full px-4 focus:outline-none "
+                                    className="w-[150px] px-4 focus:outline-none "
                                     onChange={handleInputChange}
                                     restrictNumbers={true}
                                     disabled={
@@ -164,8 +185,10 @@ const PriceListSettings = ({ isOpen, toggleAccordion, priceListData }) => {
                                     }
                                 />
                             </div>
+
+                            {/* Reservation Fee */}
                             <div className="flex items-center border border-custom-grayF1 rounded-[5px] overflow-hidden w-[375px] text-sm">
-                                <span className="text-custom-gray81 bg-custom-grayFA font-semibold flex w-[180%] pl-3 py-1 text-sm">
+                                <span className="text-custom-gray81 bg-custombg3 font-semibold flex w-[200px] pl-3 py-1 text-sm">
                                     Reservation Fee
                                 </span>
                                 <CustomInput
@@ -174,7 +197,7 @@ const PriceListSettings = ({ isOpen, toggleAccordion, priceListData }) => {
                                         pricingData?.priceListSettings
                                             ?.reservation_fee || ""
                                     }
-                                    className="w-full px-4 focus:outline-none "
+                                    className="w-[170px] px-4 focus:outline-none "
                                     onChange={handleInputChange}
                                     restrictNumbers={true}
                                     disabled={
