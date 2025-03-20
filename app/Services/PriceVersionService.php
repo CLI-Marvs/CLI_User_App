@@ -29,5 +29,8 @@ class PriceVersionService
         return $this->repository->storePriceVersion($data);
     }
 
+    /**
+     * Update price version data
+     */
     
 }

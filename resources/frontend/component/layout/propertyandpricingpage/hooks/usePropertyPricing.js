@@ -9,7 +9,7 @@ export const usePropertyPricing = (
     pricingData,
     resetPricingData,
     showToast,
-    fetchPropertyListMasters,
+    fetchData,
     checkExistingUnits
 ) => {
     const navigate = useNavigate();
@@ -61,8 +61,7 @@ export const usePropertyPricing = (
         status,
         action,
         excelId,
-        setFloorPremiumsAccordionOpen,
-        currentPage
+        setFloorPremiumsAccordionOpen
     ) => {
         e.preventDefault();
         if (action === "Edit") {
@@ -87,7 +86,7 @@ export const usePropertyPricing = (
                         true,
                         false
                     );
-                    await fetchPropertyListMasters(true, true, currentPage);
+                    await fetchData(true, true);
 
                     setTimeout(() => {
                         navigate("/property-pricing/master-lists");
@@ -132,7 +131,7 @@ export const usePropertyPricing = (
                         true,
                         false
                     );
-                    await fetchPropertyListMasters(true, true, currentPage);
+                    await fetchData(true, true);
 
                     setTimeout(() => {
                         navigate("/property-pricing/master-lists");

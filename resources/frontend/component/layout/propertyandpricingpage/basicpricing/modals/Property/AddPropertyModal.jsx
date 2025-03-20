@@ -23,7 +23,7 @@ const formDataState = {
     google_map_link: "",
 };
 
-const AddPropertyModal = ({ propertyModalRef }) => {
+const AddPropertyModal = ({ propertyModalRef, fetchData }) => {
     //State
     const { user } = useStateContext();
     const [formData, setFormData] = useState(formDataState);
@@ -78,7 +78,7 @@ const AddPropertyModal = ({ propertyModalRef }) => {
             if (response.status === 201) {
                 showToast("Data added successfully!", "success");
                 setFormData(formDataState);
-                await fetchPropertyListMasters(true, false);
+                await fetchData(true, false);
 
                 if (propertyModalRef.current) {
                     propertyModalRef.current.close();

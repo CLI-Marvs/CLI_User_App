@@ -216,9 +216,10 @@ const PriceVersioning = () => {
                                                             : ""}
                                                         {item?.tower_phase_name}
                                                     </p>
-                                                    <p className="underline text-blue-500 cursor-pointer text-sm">
+                                                    {/* TODO: Add functionality on this one, wait for the instructions */}
+                                                    {/* <p className="underline text-blue-500 cursor-pointer text-sm">
                                                         Edit
-                                                    </p>
+                                                    </p> */}
                                                 </td>
 
                                                 {/* Price Versions Table */}

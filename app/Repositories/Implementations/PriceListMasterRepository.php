@@ -123,7 +123,7 @@ class PriceListMasterRepository
 
 
     /**
-     * Update the price list master status to inactive
+     * Update the price list master status to InActive, On-going Approval, Approved and Live, Approved not Live
      */
     public function updateStatus($id)
     {

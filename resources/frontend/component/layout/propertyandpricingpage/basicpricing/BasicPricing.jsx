@@ -52,8 +52,7 @@ const BasicPricing = () => {
     const { priceListData = {}, action = null } = location.state || {};
     const { pricingData, resetPricingData, setPricingData } = usePricing();
     const {
-        fetchPropertyListMasters,
-        currentPage,
+        fetchData,
         setPropertyMasterId,
         setPriceListMasterId,
     } = usePriceListMaster();
@@ -86,9 +85,8 @@ const BasicPricing = () => {
         pricingData,
         resetPricingData,
         showToast,
-        fetchPropertyListMasters,
+        fetchData,
         checkExistingUnits,
-        currentPage
     );
 
     //Hooks
@@ -465,7 +463,6 @@ const BasicPricing = () => {
             action,
             excelId,
             setFloorPremiumsAccordionOpen,
-            currentPage
         );
     };
 

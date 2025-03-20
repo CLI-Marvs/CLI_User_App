@@ -22,8 +22,8 @@ class PaymentSchemeService
     }   
 
     /* Get all payment schemes  data*/
-    public function index()
+    public function index($validatedData)
     {
-        return $this->repository->index();
+        return $this->repository->index($validatedData);
     }
 }

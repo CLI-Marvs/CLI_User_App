@@ -1,11 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import "@/component/layout/propertyandpricingpage/style/togglebtn.css";
-import ReactPaginate from "react-paginate";
-import {
-    MdKeyboardArrowLeft,
-    MdKeyboardArrowRight,
-    MdRefresh,
-} from "react-icons/md";
+import Pagination from "@/component/layout/propertyandpricingpage/component/Pagination";
+import { MdRefresh } from "react-icons/md";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import DateLogo from "../../../../../../public/Images/Date_range.svg";
@@ -24,21 +20,20 @@ import CustomToolTip from "@/component/CustomToolTip";
 const PricingMasterList = () => {
     //States
     const {
-        priceListMaster,
+        data: priceListMaster,
         isLoading,
-        fetchPropertyListMasters,
-        currentPage,
-        setCurrentPage,
+        pageState,
+        setPageState,
+        fetchData,
         isFirstLoad,
         searchFilters,
         setSearchFilters,
-        setPriceListMaster,
         applySearch,
         refreshPage,
+        defaultFilters,
     } = usePriceListMaster();
 
-    const { fetchPaymentSchemes } = usePaymentScheme();
-    // const [startDate, setStartDate] = useState(new Date());
+    // const { fetchPaymentSchemes } = usePaymentScheme();
     const [toggled, setToggled] = useState(false);
     const [isFilterVisible, setIsFilterVisible] = useState(false);
     const navigate = useNavigate();
@@ -54,15 +49,10 @@ const PricingMasterList = () => {
             !searchFilters.status &&
             !searchFilters.date;
 
-        return allEmpty; // Disable button if all fields are empty, enable otherwise
+        return allEmpty;
     };
 
-    //Hooks
-    useEffect(() => {
-        fetchPaymentSchemes();
-        console.log("priceListMaster", priceListMaster);
-    }, [fetchPaymentSchemes]);
-
+    //Hooks  
     //Hide the search filter dropdown when clicking outside of it
     useEffect(() => {
         const handleOutsideClick = (event) => {
@@ -82,7 +72,7 @@ const PricingMasterList = () => {
 
     //Event handler
     //Handle search filter input change
-    const handleInputChange = (e) => {
+    const onInputChange = (e) => {
         const { name, value } = e.target;
         setSearchFilters((prevFilters) => ({
             ...prevFilters,
@@ -100,7 +90,13 @@ const PricingMasterList = () => {
 
     //Handle filter search button
     const handleSearch = async () => {
-        applySearch();
+        applySearch(searchFilters);
+    };
+
+    //Handle refresh page
+    const handleRefreshPage = () => {
+        setSearchFilters(defaultFilters);
+        refreshPage();
     };
 
     //Handle click to open modal
@@ -112,8 +108,11 @@ const PricingMasterList = () => {
 
     // Handles pagination: Moves to the next page when clicked
     const handlePageChange = (selectedPage) => {
-        if (selectedPage !== currentPage) {
-            setCurrentPage(selectedPage);
+        if (selectedPage !== pageState.currentPage) {
+            setPageState((prevState) => ({
+                ...prevState,
+                currentPage: selectedPage,
+            }));
         }
     };
 
@@ -123,7 +122,7 @@ const PricingMasterList = () => {
         const priceListData = {
             data: priceListItem,
         };
-        console.log("priceListData", priceListData);
+
         navigate(`/property-pricing/basic-pricing/${id}`, {
             state: {
                 priceListData: priceListData,
@@ -217,7 +216,7 @@ const PricingMasterList = () => {
                     <CustomToolTip text="Refresh page" position="top">
                         <button
                             className="  hover:bg-custom-grayF1 rounded-full text-custom-bluegreen hover:text-custom-lightblue"
-                            onClick={() => refreshPage()}
+                            onClick={handleRefreshPage}
                         >
                             <MdRefresh className="h-6 w-6 mt-1" />
                         </button>
@@ -240,7 +239,7 @@ const PricingMasterList = () => {
                                     name="property"
                                     value={searchFilters.property || ""}
                                     className="w-full  border-b-1 outline-none ml-2"
-                                    onChange={handleInputChange}
+                                    onChange={onInputChange}
                                 />
                             </div>
                             <div className="flex">
@@ -253,7 +252,7 @@ const PricingMasterList = () => {
                                     name="paymentScheme"
                                     value={searchFilters.paymentScheme || ""}
                                     className="w-full  border-b-1 outline-none ml-2"
-                                    onChange={handleInputChange}
+                                    onChange={onInputChange}
                                 />
                             </div>
                             {/* <div className="flex">
@@ -266,7 +265,7 @@ const PricingMasterList = () => {
                                     name="promo"
                                     value={searchFilters.promo || ""}
                                     className="w-full  border-b-1 outline-none ml-2"
-                                    onChange={handleInputChange}
+                                    onChange={onInputChange}
                                 />
                             </div> */}
                             <div className="flex gap-3">
@@ -301,7 +300,7 @@ const PricingMasterList = () => {
                                     className="w-full border-b-1 outline-none px-[5px]"
                                     name="status"
                                     value={searchFilters.status || ""}
-                                    onChange={handleInputChange}
+                                    onChange={onInputChange}
                                 >
                                     <option value="">Select Status</option>
                                     <option value="Draft">Draft</option>
@@ -369,9 +368,8 @@ const PricingMasterList = () => {
                                     <Skeleton height={140} />
                                 </td>
                             </tr>
-                        ) : priceListMaster &&
-                          priceListMaster.data.length > 0 ? (
-                            priceListMaster.data.map((item) => {
+                        ) : priceListMaster && priceListMaster.length > 0 ? (
+                            priceListMaster.map((item) => {
                                 return (
                                     <tr
                                         onClick={(event) => {
@@ -705,6 +703,7 @@ const PricingMasterList = () => {
                                 </td>
                             </tr>
                         )}
+
                         {/*                                                      DRAFT                                                                      */}
                         {/* {propertyMasterList && Object.values(propertyMasterList).map((item, index) => {
                             return (
@@ -900,31 +899,17 @@ const PricingMasterList = () => {
                 </table>
             </div>
             <div className="flex w-full justify-start py-5">
-                <ReactPaginate
-                    previousLabel={
-                        <MdKeyboardArrowLeft className="text-[#404B52]" />
-                    }
-                    nextLabel={
-                        <MdKeyboardArrowRight className="text-[#404B52]" />
-                    }
-                    breakLabel={"..."}
-                    pageCount={priceListMaster?.pagination?.last_page || 1}
-                    marginPagesDisplayed={2}
-                    pageRangeDisplayed={1}
-                    onPageChange={(data) => handlePageChange(data.selected + 1)}
-                    containerClassName={"flex gap-2"}
-                    previousClassName="border border-[#EEEEEE] text-custom-bluegreen font-semibold w-[26px] h-[24px] rounded-[4px] flex justify-center items-center hover:text-white hover:bg-custom-lightgreen hover:text-white"
-                    nextClassName="border border-[#EEEEEE] text-custom-bluegreen font-semibold w-[26px] h-[24px] rounded-[4px] flex justify-center items-center hover:text-white hover:bg-custom-lightgreen hover:text-white"
-                    pageClassName=" border border-[#EEEEEE] text-black w-[26px] h-[24px] rounded-[4px] flex justify-center items-center hover:bg-custom-lightgreen text-[12px]"
-                    activeClassName="w-[26px] h-[24px] border border-[#EEEEEE] bg-custom-lightgreen text-[#404B52] rounded-[4px] text-white text-[12px]"
-                    pageLinkClassName="w-full h-full flex justify-center items-center"
-                    activeLinkClassName="w-full h-full flex justify-center items-center"
-                    disabledLinkClassName={"text-gray-300 cursor-not-allowed"}
-                    forcePage={currentPage - 1}
+                <Pagination
+                    pageCount={pageState.pagination?.last_page || 1}
+                    currentPage={pageState.currentPage || 1}
+                    onPageChange={handlePageChange}
                 />
             </div>
             <div>
-                <AddPropertyModal propertyModalRef={propertyModalRef} />
+                <AddPropertyModal
+                    fetchData={fetchData}
+                    propertyModalRef={propertyModalRef}
+                />
             </div>
         </div>
     );

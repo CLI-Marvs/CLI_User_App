@@ -30,7 +30,7 @@ const ReviewsandApprovalRouting = ({
     action,
 }) => {
     //States
-    const { fetchPropertyListMasters } = usePriceListMaster();
+    const { fetchData } = usePriceListMaster();
     const { pricingData, resetPricingData } = usePricing();
     const reviewerApproverModalRef = useRef(null);
     const expandUnitTableViewRef = useRef(null);
@@ -65,7 +65,7 @@ const ReviewsandApprovalRouting = ({
         pricingData,
         resetPricingData,
         showToast,
-        fetchPropertyListMasters,
+        fetchData,
         checkExistingUnits
     );
     const [type, setModalType] = useState(null);

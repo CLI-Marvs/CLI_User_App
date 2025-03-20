@@ -7,6 +7,7 @@ import {
 } from "react";
 import { priceListMasterService } from "@/component/servicesApi/apiCalls/propertyPricing/priceListMaster/priceListMasterService";
 import _ from "lodash";
+import usePaginatedFetch from "@/component/layout/propertyandpricingpage/hooks/usePaginatedFetch";
 
 const PropertyMasterContext = createContext();
 
@@ -18,101 +19,43 @@ const defaultFilters = {
 };
 
 export const PriceListMasterProvider = ({ children }) => {
-    const [priceListMaster, setPriceListMaster] = useState(null);
-    const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState(null);
-    const [currentPage, setCurrentPage] = useState(1);
-    const [isFirstLoad, setIsFirstLoad] = useState(true);
-    const [previousFilters, setPreviousFilters] = useState([]);
     const [propertyMasterId, setPropertyMasterId] = useState(null); //TODO: move propertyMasterId t property context
     const [priceListMasterId, setPriceListMasterId] = useState(null);
     const [searchFilters, setSearchFilters] = useState(defaultFilters);
-    const [appliedFilters, setAppliedFilters] = useState(defaultFilters);
-
-    const fetchPropertyListMasters = useCallback(
-        async (forceFetch = false, silentFetch = false, page) => {
-            const isFilterChanged = !_.isEqual(appliedFilters, previousFilters);
-            const isSamePage = page === currentPage;
-
-            if (
-                priceListMaster &&
-                !forceFetch &&
-                !isFilterChanged &&
-                isSamePage
-            ) {
-                // Prevents unnecessary fetching
-                return priceListMaster;
-            }
-
-            try {
-                if (!silentFetch && isFirstLoad) {
-                    setIsLoading(true);
-                }
-                console.log("appliedFilters", appliedFilters);
-                const response =
-                    await priceListMasterService.getPriceListMasters(
-                        page,
-                        10,
-                        appliedFilters
-                    );
-                const { data, pagination } = response.data;
-                setPriceListMaster({ data, pagination });
-                setCurrentPage(pagination?.current_page);
-
-                setError(null);
-                setPreviousFilters(appliedFilters);
-
-                if (isFirstLoad) {
-                    setIsFirstLoad(false);
-                }
-
-                return { data, pagination };
-            } catch (error) {
-                setPriceListMaster({ data: [], pagination: null });
-                setError(error.message);
-                console.error("Error fetching property master list:", error);
-            } finally {
-                if (!silentFetch) setIsLoading(false);
-            }
-        },
-        [currentPage, isFirstLoad, previousFilters, appliedFilters]
-    );
-
-    //Automatically fetch when `appliedFilters` or 'currentPage' changes
-    useEffect(() => {
-        fetchPropertyListMasters(true, false, currentPage);
-        return () => controller.abort();
-    }, [currentPage, appliedFilters]);
-
-    const applySearch = () => {
-        setAppliedFilters(searchFilters);
-        setCurrentPage(1);
-    };
-
-    const refreshPage = () => {
-        setSearchFilters(defaultFilters);
-        setAppliedFilters(defaultFilters);
-        setCurrentPage(1);
-    };
-
-    const value = {
-        priceListMaster,
+    const {
+        data,
         isLoading,
         error,
-        fetchPropertyListMasters,
-        setPriceListMaster,
-        currentPage,
-        setCurrentPage,
+        pageState,
+        setPageState,
+        fetchData,
+        setAppliedFilters,
         isFirstLoad,
-        previousFilters,
-        propertyMasterId,
-        setPropertyMasterId,
-        priceListMasterId,
-        setPriceListMasterId,
+        applySearch,
+        refreshPage,
+    } = usePaginatedFetch(
+        priceListMasterService.getPriceListMasters,
+        defaultFilters
+    );
+
+    const value = {
+        data,
+        isLoading,
+        error,
+        pageState,
+        setPageState,
+        fetchData,
+        setAppliedFilters,
+        isFirstLoad,
         searchFilters,
         setSearchFilters,
         applySearch,
         refreshPage,
+        defaultFilters,
+        propertyMasterId,
+        setPropertyMasterId,
+        priceListMasterId,
+        setPriceListMasterId,
     };
 
     return (

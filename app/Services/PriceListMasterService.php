@@ -551,6 +551,8 @@ class PriceListMasterService
             }
             //Update the price list settings
             $currentPriceBasicDetailId = $priceListMaster->pricebasic_details_id;
+          
+
             $priceBasicDetail = $this->updatePriceBasicDetails($currentPriceBasicDetailId, $data, $priceListMaster);
 
             // Fetch the current price version IDs in the PriceListMaster table
