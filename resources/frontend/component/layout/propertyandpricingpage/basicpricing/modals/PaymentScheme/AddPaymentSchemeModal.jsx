@@ -19,7 +19,7 @@ const AddPaymentSchemeModal = ({
 
     //Hooks
     useEffect(() => {
-        fetchData();
+        fetchData(true, false);
     }, []);
 
     useEffect(() => {

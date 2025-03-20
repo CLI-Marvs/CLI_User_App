@@ -1,17 +1,11 @@
-import {
-    createContext,
-    useContext,
-    useState,
-    useCallback,
-    useEffect,
-} from "react";
+import { createContext, useContext, useState } from "react";
 import { priceListMasterService } from "@/component/servicesApi/apiCalls/propertyPricing/priceListMaster/priceListMasterService";
 import _ from "lodash";
 import usePaginatedFetch from "@/component/layout/propertyandpricingpage/hooks/usePaginatedFetch";
 
 const PropertyMasterContext = createContext();
 
-const defaultFilters = {
+export const defaultFilters = {
     property: "",
     paymentScheme: "",
     date: null,

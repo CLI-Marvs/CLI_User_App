@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use function Ramsey\Uuid\v1;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\StorePriceVersionRequest;
 use App\Services\PriceVersionService;
 
-use function Ramsey\Uuid\v1;
+use App\Http\Requests\IndexPriceListRequest;
+use App\Http\Requests\StorePriceVersionRequest;
 
 class PriceVersionController extends Controller
 {
@@ -21,12 +22,17 @@ class PriceVersionController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(IndexPriceListRequest $request)
     {
-        $priceVersions = $this->service->index();
-        
+        $validatedData = $request->validated();
+        $priceVersionResponse = $this->service->index($validatedData);
+
         return response()->json(
-            $priceVersions,
+            [
+                'data' =>   $priceVersionResponse['data'],
+                'pagination' => $priceVersionResponse['pagination']
+            ]
+
         );
     }
 

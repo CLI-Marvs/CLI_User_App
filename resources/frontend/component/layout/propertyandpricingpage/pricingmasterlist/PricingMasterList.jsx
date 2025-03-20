@@ -9,14 +9,22 @@ import AddPropertyModal from "@/component/layout/propertyandpricingpage/basicpri
 import moment from "moment";
 import { useNavigate } from "react-router-dom";
 import { usePriceListMaster } from "@/context/PropertyPricing/PriceListMasterContext";
-import Skeleton from "@/component/Skeletons";
-import { usePaymentScheme } from "@/context/PropertyPricing/PaymentSchemeContext";
-import { toLowerCaseText } from "@/util/formatToLowerCase";
 import { showToast } from "@/util/toastUtil";
 import { priceListMasterService } from "@/component/servicesApi/apiCalls/propertyPricing/priceListMaster/priceListMasterService";
 import CustomInput from "@/component/Input/CustomInput";
 import CustomToolTip from "@/component/CustomToolTip";
+import CustomTable from "@/component/layout/propertyandpricingpage/component/CustomTable";
+import PricelistMasterRow from "@/component/layout/propertyandpricingpage/component/TableRows/PriceListMasterRow";
 
+const COLUMNS = [
+    { label: "Status", width: "w-[100px]" },
+    { label: "Property", width: "w-[150px]" },
+    { label: "Price Settings", width: "w-[200px]" },
+    { label: "Price Version", width: "w-[150px]" },
+    { label: "Sold Per Version", width: "w-[150px]" },
+    { label: "Promos", width: "w-[100px]" },
+    { label: "Payment Schemes", width: "w-[150px]" },
+];
 const PricingMasterList = () => {
     //States
     const {
@@ -32,27 +40,13 @@ const PricingMasterList = () => {
         refreshPage,
         defaultFilters,
     } = usePriceListMaster();
-
- 
     const [toggled, setToggled] = useState(false);
     const [isFilterVisible, setIsFilterVisible] = useState(false);
     const navigate = useNavigate();
     const dropdownRef = useRef(null);
     const propertyModalRef = useRef(null);
-    const toggleFilterBox = () => {
-        setIsFilterVisible(!isFilterVisible);
-    };
-    const isButtonDisabled = (searchFilters) => {
-        const allEmpty =
-            !searchFilters.property &&
-            !searchFilters.paymentScheme &&
-            !searchFilters.status &&
-            !searchFilters.date;
 
-        return allEmpty;
-    };
-
-    //Hooks  
+    //Hooks
     //Hide the search filter dropdown when clicking outside of it
     useEffect(() => {
         const handleOutsideClick = (event) => {
@@ -132,11 +126,10 @@ const PricingMasterList = () => {
     };
 
     //handle cancel click if the price list item status is 'Draft'
-    const handleCancelClick = async (event, priceListItem, action) => {
+    const handleStatusClick = async (event, priceListItem, action) => {
         event.stopPropagation();
         const id = priceListItem.price_list_master_id;
         const priceListData = { data: priceListItem };
-        console.log(priceListData);
 
         if (action !== "Cancel") {
             navigate(
@@ -161,6 +154,21 @@ const PricingMasterList = () => {
         } catch (error) {
             console.log("error", error);
         }
+    };
+
+    //Toggle filter box
+    const toggleFilterBox = () => {
+        setIsFilterVisible(!isFilterVisible);
+    };
+
+    const isButtonDisabled = (searchFilters) => {
+        const allEmpty =
+            !searchFilters.property &&
+            !searchFilters.paymentScheme &&
+            !searchFilters.status &&
+            !searchFilters.date;
+
+        return allEmpty;
     };
 
     return (
@@ -332,571 +340,23 @@ const PricingMasterList = () => {
                     </div>
                 )}
             </div>
-            <div className="mt-3 overflow-y-hidden">
-                <table className="overflow-x-auto bg-custom-grayFA mb-2 mx-1">
-                    <thead>
-                        <tr className="flex gap-4 items-center h-[49px] montserrat-semibold text-sm text-[#A5A5A5] bg-white rounded-[10px] mb-4 -mx-1 px-4">
-                            <th className="flex justify-start w-[100px] shrink-0 pl-1">
-                                Status
-                            </th>
-                            <th className="flex justify-start w-[150px] shrink-0 pl-1">
-                                Property
-                            </th>
-                            <th className="flex justify-start w-[200px] shrink-0 pl-1">
-                                Price Settings
-                            </th>
-                            <th className="flex justify-start w-[150px] shrink-0 pl-1">
-                                Price Version
-                            </th>
-                            <th className="flex justify-start w-[150px] shrink-0 pl-1">
-                                Sold Per Version
-                            </th>
-                            <th className="flex justify-start w-[100px] shrink-0 pl-1">
-                                Promos
-                            </th>
-                            <th className="flex justify-start w-[150px] shrink-0 pl-1">
-                                Payment Schemes
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {isLoading && isFirstLoad ? (
-                            <tr>
-                                <td className="w-full mt-1">
-                                    <Skeleton height={140} />
-                                    <Skeleton height={140} />
-                                    <Skeleton height={140} />
-                                </td>
-                            </tr>
-                        ) : priceListMaster && priceListMaster.length > 0 ? (
-                            priceListMaster.map((item) => {
-                                return (
-                                    <tr
-                                        onClick={(event) => {
-                                            if (item?.status === "Draft") {
-                                                event.stopPropagation();
-                                                return;
-                                            }
-                                            handlePriceListItemClick(item);
-                                        }}
-                                        key={item.price_list_master_id}
-                                        className={`flex gap-4 mt-2 h-[144px] shadow-custom5 rounded-[10px] overflow-hidden px-4 ${
-                                            item?.status === "Draft"
-                                                ? "bg-white cursor-not-allowed"
-                                                : item?.status === "Approved"
-                                                ? "bg-[#F0F3EE]"
-                                                : "bg-[#EBF0F6]"
-                                        }  ${
-                                            item?.status ===
-                                                "On-going Approval" ||
-                                            item?.status ===
-                                                "Approved not Live" ||
-                                            item?.status === "Approved and Live"
-                                                ? "cursor-pointer"
-                                                : ""
-                                        } text-custom-bluegreen text-sm `}
-                                    >
-                                        <td className="w-[100px] flex flex-col items-start justify-center gap-2">
-                                            <div>
-                                                <p
-                                                    className={`font-bold ${
-                                                        item?.status === "Draft"
-                                                            ? "text-custom-gray81"
-                                                            : item?.status ===
-                                                              "Approved"
-                                                            ? "text-custom-solidgreen"
-                                                            : "text-[#5B9BD5]"
-                                                    }`}
-                                                >
-                                                    {item?.status}
-                                                </p>
-                                                <span>
-                                                    {/* Fix the formatting */}
-                                                    {moment(
-                                                        item.created_at
-                                                    ).format("M / D / YYYY")}
-                                                </span>
-                                            </div>
-                                            <div>
-                                                {item?.status !==
-                                                    "Approved not Live" &&
-                                                    item?.status !==
-                                                        "Approved and Live" && (
-                                                        <p
-                                                            className="underline text-blue-500 cursor-pointer"
-                                                            onClick={(event) =>
-                                                                handleCancelClick(
-                                                                    event,
-                                                                    item,
-                                                                    item?.status ===
-                                                                        "On-going Approval"
-                                                                        ? "Cancel"
-                                                                        : "Edit"
-                                                                )
-                                                            }
-                                                        >
-                                                            {item?.status ===
-                                                            "On-going Approval"
-                                                                ? "Cancel"
-                                                                : "Edit"}{" "}
-                                                            -{" "}
-                                                            {
-                                                                item?.price_list_master_id
-                                                            }
-                                                        </p>
-                                                    )}
-                                            </div>
-                                            {item?.status === "Approved" && (
-                                                <div className="flex gap-2 items-center">
-                                                    <div>
-                                                        <p
-                                                            className={`${
-                                                                toggled
-                                                                    ? "text-[#FF0000]"
-                                                                    : "text-custom-gray81"
-                                                            } font-semibold`}
-                                                        >
-                                                            Live
-                                                        </p>
-                                                    </div>
-                                                    <div className="mt-1">
-                                                        <button
-                                                            className={`toggle-btn ${
-                                                                toggled
-                                                                    ? "toggled"
-                                                                    : ""
-                                                            }`}
-                                                            onClick={() =>
-                                                                setToggled(
-                                                                    !toggled
-                                                                )
-                                                            }
-                                                        >
-                                                            <div className="thumb"></div>
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            )}
-                                        </td>
-                                        <td className="w-[150px] flex items-center justify-start">
-                                            <div>
-                                                <p>
-                                                    {toLowerCaseText(
-                                                        item?.property_name
-                                                    )}
-                                                </p>
-                                                <p>
-                                                    Tower{" "}
-                                                    {item?.tower_phase_name}
-                                                </p>
-                                            </div>
-                                        </td>
-                                        <td className="w-[200px] flex items-center justify-start">
-                                            <div>
-                                                <p className="space-x-1">
-                                                    <span>
-                                                        Base Price (Sq.M.)
-                                                    </span>
-                                                    <span>
-                                                        {
-                                                            item
-                                                                ?.pricebasic_details
-                                                                ?.base_price
-                                                        }
-                                                    </span>
-                                                </p>
-                                                <p className="space-x-1">
-                                                    <span>Reservation</span>
-                                                    <span>
-                                                        {
-                                                            item
-                                                                ?.pricebasic_details
-                                                                ?.reservation_fee
-                                                        }
-                                                    </span>
-                                                </p>
-                                                <p className="space-x-1">
-                                                    <span>Transfer Charge</span>
-                                                    <span>
-                                                        {
-                                                            item
-                                                                ?.pricebasic_details
-                                                                ?.transfer_charge
-                                                        }
-                                                    </span>
-                                                    <span>
-                                                        {item
-                                                            ?.pricebasic_details
-                                                            ?.transfer_charge
-                                                            ? "%"
-                                                            : ""}
-                                                    </span>
-                                                </p>
-                                                <p className="space-x-1">
-                                                    <span>VAT</span>
-                                                    <span>
-                                                        {
-                                                            item
-                                                                ?.pricebasic_details
-                                                                ?.vat
-                                                        }
-                                                    </span>
-                                                    <span>
-                                                        {item
-                                                            ?.pricebasic_details
-                                                            ?.vat
-                                                            ? "%"
-                                                            : ""}
-                                                    </span>
-                                                </p>
-                                                <p className="space-x-1">
-                                                    <span>
-                                                        VATable Threshold
-                                                    </span>
-                                                    <span>
-                                                        {
-                                                            item
-                                                                ?.pricebasic_details
-                                                                ?.vatable_less_price
-                                                        }
-                                                    </span>
-                                                </p>
-                                                <p className="space-x-1">
-                                                    <span>
-                                                        Effective Balcony Base
-                                                    </span>
-                                                    <span>
-                                                        {
-                                                            item
-                                                                ?.pricebasic_details
-                                                                ?.effective_balcony_base
-                                                        }
-                                                    </span>
-                                                    <span>
-                                                        {item
-                                                            ?.pricebasic_details
-                                                            ?.effective_balcony_base
-                                                            ? "%"
-                                                            : ""}
-                                                    </span>
-                                                </p>
-                                            </div>
-                                        </td>
-
-                                        {/* Render the price version */}
-                                        <td className="w-[150px] flex items-center justify-start">
-                                            <div>
-                                                <p>
-                                                    {item?.price_versions?.map(
-                                                        (
-                                                            version,
-                                                            versionIndex
-                                                        ) => {
-                                                            return (
-                                                                <span
-                                                                    key={
-                                                                        versionIndex
-                                                                    }
-                                                                >
-                                                                    {
-                                                                        version?.version_name
-                                                                    }{" "}
-                                                                    -{" "}
-                                                                    {
-                                                                        version?.percent_increase
-                                                                    }
-                                                                    {version?.percent_increase
-                                                                        ? "%"
-                                                                        : ""}
-                                                                    {versionIndex <
-                                                                    item
-                                                                        ?.price_versions
-                                                                        ?.length -
-                                                                        1 ? (
-                                                                        <br />
-                                                                    ) : (
-                                                                        ""
-                                                                    )}
-                                                                </span>
-                                                            );
-                                                        }
-                                                    )}
-                                                </p>
-                                            </div>
-                                        </td>
-
-                                        {/* Render the sold per price version */}
-                                        <td className="w-[150px] flex items-center justify-start">
-                                            <div>
-                                                <p className="space-x-1">
-                                                    <span>Version 1 - 0</span>
-                                                </p>
-                                                <p className="space-x-1">
-                                                    <span>Version 1 - 0</span>
-                                                </p>
-                                            </div>
-                                        </td>
-
-                                        {/* Render the promos*/}
-                                        <td className="w-[100px] flex items-center justify-start">
-                                            <div>
-                                                <p className="space-x-1">
-                                                    <span>Version 1 - 0</span>
-                                                </p>
-                                            </div>
-                                        </td>
-
-                                        {/* Render payment schemes */}
-                                        <td className="w-[150px] flex items-center justify-start rounded-r-lg text-sm">
-                                            <div className="flex ">
-                                                <ul className=" pl-4 list-none ">
-                                                    {item?.price_versions?.map(
-                                                        (
-                                                            version,
-                                                            versionIndex
-                                                        ) => {
-                                                            return (
-                                                                <li
-                                                                    key={
-                                                                        versionIndex
-                                                                    }
-                                                                    className=""
-                                                                >
-                                                                    {version?.payment_schemes?.map(
-                                                                        (
-                                                                            scheme,
-                                                                            schemeIndex
-                                                                        ) => {
-                                                                            return (
-                                                                                <ul
-                                                                                    key={
-                                                                                        schemeIndex
-                                                                                    }
-                                                                                    className="pl-4"
-                                                                                >
-                                                                                    <li>
-                                                                                        {
-                                                                                            scheme?.payment_scheme_name
-                                                                                        }
-                                                                                    </li>
-                                                                                </ul>
-                                                                            );
-                                                                        }
-                                                                    )}
-                                                                </li>
-                                                            );
-                                                        }
-                                                    )}
-                                                </ul>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                );
-                            })
-                        ) : (
-                            <tr>
-                                <td
-                                    colSpan={8}
-                                    className="text-center py-4 text-custom-bluegreen"
-                                >
-                                    No data found
-                                </td>
-                            </tr>
-                        )}
-
-                        {/*                                                      DRAFT                                                                      */}
-                        {/* {propertyMasterList && Object.values(propertyMasterList).map((item, index) => {
-                            return (
-                                <tr
-                                    key={index}
-                                    className="flex gap-4 mt-2 h-[144px] shadow-custom5 rounded-[10px] overflow-hidden px-4 bg-white text-custom-bluegreen text-sm"
-                                >
-                                    <td className="w-[100px] flex flex-col items-start justify-center gap-2">
-                                        <div>
-                                            <p className="font-bold text-custom-gray81">
-                                                {item?.status}
-                                            </p>
-                                            <span>
-                                                {moment(
-                                                    item?.created_at
-                                                ).format("M / D / YYYY")}
-                                            </span>
-                                        </div>
-                                        <div>
-                                            <p className="underline text-blue-500 cursor-pointer">Edit</p>
-                                        </div>
-                                    </td>
-                                    <td className="w-[150px] flex items-center justify-start">
-                                        <div>
-                                            <p className="pr-1">
-                                                {item?.property_name}
-                                            </p>
-                                        </div>
-                                    </td>
-                                    <td className="w-[200px] flex items-center justify-start">
-                                        <div>
-                                            <p className="space-x-1">
-                                                <span>Base Price (Sq.M.)</span>
-                                                <span>6,500</span>
-                                            </p>
-                                            <p className="space-x-1">
-                                                <span>Reservation</span>
-                                                <span>50,000</span>
-                                            </p>
-                                            <p className="space-x-1">
-                                                <span>Transfer Charge</span>
-                                                <span>8%</span>
-                                            </p>
-                                            <p className="space-x-1">
-                                                <span>VAT</span>
-                                                <span>12%</span>
-                                            </p>
-                                            <p className="space-x-1">
-                                                <span>VATable Threshold</span>
-                                                <span>3,600,000</span>
-                                            </p>
-                                            <p className="space-x-1">
-                                                <span>Effective Balcony Base</span>
-                                                <span>50%</span>
-                                            </p>
-                                        </div>
-                                    </td>
-                                    <td className="w-[150px] flex items-center justify-start"></td>
-                                    <td className="w-[150px] flex items-center justify-start"></td>
-                                    <td className="w-[100px] flex items-center justify-start"></td>
-                                    <td className="w-[150px] flex items-center justify-start rounded-r-lg text-sm">
-                                        <div>
-                                            <p>Spot Cash</p>
-                                            <p>Spot 12%</p>
-                                            <p>Spot 2% + 10%</p>
-                                            <p>Installment</p>
-                                            <p>12% Installment</p>
-                                        </div>
-                                    </td>
-                                </tr>
-                            );
-                        })} */}
-
-                        {/*                                                   END                                                  */}
-                        {/*                                            ONGOING APPROVAL                                          bg-[#F0F3EE]       */}
-
-                        {/*                                                         END                                                     */}
-                        {/*                                            APPROVED LIVE                                               */}
-                        {/* <tr className='flex gap-4 mt-2 h-[144px] shadow-custom5 rounded-[10px] overflow-hidden px-4 bg-[#F0F3EE] text-custom-bluegreen text-sm'>
-                  <td className='w-[100px] flex flex-col items-start justify-center gap-2'>
-                    <div>
-                      <p className='font-bold text-custom-solidgreen'>Approved</p>
-                      <span>6/19/2024</span>
-                    </div>
-                    <div className='flex gap-2'>
-                      <div>
-                        <p className={`${toggled ?'text-[#FF0000]':'text-custom-gray81'} font-semibold`}>Live</p>
-                      </div>
-                      <div>
-                        <button
-                          className={`toggle-btn ${toggled ? "toggled" : ""}`}
-                          onClick={() => setToggled(!toggled)}
-                        >
-                          <div className='thumb'></div>
-                        </button>
-                      </div>
-                     
-                    </div>
-                  </td>
-                  <td className='w-[150px] flex items-center justify-start'>
-                    <div>
-                      <p className='pr-1'>38 Park Avenue Parking, Tower 2</p>
-                    </div>
-                  </td>
-                  <td className='w-[200px] flex items-center justify-start'>
-                    <div>
-                      <p className='space-x-1'>
-                        <span>Base Price (Sq.M.)</span>
-                        <span>6,500</span>
-                      </p>
-                      <p className='space-x-1'>
-                        <span>Reservation</span>
-                        <span>50,000</span>
-                      </p>
-                      <p className='space-x-1'>
-                        <span>Transfer Charge</span>
-                        <span>8%</span>
-                      </p>
-                      <p className='space-x-1'>
-                        <span>VAT</span>
-                        <span>12%</span>
-                      </p>
-                      <p className='space-x-1'>
-                        <span>VATable Threashold</span>
-                        <span>3,600,000</span>
-                      </p>
-                      <p className='space-x-1'>
-                        <span>Effective Balcony Base</span>
-                        <span>50%</span>
-                      </p>
-                    </div>
-                  </td>
-                  <td className='w-[150px] flex items-center justify-start'>
-                    <div>
-                          <p className='space-x-1'>
-                            <span>Version 1 -</span>
-                            <span>0%</span>
-                            <span>(Active)</span>
-                          </p>
-                          <p className='space-x-1'>
-                            <span>Version 2 -</span>
-                            <span>5%</span>
-                          </p>
-                          <p className='space-x-1'>
-                            <span>Version 3 -</span>
-                            <span>5%</span>
-                          </p>
-                          <p className='space-x-1'>
-                            <span>Version 4 -</span>
-                            <span>5%</span>
-                          </p>
-                        </div>
-                  </td>
-                  <td className='w-[150px] flex items-center justify-start'>
-                   <div>
-                      <p className='space-x-1'>
-                        <span>Version 1 -</span>
-                        <span>0</span>
-                      </p>
-                      <p className='space-x-1'>
-                        <span>Version 2 -</span>
-                        <span>0</span>
-                      </p>
-                      <p className='space-x-1'>
-                        <span>Version 3 -</span>
-                        <span>0</span>
-                      </p>
-                      <p className='space-x-1'>
-                        <span>Version 4 -</span>
-                        <span>0</span>
-                      </p>
-                    </div>
-                  </td>
-                  <td className='w-[100px] flex items-center justify-start'>
-                    <div>
-                      <p>8.8</p>
-                      <p>First 10</p>
-                      <p>12.12</p>
-                    </div>
-                  </td>
-                  <td className='w-[150px] flex items-center justify-start rounded-r-lg text-sm'>
-                    <div>
-                      <p>Spot Cash</p>
-                      <p>Spot 12%</p>
-                      <p>Spot 2% + 10%</p>
-                      <p>Installment</p>
-                      <p>12% Installment</p>
-                    </div>
-                  </td>
-                </tr> */}
-                        {/*                                                         END                                                     */}
-                    </tbody>
-                </table>
+            <div className="mt-3 ">
+                <CustomTable
+                    className="flex gap-4 items-center h-[49px] montserrat-semibold text-sm text-[#A5A5A5] bg-white rounded-[10px] mb-4 -mx-1 px-4"
+                    isLoading={isLoading && isFirstLoad}
+                    columns={COLUMNS}
+                    data={priceListMaster}
+                    renderRow={(item) => (
+                        <PricelistMasterRow
+                            key={item.price_list_master_id}
+                            item={item}
+                            handlePriceListItemClick={handlePriceListItemClick}
+                            handleStatusClick={handleStatusClick}
+                            toggled={toggled}
+                            setToggled={setToggled}
+                        />
+                    )}
+                />
             </div>
             <div className="flex w-full justify-start py-5">
                 <Pagination
