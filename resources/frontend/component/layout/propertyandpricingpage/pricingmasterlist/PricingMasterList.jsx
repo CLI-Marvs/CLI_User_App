@@ -33,7 +33,7 @@ const PricingMasterList = () => {
         defaultFilters,
     } = usePriceListMaster();
 
-    // const { fetchPaymentSchemes } = usePaymentScheme();
+ 
     const [toggled, setToggled] = useState(false);
     const [isFilterVisible, setIsFilterVisible] = useState(false);
     const navigate = useNavigate();

@@ -15,11 +15,11 @@ const formDataState = {
     bankFinancing: "",
 };
 
-const AddPaymentSchemeModal = ({ modalRef, fetchData }) => {
+const AddPaymentSchemeModal = ({ modalRef }) => {
     //State
     const [formData, setFormData] = useState(formDataState);
     const [isLoading, setIsLoading] = useState({});
-    const { fetchPaymentSchemes } = usePaymentScheme();
+    const { fetchData } = usePaymentScheme();
     const isPaymentSchemeButtonDisabled = isButtonDisabled(
         formData,
         Object.keys(formDataState)

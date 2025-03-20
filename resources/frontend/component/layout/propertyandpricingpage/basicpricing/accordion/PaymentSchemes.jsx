@@ -2,17 +2,19 @@ import React, { useEffect, useState } from "react";
 import { IoIosArrowDown } from "react-icons/io";
 import { usePricing } from "@/component/layout/propertyandpricingpage/context/BasicPricingContext";
 import { usePaymentScheme } from "@/context/PropertyPricing/PaymentSchemeContext";
+import paymentScheme from './PaymentSchemes';
 
 const paymentScheme = ({ action, priceListMasterData }) => {
     //State
     const [accordionOpen, setAccordionOpen] = useState(false);
     const { updatePricingSection } = usePricing();
     const [selectedSchemes, setSelectedSchemes] = useState([]);
-    const { paymentScheme, fetchPaymentSchemes } = usePaymentScheme();
+    const { data: paymentScheme, fetchData } =
+        usePaymentScheme();
 
     //Hooks
     useEffect(() => {
-        fetchPaymentSchemes();
+        fetchData();
     }, []);
 
     /**

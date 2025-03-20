@@ -8,7 +8,7 @@ const EditPaymentSchemeModal = ({
 }) => {
     const [selectedPaymentSchemes, setSelectedPaymentSchemes] = useState([]);
     const { pricingData, setPricingData } = usePricing();
-    const { paymentScheme } = usePaymentScheme();
+    const { data:paymentScheme } = usePaymentScheme();
 
     //Hooks
     /**
