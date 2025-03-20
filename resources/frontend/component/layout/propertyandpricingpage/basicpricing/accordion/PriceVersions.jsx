@@ -6,7 +6,7 @@ import AddPaymentSchemeModal from "@/component/layout/propertyandpricingpage/bas
 import EditPaymentSchemeModal from "@/component/layout/propertyandpricingpage/basicpricing/modals/PaymentScheme/EditPaymentSchemeModal";
 import { IoIosCloseCircle } from "react-icons/io";
 import moment from "moment";
-import { usePricing } from "@/component/layout/propertyandpricingpage/basicpricing/context/BasicPricingContext";
+import { usePricing } from "@/component/layout/propertyandpricingpage/context/BasicPricingContext";
 import { HiPencil } from "react-icons/hi";
 import { MdDelete } from "react-icons/md";
 import DatePicker from "react-datepicker";

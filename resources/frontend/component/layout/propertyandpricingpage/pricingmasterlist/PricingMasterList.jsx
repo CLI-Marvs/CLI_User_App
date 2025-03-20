@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import "./togglebtn.css";
+import "@/component/layout/propertyandpricingpage/style/togglebtn.css";
 import ReactPaginate from "react-paginate";
 import {
     MdKeyboardArrowLeft,

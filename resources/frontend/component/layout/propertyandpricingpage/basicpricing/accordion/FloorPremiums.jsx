@@ -4,9 +4,9 @@ import { FaRegTrashAlt } from "react-icons/fa";
 import FloorPremiumAssignModal from "../modals/FloorPremiumAssignModal";
 import CircularProgress from "@mui/material/CircularProgress";
 import { useUnit } from "@/context/PropertyPricing/UnitContext";
-import { usePricing } from "@/component/layout/propertyandpricingpage/basicpricing/context/BasicPricingContext";
+import { usePricing } from "@/component/layout/propertyandpricingpage/context/BasicPricingContext";
 import { showToast } from "@/util/toastUtil";
-import UnitUploadButton from "@/component/layout/propertyandpricingpage/basicpricing/component/UnitUploadButton";
+import UnitUploadButton from "@/component/layout/propertyandpricingpage/component/UnitUploadButton";
 import CustomInput from "@/component/Input/CustomInput";
 
 const newFloorState = {

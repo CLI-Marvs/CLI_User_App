@@ -5,17 +5,17 @@ import {
     IoIosCloseCircle,
     IoMdArrowDropdown,
 } from "react-icons/io";
-import { usePricing } from "@/component/layout/propertyandpricingpage/basicpricing/context/BasicPricingContext";
+import { usePricing } from "@/component/layout/propertyandpricingpage/context/BasicPricingContext";
 import { useUnit } from "@/context/PropertyPricing/UnitContext";
-import usePriceListEmployees from "@/component/layout/propertyandpricingpage/basicpricing/hooks/usePriceListEmployees";
+import usePriceListEmployees from "@/component/layout/propertyandpricingpage/hooks/usePriceListEmployees";
 import { priceListMasterService } from "@/component/servicesApi/apiCalls/propertyPricing/priceListMaster/priceListMasterService";
 import CircularProgress from "@mui/material/CircularProgress";
 import { useStateContext } from "@/context/contextprovider";
 import EmployeeReviewerApproverModal from "@/component/layout/propertyandpricingpage/basicpricing/modals/ReviewSetting/EmployeeReviewerApproverModal";
 import ExpandableDataTable from "@/component/layout/propertyandpricingpage/basicpricing/modals/ReviewSetting/ExpandableDataTable";
 import { toLowerCaseText } from "@/util/formatToLowerCase";
-import { usePropertyPricing } from "@/component/layout/propertyandpricingpage/basicpricing/hooks/usePropertyPricing";
-import { formatPayload } from "@/component/layout/propertyandpricingpage/basicpricing/utils/payloadFormatter";
+import { usePropertyPricing } from "@/component/layout/propertyandpricingpage/hooks/usePropertyPricing";
+import { formatPayload } from "@/component/layout/propertyandpricingpage/utils/payloadFormatter";
 import { showToast } from "@/util/toastUtil";
 import { usePriceListMaster } from "@/context/PropertyPricing/PriceListMasterContext";
 import CustomToolTip from "@/component/CustomToolTip";

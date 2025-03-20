@@ -4,7 +4,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 import { useUnit } from "@/context/PropertyPricing/UnitContext";
 import { showToast } from "@/util/toastUtil";
 import { usePriceListMaster } from "@/context/PropertyPricing/PriceListMasterContext";
-import { usePricing } from "@/component/layout/propertyandpricingpage/basicpricing/context/BasicPricingContext";
+import { usePricing } from "@/component/layout/propertyandpricingpage/context/BasicPricingContext";
 
 const UploadUnitDetailsModal = ({
     excelDataRows,

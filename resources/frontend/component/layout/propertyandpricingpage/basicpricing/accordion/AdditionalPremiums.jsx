@@ -2,10 +2,10 @@ import React, { useState, useRef } from "react";
 import { IoIosArrowDown } from "react-icons/io";
 import { FaRegTrashAlt } from "react-icons/fa";
 import AdditionalPremiumAssignModal from "../modals/AdditionalPremiumAssignModal";
-import { usePricing } from "@/component/layout/propertyandpricingpage/basicpricing/context/BasicPricingContext";
+import { usePricing } from "@/component/layout/propertyandpricingpage/context/BasicPricingContext";
 import { useUnit } from "@/context/PropertyPricing/UnitContext";
 import { showToast } from "@/util/toastUtil";
-import UnitUploadButton from "@/component/layout/propertyandpricingpage/basicpricing/component/UnitUploadButton";
+import UnitUploadButton from "@/component/layout/propertyandpricingpage/component/UnitUploadButton";
 import CustomInput from "@/component/Input/CustomInput";
 import generateBigIntId from "@/component/layout/propertyandpricingpage/utils/generateId";
 
@@ -177,7 +177,6 @@ const AdditionalPremiums = ({ priceListData, isOpen, toggleAccordion }) => {
                                                 onChange={
                                                     onChangeNewAdditionalPremium
                                                 }
-                                               
                                             />
                                         </div>
                                     </div>

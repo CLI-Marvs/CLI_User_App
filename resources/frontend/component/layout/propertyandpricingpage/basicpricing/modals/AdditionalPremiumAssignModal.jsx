@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useState, useMemo } from "react";
 import PremiumChecklistModal from "./PremiumChecklistModal";
 import { useUnit } from "@/context/PropertyPricing/UnitContext";
-import { usePricing } from "@/component/layout/propertyandpricingpage/basicpricing/context/BasicPricingContext";
+import { usePricing } from "@/component/layout/propertyandpricingpage/context/BasicPricingContext";
 import CircularProgress from "@mui/material/CircularProgress";
 
 const AdditionalPremiumAssignModal = ({ modalRef, priceListData }) => {
@@ -17,7 +17,7 @@ const AdditionalPremiumAssignModal = ({ modalRef, priceListData }) => {
     const [formattedUnits, setFormattedUnits] = useState([]);
     const [selectedUnit, setSelectedUnit] = useState({});
     const { pricingData } = usePricing();
-  
+
     //Hooks
     useEffect(() => {
         if (priceListData) {

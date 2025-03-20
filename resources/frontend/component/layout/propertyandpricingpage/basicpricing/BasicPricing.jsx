@@ -8,19 +8,19 @@ import ReviewsandApprovalRouting from "./accordion/ReviewsandApprovalRouting";
 import FloorPremiums from "./accordion/FloorPremiums";
 import { useLocation } from "react-router-dom";
 import { useStateContext } from "../../../../context/contextprovider";
-import { usePricing } from "@/component/layout/propertyandpricingpage/basicpricing/context/BasicPricingContext";
-import { formatPayload } from "@/component/layout/propertyandpricingpage/basicpricing/utils/payloadFormatter";
+import { usePricing } from "@/component/layout/propertyandpricingpage/context/BasicPricingContext";
+import { formatPayload } from "@/component/layout/propertyandpricingpage/utils/payloadFormatter";
 import { showToast } from "@/util/toastUtil";
 import { usePriceListMaster } from "@/context/PropertyPricing/PriceListMasterContext";
 import { useUnit } from "@/context/PropertyPricing/UnitContext";
 import CircularProgress from "@mui/material/CircularProgress";
-import { usePropertyPricing } from "@/component/layout/propertyandpricingpage/basicpricing/hooks/usePropertyPricing";
-import UnitUploadButton from "@/component/layout/propertyandpricingpage/basicpricing/component/UnitUploadButton";
+import { usePropertyPricing } from "@/component/layout/propertyandpricingpage/hooks/usePropertyPricing";
+import UnitUploadButton from "@/component/layout/propertyandpricingpage/component/UnitUploadButton";
 import generateBigIntId from "@/component/layout/propertyandpricingpage/utils/generateId";
 import {
     priceListInitialState,
     priceVersionInitialState,
-} from "@/component/layout/propertyandpricingpage/basicpricing/context/BasicPricingContext";
+} from "@/component/layout/propertyandpricingpage/context/BasicPricingContext";
 
 const additionalPremiums = [
     {

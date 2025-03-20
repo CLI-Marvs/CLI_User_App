@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { usePaymentScheme } from "@/context/PropertyPricing/PaymentSchemeContext";
-import { usePricing } from "@/component/layout/propertyandpricingpage/basicpricing/context/BasicPricingContext";
+import { usePricing } from "@/component/layout/propertyandpricingpage/context/BasicPricingContext";
 const AddPaymentSchemeModal = ({
     addPaymentSchemeModalRef,
     priceListData,
@@ -199,7 +199,7 @@ const AddPaymentSchemeModal = ({
             });
         }
     };
-    
+
     return (
         <dialog
             id="Resolved"

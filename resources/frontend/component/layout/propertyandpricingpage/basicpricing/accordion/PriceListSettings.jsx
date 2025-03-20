@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { IoIosArrowDown } from "react-icons/io";
-import { usePricing } from "@/component/layout/propertyandpricingpage/basicpricing/context/BasicPricingContext";
+import { usePricing } from "@/component/layout/propertyandpricingpage/context/BasicPricingContext";
 import CustomInput from "@/component/Input/CustomInput";
 
 const PriceListSettings = ({ isOpen, toggleAccordion, priceListData }) => {

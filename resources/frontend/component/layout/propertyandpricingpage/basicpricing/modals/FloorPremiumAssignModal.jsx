@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import FloorPremiumAddUnitModal from "./FloorPremiumAddUnitModal";
 import CircularProgress from "@mui/material/CircularProgress";
 import { useUnit } from "@/context/PropertyPricing/UnitContext";
-import { usePricing } from "@/component/layout/propertyandpricingpage/basicpricing/context/BasicPricingContext";
+import { usePricing } from "@/component/layout/propertyandpricingpage/context/BasicPricingContext";
 const FloorPremiumAssignModal = ({
     floorPremiumAssignModalRef,
     selectedFloor,

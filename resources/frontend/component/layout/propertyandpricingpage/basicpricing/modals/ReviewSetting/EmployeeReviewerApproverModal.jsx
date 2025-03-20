@@ -8,8 +8,8 @@ import React, {
 import { useStateContext } from "@/context/contextprovider";
 import { debounce } from "lodash";
 import highlightText from "@/util/hightlightText";
-import { usePricing } from "@/component/layout/propertyandpricingpage/basicpricing/context/BasicPricingContext";
-import usePriceListEmployees from "@/component/layout/propertyandpricingpage/basicpricing/hooks/usePriceListEmployees";
+import { usePricing } from "@/component/layout/propertyandpricingpage/context/BasicPricingContext";
+import usePriceListEmployees from "@/component/layout/propertyandpricingpage/hooks/usePriceListEmployees";
 import CustomInput from "@/component/Input/CustomInput";
 import _ from "lodash";
 

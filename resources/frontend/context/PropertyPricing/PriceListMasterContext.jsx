@@ -24,12 +24,10 @@ export const PriceListMasterProvider = ({ children }) => {
     const [currentPage, setCurrentPage] = useState(1);
     const [isFirstLoad, setIsFirstLoad] = useState(true);
     const [previousFilters, setPreviousFilters] = useState([]);
-    const [propertyMasterId, setPropertyMasterId] = useState(null);
+    const [propertyMasterId, setPropertyMasterId] = useState(null); //TODO: move propertyMasterId t property context
     const [priceListMasterId, setPriceListMasterId] = useState(null);
     const [searchFilters, setSearchFilters] = useState(defaultFilters);
     const [appliedFilters, setAppliedFilters] = useState(defaultFilters);
- 
-
 
     const fetchPropertyListMasters = useCallback(
         async (forceFetch = false, silentFetch = false, page) => {
@@ -60,7 +58,6 @@ export const PriceListMasterProvider = ({ children }) => {
                 const { data, pagination } = response.data;
                 setPriceListMaster({ data, pagination });
                 setCurrentPage(pagination?.current_page);
-                
 
                 setError(null);
                 setPreviousFilters(appliedFilters);
@@ -72,25 +69,19 @@ export const PriceListMasterProvider = ({ children }) => {
                 return { data, pagination };
             } catch (error) {
                 setPriceListMaster({ data: [], pagination: null });
-
                 setError(error.message);
                 console.error("Error fetching property master list:", error);
             } finally {
                 if (!silentFetch) setIsLoading(false);
             }
         },
-        [
-            priceListMaster,
-            currentPage,
-            isFirstLoad,
-            previousFilters,
-            appliedFilters,
-        ]
+        [currentPage, isFirstLoad, previousFilters, appliedFilters]
     );
 
     //Automatically fetch when `appliedFilters` or 'currentPage' changes
     useEffect(() => {
         fetchPropertyListMasters(true, false, currentPage);
+        return () => controller.abort();
     }, [currentPage, appliedFilters]);
 
     const applySearch = () => {
