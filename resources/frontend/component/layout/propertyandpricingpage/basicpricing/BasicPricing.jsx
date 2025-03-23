@@ -51,29 +51,23 @@ const BasicPricing = () => {
     const location = useLocation();
     const { priceListData = {}, action = null } = location.state || {};
     const { pricingData, resetPricingData, setPricingData } = usePricing();
-    const {
-        fetchData,
-        setPropertyMasterId,
-        setPriceListMasterId,
-    } = usePriceListMaster();
+    const { fetchData, setPropertyMasterId, setPriceListMasterId } =
+        usePriceListMaster();
     const {
         checkExistingUnits,
         units,
         excelId,
         excelIdFromPriceList,
         lastFetchedExcelId,
-        floorPremiumsAccordionOpen,
         setTowerPhaseId,
         setExcelIdFromPriceList,
         updateUnitComputedPrices,
-        computedUnitPrices,
-        saveComputedUnitPricingData,
         setFloorPremiumsAccordionOpen,
         setExcelId,
     } = useUnit();
     const [accordionStates, setAccordionStates] = useState({
         priceListSettings: false,
-        floorPremium: floorPremiumsAccordionOpen,
+        floorPremium: false,
         additionalPremiums: false,
         priceVersions: false,
         reviewAndApprovalSetting: false,
@@ -86,9 +80,9 @@ const BasicPricing = () => {
         resetPricingData,
         showToast,
         fetchData,
-        checkExistingUnits,
+        checkExistingUnits
     );
-
+ 
     //Hooks
     /**
      * Hook to update pricing data based on incoming 'data' prop.
@@ -300,13 +294,13 @@ const BasicPricing = () => {
         return () => {
             setAccordionStates({
                 priceListSettings: false,
-                floorPremium: floorPremiumsAccordionOpen,
+                floorPremium: false,
                 additionalPremiums: false,
                 priceVersions: false,
                 reviewAndApprovalSetting: false,
             });
         };
-    }, [location, floorPremiumsAccordionOpen]);
+    }, [location]);
 
     //Compute the effective balcony base
     const computeEffectiveBalconyBase = useMemo(() => {
@@ -449,21 +443,15 @@ const BasicPricing = () => {
             ...prev,
             [name]: !prev[name],
         }));
-        // console.log("name", name);
-        if (name === "floorPremium") {
-            setFloorPremiumsAccordionOpen((prev) => prev);
-        }
+        // // console.log("name", name);
+        // if (name === "floorPremium") {
+        //     setFloorPremiumsAccordionOpen((prev) => prev);
+        // }
     };
 
     //Handle price list submit
     const handleFormSubmit = (e, status) => {
-        handleSubmit(
-            e,
-            status,
-            action,
-            excelId,
-            setFloorPremiumsAccordionOpen,
-        );
+        handleSubmit(e, status, action, excelId, setFloorPremiumsAccordionOpen);
     };
 
     return (
@@ -486,6 +474,7 @@ const BasicPricing = () => {
                                 : ""
                         }`}
                         propertyData={priceListData}
+                        setAccordionStates={setAccordionStates}
                     />
 
                     <button

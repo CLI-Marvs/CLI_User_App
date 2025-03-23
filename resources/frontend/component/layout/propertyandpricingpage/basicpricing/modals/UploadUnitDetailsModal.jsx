@@ -13,6 +13,7 @@ const UploadUnitDetailsModal = ({
     selectedExcelHeader,
     handleFileChange,
     onClose,
+    ...props
 }) => {
     //State
     const [formData, setFormData] = useState({});
@@ -69,7 +70,7 @@ const UploadUnitDetailsModal = ({
         setIsUploadingUnits(true);
 
         try {
-            // Clear related data if uploading a new Excel to replace existing one
+            // Clear old data only if a new file is uploaded
             if (excelId || excelIdFromPriceList) {
                 setUnits([]);
                 setExcelId("");
@@ -83,10 +84,6 @@ const UploadUnitDetailsModal = ({
                     reviewedByEmployees: [],
                     approvedByEmployees: [],
                 }));
-
-                console.log(
-                    "Existing Excel detected - resetting related pricing data"
-                );
             }
 
             const payload = {
@@ -96,11 +93,9 @@ const UploadUnitDetailsModal = ({
                 price_list_master_id: priceListMasterId,
                 excel_id: excelId || excelIdFromPriceList || null,
             };
-            console.log("Upload payload:", payload);
 
             // Call the API to upload units
             const response = await uploadUnits(payload);
-            console.log("Upload response:", response);
 
             // Handle successful response
             if (response?.success === true) {
@@ -111,12 +106,15 @@ const UploadUnitDetailsModal = ({
                     response?.excelId,
                     true
                 );
-                console.log("Fetched floors after uploading units:", floors);
                 setFloors(floors);
 
                 // Show success message and update UI
                 showToast("Units uploaded successfully", "success");
-                setFloorPremiumsAccordionOpen(true);
+
+                props.setAccordionStates((prev) => ({
+                    ...prev,
+                    floorPremium: true,
+                }));
 
                 // Close the modal if reference exists
                 if (uploadUnitModalRef.current) {
@@ -137,6 +135,7 @@ const UploadUnitDetailsModal = ({
             setIsUploadingUnits(false);
         }
     };
+
     //Handle in replacing the file
     const onChangeReplaceFile = async (event) => {
         // Trigger the `handleFileChange` function received from BasicPricing
@@ -245,133 +244,6 @@ const UploadUnitDetailsModal = ({
                                 </div>
                             );
                         })}
-
-                    {/* <div className="flex items-center border border-custom-grayF1 rounded-md overflow-hidden">
-                        <span className="text-custom-gray81 bg-custom-grayFA flex items-center w-[450px] h-[31px] -mr-3 pl-3 text-sm">Room Number</span>
-                        <div  className="relative w-full">
-                            <select name="roomNumber" className="appearance-none w-full px-4 h-[31px] bg-white  focus:outline-none border-0">
-                                <option value="column1">Column 1</option>
-                                <option value="column2">Column 2</option>
-                                <option value="column3">Column 3</option>
-                                <option value="column4">Column 4</option>
-                                <option value="column5">Column 5</option>
-                                <option value="column6">Column 6</option>
-                                <option value="column7">Column 7</option>
-                                <option value="column8">Column 8</option>
-                            </select>
-                            <span  className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3 bg-custom-grayFA pointer-events-none">
-                                <IoMdArrowDropdown className='text-custom-gray81' />
-                            </span>
-                        </div>
-                    </div>
-                    <div className="flex items-center border border-custom-grayF1 rounded-md overflow-hidden">
-                        <span className="text-custom-gray81 bg-custom-grayFA flex items-center w-[450px] h-[31px] -mr-3 pl-3 text-sm">Unit</span>
-                        <div  className="relative w-full">
-                            <select name="unit" className="appearance-none w-full px-4 h-[31px] bg-white  focus:outline-none border-0">
-                                <option value="column1">Column 1</option>
-                                <option value="column2">Column 2</option>
-                                <option value="column3">Column 3</option>
-                                <option value="column4">Column 4</option>
-                                <option value="column5">Column 5</option>
-                                <option value="column6">Column 6</option>
-                                <option value="column7">Column 7</option>
-                                <option value="column8">Column 8</option>
-                            </select>
-                            <span  className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3 bg-custom-grayFA pointer-events-none">
-                                <IoMdArrowDropdown className='text-custom-gray81' />
-                            </span>
-                        </div>
-                    </div>
-                    <div className="flex items-center border border-custom-grayF1 rounded-md overflow-hidden">
-                        <span className="text-custom-gray81 bg-custom-grayFA flex items-center w-[450px] h-[31px] -mr-3 pl-3 text-sm">Type</span>
-                        <div  className="relative w-full">
-                            <select name="type" className="appearance-none w-full px-4 h-[31px] bg-white  focus:outline-none border-0">
-                                <option value="column1">Column 1</option>
-                                <option value="column2">Column 2</option>
-                                <option value="column3">Column 3</option>
-                                <option value="column4">Column 4</option>
-                                <option value="column5">Column 5</option>
-                                <option value="column6">Column 6</option>
-                                <option value="column7">Column 7</option>
-                                <option value="column8">Column 8</option>
-                            </select>
-                            <span  className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3 bg-custom-grayFA pointer-events-none">
-                                <IoMdArrowDropdown className='text-custom-gray81' />
-                            </span>
-                        </div>
-                    </div>
-                    <div className="flex items-center border border-custom-grayF1 rounded-md overflow-hidden">
-                        <span className="text-custom-gray81 bg-custom-grayFA flex items-center w-[450px] h-[31px] -mr-3 pl-3 text-sm">Floor Area</span>
-                        <div  className="relative w-full">
-                            <select name="floorArea" className="appearance-none w-full px-4 h-[31px] bg-white  focus:outline-none border-0">
-                                <option value="column1">Column 1</option>
-                                <option value="column2">Column 2</option>
-                                <option value="column3">Column 3</option>
-                                <option value="column4">Column 4</option>
-                                <option value="column5">Column 5</option>
-                                <option value="column6">Column 6</option>
-                                <option value="column7">Column 7</option>
-                                <option value="column8">Column 8</option>
-                            </select>
-                            <span  className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3 bg-custom-grayFA pointer-events-none">
-                                <IoMdArrowDropdown className='text-custom-gray81' />
-                            </span>
-                        </div>
-                    </div>
-                    <div className="flex items-center border border-custom-grayF1 rounded-md overflow-hidden">
-                        <span className="text-custom-gray81 bg-custom-grayFA flex items-center w-[450px] h-[31px] -mr-3 pl-3 text-sm">Balcony Area</span>
-                        <div  className="relative w-full">
-                            <select name="balconyArea" className="appearance-none w-full px-4 h-[31px] bg-white  focus:outline-none border-0">
-                                <option value="column1">Column 1</option>
-                                <option value="column2">Column 2</option>
-                                <option value="column3">Column 3</option>
-                                <option value="column4">Column 4</option>
-                                <option value="column5">Column 5</option>
-                                <option value="column6">Column 6</option>
-                                <option value="column7">Column 7</option>
-                                <option value="column8">Column 8</option>
-                            </select>
-                            <span  className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3 bg-custom-grayFA pointer-events-none">
-                                <IoMdArrowDropdown className='text-custom-gray81' />
-                            </span>
-                        </div>
-                    </div>
-                    <div className="flex items-center border border-custom-grayF1 rounded-md overflow-hidden">
-                        <span className="text-custom-gray81 bg-custom-grayFA flex items-center w-[450px] h-[31px] -mr-3 pl-3 text-sm">Garden Area</span>
-                        <div  className="relative w-full">
-                            <select name="gardenArea" className="appearance-none w-full px-4 h-[31px] bg-white  focus:outline-none border-0">
-                                <option value="column1">Column 1</option>
-                                <option value="column2">Column 2</option>
-                                <option value="column3">Column 3</option>
-                                <option value="column4">Column 4</option>
-                                <option value="column5">Column 5</option>
-                                <option value="column6">Column 6</option>
-                                <option value="column7">Column 7</option>
-                                <option value="column8">Column 8</option>
-                            </select>
-                            <span  className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3 bg-custom-grayFA pointer-events-none">
-                                <IoMdArrowDropdown className='text-custom-gray81' />
-                            </span>
-                        </div>
-                    </div>
-                    <div className="flex items-center border border-custom-grayF1 rounded-md overflow-hidden">
-                        <span className="text-custom-gray81 bg-custom-grayFA flex items-center w-[450px] h-[31px] -mr-3 pl-3 text-sm">Total Area</span>
-                        <div  className="relative w-full">
-                            <select name="totalArea" className="appearance-none w-full px-4 h-[31px] bg-white  focus:outline-none border-0">
-                                <option value="column1">Column 1</option>
-                                <option value="column2">Column 2</option>
-                                <option value="column3">Column 3</option>
-                                <option value="column4">Column 4</option>
-                                <option value="column5">Column 5</option>
-                                <option value="column6">Column 6</option>
-                                <option value="column7">Column 7</option>
-                                <option value="column8">Column 8</option>
-                            </select>
-                            <span  className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3 bg-custom-grayFA pointer-events-none">
-                                <IoMdArrowDropdown className='text-custom-gray81' />
-                            </span>
-                        </div>
-                    </div> */}
                 </div>
                 <div className="flex justify-center mt-4 mb-8">
                     {selectedExcelHeader && selectedExcelHeader.length > 0 ? (

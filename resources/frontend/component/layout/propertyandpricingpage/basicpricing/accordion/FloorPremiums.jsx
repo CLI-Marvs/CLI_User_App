@@ -25,7 +25,6 @@ const FloorPremiums = ({ isOpen, toggleAccordion, priceListData }) => {
         isFloorCountLoading,
         excelId,
         excelIdFromPriceList,
-        floorPremiumsAccordionOpen,
     } = useUnit();
     const [selectedFloor, setSelectedFloor] = useState(null);
     const { pricingData, setPricingData } = usePricing();
@@ -41,7 +40,7 @@ const FloorPremiums = ({ isOpen, toggleAccordion, priceListData }) => {
             return;
         }
 
-        if (priceListData?.excelId || excelId) {
+        if (excelIdFromPriceList || excelId) {
             const floorNumbers = floors[Object.keys(floors)[0]];
             if (Array.isArray(floorNumbers) && floorNumbers.length > 0) {
                 const initialFloorPremiums = floorNumbers.reduce(
@@ -113,30 +112,7 @@ const FloorPremiums = ({ isOpen, toggleAccordion, priceListData }) => {
         }));
     };
 
-    /**
-     * Handles the button click for adding a new floor premium configuration.
-     * Validates the input data, checks for existing floor entries, and updates the 'pricingData' state.
-     *
-     * @function handleAddNewFloor
-     * @returns {void}
-     *
-     * @description
-     * This function performs the following actions:
-     * 1.  Retrieves the 'floor', 'premiumCost', and 'excludedUnits' values from 'newFloorPremiumData'.
-     * 2.  Validates that both 'floor' and 'premiumCost' are provided. If not, displays an error toast and returns.
-     * 3.  Checks if 'pricingData.floorPremiums' is empty. If so, initializes it with the new floor data and updates the 'floors' array.
-     * 4.  Checks if the entered 'floor' already exists in 'pricingData.floorPremiums'. If it does, displays an error toast and returns.
-     * 5.  If the 'floor' does not exist, adds the new floor premium configuration to 'pricingData.floorPremiums'.
-     * 6.  Displays a success toast message indicating that the floor was added successfully.
-     * 7.  Resets the 'newFloorPremiumData' state to its initial state ('newFloorState').
-     *
-     * @requires {object} newFloorPremiumData - Contains the floor, premium cost, and excluded units for the new floor.
-     * @requires {object} pricingData - The current pricing data containing floor premiums and floors.
-     * @requires {function} setPricingData - State setter for updating 'pricingData'.
-     * @requires {function} showToast - Displays toast messages for errors and success.
-     * @requires {function} setNewFloorPremiumData - State setter for resetting 'newFloorPremiumData'.
-     * @requires {object} newFloorState - The initial state for 'newFloorPremiumData'.
-     */
+    
     const handleAddNewFloor = () => {
         const { floor, premiumCost, excludedUnits } = newFloorPremiumData;
 
@@ -207,7 +183,7 @@ const FloorPremiums = ({ isOpen, toggleAccordion, priceListData }) => {
             <div
                 className={`transition-all duration-2000 ease-in-out
       ${
-          isOpen || floorPremiumsAccordionOpen
+          isOpen 
               ? "h-[74px] mx-5 bg-white shadow-custom5 rounded-[10px]"
               : "h-[72px] gradient-btn3 rounded-[10px] p-[1px]"
       } `}
@@ -216,14 +192,14 @@ const FloorPremiums = ({ isOpen, toggleAccordion, priceListData }) => {
                     onClick={() => toggleAccordion("floorPremiums")}
                     className={`
             ${
-                isOpen || floorPremiumsAccordionOpen
+                isOpen 
                     ? "flex justify-between items-center h-full w-full bg-white rounded-[9px] px-[15px]"
                     : "flex justify-between items-center h-full w-full bg-custom-grayFA rounded-[9px] px-[15px]"
             } `}
                 >
                     <span
                         className={` text-custom-solidgreen ${
-                            isOpen || floorPremiumsAccordionOpen
+                            isOpen
                                 ? "text-[20px] montserrat-semibold"
                                 : "text-[18px] montserrat-regular"
                         }`}
@@ -232,7 +208,7 @@ const FloorPremiums = ({ isOpen, toggleAccordion, priceListData }) => {
                     </span>
                     <span
                         className={`flex justify-center items-center h-[40px] w-[40px] rounded-full  transform transition-transform duration-300 ease-in-out ${
-                            isOpen || floorPremiumsAccordionOpen
+                            isOpen 
                                 ? "rotate-180 bg-[#F3F7F2] text-custom-solidgreen"
                                 : "rotate-0 gradient-btn2 text-white"
                         }`}
@@ -244,7 +220,7 @@ const FloorPremiums = ({ isOpen, toggleAccordion, priceListData }) => {
             <div
                 className={`mx-5 rounded-[10px] shadow-custom5 grid overflow-hidden transition-all duration-300 ease-in-out
             ${
-                isOpen || floorPremiumsAccordionOpen
+                isOpen 
                     ? "mt-2 mb-4 grid-rows-[1fr] opacity-100"
                     : "grid-rows-[0fr] opacity-0"
             }

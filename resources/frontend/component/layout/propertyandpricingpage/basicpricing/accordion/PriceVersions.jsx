@@ -249,10 +249,9 @@ const PriceVersions = ({ priceListData, action, isOpen, toggleAccordion }) => {
                                                     ]?.payment_scheme;
 
                                                 return (
-                                                    <tbody>
+                                                    <tbody key={form.id}>
                                                         <tr
                                                             className="h-[66px] bg-white text-sm"
-                                                            key={index}
                                                         >
                                                             <td className="px-[10px]">
                                                                 {

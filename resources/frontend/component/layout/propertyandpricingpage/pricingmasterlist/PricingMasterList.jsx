@@ -49,6 +49,7 @@ const PricingMasterList = () => {
     //Hooks
     //Hide the search filter dropdown when clicking outside of it
     useEffect(() => {
+        console.log("priceListMaster", priceListMaster);
         const handleOutsideClick = (event) => {
             if (
                 dropdownRef.current &&

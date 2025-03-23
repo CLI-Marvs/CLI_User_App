@@ -10,6 +10,7 @@ const UnitUploadButton = ({
     buttonText = "",
     className = "",
     priceListData,
+    ...props
 }) => {
     //States
     const uploadUnitModalRef = useRef(null);
@@ -174,6 +175,7 @@ const UnitUploadButton = ({
                     uploadUnitModalRef={uploadUnitModalRef}
                     fileName={fileName}
                     selectedExcelHeader={selectedExcelHeader}
+                    setAccordionStates={props.setAccordionStates}
                 />
             </div>
         </div>

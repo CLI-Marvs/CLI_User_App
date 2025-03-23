@@ -45,7 +45,7 @@ class PriceListMasterRepository
     /*
      * Get all property price list masters with pagination of 10 per page, apply the filters also if any
      */
-    public function index(array $validatedData)
+    public function index(array $validatedData) 
     {
 
         $query = $this->getPriceListMastersWithRelations();

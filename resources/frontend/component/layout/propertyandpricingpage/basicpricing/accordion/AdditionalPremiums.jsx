@@ -10,6 +10,7 @@ import CustomInput from "@/component/Input/CustomInput";
 import generateBigIntId from "@/component/layout/propertyandpricingpage/utils/generateId";
 
 const AdditionalPremiums = ({ priceListData, isOpen, toggleAccordion }) => {
+    
     //States
     const { excelId, excelIdFromPriceList } = useUnit();
     const [newAdditionalPremium, setNewAdditionalPremium] = useState({

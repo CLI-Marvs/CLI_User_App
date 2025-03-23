@@ -1,4 +1,10 @@
-import React, { useRef, useEffect, useState, useMemo } from "react";
+import React, {
+    useRef,
+    useEffect,
+    useState,
+    useMemo,
+    useCallback,
+} from "react";
 import PremiumChecklistModal from "./PremiumChecklistModal";
 import { useUnit } from "@/context/PropertyPricing/UnitContext";
 import { usePricing } from "@/component/layout/propertyandpricingpage/context/BasicPricingContext";
@@ -6,10 +12,12 @@ import CircularProgress from "@mui/material/CircularProgress";
 
 const AdditionalPremiumAssignModal = ({ modalRef, priceListData }) => {
     //States
+    const [dataFetched, setDataFetched] = useState(false);
     const premiumCheckListModalRef = useRef(null);
     const {
         checkExistingUnits,
         excelId,
+        excelIdFromPriceList,
         towerPhaseId,
         units,
         isCheckingUnits,
@@ -19,27 +27,51 @@ const AdditionalPremiumAssignModal = ({ modalRef, priceListData }) => {
     const { pricingData } = usePricing();
 
     //Hooks
+    // Memoize the checkExistingUnits function
+    const memoizedCheckExistingUnits = useCallback(
+        (towerPhaseId, excelId, param1, param2) => {
+            return checkExistingUnits(towerPhaseId, excelId, param1, param2);
+        },
+        [] 
+    );
+
     useEffect(() => {
-        if (priceListData) {
-            const newExcelId = priceListData.data?.excel_id || excelId;
+        // Only run if have valid data and haven't fetched yet
+        if (priceListData.data && !dataFetched) {
+            const newExcelId = excelIdFromPriceList || excelId;
             const newTowerPhaseId =
-                (priceListData.tower_phases &&
-                    priceListData?.tower_phases[0].id) ||
+                (priceListData.data.tower_phases &&
+                    priceListData?.data.tower_phases[0].id) ||
                 towerPhaseId;
-            if (!newExcelId || !newTowerPhaseId) return;
 
-            const fetchData = async () => {
-                await checkExistingUnits(
-                    newTowerPhaseId,
-                    newExcelId,
-                    false,
-                    false
-                );
-            };
+            // Only fetch if we have both required IDs
+            if (newExcelId && newTowerPhaseId) {
+                const fetchData = async () => {
+                    await memoizedCheckExistingUnits(
+                        newTowerPhaseId,
+                        newExcelId,
+                        false,
+                        false
+                    );
+                    setDataFetched(true);
+                };
 
-            fetchData();
+                fetchData();
+            }
         }
-    }, [priceListData, excelId, towerPhaseId, checkExistingUnits]);
+    }, [
+        priceListData.data,
+        excelId,
+        towerPhaseId,
+        memoizedCheckExistingUnits,
+        excelIdFromPriceList,
+        dataFetched,
+    ]);
+
+    // Add this effect to reset the dataFetched flag when excel IDs change
+    useEffect(() => {
+        setDataFetched(false);
+    }, [excelId, excelIdFromPriceList]);
 
     /**
      * Groups units by floor using `useMemo` for optimization.
