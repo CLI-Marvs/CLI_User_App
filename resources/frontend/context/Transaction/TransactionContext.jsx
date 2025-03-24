@@ -16,21 +16,25 @@ export const TransactionProvider = ({ children }) => {
         data: [],
         currentPage: 0,
         totalPages: 0,
-        filters: {}
+        filters: {},
+        loading: true,
     });
 
     const [bankStatementsList, setBankStatementsList] = useState({
         data: [],
         currentPage: 0,
         totalPages: 0,
-        filters: {}
+        filters: {},
+        loading: true,
+
     });
 
     const [invoices, setInvoices] = useState({
         data: [],
         currentPage: 0,
         totalPages: 0,
-        filters: {}
+        filters: {},
+        loading: true,
     });
 
     return (

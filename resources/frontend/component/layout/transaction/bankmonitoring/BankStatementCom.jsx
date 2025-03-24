@@ -17,6 +17,55 @@ const BankStatementCom = () => {
         bankStatementsList,
         setBankStatementsList
     );
+
+    const columns = [
+        {
+            header: "Date & Time",
+            accessor: "transaction_date",
+            render: (row) => (
+                <BankTableCell type="transaction_date" row={row} />
+            ),
+        },
+        {
+            header: "Transaction",
+            accessor: "transaction",
+            render: (row) => (
+                <BankTableCell type="transaction" row={row} />
+            ),
+        },
+
+        {
+            header: "Details",
+            accessor: "details",
+            render: (row) => <BankTableCell type="details" row={row} />,
+        },
+        {
+            header: "Amount",
+            accessor: "amount",
+            render: (row) => <BankTableCell type="amount" row={row} />,
+        },
+        {
+            header: "Payment Method",
+            accessor: "payment_method",
+            render: (row) => (
+                <BankTableCell type="payment_method" row={row} />
+            ),
+        },
+        {
+            header: "Status",
+            accessor: "transaction_status",
+            render: (row) => (
+                <BankTableCell type="transaction_status" row={row} />
+            ),
+        },
+        {
+            header: "Destination Bank",
+            accessor: "destination_bank",
+            render: (row) => (
+                <BankTableCell type="destination_bank" row={row} />
+            ),
+        },
+    ];
     const fields = [
         {
             name: "bank_name",
@@ -48,50 +97,6 @@ const BankStatementCom = () => {
         { name: "date_range", type: "date_range", label: "Date" },
     ];
 
-    const columns = [
-        {
-            header: "Bank",
-            accessor: "bank_name",
-            render: (row) => {
-                return <BankTableCell type="bank_name" row={row} />;
-            },
-        },
-        {
-            header: "Transaction Details",
-            accessor: "transaction_details",
-            render: (row) => {
-                return <BankTableCell type="transaction_details" row={row} />;
-            },
-        },
-        {
-            header: "Credit",
-            accessor: "credit",
-            render: (row) => {
-                return <BankTableCell type="credit" row={row} />;
-            },
-        },
-        {
-            header: "Debit",
-            accessor: "debit",
-            render: (row) => {
-                return <BankTableCell type="debit" row={row} />;
-            },
-        },
-        {
-            header: "Running Balance",
-            accessor: "running_balance",
-            render: (row) => {
-                return <BankTableCell type="running_balance" row={row} />;
-            },
-        },
-        {
-            header: "Status",
-            accessor: "status",
-            render: (row) => {
-                return <BankTableCell type="status" row={row} />;
-            },
-        },
-    ];
     const [searchValues, setSearchValues] = useState({});
 
     const handleSearchValue = (e) => {
@@ -106,6 +111,7 @@ const BankStatementCom = () => {
         setFilters(searchValues);
         setSearchValues({});
     };
+
     /*  const handleSubmitSap = async () => {
         try {
             for (const item of matchesData) {
@@ -161,7 +167,7 @@ const BankStatementCom = () => {
                         onSubmit={onSubmit}
                     />
                 </div>
-                <GlobalTable columns={columns} data={bankStatementsList.data} />
+                <GlobalTable columns={columns} data={bankStatementsList.data} loading={bankStatementsList.loading} />
                 <div className="flex justify-end mt-4">
                     <div className="flex w-full justify-end mt-3 mb-10">
                         <Pagination

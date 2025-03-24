@@ -163,7 +163,7 @@ const InvoicesCom = () => {
                         </button>
                     </div>
                 </div>
-                <GlobalTable columns={columns} data={invoices.data} />
+                <GlobalTable columns={columns} data={invoices.data} loading={invoices.loading}/>
                 <div className="flex justify-end mt-4">
                     <div className="flex w-full justify-end mt-3 mb-10">
                         <Pagination
