@@ -46,11 +46,14 @@ class UnitService
      */
     public function storeUnitFromExcel(array $data)
     {
- 
+
         // Increase PHP limits for this request
         ini_set('max_execution_time', 300);
         ini_set('memory_limit', '512M');
+       
         $excelRowsData = $data['excelDataRows'];
+        $headerMappings = $data['selectedExcelHeader'];
+        $expectedHeaders = $data['expectedHeaders'];
         $existingExcelId = $data['excel_id'] ?? null;
         $propertyId = $data['property_masters_id'];
         $towerPhaseId = $data['tower_phase_id'];
@@ -61,6 +64,21 @@ class UnitService
         DB::beginTransaction();
         try {
             DB::disableQueryLog();
+
+
+            // Create a mapping of expected headers to their column indices in the uploaded file
+            $headerIndexMap = [];
+            foreach ($headerMappings as $mapping) {
+                if (isset($mapping['rowHeader'], $mapping['columnIndex'])) {
+                    $headerIndexMap[$mapping['rowHeader']] = $mapping['columnIndex'] - 1;
+                }
+            }
+            // Ensure all required headers exist in the mapping
+            foreach ($expectedHeaders as $expectedHeader) {
+                if (!isset($headerIndexMap[$expectedHeader])) {
+                    throw new \Exception("Missing required column: $expectedHeader");
+                }
+            }
 
 
             if ($existingExcelId !== null) {
@@ -97,22 +115,23 @@ class UnitService
                         'tower_phase_id' => null,
                     ]);
             }
-
+ 
+            // Process the data with dynamic mapping
             collect($excelRowsData)
                 ->chunk(500)
-                ->each(function ($chunk) use ($propertyId, $towerPhaseId, $priceListMasterId, $newExcelId) {
+                ->each(function ($chunk) use ($headerIndexMap, $propertyId, $towerPhaseId, $priceListMasterId, $newExcelId) {
                     $createdAt = Carbon::now()->toDateString();
 
-                    $formattedData = $chunk->map(function ($row) use ($propertyId, $towerPhaseId, $priceListMasterId, $newExcelId, $createdAt) {
+                    $formattedData = $chunk->map(function ($row) use ($headerIndexMap, $propertyId, $towerPhaseId, $priceListMasterId, $newExcelId, $createdAt) {
                         return [
-                            'floor' => $row[0],
-                            'room_number' => $row[1],
-                            'unit' => $row[2],
-                            'type' => $row[3],
-                            'indoor_area' => $row[4],
-                            'balcony_area' => $row[5],
-                            'garden_area' => $row[6],
-                            'total_area' => $row[7],
+                            'floor' => $row[$headerIndexMap["FLOOR"]],
+                            'room_number' => $row[$headerIndexMap["ROOM NUMBER"]],
+                            'unit' => $row[$headerIndexMap["UNIT"]],
+                            'type' => $row[$headerIndexMap["TYPE"]],
+                            'indoor_area' => $row[$headerIndexMap["INDOOR AREA"]],
+                            'balcony_area' => $row[$headerIndexMap["BALCONY AREA"]],
+                            'garden_area' => $row[$headerIndexMap["GARDEN AREA"]],
+                            'total_area' => $row[$headerIndexMap["TOTAL AREA"]],
                             'status' => 'Active',
                             'property_masters_id' => $propertyId,
                             'tower_phase_id' => $towerPhaseId,
@@ -122,9 +141,9 @@ class UnitService
                         ];
                     });
 
+                   
                     $this->model->insert($formattedData->toArray());
                 });
-
             DB::commit();
 
             return [

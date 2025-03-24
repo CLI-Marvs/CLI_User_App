@@ -18,7 +18,7 @@ const UnitUploadButton = ({
     const [fileName, setFileName] = useState("");
     const [excelDataRows, setExcelDataRows] = useState([]);
     const [selectedExcelHeader, setSelectedExcelHeader] = useState([]);
-
+ 
     //Event handler
     //Handle to open the unit upload modal
     const handleOpenUnitUploadModal = () => {
@@ -176,6 +176,7 @@ const UnitUploadButton = ({
                     fileName={fileName}
                     selectedExcelHeader={selectedExcelHeader}
                     setAccordionStates={props.setAccordionStates}
+                    expectedHeaders={expectedHeaders}
                 />
             </div>
         </div>
