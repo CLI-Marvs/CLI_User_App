@@ -206,7 +206,7 @@ const AutoPostingCom = () => {
             return {
                 ID: item.id,
                 BUKRS: item.company_code,
-                RECNNR: item.contract_number,
+                RECNNR: item.reference_number,
                 VBEWA: item.flow_type,
                 BELNR: item.invoice_number,
                 AMT: item.amount,
