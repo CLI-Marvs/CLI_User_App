@@ -104,7 +104,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/customer/details', 'getCustomerDetailsByEmail');
         Route::get('/transaction-list', 'retrieveTransactions');
         Route::get('/invoices-list','retrieveInvoices');
-        Route::get('/bank-statements-list','retrieveInvoices');
+        Route::get('/bank-statements-list','retrieveBankStatements');
         Route::patch('/transaction-update', 'updateTransactionStatus');
         
     });

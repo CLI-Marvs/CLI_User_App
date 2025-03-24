@@ -2,8 +2,6 @@ import { useEffect } from "react";
 
 const usePagination = (fetchData, contextState, contextSetter) => {
     const { currentPage, filters } = contextState;
-    console.log("contextState", contextState);
-    console.log("fetchData", fetchData);
 
     const getData = async () => {
         try {
@@ -12,7 +10,8 @@ const usePagination = (fetchData, contextState, contextSetter) => {
             contextSetter((prev) => ({
                 ...prev,
                 data: response.data,
-                totalPages: response.last_page || response.totalPages
+                totalPages: response.last_page,
+                loading: false
             }));
         } catch (error) {
             console.error("Failed to fetch data:", error);
@@ -26,7 +25,8 @@ const usePagination = (fetchData, contextState, contextSetter) => {
     const handlePageClick = (data) => {
         contextSetter((prev) => ({
             ...prev,
-            currentPage: data.selected
+            currentPage: data.selected,
+            isPage: true,
         }));
     };
 
@@ -34,7 +34,7 @@ const usePagination = (fetchData, contextState, contextSetter) => {
         contextSetter((prev) => ({
             ...prev,
             filters: newFilters,
-            currentPage: 0 
+            currentPage: 0,
         }));
     };
 
