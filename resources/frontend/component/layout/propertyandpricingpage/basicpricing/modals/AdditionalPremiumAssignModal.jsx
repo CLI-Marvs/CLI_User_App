@@ -18,7 +18,6 @@ const AdditionalPremiumAssignModal = ({ modalRef, priceListData }) => {
     const {
         fetchUnits,
         excelId,
-        excelIdFromPriceList,
         towerPhaseId,
         units,
         isCheckingUnits,
@@ -40,7 +39,7 @@ const AdditionalPremiumAssignModal = ({ modalRef, priceListData }) => {
     useEffect(() => {
         // Only run if have valid data and haven't fetched yet
         if (priceListData.data && !dataFetched) {
-            const newExcelId = excelIdFromPriceList || excelId;
+            const newExcelId = excelId;
             const newTowerPhaseId =
                 (priceListData.data.tower_phases &&
                     priceListData?.data.tower_phases[0].id) ||
@@ -67,7 +66,6 @@ const AdditionalPremiumAssignModal = ({ modalRef, priceListData }) => {
         excelId,
         towerPhaseId,
         memoizedfetchUnits,
-        excelIdFromPriceList,
         dataFetched,
         priceListMasterId,
     ]);
@@ -75,7 +73,7 @@ const AdditionalPremiumAssignModal = ({ modalRef, priceListData }) => {
     // Add this effect to reset the dataFetched flag when excel IDs change
     useEffect(() => {
         setDataFetched(false);
-    }, [excelId, excelIdFromPriceList]);
+    }, [excelId]);
 
     /**
      * Groups units by floor using `useMemo` for optimization.

@@ -31,7 +31,7 @@ class StoreUnitRequest extends FormRequest
                 'tower_phase_id' => 'integer',
                 'property_masters_id' => 'integer',
                 'price_list_master_id' => 'integer',
-                'excel_id' => 'nullable|string',
+                'excel_id' => ['nullable','string'],
             ];
         }
 
@@ -48,7 +48,7 @@ class StoreUnitRequest extends FormRequest
                 'total_area' => 'required|numeric',
                 'tower_phase_id' => 'integer',
                 'property_masters_id' => 'integer',
-                'excel_id' => 'string',
+                'excel_id' => ['nullable', 'string'],
                 'price_list_master_id' => 'integer',
             ];
         }

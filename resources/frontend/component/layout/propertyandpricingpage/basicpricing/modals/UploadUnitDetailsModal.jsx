@@ -7,7 +7,6 @@ import { usePriceListMaster } from "@/context/PropertyPricing/PriceListMasterCon
 import { usePricing } from "@/component/layout/propertyandpricingpage/context/BasicPricingContext";
 import { useProperty } from "@/context/PropertyPricing/PropertyContext";
 
-
 const UploadUnitDetailsModal = ({
     excelDataRows,
     uploadUnitModalRef,
@@ -26,11 +25,9 @@ const UploadUnitDetailsModal = ({
         isUploadingUnits,
         fetchFloorCount,
         excelId,
-        excelIdFromPriceList,
         setFloors,
         setUnits,
         setExcelId,
-        setExcelIdFromPriceList,
         setFloorPremiumsAccordionOpen,
         setIsUploadingUnits,
     } = useUnit();
@@ -38,6 +35,7 @@ const UploadUnitDetailsModal = ({
     const { priceListMasterId } = usePriceListMaster();
     const { propertyMasterId } = useProperty();
     
+
     //Hooks
     useEffect(() => {
         if (selectedExcelHeader) {
@@ -73,11 +71,13 @@ const UploadUnitDetailsModal = ({
         setIsUploadingUnits(true);
 
         try {
+            const excelIdToSend = excelId || null;
+            console.log("excelIdToSend", excelIdToSend);
             // Clear old data only if a new file is uploaded
-            if (excelId || excelIdFromPriceList) {
+            if (excelIdToSend) {
                 setUnits([]);
-                setExcelId("");
-                setExcelIdFromPriceList("");
+                // setExcelId("");
+                // setExcelIdFromPriceList("");
 
                 // Reset specific pricing data fields while preserving other fields
                 setPricingData((prev) => ({
@@ -94,9 +94,9 @@ const UploadUnitDetailsModal = ({
                 tower_phase_id: towerPhaseId,
                 property_masters_id: propertyMasterId,
                 price_list_master_id: priceListMasterId,
-                excel_id: excelId || excelIdFromPriceList || null,
+                excel_id: excelIdToSend,
             };
-
+            console.log("payload", payload);
             // Call the API to upload units
             const response = await uploadUnits(payload);
 
@@ -104,6 +104,7 @@ const UploadUnitDetailsModal = ({
             if (response?.success === true) {
                 // Reset floors and fetch new floor data based on the uploaded Excel
                 setFloors([]);
+
                 const floors = await fetchFloorCount(
                     towerPhaseId,
                     response?.excelId,

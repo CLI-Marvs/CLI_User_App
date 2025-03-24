@@ -8,6 +8,7 @@ import { usePricing } from "@/component/layout/propertyandpricingpage/context/Ba
 import { showToast } from "@/util/toastUtil";
 import UnitUploadButton from "@/component/layout/propertyandpricingpage/component/UnitUploadButton";
 import CustomInput from "@/component/Input/CustomInput";
+ 
 
 const newFloorState = {
     floor: null,
@@ -20,12 +21,7 @@ const FloorPremiums = ({ isOpen, toggleAccordion, priceListData }) => {
     const [newFloorPremiumData, setNewFloorPremiumData] =
         useState(newFloorState);
     const floorPremiumAssignModalRef = useRef(null);
-    const {
-        floors,
-        isFloorCountLoading,
-        excelId,
-        excelIdFromPriceList,
-    } = useUnit();
+    const { floors, isFloorCountLoading, excelId } = useUnit();
     const [selectedFloor, setSelectedFloor] = useState(null);
     const { pricingData, setPricingData } = usePricing();
 
@@ -33,14 +29,14 @@ const FloorPremiums = ({ isOpen, toggleAccordion, priceListData }) => {
     useEffect(() => {
         if (!floors || Object.keys(floors).length === 0) return;
         if (
-            (excelIdFromPriceList || excelId) &&
+            excelId &&
             pricingData.floorPremiums &&
             Object.keys(pricingData.floorPremiums).length > 0
         ) {
             return;
         }
 
-        if (excelIdFromPriceList || excelId) {
+        if (excelId) {
             const floorNumbers = floors[Object.keys(floors)[0]];
             if (Array.isArray(floorNumbers) && floorNumbers.length > 0) {
                 const initialFloorPremiums = floorNumbers.reduce(
@@ -61,7 +57,7 @@ const FloorPremiums = ({ isOpen, toggleAccordion, priceListData }) => {
                 }));
             }
         }
-    }, [floors, excelIdFromPriceList, excelId]);
+    }, [floors, excelId]);
 
     //Event handler
     //Handle to open modal to assign floor premiums
@@ -112,7 +108,6 @@ const FloorPremiums = ({ isOpen, toggleAccordion, priceListData }) => {
         }));
     };
 
-    
     const handleAddNewFloor = () => {
         const { floor, premiumCost, excludedUnits } = newFloorPremiumData;
 
@@ -183,7 +178,7 @@ const FloorPremiums = ({ isOpen, toggleAccordion, priceListData }) => {
             <div
                 className={`transition-all duration-2000 ease-in-out
       ${
-          isOpen 
+          isOpen
               ? "h-[74px] mx-5 bg-white shadow-custom5 rounded-[10px]"
               : "h-[72px] gradient-btn3 rounded-[10px] p-[1px]"
       } `}
@@ -192,7 +187,7 @@ const FloorPremiums = ({ isOpen, toggleAccordion, priceListData }) => {
                     onClick={() => toggleAccordion("floorPremiums")}
                     className={`
             ${
-                isOpen 
+                isOpen
                     ? "flex justify-between items-center h-full w-full bg-white rounded-[9px] px-[15px]"
                     : "flex justify-between items-center h-full w-full bg-custom-grayFA rounded-[9px] px-[15px]"
             } `}
@@ -208,7 +203,7 @@ const FloorPremiums = ({ isOpen, toggleAccordion, priceListData }) => {
                     </span>
                     <span
                         className={`flex justify-center items-center h-[40px] w-[40px] rounded-full  transform transition-transform duration-300 ease-in-out ${
-                            isOpen 
+                            isOpen
                                 ? "rotate-180 bg-[#F3F7F2] text-custom-solidgreen"
                                 : "rotate-0 gradient-btn2 text-white"
                         }`}
@@ -220,7 +215,7 @@ const FloorPremiums = ({ isOpen, toggleAccordion, priceListData }) => {
             <div
                 className={`mx-5 rounded-[10px] shadow-custom5 grid overflow-hidden transition-all duration-300 ease-in-out
             ${
-                isOpen 
+                isOpen
                     ? "mt-2 mb-4 grid-rows-[1fr] opacity-100"
                     : "grid-rows-[0fr] opacity-0"
             }
@@ -228,7 +223,7 @@ const FloorPremiums = ({ isOpen, toggleAccordion, priceListData }) => {
             >
                 <div className="bg-white overflow-hidden">
                     <div className="w-full p-5 h-[370px]">
-                        {excelId || excelIdFromPriceList ? (
+                        {excelId ? (
                             priceListData &&
                             priceListData.data.status === "Draft" ? (
                                 <div className="flex justify-center w-full h-[31px] gap-3 mb-4">

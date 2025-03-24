@@ -57,10 +57,10 @@ const BasicPricing = () => {
         fetchUnits,
         units,
         excelId,
-        excelIdFromPriceList,
+     
         lastFetchedExcelId,
         setTowerPhaseId,
-        setExcelIdFromPriceList,
+
         updateUnitComputedPrices,
         setFloorPremiumsAccordionOpen,
         setExcelId,
@@ -94,12 +94,7 @@ const BasicPricing = () => {
     useEffect(() => {
         if (priceListData) {
             setTowerPhaseId(priceListData?.data?.tower_phases[0]?.id);
-            if (priceListData?.data?.excel_id) {
-                setExcelIdFromPriceList(priceListData?.data.excel_id);
-            } else {
-                setExcelIdFromPriceList(null);
-                setExcelId(null);
-            }
+            setExcelId(priceListData?.data?.excel_id || null);
             setPropertyMasterId(
                 priceListData?.data?.property_commercial_detail
                     ?.property_master_id
@@ -465,7 +460,7 @@ const BasicPricing = () => {
                 <div className="flex gap-[15px] py-5">
                     <UnitUploadButton
                         buttonText={
-                            excelId || excelIdFromPriceList
+                            excelId
                                 ? "Change Uploaded Units"
                                 : "Upload Unit Details"
                         }

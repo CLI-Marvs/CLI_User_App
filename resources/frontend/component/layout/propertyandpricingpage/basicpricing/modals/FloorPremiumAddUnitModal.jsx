@@ -27,7 +27,7 @@ const FloorPremiumAddUnitModal = ({
 }) => {
     //States
     const [formData, setFormData] = useState(formDataState);
-    const { fetchUnits, excelId, excelIdFromPriceList, setUnits } = useUnit();
+    const { fetchUnits, excelId, setUnits } = useUnit();
     const [isLoading, setIsLoading] = useState(false);
     const { priceListMasterId } = usePriceListMaster();
     const { propertyMasterId } = useProperty();
@@ -71,7 +71,7 @@ const FloorPremiumAddUnitModal = ({
                 garden_area: parseFloat(formData.gardenArea).toFixed(2),
                 total_area: parseFloat(formData.totalArea).toFixed(2),
                 tower_phase_id: towerPhaseId,
-                excel_id: excelId || excelIdFromPriceList,
+                excel_id: excelId ,
                 property_masters_id: propertyMasterId,
                 price_list_master_id: priceListMasterId,
             };
@@ -92,7 +92,7 @@ const FloorPremiumAddUnitModal = ({
                 await Promise.all([
                     fetchUnits(
                         towerPhaseId,
-                        excelId || excelIdFromPriceList,
+                        excelId,
                         priceListMasterId,
                         true,
                         true

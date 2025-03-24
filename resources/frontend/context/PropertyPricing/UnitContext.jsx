@@ -6,10 +6,10 @@ const UnitContext = createContext();
 
 export const UnitProvider = ({ children }) => {
     const [excelId, setExcelId] = useState(null);
+    // const [excelIdFromPriceList, setExcelIdFromPriceList] = useState(null);
     const [floors, setFloors] = useState([]);
     const [error, setError] = useState(null);
     const [towerPhaseId, setTowerPhaseId] = useState(null);
-    const [excelIdFromPriceList, setExcelIdFromPriceList] = useState(null);
     const [floorPremiumsAccordionOpen, setFloorPremiumsAccordionOpen] =
         useState(false);
     const [unitsByFloor, setUnitByFloors] = useState([]);
@@ -100,7 +100,7 @@ export const UnitProvider = ({ children }) => {
                     excelId,
                     priceListMasterId
                 );
-                console.log("response", response);
+              
                 const unitsData = response?.data?.data || [];
                 setUnits(unitsData);
                 setLastFetchedExcelId(excelId);
@@ -194,7 +194,7 @@ export const UnitProvider = ({ children }) => {
                 const payload = {
                     payload: Object.values(data),
                     excel_id:
-                        excelId || excelIdFromPriceList || data[0]?.excel_id,
+                        excelId  || data[0]?.excel_id,
                     tower_phase_id: towerPhaseId || data[0]?.tower_phase_id,
                     property_masters_id: data[0]?.property_masters_id,
                     price_list_master_id: data[0]?.price_list_master_id,
@@ -245,8 +245,8 @@ export const UnitProvider = ({ children }) => {
         setLastFetchedExcelId,
         towerPhaseId,
         setTowerPhaseId,
-        excelIdFromPriceList,
-        setExcelIdFromPriceList,
+        // excelIdFromPriceList,
+        // setExcelIdFromPriceList,
         setExcelId,
         setUnits,
         updateUnitComputedPrices,

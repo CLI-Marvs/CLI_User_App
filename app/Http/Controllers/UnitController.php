@@ -37,9 +37,10 @@ class UnitController extends Controller
         // Update the validated data
         $validatedData['excelDataRows'] = $normalizedRows;
 
+
         try {
             $result = $this->service->storeUnitFromExcel($validatedData);
-
+             
             return response()->json([
                 'message' => $result['message'],
                 'excel_id' => $result['excel_id'],

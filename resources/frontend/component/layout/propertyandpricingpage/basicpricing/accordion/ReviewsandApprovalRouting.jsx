@@ -39,7 +39,7 @@ const ReviewsandApprovalRouting = ({
         setFloorPremiumsAccordionOpen,
         units,
         excelId,
-        excelIdFromPriceList,
+
         computedUnitPrices,
         fetchUnits,
     } = useUnit();
@@ -285,9 +285,7 @@ const ReviewsandApprovalRouting = ({
             >
                 <div className="  ">
                     <div className="p-[20px] space-y-[10px]">
-                        {(excelId ||
-                            excelIdFromPriceList ||
-                            computedUnitPrices.length > 0) && (
+                        {(excelId || computedUnitPrices.length > 0) && (
                             <div className="flex items-center justify-between">
                                 {/* Download Excel section */}
                                 {isExcelDownloading ? (
@@ -404,7 +402,7 @@ const ReviewsandApprovalRouting = ({
                                 </div>
                             </div>
 
-                            {(excelId ? true : excelIdFromPriceList) && (
+                            {excelId && (
                                 <UnitTableComponent
                                     tableWidth="w-80"
                                     computedUnitPrices={computedUnitPrices}
