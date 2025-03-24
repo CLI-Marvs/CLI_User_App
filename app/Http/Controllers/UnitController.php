@@ -28,8 +28,8 @@ class UnitController extends Controller
         $validatedData = $request->validated();
         $validatedData['excel_id'] = $validatedData['excel_id'] ?? null;
         $excelDataRows = $validatedData['excelDataRows'];
-
-        // Ensure each row has all columns (including `null` values)
+ 
+        //Each row has all columns (including `null` values)
         $normalizedRows = array_map(function ($row) {
             return array_replace(array_fill(0, 8, null), $row);
         }, $excelDataRows);

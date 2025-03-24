@@ -25,13 +25,18 @@ class StoreUnitRequest extends FormRequest
         //Request if the user ADD UNIT from excel
         if ($method === 'store') {
             return [
+                'expectedHeaders' => 'required|array',
+                'expectedHeaders.*' => 'required|string',
+                'selectedExcelHeader' => 'required|array',
+                'selectedExcelHeader.*.rowHeader' => 'required|string',
+                'selectedExcelHeader.*.columnIndex' => 'required|integer',
                 'excelDataRows' => 'required|array',
                 'excelDataRows.*' => 'required|array',
                 'excelDataRows.*.*' => 'sometimes|nullable',
                 'tower_phase_id' => 'integer',
                 'property_masters_id' => 'integer',
                 'price_list_master_id' => 'integer',
-                'excel_id' => ['nullable','string'],
+                'excel_id' => ['nullable', 'string'],
             ];
         }
 

@@ -14,6 +14,7 @@ const UploadUnitDetailsModal = ({
     selectedExcelHeader,
     handleFileChange,
     onClose,
+    expectedHeaders,
     ...props
 }) => {
     //State
@@ -34,7 +35,6 @@ const UploadUnitDetailsModal = ({
     const { setPricingData } = usePricing();
     const { priceListMasterId } = usePriceListMaster();
     const { propertyMasterId } = useProperty();
-    
 
     //Hooks
     useEffect(() => {
@@ -90,11 +90,13 @@ const UploadUnitDetailsModal = ({
             }
 
             const payload = {
+                selectedExcelHeader: selectedExcelHeader,
                 excelDataRows: excelDataRows,
                 tower_phase_id: towerPhaseId,
                 property_masters_id: propertyMasterId,
                 price_list_master_id: priceListMasterId,
                 excel_id: excelIdToSend,
+                expectedHeaders: expectedHeaders,
             };
             console.log("payload", payload);
             // Call the API to upload units

@@ -45,7 +45,7 @@ class PriceListMasterRepository
     /*
      * Get all property price list masters with pagination of 10 per page, apply the filters also if any
      */
-    public function index(array $validatedData) 
+    public function index(array $validatedData)
     {
 
         $query = $this->getPriceListMastersWithRelations();
@@ -100,7 +100,7 @@ class PriceListMasterRepository
                         $query->orWhereJsonContains('payment_scheme_id', $id);
                     }
                 })->pluck('id')->toArray();
-             
+
                 $q->where(function ($query) use ($priceVersionIds) {
                     foreach ($priceVersionIds as $id) {
                         $query->orWhereJsonContains('price_versions_id', $id);
@@ -206,7 +206,9 @@ class PriceListMasterRepository
             'price_versions' => $this->transformPriceVersions($priceList->priceVersions),
             'floor_premiums' => $this->transformFloorPremiums($priceList->floorPremiums),
             'additional_premiums' => $this->transformAdditionalPremium(
-                $priceList->additionalPremiums()->oldest()->get()
+                $priceList->additionalPremiums()
+                    ->orderBy('created_at', 'desc')
+                    ->get()
             ),
             'reviewedByEmployees' => $this->employeeModel->whereIn(
                 'id',
@@ -240,7 +242,9 @@ class PriceListMasterRepository
                 'id' => $additionalPremium->id,
                 'viewName' => $additionalPremium->additional_premium,
                 'premiumCost' => $additionalPremium->premium_cost,
-                'excludedUnitIds' => $excludedUnitIds
+                'excludedUnitIds' => $excludedUnitIds,
+                'created_at' => $additionalPremium->created_at,
+                'updated_at' => $additionalPremium->updated_at,
             ];
         })->toArray();
     }

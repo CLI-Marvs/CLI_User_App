@@ -125,7 +125,10 @@ const PriceVersioning = () => {
                     </svg>
                 </div>
                 {isFilterVisible && (
-                    <div className="absolute left-0 mt-12 p-8 bg-white border border-gray-300 shadow-lg rounded-lg z-10 w-[582px]">
+                    <div
+                        className="absolute left-0 mt-12 p-8 bg-white border border-gray-300 shadow-lg rounded-lg z-10 w-[582px]"
+                        ref={dropdownRef}
+                    >
                         <div className="flex flex-col gap-2">
                             <div className="flex">
                                 <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
