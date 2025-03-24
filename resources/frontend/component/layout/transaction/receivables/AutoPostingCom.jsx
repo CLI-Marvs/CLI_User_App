@@ -6,6 +6,7 @@ import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md";
 import { transaction } from "@/component/servicesApi/apiCalls/transactions";
 import TransactionSearchBar from "@/component/layout/transaction/TransactionSearchBar";
 import Skeletons from "@/component/Skeletons";
+import apiServiceSap from "@/component/servicesApi/apiServiceSap";
 
 const AutoPostingCom = () => {
     const statuses = ["Cleared", "Posted", "Floating"];
