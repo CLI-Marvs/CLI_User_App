@@ -146,7 +146,7 @@ const TransactionCom = () => {
                         onSubmit={onSubmit}
                     />
                 </div>
-                <GlobalTable columns={columns} data={transactions.data} />
+                <GlobalTable columns={columns} data={transactions.data} loading={transactions.loading}  />
                 <div className="flex justify-end mt-4">
                     <div className="flex w-full justify-end mt-3 mb-10">
                         <Pagination

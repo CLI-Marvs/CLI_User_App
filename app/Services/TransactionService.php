@@ -96,6 +96,6 @@ class TransactionService
 
     public function retrieveBankStatements(array $data)
     {
-        return $this->repository->retrieveInvoices($data);
+        return $this->repository->retrieveBankStatements($data);
     }
 }

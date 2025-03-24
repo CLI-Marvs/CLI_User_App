@@ -34,7 +34,6 @@ const TransactionSearchBar = ({
         }
     };
 
-    console.log("sesarchValues", searchValues);
     const handleDateChange = (date) => {
         setStartDate(date);
     };
