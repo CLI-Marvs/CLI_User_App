@@ -2,16 +2,16 @@ import React, { useState, useRef } from "react";
 import { IoIosArrowDown } from "react-icons/io";
 import { FaRegTrashAlt } from "react-icons/fa";
 import AdditionalPremiumAssignModal from "../modals/AdditionalPremiumAssignModal";
-import { usePricing } from "@/component/layout/propertyandpricingpage/basicpricing/context/BasicPricingContext";
+import { usePricing } from "@/component/layout/propertyandpricingpage/context/BasicPricingContext";
 import { useUnit } from "@/context/PropertyPricing/UnitContext";
 import { showToast } from "@/util/toastUtil";
-import UnitUploadButton from "@/component/layout/propertyandpricingpage/basicpricing/component/UnitUploadButton";
+import UnitUploadButton from "@/component/layout/propertyandpricingpage/component/UnitUploadButton";
 import CustomInput from "@/component/Input/CustomInput";
 import generateBigIntId from "@/component/layout/propertyandpricingpage/utils/generateId";
 
 const AdditionalPremiums = ({ priceListData, isOpen, toggleAccordion }) => {
     //States
-    const { excelId, excelIdFromPriceList } = useUnit();
+    const { excelId } = useUnit();
     const [newAdditionalPremium, setNewAdditionalPremium] = useState({
         viewName: "",
         premiumCost: 0,
@@ -155,9 +155,7 @@ const AdditionalPremiums = ({ priceListData, isOpen, toggleAccordion }) => {
             >
                 <div className=" overflow-hidden">
                     <div className="w-full p-5">
-                        {(excelIdFromPriceList !== null &&
-                            excelIdFromPriceList !== undefined) ||
-                        (excelId !== null && excelId !== undefined) ? (
+                        {excelId !== null && excelId !== undefined ? (
                             priceListData &&
                             priceListData.data.status === "Draft" ? (
                                 <div className="flex justify-center w-full h-[31px] gap-3 mb-4">
@@ -177,7 +175,6 @@ const AdditionalPremiums = ({ priceListData, isOpen, toggleAccordion }) => {
                                                 onChange={
                                                     onChangeNewAdditionalPremium
                                                 }
-                                               
                                             />
                                         </div>
                                     </div>
@@ -313,7 +310,7 @@ const AdditionalPremiums = ({ priceListData, isOpen, toggleAccordion }) => {
                             </div>
                         </div>
                         <div className="flex justify-center">
-                            {(excelId || excelIdFromPriceList) &&
+                            {excelId &&
                                 (priceListData?.data?.status === "Draft" ? (
                                     <button
                                         onClick={handleOpenModal}

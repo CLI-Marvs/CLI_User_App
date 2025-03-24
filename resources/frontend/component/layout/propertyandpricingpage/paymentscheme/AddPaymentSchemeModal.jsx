@@ -19,7 +19,7 @@ const AddPaymentSchemeModal = ({ modalRef }) => {
     //State
     const [formData, setFormData] = useState(formDataState);
     const [isLoading, setIsLoading] = useState({});
-    const { fetchPaymentSchemes } = usePaymentScheme();
+    const { fetchData } = usePaymentScheme();
     const isPaymentSchemeButtonDisabled = isButtonDisabled(
         formData,
         Object.keys(formDataState)
@@ -55,7 +55,7 @@ const AddPaymentSchemeModal = ({ modalRef }) => {
             if (response.status === 201) {
                 showToast("Data added successfully!", "success");
                 setFormData(formDataState);
-                await fetchPaymentSchemes(true);
+                await fetchData(true, false);
                 if (modalRef.current) {
                     modalRef.current.close();
                 }

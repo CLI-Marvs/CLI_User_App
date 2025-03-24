@@ -7,6 +7,7 @@ use App\Models\PaymentScheme;
 use App\Traits\HasExpiryDate;
 use App\Models\PropertyMaster;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class PriceVersionRepository
 {
@@ -23,7 +24,7 @@ class PriceVersionRepository
     /*
      * Get all price versions data
      */
-    public function index()
+    public function index($validatedData)
     {
         // First pluck all unique property_masters_id values
         $propertyMasterIds = $this->model->pluck('property_masters_id')->unique()->values();
@@ -31,14 +32,20 @@ class PriceVersionRepository
         // Get property master data
         $propertyMasters = PropertyMaster::whereIn('id', $propertyMasterIds)
             ->get()
-            ->keyBy('id'); // Index by ID for easier lookup
+            ->keyBy('id');
 
         // Then retrieve full data for these IDs
         $priceVersions = $this->model
             ->whereIn('property_masters_id', $propertyMasterIds)
             ->where('status', '=', 'Active')
             ->orderBy('created_at', 'desc')
-            ->get();
+            ->paginate(
+                $validatedData['per_page'],
+                ['*'],
+                'page',
+                $validatedData['page']
+            );
+
 
         if ($priceVersions->isEmpty()) {
             return response()->json([
@@ -53,11 +60,12 @@ class PriceVersionRepository
         $groupedData = $priceVersions
             ->groupBy('property_masters_id')
             ->map(function ($versions, $propertyId) use ($propertyMasters) {
+                $towerPhase = optional($versions->first())->tower_phase_name;
                 return [
                     'property_masters_id' => $propertyId,
                     'propertyName' => $propertyMasters[$propertyId]->property_name ?? null,
                     'tower_phase_name' =>
-                    $this->towerPhase,
+                    $towerPhase,
                     'versions' => $versions->map(function ($version) {
                         $this->towerPhase = $version->tower_phase_name;
                         return [
@@ -72,11 +80,28 @@ class PriceVersionRepository
                         ];
                     })->values()->all()
                 ];
-            })->values();
-
+            });
+        // Convert collection to pagination
+        $perPage = $validatedData['per_page'];
+        $currentPage = $validatedData['page'];
+        $pagedData = new LengthAwarePaginator(
+            $groupedData->forPage($currentPage, $perPage)->values(),
+            $groupedData->count(),
+            $perPage,
+            $currentPage,
+            ['path' => request()->url()]
+        );
+        
         return  [
-            'status' => 'success',
-            'data' => $groupedData
+            'data' => $pagedData->items(),
+            'pagination' => [
+                'current_page' => $pagedData->currentPage(),
+                'last_page' => $pagedData->lastPage(),
+                'per_page' => $pagedData->perPage(),
+                'total' => $pagedData->total(),
+                'next_page_url' => $pagedData->nextPageUrl(),
+                'prev_page_url' => $pagedData->previousPageUrl(),
+            ]
         ];
     }
 

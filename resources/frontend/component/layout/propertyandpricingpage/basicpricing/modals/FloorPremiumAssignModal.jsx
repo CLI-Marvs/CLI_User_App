@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import FloorPremiumAddUnitModal from "./FloorPremiumAddUnitModal";
 import CircularProgress from "@mui/material/CircularProgress";
 import { useUnit } from "@/context/PropertyPricing/UnitContext";
-import { usePricing } from "@/component/layout/propertyandpricingpage/basicpricing/context/BasicPricingContext";
+import { usePricing } from "@/component/layout/propertyandpricingpage/context/BasicPricingContext";
 const FloorPremiumAssignModal = ({
     floorPremiumAssignModalRef,
     selectedFloor,
@@ -139,7 +139,7 @@ const FloorPremiumAssignModal = ({
                             <p className="font-bold">0000000</p>
                         </div>
                     </div>
-                    <p>Selected unitsByFloor for floor premium rate</p>
+                    <p>Selected units for floor premium rate</p>
                 </div>
                 <div className="h-auto flex gap-[20px]">
                     <div className="h-full flex justify-start items-start">
@@ -174,7 +174,7 @@ const FloorPremiumAssignModal = ({
                                             onClick={() =>
                                                 handleUnitSelect(item?.id)
                                             }
-                                            className={`h-[63px] w-[95px] p-[6px] ${
+                                            className={`h-[63px] p-[6px] ${
                                                 !isExcluded
                                                     ? "gradient-btn4"
                                                     : ""
@@ -182,10 +182,10 @@ const FloorPremiumAssignModal = ({
                                             key={key}
                                         >
                                             <button
-                                                className={`flex justify-center items-center bg-white h-full w-full text-custom-solidgreen rounded-[10px] font-bold   ${
+                                                className={`flex justify-center items-center bg-white h-full min-w-max px-2 text-custom-solidgreen rounded-[10px] font-bold ${
                                                     priceListData.data
                                                         .status !== "Draft"
-                                                        ? "cursor-not-allowed "
+                                                        ? "cursor-not-allowed"
                                                         : "cursor-pointer"
                                                 }`}
                                                 disabled={

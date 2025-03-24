@@ -8,7 +8,6 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { priceVersionService } from "@/component/servicesApi/apiCalls/propertyPricing/priceVersion/priceVersionService";
 import { showToast } from "@/util/toastUtil";
-import { usePriceVersion } from "@/context/PropertyPricing/PriceVersionContext";
 import CircularProgress from "@mui/material/CircularProgress";
 import { IoIosCloseCircle } from "react-icons/io";
 import { toLowerCaseText } from "@/util/formatToLowerCase";
@@ -20,14 +19,13 @@ const formDataState = {
     expiry_date: moment(new Date()).format("MM-DD-YYYY HH:mm:ss"),
 };
 
-const AddPriceVersionModal = ({ modalRef }) => {
+const AddPriceVersionModal = ({ modalRef, fetchData }) => {
     //States
     const { propertyNamesList } = useProperty();
     const [formData, setFormData] = useState([formDataState]);
     const [isLoading, setIsLoading] = useState(false);
     const [selectedProperty, setSelectedProperty] = useState("");
     const [selectedTowerPhase, setSelectedTowerPhase] = useState("");
-    const { getPriceVersions } = usePriceVersion();
 
     //Event Handler
     //Handle change in the input field for price version
@@ -67,10 +65,10 @@ const AddPriceVersionModal = ({ modalRef }) => {
 
             if (response?.status === 201) {
                 showToast(response?.data?.message, "success");
-                setFormData([{ ...formDataState }]);
+                setFormData([formDataState]);
                 setSelectedProperty("");
                 setSelectedTowerPhase("");
-                await getPriceVersions(true, false);
+                await fetchData(true, false);
 
                 if (modalRef.current) {
                     modalRef.current.close();
@@ -105,7 +103,7 @@ const AddPriceVersionModal = ({ modalRef }) => {
     //Handle close the modal
     const handleCloseModal = () => {
         if (modalRef.current) {
-            setFormData([{ ...formDataState }]);
+            setFormData([formDataState]);
             setSelectedProperty("");
             setSelectedTowerPhase("");
             modalRef.current.close();
@@ -210,11 +208,11 @@ const AddPriceVersionModal = ({ modalRef }) => {
                                 <th className="w-[100px] text-left pl-[10px] pr-10 leading-[18px]">
                                     No. of allowed buyers
                                 </th>
-                                <th className="w-[100px]">Expiry Date</th>
+                                <th className="w-[90px]">Expiry Date</th>
                                 <th className="rounded-tr-[10px] w-[62px]"></th>
                             </tr>
                         </thead>
-                        <div className="shadow-custom5 rounded-[10px] overflow-hidden w-[600px]">
+                        <div className="shadow-custom5 rounded-[10px] overflow-hidden w-[610px]">
                             {formData.length > 0 &&
                                 formData.map((form, index) => (
                                     <tbody className="" key={index}>
@@ -265,7 +263,7 @@ const AddPriceVersionModal = ({ modalRef }) => {
                                                     }
                                                 />
                                             </td>
-                                            <td className="px-[10px] mt-4 flex items-center gap-x-2">
+                                            <td className="px-[20px] mt-4 flex items-center gap-x-2">
                                                 <DatePicker
                                                     selected={
                                                         formData.expiry_date !==

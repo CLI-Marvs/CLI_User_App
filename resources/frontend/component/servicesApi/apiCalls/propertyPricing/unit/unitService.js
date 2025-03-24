@@ -30,13 +30,13 @@ export const unitService = {
     },
 
     //Function to check existing units for a tower phase
-    getExistingUnits: async (towerPhaseId, excelId) => {
-        if (excelId === null || excelId === undefined) {
+    getUnits: async (towerPhaseId, excelId, priceListMasterId) => {
+        if (excelId === null || excelId === undefined || priceListMasterId === null || priceListMasterId === undefined) {
             return { data: { data: [] } }; // Return empty data to prevent errors
         }
         try {
             const response = await apiService.get(
-                `units/check/${towerPhaseId}/${excelId}`
+                `units/get/${towerPhaseId}/${excelId}/${priceListMasterId}`
             );
             return response;
         } catch (error) {

@@ -5,17 +5,17 @@ import {
     IoIosCloseCircle,
     IoMdArrowDropdown,
 } from "react-icons/io";
-import { usePricing } from "@/component/layout/propertyandpricingpage/basicpricing/context/BasicPricingContext";
+import { usePricing } from "@/component/layout/propertyandpricingpage/context/BasicPricingContext";
 import { useUnit } from "@/context/PropertyPricing/UnitContext";
-import usePriceListEmployees from "@/component/layout/propertyandpricingpage/basicpricing/hooks/usePriceListEmployees";
+import usePriceListEmployees from "@/component/layout/propertyandpricingpage/hooks/usePriceListEmployees";
 import { priceListMasterService } from "@/component/servicesApi/apiCalls/propertyPricing/priceListMaster/priceListMasterService";
 import CircularProgress from "@mui/material/CircularProgress";
 import { useStateContext } from "@/context/contextprovider";
 import EmployeeReviewerApproverModal from "@/component/layout/propertyandpricingpage/basicpricing/modals/ReviewSetting/EmployeeReviewerApproverModal";
 import ExpandableDataTable from "@/component/layout/propertyandpricingpage/basicpricing/modals/ReviewSetting/ExpandableDataTable";
 import { toLowerCaseText } from "@/util/formatToLowerCase";
-import { usePropertyPricing } from "@/component/layout/propertyandpricingpage/basicpricing/hooks/usePropertyPricing";
-import { formatPayload } from "@/component/layout/propertyandpricingpage/basicpricing/utils/payloadFormatter";
+import { usePropertyPricing } from "@/component/layout/propertyandpricingpage/hooks/usePropertyPricing";
+import { formatPayload } from "@/component/layout/propertyandpricingpage/utils/payloadFormatter";
 import { showToast } from "@/util/toastUtil";
 import { usePriceListMaster } from "@/context/PropertyPricing/PriceListMasterContext";
 import CustomToolTip from "@/component/CustomToolTip";
@@ -30,7 +30,7 @@ const ReviewsandApprovalRouting = ({
     action,
 }) => {
     //States
-    const { fetchPropertyListMasters } = usePriceListMaster();
+    const { fetchData } = usePriceListMaster();
     const { pricingData, resetPricingData } = usePricing();
     const reviewerApproverModalRef = useRef(null);
     const expandUnitTableViewRef = useRef(null);
@@ -39,9 +39,9 @@ const ReviewsandApprovalRouting = ({
         setFloorPremiumsAccordionOpen,
         units,
         excelId,
-        excelIdFromPriceList,
+
         computedUnitPrices,
-        checkExistingUnits,
+        fetchUnits,
     } = useUnit();
     const [priceVersions, setPriceVersions] = useState([]);
     const [subHeaders, setSubHeaders] = useState([]);
@@ -65,8 +65,8 @@ const ReviewsandApprovalRouting = ({
         pricingData,
         resetPricingData,
         showToast,
-        fetchPropertyListMasters,
-        checkExistingUnits
+        fetchData,
+        fetchUnits
     );
     const [type, setModalType] = useState(null);
     const [selectedVersion, setSelectedVersion] = useState(null);
@@ -285,9 +285,7 @@ const ReviewsandApprovalRouting = ({
             >
                 <div className="  ">
                     <div className="p-[20px] space-y-[10px]">
-                        {(excelId ||
-                            excelIdFromPriceList ||
-                            computedUnitPrices.length > 0) && (
+                        {(excelId || computedUnitPrices.length > 0) && (
                             <div className="flex items-center justify-between">
                                 {/* Download Excel section */}
                                 {isExcelDownloading ? (
@@ -404,7 +402,7 @@ const ReviewsandApprovalRouting = ({
                                 </div>
                             </div>
 
-                            {(excelId ? true : excelIdFromPriceList) && (
+                            {excelId && (
                                 <UnitTableComponent
                                     tableWidth="w-80"
                                     computedUnitPrices={computedUnitPrices}

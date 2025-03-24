@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { usePaymentScheme } from "@/context/PropertyPricing/PaymentSchemeContext";
-import { usePricing } from "@/component/layout/propertyandpricingpage/basicpricing/context/BasicPricingContext";
+import { usePricing } from "@/component/layout/propertyandpricingpage/context/BasicPricingContext";
 const AddPaymentSchemeModal = ({
     addPaymentSchemeModalRef,
     priceListData,
@@ -8,7 +8,7 @@ const AddPaymentSchemeModal = ({
     versionIndex,
 }) => {
     //States
-    const { paymentScheme, fetchPaymentSchemes } = usePaymentScheme();
+    const { data: paymentScheme, fetchData } = usePaymentScheme();
     const [selectedSchemes, setSelectedSchemes] = useState([]);
     const { pricingData, setPricingData } = usePricing();
     const isDisabled =
@@ -19,7 +19,7 @@ const AddPaymentSchemeModal = ({
 
     //Hooks
     useEffect(() => {
-        fetchPaymentSchemes();
+        fetchData(true, false);
     }, []);
 
     useEffect(() => {
@@ -171,7 +171,7 @@ const AddPaymentSchemeModal = ({
 
                 return (
                     <div
-                        className="w-[calc(33.33%-20px)] h-[259px] p-[20px] bg-[#F7F7F7]  rounded-[10px]"
+                        className="w-[calc(33.33%-20px)] h-auto p-[15px] bg-[#F7F7F7] rounded-[10px]"
                         key={index}
                     >
                         <div className="flex items-center gap-[15px] h-[36px] w-full mb-[10px]  ">
@@ -187,19 +187,25 @@ const AddPaymentSchemeModal = ({
                                 {item?.payment_scheme_name}
                             </p>
                         </div>
-                        <div className="flex flex-col gap-1 text-sm pr-4">
+                        <div
+                            className={`flex flex-col gap-1 text-sm pr-4 py-2   ${
+                                item?.description.length === 350
+                                    ? "overflow-y-auto max-h-[200px] overflow-hidden"
+                                    : ""
+                            }`}
+                        >
                             <p>{item?.description}</p>
                             <p>Spot {item?.spot}%</p>
                             <p>Installment {item?.downpayment_installment}%</p>
                             <p>Bank Financing {item?.bank_financing}%</p>
-                            <p>Discount 8% (100% LP - RF)</p>
+                            <p className="">Discount 8% (100% LP - RF)</p>
                         </div>
                     </div>
                 );
             });
         }
     };
-    
+
     return (
         <dialog
             id="Resolved"

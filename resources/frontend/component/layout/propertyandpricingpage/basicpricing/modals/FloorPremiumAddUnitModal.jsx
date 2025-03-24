@@ -6,6 +6,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 import CustomInput from "@/component/Input/CustomInput";
 import { usePriceListMaster } from "@/context/PropertyPricing/PriceListMasterContext";
 import isButtonDisabled from "@/util/isFormButtonDisabled";
+import { useProperty } from "@/context/PropertyPricing/PropertyContext";
 
 const formDataState = {
     floor: "",
@@ -26,10 +27,10 @@ const FloorPremiumAddUnitModal = ({
 }) => {
     //States
     const [formData, setFormData] = useState(formDataState);
-    const { checkExistingUnits, excelId, excelIdFromPriceList, setUnits } =
-        useUnit();
+    const { fetchUnits, excelId, setUnits } = useUnit();
     const [isLoading, setIsLoading] = useState(false);
-    const { propertyMasterId, priceListMasterId } = usePriceListMaster();
+    const { priceListMasterId } = usePriceListMaster();
+    const { propertyMasterId } = useProperty();
     const isFloorAssignButtonDisabled = isButtonDisabled(
         formData,
         Object.keys(formDataState)
@@ -70,7 +71,7 @@ const FloorPremiumAddUnitModal = ({
                 garden_area: parseFloat(formData.gardenArea).toFixed(2),
                 total_area: parseFloat(formData.totalArea).toFixed(2),
                 tower_phase_id: towerPhaseId,
-                excel_id: excelId || excelIdFromPriceList,
+                excel_id: excelId ,
                 property_masters_id: propertyMasterId,
                 price_list_master_id: priceListMasterId,
             };
@@ -89,9 +90,10 @@ const FloorPremiumAddUnitModal = ({
                     return newUnits;
                 });
                 await Promise.all([
-                    checkExistingUnits(
+                    fetchUnits(
                         towerPhaseId,
-                        excelId || excelIdFromPriceList,
+                        excelId,
+                        priceListMasterId,
                         true,
                         true
                     ),

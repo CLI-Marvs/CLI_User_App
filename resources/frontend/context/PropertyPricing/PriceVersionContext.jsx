@@ -1,45 +1,63 @@
-import React, {
-    createContext,
-    useContext,
-    useState,
-    useCallback,
-} from "react";
+import React, { createContext, useContext, useState, useCallback } from "react";
 import { priceVersionService } from "@/component/servicesApi/apiCalls/propertyPricing/priceVersion/priceVersionService";
-
+import usePaginatedFetch from "@/component/layout/propertyandpricingpage/hooks/usePaginatedFetch";
+import { defaultFilters } from "@/context/PropertyPricing/PriceListMasterContext";
 const PriceVersionContext = createContext();
 
 export const PriceVersionProvider = ({ children }) => {
-    const [isFetchingPriceVersions, setIsFetchingPriceVersions] =
-        useState(false);
-    const [priceVersion, setPriceVersion] = useState([]);
+    // const [isFetchingPriceVersions, setIsFetchingPriceVersions] =
+    //     useState(false);
+    // const [priceVersion, setPriceVersion] = useState([]);
 
-    const getPriceVersions = useCallback(
-        async (forceFetch = false, setLoading = true) => {
-            if (priceVersion.length > 0 && !forceFetch) {
-                return priceVersion;
-            }
+    // const getPriceVersions = useCallback(
+    //     async (forceFetch = false, setLoading = true) => {
+    //         if (priceVersion.length > 0 && !forceFetch) {
+    //             return priceVersion;
+    //         }
 
-            try {
-                if (setLoading) setIsFetchingPriceVersions(true);
-                const response = await priceVersionService.getPriceVersions();
-                setPriceVersion(response?.data.data);
-                
-                return response;
-            } catch (error) {
-                console.error("Error getting price versions:", error);
-                throw error;
-            } finally {
-                if (setLoading) setIsFetchingPriceVersions(false);
-            }
-        },
-        [priceVersion]
-    );
-    
- 
+    //         try {
+    //             if (setLoading) setIsFetchingPriceVersions(true);
+    //             const response = await priceVersionService.getPriceVersions();
+    //             setPriceVersion(response?.data.data);
+
+    //             return response;
+    //         } catch (error) {
+    //             console.error("Error getting price versions:", error);
+    //             throw error;
+    //         } finally {
+    //             if (setLoading) setIsFetchingPriceVersions(false);
+    //         }
+    //     },
+    //     [priceVersion]
+    // );
+    const [searchFilters, setSearchFilters] = useState(defaultFilters);
+    const {
+        data,
+        isLoading,
+        error,
+        pageState,
+        setPageState,
+        fetchData,
+        setAppliedFilters,
+        isFirstLoad,
+        applySearch,
+        refreshPage,
+    } = usePaginatedFetch(priceVersionService.getPriceVersions, {});
+
     const value = {
-        isFetchingPriceVersions,
-        getPriceVersions,
-        priceVersion,
+        // isFetchingPriceVersions,
+        // getPriceVersions,
+        // priceVersion,
+        data,
+        isLoading,
+        error,
+        pageState,
+        setPageState,
+        fetchData,
+        setAppliedFilters,
+        isFirstLoad,
+        applySearch,
+        refreshPage,
     };
     return (
         <PriceVersionContext.Provider value={value}>

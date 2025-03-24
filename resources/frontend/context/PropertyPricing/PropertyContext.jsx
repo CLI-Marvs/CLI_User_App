@@ -12,6 +12,7 @@ export const PropertyProvider = ({ children }) => {
     const [propertyNamesList, setPropertyNamesList] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
+    const [propertyMasterId, setPropertyMasterId] = useState(null);  
 
     // This function does the actual database fetch
     const fetchPropertyNamesWithIds = async () => {
@@ -40,6 +41,8 @@ export const PropertyProvider = ({ children }) => {
         isLoading,
         error,
         fetchPropertyNamesWithIds,
+        propertyMasterId,
+        setPropertyMasterId,
     };
 
     return (

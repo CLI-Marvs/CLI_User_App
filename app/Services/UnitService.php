@@ -8,6 +8,7 @@ use App\Models\FloorPremium;
 use App\Models\PriceListMaster;
 use App\Models\AdditionalPremium;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use App\Repositories\Implementations\UnitRepository;
 
 class UnitService
@@ -45,9 +46,7 @@ class UnitService
      */
     public function storeUnitFromExcel(array $data)
     {
-        if (!array_key_exists('excel_id', $data)) {
-            throw new \Exception('excel_id is missing in storeUnitFromExcel');
-        }
+ 
         // Increase PHP limits for this request
         ini_set('max_execution_time', 300);
         ini_set('memory_limit', '512M');
@@ -63,7 +62,7 @@ class UnitService
         try {
             DB::disableQueryLog();
 
-            
+
             if ($existingExcelId !== null) {
                 $this->model->where('price_list_master_id', $priceListMasterId)
                     ->where('tower_phase_id', $towerPhaseId)
@@ -142,55 +141,18 @@ class UnitService
         }
     }
 
-    /**
-     * Count floors in the uploaded excel
-     */
     public function countFloor($towerPhaseId, $excelId)
     {
-        DB::beginTransaction();
-        try {
-            $distinctFloors = $this->model->where([
-                'tower_phase_id'
-                => $towerPhaseId,
-                'status' => 'Active',
-                'excel_id' => $excelId,
-
-            ])
-                ->distinct('floor')
-                ->pluck('floor');
-
-            return [
-                $distinctFloors
-            ];
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return [
-                'success' => false,
-                'message' => 'Failed to count floor: ' . $e->getMessage()
-            ];
-        }
+        return $this->repository->countFloor($towerPhaseId, $excelId);
     }
 
-    /**
-     * Get existing units for a specific tower phase
-     */
-    public function getExistingUnits($towerPhaseId, $excelId)
+
+    public function getUnits($towerPhaseId, $excelId, $priceListMasterId)
     {
-        return $this->repository->getExistingUnits($towerPhaseId, $excelId);
+        return $this->repository->getUnits($towerPhaseId, $excelId, $priceListMasterId);
     }
 
-    /**
-     * Get units for a specific tower phase and floor
-     */
-    public function getUnits($towerPhaseId, $selectedFloor, $excelId)
-    {
 
-        return $this->repository->getUnits($towerPhaseId, $selectedFloor, $excelId);
-    }
-
-    /**
-     * Store unit details from the system
-     */
     public function storeUnitDetails(array $data)
     {
         return $this->repository->storeUnitDetails($data);

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { priceListMasterService } from "@/component/servicesApi/apiCalls/propertyPricing/priceListMaster/priceListMasterService";
+import { usePriceListMaster } from "@/context/PropertyPricing/PriceListMasterContext";
 
 export const usePropertyPricing = (
     user,
@@ -9,12 +10,12 @@ export const usePropertyPricing = (
     pricingData,
     resetPricingData,
     showToast,
-    fetchPropertyListMasters,
-    checkExistingUnits
+    fetchData,
+    fetchUnits
 ) => {
     const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState({});
-
+    const { priceListMasterId } = usePriceListMaster();
     /*
      * Payload object for submission with the provided status.
      * The payload includes employee ID, tower phase ID, price list settings, payment scheme, and the specified status.
@@ -61,8 +62,7 @@ export const usePropertyPricing = (
         status,
         action,
         excelId,
-        setFloorPremiumsAccordionOpen,
-        currentPage
+        setFloorPremiumsAccordionOpen
     ) => {
         e.preventDefault();
         if (action === "Edit") {
@@ -81,13 +81,14 @@ export const usePropertyPricing = (
                         "success"
                     );
 
-                    await checkExistingUnits(
+                    await fetchUnits(
                         priceListData.tower_phase_id,
                         excelId || priceListData?.excelId,
+                        priceListMasterId,
                         true,
                         false
                     );
-                    await fetchPropertyListMasters(true, true, currentPage);
+                    await fetchData(true, true);
 
                     setTimeout(() => {
                         navigate("/property-pricing/master-lists");
@@ -126,13 +127,14 @@ export const usePropertyPricing = (
                     );
 
                     resetPricingData();
-                    await checkExistingUnits(
+                    await fetchUnits(
                         priceListData.tower_phase_id,
                         excelId || priceListData?.excelId,
+                        priceListMasterId,
                         true,
                         false
                     );
-                    await fetchPropertyListMasters(true, true, currentPage);
+                    await fetchData(true, true);
 
                     setTimeout(() => {
                         navigate("/property-pricing/master-lists");

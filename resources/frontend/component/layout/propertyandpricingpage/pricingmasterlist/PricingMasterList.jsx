@@ -1,11 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
-import "./togglebtn.css";
-import ReactPaginate from "react-paginate";
-import {
-    MdKeyboardArrowLeft,
-    MdKeyboardArrowRight,
-    MdRefresh,
-} from "react-icons/md";
+import "@/component/layout/propertyandpricingpage/style/togglebtn.css";
+import Pagination from "@/component/layout/propertyandpricingpage/component/Pagination";
+import { MdRefresh } from "react-icons/md";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import DateLogo from "../../../../../../public/Images/Date_range.svg";
@@ -13,65 +9,47 @@ import AddPropertyModal from "@/component/layout/propertyandpricingpage/basicpri
 import moment from "moment";
 import { useNavigate } from "react-router-dom";
 import { usePriceListMaster } from "@/context/PropertyPricing/PriceListMasterContext";
-import Skeleton from "@/component/Skeletons";
-import { usePaymentScheme } from "@/context/PropertyPricing/PaymentSchemeContext";
-import { toLowerCaseText } from "@/util/formatToLowerCase";
 import { showToast } from "@/util/toastUtil";
 import { priceListMasterService } from "@/component/servicesApi/apiCalls/propertyPricing/priceListMaster/priceListMasterService";
 import CustomInput from "@/component/Input/CustomInput";
 import CustomToolTip from "@/component/CustomToolTip";
-import usePagination from "@/hooks/usePagination";
-import Pagination from "@/component/Pagination";
+import CustomTable from "@/component/layout/propertyandpricingpage/component/CustomTable";
+import PricelistMasterRow from "@/component/layout/propertyandpricingpage/component/TableRows/PriceListMasterRow";
 
+const COLUMNS = [
+    { label: "Status", width: "w-[100px]" },
+    { label: "Property", width: "w-[150px]" },
+    { label: "Price Settings", width: "w-[200px]" },
+    { label: "Price Version", width: "w-[150px]" },
+    { label: "Sold Per Version", width: "w-[150px]" },
+    { label: "Promos", width: "w-[100px]" },
+    { label: "Payment Schemes", width: "w-[150px]" },
+];
 const PricingMasterList = () => {
     //States
     const {
-        priceListMaster,
+        data: priceListMaster,
         isLoading,
-        fetchPropertyListMasters,
-        // currentPage,
-        // setCurrentPage,
+        pageState,
+        setPageState,
+        fetchData,
         isFirstLoad,
         searchFilters,
         setSearchFilters,
-        setPriceListMaster,
         applySearch,
         refreshPage,
+        defaultFilters,
     } = usePriceListMaster();
-
-    const { fetchPaymentSchemes } = usePaymentScheme();
-    // const [startDate, setStartDate] = useState(new Date());
     const [toggled, setToggled] = useState(false);
     const [isFilterVisible, setIsFilterVisible] = useState(false);
     const navigate = useNavigate();
     const dropdownRef = useRef(null);
     const propertyModalRef = useRef(null);
-    const toggleFilterBox = () => {
-        setIsFilterVisible(!isFilterVisible);
-    };
-    const isButtonDisabled = (searchFilters) => {
-        const allEmpty =
-            !searchFilters.property &&
-            !searchFilters.paymentScheme &&
-            !searchFilters.status &&
-            !searchFilters.date;
-
-        return allEmpty; // Disable button if all fields are empty, enable otherwise
-    };
-    const { handlePageClick, setFilters } = usePagination(
-        fetchPropertyListMasters,
-        priceListMaster,
-        setPriceListMaster
-    );
 
     //Hooks
-    useEffect(() => {
-        fetchPaymentSchemes();
-        console.log("priceListMaster", priceListMaster);
-    }, [fetchPaymentSchemes]);
-
     //Hide the search filter dropdown when clicking outside of it
     useEffect(() => {
+        console.log("priceListMaster", priceListMaster);
         const handleOutsideClick = (event) => {
             if (
                 dropdownRef.current &&
@@ -89,7 +67,7 @@ const PricingMasterList = () => {
 
     //Event handler
     //Handle search filter input change
-    const handleInputChange = (e) => {
+    const onInputChange = (e) => {
         const { name, value } = e.target;
         setSearchFilters((prevFilters) => ({
             ...prevFilters,
@@ -107,7 +85,13 @@ const PricingMasterList = () => {
 
     //Handle filter search button
     const handleSearch = async () => {
-        applySearch();
+        applySearch(searchFilters);
+    };
+
+    //Handle refresh page
+    const handleRefreshPage = () => {
+        setSearchFilters(defaultFilters);
+        refreshPage();
     };
 
     //Handle click to open modal
@@ -118,11 +102,14 @@ const PricingMasterList = () => {
     };
 
     // Handles pagination: Moves to the next page when clicked
-    // const handlePageChange = (selectedPage) => {
-    //     if (selectedPage !== currentPage) {
-    //         setCurrentPage(selectedPage);
-    //     }
-    // };
+    const handlePageChange = (selectedPage) => {
+        if (selectedPage !== pageState.currentPage) {
+            setPageState((prevState) => ({
+                ...prevState,
+                currentPage: selectedPage,
+            }));
+        }
+    };
 
     //Handle click the price list item
     const handlePriceListItemClick = async (priceListItem) => {
@@ -130,7 +117,7 @@ const PricingMasterList = () => {
         const priceListData = {
             data: priceListItem,
         };
-        console.log("priceListData", priceListData);
+
         navigate(`/property-pricing/basic-pricing/${id}`, {
             state: {
                 priceListData: priceListData,
@@ -140,11 +127,10 @@ const PricingMasterList = () => {
     };
 
     //handle cancel click if the price list item status is 'Draft'
-    const handleCancelClick = async (event, priceListItem, action) => {
+    const handleStatusClick = async (event, priceListItem, action) => {
         event.stopPropagation();
         const id = priceListItem.price_list_master_id;
         const priceListData = { data: priceListItem };
-        console.log(priceListData);
 
         if (action !== "Cancel") {
             navigate(
@@ -169,6 +155,21 @@ const PricingMasterList = () => {
         } catch (error) {
             console.log("error", error);
         }
+    };
+
+    //Toggle filter box
+    const toggleFilterBox = () => {
+        setIsFilterVisible(!isFilterVisible);
+    };
+
+    const isButtonDisabled = (searchFilters) => {
+        const allEmpty =
+            !searchFilters.property &&
+            !searchFilters.paymentScheme &&
+            !searchFilters.status &&
+            !searchFilters.date;
+
+        return allEmpty;
     };
 
     return (
@@ -224,7 +225,7 @@ const PricingMasterList = () => {
                     <CustomToolTip text="Refresh page" position="top">
                         <button
                             className="  hover:bg-custom-grayF1 rounded-full text-custom-bluegreen hover:text-custom-lightblue"
-                            onClick={() => refreshPage()}
+                            onClick={handleRefreshPage}
                         >
                             <MdRefresh className="h-6 w-6 mt-1" />
                         </button>
@@ -247,7 +248,7 @@ const PricingMasterList = () => {
                                     name="property"
                                     value={searchFilters.property || ""}
                                     className="w-full  border-b-1 outline-none ml-2"
-                                    onChange={handleInputChange}
+                                    onChange={onInputChange}
                                 />
                             </div>
                             <div className="flex">
@@ -260,7 +261,7 @@ const PricingMasterList = () => {
                                     name="paymentScheme"
                                     value={searchFilters.paymentScheme || ""}
                                     className="w-full  border-b-1 outline-none ml-2"
-                                    onChange={handleInputChange}
+                                    onChange={onInputChange}
                                 />
                             </div>
                             {/* <div className="flex">
@@ -273,7 +274,7 @@ const PricingMasterList = () => {
                                     name="promo"
                                     value={searchFilters.promo || ""}
                                     className="w-full  border-b-1 outline-none ml-2"
-                                    onChange={handleInputChange}
+                                    onChange={onInputChange}
                                 />
                             </div> */}
                             <div className="flex gap-3">
@@ -308,7 +309,7 @@ const PricingMasterList = () => {
                                     className="w-full border-b-1 outline-none px-[5px]"
                                     name="status"
                                     value={searchFilters.status || ""}
-                                    onChange={handleInputChange}
+                                    onChange={onInputChange}
                                 >
                                     <option value="">Select Status</option>
                                     <option value="Draft">Draft</option>
@@ -340,259 +341,36 @@ const PricingMasterList = () => {
                     </div>
                 )}
             </div>
-            <div className="mt-3 overflow-y-hidden">
-                <table className="overflow-x-auto bg-custom-grayFA mb-2 mx-1">
-                    <thead>
-                        <tr className="flex gap-4 items-center h-[49px] montserrat-semibold text-sm text-[#A5A5A5] bg-white rounded-[10px] mb-4 -mx-1 px-4">
-                            <th className="flex justify-start w-[100px] shrink-0 pl-1">
-                                Status
-                            </th>
-                            <th className="flex justify-start w-[150px] shrink-0 pl-1">
-                                Property
-                            </th>
-                            <th className="flex justify-start w-[200px] shrink-0 pl-1">
-                                Price Settings
-                            </th>
-                            <th className="flex justify-start w-[150px] shrink-0 pl-1">
-                                Price Version
-                            </th>
-                            <th className="flex justify-start w-[150px] shrink-0 pl-1">
-                                Sold Per Version
-                            </th>
-                            <th className="flex justify-start w-[100px] shrink-0 pl-1">
-                                Promos
-                            </th>
-                            <th className="flex justify-start w-[150px] shrink-0 pl-1">
-                                Payment Schemes
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {/*                                                      DRAFT                                                                      */}
-                        {/* {propertyMasterList && Object.values(propertyMasterList).map((item, index) => {
-                            return (
-                                <tr
-                                    key={index}
-                                    className="flex gap-4 mt-2 h-[144px] shadow-custom5 rounded-[10px] overflow-hidden px-4 bg-white text-custom-bluegreen text-sm"
-                                >
-                                    <td className="w-[100px] flex flex-col items-start justify-center gap-2">
-                                        <div>
-                                            <p className="font-bold text-custom-gray81">
-                                                {item?.status}
-                                            </p>
-                                            <span>
-                                                {moment(
-                                                    item?.created_at
-                                                ).format("M / D / YYYY")}
-                                            </span>
-                                        </div>
-                                        <div>
-                                            <p className="underline text-blue-500 cursor-pointer">Edit</p>
-                                        </div>
-                                    </td>
-                                    <td className="w-[150px] flex items-center justify-start">
-                                        <div>
-                                            <p className="pr-1">
-                                                {item?.property_name}
-                                            </p>
-                                        </div>
-                                    </td>
-                                    <td className="w-[200px] flex items-center justify-start">
-                                        <div>
-                                            <p className="space-x-1">
-                                                <span>Base Price (Sq.M.)</span>
-                                                <span>6,500</span>
-                                            </p>
-                                            <p className="space-x-1">
-                                                <span>Reservation</span>
-                                                <span>50,000</span>
-                                            </p>
-                                            <p className="space-x-1">
-                                                <span>Transfer Charge</span>
-                                                <span>8%</span>
-                                            </p>
-                                            <p className="space-x-1">
-                                                <span>VAT</span>
-                                                <span>12%</span>
-                                            </p>
-                                            <p className="space-x-1">
-                                                <span>VATable Threshold</span>
-                                                <span>3,600,000</span>
-                                            </p>
-                                            <p className="space-x-1">
-                                                <span>Effective Balcony Base</span>
-                                                <span>50%</span>
-                                            </p>
-                                        </div>
-                                    </td>
-                                    <td className="w-[150px] flex items-center justify-start"></td>
-                                    <td className="w-[150px] flex items-center justify-start"></td>
-                                    <td className="w-[100px] flex items-center justify-start"></td>
-                                    <td className="w-[150px] flex items-center justify-start rounded-r-lg text-sm">
-                                        <div>
-                                            <p>Spot Cash</p>
-                                            <p>Spot 12%</p>
-                                            <p>Spot 2% + 10%</p>
-                                            <p>Installment</p>
-                                            <p>12% Installment</p>
-                                        </div>
-                                    </td>
-                                </tr>
-                            );
-                        })} */}
-
-                        {/*                                                   END                                                  */}
-                        {/*                                            ONGOING APPROVAL                                          bg-[#F0F3EE]       */}
-
-                        {/*                                                         END                                                     */}
-                        {/*                                            APPROVED LIVE                                               */}
-                        {/* <tr className='flex gap-4 mt-2 h-[144px] shadow-custom5 rounded-[10px] overflow-hidden px-4 bg-[#F0F3EE] text-custom-bluegreen text-sm'>
-                  <td className='w-[100px] flex flex-col items-start justify-center gap-2'>
-                    <div>
-                      <p className='font-bold text-custom-solidgreen'>Approved</p>
-                      <span>6/19/2024</span>
-                    </div>
-                    <div className='flex gap-2'>
-                      <div>
-                        <p className={`${toggled ?'text-[#FF0000]':'text-custom-gray81'} font-semibold`}>Live</p>
-                      </div>
-                      <div>
-                        <button
-                          className={`toggle-btn ${toggled ? "toggled" : ""}`}
-                          onClick={() => setToggled(!toggled)}
-                        >
-                          <div className='thumb'></div>
-                        </button>
-                      </div>
-                     
-                    </div>
-                  </td>
-                  <td className='w-[150px] flex items-center justify-start'>
-                    <div>
-                      <p className='pr-1'>38 Park Avenue Parking, Tower 2</p>
-                    </div>
-                  </td>
-                  <td className='w-[200px] flex items-center justify-start'>
-                    <div>
-                      <p className='space-x-1'>
-                        <span>Base Price (Sq.M.)</span>
-                        <span>6,500</span>
-                      </p>
-                      <p className='space-x-1'>
-                        <span>Reservation</span>
-                        <span>50,000</span>
-                      </p>
-                      <p className='space-x-1'>
-                        <span>Transfer Charge</span>
-                        <span>8%</span>
-                      </p>
-                      <p className='space-x-1'>
-                        <span>VAT</span>
-                        <span>12%</span>
-                      </p>
-                      <p className='space-x-1'>
-                        <span>VATable Threashold</span>
-                        <span>3,600,000</span>
-                      </p>
-                      <p className='space-x-1'>
-                        <span>Effective Balcony Base</span>
-                        <span>50%</span>
-                      </p>
-                    </div>
-                  </td>
-                  <td className='w-[150px] flex items-center justify-start'>
-                    <div>
-                          <p className='space-x-1'>
-                            <span>Version 1 -</span>
-                            <span>0%</span>
-                            <span>(Active)</span>
-                          </p>
-                          <p className='space-x-1'>
-                            <span>Version 2 -</span>
-                            <span>5%</span>
-                          </p>
-                          <p className='space-x-1'>
-                            <span>Version 3 -</span>
-                            <span>5%</span>
-                          </p>
-                          <p className='space-x-1'>
-                            <span>Version 4 -</span>
-                            <span>5%</span>
-                          </p>
-                        </div>
-                  </td>
-                  <td className='w-[150px] flex items-center justify-start'>
-                   <div>
-                      <p className='space-x-1'>
-                        <span>Version 1 -</span>
-                        <span>0</span>
-                      </p>
-                      <p className='space-x-1'>
-                        <span>Version 2 -</span>
-                        <span>0</span>
-                      </p>
-                      <p className='space-x-1'>
-                        <span>Version 3 -</span>
-                        <span>0</span>
-                      </p>
-                      <p className='space-x-1'>
-                        <span>Version 4 -</span>
-                        <span>0</span>
-                      </p>
-                    </div>
-                  </td>
-                  <td className='w-[100px] flex items-center justify-start'>
-                    <div>
-                      <p>8.8</p>
-                      <p>First 10</p>
-                      <p>12.12</p>
-                    </div>
-                  </td>
-                  <td className='w-[150px] flex items-center justify-start rounded-r-lg text-sm'>
-                    <div>
-                      <p>Spot Cash</p>
-                      <p>Spot 12%</p>
-                      <p>Spot 2% + 10%</p>
-                      <p>Installment</p>
-                      <p>12% Installment</p>
-                    </div>
-                  </td>
-                </tr> */}
-                        {/*                                                         END                                                     */}
-                    </tbody>
-                </table>
+            <div className="mt-3 ">
+                <CustomTable
+                    className="flex gap-4 items-center h-[49px] montserrat-semibold text-sm text-[#A5A5A5] bg-white rounded-[10px] mb-4 -mx-1 px-4"
+                    isLoading={isLoading && isFirstLoad}
+                    columns={COLUMNS}
+                    data={priceListMaster}
+                    renderRow={(item) => (
+                        <PricelistMasterRow
+                            key={item.price_list_master_id}
+                            item={item}
+                            handlePriceListItemClick={handlePriceListItemClick}
+                            handleStatusClick={handleStatusClick}
+                            toggled={toggled}
+                            setToggled={setToggled}
+                        />
+                    )}
+                />
             </div>
             <div className="flex w-full justify-start py-5">
-                {/* <ReactPaginate
-                    previousLabel={
-                        <MdKeyboardArrowLeft className="text-[#404B52]" />
-                    }
-                    nextLabel={
-                        <MdKeyboardArrowRight className="text-[#404B52]" />
-                    }
-                    breakLabel={"..."}
-                    pageCount={priceListMaster?.pagination?.last_page || 1}
-                    marginPagesDisplayed={2}
-                    pageRangeDisplayed={1}
-                    onPageChange={(data) => handlePageChange(data.selected + 1)}
-                    containerClassName={"flex gap-2"}
-                    previousClassName="border border-[#EEEEEE] text-custom-bluegreen font-semibold w-[26px] h-[24px] rounded-[4px] flex justify-center items-center hover:text-white hover:bg-custom-lightgreen hover:text-white"
-                    nextClassName="border border-[#EEEEEE] text-custom-bluegreen font-semibold w-[26px] h-[24px] rounded-[4px] flex justify-center items-center hover:text-white hover:bg-custom-lightgreen hover:text-white"
-                    pageClassName=" border border-[#EEEEEE] text-black w-[26px] h-[24px] rounded-[4px] flex justify-center items-center hover:bg-custom-lightgreen text-[12px]"
-                    activeClassName="w-[26px] h-[24px] border border-[#EEEEEE] bg-custom-lightgreen text-[#404B52] rounded-[4px] text-white text-[12px]"
-                    pageLinkClassName="w-full h-full flex justify-center items-center"
-                    activeLinkClassName="w-full h-full flex justify-center items-center"
-                    disabledLinkClassName={"text-gray-300 cursor-not-allowed"}
-                    forcePage={currentPage - 1}
-                /> */}
                 <Pagination
-                    currentPage={priceListMaster?.currentPage ?? 1} // Ensure a default value
-                    totalPages={priceListMaster?.totalPages ?? 0} // Ensure a default value
-                    onPageChange={handlePageClick}
+                    pageCount={pageState.pagination?.last_page || 1}
+                    currentPage={pageState.currentPage || 1}
+                    onPageChange={handlePageChange}
                 />
             </div>
             <div>
-                <AddPropertyModal propertyModalRef={propertyModalRef} />
+                <AddPropertyModal
+                    fetchData={fetchData}
+                    propertyModalRef={propertyModalRef}
+                />
             </div>
         </div>
     );

@@ -1,45 +1,79 @@
-import React, { useRef, useEffect, useState, useMemo } from "react";
+import React, {
+    useRef,
+    useEffect,
+    useState,
+    useMemo,
+    useCallback,
+} from "react";
 import PremiumChecklistModal from "./PremiumChecklistModal";
 import { useUnit } from "@/context/PropertyPricing/UnitContext";
-import { usePricing } from "@/component/layout/propertyandpricingpage/basicpricing/context/BasicPricingContext";
+import { usePricing } from "@/component/layout/propertyandpricingpage/context/BasicPricingContext";
 import CircularProgress from "@mui/material/CircularProgress";
+import { usePriceListMaster } from "@/context/PropertyPricing/PriceListMasterContext";
 
 const AdditionalPremiumAssignModal = ({ modalRef, priceListData }) => {
     //States
+    const [dataFetched, setDataFetched] = useState(false);
     const premiumCheckListModalRef = useRef(null);
     const {
-        checkExistingUnits,
+        fetchUnits,
         excelId,
         towerPhaseId,
         units,
         isCheckingUnits,
     } = useUnit();
+    const { priceListMasterId } = usePriceListMaster();
     const [formattedUnits, setFormattedUnits] = useState([]);
     const [selectedUnit, setSelectedUnit] = useState({});
     const { pricingData } = usePricing();
-  
+
     //Hooks
+    // Memoize the fetchUnits function
+    const memoizedfetchUnits = useCallback(
+        (towerPhaseId, excelId,priceListMasterId, param1, param2) => {
+            return fetchUnits(towerPhaseId, excelId,priceListMasterId, param1, param2);
+        },
+        []
+    );
+
     useEffect(() => {
-        if (priceListData) {
-            const newExcelId = priceListData.data?.excel_id || excelId;
+        // Only run if have valid data and haven't fetched yet
+        if (priceListData.data && !dataFetched) {
+            const newExcelId = excelId;
             const newTowerPhaseId =
-                (priceListData.tower_phases &&
-                    priceListData?.tower_phases[0].id) ||
+                (priceListData.data.tower_phases &&
+                    priceListData?.data.tower_phases[0].id) ||
                 towerPhaseId;
-            if (!newExcelId || !newTowerPhaseId) return;
 
-            const fetchData = async () => {
-                await checkExistingUnits(
-                    newTowerPhaseId,
-                    newExcelId,
-                    false,
-                    false
-                );
-            };
+            // Only fetch if we have both required IDs
+            if (newExcelId && newTowerPhaseId) {
+                const fetchData = async () => {
+                    await memoizedfetchUnits(
+                        newTowerPhaseId,
+                        newExcelId,
+                        priceListMasterId,
+                        false,
+                        false
+                    );
+                    setDataFetched(true);
+                };
 
-            fetchData();
+                fetchData();
+            }
         }
-    }, [priceListData, excelId, towerPhaseId, checkExistingUnits]);
+    }, [
+        priceListData.data,
+        excelId,
+        towerPhaseId,
+        memoizedfetchUnits,
+        dataFetched,
+        priceListMasterId,
+    ]);
+
+    // Add this effect to reset the dataFetched flag when excel IDs change
+    useEffect(() => {
+        setDataFetched(false);
+    }, [excelId]);
 
     /**
      * Groups units by floor using `useMemo` for optimization.
@@ -196,16 +230,16 @@ const AdditionalPremiumAssignModal = ({ modalRef, priceListData }) => {
                                                                         additional_premium_id
                                                                     )
                                                                 }
-                                                                className="h-[63px] w-[95px]   rounded-[15px] bg-white "
+                                                                className="h-[63px] rounded-[15px] bg-white "
                                                             >
                                                                 <div
-                                                                    className={`h-[63px] w-[95px] p-[6px] rounded-[15px] ${
+                                                                    className={`h-[63px] p-[6px] rounded-[15px] ${
                                                                         isSelected
                                                                             ? "gradient-btn4 "
                                                                             : ""
                                                                     }  `}
                                                                 >
-                                                                    <div className="flex  justify-center items-center bg-white h-full w-full text-custom-solidgreen rounded-[10px]">
+                                                                    <div className="flex  justify-center items-center bg-white h-full min-w-max px-2  text-custom-solidgreen rounded-[10px]">
                                                                         <p className="font-bold">
                                                                             {
                                                                                 unit

@@ -23,7 +23,7 @@ const formDataState = {
     google_map_link: "",
 };
 
-const AddPropertyModal = ({ propertyModalRef }) => {
+const AddPropertyModal = ({ propertyModalRef, fetchData }) => {
     //State
     const { user } = useStateContext();
     const [formData, setFormData] = useState(formDataState);
@@ -31,7 +31,7 @@ const AddPropertyModal = ({ propertyModalRef }) => {
     const navigate = useNavigate();
     const { propertyNamesList } = useProperty();
     const { fetchPropertyListMasters } = usePriceListMaster();
-    const { setExcelId, setExcelIdFromPriceList } = useUnit();
+    const { setExcelId } = useUnit();
     const isPropertyButtonDisabled = isButtonDisabled(
         formData,
         Object.keys(formDataState).filter((key) => key !== "google_map_link")
@@ -78,13 +78,12 @@ const AddPropertyModal = ({ propertyModalRef }) => {
             if (response.status === 201) {
                 showToast("Data added successfully!", "success");
                 setFormData(formDataState);
-                await fetchPropertyListMasters(true, false);
+                await fetchData(true, false);
 
                 if (propertyModalRef.current) {
                     propertyModalRef.current.close();
                 }
                 setExcelId(null);
-                setExcelIdFromPriceList(null);
                 navigate(`/property-pricing/basic-pricing/${priceListId}`, {
                     state: { priceListData: priceListData },
                 });

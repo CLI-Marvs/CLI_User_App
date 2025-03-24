@@ -8,19 +8,20 @@ import ReviewsandApprovalRouting from "./accordion/ReviewsandApprovalRouting";
 import FloorPremiums from "./accordion/FloorPremiums";
 import { useLocation } from "react-router-dom";
 import { useStateContext } from "../../../../context/contextprovider";
-import { usePricing } from "@/component/layout/propertyandpricingpage/basicpricing/context/BasicPricingContext";
-import { formatPayload } from "@/component/layout/propertyandpricingpage/basicpricing/utils/payloadFormatter";
+import { usePricing } from "@/component/layout/propertyandpricingpage/context/BasicPricingContext";
+import { formatPayload } from "@/component/layout/propertyandpricingpage/utils/payloadFormatter";
 import { showToast } from "@/util/toastUtil";
 import { usePriceListMaster } from "@/context/PropertyPricing/PriceListMasterContext";
 import { useUnit } from "@/context/PropertyPricing/UnitContext";
 import CircularProgress from "@mui/material/CircularProgress";
-import { usePropertyPricing } from "@/component/layout/propertyandpricingpage/basicpricing/hooks/usePropertyPricing";
-import UnitUploadButton from "@/component/layout/propertyandpricingpage/basicpricing/component/UnitUploadButton";
+import { usePropertyPricing } from "@/component/layout/propertyandpricingpage/hooks/usePropertyPricing";
+import { useProperty } from "@/context/PropertyPricing/PropertyContext";
+import UnitUploadButton from "@/component/layout/propertyandpricingpage/component/UnitUploadButton";
 import generateBigIntId from "@/component/layout/propertyandpricingpage/utils/generateId";
 import {
     priceListInitialState,
     priceVersionInitialState,
-} from "@/component/layout/propertyandpricingpage/basicpricing/context/BasicPricingContext";
+} from "@/component/layout/propertyandpricingpage/context/BasicPricingContext";
 
 const additionalPremiums = [
     {
@@ -51,30 +52,23 @@ const BasicPricing = () => {
     const location = useLocation();
     const { priceListData = {}, action = null } = location.state || {};
     const { pricingData, resetPricingData, setPricingData } = usePricing();
+    const { fetchData, setPriceListMasterId } = usePriceListMaster();
     const {
-        fetchPropertyListMasters,
-        currentPage,
-        setPropertyMasterId,
-        setPriceListMasterId,
-    } = usePriceListMaster();
-    const {
-        checkExistingUnits,
+        fetchUnits,
         units,
         excelId,
-        excelIdFromPriceList,
+     
         lastFetchedExcelId,
-        floorPremiumsAccordionOpen,
         setTowerPhaseId,
-        setExcelIdFromPriceList,
+
         updateUnitComputedPrices,
-        computedUnitPrices,
-        saveComputedUnitPricingData,
         setFloorPremiumsAccordionOpen,
         setExcelId,
     } = useUnit();
+    const { setPropertyMasterId } = useProperty();
     const [accordionStates, setAccordionStates] = useState({
         priceListSettings: false,
-        floorPremium: floorPremiumsAccordionOpen,
+        floorPremium: false,
         additionalPremiums: false,
         priceVersions: false,
         reviewAndApprovalSetting: false,
@@ -86,9 +80,8 @@ const BasicPricing = () => {
         pricingData,
         resetPricingData,
         showToast,
-        fetchPropertyListMasters,
-        checkExistingUnits,
-        currentPage
+        fetchData,
+        fetchUnits
     );
 
     //Hooks
@@ -101,12 +94,7 @@ const BasicPricing = () => {
     useEffect(() => {
         if (priceListData) {
             setTowerPhaseId(priceListData?.data?.tower_phases[0]?.id);
-            if (priceListData?.data?.excel_id) {
-                setExcelIdFromPriceList(priceListData?.data.excel_id);
-            } else {
-                setExcelIdFromPriceList(null);
-                setExcelId(null);
-            }
+            setExcelId(priceListData?.data?.excel_id || null);
             setPropertyMasterId(
                 priceListData?.data?.property_commercial_detail
                     ?.property_master_id
@@ -302,13 +290,13 @@ const BasicPricing = () => {
         return () => {
             setAccordionStates({
                 priceListSettings: false,
-                floorPremium: floorPremiumsAccordionOpen,
+                floorPremium: false,
                 additionalPremiums: false,
                 priceVersions: false,
                 reviewAndApprovalSetting: false,
             });
         };
-    }, [location, floorPremiumsAccordionOpen]);
+    }, [location]);
 
     //Compute the effective balcony base
     const computeEffectiveBalconyBase = useMemo(() => {
@@ -451,22 +439,15 @@ const BasicPricing = () => {
             ...prev,
             [name]: !prev[name],
         }));
-        // console.log("name", name);
-        if (name === "floorPremium") {
-            setFloorPremiumsAccordionOpen((prev) => prev);
-        }
+        // // console.log("name", name);
+        // if (name === "floorPremium") {
+        //     setFloorPremiumsAccordionOpen((prev) => prev);
+        // }
     };
 
     //Handle price list submit
     const handleFormSubmit = (e, status) => {
-        handleSubmit(
-            e,
-            status,
-            action,
-            excelId,
-            setFloorPremiumsAccordionOpen,
-            currentPage
-        );
+        handleSubmit(e, status, action, excelId, setFloorPremiumsAccordionOpen);
     };
 
     return (
@@ -479,7 +460,7 @@ const BasicPricing = () => {
                 <div className="flex gap-[15px] py-5">
                     <UnitUploadButton
                         buttonText={
-                            excelId || excelIdFromPriceList
+                            excelId
                                 ? "Change Uploaded Units"
                                 : "Upload Unit Details"
                         }
@@ -489,6 +470,7 @@ const BasicPricing = () => {
                                 : ""
                         }`}
                         propertyData={priceListData}
+                        setAccordionStates={setAccordionStates}
                     />
 
                     <button

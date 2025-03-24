@@ -1,28 +1,57 @@
 import React, { useState, useRef, useEffect } from "react";
-import ReactPaginate from "react-paginate";
-import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md";
+import Pagination from "@/component/layout/propertyandpricingpage/component/Pagination";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import DateLogo from "../../../../../../public/Images/Date_range.svg";
 import AddPriceVersionModal from "@/component/layout/propertyandpricingpage/priceversioning/AddPriceVersionModal";
 import { usePriceVersion } from "@/context/PropertyPricing/PriceVersionContext";
-import Skeleton from "@/component/Skeletons";
-import { toLowerCaseText } from "@/util/formatToLowerCase";
+import CustomTable from "@/component/layout/propertyandpricingpage/component/CustomTable";
+import PriceVersionRow from "@/component/layout/propertyandpricingpage/component/TableRows/PriceVersionRow";
 
+const COLUMNS = [
+    { label: "Property", width: "w-[160px]" },
+    { label: "Version", width: "w-[150px]" },
+    { label: "Percent Increase", width: "w-[100px]" },
+    { label: "No. of Allowed Buyers", width: "w-[150px]" },
+    { label: "Expiry Date", width: "w-[100px]" },
+];
 const PriceVersioning = () => {
     //States
     const [startDate, setStartDate] = useState(new Date());
+    const dropdownRef = useRef(null);
     const [toggled, setToggled] = useState(false);
     const [isFilterVisible, setIsFilterVisible] = useState(false);
     const modalRef = useRef(null);
-    const { priceVersion, isFetchingPriceVersions, getPriceVersions } =
-        usePriceVersion();
+    const {
+        data: priceVersion,
+        isLoading,
+        pageState,
+        setPageState,
+        fetchData,
+        isFirstLoad,
+    } = usePriceVersion();
 
     //Hooks
     useEffect(() => {
         if (priceVersion && priceVersion.length === 0) {
-            getPriceVersions();
+            fetchData();
         }
+    }, []);
+
+    useEffect(() => {
+        const handleOutsideClick = (event) => {
+            if (
+                dropdownRef.current &&
+                !dropdownRef.current.contains(event.target)
+            ) {
+                setIsFilterVisible(false);
+            }
+        };
+
+        document.addEventListener("mousedown", handleOutsideClick);
+        return () => {
+            document.removeEventListener("mousedown", handleOutsideClick);
+        };
     }, []);
 
     //Event handler
@@ -37,6 +66,15 @@ const PriceVersioning = () => {
         }
     };
 
+    // Handles pagination: Moves to the next page when clicked
+    const handlePageChange = (selectedPage) => {
+        if (selectedPage !== pageState.currentPage) {
+            setPageState((prevState) => ({
+                ...prevState,
+                currentPage: selectedPage,
+            }));
+        }
+    };
     return (
         <div className="h-screen max-w-[1800px] bg-custom-grayFA px-4">
             <div className="">
@@ -65,6 +103,8 @@ const PriceVersioning = () => {
                     </svg>
                     <input
                         type="text"
+                        readOnly
+                        onClick={toggleFilterBox}
                         className="h-10 w-full rounded-lg pl-9 pr-6 text-sm"
                         placeholder="Search"
                     />
@@ -163,141 +203,31 @@ const PriceVersioning = () => {
                 )}
             </div>
             <div className="mt-3 overflow-y-hidden">
-                <table className="overflow-x-auto bg-custom-grayFA mb-2 mx-1">
-                    <thead className="h-[103px]">
-                        <tr className="flex gap-[30px] items-center h-[83px] montserrat-semibold text-sm text-[#A5A5A5] bg-white rounded-[10px] p-[16px]">
-                            <th className="flex justify-start w-[148px] shrink-0 pl-1">
-                                Property
-                            </th>
-                            <th className="flex justify-start w-[150px] shrink-0 pl-1">
-                                Version
-                            </th>
-                            <th className="w-[100px] shrink-0 pl-1">
-                                <div className="flex justify-start text-left break-words">
-                                    Percent Increase
-                                </div>
-                            </th>
-                            <th className=" w-[100px] shrink-0 pl-1">
-                                <div className="flex justify-start text-left">
-                                    No. of allowed buyers
-                                </div>
-                            </th>
-                            <th className="flex justify-start w-[100px] shrink-0 pl-1">
-                                Expiry Date
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody className="flex flex-col gap-[20px]">
-                        {isFetchingPriceVersions ? (
-                            <div>
-                                <Skeleton height={140} />
-                                <Skeleton height={140} />
-                                <Skeleton height={140} />
-                            </div>
-                        ) : (
-                            priceVersion &&
-                            priceVersion.map((item, index) => (
-                                <div
-                                    className="border-b border-custom-lightestgreen pb-[20px]"
-                                    key={index}
-                                >
-                                    <table className="w-full border-separate bg-white  rounded-[10px]">
-                                        <tbody>
-                                            <tr className="flex gap-[10px] overflow-hidden p-1">
-                                                {/* Property Name and Edit */}
-                                                <td className="flex flex-col gap-[10px] justify-center w-[169px] p-[20px] rounded-[10px] shadow-custom5">
-                                                    <p className="montserrat-semibold text-sm leading-[17px]">
-                                                        {toLowerCaseText(
-                                                            item?.propertyName
-                                                        )}
-
-                                                        {item?.tower_phase_name
-                                                            ? ", Tower "
-                                                            : ""}
-                                                        {item?.tower_phase_name}
-                                                    </p>
-                                                    <p className="underline text-blue-500 cursor-pointer text-sm">
-                                                        Edit
-                                                    </p>
-                                                </td>
-
-                                                {/* Price Versions Table */}
-                                                <td className="rounded-[10px] shadow-custom5 text-sm w-[572px] overflow-hidden">
-                                                    <table className="w-full border-separate">
-                                                        <tbody>
-                                                            {item?.versions.map(
-                                                                (
-                                                                    versionItem,
-                                                                    versionIndex
-                                                                ) => (
-                                                                    <tr
-                                                                        className="flex items-center bg-white gap-[30px]"
-                                                                        key={
-                                                                            versionIndex
-                                                                        }
-                                                                    >
-                                                                        <td className="w-[150px] p-[15px]">
-                                                                            {
-                                                                                versionItem?.version
-                                                                            }
-                                                                        </td>
-                                                                        <td className="w-[100px] p-[15px]">
-                                                                            {
-                                                                                versionItem?.percent_increase
-                                                                            }{" "}
-                                                                            %
-                                                                        </td>
-                                                                        <td className="w-[100px] p-[15px]">
-                                                                            {
-                                                                                versionItem?.no_of_allowed_buyers
-                                                                            }
-                                                                        </td>
-                                                                        <td className="w-[120px] p-[15px]">
-                                                                            {
-                                                                                versionItem?.expiry_date
-                                                                            }
-                                                                        </td>
-                                                                    </tr>
-                                                                )
-                                                            )}
-                                                        </tbody>
-                                                    </table>
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            ))
-                        )}
-                    </tbody>
-                </table>
+                <CustomTable
+                    className="flex gap-4 items-center h-[49px] montserrat-semibold text-sm text-[#A5A5A5] bg-white rounded-[10px] mb-4 -mx-1 px-4"
+                    isLoading={isLoading && isFirstLoad}
+                    columns={COLUMNS}
+                    data={priceVersion}
+                    renderRow={(item) => (
+                        <PriceVersionRow
+                            key={item.property_masters_id}
+                            item={item}
+                        />
+                    )}
+                />
             </div>
             <div className="flex w-full justify-start mt-[20px] pb-[150px] bg-custom-grayFA">
-                <ReactPaginate
-                    previousLabel={
-                        <MdKeyboardArrowLeft className="text-[#404B52]" />
-                    }
-                    nextLabel={
-                        <MdKeyboardArrowRight className="text-[#404B52]" />
-                    }
-                    breakLabel={"..."}
-                    pageCount={2}
-                    marginPagesDisplayed={2}
-                    pageRangeDisplayed={1}
-                    /* onPageChange={handlePageClick} */
-                    containerClassName={"flex gap-2"}
-                    previousClassName="border border-[#EEEEEE] text-custom-bluegreen font-semibold w-[26px] h-[24px] rounded-[4px] flex justify-center items-center hover:text-white hover:bg-custom-lightgreen hover:text-white"
-                    nextClassName="border border-[#EEEEEE] text-custom-bluegreen font-semibold w-[26px] h-[24px] rounded-[4px] flex justify-center items-center hover:text-white hover:bg-custom-lightgreen hover:text-white"
-                    pageClassName=" border border-[#EEEEEE] text-black w-[26px] h-[24px] rounded-[4px] flex justify-center items-center hover:bg-custom-lightgreen text-[12px]"
-                    activeClassName="w-[26px] h-[24px] border border-[#EEEEEE] bg-custom-lightgreen text-[#404B52] rounded-[4px] text-white text-[12px]"
-                    pageLinkClassName="w-full h-full flex justify-center items-center"
-                    activeLinkClassName="w-full h-full flex justify-center items-center"
-                    disabledLinkClassName={"text-gray-300 cursor-not-allowed"}
-                    /* forcePage={currentPage} */
+                <Pagination
+                    pageCount={pageState.pagination?.last_page || 1}
+                    currentPage={pageState.currentPage || 1}
+                    onPageChange={handlePageChange}
                 />
             </div>
             <div>
-                <AddPriceVersionModal modalRef={modalRef} />
+                <AddPriceVersionModal
+                    fetchData={fetchData}
+                    modalRef={modalRef}
+                />
             </div>
         </div>
     );

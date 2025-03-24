@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { usePricing } from "@/component/layout/propertyandpricingpage/basicpricing/context/BasicPricingContext";
+import { usePricing } from "@/component/layout/propertyandpricingpage/context/BasicPricingContext";
 import { usePaymentScheme } from "@/context/PropertyPricing/PaymentSchemeContext";
 
 const EditPaymentSchemeModal = ({
@@ -8,7 +8,7 @@ const EditPaymentSchemeModal = ({
 }) => {
     const [selectedPaymentSchemes, setSelectedPaymentSchemes] = useState([]);
     const { pricingData, setPricingData } = usePricing();
-    const { paymentScheme } = usePaymentScheme();
+    const { data:paymentScheme } = usePaymentScheme();
 
     //Hooks
     /**

@@ -1,19 +1,20 @@
 import React, { useEffect, useState } from "react";
 import { IoIosArrowDown } from "react-icons/io";
-import { usePricing } from "@/component/layout/propertyandpricingpage/basicpricing/context/BasicPricingContext";
+import { usePricing } from "@/component/layout/propertyandpricingpage/context/BasicPricingContext";
 import { usePaymentScheme } from "@/context/PropertyPricing/PaymentSchemeContext";
+import paymentScheme from './PaymentSchemes';
 
 const paymentScheme = ({ action, priceListMasterData }) => {
     //State
     const [accordionOpen, setAccordionOpen] = useState(false);
     const { updatePricingSection } = usePricing();
     const [selectedSchemes, setSelectedSchemes] = useState([]);
-    const { paymentScheme, fetchPaymentSchemes } = usePaymentScheme();
- 
+    const { data: paymentScheme, fetchData } =
+        usePaymentScheme();
 
     //Hooks
     useEffect(() => {
-        fetchPaymentSchemes();
+        fetchData();
     }, []);
 
     /**
@@ -23,12 +24,16 @@ const paymentScheme = ({ action, priceListMasterData }) => {
      * @param {*} action
      */
     useEffect(() => {
-        if (priceListMasterData || action === 'Edit') {
+        if (priceListMasterData || action === "Edit") {
             if (priceListMasterData?.payment_scheme) {
-                setSelectedSchemes(prev => ({
+                setSelectedSchemes((prev) => ({
                     ...prev,
-                    paymentSchemes: Array.isArray(priceListMasterData.payment_scheme)
-                        ? priceListMasterData.payment_scheme.map(scheme => scheme.id)
+                    paymentSchemes: Array.isArray(
+                        priceListMasterData.payment_scheme
+                    )
+                        ? priceListMasterData.payment_scheme.map(
+                              (scheme) => scheme.id
+                          )
                         : [priceListMasterData.payment_scheme.id],
                 }));
             }
@@ -46,10 +51,12 @@ const paymentScheme = ({ action, priceListMasterData }) => {
      */
     const handleSelectedPaymentScheme = (e, schemeId) => {
         const isChecked = e.target.checked;
-        if (action === 'Edit') {
+        if (action === "Edit") {
             setSelectedSchemes((prevSchemes) => {
                 // Ensure paymentSchemes is an array
-                const paymentSchemes = Array.isArray(prevSchemes?.paymentSchemes)
+                const paymentSchemes = Array.isArray(
+                    prevSchemes?.paymentSchemes
+                )
                     ? prevSchemes.paymentSchemes
                     : [];
 
@@ -61,40 +68,42 @@ const paymentScheme = ({ action, priceListMasterData }) => {
                     : [...paymentSchemes, schemeId];
 
                 // Update pricingData directly as an array of IDs
-                updatePricingSection('paymentSchemes', updatedPaymentSchemes);
+                updatePricingSection("paymentSchemes", updatedPaymentSchemes);
 
                 return {
                     ...prevSchemes,
                     paymentSchemes: updatedPaymentSchemes, // Ensure array structure
                 };
             });
-        }
-        else {
-            setSelectedSchemes(prevSchemes => {
+        } else {
+            setSelectedSchemes((prevSchemes) => {
                 // If selectedSchemes is undefined or null, default to an empty array
                 const schemes = prevSchemes || [];
 
                 // Check if the schemeId already exists in the array
                 const isAlreadySelected = schemes.includes(schemeId);
-                const newSchemes = isChecked && !isAlreadySelected
-                    ? [...schemes, schemeId] 
-                    : schemes.filter(id => id !== schemeId); 
-                
-                updatePricingSection('paymentSchemes', { selectedSchemes: newSchemes });
+                const newSchemes =
+                    isChecked && !isAlreadySelected
+                        ? [...schemes, schemeId]
+                        : schemes.filter((id) => id !== schemeId);
+
+                updatePricingSection("paymentSchemes", {
+                    selectedSchemes: newSchemes,
+                });
                 return newSchemes;
             });
         }
     };
 
-
     //Render function
     const renderPaymentSchemes = () => {
         if (paymentScheme && Array.isArray(paymentScheme)) {
             return paymentScheme.map((item, index) => {
-                const paymentSchemesArray = action === 'Edit'
-                    ? selectedSchemes?.paymentSchemes || [] 
-                    : Array.isArray(selectedSchemes)
-                        ? selectedSchemes  
+                const paymentSchemesArray =
+                    action === "Edit"
+                        ? selectedSchemes?.paymentSchemes || []
+                        : Array.isArray(selectedSchemes)
+                        ? selectedSchemes
                         : [];
                 const isChecked = paymentSchemesArray.includes(item.id);
 
@@ -117,57 +126,51 @@ const paymentScheme = ({ action, priceListMasterData }) => {
                             </p>
                         </div>
                         <div className="flex flex-col gap-1 text-sm pr-4">
-                            <p>
-                                {item?.description}
-                            </p>
-                            <p>
-                                Spot {item?.spot}%
-                            </p>
-                            <p>
-                                Installment{" "}
-                                {item?.downpayment_installment}%
-                            </p>
-                            <p>
-                                Bank Financing{" "}
-                                {item?.bank_financing}%
-                            </p>
+                            <p>{item?.description}</p>
+                            <p>Spot {item?.spot}%</p>
+                            <p>Installment {item?.downpayment_installment}%</p>
+                            <p>Bank Financing {item?.bank_financing}%</p>
                             <p>Discount 8% (100% LP - RF)</p>
                         </div>
                     </div>
                 );
             });
         }
-    }
+    };
     return (
         <>
             <div
                 className={`transition-all duration-2000 ease-in-out
-      ${accordionOpen
-                        ? "h-[74px] mx-5 bg-white shadow-custom5 rounded-[10px]"
-                        : "h-[72px] gradient-btn3 rounded-[10px] p-[1px]"
-                    } `}
+      ${
+          accordionOpen
+              ? "h-[74px] mx-5 bg-white shadow-custom5 rounded-[10px]"
+              : "h-[72px] gradient-btn3 rounded-[10px] p-[1px]"
+      } `}
             >
                 <button
                     onClick={() => setAccordionOpen(!accordionOpen)}
                     className={`
-            ${accordionOpen
-                            ? "flex justify-between items-center h-full w-full bg-white rounded-[9px] px-[15px]"
-                            : "flex justify-between items-center h-full w-full bg-custom-grayFA rounded-[9px] px-[15px]"
-                        } `}
+            ${
+                accordionOpen
+                    ? "flex justify-between items-center h-full w-full bg-white rounded-[9px] px-[15px]"
+                    : "flex justify-between items-center h-full w-full bg-custom-grayFA rounded-[9px] px-[15px]"
+            } `}
                 >
                     <span
-                        className={` text-custom-solidgreen ${accordionOpen
-                            ? "text-[20px] montserrat-semibold"
-                            : "text-[18px] montserrat-regular"
-                            }`}
+                        className={` text-custom-solidgreen ${
+                            accordionOpen
+                                ? "text-[20px] montserrat-semibold"
+                                : "text-[18px] montserrat-regular"
+                        }`}
                     >
                         Payment Schemes
                     </span>
                     <span
-                        className={`flex justify-center items-center h-[40px] w-[40px] rounded-full  transform transition-transform duration-300 ease-in-out ${accordionOpen
-                            ? "rotate-180 bg-[#F3F7F2] text-custom-solidgreen"
-                            : "rotate-0 gradient-btn2 text-white"
-                            }`}
+                        className={`flex justify-center items-center h-[40px] w-[40px] rounded-full  transform transition-transform duration-300 ease-in-out ${
+                            accordionOpen
+                                ? "rotate-180 bg-[#F3F7F2] text-custom-solidgreen"
+                                : "rotate-0 gradient-btn2 text-white"
+                        }`}
                     >
                         <IoIosArrowDown className=" text-[18px]" />
                     </span>
@@ -175,10 +178,11 @@ const paymentScheme = ({ action, priceListMasterData }) => {
             </div>
             <div
                 className={`mx-5 rounded-[10px] shadow-custom5 grid overflow-hidden transition-all duration-300 ease-in-out
-            ${accordionOpen
-                        ? "mt-2 mb-4 grid-rows-[1fr] opacity-100"
-                        : "grid-rows-[0fr] opacity-0"
-                    }
+            ${
+                accordionOpen
+                    ? "mt-2 mb-4 grid-rows-[1fr] opacity-100"
+                    : "grid-rows-[0fr] opacity-0"
+            }
             `}
             >
                 <div className=" overflow-hidden bg-white">

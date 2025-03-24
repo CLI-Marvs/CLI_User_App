@@ -3,7 +3,7 @@ import { PaymentSchemeProvider } from "@/context/PropertyPricing/PaymentSchemeCo
 import { UnitProvider } from "@/context/PropertyPricing/UnitContext";
 import { PriceVersionProvider } from "@/context/PropertyPricing/PriceVersionContext";
 import { PropertyProvider } from "@/context/PropertyPricing/PropertyContext";
-import { BasicPricingProvider } from "@/component/layout/propertyandpricingpage/basicpricing/context/BasicPricingContext";
+import { BasicPricingProvider } from "@/component/layout/propertyandpricingpage/context/BasicPricingContext";
 /**
  * This is the main provider for the property pricing context.
  * It wraps the PriceListMasterProvider and PaymentSchemeProvider.

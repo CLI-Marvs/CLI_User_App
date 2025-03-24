@@ -6,7 +6,7 @@ export const priceListMasterService = {
      * @returns {Promise<Array>} Resolves with an array of price list masters.
      * @throws Will throw an error if the API request fails.
      */
-    getPriceListMasters: async (page = 1, filters) => {
+    getPriceListMasters: async (page = 1, perPage = 10, filters) => {
         try {
             const cleanFilters = Object.fromEntries(
                 Object.entries(filters || {}).filter(
@@ -17,7 +17,7 @@ export const priceListMasterService = {
             // Convert filters object into query parameters
             const queryParams = new URLSearchParams({
                 page,
-                per_page: 10,
+                per_page: perPage,
                 ...cleanFilters, // Spread the filters object
             }).toString();
 

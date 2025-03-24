@@ -1,16 +1,11 @@
-import {
-    createContext,
-    useContext,
-    useState,
-    useCallback,
-    useEffect,
-} from "react";
+import { createContext, useContext, useState } from "react";
 import { priceListMasterService } from "@/component/servicesApi/apiCalls/propertyPricing/priceListMaster/priceListMasterService";
 import _ from "lodash";
+import usePaginatedFetch from "@/component/layout/propertyandpricingpage/hooks/usePaginatedFetch";
 
 const PropertyMasterContext = createContext();
 
-const defaultFilters = {
+export const defaultFilters = {
     property: "",
     paymentScheme: "",
     date: null,
@@ -18,122 +13,40 @@ const defaultFilters = {
 };
 
 export const PriceListMasterProvider = ({ children }) => {
-    const [priceListMaster, setPriceListMaster] = useState({
-        data: [],
-        currentPage: 1,
-        totalPages: 0,
-        filters: {},
-    });
-    const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState(null);
-    // const [currentPage, setCurrentPage] = useState(1);
-    const [isFirstLoad, setIsFirstLoad] = useState(true);
-    const [previousFilters, setPreviousFilters] = useState([]);
-    const [propertyMasterId, setPropertyMasterId] = useState(null);
     const [priceListMasterId, setPriceListMasterId] = useState(null);
     const [searchFilters, setSearchFilters] = useState(defaultFilters);
-    const [appliedFilters, setAppliedFilters] = useState(defaultFilters);
-
-    const fetchPropertyListMasters = useCallback(
-        async (forceFetch = false, silentFetch = false, page) => {
-            const isFilterChanged = !_.isEqual(appliedFilters, previousFilters);
-            const isSamePage = page === priceListMaster.currentPage;
-            if (
-                priceListMaster &&
-                !forceFetch &&
-                !isFilterChanged &&
-                isSamePage
-            ) {
-                // Prevents unnecessary fetching
-                return priceListMaster;
-            }
-
-            try {
-                if (!silentFetch && isFirstLoad) {
-                    setIsLoading(true);
-                }
-                const response =
-                    await priceListMasterService.getPriceListMasters(
-                        page,
-                        appliedFilters
-                    );
-                const { data, pagination } = response.data;
-                console.log("response 62", data);
-                // setPriceListMaster({
-                //     data,
-                //     currentPage: pagination?.current_page,
-                //     totalPages: pagination?.last_page,
-                //     filters: appliedFilters,
-                // });
-                setPriceListMaster((prev) => ({
-                    ...prev,
-                    data,
-                    currentPage: pagination?.current_page ?? 1,
-                    totalPages: pagination?.last_page ?? 0,
-                    filters: appliedFilters,
-                }));
-                setError(null);
-                setPreviousFilters(appliedFilters);
-
-                if (isFirstLoad) {
-                    setIsFirstLoad(false);
-                }
-
-                return { data, pagination };
-            } catch (error) {
-                // setPriceListMaster({ data: [], pagination: null });
-                setPriceListMaster((prev) => ({
-                    ...prev,
-                    data: [],
-                    totalPages: 0, // Reset totalPages correctly
-                }));
-                setError(error.message);
-                console.error("Error fetching property master list:", error);
-            } finally {
-                if (!silentFetch) setIsLoading(false);
-            }
-        },
-        [
-            // priceListMaster,
-            // priceListMaster.currentPage,
-            // isFirstLoad,
-            previousFilters,
-            appliedFilters,
-        ]
-    );
-
-    //Automatically fetch when `appliedFilters` or 'currentPage' changes
-    useEffect(() => {
-        fetchPropertyListMasters(true, false, priceListMaster.currentPage);
-    }, [priceListMaster.currentPage, appliedFilters]);
-
-    const applySearch = () => {
-        setAppliedFilters(searchFilters);
-        // setCurrentPage(1);
-    };
-
-    const refreshPage = () => {
-        setSearchFilters(defaultFilters);
-        setAppliedFilters(defaultFilters);
-        // setCurrentPage(1);
-    };
-
-    const value = {
-        priceListMaster,
+    const {
+        data,
         isLoading,
         error,
-        fetchPropertyListMasters,
-        setPriceListMaster,
+        pageState,
+        setPageState,
+        fetchData,
+        setAppliedFilters,
         isFirstLoad,
-        previousFilters,
-        propertyMasterId,
-        setPropertyMasterId,
-        priceListMasterId,
-        setPriceListMasterId,
+        applySearch,
+        refreshPage,
+    } = usePaginatedFetch(
+        priceListMasterService.getPriceListMasters,
+        defaultFilters
+    );
+
+    const value = {
+        data,
+        isLoading,
+        error,
+        pageState,
+        setPageState,
+        fetchData,
+        setAppliedFilters,
+        isFirstLoad,
         searchFilters,
         setSearchFilters,
         applySearch,
         refreshPage,
+        defaultFilters,
+        priceListMasterId,
+        setPriceListMasterId,
     };
 
     return (

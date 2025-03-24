@@ -12,7 +12,7 @@ import {
     AccordionBody,
 } from "@material-tailwind/react";
 import { Link, useLocation } from "react-router-dom";
-import { usePricing } from "@/component/layout/propertyandpricingpage/basicpricing/context/BasicPricingContext";
+import { usePricing } from "@/component/layout/propertyandpricingpage/context/BasicPricingContext";
 import { useUnit } from "@/context/PropertyPricing/UnitContext";
 import { showToast } from "@/util/toastUtil";
 

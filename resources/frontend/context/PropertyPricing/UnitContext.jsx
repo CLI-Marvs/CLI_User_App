@@ -6,10 +6,10 @@ const UnitContext = createContext();
 
 export const UnitProvider = ({ children }) => {
     const [excelId, setExcelId] = useState(null);
+    // const [excelIdFromPriceList, setExcelIdFromPriceList] = useState(null);
     const [floors, setFloors] = useState([]);
     const [error, setError] = useState(null);
     const [towerPhaseId, setTowerPhaseId] = useState(null);
-    const [excelIdFromPriceList, setExcelIdFromPriceList] = useState(null);
     const [floorPremiumsAccordionOpen, setFloorPremiumsAccordionOpen] =
         useState(false);
     const [unitsByFloor, setUnitByFloors] = useState([]);
@@ -40,7 +40,7 @@ export const UnitProvider = ({ children }) => {
                     towerPhaseId,
                     excelId
                 );
-
+              
                 if (response?.data?.data) {
                     setFloors(response.data.data);
                     return response.data.data;
@@ -66,10 +66,11 @@ export const UnitProvider = ({ children }) => {
      * Sets the current towerPhaseId.
      * Handles loading and error states during the API call.
      */
-    const checkExistingUnits = useCallback(
+    const fetchUnits = useCallback(
         async (
             towerPhaseId,
             excelId,
+            priceListMasterId,
             forceFetch = false,
             skipFloorCount = false
         ) => {
@@ -94,11 +95,12 @@ export const UnitProvider = ({ children }) => {
 
             try {
                 setIsCheckingUnits(true);
-                const response = await unitService.getExistingUnits(
+                const response = await unitService.getUnits(
                     towerPhaseId,
-                    excelId
+                    excelId,
+                    priceListMasterId
                 );
-                
+              
                 const unitsData = response?.data?.data || [];
                 setUnits(unitsData);
                 setLastFetchedExcelId(excelId);
@@ -114,7 +116,7 @@ export const UnitProvider = ({ children }) => {
                 }
             } catch (err) {
                 setError(err);
-                console.error("Error in checkExistingUnits:", err);
+                console.error("Error in fetchUnits:", err);
             } finally {
                 setIsCheckingUnits(false);
             }
@@ -192,7 +194,7 @@ export const UnitProvider = ({ children }) => {
                 const payload = {
                     payload: Object.values(data),
                     excel_id:
-                        excelId || excelIdFromPriceList || data[0]?.excel_id,
+                        excelId  || data[0]?.excel_id,
                     tower_phase_id: towerPhaseId || data[0]?.tower_phase_id,
                     property_masters_id: data[0]?.property_masters_id,
                     price_list_master_id: data[0]?.price_list_master_id,
@@ -210,16 +212,14 @@ export const UnitProvider = ({ children }) => {
     // Update computed prices and trigger save
     const updateUnitComputedPrices = useCallback(
         (newPrices) => {
-            // setComputedUnitPrices(newPrices);
             setComputedUnitPrices((prevPrices) => {
                 if (JSON.stringify(prevPrices) !== JSON.stringify(newPrices)) {
                     // Only trigger save if prices actually changed
-                    saveComputedUnitPricingData(newPrices);
+                    //TODO: uncomment this line to save the computed prices
+                    //  saveComputedUnitPricingData(newPrices);
                 }
                 return newPrices;
             });
-            //TODO: uncomment this line to save the computed prices
-           // saveComputedUnitPricingData(newPrices);
         },
         [saveComputedUnitPricingData]
     );
@@ -229,7 +229,7 @@ export const UnitProvider = ({ children }) => {
         floors,
         error,
         fetchFloorCount,
-        checkExistingUnits,
+        fetchUnits,
         uploadUnits,
         floorPremiumsAccordionOpen,
         setFloorPremiumsAccordionOpen,
@@ -245,8 +245,8 @@ export const UnitProvider = ({ children }) => {
         setLastFetchedExcelId,
         towerPhaseId,
         setTowerPhaseId,
-        excelIdFromPriceList,
-        setExcelIdFromPriceList,
+        // excelIdFromPriceList,
+        // setExcelIdFromPriceList,
         setExcelId,
         setUnits,
         updateUnitComputedPrices,

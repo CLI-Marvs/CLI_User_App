@@ -5,6 +5,7 @@ namespace App\Repositories\Implementations;
 
 
 use App\Models\Unit;
+use Illuminate\Support\Facades\DB;
 
 class UnitRepository
 {
@@ -18,7 +19,7 @@ class UnitRepository
     /**
      * Get existing units for a specific tower phase
      */
-    public function getExistingUnits($towerPhaseId, $excelId)
+    public function getUnits($towerPhaseId, $excelId, $priceListMasterId)
     {
         if (empty($excelId)) {
             throw new \InvalidArgumentException("excelId is required and cannot be empty.");
@@ -26,35 +27,40 @@ class UnitRepository
 
         return  $this->model->where('tower_phase_id', $towerPhaseId)
             ->where('excel_id', $excelId)
+            ->where('price_list_master_id', $priceListMasterId)
             ->where('status', 'Active')
             ->orderBy('floor', 'asc')
             ->orderBy('unit', 'asc')
             ->get();
     }
 
-
-    /**
-     * Get all units for a specific tower phase and selected floor
-     */
-    public function getUnits($towerPhaseId, $selectedFloor, $excelId)
+    /*Count floors of the units*/
+    public function countFloor($towerPhaseId, $excelId)
     {
-        $units = $this->model->where('tower_phase_id', $towerPhaseId)
-            ->where('floor', $selectedFloor)
-            ->where('excel_id', $excelId)
-            ->where('status', 'Active')
-            ->orderBy('floor', 'asc')
-            ->orderBy('unit', 'asc')
-            ->get();
+        DB::beginTransaction();
+        try {
+            $distinctFloors = $this->model->where([
+                'tower_phase_id'
+                => $towerPhaseId,
+                'status' => 'Active',
+                'excel_id' => $excelId,
 
-        if ($units->isEmpty()) {
+            ])
+                ->distinct('floor')
+                ->pluck('floor');
+
             return [
-                'message' => "No active units found for the given tower phase and floor."
+                $distinctFloors
+            ];
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return [
+                'success' => false,
+                'message' => 'Failed to count floor: ' . $e->getMessage()
             ];
         }
-
-        return $units;
     }
-
+ 
     /**
      * Store unit details from the system
      */
