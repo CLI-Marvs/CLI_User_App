@@ -208,7 +208,7 @@ const AutoPostingCom = () => {
                 BUKRS: item.company_code,
                 RECNNR: item.reference_number,
                 VBEWA: item.flow_type,
-                BELNR: item.invoice_number,
+                BELNR: item.invoice_number?.toString() || '',
                 AMT: item.amount,
                 PAYD: "Cash",
                 INVID: item.invoice_id,
