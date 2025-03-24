@@ -5,6 +5,7 @@ import ReactPaginate from "react-paginate";
 import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md";
 import { transaction } from "@/component/servicesApi/apiCalls/transactions";
 import TransactionSearchBar from "@/component/layout/transaction/TransactionSearchBar";
+import Skeletons from "@/component/Skeletons";
 
 const AutoPostingCom = () => {
     const statuses = ["Cleared", "Posted", "Floating"];
@@ -26,32 +27,32 @@ const AutoPostingCom = () => {
     const fields = [
         { name: "transaction_customer_name", label: "Name" },
         { name: "transaction_email", label: "Email" },
-        { 
-            name: "transaction_bank", 
+        {
+            name: "transaction_bank",
             label: "Bank",
             type: "select",
             options: [
-                { label: "Select Bank", value: "" }, 
+                { label: "Select Bank", value: "" },
                 { label: "BDO", value: "bdo" },
                 { label: "BPI", value: "bpi" },
                 { label: "LANDBANK", value: "landbank" },
-            ]
-        }, 
-        { 
-            name: "project_name", 
+            ],
+        },
+        {
+            name: "project_name",
             label: "Project Name",
             type: "select",
             options: [
-                { label: "Select Project", value: "" }, 
+                { label: "Select Project", value: "" },
                 { label: "Casa Mira", value: "Casa Mira" },
                 { label: "38th Park", value: "38th Park" },
-            ]
-        }, 
+            ],
+        },
         { name: "transaction_invoice_number", label: "Invoice Number" },
         { name: "transaction_document_number", label: "Document Number" },
         { name: "transaction_reference_number", label: "Reference Number" },
-        { 
-            name: "transaction_status", 
+        {
+            name: "transaction_status",
             label: "Status",
             type: "select",
             options: [
@@ -59,8 +60,8 @@ const AutoPostingCom = () => {
                 { label: "Not Posted", value: "not_posted" },
                 { label: "Posted", value: "posted" },
                 { label: "Floating", value: "floating" },
-            ]
-        } 
+            ],
+        },
     ];
 
     const dynamicClass = (item) =>
@@ -83,15 +84,42 @@ const AutoPostingCom = () => {
     const [selectedRows, setSelectedRows] = useState([]);
     const [statusToPost, setStatusPost] = useState([]);
     const [isSelectedAll, setIsSelectedAll] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const skeletonRows = 5;
 
-    const getPostingList = async () => {
-        const filter = activeItemTransaction ? { status: activeItemTransaction } : {};
+    const pageHandler = async (data = {}) => {
+        if (data.response.length === 0 && data.currentPage > 1) {
+            const newPage = data.currentPage - 1;
+            await setCurrentPagePosting(newPage);
+            return;
+        }
+        if (data.response.length === 0 && data.currentPage === 1) {
+            await setCurrentPagePosting(0);
+            return;
+        }
+    };
+    const getPostingList = async (isUpdate = false) => {
+        if(isUpdate) {  
+            setLoading(true);
+        }
+        const filter = activeItemTransaction
+            ? { status: activeItemTransaction }
+            : {};
+
         const response = await transaction.transactionList(
             currentPagePosting,
             filter
         );
+
+        if (isUpdate) {
+            await pageHandler({
+                response: response.data,
+                currentPage: currentPagePosting,
+            });
+        }
         setPostingList(response.data);
         setTotalPagePosting(response.last_page);
+        setLoading(false);
     };
 
     const handleActiveItem = (item) => {
@@ -104,7 +132,6 @@ const AutoPostingCom = () => {
 
     const handleUpdateItems = async (item) => {
         let payload = [];
-
         const statusRef = labelStatuses
             .filter((ref) => ref.name === item)
             .map((item) => item.statusRef);
@@ -117,9 +144,14 @@ const AutoPostingCom = () => {
 
             payload = updatedRows;
         }
-        const response = await transaction.transactionUpdate(payload);
+
+        if(item === "For Posting") {
+            await handleSubmitSap();
+        }
+        await transaction.transactionUpdate(payload);
+        await getPostingList(true);
         setIsSelectedAll(false);
-        getPostingList();
+        setStatusPost([]);
     };
 
     const handlePageClick = (data) => {
@@ -162,6 +194,65 @@ const AutoPostingCom = () => {
         } else {
             setIsSelectedAll(false);
             setSelectedRows([]);
+        }
+    };
+
+    console.log("PostlingList", postingList);
+
+
+    const handleSubmitSap = async () => {
+        const newDataObject = postingList.map((item) => {
+            return {
+                ID: item.id,
+                BUKRS: item.company_code,
+                RECNNR: item.invoice_number,
+                VBEWA: item.flow_type,
+                BELNR: item.invoice_number,
+                AMT: item.amount,
+                PAYD: "Cash",
+                INVID: item.invoice_id,
+            };
+        });
+        console.log("newDataObject", newDataObject);
+        try {
+            for (const item of newDataObject) {
+                let soapBody = `
+                    <soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:urn="urn:sap-com:document:sap:soap:functions:mc-style">
+                    <soap:Header/>
+                    <soap:Body>
+                       <urn:ZdataWarehousePosted>
+                          <LtZcol>
+                             <item>
+                                <Id>${item.ID}</Id>
+                                <Bukrs>${item.BUKRS}</Bukrs>
+                                <Recnnr>${item.RECNNR}</Recnnr>
+                                <Vbewa>${item.VBEWA}</Vbewa>
+                                <Belnr>${item.BELNR}</Belnr>
+                                <Amt>${item.AMT}</Amt>
+                                <Payd>${item.PAYD}</Payd>
+                                <InvId>${item.INVID}</InvId>
+                             </item>
+                          </LtZcol>
+                       </urn:ZdataWarehousePosted>
+                    </soap:Body>
+                    </soap:Envelope>`;
+
+                const response = await apiServiceSap.post(
+                    "post-data-sap",
+                    soapBody
+                );
+            }
+
+            if (modalRef.current) {
+                modalRef.current.close();
+            }
+            toast.success("All Data Posted Successfully!");
+        } catch (error) {
+            console.error(
+                "Error:",
+                error.response ? error.response.data : error.message
+            );
+            toast.error("Sometine went wrong. Please refresh the page");
         }
     };
 
@@ -240,7 +331,7 @@ const AutoPostingCom = () => {
     return (
         <div className="overflow-y-hidden px-3 flex flex-col space-y-1">
             <div className="px-2">
-                <TransactionSearchBar fields={fields}/>
+                <TransactionSearchBar fields={fields} />
             </div>
             <div className="flex justify-between px-2">
                 <div className="flex gap-[21px]">
@@ -297,7 +388,25 @@ const AutoPostingCom = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {postingList && postingList.length > 0 ? (
+                        {loading ? (
+                            <>
+                                {[...Array(skeletonRows)].map((_, rowIndex) => (
+                                    <tr
+                                        key={rowIndex}
+                                        className="border-r-[1px] border-opacity-10 border-[#B9B7B7] shadow-custom11"
+                                    >
+                                        {columns.map((_, colIndex) => (
+                                            <td
+                                                key={colIndex}
+                                                className="px-3 py-3 w-[208px] text-xs border-r-[1px] border-opacity-50 border-[#B9B7B7]"
+                                            >
+                                                <Skeletons height={20} />
+                                            </td>
+                                        ))}
+                                    </tr>
+                                ))}
+                            </>
+                        ) : postingList && postingList.length > 0 ? (
                             postingList.map((row, rowIndex) => (
                                 <tr
                                     key={rowIndex}
@@ -305,10 +414,10 @@ const AutoPostingCom = () => {
                                 >
                                     {columns.map((col, colIndex) => (
                                         <td
+                                            key={colIndex}
                                             className={`px-3 py-3 cursor-pointer w-[208px] text-xs border-r-[1px] border-opacity-50 border-[#B9B7B7] relative ${dynamicClass(
                                                 row.status
                                             )}`}
-                                            key={colIndex}
                                         >
                                             {col.render
                                                 ? col.render(row)

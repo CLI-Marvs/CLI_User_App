@@ -4,7 +4,7 @@ export const transaction = {
     transactionList: async (currentPage, filter = {}) => {
         try {
             const params = { page: currentPage + 1, ...filter };
-
+            
             const response = await apiService.get("transaction-list", {
                 params,
             });

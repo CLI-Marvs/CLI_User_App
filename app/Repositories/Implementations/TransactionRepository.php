@@ -134,10 +134,21 @@ class TransactionRepository
     {
         $startDate = $data['start_date'] ?? null;
         $endDate = $data['end_date'] ?? null;
-
+    
         $query = $this->transactionModel
             ->join('property_masters', 'property_masters.id', '=', 'transaction.id')
-            ->select('transaction.*', 'property_masters.property_name')
+            ->leftJoin('invoices', function($join) {
+                $join->on('invoices.contract_number', '=', 'transaction.reference_number')
+                     ->where('transaction.status', 'Cleared');
+            })
+            ->select(
+                'transaction.*',
+                'property_masters.property_name',
+                'invoices.company_code',
+                'invoices.invoice_number',
+                'invoices.flow_type',
+                'invoices.id as invoice_id'
+            )
             ->orderBy('transaction.created_at', 'desc')
             ->when(!empty($data['status']), fn($q) => $q->where('transaction.status', $data['status']))
             ->when(!empty($data['email']), fn($q) => $q->where('transaction.email', $data['email']))
@@ -149,10 +160,11 @@ class TransactionRepository
             ->when($startDate && $endDate, fn($q) => $q->whereBetween('transaction.transaction_date', [$startDate, $endDate]))
             ->when($startDate && !$endDate, fn($q) => $q->whereDate('transaction.transaction_date', $startDate))
             ->when($endDate && !$startDate, fn($q) => $q->whereDate('transaction.transaction_date', $endDate))
-            ->paginate(20);
-
+            ->paginate(2);
+    
         return $query;
     }
+    
 
     public function retrieveInvoices(array $data)
     {
@@ -161,7 +173,7 @@ class TransactionRepository
             ->when(!empty($data['invoice_number']), fn($q) => $q->where('invoice_number', $data['invoice_number']))
             ->when(!empty($data['customer_name']), fn($q) => $q->whereRaw('customer_name ILIKE ?', ["%{$data['customer_name']}%"]))
             ->when(!empty($data['contract_number']), fn($q) => $q->where('contract_number', $data['contract_number']))
-            ->paginate(20);
+            ->paginate(2);
 
         return $query;
     }
@@ -181,7 +193,7 @@ class TransactionRepository
             ->when($startDate && $endDate, fn($q) => $q->whereBetween('transaction_date', [$startDate, $endDate]))
             ->when($startDate && !$endDate, fn($q) => $q->whereDate('transaction_date', $startDate))
             ->when($endDate && !$startDate, fn($q) => $q->whereDate('transaction_date', $endDate))
-            ->paginate(20);
+            ->paginate(2);
 
         return $query;
     }
