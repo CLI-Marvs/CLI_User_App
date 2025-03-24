@@ -74,39 +74,18 @@ class UnitController extends Controller
     /** 
      * Get existing units for a specific tower phase
      */
-    public function getExistingUnits(int $towerPhaseId, string $excelId)
+    public function getUnits(int $towerPhaseId, string $excelId, int $priceListMasterId)
     {
-        $existingUnits = $this->service->getExistingUnits($towerPhaseId, $excelId);
+        $existingUnitsResponse = $this->service->getUnits($towerPhaseId, $excelId, $priceListMasterId);
 
         return response()->json([
-            'data' => $existingUnits,
+            'data' => $existingUnitsResponse,
         ]);
     }
 
     /**
-     * Retrieve units for a specific tower phase and floor.
-     *
-     * @param Request $request The incoming HTTP request
-     * @return \Illuminate\Http\JsonResponse JSON response containing units or error message
+     * Add new unit from the system/admin page
      */
-    // public function getUnits($selectedFloor, $towerPhaseId, $excelId)
-    // {
-    //     try {
-    //         // Query the database for units matching the specified towerPhaseId and selectedFloor
-    //         $units =  $this->service->getUnits($towerPhaseId, $selectedFloor, $excelId);
-
-    //         return response()->json([
-    //             'data' => $units
-    //         ]);
-    //     } catch (\Exception $e) {
-    //         return response()->json([
-    //             'message' => 'Error getting the units.',
-    //             'error' => $e->getMessage(),
-    //         ], 500);
-    //     }
-    // }
-
-    //Add new unit from the system/admin page
     public function storeUnit(StoreUnitRequest $request)
     {
         try {
@@ -125,7 +104,9 @@ class UnitController extends Controller
         }
     }
 
-    //Save the computed unit pricing data
+    /**
+     * Save the computed unit pricing data
+     */
     public function saveComputedUnitPricingData(UpdateStoreRequest $request)
     {
         try {

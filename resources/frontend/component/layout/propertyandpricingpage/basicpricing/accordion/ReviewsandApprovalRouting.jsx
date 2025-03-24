@@ -41,7 +41,7 @@ const ReviewsandApprovalRouting = ({
         excelId,
         excelIdFromPriceList,
         computedUnitPrices,
-        checkExistingUnits,
+        fetchUnits,
     } = useUnit();
     const [priceVersions, setPriceVersions] = useState([]);
     const [subHeaders, setSubHeaders] = useState([]);
@@ -66,7 +66,7 @@ const ReviewsandApprovalRouting = ({
         resetPricingData,
         showToast,
         fetchData,
-        checkExistingUnits
+        fetchUnits
     );
     const [type, setModalType] = useState(null);
     const [selectedVersion, setSelectedVersion] = useState(null);

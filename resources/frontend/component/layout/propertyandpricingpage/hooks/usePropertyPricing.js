@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { priceListMasterService } from "@/component/servicesApi/apiCalls/propertyPricing/priceListMaster/priceListMasterService";
+import { usePriceListMaster } from "@/context/PropertyPricing/PriceListMasterContext";
 
 export const usePropertyPricing = (
     user,
@@ -10,11 +11,11 @@ export const usePropertyPricing = (
     resetPricingData,
     showToast,
     fetchData,
-    checkExistingUnits
+    fetchUnits
 ) => {
     const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState({});
-
+    const { priceListMasterId } = usePriceListMaster();
     /*
      * Payload object for submission with the provided status.
      * The payload includes employee ID, tower phase ID, price list settings, payment scheme, and the specified status.
@@ -80,9 +81,10 @@ export const usePropertyPricing = (
                         "success"
                     );
 
-                    await checkExistingUnits(
+                    await fetchUnits(
                         priceListData.tower_phase_id,
                         excelId || priceListData?.excelId,
+                        priceListMasterId,
                         true,
                         false
                     );
@@ -125,9 +127,10 @@ export const usePropertyPricing = (
                     );
 
                     resetPricingData();
-                    await checkExistingUnits(
+                    await fetchUnits(
                         priceListData.tower_phase_id,
                         excelId || priceListData?.excelId,
+                        priceListMasterId,
                         true,
                         false
                     );

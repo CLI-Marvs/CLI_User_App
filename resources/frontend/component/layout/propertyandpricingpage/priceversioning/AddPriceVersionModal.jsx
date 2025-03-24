@@ -208,11 +208,11 @@ const AddPriceVersionModal = ({ modalRef, fetchData }) => {
                                 <th className="w-[100px] text-left pl-[10px] pr-10 leading-[18px]">
                                     No. of allowed buyers
                                 </th>
-                                <th className="w-[100px]">Expiry Date</th>
+                                <th className="w-[90px]">Expiry Date</th>
                                 <th className="rounded-tr-[10px] w-[62px]"></th>
                             </tr>
                         </thead>
-                        <div className="shadow-custom5 rounded-[10px] overflow-hidden w-[600px]">
+                        <div className="shadow-custom5 rounded-[10px] overflow-hidden w-[610px]">
                             {formData.length > 0 &&
                                 formData.map((form, index) => (
                                     <tbody className="" key={index}>
@@ -263,7 +263,7 @@ const AddPriceVersionModal = ({ modalRef, fetchData }) => {
                                                     }
                                                 />
                                             </td>
-                                            <td className="px-[10px] mt-4 flex items-center gap-x-2">
+                                            <td className="px-[20px] mt-4 flex items-center gap-x-2">
                                                 <DatePicker
                                                     selected={
                                                         formData.expiry_date !==

@@ -9,30 +9,32 @@ import PremiumChecklistModal from "./PremiumChecklistModal";
 import { useUnit } from "@/context/PropertyPricing/UnitContext";
 import { usePricing } from "@/component/layout/propertyandpricingpage/context/BasicPricingContext";
 import CircularProgress from "@mui/material/CircularProgress";
+import { usePriceListMaster } from "@/context/PropertyPricing/PriceListMasterContext";
 
 const AdditionalPremiumAssignModal = ({ modalRef, priceListData }) => {
     //States
     const [dataFetched, setDataFetched] = useState(false);
     const premiumCheckListModalRef = useRef(null);
     const {
-        checkExistingUnits,
+        fetchUnits,
         excelId,
         excelIdFromPriceList,
         towerPhaseId,
         units,
         isCheckingUnits,
     } = useUnit();
+    const { priceListMasterId } = usePriceListMaster();
     const [formattedUnits, setFormattedUnits] = useState([]);
     const [selectedUnit, setSelectedUnit] = useState({});
     const { pricingData } = usePricing();
 
     //Hooks
-    // Memoize the checkExistingUnits function
-    const memoizedCheckExistingUnits = useCallback(
-        (towerPhaseId, excelId, param1, param2) => {
-            return checkExistingUnits(towerPhaseId, excelId, param1, param2);
+    // Memoize the fetchUnits function
+    const memoizedfetchUnits = useCallback(
+        (towerPhaseId, excelId,priceListMasterId, param1, param2) => {
+            return fetchUnits(towerPhaseId, excelId,priceListMasterId, param1, param2);
         },
-        [] 
+        []
     );
 
     useEffect(() => {
@@ -47,9 +49,10 @@ const AdditionalPremiumAssignModal = ({ modalRef, priceListData }) => {
             // Only fetch if we have both required IDs
             if (newExcelId && newTowerPhaseId) {
                 const fetchData = async () => {
-                    await memoizedCheckExistingUnits(
+                    await memoizedfetchUnits(
                         newTowerPhaseId,
                         newExcelId,
+                        priceListMasterId,
                         false,
                         false
                     );
@@ -63,9 +66,10 @@ const AdditionalPremiumAssignModal = ({ modalRef, priceListData }) => {
         priceListData.data,
         excelId,
         towerPhaseId,
-        memoizedCheckExistingUnits,
+        memoizedfetchUnits,
         excelIdFromPriceList,
         dataFetched,
+        priceListMasterId,
     ]);
 
     // Add this effect to reset the dataFetched flag when excel IDs change

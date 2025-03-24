@@ -40,7 +40,7 @@ export const UnitProvider = ({ children }) => {
                     towerPhaseId,
                     excelId
                 );
-
+              
                 if (response?.data?.data) {
                     setFloors(response.data.data);
                     return response.data.data;
@@ -66,10 +66,11 @@ export const UnitProvider = ({ children }) => {
      * Sets the current towerPhaseId.
      * Handles loading and error states during the API call.
      */
-    const checkExistingUnits = useCallback(
+    const fetchUnits = useCallback(
         async (
             towerPhaseId,
             excelId,
+            priceListMasterId,
             forceFetch = false,
             skipFloorCount = false
         ) => {
@@ -94,11 +95,12 @@ export const UnitProvider = ({ children }) => {
 
             try {
                 setIsCheckingUnits(true);
-                const response = await unitService.getExistingUnits(
+                const response = await unitService.getUnits(
                     towerPhaseId,
-                    excelId
+                    excelId,
+                    priceListMasterId
                 );
-
+                console.log("response", response);
                 const unitsData = response?.data?.data || [];
                 setUnits(unitsData);
                 setLastFetchedExcelId(excelId);
@@ -114,7 +116,7 @@ export const UnitProvider = ({ children }) => {
                 }
             } catch (err) {
                 setError(err);
-                console.error("Error in checkExistingUnits:", err);
+                console.error("Error in fetchUnits:", err);
             } finally {
                 setIsCheckingUnits(false);
             }
@@ -227,7 +229,7 @@ export const UnitProvider = ({ children }) => {
         floors,
         error,
         fetchFloorCount,
-        checkExistingUnits,
+        fetchUnits,
         uploadUnits,
         floorPremiumsAccordionOpen,
         setFloorPremiumsAccordionOpen,

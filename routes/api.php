@@ -167,7 +167,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('units')->group(function () {
         Route::post('/', [UnitController::class, 'store']);
         Route::get('/floors/{towerPhaseId}/{excelId}', [UnitController::class, 'countFloors']);
-        Route::get('/check/{towerPhaseId}/{excelId}', [UnitController::class, 'getExistingUnits']);
+        Route::get('/get/{towerPhaseId}/{excelId}/{priceListMasterId}', [UnitController::class, 'getUnits']);
         // Route::get('/tower/{towerPhaseId}/floor/{selectedFloor}/units/{excelId}', [UnitController::class, 'getUnits']);
         Route::post('/store-unit', [UnitController::class, 'storeUnit']);
         Route::post('/save-computed-pricing-data', [UnitController::class, 'saveComputedUnitPricingData']);

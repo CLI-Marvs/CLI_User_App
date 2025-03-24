@@ -15,6 +15,7 @@ import { usePriceListMaster } from "@/context/PropertyPricing/PriceListMasterCon
 import { useUnit } from "@/context/PropertyPricing/UnitContext";
 import CircularProgress from "@mui/material/CircularProgress";
 import { usePropertyPricing } from "@/component/layout/propertyandpricingpage/hooks/usePropertyPricing";
+import { useProperty } from "@/context/PropertyPricing/PropertyContext";
 import UnitUploadButton from "@/component/layout/propertyandpricingpage/component/UnitUploadButton";
 import generateBigIntId from "@/component/layout/propertyandpricingpage/utils/generateId";
 import {
@@ -51,10 +52,9 @@ const BasicPricing = () => {
     const location = useLocation();
     const { priceListData = {}, action = null } = location.state || {};
     const { pricingData, resetPricingData, setPricingData } = usePricing();
-    const { fetchData, setPropertyMasterId, setPriceListMasterId } =
-        usePriceListMaster();
+    const { fetchData, setPriceListMasterId } = usePriceListMaster();
     const {
-        checkExistingUnits,
+        fetchUnits,
         units,
         excelId,
         excelIdFromPriceList,
@@ -65,6 +65,7 @@ const BasicPricing = () => {
         setFloorPremiumsAccordionOpen,
         setExcelId,
     } = useUnit();
+    const { setPropertyMasterId } = useProperty();
     const [accordionStates, setAccordionStates] = useState({
         priceListSettings: false,
         floorPremium: false,
@@ -80,9 +81,9 @@ const BasicPricing = () => {
         resetPricingData,
         showToast,
         fetchData,
-        checkExistingUnits
+        fetchUnits
     );
- 
+
     //Hooks
     /**
      * Hook to update pricing data based on incoming 'data' prop.

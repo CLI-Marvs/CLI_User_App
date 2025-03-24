@@ -13,7 +13,6 @@ export const defaultFilters = {
 };
 
 export const PriceListMasterProvider = ({ children }) => {
-    const [propertyMasterId, setPropertyMasterId] = useState(null); //TODO: move propertyMasterId t property context
     const [priceListMasterId, setPriceListMasterId] = useState(null);
     const [searchFilters, setSearchFilters] = useState(defaultFilters);
     const {
@@ -46,8 +45,6 @@ export const PriceListMasterProvider = ({ children }) => {
         applySearch,
         refreshPage,
         defaultFilters,
-        propertyMasterId,
-        setPropertyMasterId,
         priceListMasterId,
         setPriceListMasterId,
     };
