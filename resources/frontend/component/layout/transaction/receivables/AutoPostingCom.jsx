@@ -242,17 +242,13 @@ const AutoPostingCom = () => {
                     soapBody
                 );
             }
-
-            if (modalRef.current) {
-                modalRef.current.close();
-            }
-            toast.success("All Data Posted Successfully!");
+            alert("All Data Posted Successfully!");
         } catch (error) {
             console.error(
                 "Error:",
                 error.response ? error.response.data : error.message
             );
-            toast.error("Sometine went wrong. Please refresh the page");
+            alert("Sometine went wrong. Please refresh the page");
         }
     };
 
