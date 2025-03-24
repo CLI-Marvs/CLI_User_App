@@ -228,16 +228,16 @@ const AdditionalPremiumAssignModal = ({ modalRef, priceListData }) => {
                                                                         additional_premium_id
                                                                     )
                                                                 }
-                                                                className="h-[63px] w-[95px]   rounded-[15px] bg-white "
+                                                                className="h-[63px] rounded-[15px] bg-white "
                                                             >
                                                                 <div
-                                                                    className={`h-[63px] w-[95px] p-[6px] rounded-[15px] ${
+                                                                    className={`h-[63px] p-[6px] rounded-[15px] ${
                                                                         isSelected
                                                                             ? "gradient-btn4 "
                                                                             : ""
                                                                     }  `}
                                                                 >
-                                                                    <div className="flex  justify-center items-center bg-white h-full w-full text-custom-solidgreen rounded-[10px]">
+                                                                    <div className="flex  justify-center items-center bg-white h-full min-w-max px-2  text-custom-solidgreen rounded-[10px]">
                                                                         <p className="font-bold">
                                                                             {
                                                                                 unit
