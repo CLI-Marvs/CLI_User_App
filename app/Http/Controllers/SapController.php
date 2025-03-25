@@ -359,37 +359,41 @@ class SapController extends Controller
         } */
     }
 
-
     public function postRecordsFromSap(Request $request)
     {
         try {
             \Log::info('Post Records From Sap Kyla', [$request->all()]);
-            $idRef = $request->input('ID');
-            $invoiceIdRef = $request->input('INVID');
+            
+            $idRef = (int) $request->input('ID');
+            $invoiceIdRef = (int) $request->input('INVID');
+            
             $attachment = $request->input('file'); 
             $fileLink = $this->uploadToFile($attachment);
+            
             $transactionRef = BankTransaction::find($idRef);
             $invoiceRef = Invoices::find($invoiceIdRef);
-
-            $invoiceRef->invoice_status = "Posted";
-            $invoiceRef->save();
-
-            if (!$transactionRef) {
-                \Log::info('transaction not found');
+    
+            if ($invoiceRef) {
+                $invoiceRef->invoice_status = "Posted";
+                $invoiceRef->save();
             }
-
-            $transactionRef->document_number = $request->input('BELNR');
-            $transactionRef->company_code = $request->input('BUKRS');
-            $transactionRef->collection_receipt_link = $fileLink;
-            $transactionRef->status = "Posted";
-            $transactionRef->save();
-
+    
+            if (!$transactionRef) {
+                \Log::info('Transaction not found');
+            } else {
+                $transactionRef->document_number = $request->input('BELNR');
+                $transactionRef->collection_receipt_link = $fileLink;
+                $transactionRef->status = "Posted";
+                $transactionRef->save();
+            }
+    
             return response()->json(['message' => 'Records updated successfully']);
+            
         } catch (\Throwable $e) {
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
         }
     }
-
+    
 
     public function uploadToFile($attachment)
     {
