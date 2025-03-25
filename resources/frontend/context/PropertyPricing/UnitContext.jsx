@@ -40,7 +40,7 @@ export const UnitProvider = ({ children }) => {
                     towerPhaseId,
                     excelId
                 );
-              
+
                 if (response?.data?.data) {
                     setFloors(response.data.data);
                     return response.data.data;
@@ -100,7 +100,7 @@ export const UnitProvider = ({ children }) => {
                     excelId,
                     priceListMasterId
                 );
-              
+
                 const unitsData = response?.data?.data || [];
                 setUnits(unitsData);
                 setLastFetchedExcelId(excelId);
@@ -193,8 +193,7 @@ export const UnitProvider = ({ children }) => {
             try {
                 const payload = {
                     payload: Object.values(data),
-                    excel_id:
-                        excelId  || data[0]?.excel_id,
+                    excel_id: excelId || data[0]?.excel_id,
                     tower_phase_id: towerPhaseId || data[0]?.tower_phase_id,
                     property_masters_id: data[0]?.property_masters_id,
                     price_list_master_id: data[0]?.price_list_master_id,
@@ -216,7 +215,7 @@ export const UnitProvider = ({ children }) => {
                 if (JSON.stringify(prevPrices) !== JSON.stringify(newPrices)) {
                     // Only trigger save if prices actually changed
                     //TODO: uncomment this line to save the computed prices
-                    //  saveComputedUnitPricingData(newPrices);
+                    saveComputedUnitPricingData(newPrices);
                 }
                 return newPrices;
             });
