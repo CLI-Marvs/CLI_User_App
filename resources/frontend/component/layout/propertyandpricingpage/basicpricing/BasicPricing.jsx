@@ -57,10 +57,8 @@ const BasicPricing = () => {
         fetchUnits,
         units,
         excelId,
-     
         lastFetchedExcelId,
         setTowerPhaseId,
-
         updateUnitComputedPrices,
         setFloorPremiumsAccordionOpen,
         setExcelId,
@@ -439,10 +437,6 @@ const BasicPricing = () => {
             ...prev,
             [name]: !prev[name],
         }));
-        // // console.log("name", name);
-        // if (name === "floorPremium") {
-        //     setFloorPremiumsAccordionOpen((prev) => prev);
-        // }
     };
 
     //Handle price list submit

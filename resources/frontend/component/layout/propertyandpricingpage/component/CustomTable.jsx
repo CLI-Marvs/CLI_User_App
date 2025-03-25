@@ -3,7 +3,6 @@ import CustomTableHeader from "@/component/layout/propertyandpricingpage/compone
 import Skeleton from "@/component/Skeletons";
 
 const CustomTable = ({ isLoading, columns, data, renderRow, className }) => {
-
     return (
         <table>
             <CustomTableHeader columns={columns} className={className} />
@@ -16,7 +15,7 @@ const CustomTable = ({ isLoading, columns, data, renderRow, className }) => {
                             <Skeleton height={140} />
                         </td>
                     </tr>
-                ) : data.length > 0 ? (
+                ) : data && data.length > 0 ? (
                     data.map(renderRow)
                 ) : (
                     <tr>

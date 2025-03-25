@@ -22,7 +22,7 @@ const PriceVersions = ({ priceListData, action, isOpen, toggleAccordion }) => {
 
     //Event handler
     //Handle change in the input field for price version
-    const handlePriceVersionInputChange = (event, formIndex) => {
+    const handleInputChange = (event, formIndex) => {
         const { name, value } = event.target;
 
         if (!Array.isArray(pricingData?.priceVersions)) {
@@ -270,7 +270,7 @@ const PriceVersions = ({ priceListData, action, isOpen, toggleAccordion }) => {
                                                                     onChange={(
                                                                         event
                                                                     ) =>
-                                                                        handlePriceVersionInputChange(
+                                                                        handleInputChange(
                                                                             event,
                                                                             index
                                                                         )
@@ -295,7 +295,7 @@ const PriceVersions = ({ priceListData, action, isOpen, toggleAccordion }) => {
                                                                     onChange={(
                                                                         event
                                                                     ) =>
-                                                                        handlePriceVersionInputChange(
+                                                                        handleInputChange(
                                                                             event,
                                                                             index
                                                                         )
@@ -324,7 +324,7 @@ const PriceVersions = ({ priceListData, action, isOpen, toggleAccordion }) => {
                                                                     onChange={(
                                                                         event
                                                                     ) =>
-                                                                        handlePriceVersionInputChange(
+                                                                        handleInputChange(
                                                                             event,
                                                                             index
                                                                         )

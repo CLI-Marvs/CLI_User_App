@@ -302,24 +302,25 @@ const ReviewsandApprovalRouting = ({
                                 )}
 
                                 {/* Expand Table View button */}
-                                {computedUnitPrices.length > 0 && (
-                                    <div className="px-5 text-black">
-                                        <CustomToolTip
-                                            text="Expand Table View"
-                                            position="left"
-                                        >
-                                            <button
-                                                onClick={
-                                                    toggleExpandUnitTableView
-                                                }
-                                                aria-label="ExpandTableView"
-                                                className="flex items-center"
+                                {computedUnitPrices &&
+                                    computedUnitPrices.length > 0 && (
+                                        <div className="px-5 text-black">
+                                            <CustomToolTip
+                                                text="Expand Table View"
+                                                position="left"
                                             >
-                                                <IoIosExpand className="text-[25px]" />
-                                            </button>
-                                        </CustomToolTip>
-                                    </div>
-                                )}
+                                                <button
+                                                    onClick={
+                                                        toggleExpandUnitTableView
+                                                    }
+                                                    aria-label="ExpandTableView"
+                                                    className="flex items-center"
+                                                >
+                                                    <IoIosExpand className="text-[25px]" />
+                                                </button>
+                                            </CustomToolTip>
+                                        </div>
+                                    )}
                             </div>
                         )}
 
