@@ -2,8 +2,14 @@ import React, { createContext, useContext, useState, useCallback } from "react";
 import { priceVersionService } from "@/component/servicesApi/apiCalls/propertyPricing/priceVersion/priceVersionService";
 import usePaginatedFetch from "@/component/layout/propertyandpricingpage/hooks/usePaginatedFetch";
 import { defaultFilters } from "@/context/PropertyPricing/PriceListMasterContext";
+
 const PriceVersionContext = createContext();
 
+const priceVersionFilters = {
+    ...defaultFilters,
+    version: "",
+    effectiveDate: null,
+};
 export const PriceVersionProvider = ({ children }) => {
     // const [isFetchingPriceVersions, setIsFetchingPriceVersions] =
     //     useState(false);
@@ -30,7 +36,7 @@ export const PriceVersionProvider = ({ children }) => {
     //     },
     //     [priceVersion]
     // );
-    const [searchFilters, setSearchFilters] = useState(defaultFilters);
+    const [searchFilters, setSearchFilters] = useState(priceVersionFilters);
     const {
         data,
         isLoading,
@@ -42,7 +48,10 @@ export const PriceVersionProvider = ({ children }) => {
         isFirstLoad,
         applySearch,
         refreshPage,
-    } = usePaginatedFetch(priceVersionService.getPriceVersions, {});
+    } = usePaginatedFetch(
+        priceVersionService.getPriceVersions,
+        priceVersionFilters
+    );
 
     const value = {
         // isFetchingPriceVersions,
@@ -58,6 +67,8 @@ export const PriceVersionProvider = ({ children }) => {
         isFirstLoad,
         applySearch,
         refreshPage,
+        searchFilters,
+        setSearchFilters
     };
     return (
         <PriceVersionContext.Provider value={value}>

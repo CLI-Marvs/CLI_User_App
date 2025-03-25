@@ -6,7 +6,7 @@ use function Ramsey\Uuid\v1;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Services\PriceVersionService;
-
+use Dotenv\Exception\ValidationException;
 use App\Http\Requests\IndexPriceListRequest;
 use App\Http\Requests\StorePriceVersionRequest;
 
@@ -26,7 +26,6 @@ class PriceVersionController extends Controller
     {
         $validatedData = $request->validated();
         $priceVersionResponse = $this->service->index($validatedData);
-
         return response()->json(
             [
                 'data' =>   $priceVersionResponse['data'],
@@ -49,11 +48,16 @@ class PriceVersionController extends Controller
                 'message' => 'Price version created successfully',
                 'data' => $priceVersion,
             ], 201);
-        } catch (\Exception $e) {
+        } catch (ValidationException $e) {
             return response()->json([
                 'error' => 'Validation failed',
                 'messages' => $e->errors(),
             ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'An unexpected error occurred',
+                'message' => $e->getMessage(),
+            ], 500);
         }
     }
 }
