@@ -363,6 +363,7 @@ class SapController extends Controller
     public function postRecordsFromSap(Request $request)
     {
         try {
+            \Log::info('Post Records From Sap Kyla', [$request->all()]);
             $idRef = $request->input('ID');
             $invoiceIdRef = $request->input('INVID');
             $attachment = $request->input('file'); 
