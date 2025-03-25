@@ -62,10 +62,17 @@ const InvoicesCom = () => {
             ),
         },
         {
-            header: "Invoice Link",
+            header: "Invoice",
             accessor: "invoice_link",
             render: (row) => (
                 <InvoicesTableCell type="invoice_link" row={row} />
+            ),
+        },
+        {
+            header: "SOA",
+            accessor: "soa_link",
+            render: (row) => (
+                <InvoicesTableCell type="soa_link" row={row} />
             ),
         },
     ];

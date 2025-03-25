@@ -57,11 +57,21 @@ const InvoicesTableCell = ({ type, row }) => {
                 <div className="flex justify-between w-[139px] montserrat-regular items-center">
                     <div className="flex flex-col">
                         <span className="text-[13px] text-custom-blue underline">
-                            View Invoice
+                            View Sales Invoice
                         </span>
                     </div>
                 </div>
             );
+            case "soa_link":
+                return (
+                    <div className="flex justify-between w-[139px] montserrat-regular items-center">
+                        <div className="flex flex-col">
+                            <span className="text-[13px] text-custom-blue underline">
+                                View SOA
+                            </span>
+                        </div>
+                    </div>
+                );
         default:
             return <span>{row[type]}</span>;
     }
