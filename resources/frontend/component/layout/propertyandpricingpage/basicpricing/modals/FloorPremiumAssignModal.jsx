@@ -162,9 +162,7 @@ const FloorPremiumAssignModal = ({
                             unitsByFloor &&
                             unitsByFloor.length > 0 &&
                             unitsByFloor
-                                // .filter((item) => item.floor === selectedFloor)
                                 .map((item, key) => {
-                                    // Check if this unit's ID is in the excludedUnits for the current floor
                                     const isExcluded =
                                         pricingData?.floorPremiums?.[
                                             selectedFloor

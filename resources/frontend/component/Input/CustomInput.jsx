@@ -12,7 +12,7 @@
  * - `className` (string)   : Custom CSS classes for styling.
  * - `restrictNumbers` (bool): If `true`, allows only numbers and a single decimal point.
  * - `inputRef` (ref)       : Reference for the input element.
- * - `...rest`              : Spreads additional props to the input element.
+ * - `...props`              : Spreads additional props to the input element.
  *
  * Features:
  * - Restricts numeric inputs to only digits and a single decimal point.
@@ -33,10 +33,10 @@ const CustomInput = ({
     restrictNumbers,
     inputRef,
     placeholder,
-    ...rest
+    ...props
 }) => {
     // Handle input to validate against patterns
-    const handleInput = (e) => {
+    const handleInputChange = (e) => {
         let inputValue = e.target.value;
 
         // Apply number restriction if enabled
@@ -66,20 +66,54 @@ const CustomInput = ({
         }
     };
 
-    
-    return (
-        <input
-            name={name}
-            value={value || ""}
-            onChange={handleInput}
-            onKeyDown={handleKeyDown}
-            type={type}
-            className={className}
-            ref={inputRef}
-            placeholder={placeholder}
-            {...rest}
-        />
-    );
+    // return (
+    //     <input
+    //         name={name}
+    //         value={value || ""}
+    //         onChange={handleInputChange}
+    //         onKeyDown={handleKeyDown}
+    //         type={type}
+    //         className={className}
+    //         ref={inputRef}
+    //         placeholder={placeholder}
+    //         {...props}
+    //     />
+    // );
+    // Render different input types
+    const renderInput = () => {
+        switch (type) {
+            case "textarea":
+                return (
+                    <textarea
+                        ref={inputRef}
+                        name={name}
+                        value={value}
+                        onChange={handleInputChange}
+                        placeholder={placeholder}
+                        rows={props.rows}
+                        maxLength={props.maxLength}
+                        className={className}
+                        {...props}
+                    />
+                );
+            default:
+                return (
+                    <input
+                        name={name}
+                        value={value || ""}
+                        onChange={handleInputChange}
+                        onKeyDown={handleKeyDown}
+                        type={type}
+                        className={className}
+                        ref={inputRef}
+                        placeholder={placeholder}
+                        {...props}
+                    />
+                );
+        }
+    };
+
+    return renderInput();
 };
 
 export default CustomInput;

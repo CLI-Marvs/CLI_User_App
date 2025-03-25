@@ -48,9 +48,20 @@ class StorePropertyMasterRequest extends FormRequest
             'required',
             'regex:/^(?=.*[a-zA-Z])[\pL\pN\s\-\.\']+$/u',
             'max:255',
-            'google_map_link' => 'nullable|string',
             'status' => 'nullable|string|max:255',
             'emp_id' => 'required|integer',
+            'google_map_link' => ['nullable', 'string', function ($attribute, $value, $fail) {
+                // Reject purely numeric values
+                if (is_numeric($value) || preg_match('/^\d+$/', $value)) {
+                    return $fail('Invalid Google Map link. Numeric values are not allowed.');
+                }
+
+                // Ensure it's a valid Google Maps link
+                if (!preg_match('/(google\.[a-z.]+\/maps)/', $value)) {
+                    return $fail('Invalid Google Map link. Must be a Google Maps URL.');
+                }
+            }],
+
         ];
     }
 }

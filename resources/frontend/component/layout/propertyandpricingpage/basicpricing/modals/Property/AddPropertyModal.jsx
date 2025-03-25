@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { IoMdArrowDropdown } from "react-icons/io";
 import isButtonDisabled from "@/util/isFormButtonDisabled";
 import { useNavigate } from "react-router-dom";
@@ -10,6 +10,7 @@ import { usePriceListMaster } from "@/context/PropertyPricing/PriceListMasterCon
 import { useProperty } from "@/context/PropertyPricing/PropertyContext";
 import { useUnit } from "@/context/PropertyPricing/UnitContext";
 import { toLowerCaseText } from "@/util/formatToLowerCase";
+import CustomInput from "@/component/Input/CustomInput";
 
 const formDataState = {
     propertyName: "",
@@ -89,7 +90,9 @@ const AddPropertyModal = ({ propertyModalRef, fetchData }) => {
                 });
             }
         } catch (error) {
-            console.log("Error saving property master data:", error);
+            if (error.response.status === 422) {
+                showToast(error.response.data.message, "error");
+            }
         } finally {
             setIsLoading(false);
         }
@@ -189,13 +192,11 @@ const AddPropertyModal = ({ propertyModalRef, fetchData }) => {
                             <span className="text-custom-gray81 bg-custombg3 flex w-3/4 pl-3 py-1 montserrat-semibold  text-sm">
                                 Tower/Phase
                             </span>
-                            <input
+                            <CustomInput
                                 name="towerPhase"
-                                type="string"
+                                value={formData.towerPhase || ""}
                                 className="w-full px-4 focus:outline-none"
-                                placeholder=""
                                 onChange={handleInputChange}
-                                value={formData.towerPhase}
                             />
                         </div>
 
@@ -212,15 +213,15 @@ const AddPropertyModal = ({ propertyModalRef, fetchData }) => {
                                 </span>
                             </div>
                             <div className="flex gap-3 ">
-                                <textarea
+                                <CustomInput
+                                    type="textarea"
                                     id="tower_description"
                                     name="tower_description"
-                                    placeholder=""
-                                    value={formData.tower_description}
-                                    rows="4"
+                                    value={formData.tower_description || ""}
+                                    className="rounded-b-[5px] border-t w-full pl-2 outline-none"
                                     onChange={handleInputChange}
+                                    rows="4"
                                     maxLength={350}
-                                    className={`rounded-b-[5px] border-t w-full pl-2 outline-none`}
                                 />
                             </div>
                         </div>
@@ -234,13 +235,12 @@ const AddPropertyModal = ({ propertyModalRef, fetchData }) => {
                             <span className="text-custom-gray81 bg-custombg3 flex w-3/4 pl-3 py-1 montserrat-semibold  text-sm">
                                 Street/Barangay
                             </span>
-                            <input
-                                name="barangay"
+                            <CustomInput
                                 type="text"
-                                onChange={handleInputChange}
-                                value={formData.barangay}
+                                name="barangay"
+                                value={formData.barangay || ""}
                                 className="w-full px-4 focus:outline-none"
-                                placeholder=""
+                                onChange={handleInputChange}
                             />
                         </div>
 
@@ -249,13 +249,12 @@ const AddPropertyModal = ({ propertyModalRef, fetchData }) => {
                             <span className="text-custom-gray81 bg-custombg3 flex w-3/4 pl-3 py-1 montserrat-semibold text-sm">
                                 City
                             </span>
-                            <input
-                                name="city"
+                            <CustomInput
                                 type="text"
-                                onChange={handleInputChange}
-                                value={formData.city}
+                                name="city"
+                                value={formData.city || ""}
                                 className="w-full px-4 focus:outline-none"
-                                placeholder=""
+                                onChange={handleInputChange}
                             />
                         </div>
 
@@ -264,13 +263,12 @@ const AddPropertyModal = ({ propertyModalRef, fetchData }) => {
                             <span className="text-custom-gray81 bg-custombg3 flex w-3/4 pl-3 py-1 montserrat-semibold  text-sm">
                                 Province
                             </span>
-                            <input
-                                name="province"
+                            <CustomInput
                                 type="text"
-                                onChange={handleInputChange}
-                                value={formData.province}
+                                name="province"
+                                value={formData.province || ""}
                                 className="w-full px-4 focus:outline-none"
-                                placeholder=""
+                                onChange={handleInputChange}
                             />
                         </div>
 
@@ -279,20 +277,19 @@ const AddPropertyModal = ({ propertyModalRef, fetchData }) => {
                             <span className="text-custom-gray81 bg-custombg3 flex w-3/4 pl-3 py-1 montserrat-semibold  text-sm">
                                 Country
                             </span>
-                            <input
-                                name="country"
+                            <CustomInput
                                 type="text"
-                                onChange={handleInputChange}
-                                value={formData.country}
+                                name="country"
+                                value={formData.country || ""}
                                 className="w-full px-4 focus:outline-none"
-                                placeholder=""
+                                onChange={handleInputChange}
                             />
                         </div>
 
                         {/* Google Map Link */}
                         <div className="rounded-[5px] border-custom-gray81 border bg-custombg3">
                             <div className="flex items-center justify-between">
-                                <p className="text-custom-gray81 text-sm bg-custombg3 pl-3  montserrat-semibold flex-grow mobile:text-xs mobile:w-[170px]">
+                                <p className="text-custom-gray81 text-sm bg-custombg3 pl-3  montserrat-semibold flex-grow mobile:text-xs mobile:w-[170px] py-1">
                                     Google Map Link
                                 </p>
                                 {/* <span className="bg-white text-sm2 text-gray-400 font-normal py-3 border-l   pl-2 pr-12 mobile:pr-1 mobile:text-xs ml-auto rounded-tr-[4px]">
@@ -302,15 +299,14 @@ const AddPropertyModal = ({ propertyModalRef, fetchData }) => {
                                 </span> */}
                             </div>
                             <div className="flex gap-3 ">
-                                <textarea
+                                <CustomInput
+                                    type="textarea"
                                     id="google_map_link"
-                                    value={formData.google_map_link}
                                     name="google_map_link"
-                                    placeholder=""
-                                    onChange={handleInputChange}
-                                    // maxLength={350}
-                                    rows="4"
+                                    value={formData.google_map_link || ""}
                                     className={` rounded-b-[5px] border-t w-full pl-2 outline-none`}
+                                    onChange={handleInputChange}
+                                    rows="4"
                                 />
                             </div>
                         </div>

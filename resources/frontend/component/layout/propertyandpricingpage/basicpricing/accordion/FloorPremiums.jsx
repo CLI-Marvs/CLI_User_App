@@ -261,7 +261,7 @@ const FloorPremiums = ({ isOpen, toggleAccordion, priceListData }) => {
                                     <div>
                                         <button
                                             className="w-[60px] h-[31px] rounded-[7px] gradient-btn2 p-[4px] text-custom-solidgreen hover:shadow-custom4 text-sm"
-                                            onClick={handleAddNewFloor} // Move onClick to the button tag
+                                            onClick={handleAddNewFloor}  
                                         >
                                             <div className="flex justify-center items-center bg-white montserrat-bold h-full w-full rounded-[4px] p-[4px]">
                                                 ADD

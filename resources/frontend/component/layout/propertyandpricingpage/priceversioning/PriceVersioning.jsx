@@ -85,7 +85,8 @@ const PriceVersioning = () => {
                     Add Price Version
                 </button>
             </div>
-            <div className="relative flex justify-start gap-3 mt-[20px]">
+            {/* TODO: to make functionality on this */}
+            {/* <div className="relative flex justify-start gap-3 mt-[20px]">
                 <div className="relative w-[582px]">
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -204,7 +205,7 @@ const PriceVersioning = () => {
                         </div>
                     </div>
                 )}
-            </div>
+            </div> */}
             <div className="mt-3 overflow-y-hidden">
                 <CustomTable
                     className="flex gap-4 items-center h-[49px] montserrat-semibold text-sm text-[#A5A5A5] bg-white rounded-[10px] mb-4 -mx-1 px-4"
