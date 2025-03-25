@@ -25,6 +25,6 @@ class MatchTableRecords extends Command
      */
     public function handle()
     {
-        info('This is a scheduled command');
+        
     }
 }

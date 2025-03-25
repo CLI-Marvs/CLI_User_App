@@ -169,7 +169,7 @@ const AutoPostingCom = () => {
     const handleSubmitSap = async () => {
         const newDataObject = postingList.map((item) => {
             return {
-                ID: item.id,
+                ID: item.transaction_id,
                 BUKRS: item.company_code,
                 RECNNR: item.reference_number,
                 VBEWA: item.flow_type,

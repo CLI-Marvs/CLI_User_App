@@ -141,7 +141,7 @@ class TransactionRepository
                 $join->on('invoices.contract_number', '=', 'transaction.reference_number')
                      ->where('transaction.status', 'Cleared');
             })
-            ->select(
+        ->select(
                 'transaction.*',
                 'property_masters.property_name',
                 'invoices.company_code',
