@@ -68,13 +68,13 @@ const PricingMasterList = () => {
 
     //Event handler
     //Handle search filter input change
-    const onInputChange = (e) => {
+    const handleInputChange = (e) => {
         const { name, value } = e.target;
         setSearchFilters((prevFilters) => ({
             ...prevFilters,
             [name]: value,
         }));
-    };
+    }; 
 
     //Handle search filter date change
     const handleDateChange = (date) => {
@@ -218,7 +218,7 @@ const PricingMasterList = () => {
                                 name="property"
                                 value={searchFilters.property || ""}
                                 className="w-full  border-b-1 outline-none ml-2"
-                                onChange={onInputChange}
+                                onChange={handleInputChange}
                             />
                         </div>
                         <div className="flex">
@@ -231,7 +231,7 @@ const PricingMasterList = () => {
                                 name="paymentScheme"
                                 value={searchFilters.paymentScheme || ""}
                                 className="w-full  border-b-1 outline-none ml-2"
-                                onChange={onInputChange}
+                                onChange={handleInputChange}
                             />
                         </div>
 
@@ -265,7 +265,7 @@ const PricingMasterList = () => {
                                 className="w-full border-b-1 outline-none px-[5px]"
                                 name="status"
                                 value={searchFilters.status || ""}
-                                onChange={onInputChange}
+                                onChange={handleInputChange}
                             >
                                 <option value="">Select Status</option>
                                 <option value="Draft">Draft</option>
