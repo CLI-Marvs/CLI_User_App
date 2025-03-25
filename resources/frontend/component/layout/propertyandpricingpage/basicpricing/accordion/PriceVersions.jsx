@@ -140,7 +140,7 @@ const PriceVersions = ({ priceListData, action, isOpen, toggleAccordion }) => {
     };
 
     //Handle date change
-    const onDateChange = (date, formIndex) => {
+    const w = (date, formIndex) => {
         setPricingData((prevState) => {
             const updatedPriceVersions = prevState.priceVersions.map(
                 (item, i) =>
