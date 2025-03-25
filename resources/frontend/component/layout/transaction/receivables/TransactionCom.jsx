@@ -21,7 +21,7 @@ const TransactionCom = () => {
             ),
         },
         {
-            header: "Transaction",
+            header: "Transactions",
             accessor: "transaction",
             render: (row) => (
                 <TransactionTableCell type="transaction" row={row} />
@@ -80,7 +80,7 @@ const TransactionCom = () => {
     );
 
     const fields = [
-        { name: "customer_name", label: "Name" },
+        { name: "customer_name", label: "Customer Name" },
         { name: "email", label: "Email" },
         {
             name: "destination_bank",

@@ -14,7 +14,9 @@ const BankTableCell = ({ type, row }) => {
             );
         case "transaction":
             return (
-                <div className="flex justify-between w-[608px]">
+                <div className="flex justify-between w-[600px]">
+                    {" "}
+                    {/* Reduced width by 8px */}
                     <div className="flex flex-col flex-1">
                         <div className="flex gap-2">
                             <span className="monterrat-regular text-[14px]">
@@ -33,12 +35,10 @@ const BankTableCell = ({ type, row }) => {
                             </span>
                         </div>
                     </div>
-
-                    {/* Separator */}
-                    <div className="flex items-center justify-center px-4">
-                        <span className="text-gray-500 text-[16px]">|</span>
+                    {/* Centered Separator */}
+                    <div className="flex items-center justify-center w-[20px]">
+                        <span className="text-gray-500 text-[24px]">|</span>
                     </div>
-
                     <div className="flex flex-col flex-1">
                         <div className="flex gap-2">
                             <span className="monterrat-regular text-[14px]">
@@ -50,7 +50,7 @@ const BankTableCell = ({ type, row }) => {
                         </div>
                         <div className="flex gap-2">
                             <span className="monterrat-regular text-[14px]">
-                                Transation Code:
+                                Transaction Code:
                             </span>
                             <span className="montserrat-semibold text-[13px] break-all whitespace-normal overflow-hidden">
                                 {row.transaction_code}
@@ -63,26 +63,25 @@ const BankTableCell = ({ type, row }) => {
         case "details":
             return (
                 <div className="flex justify-between w-[400px]">
-                <div className="flex flex-col">
-                    <div className="flex gap-2">
-                        <span className="monterrat-regular text-[14px]">
-                            Reference Number:
-                        </span>
-                        <span className="montserrat-semibold text-[13px] break-all whitespace-normal overflow-hidden">
-                            {row.reference_number}
-                        </span>
-                    </div>
-                    <div className="flex gap-2">
-                        <span className="monterrat-regular text-[14px]">
-                            Transaction Description:
-                        </span>
-                        <span className="montserrat-semibold text-[13px] break-all whitespace-normal overflow-hidden">
-                            {row.transaction_description}
-                        </span>
+                    <div className="flex flex-col">
+                        <div className="flex gap-2">
+                            <span className="monterrat-regular text-[14px]">
+                                Reference Number:
+                            </span>
+                            <span className="montserrat-semibold text-[13px] break-all whitespace-normal overflow-hidden">
+                                {row.reference_number}
+                            </span>
+                        </div>
+                        <div className="flex gap-2">
+                            <span className="monterrat-regular text-[14px]">
+                                Transaction Description:
+                            </span>
+                            <span className="montserrat-semibold text-[13px] break-all whitespace-normal overflow-hidden">
+                                {row.transaction_description}
+                            </span>
+                        </div>
                     </div>
                 </div>
-               
-            </div>
             );
         case "amount":
             return (
@@ -109,7 +108,9 @@ const BankTableCell = ({ type, row }) => {
             return (
                 <div className="flex items-center justify-center">
                     <div className="w-full max-w-[81px] h-[25px] rounded-[10px] bg-custom-solidgreen flex items-center justify-center">
-                        <span className="text-white">{row.status_of_posting}</span>
+                        <span className="text-white">
+                            {row.status_of_posting}
+                        </span>
                     </div>
                 </div>
             );

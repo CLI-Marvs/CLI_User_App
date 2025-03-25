@@ -160,7 +160,7 @@ class TransactionRepository
             ->when($startDate && $endDate, fn($q) => $q->whereBetween('transaction.transaction_date', [$startDate, $endDate]))
             ->when($startDate && !$endDate, fn($q) => $q->whereDate('transaction.transaction_date', $startDate))
             ->when($endDate && !$startDate, fn($q) => $q->whereDate('transaction.transaction_date', $endDate))
-            ->paginate(2);
+            ->paginate(20);
     
         return $query;
     }
@@ -173,7 +173,7 @@ class TransactionRepository
             ->when(!empty($data['invoice_number']), fn($q) => $q->where('invoice_number', $data['invoice_number']))
             ->when(!empty($data['customer_name']), fn($q) => $q->whereRaw('customer_name ILIKE ?', ["%{$data['customer_name']}%"]))
             ->when(!empty($data['contract_number']), fn($q) => $q->where('contract_number', $data['contract_number']))
-            ->paginate(2);
+            ->paginate(20);
 
         return $query;
     }
@@ -193,7 +193,7 @@ class TransactionRepository
             ->when($startDate && $endDate, fn($q) => $q->whereBetween('transaction_date', [$startDate, $endDate]))
             ->when($startDate && !$endDate, fn($q) => $q->whereDate('transaction_date', $startDate))
             ->when($endDate && !$startDate, fn($q) => $q->whereDate('transaction_date', $endDate))
-            ->paginate(2);
+            ->paginate(20);
 
         return $query;
     }
