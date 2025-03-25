@@ -215,7 +215,7 @@ export const UnitProvider = ({ children }) => {
                 if (JSON.stringify(prevPrices) !== JSON.stringify(newPrices)) {
                     // Only trigger save if prices actually changed
                     //TODO: uncomment this line to save the computed prices
-                    saveComputedUnitPricingData(newPrices);
+                    //saveComputedUnitPricingData(newPrices);
                 }
                 return newPrices;
             });

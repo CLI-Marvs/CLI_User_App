@@ -27,9 +27,9 @@ class PropertyMasterController extends Controller
      */
     public function store(StorePropertyMasterRequest $request)
     {
-
         try {
-            $property = $this->service->store($request->validated());
+            $validatedData = $request->validated();
+            $property = $this->service->store($validatedData);
 
             return response()->json($property, 201);
         } catch (ValidationException $e) {
