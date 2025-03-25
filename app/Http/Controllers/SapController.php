@@ -51,10 +51,9 @@ class SapController extends Controller
                 'timeout' => 14400,
             ]);
         } catch (\Exception $e) {
-            // Log error and response for further analysis
             \Log::error('SAP Request Error: ', [
                 'error' => $e->getMessage(),
-                'response' => $e->getResponse() ? $e->getResponse()->getBody()->getContents() : 'No response'
+               /*  'response' => $e->getResponse() ? $e->getResponse()->getBody()->getContents() : 'No response' */
             ]);
             return response()->json(['error' => 'SAP Server Error'], 500);
         }

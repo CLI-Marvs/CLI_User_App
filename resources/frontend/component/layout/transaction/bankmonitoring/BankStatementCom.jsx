@@ -112,49 +112,6 @@ const BankStatementCom = () => {
         setSearchValues({});
     };
 
-    /*  const handleSubmitSap = async () => {
-        try {
-            for (const item of matchesData) {
-                let soapBody = `
-                    <soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:urn="urn:sap-com:document:sap:soap:functions:mc-style">
-                    <soap:Header/>
-                    <soap:Body>
-                       <urn:ZdataWarehousePosted>
-                          <LtZcol>
-                             <item>
-                                <Id>${item.ID}</Id>
-                                <Bukrs>${item.BUKRS}</Bukrs>
-                                <Recnnr>${item.RECNNR}</Recnnr>
-                                <Vbewa>${item.VBEWA}</Vbewa>
-                                <Belnr>${item.BELNR}</Belnr>
-                                <Amt>${item.AMT}</Amt>
-                                <Payd>${item.PAYD}</Payd>
-                                <InvId>${item.INVID}</InvId>
-                             </item>
-                          </LtZcol>
-                       </urn:ZdataWarehousePosted>
-                    </soap:Body>
-                    </soap:Envelope>`;
-
-                const response = await apiServiceSap.post(
-                    "post-data-sap",
-                    soapBody
-                );
-            }
-
-            if (modalRef.current) {
-                modalRef.current.close();
-            }
-            toast.success("All Data Posted Successfully!");
-        } catch (error) {
-            console.error(
-                "Error:",
-                error.response ? error.response.data : error.message
-            );
-            toast.error("Sometine went wrong. Please refresh the page");
-        }
-    }; */
-
     return (
         <>
             <div className="overflow-y-hidden px-3">

@@ -26,7 +26,6 @@ const usePagination = (fetchData, contextState, contextSetter) => {
         contextSetter((prev) => ({
             ...prev,
             currentPage: data.selected,
-            isPage: true,
         }));
     };
 

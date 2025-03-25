@@ -214,6 +214,13 @@ const Navbar = () => {
                 breadcrumbLabel = "Bank Statements";
             }
 
+            if (value.toLowerCase() === "receivables") {
+                breadcrumbLabel = "Receivables/Incoming";
+            }
+            if (value.toLowerCase() === "posting") {
+                breadcrumbLabel = "Auto Posting";
+            }
+
             if (value.toLowerCase() === "thread") {
                 breadcrumbLabel = "Feedback";
                 return (

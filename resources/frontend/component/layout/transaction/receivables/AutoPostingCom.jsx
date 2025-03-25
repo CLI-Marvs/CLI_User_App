@@ -5,9 +5,14 @@ import ReactPaginate from "react-paginate";
 import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md";
 import { transaction } from "@/component/servicesApi/apiCalls/transactions";
 import TransactionSearchBar from "@/component/layout/transaction/TransactionSearchBar";
+import Skeletons from "@/component/Skeletons";
+import apiServiceSap from "@/component/servicesApi/apiServiceSap";
+import { useStateContext } from "@/context/contextprovider";
+import { toLowerCaseText } from "@/util/formatToLowerCase";
 
 const AutoPostingCom = () => {
     const statuses = ["Cleared", "Posted", "Floating"];
+
     const labelStatuses = [
         {
             statusRef: "Cleared",
@@ -23,46 +28,6 @@ const AutoPostingCom = () => {
         },
     ];
 
-    const fields = [
-        { name: "transaction_customer_name", label: "Name" },
-        { name: "transaction_email", label: "Email" },
-        { 
-            name: "transaction_bank", 
-            label: "Bank",
-            type: "select",
-            options: [
-                { label: "Select Bank", value: "" }, 
-                { label: "BDO", value: "bdo" },
-                { label: "BPI", value: "bpi" },
-                { label: "LANDBANK", value: "landbank" },
-            ]
-        }, 
-        { 
-            name: "project_name", 
-            label: "Project Name",
-            type: "select",
-            options: [
-                { label: "Select Project", value: "" }, 
-                { label: "Casa Mira", value: "Casa Mira" },
-                { label: "38th Park", value: "38th Park" },
-            ]
-        }, 
-        { name: "transaction_invoice_number", label: "Invoice Number" },
-        { name: "transaction_document_number", label: "Document Number" },
-        { name: "transaction_reference_number", label: "Reference Number" },
-        { 
-            name: "transaction_status", 
-            label: "Status",
-            type: "select",
-            options: [
-                { label: "Select Status", value: "" },
-                { label: "Not Posted", value: "not_posted" },
-                { label: "Posted", value: "posted" },
-                { label: "Floating", value: "floating" },
-            ]
-        } 
-    ];
-
     const dynamicClass = (item) =>
         item === "Floating"
             ? "bg-[#FFFCD9]"
@@ -70,6 +35,7 @@ const AutoPostingCom = () => {
             ? "bg-[#EAF1FA]"
             : "bg-[#ECFCE6]";
 
+    const { propertyNamesList } = useStateContext();
     const {
         postingList,
         setPostingList,
@@ -83,15 +49,45 @@ const AutoPostingCom = () => {
     const [selectedRows, setSelectedRows] = useState([]);
     const [statusToPost, setStatusPost] = useState([]);
     const [isSelectedAll, setIsSelectedAll] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [searchValues, setSearchValues] = useState({});
+    const [dataSearch, setDataSearch] = useState({});
+    const skeletonRows = 5;
 
-    const getPostingList = async () => {
-        const filter = activeItemTransaction ? { status: activeItemTransaction } : {};
+    const pageHandler = async (data = {}) => {
+        if (data.response.length === 0 && data.currentPage > 1) {
+            const newPage = data.currentPage - 1;
+            await setCurrentPagePosting(newPage);
+            return;
+        }
+        if (data.response.length === 0 && data.currentPage === 1) {
+            await setCurrentPagePosting(0);
+            return;
+        }
+    };
+
+    const getPostingList = async (isUpdate = false) => {
+        if (isUpdate) {
+            setLoading(true);
+        }
+        const filter = activeItemTransaction
+            ? { ...dataSearch, status: activeItemTransaction }
+            : {};
+
         const response = await transaction.transactionList(
             currentPagePosting,
             filter
         );
+
+        if (isUpdate) {
+            await pageHandler({
+                response: response.data,
+                currentPage: currentPagePosting,
+            });
+        }
         setPostingList(response.data);
         setTotalPagePosting(response.last_page);
+        setLoading(false);
     };
 
     const handleActiveItem = (item) => {
@@ -100,11 +96,11 @@ const AutoPostingCom = () => {
         setSelectedRows([]);
         setStatusPost([]);
         setIsSelectedAll(false);
+        setDataSearch({});
     };
 
     const handleUpdateItems = async (item) => {
         let payload = [];
-
         const statusRef = labelStatuses
             .filter((ref) => ref.name === item)
             .map((item) => item.statusRef);
@@ -117,9 +113,14 @@ const AutoPostingCom = () => {
 
             payload = updatedRows;
         }
-        const response = await transaction.transactionUpdate(payload);
+
+        if (item === "For Posting") {
+            await handleSubmitSap();
+        }
+        await transaction.transactionUpdate(payload);
+        await getPostingList(true);
         setIsSelectedAll(false);
-        getPostingList();
+        setStatusPost([]);
     };
 
     const handlePageClick = (data) => {
@@ -128,7 +129,7 @@ const AutoPostingCom = () => {
 
     useEffect(() => {
         getPostingList();
-    }, [currentPagePosting, activeItemTransaction]);
+    }, [currentPagePosting, activeItemTransaction, dataSearch]);
 
     const handleCheckboxChange = (item) => {
         setSelectedRows((prev) =>
@@ -165,33 +166,145 @@ const AutoPostingCom = () => {
         }
     };
 
+    const handleSubmitSap = async () => {
+        const newDataObject = postingList.map((item) => {
+            return {
+                ID: item.id,
+                BUKRS: item.company_code,
+                RECNNR: item.reference_number,
+                VBEWA: item.flow_type,
+                BELNR: item.invoice_number?.toString() || "",
+                AMT: item.amount,
+                PAYD: "Cash",
+                INVID: item.invoice_id,
+            };
+        });
+        try {
+            for (const item of newDataObject) {
+                let soapBody = `
+                    <soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:urn="urn:sap-com:document:sap:soap:functions:mc-style">
+                    <soap:Header/>
+                    <soap:Body>
+                       <urn:ZdataWarehousePosted>
+                          <LtZcol>
+                             <item>
+                                <Id>${item.ID}</Id>
+                                <Bukrs>${item.BUKRS}</Bukrs>
+                                <Recnnr>${item.RECNNR}</Recnnr>
+                                <Vbewa>${item.VBEWA}</Vbewa>
+                                <Belnr>${item.BELNR}</Belnr>
+                                <Amt>${item.AMT}</Amt>
+                                <Payd>${item.PAYD}</Payd>
+                                <InvId>${item.INVID}</InvId>
+                             </item>
+                          </LtZcol>
+                       </urn:ZdataWarehousePosted>
+                    </soap:Body>
+                    </soap:Envelope>`;
+
+                const response = await apiServiceSap.post(
+                    "post-data-sap",
+                    soapBody
+                );
+            }
+            alert("All Data Posted Successfully!");
+        } catch (error) {
+            console.error(
+                "Error:",
+                error.response ? error.response.data : error.message
+            );
+            alert("Sometine went wrong. Please refresh the page");
+        }
+    };
+
+    const handleSearchValue = (e) => {
+        const { name, value } = e.target;
+        setSearchValues((prev) => ({
+            ...prev,
+            [name]: value,
+        }));
+    };
+
+    const onSubmit = () => {
+        setDataSearch(searchValues);
+        setSearchValues({});
+    };
+
     const columns = [
         {
             header: (
                 <>
-                    <div className="flex gap-5 items-center">
+                    <div className="flex gap-5 items-center relative">
                         <input
+                            id="select-all"
                             type="checkbox"
-                            className="w-[15px] h-[15px]"
+                            className="opacity-0 absolute w-6 h-6 peer"
                             checked={isSelectedAll}
                             onChange={(e) => handleSelectAll(e)}
                         />
+                        <label
+                            htmlFor="select-all"
+                            className={`w-6 h-6 border-[#FFFFFF] peer-checked:bg-[#FFFFFF] rounded-sm peer-checked:text-[#348017] cursor-pointer flex items-center justify-center ${
+                                isSelectedAll ? "" : "border-2"
+                            }`}
+                        >
+                            {isSelectedAll && (
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    className="w-4 h-4"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="3"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                >
+                                    <path d="M5 12l4 4L19 7" />
+                                </svg>
+                            )}
+                        </label>
                         <span>Select All</span>
                     </div>
                 </>
             ),
             accessor: "checkbox",
-            render: (row) => (
-                <div className="w-[100px]">
-                    <input
-                        type="checkbox"
-                        checked={selectedRows.some(
-                            (selected) => selected.id === row.transaction_id
-                        )}
-                        onChange={() => handleCheckboxChange(row)}
-                    />
-                </div>
-            ),
+            render: (row) => {
+                const isChecked = selectedRows.some(
+                    (selected) => selected.id === row.transaction_id
+                );
+                return (
+                    <div className="w-[100px]">
+                        <input
+                            id={`checkbox-${row.transaction_id}`}
+                            type="checkbox"
+                            checked={isChecked}
+                            onChange={() => handleCheckboxChange(row)}
+                            className="hidden peer"
+                        />
+                        <label
+                            htmlFor={`checkbox-${row.transaction_id}`}
+                            className={`w-6 h-6 border-[#348017] peer-checked:bg-[#348017] rounded-sm peer-checked:text-white cursor-pointer flex items-center justify-center ${
+                                isChecked ? "" : "border-2"
+                            }`}
+                        >
+                            {isChecked && (
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    className="w-4 h-4"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="3"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                >
+                                    <path d="M5 12l4 4L19 7" />
+                                </svg>
+                            )}
+                        </label>
+                    </div>
+                );
+            },
         },
         {
             header: "Transaction",
@@ -237,10 +350,58 @@ const AutoPostingCom = () => {
         },
     ];
 
+    const fields = [
+        { name: "customer_name", label: "Customer Name" },
+        { name: "email", label: "Email" },
+        {
+            name: "destination_bank",
+            label: "Bank",
+            type: "select",
+            options: [
+                { label: "Select Bank", value: "" },
+                { label: "BDO", value: "BDO" },
+                { label: "BPI", value: "BPI" },
+                { label: "LANDBANK", value: "LANDBANK" },
+            ],
+        },
+        {
+            name: "property_name",
+            label: "Project Name",
+            type: "select",
+            options: [
+                { label: "Select Project", value: "" },
+                ...propertyNamesList.map((item) => {
+                    return { label: toLowerCaseText(item), value: item };
+                }),
+            ],
+        },
+        { name: "invoice_number", label: "Invoice Number" },
+        { name: "document_number", label: "Document Number" },
+        { name: "reference_number", label: "Reference Number" },
+        {
+            name: "status",
+            label: "Status",
+            type: "select",
+            options: [
+                { label: "Select Status", value: "" },
+                { label: "Cleared", value: "Cleared" },
+                { label: "Posted", value: "Posted" },
+                { label: "Floating", value: "Floating" },
+            ],
+        },
+        { name: "date_range", type: "date_range", label: "Date" },
+    ];
+
     return (
         <div className="overflow-y-hidden px-3 flex flex-col space-y-1">
             <div className="px-2">
-                <TransactionSearchBar fields={fields}/>
+                <TransactionSearchBar
+                    fields={fields}
+                    searchValues={searchValues}
+                    setSearchValues={setSearchValues}
+                    onChangeSearch={handleSearchValue}
+                    onSubmit={onSubmit}
+                />
             </div>
             <div className="flex justify-between px-2">
                 <div className="flex gap-[21px]">
@@ -297,7 +458,25 @@ const AutoPostingCom = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {postingList && postingList.length > 0 ? (
+                        {loading ? (
+                            <>
+                                {[...Array(skeletonRows)].map((_, rowIndex) => (
+                                    <tr
+                                        key={rowIndex}
+                                        className="border-r-[1px] border-opacity-10 border-[#B9B7B7] shadow-custom11"
+                                    >
+                                        {columns.map((_, colIndex) => (
+                                            <td
+                                                key={colIndex}
+                                                className="px-3 py-3 w-[208px] text-xs border-r-[1px] border-opacity-50 border-[#B9B7B7]"
+                                            >
+                                                <Skeletons height={20} />
+                                            </td>
+                                        ))}
+                                    </tr>
+                                ))}
+                            </>
+                        ) : postingList && postingList.length > 0 ? (
                             postingList.map((row, rowIndex) => (
                                 <tr
                                     key={rowIndex}
@@ -305,10 +484,10 @@ const AutoPostingCom = () => {
                                 >
                                     {columns.map((col, colIndex) => (
                                         <td
+                                            key={colIndex}
                                             className={`px-3 py-3 cursor-pointer w-[208px] text-xs border-r-[1px] border-opacity-50 border-[#B9B7B7] relative ${dynamicClass(
                                                 row.status
                                             )}`}
-                                            key={colIndex}
                                         >
                                             {col.render
                                                 ? col.render(row)
