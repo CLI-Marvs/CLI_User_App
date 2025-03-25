@@ -148,7 +148,7 @@ const Navbar = () => {
             if (value.toLowerCase() === "report") {
                 breadcrumbLabel = "Reports";
             }
-            
+
             if (value.toLowerCase() === "sales") {
                 breadcrumbLabel = "Sales Management";
                 // Non-linkable
@@ -191,11 +191,23 @@ const Navbar = () => {
             if (value.toLowerCase() === "master-lists") {
                 breadcrumbLabel = "Master Lists";
             }
+            if (value.toLowerCase() === "basic-pricing") {
+                breadcrumbLabel = "Basic Pricing";
+            }
+            if (value.toLowerCase() === "payment-scheme") {
+                breadcrumbLabel = "Payment Scheme";
+            }
+            if (value.toLowerCase() === "price-versioning") {
+                breadcrumbLabel = "Price Versioning";
+            }
+            if (value.toLowerCase() === "promotional-pricing") {
+                breadcrumbLabel = "Promotional Pricing";
+            }
             if (value.toLowerCase() === "super-admin") {
                 breadcrumbLabel = "Super Admin";
             }
             if (value.toLowerCase() === "user-rights-and-permissions") {
-               breadcrumbLabel = "User Rights & Permissions";
+                breadcrumbLabel = "User Rights & Permissions";
             }
             if (value.toLowerCase() === "inquirylist") {
                 breadcrumbLabel = "Feedback";
@@ -238,7 +250,6 @@ const Navbar = () => {
                 return null; // Skip rendering this breadcrumb
             }
 
-
             if (breadcrumbLabel.startsWith("Ticket#")) {
                 const ticketId = breadcrumbLabel;
                 const dataProperty =
@@ -265,9 +276,14 @@ const Navbar = () => {
                                 concernData?.buyer_middlename || ""
                             } ${concernData?.buyer_lastname || ""}`
                         }{" "}
-                        {/* capitalizeWords()*/concernData?.suffix_name || ""} {""}
-                        {concernData?.details_concern ? (concernData?.details_concern) : ""} {" "} 
-                        {concernData?.email_subject ? `[Direct Email] (Email Subject: ${concernData?.email_subject})` : ""}
+                        {/* capitalizeWords()*/ concernData?.suffix_name || ""}{" "}
+                        {""}
+                        {concernData?.details_concern
+                            ? concernData?.details_concern
+                            : ""}{" "}
+                        {concernData?.email_subject
+                            ? `[Direct Email] (Email Subject: ${concernData?.email_subject})`
+                            : ""}
                         {concernData?.property || ""} ({concernData?.ticket_id})
                     </span>
                 );
