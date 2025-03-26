@@ -161,6 +161,7 @@ Route::middleware('auth:sanctum')->group(function () {
             '/export-excel',
             [PriceListMasterController::class, 'exportExcel']
         );
+        Route::get('/approved-or-reviewed/{userId}', [PriceListMasterController::class, 'getPriceListsForReviewerOrApprover']);
     });
 
     /* Units */

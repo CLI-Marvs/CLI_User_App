@@ -303,7 +303,7 @@ const EmployeeReviewerApproverModal = ({
                         className={` 
                                  h-[40px] px-[20px] pr-[40px] rounded-[10px]  w-full outline-none`}
                         onChange={(e) => handleSearchOnChange(e.target.value)}
-                        placeholder="Search by employee name"
+                        placeholder="Search by Employee Name"
                     />
                 </div>
                 {/*Selected Employee  */}
@@ -333,7 +333,7 @@ const EmployeeReviewerApproverModal = ({
                                     ))
                                 ) : (
                                     <span className="text-xs text-gray-500 px-1 montserrat-semibold">
-                                        No selected reviewer
+                                        No Reviewer/s Selected
                                     </span>
                                 )
                             ) : approvedByEmployees.length > 0 ? (
@@ -358,7 +358,7 @@ const EmployeeReviewerApproverModal = ({
                                 ))
                             ) : (
                                 <span className="text-xs text-gray-500 px-1 montserrat-semibold">
-                                    No selected approver
+                                    No Approver/s Selected
                                 </span>
                             )}
                         </div>
