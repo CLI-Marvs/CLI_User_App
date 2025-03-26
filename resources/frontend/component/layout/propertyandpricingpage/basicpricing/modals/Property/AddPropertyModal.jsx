@@ -6,7 +6,6 @@ import CircularProgress from "@mui/material/CircularProgress";
 import { useStateContext } from "@/context/contextprovider";
 import { showToast } from "@/util/toastUtil";
 import { propertyMasterService } from "@/component/servicesApi/apiCalls/propertyPricing/property/propertyMasterService";
-import { usePriceListMaster } from "@/context/PropertyPricing/PriceListMasterContext";
 import { useProperty } from "@/context/PropertyPricing/PropertyContext";
 import { useUnit } from "@/context/PropertyPricing/UnitContext";
 import { toLowerCaseText } from "@/util/formatToLowerCase";
@@ -31,7 +30,6 @@ const AddPropertyModal = ({ propertyModalRef, fetchData }) => {
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
     const { propertyNamesList } = useProperty();
-    const { fetchPropertyListMasters } = usePriceListMaster();
     const { setExcelId } = useUnit();
     const isPropertyButtonDisabled = isButtonDisabled(
         formData,
@@ -69,7 +67,6 @@ const AddPropertyModal = ({ propertyModalRef, fetchData }) => {
             const response = await propertyMasterService.storePropertyMaster(
                 payload
             );
-            console.log("response 67 AddPropertyModal", response);
             const priceListData = { data: response.data.data };
             const propertyCommercialDetail =
                 priceListData?.data?.property_commercial_detail;
