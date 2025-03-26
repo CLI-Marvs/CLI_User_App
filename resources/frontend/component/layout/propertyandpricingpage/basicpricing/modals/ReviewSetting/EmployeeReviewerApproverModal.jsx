@@ -277,7 +277,7 @@ const EmployeeReviewerApproverModal = ({
 
     return (
         <dialog
-            className="modal w-[623px] rounded-lg h-[700px] backdrop:bg-black/50 backdrop-blur-md"
+            className="modal w-[623px] rounded-lg h-[700px] backdrop:bg-black/50 backdrop-blur-md overflow-hidden"
             ref={reviewerApproverModalRef}
         >
             <div className=" px-14 rounded-[10px] h-full">
@@ -293,21 +293,32 @@ const EmployeeReviewerApproverModal = ({
                     </button>
                 </div>
                 {/* Search input */}
-                <div
-                    className={`flex items-center border  rounded-[5px] overflow-hidden `}
-                >
+                <div className="relative border rounded-[5px] overflow-hidden  w-[520px]">
                     <CustomInput
                         type="text"
                         name="no_of_allowed_buyers"
                         value={searchEmployee || ""}
-                        className={` 
-                                 h-[40px] px-[20px] pr-[40px] rounded-[10px]  w-full outline-none`}
+                        className="h-[40px] px-[20px] pr-[110px] rounded-[5px] w-full outline-none"
                         onChange={(e) => handleSearchOnChange(e.target.value)}
                         placeholder="Search by Employee Name"
                     />
+                    <div className="absolute right-[2px] flex justify-end top-1/2 transform -translate-y-1/2">
+                        <button
+                            disabled={isDisabled}
+                            className={`h-[37px] w-[100px] rounded-[5px] text-white montserrat-semibold text-sm gradient-btn5 hover:shadow-custom4 ${
+                                isDisabled
+                                    ? "cursor-not-allowed opacity-50"
+                                    : ""
+                            }`}
+                            onClick={handleApply}
+                        >
+                            Apply
+                        </button>
+                    </div>
                 </div>
+
                 {/*Selected Employee  */}
-                <div className="mt-2  ">
+                <div className="mt-2">
                     <div className="py-1 overflow-x-auto whitespace-nowrap flex gap-2 ">
                         <div className="inline-flex flex-wrap items-center gap-2">
                             {type === "reviewedByEmployees" ? (
@@ -364,10 +375,23 @@ const EmployeeReviewerApproverModal = ({
                         </div>
                     </div>
                 </div>
+                {/* Search Button */}
+                {/* <div className=" mt-6 flex justify-end">
+                    <button
+                        disabled={isDisabled}
+                        className={`h-[37px] w-[176px] rounded-[10px] text-white montserrat-semibold text-sm gradient-btn5 hover:shadow-custom4 ${
+                            isDisabled ? "cursor-not-allowed opacity-50" : ""
+                        }`}
+                        onClick={handleApply}
+                    >
+                        Apply
+                    </button>
+                </div>{" "} */}
+                {/** Employee list */}
                 <div className="mt-1  h-[600px] ">
                     <>
                         <div
-                            className="absolute w-[520px] space-y-2 border-t-0 border-gray-300 p-2 py-[20px]  rounded-[10px] bg-white z-20 mt-1"
+                            className="absolute w-[520px] space-y-2 border-t-0 border-gray-300 p-2 py-[20px]  rounded-[10px] z-20 mt-1"
                             ref={dropdownRef}
                         >
                             <ul className="flex flex-col space-y-2 max-h-[500px] overflow-auto  ">
@@ -443,7 +467,7 @@ const EmployeeReviewerApproverModal = ({
                         </div>
                     </>
                 </div>
-                <div className="py-4 flex justify-center">
+                {/* <div className="py-4 flex justify-center">
                     <button
                         disabled={isDisabled}
                         className={`h-[37px] w-[176px] rounded-[10px] text-white montserrat-semibold text-sm gradient-btn5 hover:shadow-custom4 ${
@@ -453,7 +477,7 @@ const EmployeeReviewerApproverModal = ({
                     >
                         Apply
                     </button>
-                </div>
+                </div> */}
             </div>
         </dialog>
     );

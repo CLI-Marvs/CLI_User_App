@@ -188,15 +188,16 @@ const Navbar = () => {
             if (value.toLowerCase() === "property-pricing") {
                 breadcrumbLabel = "Property Pricing";
             }
-               if (value.toLowerCase() === "workflow-notification") {
-                   breadcrumbLabel = "Workflow Notification";
-               }
-            if (value.toLowerCase() === "master-lists") {
+            if (value.toLowerCase() === "workflow-notification") {
+                breadcrumbLabel = "Workflow Notification";
+            }
+            if (
+                value.toLowerCase() === "master-lists" ||
+                value.toLowerCase() === "basic-pricing"
+            ) {
                 breadcrumbLabel = "Price List";
             }
-            if (value.toLowerCase() === "basic-pricing") {
-                breadcrumbLabel = "Basic Pricing";
-            }
+
             if (value.toLowerCase() === "payment-scheme") {
                 breadcrumbLabel = "Payment Scheme";
             }
