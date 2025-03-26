@@ -155,7 +155,7 @@ const UnitUploadButton = ({
                     {buttonText}
                 </button>
             ) : (
-                <p className="montserrat-regular text-center text-red-500">
+                <p className="montserrat-regular text-center text-red-500 py-2">
                     No units have been uploaded.
                     <span
                         className="underline ml-2 text-blue-500 w-80 cursor-pointer"

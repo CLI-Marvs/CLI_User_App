@@ -1,20 +1,27 @@
 import React, { useState, useRef, useEffect } from "react";
 import { IoIosArrowDown } from "react-icons/io";
-import { FaRegTrashAlt } from "react-icons/fa";
 import FloorPremiumAssignModal from "../modals/FloorPremiumAssignModal";
-import CircularProgress from "@mui/material/CircularProgress";
 import { useUnit } from "@/context/PropertyPricing/UnitContext";
 import { usePricing } from "@/component/layout/propertyandpricingpage/context/BasicPricingContext";
 import { showToast } from "@/util/toastUtil";
 import UnitUploadButton from "@/component/layout/propertyandpricingpage/component/UnitUploadButton";
 import CustomInput from "@/component/Input/CustomInput";
- 
+import FloorPremiumRow from "@/component/layout/propertyandpricingpage/component/TableRows/FloorPremiumRow";
+import CustomTable from "@/component/layout/propertyandpricingpage/component/CustomTable";
 
 const newFloorState = {
     floor: null,
     premiumCost: 0,
     excludedUnits: [],
 };
+
+const COLUMNS = [
+    { label: "Floor", width: "w-[150px]" },
+    { label: "Premium Cost", width: "w-[150px]" },
+    { label: "Lucky No.", width: "w-[150px]" },
+    { label: "Unit Assignment", width: "w-[150px]" },
+    { label: "", width: "w-[62px]" },
+];
 
 const FloorPremiums = ({ isOpen, toggleAccordion, priceListData }) => {
     //States
@@ -68,8 +75,8 @@ const FloorPremiums = ({ isOpen, toggleAccordion, priceListData }) => {
         }
     };
 
-    //  Handle to input floor premiums data(e.g premium cost)
-    const handleOnChange = (floorNumber, e) => {
+    // Handles changes in floor premium inputs (e.g., premium cost)
+    const handleFloorPremiumChange = (floorNumber, e) => {
         const { name, type, checked, value } = e.target;
         if (
             !pricingData?.floorPremiums ||
@@ -100,7 +107,7 @@ const FloorPremiums = ({ isOpen, toggleAccordion, priceListData }) => {
     };
 
     //Handle input change for adding  new floor
-    const handleNewFloorChange = (e) => {
+    const handleNewFloorInputChange = (e) => {
         const { name, value } = e.target;
         setNewFloorPremiumData((prevData) => ({
             ...prevData,
@@ -238,7 +245,7 @@ const FloorPremiums = ({ isOpen, toggleAccordion, priceListData }) => {
                                                 newFloorPremiumData.floor || ""
                                             }
                                             className="w-full px-4 focus:outline-none"
-                                            onChange={handleNewFloorChange}
+                                            onChange={handleNewFloorInputChange}
                                             restrictNumbers={true}
                                         />
                                     </div>
@@ -254,14 +261,14 @@ const FloorPremiums = ({ isOpen, toggleAccordion, priceListData }) => {
                                                 ""
                                             }
                                             className="w-full px-4 focus:outline-none"
-                                            onChange={handleNewFloorChange}
+                                            onChange={handleNewFloorInputChange}
                                             restrictNumbers={true}
                                         />
                                     </div>
                                     <div>
                                         <button
                                             className="w-[60px] h-[31px] rounded-[7px] gradient-btn2 p-[4px] text-custom-solidgreen hover:shadow-custom4 text-sm"
-                                            onClick={handleAddNewFloor}  
+                                            onClick={handleAddNewFloor}
                                         >
                                             <div className="flex justify-center items-center bg-white montserrat-bold h-full w-full rounded-[4px] p-[4px]">
                                                 ADD
@@ -281,169 +288,43 @@ const FloorPremiums = ({ isOpen, toggleAccordion, priceListData }) => {
 
                         <div className="flex justify-center w-full    h-[300px] overflow-y-auto">
                             <div className="w-[662px]">
-                                <table>
-                                    <thead>
-                                        <tr className="h-[49px] bg-custom-grayFA text-custom-gray81 montserrat-semibold text-sm">
-                                            <th className="rounded-tl-[10px] pl-[10px] w-[150px] text-left">
-                                                Floor
-                                            </th>
-                                            <th className="w-[150px] text-left">
-                                                Premium Cost
-                                            </th>
-                                            <th className="w-[150px] text-left">
-                                                Lucky No.
-                                            </th>
-                                            <th className="w-[150px] text-left">
-                                                Unit Assignment
-                                            </th>
-                                            <th className="rounded-tr-[10px] w-[62px]"></th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="">
-                                        {isFloorCountLoading &&
-                                        floors.length === 0 ? (
-                                            <tr className="ml-4">
-                                                <td
-                                                    colSpan="5"
-                                                    className="text-center"
-                                                >
-                                                    <CircularProgress className="spinnerSize" />
-                                                </td>
-                                            </tr>
-                                        ) : pricingData &&
-                                          Object.keys(
-                                              pricingData?.floorPremiums
-                                          ).length > 0 ? (
-                                            Object.entries(
-                                                pricingData?.floorPremiums
-                                            ).map(
-                                                (
-                                                    [floorNumber, floorData],
-                                                    index
-                                                ) => {
-                                                    return (
-                                                        <tr
-                                                            className="h-[46px] bg-white text-sm"
-                                                            key={index}
-                                                        >
-                                                            <td className="text-custom-gray81 pl-4">
-                                                                {floorNumber}
-                                                            </td>
-                                                            <td>
-                                                                <div className="">
-                                                                    <CustomInput
-                                                                        type="number"
-                                                                        name="premiumCost"
-                                                                        id="premiumCost"
-                                                                        value={
-                                                                            floorData.premiumCost ||
-                                                                            ""
-                                                                        }
-                                                                        className="bg-white h-[29px] w-[120px] border border-[#D9D9D9] rounded-[5px] px-2 outline-none text-center"
-                                                                        onChange={(
-                                                                            e
-                                                                        ) =>
-                                                                            handleOnChange(
-                                                                                floorNumber,
-                                                                                e
-                                                                            )
-                                                                        }
-                                                                        restrictNumbers={
-                                                                            true
-                                                                        }
-                                                                        disabled={
-                                                                            priceListData
-                                                                                .data
-                                                                                .status !==
-                                                                            "Draft"
-                                                                        }
-                                                                    />
-                                                                </div>
-                                                            </td>
-                                                            <td>
-                                                                <input
-                                                                    onChange={(
-                                                                        e
-                                                                    ) =>
-                                                                        handleOnChange(
-                                                                            floorNumber,
-                                                                            e
-                                                                        )
-                                                                    }
-                                                                    checked={
-                                                                        floorData.luckyNumber ||
-                                                                        false
-                                                                    }
-                                                                    name="luckyNumber"
-                                                                    id="luckyNumber"
-                                                                    type="checkbox"
-                                                                    className="h-[16px] w-[16px] ml-[16px] rounded-[2px] appearance-none border border-gray-400 checked:bg-transparent flex items-center justify-center checked:before:bg-black checked:before:w-[12px] checked:before:h-[12px] checked:before:block checked:before:content-['']"
-                                                                    disabled={
-                                                                        priceListData
-                                                                            ?.data
-                                                                            ?.status !==
-                                                                        "Draft"
-                                                                    }
-                                                                />
-                                                            </td>
-                                                            {priceListData.data
-                                                                .status ===
-                                                            "Draft" ? (
-                                                                <td
-                                                                    onClick={() =>
-                                                                        handleOpenModal(
-                                                                            floorNumber
-                                                                        )
-                                                                    }
-                                                                    className="text-blue-500 underline cursor-pointer"
-                                                                >
-                                                                    Assign
-                                                                </td>
-                                                            ) : (
-                                                                <td
-                                                                    onClick={() =>
-                                                                        handleOpenModal(
-                                                                            floorNumber
-                                                                        )
-                                                                    }
-                                                                    className="text-blue-500 underline cursor-pointer"
-                                                                >
-                                                                    View
-                                                                </td>
-                                                            )}
-
-                                                            {priceListData &&
-                                                                priceListData
-                                                                    .data
-                                                                    .status ===
-                                                                    "Draft" && (
-                                                                    <td>
-                                                                        <FaRegTrashAlt
-                                                                            onClick={() =>
-                                                                                handleRemoveFloorPremium(
-                                                                                    floorNumber
-                                                                                )
-                                                                            }
-                                                                            className="size-5 text-custom-gray81 hover:text-red-500 cursor-pointer"
-                                                                        />
-                                                                    </td>
-                                                                )}
-                                                        </tr>
-                                                    );
+                                <CustomTable
+                                    tableSkeleton={40}
+                                    className="h-[49px] flex bg-custom-grayFA text-custom-gray81 montserrat-semibold text-sm"
+                                    isLoading={
+                                        isFloorCountLoading && floors.length === 0
+                                    }
+                                    columns={COLUMNS}
+                                    data={
+                                        pricingData
+                                            ? Object.entries(
+                                                  pricingData?.floorPremiums
+                                              )
+                                            : []
+                                    }
+                                    renderRow={(
+                                        [floorNumber, floorData],
+                                        index
+                                    ) => {
+                                        return (
+                                            <FloorPremiumRow
+                                                key={floorNumber}
+                                                floorNumber={floorNumber}
+                                                floorData={floorData}
+                                                onChangeFloorPremium={
+                                                    handleFloorPremiumChange
                                                 }
-                                            )
-                                        ) : (
-                                            <tr>
-                                                <td
-                                                    colSpan="5"
-                                                    className="text-center text-custom-gray81 py-2 montserrat-semibold"
-                                                >
-                                                    No floor premiums
-                                                </td>
-                                            </tr>
-                                        )}
-                                    </tbody>
-                                </table>
+                                                handleOpenModal={
+                                                    handleOpenModal
+                                                }
+                                                priceListData={priceListData}
+                                                handleRemoveFloorPremium={
+                                                    handleRemoveFloorPremium
+                                                }
+                                            />
+                                        );
+                                    }}
+                                />
                             </div>
                         </div>
                     </div>
