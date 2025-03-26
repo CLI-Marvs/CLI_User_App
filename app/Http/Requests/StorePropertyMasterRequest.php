@@ -27,7 +27,7 @@ class StorePropertyMasterRequest extends FormRequest
             'type' =>
             'required|string|max:255',
             'tower_phase' =>
-            'required|string|max:255',
+            'required|string|max:255|regex:/^[a-zA-Z0-9 ]+$/',
             'tower_description' =>
             'required|string|max:350',
             'regex:/^(?=.*[a-zA-Z])[\pL\pN\s\-\.\']+$/u',
@@ -61,6 +61,19 @@ class StorePropertyMasterRequest extends FormRequest
                     return $fail('Invalid Google Map link. Must be a Google Maps URL.');
                 }
             }],
+
+        ];
+    }
+
+    /**
+     * Get the error messages for the defined validation rules.
+     *
+     * @return array<string, string>
+     */
+    public function messages(): array
+    {
+        return [
+            'tower_phase.regex' => 'Tower Phase may only contain letters, numbers, and spaces.',
 
         ];
     }

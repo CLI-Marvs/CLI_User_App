@@ -128,8 +128,7 @@ const PriceListSettings = ({ isOpen, toggleAccordion, priceListData }) => {
                                         onChange={handleInputChange}
                                         restrictNumbers={true}
                                         disabled={
-                                            priceListData.data.status !==
-                                            "Draft"
+                                           true
                                         }
                                     />
                                     <div className="w-[56px]  bg-custombg3  flex items-center justify-center rounded-r-[5px] h-full">
