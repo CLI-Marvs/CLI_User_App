@@ -127,7 +127,6 @@ const InvoicesCom = () => {
     return (
         <>
             <div className="overflow-y-hidden px-3 flex flex-col space-y-2">
-                <div className="px-2">
                     <TransactionSearchBar
                         fields={fields}
                         searchValues={searchValues}
@@ -135,7 +134,6 @@ const InvoicesCom = () => {
                         onChangeSearch={handleSearchValue}
                         onSubmit={onSubmit}
                     />
-                </div>
                 <div className="flex gap-[15px] flex-wrap mb-[16px] px-2">
                     <div className="relative flex border w-max border-custom-lightgreen rounded-[5px] shrink-0 z-10">
                         <span className="border-white text-white bg-custom-lightgreen text-sm flex items-center w-max px-[15px] pl-3 py-1 shrink-0 cursor-default">

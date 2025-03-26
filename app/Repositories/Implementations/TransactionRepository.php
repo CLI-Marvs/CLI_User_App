@@ -184,7 +184,7 @@ class TransactionRepository
         $endDate = $data['end_date'] ?? null;
 
         $query = $this->bankStatementModel
-            ->when(!empty($data['status']), fn($q) => $q->where('status_of_posting', $data['status']))
+            ->when(!empty($data['status_of_posting']), fn($q) => $q->where('status_of_posting', $data['status_of_posting']))
             ->when(!empty($data['bank_name']), fn($q) => $q->where('bank_name', $data['bank_name']))
             ->when(!empty($data['transaction_number']), fn($q) => $q->where('transaction_number', $data['transaction_number']))
             ->when(!empty($data['document_number']), fn($q) => $q->where('document_number', $data['document_number']))

@@ -102,7 +102,7 @@ class SapController extends Controller
                 $invoice->post_date = $request->input('D_BUDAT');
                 $invoice->customer_name = $request->input('D_NAME1');
                 $invoice->flow_type = $request->input('D_VBEWA');
-                $invoice->invoice_status = $request->input('D_STATS');
+                $invoice->invoice_status = "Uncleared";
                 $invoice->invoice_link = $fileLink;
                 $invoice->soa_link = $soaLink;
                 /*  $invoice->invoice_status = $request->input('invoice_status'); 

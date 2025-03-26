@@ -48,7 +48,7 @@ const GlobalTable = ({ columns, data, loading }) => {
                                     {columns.map((col, colIndex) => (
                                         <td
                                             key={colIndex}
-                                            className="px-3 py-3 cursor-pointer w-[208px] text-xs border-r-[1px] border-opacity-50 border-[#B9B7B7] relative"
+                                            className="px-3 py-3 w-[208px] text-xs border-r-[1px] border-opacity-50 border-[#B9B7B7] relative"
                                         >
                                             {col.render
                                                 ? col.render(row)
