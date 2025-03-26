@@ -69,7 +69,6 @@ export const usePropertyPricing = (
             try {
                 setIsLoading((prev) => ({ ...prev, [status]: true }));
                 const payload = buildSubmissionPayload(status);
-                console.log("payload Edit", payload);
                 const response =
                     await priceListMasterService.updatePriceListMasters(
                         payload
@@ -116,10 +115,8 @@ export const usePropertyPricing = (
             try {
                 setIsLoading((prev) => ({ ...prev, [status]: true }));
                 const payload = buildSubmissionPayload(status);
-                console.log("payload straight forward add", payload);
                 const response =
                     await priceListMasterService.storePriceListMasters(payload);
-                console.log("response straight forward add", response);
                 if (response?.status === 201 || response?.status === 200) {
                     showToast(
                         response?.data?.message || "Data added successfully",

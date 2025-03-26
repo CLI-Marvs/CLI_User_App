@@ -42,7 +42,7 @@ class SapController extends Controller
     {
         $client = new Client();
         try {
-            $response = $client->post('https://SAP-DEV.cebulandmasters.com:44304/sap/bc/srt/rfc/sap/zdevposcol/200/zdevposcol/zdevposcol', [
+            $response = $client->post('https://SAP-DEV.cebulandmasters.com:44304/sap/bc/srt/rfc/sap/zlast/200/zlast/zlast', [
                 'headers' => [
                     'Authorization' => 'Basic ' . base64_encode('KBELMONTE:Tomorrowbytogether2019!'),
                     'Content-Type' => 'application/soap+xml',
@@ -102,7 +102,7 @@ class SapController extends Controller
                 $invoice->post_date = $request->input('D_BUDAT');
                 $invoice->customer_name = $request->input('D_NAME1');
                 $invoice->flow_type = $request->input('D_VBEWA');
-                $invoice->invoice_status = $request->input('D_STATS');
+                $invoice->invoice_status = "Uncleared";
                 $invoice->invoice_link = $fileLink;
                 $invoice->soa_link = $soaLink;
                 /*  $invoice->invoice_status = $request->input('invoice_status'); 
@@ -359,36 +359,41 @@ class SapController extends Controller
         } */
     }
 
-
     public function postRecordsFromSap(Request $request)
     {
         try {
-            $idRef = $request->input('ID');
-            $invoiceIdRef = $request->input('INVID');
+            \Log::info('Post Records From Sap Kyla', [$request->all()]);
+            
+            $idRef = (int) $request->input('ID');
+            $invoiceIdRef = (int) $request->input('INVID');
+            
             $attachment = $request->input('file'); 
             $fileLink = $this->uploadToFile($attachment);
+            
             $transactionRef = BankTransaction::find($idRef);
             $invoiceRef = Invoices::find($invoiceIdRef);
-
-            $invoiceRef->invoice_status = "Posted";
-            $invoiceRef->save();
-
-            if (!$transactionRef) {
-                \Log::info('transaction not found');
+    
+            if ($invoiceRef) {
+                $invoiceRef->invoice_status = "Posted";
+                $invoiceRef->save();
             }
-
-            $transactionRef->document_number = $request->input('BELNR');
-            $transactionRef->company_code = $request->input('BUKRS');
-            $transactionRef->collection_receipt_link = $fileLink;
-            $transactionRef->status = "Posted";
-            $transactionRef->save();
-
+    
+            if (!$transactionRef) {
+                \Log::info('Transaction not found');
+            } else {
+                $transactionRef->document_number = $request->input('BELNR');
+                $transactionRef->collection_receipt_link = $fileLink;
+                $transactionRef->status = "Posted";
+                $transactionRef->save();
+            }
+    
             return response()->json(['message' => 'Records updated successfully']);
+            
         } catch (\Throwable $e) {
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
         }
     }
-
+    
 
     public function uploadToFile($attachment)
     {

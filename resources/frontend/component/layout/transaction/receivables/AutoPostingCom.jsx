@@ -169,7 +169,7 @@ const AutoPostingCom = () => {
     const handleSubmitSap = async () => {
         const newDataObject = postingList.map((item) => {
             return {
-                ID: item.id,
+                ID: item.transaction_id,
                 BUKRS: item.company_code,
                 RECNNR: item.reference_number,
                 VBEWA: item.flow_type,
@@ -394,15 +394,14 @@ const AutoPostingCom = () => {
 
     return (
         <div className="overflow-y-hidden px-3 flex flex-col space-y-1">
-            <div className="px-2">
-                <TransactionSearchBar
-                    fields={fields}
-                    searchValues={searchValues}
-                    setSearchValues={setSearchValues}
-                    onChangeSearch={handleSearchValue}
-                    onSubmit={onSubmit}
-                />
-            </div>
+            <TransactionSearchBar
+                fields={fields}
+                searchValues={searchValues}
+                setSearchValues={setSearchValues}
+                onChangeSearch={handleSearchValue}
+                onSubmit={onSubmit}
+                setFilters={setDataSearch}
+            />
             <div className="flex justify-between px-2">
                 <div className="flex gap-[21px]">
                     {statuses.map((item, index) => {
@@ -485,7 +484,7 @@ const AutoPostingCom = () => {
                                     {columns.map((col, colIndex) => (
                                         <td
                                             key={colIndex}
-                                            className={`px-3 py-3 cursor-pointer w-[208px] text-xs border-r-[1px] border-opacity-50 border-[#B9B7B7] relative ${dynamicClass(
+                                            className={`px-3 py-3 w-[208px] text-xs border-r-[1px] border-opacity-50 border-[#B9B7B7] relative ${dynamicClass(
                                                 row.status
                                             )}`}
                                         >

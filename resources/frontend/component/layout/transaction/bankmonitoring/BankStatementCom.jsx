@@ -29,9 +29,7 @@ const BankStatementCom = () => {
         {
             header: "Transaction",
             accessor: "transaction",
-            render: (row) => (
-                <BankTableCell type="transaction" row={row} />
-            ),
+            render: (row) => <BankTableCell type="transaction" row={row} />,
         },
 
         {
@@ -47,9 +45,7 @@ const BankStatementCom = () => {
         {
             header: "Payment Method",
             accessor: "payment_method",
-            render: (row) => (
-                <BankTableCell type="payment_method" row={row} />
-            ),
+            render: (row) => <BankTableCell type="payment_method" row={row} />,
         },
         {
             header: "Status",
@@ -66,6 +62,7 @@ const BankStatementCom = () => {
             ),
         },
     ];
+    
     const fields = [
         {
             name: "bank_name",
@@ -115,16 +112,19 @@ const BankStatementCom = () => {
     return (
         <>
             <div className="overflow-y-hidden px-3">
-                <div className="px-2">
-                    <TransactionSearchBar
-                        fields={fields}
-                        searchValues={searchValues}
-                        setSearchValues={setSearchValues}
-                        onChangeSearch={handleSearchValue}
-                        onSubmit={onSubmit}
-                    />
-                </div>
-                <GlobalTable columns={columns} data={bankStatementsList.data} loading={bankStatementsList.loading} />
+                <TransactionSearchBar
+                    fields={fields}
+                    searchValues={searchValues}
+                    setSearchValues={setSearchValues}
+                    onChangeSearch={handleSearchValue}
+                    onSubmit={onSubmit}
+                    setFilters={setFilters}
+                />
+                <GlobalTable
+                    columns={columns}
+                    data={bankStatementsList.data}
+                    loading={bankStatementsList.loading}
+                />
                 <div className="flex justify-end mt-4">
                     <div className="flex w-full justify-end mt-3 mb-10">
                         <Pagination
