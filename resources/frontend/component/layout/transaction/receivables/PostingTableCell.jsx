@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
 const PostingTableCell = ({ type, row }) => {
     const dynamicStyle = (item) =>
@@ -7,7 +8,7 @@ const PostingTableCell = ({ type, row }) => {
             : item === "Posted"
             ? "bg-[#1A73E8]"
             : "bg-[#348017]";
- 
+
     switch (type) {
         case "transaction_date":
             return (
@@ -91,9 +92,33 @@ const PostingTableCell = ({ type, row }) => {
             return (
                 <div className="flex justify-between w-[139px] montserrat-regular items-center">
                     <div className="flex flex-col">
-                        <span className="text-[13px] text-custom-blue underline">
-                            View Receipt
-                        </span>
+                        {row.collection_receipt_link ? (
+                            <Link
+                                to={`/file-viewer/attachment/${row.transaction_id}`}
+                                onClick={(e) => {
+                                    e.preventDefault();
+
+                                    localStorage.setItem(
+                                        "fileUrlPath",
+                                        JSON.stringify(
+                                            row.collection_receipt_link
+                                        )
+                                    );
+                                    window.open(
+                                        `/file-viewer/attachment/${row.transaction_id}`,
+                                        "_blank"
+                                    );
+                                }}
+                            >
+                                <span className="text-[13px] text-custom-blue underline">
+                                    View Receipt
+                                </span>
+                            </Link>
+                        ) : (
+                            <span className="montserrat-semibold text-[13px] break-all whitespace-normal overflow-hidden">
+                                To be generated
+                            </span>
+                        )}
                     </div>
                 </div>
             );

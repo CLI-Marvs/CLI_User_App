@@ -1,7 +1,7 @@
 import moment from "moment";
 import React from "react";
 import { toLowerCaseText } from "@/util/formatToLowerCase";
-
+import { Link } from "react-router-dom";
 
 const TransactionTableCell = ({ type, row }) => {
     switch (type) {
@@ -57,8 +57,8 @@ const TransactionTableCell = ({ type, row }) => {
                 <div className="flex gap-8 items-center w-[450px]">
                     <div className="flex flex-col montserrat-regular">
                         <div className="flex gap-2">
-                            <span className="monterrat-regular text-[14px]">
-                                Contract No.:
+                            <span className="monterrat-regular text-[13px]">
+                                Reference/Contract No.:
                             </span>
                             <span className="montserrat-semibold text-[13px] break-all whitespace-normal overflow-hidden">
                                 {row.reference_number}
@@ -69,7 +69,9 @@ const TransactionTableCell = ({ type, row }) => {
                         </span>
                     </div>
                     <div className="flex flex-col flex-1 montserrat-regular">
-                        <span className="text-[13px]">{toLowerCaseText(row.property_name)}</span>
+                        <span className="text-[13px]">
+                            {toLowerCaseText(row.property_name)}
+                        </span>
                         <span className="text-xs text-custom-lightgreen">
                             {row.remarks}
                         </span>
@@ -110,9 +112,33 @@ const TransactionTableCell = ({ type, row }) => {
             return (
                 <div className="flex justify-between w-[139px] montserrat-regular items-center">
                     <div className="flex flex-col">
-                        <span className="text-[13px] text-custom-blue underline">
-                            View Receipt
-                        </span>
+                        {row.collection_receipt_link ? (
+                            <Link
+                                to={`/file-viewer/attachment/${row.transaction_id}`}
+                                onClick={(e) => {
+                                    e.preventDefault();
+
+                                    localStorage.setItem(
+                                        "fileUrlPath",
+                                        JSON.stringify(
+                                            row.collection_receipt_link
+                                        )
+                                    );
+                                    window.open(
+                                        `/file-viewer/attachment/${row.transaction_id}`,
+                                        "_blank"
+                                    );
+                                }}
+                            >
+                                <span className="text-[13px] text-custom-blue underline">
+                                    View Receipt
+                                </span>
+                            </Link>
+                        ) : (
+                            <span className="montserrat-semibold text-[13px] break-all whitespace-normal overflow-hidden">
+                                To be generated
+                            </span>
+                        )}
                     </div>
                 </div>
             );

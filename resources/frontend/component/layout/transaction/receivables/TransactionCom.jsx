@@ -4,12 +4,13 @@ import TransactionTableCell from "./TransactionTableCell";
 import { useTransactionContext } from "@/context/Transaction/TransactionContext";
 import { transaction } from "@/component/servicesApi/apiCalls/transactions";
 import ReactPaginate from "react-paginate";
-import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md";
+import { MdKeyboardArrowLeft, MdKeyboardArrowRight, MdRefresh } from "react-icons/md";
 import TransactionSearchBar from "@/component/layout/transaction/TransactionSearchBar";
 import { useStateContext } from "@/context/contextprovider";
 import { toLowerCaseText } from "@/util/formatToLowerCase";
 import Pagination from "@/component/Pagination";
 import usePagination from "@/hooks/usePagination";
+import CustomToolTip from "@/component/CustomToolTip";
 
 const TransactionCom = () => {
     const columns = [
@@ -53,7 +54,7 @@ const TransactionCom = () => {
             ),
         },
         {
-            header: "Receipt",
+            header: "Collection Receipt",
             accessor: "collection_receipt_link",
             render: (row) => (
                 <TransactionTableCell
@@ -129,6 +130,10 @@ const TransactionCom = () => {
         }));
     };
 
+    const handleRefreshPage = () => {
+        setFilters({});
+    };
+
     const onSubmit = () => {
         setFilters(searchValues);
         setSearchValues({});
@@ -137,15 +142,14 @@ const TransactionCom = () => {
     return (
         <>
             <div className="overflow-y-hidden px-3 space-y-2">
-                <div className="px-2">
                     <TransactionSearchBar
                         fields={fields}
                         searchValues={searchValues}
                         setSearchValues={setSearchValues}
                         onChangeSearch={handleSearchValue}
                         onSubmit={onSubmit}
+                        setFilters={setFilters}
                     />
-                </div>
                 <GlobalTable columns={columns} data={transactions.data} loading={transactions.loading}  />
                 <div className="flex justify-end mt-4">
                     <div className="flex w-full justify-end mt-3 mb-10">
