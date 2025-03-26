@@ -333,7 +333,7 @@ const EmployeeReviewerApproverModal = ({
                                     ))
                                 ) : (
                                     <span className="text-xs text-gray-500 px-1 montserrat-semibold">
-                                        No Reviewers
+                                        No selected reviewer
                                     </span>
                                 )
                             ) : approvedByEmployees.length > 0 ? (
@@ -358,7 +358,7 @@ const EmployeeReviewerApproverModal = ({
                                 ))
                             ) : (
                                 <span className="text-xs text-gray-500 px-1 montserrat-semibold">
-                                    No Approvers
+                                    No selected approver
                                 </span>
                             )}
                         </div>
