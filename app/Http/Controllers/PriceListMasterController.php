@@ -28,15 +28,7 @@ class PriceListMasterController extends Controller
     public function index(IndexPriceListRequest $request)
     {
         $validatedData = $request->validated();
-        // dd($validatedData);
-        // Capture query parameters from request
-        // $perPage = $request->input('per_page', 10);
-        // $page = $request->input('page', 1);
-
-        // $priceListMastersResponse = $this->service->index($page, $perPage);
         $priceListMastersResponse = $this->service->index($validatedData);
-
-
         return response()->json([
             'data' => $priceListMastersResponse['data'],
             'pagination' => $priceListMastersResponse['pagination']
