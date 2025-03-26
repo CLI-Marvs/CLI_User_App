@@ -21,6 +21,7 @@ import CallBackView from "./views/pages/callback/CallBackView";
 import ReportViews from "./views/pages/raiseaconcernViews/ReportViews";
 import PropertyAndPricingLayout from "./views/layout/PropertyAndPricingLayout";
 import PricingMasterListView from "./views/pages/PropertyAndPricingViews/PricingMasterListView";
+import WorkFlowNotificationView from "./views/pages/PropertyAndPricingViews/WorkFlowNotificationView";
 import BasicPricingView from "./views/pages/PropertyAndPricingViews/BasicPricingView";
 import PaymentSchemeView from "./views/pages/PropertyAndPricingViews/PaymentSchemeView";
 import PriceVersioningView from "./views/pages/PropertyAndPricingViews/PriceVersioningView";
@@ -196,7 +197,7 @@ const App = () => {
                                     children: [
                                         {
                                             path: "bank-statements",
-                                             element: <BankStatementView />,
+                                            element: <BankStatementView />,
                                         },
                                     ],
                                 },
@@ -206,17 +207,16 @@ const App = () => {
                                     children: [
                                         {
                                             path: "invoices",
-                                             element: <InvoicesView />,
+                                            element: <InvoicesView />,
                                         },
                                         {
                                             path: "transactions",
-                                             element: <TransactionView />,
+                                            element: <TransactionView />,
                                         },
                                         {
                                             path: "posting",
-                                             element: <AutoPostingView />,
+                                            element: <AutoPostingView />,
                                         },
-                                       
                                     ],
                                 },
                                 {
@@ -279,6 +279,10 @@ const App = () => {
                                 </PrivateRoute>
                             ),
                             children: [
+                                {
+                                    path: "workflow-notification",
+                                    element: <WorkFlowNotificationView />,
+                                },
                                 {
                                     path: "master-lists",
                                     element: <PricingMasterListView />,

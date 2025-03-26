@@ -59,14 +59,18 @@ const PriceVersions = ({ priceListData, action, isOpen, toggleAccordion }) => {
     };
 
     //Handle click to iterate more fields
-    const handleAddFields = () => {
+    const handleAddPriceVersions = () => {
         setPricingData((prev) => {
             // Ensure priceVersions is always an array
             const priceVersions = Array.isArray(prev.priceVersions)
                 ? [...prev.priceVersions]
                 : [];
-
-            // Get the last priority_number and increment by 1
+            
+            const lastId =
+                priceVersions.length > 0
+                    ? priceVersions[priceVersions.length - 1].id
+                    : 0;
+           
             const lastPriorityNumber =
                 priceVersions.length > 0
                     ? priceVersions[priceVersions.length - 1].priority_number ||
@@ -74,7 +78,7 @@ const PriceVersions = ({ priceListData, action, isOpen, toggleAccordion }) => {
                     : 0;
 
             priceVersions.push({
-                id: 0,
+                id: lastId + 1,
                 name: "",
                 percent_increase: 0,
                 status: "Active",
@@ -140,7 +144,7 @@ const PriceVersions = ({ priceListData, action, isOpen, toggleAccordion }) => {
     };
 
     //Handle date change
-    const w = (date, formIndex) => {
+    const onDateChange = (date, formIndex) => {
         setPricingData((prevState) => {
             const updatedPriceVersions = prevState.priceVersions.map(
                 (item, i) =>
@@ -250,9 +254,7 @@ const PriceVersions = ({ priceListData, action, isOpen, toggleAccordion }) => {
 
                                                 return (
                                                     <tbody key={form.id}>
-                                                        <tr
-                                                            className="h-[66px] bg-white text-sm"
-                                                        >
+                                                        <tr className="h-[66px] bg-white text-sm">
                                                             <td className="px-[10px]">
                                                                 {
                                                                     form.priority_number
@@ -369,7 +371,7 @@ const PriceVersions = ({ priceListData, action, isOpen, toggleAccordion }) => {
                                                                         className="w-[100px] border border-custom-grayF1 rounded-[5px] h-[31px] pl-2"
                                                                         name="expiry_date"
                                                                         calendarClassName="custom-calendar"
-                                                                        placeholderText="N/A" // Display "N/A" when no date is selected
+                                                                        placeholderText="N/A"
                                                                     />
 
                                                                     <FaRegCalendar className="size-5 text-custom-gray81 hover:text-red-500" />
@@ -387,22 +389,24 @@ const PriceVersions = ({ priceListData, action, isOpen, toggleAccordion }) => {
                                                                                         (
                                                                                             scheme,
                                                                                             schemeIndex
-                                                                                        ) => (
-                                                                                            <span
-                                                                                                className="h-auto bg-custom-lightestgreen rounded-lg ml-1"
-                                                                                                key={
-                                                                                                    schemeIndex
-                                                                                                }
-                                                                                            >
-                                                                                                {
-                                                                                                    scheme?.payment_scheme_name
-                                                                                                }
-                                                                                                {schemeIndex <
-                                                                                                    paymentScheme.length -
-                                                                                                        1 &&
-                                                                                                    ", "}
-                                                                                            </span>
-                                                                                        )
+                                                                                        ) => {
+                                                                                            return (
+                                                                                                <span
+                                                                                                    className="h-auto bg-custom-lightestgreen rounded-lg ml-1"
+                                                                                                    key={
+                                                                                                        scheme.id
+                                                                                                    }
+                                                                                                >
+                                                                                                    {
+                                                                                                        scheme?.payment_scheme_name
+                                                                                                    }
+                                                                                                    {schemeIndex <
+                                                                                                        paymentScheme.length -
+                                                                                                            1 &&
+                                                                                                        ", "}
+                                                                                                </span>
+                                                                                            );
+                                                                                        }
                                                                                     )}
                                                                                 </p>
                                                                             </div>
@@ -511,7 +515,7 @@ const PriceVersions = ({ priceListData, action, isOpen, toggleAccordion }) => {
                                     {priceListData.data.status === "Draft" ? (
                                         <button
                                             className="h-[44px] w-[81px] flex gap-2 rounded-[10px] justify-center items-center bg-custom-grayFA text-sm border border-custom-grayF1"
-                                            onClick={handleAddFields}
+                                            onClick={handleAddPriceVersions}
                                         >
                                             <span>Add</span>
                                             <span>

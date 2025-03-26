@@ -113,7 +113,7 @@ const PriceVersioning = () => {
         return allEmpty;
     };
     return (
-        <div className="h-screen max-w-[1800px] bg-custom-grayFA px-4">
+        <div className="h-screen max-w-[1800px] bg-custom-grayFA px-10">
             <div className="">
                 <button
                     onClick={handleOpenModal}

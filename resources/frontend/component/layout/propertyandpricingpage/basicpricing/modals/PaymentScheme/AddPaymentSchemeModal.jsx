@@ -16,6 +16,13 @@ const AddPaymentSchemeModal = ({
         selectedSchemes.length === 0 ||
         (Array.isArray(selectedSchemes?.paymentSchemes) &&
             selectedSchemes.paymentSchemes.length === 0);
+    const [expandedItems, setExpandedItems] = useState({});
+    const toggleExpand = (id) => {
+        setExpandedItems((prev) => ({
+            ...prev,
+            [id]: !prev[id], // Toggle only for the specific item
+        }));
+    };
 
     //Hooks
     useEffect(() => {
@@ -168,7 +175,9 @@ const AddPaymentSchemeModal = ({
                 const isChecked = paymentSchemesArray.some(
                     (scheme) => scheme.id === item.id
                 );
-
+                const isExpanded = expandedItems[item.id] || false;
+                const showSeeMore = item.description.length > 150;
+                
                 return (
                     <div
                         className="w-[calc(33.33%-20px)] h-auto p-[15px] bg-[#F7F7F7] rounded-[10px]"
@@ -188,13 +197,30 @@ const AddPaymentSchemeModal = ({
                             </p>
                         </div>
                         <div
-                            className={`flex flex-col gap-1 text-sm pr-4 py-2   ${
-                                item?.description.length === 350
-                                    ? "overflow-y-auto max-h-[200px] overflow-hidden"
-                                    : ""
+                            key={item.id}
+                            className={`flex flex-col gap-1 text-sm pr-4 py-2 ${
+                                isExpanded
+                                    ? "overflow-y-auto max-h-[200px]"
+                                    : "overflow-hidden"
                             }`}
                         >
-                            <p>{item?.description}</p>
+                            <p
+                                className={`relative ${
+                                    isExpanded ? "" : "line-clamp-3"
+                                } text-gray-700`}
+                            >
+                                {item.description}
+                            </p>
+
+                            {showSeeMore && (
+                                <span
+                                    className="text-blue-500 cursor-pointer block"
+                                    onClick={() => toggleExpand(item.id)}
+                                >
+                                    {isExpanded ? " See less" : " See more"}
+                                </span>
+                            )}
+
                             <p>Spot {item?.spot}%</p>
                             <p>Installment {item?.downpayment_installment}%</p>
                             <p>Bank Financing {item?.bank_financing}%</p>

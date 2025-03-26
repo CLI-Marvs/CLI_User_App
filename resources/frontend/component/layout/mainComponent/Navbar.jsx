@@ -188,6 +188,9 @@ const Navbar = () => {
             if (value.toLowerCase() === "property-pricing") {
                 breadcrumbLabel = "Property Pricing";
             }
+               if (value.toLowerCase() === "workflow-notification") {
+                   breadcrumbLabel = "Workflow Notification";
+               }
             if (value.toLowerCase() === "master-lists") {
                 breadcrumbLabel = "Price List";
             }
