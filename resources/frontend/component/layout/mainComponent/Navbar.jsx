@@ -189,7 +189,7 @@ const Navbar = () => {
                 breadcrumbLabel = "Property Pricing";
             }
             if (value.toLowerCase() === "master-lists") {
-                breadcrumbLabel = "Master Lists";
+                breadcrumbLabel = "Price List";
             }
             if (value.toLowerCase() === "basic-pricing") {
                 breadcrumbLabel = "Basic Pricing";

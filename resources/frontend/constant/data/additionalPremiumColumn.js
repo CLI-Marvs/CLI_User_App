@@ -1,0 +1,8 @@
+
+export const ADDITIONAL_PREMIUM_COLUMNS = [
+    { label: "Floor", width: "w-[150px]" },
+    { label: "Premium Cost", width: "w-[150px]" },
+    { label: "Lucky No.", width: "w-[150px]" },
+    { label: "Unit Assignment", width: "w-[150px]" },
+    { label: "", width: "w-[62px]" },
+];

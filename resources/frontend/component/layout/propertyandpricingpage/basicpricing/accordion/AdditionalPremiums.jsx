@@ -8,6 +8,9 @@ import { showToast } from "@/util/toastUtil";
 import UnitUploadButton from "@/component/layout/propertyandpricingpage/component/UnitUploadButton";
 import CustomInput from "@/component/Input/CustomInput";
 import generateBigIntId from "@/component/layout/propertyandpricingpage/utils/generateId";
+import CustomTable from "@/component/layout/propertyandpricingpage/component/CustomTable";
+
+
 
 const AdditionalPremiums = ({ priceListData, isOpen, toggleAccordion }) => {
     //States
