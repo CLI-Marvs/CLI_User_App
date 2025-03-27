@@ -230,7 +230,7 @@ const TransactionSearchBar = ({
                     )}
                 </div>
             </div>
-            <CustomToolTip text="Clear Filter" position="top z-10">
+            <CustomToolTip text="Clear Filter" position="top z-50">
                 <button
                     className="  hover:bg-custom-grayF1 rounded-full text-custom-bluegreen hover:text-custom-lightblue"
                      onClick={handleRefreshPage}
