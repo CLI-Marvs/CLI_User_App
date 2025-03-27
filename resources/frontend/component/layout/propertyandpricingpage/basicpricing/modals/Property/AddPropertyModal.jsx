@@ -126,8 +126,10 @@ const AddPropertyModal = ({ propertyModalRef, fetchData }) => {
                 {/* <div className="w-full flex justify-center items-center h-12 bg-red-100 mb-4 rounded-lg">
                     <p className="flex text-[#C42E2E] ">Error message here</p>
                 </div> */}
-                <div className="pt-5 flex justify-start items-center mb-5">
-                    <p className="montserrat-bold">Add Property Details</p>
+                <div className="pt-5 flex justify-center items-center mb-5 ">
+                    <p className="montserrat-bold text-center text-custom-solidgreen ">
+                        Add Property Details
+                    </p>
                 </div>
                 <form>
                     <div className="flex flex-col gap-2">
@@ -135,13 +137,13 @@ const AddPropertyModal = ({ propertyModalRef, fetchData }) => {
                         TODO: fix the placing of the select box
                         */}
                         <div className="flex items-center border border-custom-gray81 rounded-md overflow-hidden">
-                            <span className="text-custom-gray81 bg-custombg3 flex items-center w-3/4 -mr-3 pl-3 py-1 montserrat-semibold text-sm">
+                            <span className="text-custom-bluegreen bg-custom-lightestgreen py-1.5 flex items-center w-3/4 -mr-3 pl-3  montserrat-semibold text-sm">
                                 Property Name
                             </span>
                             <div className="relative w-full">
                                 <select
                                     name="propertyName"
-                                    className="appearance-none w-full px-4 py-1 bg-white focus:outline-none border-0"
+                                    className="appearance-none w-full px-4 py-1  focus:outline-none border-0"
                                     onChange={handleInputChange}
                                     value={formData.propertyName}
                                 >
@@ -162,7 +164,7 @@ const AddPropertyModal = ({ propertyModalRef, fetchData }) => {
                         </div>
                         {/* Type */}
                         <div className="flex items-center border border-custom-gray81 rounded-md overflow-hidden">
-                            <span className="text-custom-gray81 bg-custombg3 flex items-center w-3/4 -mr-3 pl-3 py-1 montserrat-semibold text-sm">
+                            <span className="text-custom-bluegreen bg-custom-lightestgreen py-1.5  flex items-center w-3/4 -mr-3 pl-3   montserrat-semibold text-sm">
                                 Type
                             </span>
                             <div className="relative w-full">
@@ -186,7 +188,7 @@ const AddPropertyModal = ({ propertyModalRef, fetchData }) => {
 
                         {/* Tower/Phase */}
                         <div className="flex items-center border border-custom-gray81 rounded-md overflow-hidden">
-                            <span className="text-custom-gray81 bg-custombg3 flex w-3/4 pl-3 py-1 montserrat-semibold  text-sm">
+                            <span className="text-custom-bluegreen bg-custom-lightestgreen py-1.5  flex w-3/4 pl-3  montserrat-semibold  text-sm">
                                 Tower/Phase
                             </span>
                             <CustomInput
@@ -199,11 +201,11 @@ const AddPropertyModal = ({ propertyModalRef, fetchData }) => {
 
                         {/* tower_description */}
                         <div className="rounded-[5px] border-custom-gray81 border bg-custombg3">
-                            <div className="flex items-center justify-between">
-                                <p className="text-custom-gray81 text-sm bg-custombg3 pl-3  montserrat-semibold flex-grow mobile:text-xs mobile:w-[170px] montserrat-semibold">
+                            <div className="flex items-center justify-between ">
+                                <p className="text-custom-bluegreen bg-custom-lightestgreen py-[10px] lg:py-[12px] text-sm pl-3  montserrat-semibold flex-grow mobile:text-xs mobile:w-[170px] montserrat-semibold  rounded-tl-[5px]">
                                     Description
                                 </p>
-                                <span className="bg-white text-sm2 text-gray-400 font-normal py-3 border-l   pl-2 pr-12 mobile:pr-1 mobile:text-xs ml-auto rounded-tr-[4px]">
+                                <span className="bg-white text-sm2 text-gray-400 font-normal py-3 border-l pl-2 pr-12 mobile:pr-1 mobile:text-xs ml-auto rounded-tr-[4px]">
                                     {" "}
                                     {formData.tower_description?.length || 0}
                                     /350 characters
@@ -229,7 +231,7 @@ const AddPropertyModal = ({ propertyModalRef, fetchData }) => {
 
                         {/*Street/ Barangy */}
                         <div className="flex items-center border border-custom-gray81 rounded-md overflow-hidden">
-                            <span className="text-custom-gray81 bg-custombg3 flex w-3/4 pl-3 py-1 montserrat-semibold  text-sm">
+                            <span className="text-custom-bluegreen bg-custom-lightestgreen py-1.5  flex w-3/4 pl-3  montserrat-semibold  text-sm">
                                 Street/Barangay
                             </span>
                             <CustomInput
@@ -243,7 +245,7 @@ const AddPropertyModal = ({ propertyModalRef, fetchData }) => {
 
                         {/* City */}
                         <div className="flex items-center border border-custom-gray81 rounded-md overflow-hidden">
-                            <span className="text-custom-gray81 bg-custombg3 flex w-3/4 pl-3 py-1 montserrat-semibold text-sm">
+                            <span className="text-custom-bluegreen bg-custom-lightestgreen py-1.5  flex w-3/4 pl-3  montserrat-semibold text-sm">
                                 City
                             </span>
                             <CustomInput
@@ -257,7 +259,7 @@ const AddPropertyModal = ({ propertyModalRef, fetchData }) => {
 
                         {/* Province */}
                         <div className="flex items-center border border-custom-gray81 rounded-md overflow-hidden">
-                            <span className="text-custom-gray81 bg-custombg3 flex w-3/4 pl-3 py-1 montserrat-semibold  text-sm">
+                            <span className="text-custom-bluegreen bg-custom-lightestgreen py-1.5  flex w-3/4 pl-3 montserrat-semibold  text-sm">
                                 Province
                             </span>
                             <CustomInput
@@ -271,7 +273,7 @@ const AddPropertyModal = ({ propertyModalRef, fetchData }) => {
 
                         {/* Country */}
                         <div className="flex items-center border border-custom-gray81 rounded-md overflow-hidden">
-                            <span className="text-custom-gray81 bg-custombg3 flex w-3/4 pl-3 py-1 montserrat-semibold  text-sm">
+                            <span className="text-custom-bluegreen bg-custom-lightestgreen py-1.5  flex w-3/4 pl-3   montserrat-semibold  text-sm">
                                 Country
                             </span>
                             <CustomInput
@@ -286,7 +288,7 @@ const AddPropertyModal = ({ propertyModalRef, fetchData }) => {
                         {/* Google Map Link */}
                         <div className="rounded-[5px] border-custom-gray81 border bg-custombg3">
                             <div className="flex items-center justify-between">
-                                <p className="text-custom-gray81 text-sm bg-custombg3 pl-3  montserrat-semibold flex-grow mobile:text-xs mobile:w-[170px] py-1">
+                                <p className="text-custom-bluegreen bg-custom-lightestgreen py-1.5  pl-3  montserrat-semibold flex-grow mobile:text-xs mobile:w-[170px]  rounded-t-md">
                                     Google Map Link
                                 </p>
                                 {/* <span className="bg-white text-sm2 text-gray-400 font-normal py-3 border-l   pl-2 pr-12 mobile:pr-1 mobile:text-xs ml-auto rounded-tr-[4px]">
