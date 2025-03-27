@@ -23,19 +23,18 @@ export const SurveySection = (
         updateIsRequired,
         updateTitle,
         updateDescription,
+        updateConsent,
+        updateConsentDescription,
 
     }) => {
 
-
-    
-
-     const modalRef = useRef(null);
+    const modalRef = useRef(null);
 
     const handleOpenReview = () => {
-        if(modalRef.current) {
+        if (modalRef.current) {
             modalRef.current.showModal();
         }
-        
+
     };
 
     const handleCloseModal = () => {
@@ -43,12 +42,14 @@ export const SurveySection = (
             modalRef.current.close();
         }
     };
-     
+
     const handleInput = (e) => {
         // Auto-expand height
         e.target.style.height = "auto";
         e.target.style.height = e.target.scrollHeight + "px";
     };
+
+    
 
     return (
         <>
@@ -68,6 +69,9 @@ export const SurveySection = (
                                 if (!e.target.value) updateTitle("Untitled Form", sectionIndex);
                             }}
                             onChange={(e) => updateTitle(e.target.value, sectionIndex)}
+                            onKeyDown={(e) => {
+                                if (e.key === "Enter") e.preventDefault(); // Prevent Enter key
+                            }}
                         />
                     </div>
                     <div>
@@ -129,9 +133,66 @@ export const SurveySection = (
                         />
                     ))}
                 </div>
+                <div className='w-full border-b-1 border-custom-grayA5 my-[20px]' />
+                <div className='w-full rounded-[10px] bg-custom-lightestgreen p-[10px] flex flex-col'>
+                    <div className="flex flex-col gap-4 bg-white w-full rounded-[10px] pt-[18px] pb-[22px] px-[16px] border-2">
+                        {/* Consent Title */}
+                        <div className="w-full  border-b border-[#3A3A3A]">
+                            <textarea
+                                className="montserrat-medium text-[18px] w-full h-auto resize-none overflow-hidden px-[3px]"
+                                rows="1"
+                                value={data.consentTitle}
+                                onChange={(e) => updateConsent(e.target.value, sectionIndex)}
+                                maxLength={100}
+                                onFocus={(e) => {
+                                    if (data.consentTitle === "Declaration and Consent") {
+                                        updateConsent("consentTitle", "", sectionIndex);
+                                      }
+                                }}
+                                onBlur={(e) => {
+                                    if (!e.target.value) updateConsent("Declaration and Consent", sectionIndex);
+                                }}
+                                /* onFocus={() => {
+                                    if (data.consentTitle?.trim() === "Declaration and Consent") {
+                                      updateConsent("consentTitle", "", sectionIndex);
+                                    }
+                                  }}
+                                  onBlur={(e) => {
+                                    if (!e.target.value.trim()) {
+                                      updateConsent("consentTitle", "Declaration and Consent", sectionIndex);
+                                    }
+                                  }} */
+                                onKeyDown={(e) => e.key === "Enter" && e.preventDefault()}
+                            />
+                        </div>
+
+                        {/* Consent Checkbox and Description */}
+                        <div className="flex items-center gap-3 px-[10.9px]">
+                            <input
+                                type="checkbox"
+                                className="h-[22px] w-[22px] rounded-[2px] border border-gray-400 accent-custom-lightgreen"
+                                value="checkbox"
+                                disabled={true}
+                            />
+                             <textarea
+                                className="w-full min-h-[72px] resize-none overflow-y-auto leading-tight text-[16px] p-[6px]"
+                                rows="1"
+                                value={data.consentDescription}
+                                maxLength={1000}
+                                placeholder="Consent Description"
+                                onInput={handleInput}
+                                onChange={(e) => updateConsentDescription(e.target.value, sectionIndex)}
+                            />
+                        </div>
+                        {/* Required Message */}
+                        <div className="w-full flex justify-end">
+                            <p className="text-[#EB4444] montserrat-light text-xs">Required</p>
+                        </div>
+                    </div>
+                </div>
             </div>
             <div>
-                <SurveyReview modalRef={modalRef} handleCloseModal={handleCloseModal} />
+                <SurveyReview modalRef={modalRef} handleCloseModal={handleCloseModal} surveyData={data} />
             </div>
         </>
 

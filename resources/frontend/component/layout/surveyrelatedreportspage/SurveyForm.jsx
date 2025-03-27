@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom';
 import { MdKeyboardArrowLeft } from "react-icons/md";
 import { SurveySection } from './surveyComponents/SurveySection';
+import apiService from '../../servicesApi/apiService';
 const SurveyForm = () => {
 
   const navigate = useNavigate();
@@ -34,6 +35,8 @@ const SurveyForm = () => {
               required: false,
             },
           ],
+          consentTitle: "Declaration and Consent",
+          consentDescription: "I hereby agree and consent to CLI and its authorized personnel collecting, storing, and processing the personal data I have provided in this form. This is for the purpose of proper identification and customer satisfaction reporting.",
         },
       ],
     },
@@ -43,38 +46,38 @@ const SurveyForm = () => {
 
 
   // Update Survey Title
-const updateTitle = (newTitle, sectionIndex) => {
-  setSurveyData((prev) =>
-    prev.map((survey, idx) =>
-      idx === 0
-        ? {
-            ...survey,
-            data: survey.data.map((item, i) =>
-              i === sectionIndex ? { ...item, title: newTitle } : item
-            ),
-          }
-        : survey
-    )
-  );
-};
+  const updateTitle = (newTitle, sectionIndex) => {
+    setSurveyData((prev) =>
+      prev.map((survey, idx) =>
+        idx === 0
+          ? {
+              ...survey,
+              data: survey.data.map((item, i) =>
+                i === sectionIndex ? { ...item, title: newTitle } : item
+              ),
+            }
+          : survey
+      )
+    );
+  };
 
-// Update Survey Description
-const updateDescription = (newDescription, sectionIndex) => {
-  setSurveyData((prev) =>
-    prev.map((survey, idx) =>
-      idx === 0
-        ? {
-            ...survey,
-            data: survey.data.map((item, i) =>
-              i === sectionIndex
-                ? { ...item, description: newDescription }
-                : item
-            ),
-          }
-        : survey
-    )
-  );
-};
+  // Update Survey Description
+  const updateDescription = (newDescription, sectionIndex) => {
+    setSurveyData((prev) =>
+      prev.map((survey, idx) =>
+        idx === 0
+          ? {
+              ...survey,
+              data: survey.data.map((item, i) =>
+                i === sectionIndex
+                  ? { ...item, description: newDescription }
+                  : item
+              ),
+            }
+          : survey
+      )
+    );
+  };
 
 
   const addQuestion = (sectionIndex) => {
@@ -90,7 +93,7 @@ const updateDescription = (newDescription, sectionIndex) => {
                   dataQASet: [
                     ...section.dataQASet,
                     {
-                      id: generateId(), // Ensure unique ID
+                      id: generateId(), 
                       question: "",
                       inputType: "dropdown",
                       option: [{
@@ -277,14 +280,53 @@ const updateDescription = (newDescription, sectionIndex) => {
     );
   };
 
+  const updateConsentTitle = (newConsentTitle, sectionIndex) => {
+    setSurveyData((prev) =>
+      prev.map((survey, idx) =>
+        idx === 0
+          ? {
+              ...survey,
+              data: survey.data.map((item, i) =>
+                i === sectionIndex
+                  ? { ...item, consentTitle: newConsentTitle }
+                  : item
+              ),
+            }
+          : survey
+      )
+    );
+  };
+
+  const updateConsentDescription = (newConsentDescription, sectionIndex) => {
+    setSurveyData((prev) =>
+      prev.map((survey, idx) =>
+        idx === 0
+          ? {
+              ...survey,
+              data: survey.data.map((item, i) =>
+                i === sectionIndex
+                  ? { ...item, consentDescription: newConsentDescription }
+                  : item
+              ),
+            }
+          : survey
+      )
+    );
+  };
+
   
   
   
   
   
 
-  const handleSubmit = () => {
-    console.log("surveyData", surveyData[0]?.data);
+  const handleSubmit = async () => {
+    try {
+      await apiService.post('/surveys', { surveyData });
+      alert('Survey submitted successfully!');
+    } catch (error) {
+      console.error('Error saving survey:', error);
+    }
   };
 
 
@@ -310,6 +352,8 @@ const updateDescription = (newDescription, sectionIndex) => {
               updateIsRequired={updateIsRequired}
               updateTitle={updateTitle}
               updateDescription={updateDescription}
+              updateConsent={updateConsentTitle}
+              updateConsentDescription={updateConsentDescription}
             />
           ))}
         </div>

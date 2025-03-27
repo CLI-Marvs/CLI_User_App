@@ -10,6 +10,7 @@ use App\Http\Controllers\PriceBasicDetailController;
 use App\Http\Controllers\PriceListMasterController;
 use App\Http\Controllers\PropertyMasterController;
 use App\Http\Controllers\SapController;
+use App\Http\Controllers\SurveyController;
 use App\Http\Controllers\UnitController;
 use App\Models\DynamicBanner;
 use App\Models\PropertyMaster;
@@ -130,4 +131,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/get-banner', [DynamicBannerController::class, 'getBanner']);
     Route::delete('/banner/{id}', [DynamicBannerController::class, 'deleteBanner']);
     Route::post('/update-banner', [DynamicBannerController::class, 'updateBanner']);
+
+
+    Route::post('/surveys', [SurveyController::class, 'store']);
 });
