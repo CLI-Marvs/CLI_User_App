@@ -51,9 +51,10 @@ import TransactionSidebar from "./layout/transaction/TransactionSidebar";
 import InvoicesView from "@/component/views/pages/transactionViews/InvoicesView";
 import TransactionView from "./views/pages/transactionViews/TransactionView";
 import AutoPostingView from "./views/pages/transactionViews/AutoPostingView";
+import ErrorPage from "@/component/ErrorElement/ErrorPage";
 
 // PrivateRoute component to check authentication and permissions( department and employee )
-const PrivateRoute = ({ requiredPermission ,children}) => {
+const PrivateRoute = ({ requiredPermission, children }) => {
     const { hasPermission } = useStateContext();
 
     // Check for authentication token
@@ -74,10 +75,10 @@ const PrivateRoute = ({ requiredPermission ,children}) => {
     }
 
     // Render the child routes if authentication and permission checks pass
-     return children ? children : <Outlet />;
+    return children ? children : <Outlet />;
 };
+
 const App = () => {
-    
     /**
      * Implement storage event listener to handle authToken changes across tabs
      */
@@ -128,8 +129,8 @@ const App = () => {
         return (
             <>
                 <div className="flex bg-white relative overflow-x-hidden min-h-screen">
-                        <TransactionSidebar />
-                        <Outlet />
+                    <TransactionSidebar />
+                    <Outlet />
                 </div>
             </>
         );
@@ -350,6 +351,10 @@ const App = () => {
         {
             path: "/paymentmethod/payonlinenow",
             element: <PaymentSectionView />,
+        },
+        {
+            path: "*",
+            element: <ErrorPage />,
         },
     ]);
 

@@ -1,7 +1,11 @@
 import { useState, useCallback, useEffect } from "react";
 import _ from "lodash";
 
-const usePaginatedFetch = (fetchFunction, defaultFilters = {}) => {
+const usePaginatedFetch = (
+    fetchFunction,
+    defaultFilters = {},
+    extraParams = {}
+) => {
     const [data, setData] = useState([]);
     const [pageState, setPageState] = useState({
         pagination: null,
@@ -12,7 +16,7 @@ const usePaginatedFetch = (fetchFunction, defaultFilters = {}) => {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
     const [isFirstLoad, setIsFirstLoad] = useState(true);
-
+     
     // Fetch data from the API
     const fetchData = useCallback(
         async (
@@ -38,7 +42,12 @@ const usePaginatedFetch = (fetchFunction, defaultFilters = {}) => {
                     setIsLoading(true);
                 }
 
-                const response = await fetchFunction(page, 10, filters);
+                const response = await fetchFunction(
+                    page,
+                    10,
+                    filters,
+                    extraParams
+                );
 
                 const { data: newData, pagination: newPagination } =
                     response.data;
@@ -61,7 +70,13 @@ const usePaginatedFetch = (fetchFunction, defaultFilters = {}) => {
                 if (!silentFetch) setIsLoading(false);
             }
         },
-        [pageState.currentPage, isFirstLoad, previousFilters, filters]
+        [
+            pageState.currentPage,
+            isFirstLoad,
+            previousFilters,
+            filters,
+            extraParams,
+        ]
     );
 
     useEffect(() => {

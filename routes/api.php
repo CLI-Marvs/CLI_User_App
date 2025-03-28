@@ -24,7 +24,7 @@ use App\Http\Controllers\TransactionController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
-})->middleware('auth:sanctum');
+})->middleware(['auth:sanctum', 'throttle:60,1']);
 
 
 Route::middleware('auth:sanctum')->post('/auth/logout', [AuthController::class, 'logout']);
@@ -49,9 +49,9 @@ Route::post('/send-message', [ConcernController::class, 'sendMessage']);
 
 Route::get('/get-logs/{ticketId}', [ConcernController::class, 'getInquiryLogs']);
 
-Route::get('/get-messageId/{ticketId}', [ConcernController::class, 'getMessageId']);
+Route::get('/get-messageId/{ticketId}', [ConcernController::class, 'getMessageId']);    
  */
-Route::get('/concern-year', [ConcernController::class, 'getCreatedDates']);
+Route::get('/concern-year', [ConcernController::class, 'getCreatedDates'])->middleware('throttle:60,1');
 Route::get('/report-monthly', [ConcernController::class, 'getMonthlyReports']);
 Route::get('/category-monthly', [ConcernController::class, 'getInquiriesByCategory']);
 Route::get('/inquiries-property', [ConcernController::class, 'getInquiriesPerProperty']);

@@ -31,6 +31,38 @@ export const priceListMasterService = {
         }
     },
 
+    getPriceListsForReviewerOrApprover: async (
+        page = 1,
+        perPage = 10,
+        filters,
+        extraParams
+    ) => {
+        console.log("extraParams",extraParams);
+        try {
+            const cleanFilters = Object.fromEntries(
+                Object.entries(filters || {}).filter(
+                    ([_, v]) => v != null && v !== ""
+                )
+            );
+            const empId = extraParams.empId;
+           
+            // Convert filters object into query parameters
+            const queryParams = new URLSearchParams({
+                page,
+                per_page: perPage,
+                ...cleanFilters, // Spread the filters object
+            }).toString();
+
+            const response = await apiService.get(
+                `price-list-masters/approved-or-reviewed/${empId}?${queryParams}`
+            );
+            return response;
+        } catch (error) {
+            console.error("Error getting price list masters:", error);
+            throw error;
+        }
+    },
+
     /**
      * Stores a new price list master by sending a POST request to the API.
      * @param {Object} payload - The data to be sent in the request body.

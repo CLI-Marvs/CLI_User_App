@@ -323,15 +323,25 @@ class PriceListMasterRepository
 
     public function getPriceListsForReviewerOrApprover(int $userId)
     {
-        $query = $this->getPriceListMastersWithRelations();
+        try {
+            // Retrieve base query with all necessary relations
+            $query = $this->model;
 
-        // Apply filtering for approved/reviewed employees
-        // $userId = auth()->id(); // Get logged-in user ID
+            // Filter price lists where the user is a reviewer or approver
+            $priceListMasters = $query->where(function ($q) use ($userId) {
+                $q->whereJsonContains('reviewed_by_employee_id', $userId)
+                    ->orWhereJsonContains('approved_by_employee_id', $userId);
+            })
+                ->with(['additionalRelations']) // Add any necessary eager loading
+                ->paginate(15); // Optional: add pagination
 
-        $queryAllPriceListMasters =   $query->where(function ($q) use ($userId) {
-            $q->where('reviewed_by_employee_id', $userId)
-                ->orWhere('approved_by_employee_id', $userId);
-        });
-        dd($queryAllPriceListMasters);
+            return $priceListMasters;
+        } catch (\Exception $e) {
+            // Log the error
+            \Log::error('Error retrieving price lists: ' . $e->getMessage());
+
+            // Return an empty collection or throw a custom exception
+            return collect();
+        }
     }
 }

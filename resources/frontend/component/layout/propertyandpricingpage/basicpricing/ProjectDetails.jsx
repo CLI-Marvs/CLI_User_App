@@ -183,8 +183,7 @@ const ProjectDetails = ({ priceListData }) => {
                             <div className="h-[26px] w-auto px-[15px] py-[5px] bg-white rounded-[5px]">
                                 <p className="text-custom-gray81 text-xs">
                                     {toLowerCaseText(
-                                        priceListData?.data?.property_name ||
-                                            priceListData?.property_name
+                                        priceListData?.data?.property_name
                                     )}
                                 </p>
                             </div>
@@ -199,10 +198,10 @@ const ProjectDetails = ({ priceListData }) => {
                             {/* Type */}
                             <div className="h-[26px] w-auto px-[15px] py-[5px] bg-white rounded-[5px]">
                                 <p className="text-custom-gray81 text-xs">
-                                    {priceListData?.data
-                                        ?.property_commercial_detail?.type ||
-                                        priceListData
-                                            ?.property_commercial_detail?.type}
+                                    {
+                                        priceListData?.data
+                                            ?.property_commercial_detail?.type
+                                    }
                                 </p>
                             </div>
                         </div>
@@ -215,9 +214,10 @@ const ProjectDetails = ({ priceListData }) => {
                             </div>
                             <div className=" w-auto h-[26px] px-[15px] py-[5px] bg-white rounded-[5px]">
                                 <p className=" text-custom-gray81 text-xs">
-                                    {priceListData?.data?.tower_phases?.[0]
-                                        ?.tower_phase_name ||
-                                        priceListData?.tower_phase_name}
+                                    {
+                                        priceListData?.data?.tower_phases?.[0]
+                                            ?.tower_phase_name
+                                    }
                                 </p>
                             </div>
                         </div>
