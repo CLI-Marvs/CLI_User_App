@@ -3,6 +3,7 @@ import UploadUnitDetailsModal from "@/component/layout/propertyandpricingpage/ba
 import expectedHeaders from "@/constant/data/excelHeader";
 import * as XLSX from "xlsx";
 import { showToast } from "@/util/toastUtil";
+import { SPREADSHEET_FILE_EXTENSIONS } from "@/constant/data/spreadSheetExtension";
 
 const UnitUploadButton = ({
     linkText = "Upload",
@@ -18,7 +19,7 @@ const UnitUploadButton = ({
     const [fileName, setFileName] = useState("");
     const [excelDataRows, setExcelDataRows] = useState([]);
     const [selectedExcelHeader, setSelectedExcelHeader] = useState([]);
- 
+
     //Event handler
     //Handle to open the unit upload modal
     const handleOpenUnitUploadModal = () => {
@@ -50,6 +51,17 @@ const UnitUploadButton = ({
         const file = event.target.files[0];
         setFileName(file.name);
         const reader = new FileReader();
+        const extension = file?.name.split(".").pop().toLowerCase();
+       
+        if (!SPREADSHEET_FILE_EXTENSIONS.includes(extension)) {
+            showToast("Invalid file format. Please upload a valid Excel file.", "error");
+            return;
+        }
+
+        if (file.size > 5 * 1024 * 1024) { 
+            showToast("File size exceeds the 5MB limit. Please upload a smaller file.", "error");
+            return;
+        }
 
         reader.onload = (e) => {
             const data = new Uint8Array(e.target.result);
