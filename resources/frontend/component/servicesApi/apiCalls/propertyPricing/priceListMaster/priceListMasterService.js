@@ -10,10 +10,9 @@ export const priceListMasterService = {
         try {
             const cleanFilters = Object.fromEntries(
                 Object.entries(filters || {}).filter(
-                    ([_, v]) => v != null && v !== ""
+                    ([, v]) => v != null && v !== "" // Ignore the key
                 )
             );
-
             // Convert filters object into query parameters
             const queryParams = new URLSearchParams({
                 page,
@@ -37,15 +36,15 @@ export const priceListMasterService = {
         filters,
         extraParams
     ) => {
-        console.log("extraParams",extraParams);
+        console.log("extraParams", extraParams);
         try {
             const cleanFilters = Object.fromEntries(
                 Object.entries(filters || {}).filter(
-                    ([_, v]) => v != null && v !== ""
+                    ([, v]) => v != null && v !== "" // Ignore the key
                 )
             );
             const empId = extraParams.empId;
-           
+
             // Convert filters object into query parameters
             const queryParams = new URLSearchParams({
                 page,

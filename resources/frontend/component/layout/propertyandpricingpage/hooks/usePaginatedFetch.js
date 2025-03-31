@@ -16,7 +16,7 @@ const usePaginatedFetch = (
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
     const [isFirstLoad, setIsFirstLoad] = useState(true);
-     
+
     // Fetch data from the API
     const fetchData = useCallback(
         async (
@@ -34,7 +34,7 @@ const usePaginatedFetch = (
                 !isFilterChanged &&
                 isSamePage
             ) {
-                return { data, pagination };
+                return { data, pagination: pageState.pagination };
             }
 
             try {

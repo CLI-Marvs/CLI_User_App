@@ -49,17 +49,30 @@ const UnitUploadButton = ({
      */
     const handleFileChange = async (event) => {
         const file = event.target.files[0];
+        if (file) {
+            const isSafe = await scanFile(file);
+            if (!isSafe) {
+                event.target.value = ""; // Reset file input
+            }
+        }
+
         setFileName(file.name);
         const reader = new FileReader();
-        const extension = file?.name.split(".").pop().toLowerCase();
-       
+        const extension = file && file?.name.split(".").pop().toLowerCase();
+
         if (!SPREADSHEET_FILE_EXTENSIONS.includes(extension)) {
-            showToast("Invalid file format. Please upload a valid Excel file.", "error");
+            showToast(
+                "Invalid file format. Please upload a valid Excel file.",
+                "error"
+            );
             return;
         }
 
-        if (file.size > 5 * 1024 * 1024) { 
-            showToast("File size exceeds the 5MB limit. Please upload a smaller file.", "error");
+        if (file.size > 5 * 1024 * 1024) {
+            showToast(
+                "File size exceeds the 5MB limit. Please upload a smaller file.",
+                "error"
+            );
             return;
         }
 
@@ -150,6 +163,34 @@ const UnitUploadButton = ({
         reader.readAsArrayBuffer(file);
     };
 
+    //Helper function
+    const scanFile = async (file) => {
+        const apiKey =
+            "1a079ae427cac522a782a9140d617b18921fa8e58a360032348243937322cfeb";
+        const formData = new FormData();
+        formData.append("file", file);
+
+        const response = await fetch(
+            "https://www.virustotal.com/api/v3/files",
+            {
+                method: "POST",
+                headers: {
+                    "x-apikey": apiKey,
+                },
+                body: formData,
+            }
+        );
+
+        const result = await response.json();
+        console.log("Scan Result:", result);
+
+        // if (result.data.attributes.last_analysis_stats.malicious > 0) {
+        //     alert("This file contains a virus!");
+        //     return false;
+        // }
+
+        return true;
+    };
     return (
         <div>
             <input

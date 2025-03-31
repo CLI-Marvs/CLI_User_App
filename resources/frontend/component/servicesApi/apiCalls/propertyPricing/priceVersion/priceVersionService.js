@@ -6,7 +6,7 @@ export const priceVersionService = {
         try {
             const cleanFilters = Object.fromEntries(
                 Object.entries(filters || {}).filter(
-                    ([_, v]) => v != null && v !== ""
+                    ([, v]) => v != null && v !== "" // Ignore the key
                 )
             );
             // Convert filters object into query parameters

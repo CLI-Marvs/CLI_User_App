@@ -47,7 +47,7 @@ const PricingMasterList = () => {
     const navigate = useNavigate();
     const dropdownRef = useRef(null);
     const propertyModalRef = useRef(null);
-   
+
     //Hooks
     //Hide the search filter dropdown when clicking outside of it
     useEffect(() => {
@@ -74,7 +74,7 @@ const PricingMasterList = () => {
             ...prevFilters,
             [name]: value,
         }));
-    }; 
+    };
 
     //Handle search filter date change
     const handleDateChange = (date) => {
@@ -163,6 +163,7 @@ const PricingMasterList = () => {
         setIsFilterVisible(!isFilterVisible);
     };
 
+    //Determines if a button should be disabled based on the provided search filters.
     const isButtonDisabled = (searchFilters) => {
         const allEmpty =
             !searchFilters.property &&

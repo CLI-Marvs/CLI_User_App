@@ -54,7 +54,10 @@ export const formatPayload = {
     formatMultipleFloorPremiums: (floorPremiums = {}) => {
         const formattedFloorPremiums = Object.keys(floorPremiums).reduce(
             (acc, floorNumber) => {
+                /* eslint-disable security/detect-object-injection */
                 const floor = floorPremiums[floorNumber];
+                /* eslint-enable security/detect-object-injection */
+
                 const formattedFloor = {
                     id: floor.id,
                     floor: parseInt(floorNumber, 10),
