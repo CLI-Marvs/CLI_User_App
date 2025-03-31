@@ -9,6 +9,7 @@ const PriceListMasterRow = ({
     toggled,
     setToggled,
 }) => {
+    console.log("item", item);
     return (
         <tr
             onClick={(event) => {
@@ -69,7 +70,7 @@ const PriceListMasterRow = ({
                                 {item?.status === "On-going Approval"
                                     ? "Cancel"
                                     : "Edit"}{" "}
-                                - {item?.price_list_master_id}
+                                {/* - {item?.price_list_master_id} */}
                             </p>
                         )}
                 </div>
@@ -102,7 +103,7 @@ const PriceListMasterRow = ({
             <td className="w-[150px] flex items-center justify-start">
                 <div>
                     <p>{toLowerCaseText(item?.property_name)}</p>
-                    <p>Tower {item?.tower_phase_name}</p>
+                    <p>Tower {item?.tower_phases[0]?.tower_phase_name}</p>
                 </div>
             </td>
             <td className="w-[200px] flex items-center justify-start">
