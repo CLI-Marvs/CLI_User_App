@@ -51,7 +51,7 @@ Route::get('/get-logs/{ticketId}', [ConcernController::class, 'getInquiryLogs'])
 
 Route::get('/get-messageId/{ticketId}', [ConcernController::class, 'getMessageId']);    
  */
-Route::get('/concern-year', [ConcernController::class, 'getCreatedDates'])->middleware('throttle:60,1');
+Route::get('/concern-year', [ConcernController::class, 'getCreatedDates']);
 Route::get('/report-monthly', [ConcernController::class, 'getMonthlyReports']);
 Route::get('/category-monthly', [ConcernController::class, 'getInquiriesByCategory']);
 Route::get('/inquiries-property', [ConcernController::class, 'getInquiriesPerProperty']);

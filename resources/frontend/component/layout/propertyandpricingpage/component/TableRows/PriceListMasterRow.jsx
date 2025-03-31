@@ -9,7 +9,6 @@ const PriceListMasterRow = ({
     toggled,
     setToggled,
 }) => {
-    console.log("item", item);
     return (
         <tr
             onClick={(event) => {
