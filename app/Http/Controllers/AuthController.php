@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use Log;
 use App\Models\User;
 use App\Models\Employee;
+use App\Models\ActivityLog;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -75,12 +77,31 @@ class AuthController extends Controller
 
         try {
             $googleUser = Socialite::driver("google")->user();
-
-          /*   if (!$request->has('code')) {
+            // Log::info('Google callback request', [
+            //     'request' => $request->all(),
+            //     $googleUser
+            // ]);
+            /*   if (!$request->has('code')) {
                 return redirect('/')->with('error', 'Authentication failed. Missing code parameter.');
             } */
 
             if (strpos($googleUser->email, '@cebulandmasters.com') === false) {
+                // $test = ActivityLog::create([
+                //     'user_id' => $googleUser->id,
+                //     'action' => 'login_failed',
+                //     'ip_address' => $request->ip(),
+                //     'device' => $request->header('User-Agent'),
+                // ]);
+                // dd($test);
+
+                // ActivityLog::create([
+                //     'user_id' => null, // Since the user does not exist in the system
+                //     'action' => 'login_failed',
+                //     'ip_address' => $request->ip(),
+                //     'device' => $request->header('User-Agent'),
+                //     'created_at' => now(),
+                //     'updated_at' => now()
+                // ]);
                 return redirect('/?error=' . urlencode('Authentication failed. You need to use your CLI email.'));
             }
 
@@ -112,15 +133,15 @@ class AuthController extends Controller
                 ]);
             }
             $userAccessData = $this->permissionService->getUserAccessData($user);
-        
+
             Auth::login($user);
 
             $token = $user->createToken('authToken')->plainTextToken;
             $userAccessDataEncoded  = urlencode(json_encode($userAccessData));
-           
+
             // Redirect with token and permissions
             return redirect(config("app.frontend_url") . "/callback?token=" . $token . "&userAccessData=" . $userAccessDataEncoded);
-        }   catch (\Exception $e) {
+        } catch (\Exception $e) {
             return redirect('/')->with('error', 'Authentication failed. Missing code parameter.');
         }
     }
