@@ -49,7 +49,7 @@ const PricingMasterList = () => {
     const propertyModalRef = useRef(null);
 
     //Hooks
-    //Hide the search filter dropdown when clicking outside of it
+    //Hide the search filter dropdown when clicking outside of it, test
     useEffect(() => {
         const handleOutsideClick = (event) => {
             if (
