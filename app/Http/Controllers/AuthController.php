@@ -82,26 +82,19 @@ class AuthController extends Controller
             //     $googleUser
             // ]);
             /*   if (!$request->has('code')) {
-                return redirect('/')->with('error', 'Authentication failed. Missing code parameter.');
+                return redirect('/')->with('error', 'Authentication failed. Missing code parameter.');                <?php
             } */
+            Log::error('Google OAuth error', ['error' => 'An error occurred during Google OAuth callback.']);
 
-            if (strpos($googleUser->email, '@cebulandmasters.com') === false) {
-                // $test = ActivityLog::create([
-                //     'user_id' => $googleUser->id,
-                //     'action' => 'login_failed',
-                //     'ip_address' => $request->ip(),
-                //     'device' => $request->header('User-Agent'),
-                // ]);
-                // dd($test);
-
-                // ActivityLog::create([
-                //     'user_id' => null, // Since the user does not exist in the system
-                //     'action' => 'login_failed',
-                //     'ip_address' => $request->ip(),
-                //     'device' => $request->header('User-Agent'),
-                //     'created_at' => now(),
-                //     'updated_at' => now()
-                // ]);
+            if (!$googleUser->email || strpos($googleUser->email, '@cebulandmasters.com') === false) {
+                ActivityLog::create([
+                    'user_id' => null, // Since the user does not exist in the system
+                    'action' => 'login_failed',
+                    'ip_address' => $request->ip(),
+                    'device' => $request->header('User-Agent'),
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ]);
                 return redirect('/?error=' . urlencode('Authentication failed. You need to use your CLI email.'));
             }
 
@@ -124,12 +117,24 @@ class AuthController extends Controller
                 return redirect('/?error=' .
                     urlencode('Email ' . $googleUser->email . ' doest not exist',));
             } else {
+                // Get the real IP address
+                $ipAddress = $request->header('X-Forwarded-For')
+                    ? explode(',', $request->header('X-Forwarded-For'))[0]
+                    : $request->ip();
                 $user->update([
                     'google_id' => $googleUser->id,
                     'email_verify_at' => now(),
                     'profile_picture' => $googleUser->avatar,
                     'updated_at' => now(),
                     'created_at' => now()
+                ]);
+                ActivityLog::create([
+                    'user_id' => $user->id,
+                    'action' => 'login_success',
+                    'ip_address' => $ipAddress,
+                    'device' => $request->header('User-Agent'),
+                    'created_at' => now(),
+                    'updated_at' => now()
                 ]);
             }
             $userAccessData = $this->permissionService->getUserAccessData($user);
@@ -151,7 +156,18 @@ class AuthController extends Controller
     public function logout(Request $request)
     {
         $user = $request->user();
-
+        $ipAddress = $request->header('X-Forwarded-For')
+            ? explode(',', $request->header('X-Forwarded-For'))[0]
+            : $request->ip();
+            
+        ActivityLog::create([
+            'user_id' => $user->id,
+            'action' => 'logout_account',
+            'ip_address' => $ipAddress,
+            'device' => $request->header('User-Agent'),
+            'created_at' => now(),
+            'updated_at' => now()
+        ]);
         $user->currentAccessToken()->delete();
 
         return response()->json(['message' => 'Logged out successfully'], 200);
