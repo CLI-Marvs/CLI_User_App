@@ -10,10 +10,9 @@ export const priceListMasterService = {
         try {
             const cleanFilters = Object.fromEntries(
                 Object.entries(filters || {}).filter(
-                    ([_, v]) => v != null && v !== ""
+                    ([, v]) => v != null && v !== "" // Ignore the key
                 )
             );
-
             // Convert filters object into query parameters
             const queryParams = new URLSearchParams({
                 page,
@@ -23,6 +22,38 @@ export const priceListMasterService = {
 
             const response = await apiService.get(
                 `price-list-masters?${queryParams}`
+            );
+            return response;
+        } catch (error) {
+            console.error("Error getting price list masters:", error);
+            throw error;
+        }
+    },
+
+    getPriceListsForReviewerOrApprover: async (
+        page = 1,
+        perPage = 10,
+        filters,
+        extraParams
+    ) => {
+        console.log("extraParams", extraParams);
+        try {
+            const cleanFilters = Object.fromEntries(
+                Object.entries(filters || {}).filter(
+                    ([, v]) => v != null && v !== "" // Ignore the key
+                )
+            );
+            const empId = extraParams.empId;
+
+            // Convert filters object into query parameters
+            const queryParams = new URLSearchParams({
+                page,
+                per_page: perPage,
+                ...cleanFilters, // Spread the filters object
+            }).toString();
+
+            const response = await apiService.get(
+                `price-list-masters/approved-or-reviewed/${empId}?${queryParams}`
             );
             return response;
         } catch (error) {

@@ -24,7 +24,7 @@ use App\Http\Controllers\TransactionController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
-})->middleware('auth:sanctum');
+})->middleware(['auth:sanctum', 'throttle:60,1']);
 
 
 Route::middleware('auth:sanctum')->post('/auth/logout', [AuthController::class, 'logout']);
@@ -49,16 +49,20 @@ Route::post('/send-message', [ConcernController::class, 'sendMessage']);
 
 Route::get('/get-logs/{ticketId}', [ConcernController::class, 'getInquiryLogs']);
 
-Route::get('/get-messageId/{ticketId}', [ConcernController::class, 'getMessageId']);
+Route::get('/get-messageId/{ticketId}', [ConcernController::class, 'getMessageId']);    
  */
 Route::get('/concern-year', [ConcernController::class, 'getCreatedDates']);
-Route::get('/report-monthly', [ConcernController::class, 'getMonthlyReports']);
-Route::get('/category-monthly', [ConcernController::class, 'getInquiriesByCategory']);
-Route::get('/inquiries-property', [ConcernController::class, 'getInquiriesPerProperty']);
-Route::get('/inquiries-department', [ConcernController::class, 'getInquiriesPerDepartment']);
 Route::get('/inquiries-channel', [ConcernController::class, 'getInquiriesPerChannel']);
 Route::get('/communication-type-property', [ConcernController::class, 'getCommunicationType']);
 
+Route::middleware('auth:sanctum')->group(
+    function () {
+        Route::get('/category-monthly', [ConcernController::class, 'getInquiriesByCategory']);
+        Route::get('/inquiries-property', [ConcernController::class, 'getInquiriesPerProperty']);
+        Route::get('/report-monthly', [ConcernController::class, 'getMonthlyReports']);
+        Route::get('/inquiries-department', [ConcernController::class, 'getInquiriesPerDepartment']);
+    }
+);
 
 Route::post('delete-concerns', [ConcernController::class, 'deleteConcern']);
 Route::post('close-concerns', [ConcernController::class, 'markAsClosed']);
@@ -103,10 +107,9 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/customer/data', 'getCustomerData');
         Route::get('/customer/details', 'getCustomerDetailsByEmail');
         Route::get('/transaction-list', 'retrieveTransactions');
-        Route::get('/invoices-list','retrieveInvoices');
-        Route::get('/bank-statements-list','retrieveBankStatements');
+        Route::get('/invoices-list', 'retrieveInvoices');
+        Route::get('/bank-statements-list', 'retrieveBankStatements');
         Route::patch('/transaction-update', 'updateTransactionStatus');
-        
     });
 
     Route::controller(ConcernController::class)->group(function () {
@@ -161,6 +164,7 @@ Route::middleware('auth:sanctum')->group(function () {
             '/export-excel',
             [PriceListMasterController::class, 'exportExcel']
         );
+        Route::get('/approved-or-reviewed/{userId}', [PriceListMasterController::class, 'getPriceListsForReviewerOrApprover']);
     });
 
     /* Units */
@@ -171,6 +175,7 @@ Route::middleware('auth:sanctum')->group(function () {
         // Route::get('/tower/{towerPhaseId}/floor/{selectedFloor}/units/{excelId}', [UnitController::class, 'getUnits']);
         Route::post('/store-unit', [UnitController::class, 'storeUnit']);
         Route::post('/save-computed-pricing-data', [UnitController::class, 'saveComputedUnitPricingData']);
+        Route::post('/scan-file', [UnitController::class, 'scanFile']);
     });
 
 

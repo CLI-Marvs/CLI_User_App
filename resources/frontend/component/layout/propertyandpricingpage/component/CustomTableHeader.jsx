@@ -7,7 +7,7 @@ const CustomTableHeader = ({ columns, className = "" }) => {
                 {columns.map((col, index) => (
                     <th
                         key={index}
-                        className={`flex justify-start shrink-0 pl-1 ${col.width}   `}
+                        className={`text-start shrink-0 pl-1 ${col.width}   `}
                     >
                         {col.label}
                     </th>

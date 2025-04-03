@@ -28,15 +28,7 @@ class PriceListMasterController extends Controller
     public function index(IndexPriceListRequest $request)
     {
         $validatedData = $request->validated();
-        // dd($validatedData);
-        // Capture query parameters from request
-        // $perPage = $request->input('per_page', 10);
-        // $page = $request->input('page', 1);
-
-        // $priceListMastersResponse = $this->service->index($page, $perPage);
         $priceListMastersResponse = $this->service->index($validatedData);
-
-
         return response()->json([
             'data' => $priceListMastersResponse['data'],
             'pagination' => $priceListMastersResponse['pagination']
@@ -50,7 +42,7 @@ class PriceListMasterController extends Controller
     {
         try {
             $storeResponse = $this->service->store($request->validated());
-            
+
             if ($storeResponse['success']) {
                 return response()->json([
                     'message' => $storeResponse['message'],
@@ -75,15 +67,6 @@ class PriceListMasterController extends Controller
             );
         }
     }
-
-    /**
-     * Filter the price list base on filter search params
-     */
-    // public function filterPriceList(FilterPriceListRequest $request)
-    // {
-    //     $filterResponse = $this->service->filterPriceList($request->validated());
-    //     dd($filterResponse);
-    // }
 
     /*
      * Update the specified resource in storage.
@@ -115,6 +98,8 @@ class PriceListMasterController extends Controller
         }
     }
 
+
+    /* Custom functions */
     /**
      * Update the price list master status 
      */
@@ -156,5 +141,12 @@ class PriceListMasterController extends Controller
                 500
             );
         }
+    }
+
+
+    public function getPriceListsForReviewerOrApprover(int $userId)
+    {
+       
+        $pricelistResponse = $this->service->getPriceListsForReviewerOrApprover($userId);
     }
 }

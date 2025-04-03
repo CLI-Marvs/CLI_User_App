@@ -47,9 +47,9 @@ const PricingMasterList = () => {
     const navigate = useNavigate();
     const dropdownRef = useRef(null);
     const propertyModalRef = useRef(null);
-   
+
     //Hooks
-    //Hide the search filter dropdown when clicking outside of it
+    //Hide the search filter dropdown when clicking outside of it, test
     useEffect(() => {
         const handleOutsideClick = (event) => {
             if (
@@ -74,7 +74,7 @@ const PricingMasterList = () => {
             ...prevFilters,
             [name]: value,
         }));
-    }; 
+    };
 
     //Handle search filter date change
     const handleDateChange = (date) => {
@@ -163,6 +163,7 @@ const PricingMasterList = () => {
         setIsFilterVisible(!isFilterVisible);
     };
 
+    //Determines if a button should be disabled based on the provided search filters.
     const isButtonDisabled = (searchFilters) => {
         const allEmpty =
             !searchFilters.property &&
@@ -174,7 +175,7 @@ const PricingMasterList = () => {
     };
 
     return (
-        <div className="h-screen max-w-[1800px] bg-custom-grayFA px-4">
+        <div className="h-screen max-w-[1800px] bg-custom-grayFA px-10">
             <div className="">
                 <button
                     onClick={handleOpenModal}

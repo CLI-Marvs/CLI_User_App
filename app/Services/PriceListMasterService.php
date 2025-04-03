@@ -37,20 +37,12 @@ class PriceListMasterService
         $this->employeeModel = $employeeModel;
     }
 
-    /** 
-     * Get all property price list masters
-     */
+
     public function index(array $validatedData)
     {
         return $this->repository->index($validatedData);
     }
 
-    /**
-     * Filter price list base on filter 
-     */
-    // public function filterPriceList($data){
-    //     return $this->repository->filterPriceList($data);
-    // }
     /*
     Store price list master data
     */
@@ -551,7 +543,7 @@ class PriceListMasterService
             }
             //Update the price list settings
             $currentPriceBasicDetailId = $priceListMaster->pricebasic_details_id;
-          
+
 
             $priceBasicDetail = $this->updatePriceBasicDetails($currentPriceBasicDetailId, $data, $priceListMaster);
 
@@ -887,15 +879,19 @@ class PriceListMasterService
         return $priceBasicDetail;
     }
 
-    //Update the price list master status
+
     public function updateStatus($id)
     {
         return $this->repository->updateStatus($id);
     }
 
-    //Download the price list excel
+
     public function exportExcel($data)
     {
         return $this->repository->exportExcel($data);
+    }
+
+    public function getPriceListsForReviewerOrApprover(int $userId) {
+        return $this->repository->getPriceListsForReviewerOrApprover($userId);
     }
 }

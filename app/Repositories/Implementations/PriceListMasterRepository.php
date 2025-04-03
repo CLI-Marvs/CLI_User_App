@@ -43,12 +43,21 @@ class PriceListMasterRepository
 
 
     /*
-     * Get all property price list masters with pagination of 10 per page, apply the filters also if any
+     * Get price list data with pagination of 10 per page, apply the filters also if any
      */
     public function index(array $validatedData)
     {
-
         $query = $this->getPriceListMastersWithRelations();
+
+        // Apply filtering for approved/reviewed employees
+        // $userId = auth()->id(); // Get logged-in user ID
+        // $queryAllPriceListMasters = $this->getPriceListMastersWithRelations();
+        // $test =   $queryAllPriceListMasters->where(function ($q) use ($userId) {
+        //     $q->where('reviewed_by_employee_id', $userId)
+        //         ->orWhere('approved_by_employee_id', $userId);
+        // });
+        // dd($test);
+
         $query = $this->filterPriceList($validatedData, $query);
         $priceListMasters = $query->paginate(
             $validatedData['per_page'],
@@ -56,7 +65,6 @@ class PriceListMasterRepository
             'page',
             $validatedData['page']
         );
-
 
         return [
             'data' => $priceListMasters->getCollection()->map(
@@ -119,7 +127,6 @@ class PriceListMasterRepository
                 $q->whereDate('created_at', $validatedData['date']);
             });
     }
-
 
 
     /**
@@ -312,5 +319,29 @@ class PriceListMasterRepository
             $data['payload']['selectedVersion']
         );
         return $this->excel->download($export, 'price_list_master.xlsx');
+    }
+
+    public function getPriceListsForReviewerOrApprover(int $userId)
+    {
+        try {
+            // Retrieve base query with all necessary relations
+            $query = $this->model;
+
+            // Filter price lists where the user is a reviewer or approver
+            $priceListMasters = $query->where(function ($q) use ($userId) {
+                $q->whereJsonContains('reviewed_by_employee_id', $userId)
+                    ->orWhereJsonContains('approved_by_employee_id', $userId);
+            })
+                ->with(['additionalRelations']) // Add any necessary eager loading
+                ->paginate(15); // Optional: add pagination
+
+            return $priceListMasters;
+        } catch (\Exception $e) {
+            // Log the error
+            \Log::error('Error retrieving price lists: ' . $e->getMessage());
+
+            // Return an empty collection or throw a custom exception
+            return collect();
+        }
     }
 }

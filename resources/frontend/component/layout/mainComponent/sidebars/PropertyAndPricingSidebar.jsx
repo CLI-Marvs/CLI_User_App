@@ -71,10 +71,11 @@ const PropertyAndPricingSidebar = () => {
 
     return (
         <>
-            <Card className="flex w-[230px] h-screen pt-3 rounded-[10px] bg-customnavbar  ">
+            <Card className="flex h-screen pt-3 rounded-[10px] bg-customnavbar  ">
                 <List className="flex flex-col justify-center w-full">
                     <div className="px-5 leading-1">
                         <div className="flex flex-col space-y-1 mt-1">
+                            {/* Master list */}
                             <Link to="master-lists">
                                 <ListItem
                                     onClick={(e) =>
@@ -93,6 +94,8 @@ const PropertyAndPricingSidebar = () => {
                                     Price List
                                 </ListItem>
                             </Link>
+
+                            {/* Payment scheme */}
                             <Link to="payment-scheme">
                                 <ListItem
                                     onClick={(e) =>
@@ -111,6 +114,8 @@ const PropertyAndPricingSidebar = () => {
                                     Payment Scheme
                                 </ListItem>
                             </Link>
+
+                            {/*Price versioning */}
                             <Link to="price-versioning">
                                 <ListItem
                                     onClick={(e) =>
@@ -129,6 +134,8 @@ const PropertyAndPricingSidebar = () => {
                                     Price Versioning
                                 </ListItem>
                             </Link>
+
+                            {/*Promotional pricing */}
                             <Link to="promotional-pricing">
                                 <ListItem
                                     onClick={(e) =>
@@ -145,6 +152,35 @@ const PropertyAndPricingSidebar = () => {
                                     }`}
                                 >
                                     Promotional Pricing
+                                </ListItem>
+                            </Link>
+
+                            {/* Workflow notification */}
+                            <Link to="workflow-notification">
+                                <ListItem
+                                    onClick={(e) =>
+                                        handleNavigation(
+                                            e,
+                                            "/property-pricing/workflow-notification"
+                                        )
+                                    }
+                                    className={`menu2 text-sm h-9 mb-1 flex justify-start pl-4 gap-2 rounded-full text-custom-solidgreen font-normal hover:font-semibold hover:bg-white  ${
+                                        location.pathname ===
+                                        "/property-pricing/workflow-notification"
+                                            ? "text-custom-solidgreen font-semibold bg-white"
+                                            : "text-custom-solidgreen"
+                                    }`}
+                                >
+                                    Workflow Notification
+                                    <ListItemSuffix>
+                                        <Chip
+                                            value={1}
+                                            size="sm"
+                                            variant="ghost"
+                                            color="blue-gray"
+                                            className="rounded-md gradient-btn2 text-white"
+                                        />
+                                    </ListItemSuffix>
                                 </ListItem>
                             </Link>
                         </div>

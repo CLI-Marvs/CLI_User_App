@@ -21,6 +21,7 @@ import CallBackView from "./views/pages/callback/CallBackView";
 import ReportViews from "./views/pages/raiseaconcernViews/ReportViews";
 import PropertyAndPricingLayout from "./views/layout/PropertyAndPricingLayout";
 import PricingMasterListView from "./views/pages/PropertyAndPricingViews/PricingMasterListView";
+import WorkFlowNotificationView from "./views/pages/PropertyAndPricingViews/WorkFlowNotificationView";
 import BasicPricingView from "./views/pages/PropertyAndPricingViews/BasicPricingView";
 import PaymentSchemeView from "./views/pages/PropertyAndPricingViews/PaymentSchemeView";
 import PriceVersioningView from "./views/pages/PropertyAndPricingViews/PriceVersioningView";
@@ -50,9 +51,10 @@ import TransactionSidebar from "./layout/transaction/TransactionSidebar";
 import InvoicesView from "@/component/views/pages/transactionViews/InvoicesView";
 import TransactionView from "./views/pages/transactionViews/TransactionView";
 import AutoPostingView from "./views/pages/transactionViews/AutoPostingView";
+import ErrorPage from "@/component/ErrorElement/ErrorPage";
 
 // PrivateRoute component to check authentication and permissions( department and employee )
-const PrivateRoute = ({ requiredPermission ,children}) => {
+const PrivateRoute = ({ requiredPermission, children }) => {
     const { hasPermission } = useStateContext();
 
     // Check for authentication token
@@ -73,10 +75,10 @@ const PrivateRoute = ({ requiredPermission ,children}) => {
     }
 
     // Render the child routes if authentication and permission checks pass
-     return children ? children : <Outlet />;
+    return children ? children : <Outlet />;
 };
+
 const App = () => {
-    
     /**
      * Implement storage event listener to handle authToken changes across tabs
      */
@@ -127,8 +129,8 @@ const App = () => {
         return (
             <>
                 <div className="flex bg-white relative overflow-x-hidden min-h-screen">
-                        <TransactionSidebar />
-                        <Outlet />
+                    <TransactionSidebar />
+                    <Outlet />
                 </div>
             </>
         );
@@ -196,7 +198,7 @@ const App = () => {
                                     children: [
                                         {
                                             path: "bank-statements",
-                                             element: <BankStatementView />,
+                                            element: <BankStatementView />,
                                         },
                                     ],
                                 },
@@ -206,17 +208,16 @@ const App = () => {
                                     children: [
                                         {
                                             path: "invoices",
-                                             element: <InvoicesView />,
+                                            element: <InvoicesView />,
                                         },
                                         {
                                             path: "transactions",
-                                             element: <TransactionView />,
+                                            element: <TransactionView />,
                                         },
                                         {
                                             path: "posting",
-                                             element: <AutoPostingView />,
+                                            element: <AutoPostingView />,
                                         },
-                                       
                                     ],
                                 },
                                 {
@@ -279,6 +280,10 @@ const App = () => {
                                 </PrivateRoute>
                             ),
                             children: [
+                                {
+                                    path: "workflow-notification",
+                                    element: <WorkFlowNotificationView />,
+                                },
                                 {
                                     path: "master-lists",
                                     element: <PricingMasterListView />,
@@ -346,6 +351,10 @@ const App = () => {
         {
             path: "/paymentmethod/payonlinenow",
             element: <PaymentSectionView />,
+        },
+        {
+            path: "*",
+            element: <ErrorPage />,
         },
     ]);
 

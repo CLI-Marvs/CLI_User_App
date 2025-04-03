@@ -17,7 +17,7 @@ export const paymentSchemeService = {
         try {
             const cleanFilters = Object.fromEntries(
                 Object.entries(filters || {}).filter(
-                    ([_, v]) => v != null && v !== ""
+                    ([, v]) => v != null && v !== "" // Ignore the key
                 )
             );
             // Convert filters object into query parameters
@@ -29,7 +29,7 @@ export const paymentSchemeService = {
             const response = await apiService.get(
                 `payment-schemes?${queryParams}`
             );
-     
+
             return response;
         } catch (error) {
             console.error("Error fetching property names:", error);
