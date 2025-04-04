@@ -78,14 +78,14 @@ const UnitUploadButton = ({
             formData.append("file", file);
             const response = await unitService.scanFile(formData);
             console.log("response", response);
-
+            return;
             // Handle backend errors
-            if (response?.data?.errors?.file) {
-                console.log("response insidet the if statement", response);
+            // if (response?.data?.errors?.file) {
+            //     console.log("response insidet the if statement", response);
 
-                showToast(response.data.errors.file[0], "error");
-                return;
-            }
+            //     showToast(response.data.errors.file[0], "error");
+            //     return;
+            // }
 
             reader.onload = (e) => {
                 try {

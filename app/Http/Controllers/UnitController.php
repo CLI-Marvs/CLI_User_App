@@ -8,6 +8,7 @@ use App\Services\UnitService;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreUnitRequest;
 use App\Http\Requests\UpdateStoreRequest;
+use App\Rules\MaliciousDetectionRule;
 
 class UnitController extends Controller
 {
@@ -132,11 +133,12 @@ class UnitController extends Controller
     {
         try {
             // Validate the file and scan it for malware
-            $request->validate([
-                'file' => ['required', 'file', 'clamav'], // 'clamav' rule scans the file
+            $validatedData =  $request->validate([
+                'file' => ['required', 'file', new MaliciousDetectionRule],
             ]);
             // If validation passes, the file is safe
             $file = $request->file('file');
+            dd($validatedData);
             return response()->json(['message' => 'File is clean and safe for processing']);
         } catch (Exception $e) {
             return response()->json([
