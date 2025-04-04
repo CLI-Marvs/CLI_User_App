@@ -28,7 +28,7 @@ class UnitController extends Controller
         $validatedData = $request->validated();
         $validatedData['excel_id'] = $validatedData['excel_id'] ?? null;
         $excelDataRows = $validatedData['excelDataRows'];
- 
+
         //Each row has all columns (including `null` values)
         $normalizedRows = array_map(function ($row) {
             return array_replace(array_fill(0, 8, null), $row);
@@ -40,7 +40,7 @@ class UnitController extends Controller
 
         try {
             $result = $this->service->storeUnitFromExcel($validatedData);
-             
+
             return response()->json([
                 'message' => $result['message'],
                 'excel_id' => $result['excel_id'],
@@ -118,6 +118,27 @@ class UnitController extends Controller
                 'message' => $result['message'],
             ], 201);
         } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Validation failed',
+                'messages' => $e->getMessage(),
+            ], 422);
+        }
+    }
+
+    /**
+     * Scan file uploaded
+     */
+    public function scanFile(Request $request)
+    {
+        try {
+            // Validate the file and scan it for malware
+            $request->validate([
+                'file' => ['required', 'file', 'clamav'], // 'clamav' rule scans the file
+            ]);
+            // If validation passes, the file is safe
+            $file = $request->file('file');
+            return response()->json(['message' => 'File is clean and safe for processing']);
+        } catch (Exception $e) {
             return response()->json([
                 'error' => 'Validation failed',
                 'messages' => $e->getMessage(),
