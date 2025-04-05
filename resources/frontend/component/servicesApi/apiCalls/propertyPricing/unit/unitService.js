@@ -96,7 +96,6 @@ export const unitService = {
 
     //Scan file
     scanFile: async (payload) => {
-        console.log("payload", payload);
         try {
             const response = await apiService.post("units/scan-file", payload, {
                 headers: {

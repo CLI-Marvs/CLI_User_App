@@ -73,19 +73,17 @@ const UnitUploadButton = ({
                 return;
             }
 
-            //Scan the file for viruses
+            // Scan the file for viruses/malicious content
             const formData = new FormData();
             formData.append("file", file);
-            const response = await unitService.scanFile(formData);
-            console.log("response", response);
-            return;
-            // Handle backend errors
-            // if (response?.data?.errors?.file) {
-            //     console.log("response insidet the if statement", response);
-
-            //     showToast(response.data.errors.file[0], "error");
-            //     return;
-            // }
+            try {
+                await unitService.scanFile(formData);
+            } catch (error) {
+                showToast(error.response.data.message, "error");
+                setSelectedExcelHeader([]);
+                fileInputRef.current.value = "";
+                return;
+            }
 
             reader.onload = (e) => {
                 try {
@@ -98,6 +96,14 @@ const UnitUploadButton = ({
                     }); //all data in excel
 
                     const selectedHeaders = jsonData[0]; // First row contains headers
+                    if (!selectedHeaders || selectedHeaders.length === 0) {
+                        showToast(
+                            "Please check your Excel file. No headers found.",
+                            "error"
+                        );
+                        setSelectedExcelHeader([]);
+                        return;
+                    }
                     const dataRows = jsonData.slice(1); // All rows after the first one
 
                     // Normalize empty values to `null` and Remove empty rows
@@ -129,6 +135,7 @@ const UnitUploadButton = ({
                             )}`,
                             "warning"
                         );
+                        fileInputRef.current.value = ""; // Reset the file input
                         setSelectedExcelHeader([]);
                         return;
                     }

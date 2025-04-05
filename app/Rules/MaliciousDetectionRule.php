@@ -2,33 +2,14 @@
 
 namespace App\Rules;
 
+use Log;
 use Closure;
 use Illuminate\Http\UploadedFile;
+use PhpOffice\PhpSpreadsheet\IOFactory;
 use Illuminate\Contracts\Validation\ValidationRule;
 
 class MaliciousDetectionRule implements ValidationRule
 {
-
-    /**
-     * Create a new rule instance.
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-        //
-    }
-
-
-    /**
-     * Run the validation rule.
-     *
-     * @param  \Closure(string, ?string=): \Illuminate\Translation\PotentiallyTranslatedString  $fail
-     */
-    public function validate(string $attribute, mixed $value, Closure $fail): void
-    {
-        //
-    }
 
     protected $malicious_keywords = [
         '\\/bin\\/bash',
@@ -37,7 +18,8 @@ class MaliciousDetectionRule implements ValidationRule
         'Laravel',
         'Monolog',
         'PendingRequest',
-        '\\<script',
+        '<script',   
+        '</script>', 
         'ThinkPHP',
         'phar',
         'phpinfo',
@@ -55,6 +37,25 @@ class MaliciousDetectionRule implements ValidationRule
         'FilesMan',
     ];
 
+    /**
+     * Create a new rule instance.
+     *
+     * @return void
+     */
+    public function __construct(){}
+    
+
+    /**
+     * Run the validation rule.
+     *
+     * @param  \Closure(string, ?string=): \Illuminate\Translation\PotentiallyTranslatedString  $fail
+     */
+    public function validate(string $attribute, mixed $value, Closure $fail): void
+    {
+        //
+    }
+
+
 
     /**
      * Determine if the validation rule passes.
@@ -68,30 +69,57 @@ class MaliciousDetectionRule implements ValidationRule
     public function passes($attribute, $value)
     {
         $allowedMimeTypes = ['application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'];
-        if ($value instanceof UploadedFile) {
-            // Check if the file is an Excel file based on MIME type
 
+        if ($value instanceof UploadedFile) {
+            // Check MIME type
             if (!in_array($value->getMimeType(), $allowedMimeTypes)) {
+                \Log::warning('❌ Blocked file due to invalid MIME type: ' . $value->getMimeType());
                 return false;
             }
 
-            // Check for malicious content
-            return !preg_match('/(' . implode('|', $this->malicious_keywords) . ')/im', $value->get());
+            try {
+                // Load Excel file and extract text content
+                $spreadsheet = IOFactory::load($value->getRealPath());
+                $textContent = '';
+
+                foreach ($spreadsheet->getWorksheetIterator() as $worksheet) {
+                    foreach ($worksheet->getRowIterator() as $row) {
+                        foreach ($row->getCellIterator() as $cell) {
+                            // Extract cell value
+                            $textContent .= ' ' . $cell->getValue();
+
+                            // Extract formula if present
+                            if ($cell->isFormula()) {
+                                $textContent .= ' ' . $cell->getCalculatedValue();
+                            }
+                        }
+                    }
+                }
+
+                // Log extracted content for debugging
+                \Log::info('📂 Extracted Excel Content: ' . $textContent);
+
+                // Escape special characters dynamically
+                $escapedKeywords = array_map('preg_quote', $this->malicious_keywords);
+                $pattern = '/(' . implode('|', $escapedKeywords) . ')/im';
+
+                // Log the regex pattern
+                \Log::info('🔍 Regex Pattern: ' . $pattern);
+
+                // Check for malicious content
+                if (preg_match($pattern, $textContent)) {
+                    \Log::warning('🚨 Malicious content detected: ' . $textContent);
+                    return false;
+                }
+
+                return true; // File is clean
+            } catch (\Exception $e) {
+                \Log::error('❌ Error reading Excel file: ' . $e->getMessage());
+                return false;
+            }
         }
 
-        if (!request()->hasFile($attribute)) {
-            return true;
-        }
-
-        $uploadedFile = request()->file($attribute);
-
-        // Check if the file is an Excel file based on MIME type
-        if (!in_array($uploadedFile->getMimeType(), $allowedMimeTypes)) {
-            return false;
-        }
-
-        // Check for malicious content
-        return !preg_match('/(' . implode('|', $this->malicious_keywords) . ')/im', $uploadedFile->get());
+        return false; // Invalid file
     }
 
     /**
