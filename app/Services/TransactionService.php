@@ -98,4 +98,9 @@ class TransactionService
     {
         return $this->repository->retrieveBankStatements($data);
     }
+
+    public function storeBankStatements(array $data)
+    {
+        return $this->repository->storeBankStatements($data);
+    }
 }

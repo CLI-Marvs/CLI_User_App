@@ -220,7 +220,7 @@ class TransactionController extends Controller
     }
     
 
- /*    public function postBpiBank(Request $request) {
+    /* public function postBpiBank(Request $request) {
         $username = config('services.paynamics.username');
         $password = config('services.paynamics.password');
 
@@ -253,5 +253,25 @@ class TransactionController extends Controller
             ], 500);
         }
     } */
+
+
+    public function storeBankStatements(Request $request)
+    {
+        try {
+            $data = $request->all();
+            $response = $this->transactionService->storeBankStatements($data);
+
+            return response()->json([
+                'response_message' => 'Data stored successfully',
+                'data' => $response
+            ]);
+            //code...
+        } catch (\Throwable $e) {
+            return response()->json([
+                'message' => 'Error occurred.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
     
 }

@@ -211,4 +211,11 @@ class TransactionRepository
 
         return $transactionData;
     }
+
+
+    public function storeBankStatements(array $data)
+    {
+        $data = $this->bankStatementModel->create($data);
+        return $data;
+    }
 }
