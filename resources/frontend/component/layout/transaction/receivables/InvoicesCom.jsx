@@ -133,6 +133,7 @@ const InvoicesCom = () => {
                         setSearchValues={setSearchValues}
                         onChangeSearch={handleSearchValue}
                         onSubmit={onSubmit}
+                        setFilters={setFilters}
                     />
                 <div className="flex gap-[15px] flex-wrap mb-[16px] px-2">
                     <div className="relative flex border w-max border-custom-lightgreen rounded-[5px] shrink-0 z-10">
