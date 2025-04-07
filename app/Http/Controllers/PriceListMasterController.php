@@ -146,7 +146,6 @@ class PriceListMasterController extends Controller
 
     public function getPriceListsForReviewerOrApprover(int $userId)
     {
-       
         $pricelistResponse = $this->service->getPriceListsForReviewerOrApprover($userId);
     }
 }

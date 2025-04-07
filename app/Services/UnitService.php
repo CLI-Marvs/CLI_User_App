@@ -50,7 +50,7 @@ class UnitService
         // Increase PHP limits for this request
         ini_set('max_execution_time', 300);
         ini_set('memory_limit', '512M');
-       
+
         $excelRowsData = $data['excelDataRows'];
         $headerMappings = $data['selectedExcelHeader'];
         $expectedHeaders = $data['expectedHeaders'];
@@ -115,7 +115,7 @@ class UnitService
                         'tower_phase_id' => null,
                     ]);
             }
- 
+
             // Process the data with dynamic mapping
             collect($excelRowsData)
                 ->chunk(500)
@@ -141,7 +141,7 @@ class UnitService
                         ];
                     });
 
-                   
+
                     $this->model->insert($formattedData->toArray());
                 });
             DB::commit();

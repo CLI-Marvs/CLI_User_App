@@ -37,6 +37,7 @@ class StoreUnitRequest extends FormRequest
                 'property_masters_id' => 'integer',
                 'price_list_master_id' => 'integer',
                 'excel_id' => ['nullable', 'string'],
+                
             ];
         }
 

@@ -17,7 +17,7 @@ class HstsMiddleware
     {
         $response = $next($request);
 
-        // Apply HSTS only if the request is HTTPS
+        // Apply HSTS (HTTP Strict Transport Security) only if the request is HTTPS
         if ($request->secure()) {
             $response->headers->set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
         }

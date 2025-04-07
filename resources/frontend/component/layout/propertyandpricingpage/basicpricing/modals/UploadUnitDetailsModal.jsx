@@ -72,14 +72,10 @@ const UploadUnitDetailsModal = ({
 
         try {
             const excelIdToSend = excelId || null;
-            console.log("excelIdToSend", excelIdToSend);
+
             // Clear old data only if a new file is uploaded
             if (excelIdToSend) {
                 setUnits([]);
-                // setExcelId("");
-                // setExcelIdFromPriceList("");
-
-                // Reset specific pricing data fields while preserving other fields
                 setPricingData((prev) => ({
                     ...prev,
                     floorPremiums: {},
@@ -98,8 +94,6 @@ const UploadUnitDetailsModal = ({
                 excel_id: excelIdToSend,
                 expectedHeaders: expectedHeaders,
             };
-            console.log("payload", payload);
-            // Call the API to upload units
             const response = await uploadUnits(payload);
 
             // Handle successful response
@@ -127,7 +121,6 @@ const UploadUnitDetailsModal = ({
                     uploadUnitModalRef.current.close();
                 }
             } else {
-                // Handle unsuccessful response
                 showToast(
                     response?.message || "Failed to upload units",
                     "error"
@@ -135,7 +128,6 @@ const UploadUnitDetailsModal = ({
                 setIsUploadingUnits(false);
             }
         } catch (error) {
-            // Handle errors
             console.error("Error uploading Excel:", error);
             showToast("An error occurred while uploading units", "error");
             setIsUploadingUnits(false);
@@ -172,7 +164,7 @@ const UploadUnitDetailsModal = ({
                         </button>
                     </div>
                 </div>
-                <div className="flex justify-between items-center bg-custom-grayFA h-[54px]  mb-3">
+                <div className="flex justify-between items-center bg-custom-grayFA h-[54px]  mb-3 px-1">
                     <div>
                         <p className="underline text-blue-500 ">{fileName}</p>
                     </div>

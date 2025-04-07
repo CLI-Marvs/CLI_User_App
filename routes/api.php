@@ -52,8 +52,6 @@ Route::get('/get-logs/{ticketId}', [ConcernController::class, 'getInquiryLogs'])
 Route::get('/get-messageId/{ticketId}', [ConcernController::class, 'getMessageId']);    
  */
 Route::get('/concern-year', [ConcernController::class, 'getCreatedDates']);
-Route::get('/inquiries-channel', [ConcernController::class, 'getInquiriesPerChannel']);
-Route::get('/communication-type-property', [ConcernController::class, 'getCommunicationType']);
 
 Route::middleware('auth:sanctum')->group(
     function () {
@@ -61,6 +59,8 @@ Route::middleware('auth:sanctum')->group(
         Route::get('/inquiries-property', [ConcernController::class, 'getInquiriesPerProperty']);
         Route::get('/report-monthly', [ConcernController::class, 'getMonthlyReports']);
         Route::get('/inquiries-department', [ConcernController::class, 'getInquiriesPerDepartment']);
+        Route::get('/communication-type-property', [ConcernController::class, 'getCommunicationType']);
+        Route::get('/inquiries-channel', [ConcernController::class, 'getInquiriesPerChannel']);
     }
 );
 

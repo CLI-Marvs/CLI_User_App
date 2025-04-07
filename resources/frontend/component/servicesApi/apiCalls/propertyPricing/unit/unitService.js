@@ -31,7 +31,12 @@ export const unitService = {
 
     //Function to check existing units for a tower phase
     getUnits: async (towerPhaseId, excelId, priceListMasterId) => {
-        if (excelId === null || excelId === undefined || priceListMasterId === null || priceListMasterId === undefined) {
+        if (
+            excelId === null ||
+            excelId === undefined ||
+            priceListMasterId === null ||
+            priceListMasterId === undefined
+        ) {
             return { data: { data: [] } }; // Return empty data to prevent errors
         }
         try {
@@ -85,6 +90,21 @@ export const unitService = {
             return response;
         } catch (error) {
             console.error("Error saving pricing data:", error);
+            throw error;
+        }
+    },
+
+    //Scan file
+    scanFile: async (payload) => {
+        try {
+            const response = await apiService.post("units/scan-file", payload, {
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                },
+            });
+            return response;
+        } catch (error) {
+            console.error("Error scanning file:", error);
             throw error;
         }
     },
