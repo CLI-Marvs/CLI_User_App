@@ -110,6 +110,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/invoices-list', 'retrieveInvoices');
         Route::get('/bank-statements-list', 'retrieveBankStatements');
         Route::patch('/transaction-update', 'updateTransactionStatus');
+        Route::post('/bank-statements-store', 'storeBankStatements');
     });
 
     Route::controller(ConcernController::class)->group(function () {
