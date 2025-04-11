@@ -28,7 +28,7 @@ const TransactionTableCell = ({ type, row }) => {
                             </span>
                         </div>
                         <div className="flex gap-2">
-                            <span className="monterrat-regular text-[14px]">
+                            <span className="monterrat-regular text-[14px] break-all whitespace-normal overflow-hidden">
                                 Transaction Type:
                             </span>
                             <span className="montserrat-semibold text-[13px] break-all whitespace-normal overflow-hidden">
@@ -60,7 +60,7 @@ const TransactionTableCell = ({ type, row }) => {
                             <span className="monterrat-regular text-[13px]">
                                 Reference/Contract No.:
                             </span>
-                            <span className="montserrat-semibold text-[13px] break-all whitespace-normal overflow-hidden">
+                            <span className="montserrat-semibold text-[13px] break-all">
                                 {row.reference_number}
                             </span>
                         </div>
@@ -72,7 +72,7 @@ const TransactionTableCell = ({ type, row }) => {
                         <span className="text-[13px]">
                             {toLowerCaseText(row.property_name)}
                         </span>
-                        <span className="text-xs text-custom-lightgreen">
+                        <span className="text-xs text-custom-lightgreen break-all">
                             {row.remarks}
                         </span>
                     </div>
@@ -88,12 +88,12 @@ const TransactionTableCell = ({ type, row }) => {
             return (
                 <div className="flex justify-between w-[400px]">
                     <div className="flex flex-col">
-                        <span className="montserrat-semibold text-[13px] break-all whitespace-normal overflow-hidden">
+                        <span className="montserrat-semibold text-[13px] break-all">
                             {row.payment_method}
                         </span>
                     </div>
                     <div className="flex flex-col">
-                        <span className="montserrat-medium text-[13px] break-all whitespace-normal overflow-hidden">
+                        <span className="montserrat-medium text-[13px] break-all">
                             {row.payment_option}
                         </span>
                     </div>
@@ -135,7 +135,7 @@ const TransactionTableCell = ({ type, row }) => {
                                 </span>
                             </Link>
                         ) : (
-                            <span className="montserrat-semibold text-[13px] break-all whitespace-normal overflow-hidden">
+                            <span className="montserrat-semibold text-[13px] break-all">
                                 To be generated
                             </span>
                         )}

@@ -80,6 +80,7 @@ const TransactionCom = () => {
         setTransactions
     );
 
+
     const fields = [
         { name: "customer_name", label: "Customer Name" },
         { name: "email", label: "Email" },
@@ -128,10 +129,6 @@ const TransactionCom = () => {
             ...prev,
             [name]: value,
         }));
-    };
-
-    const handleRefreshPage = () => {
-        setFilters({});
     };
 
     const onSubmit = () => {
