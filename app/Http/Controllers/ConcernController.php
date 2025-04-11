@@ -1049,10 +1049,9 @@ class ConcernController extends Controller
         if (!empty($searchParams['category'] ?? null) && $searchParams['category'] !== 'Other Concerns') {
             $query->where('details_concern', 'ILIKE', '%' . $searchParams['category'] . '%');
         } else {
-            $query->where(function($query) use ($searchParams) {
+            $query->where(function ($query) use ($searchParams) {
                 $query->where('details_concern', 'ILIKE', '%' . ($searchParams['category'] ?? '') . '%')
-                ->orWhereNull('details_concern');
-                      
+                    ->orWhereNull('details_concern');
             });
         }
         if (!empty($searchParams['email'])) {
@@ -1068,25 +1067,24 @@ class ConcernController extends Controller
         if (!empty($searchParams['type'])) {
             if ($searchParams['type'] === 'No Type') {
                 $query->whereNull('communication_type');
-            }else {
+            } else {
                 $query->where('communication_type', 'ILIKE', '%' . $searchParams['type'] . '%');
             }
         }
         if (!empty($searchParams['selectedProperty'] ?? null) && $searchParams['selectedProperty'] !== 'N/A') {
             $query->where('property', 'ILIKE', '%' . $searchParams['selectedProperty'] . '%');
         } else {
-            $query->where(function($query) use ($searchParams) {
+            $query->where(function ($query) use ($searchParams) {
                 $query->where('property', 'ILIKE', '%' . ($searchParams['selectedProperty'] ?? '') . '%')
-                      ->orWhereNull('property');
+                    ->orWhereNull('property');
             });
         }
         if (!empty($searchParams['channels'])) {
             if ($searchParams['channels'] === 'No Channel') {
                 $query->whereNull('channels');
-            }else {
+            } else {
                 $query->where('channels', $searchParams['channels']);
             }
-           
         }
 
         if (!empty($searchParams['startDate'])) {
@@ -1106,7 +1104,7 @@ class ConcernController extends Controller
             $departments = $searchParams['departments'];
 
             if (!is_array($departments)) {
-                $departments = explode(',', $departments); 
+                $departments = explode(',', $departments);
             }
 
             foreach ($departments as $department) {
@@ -2049,12 +2047,11 @@ class ConcernController extends Controller
             if ($project === "N/A") {
                 $query->where(function ($subQuery) {
                     $subQuery->where('property', 'N/A')
-                             ->orWhereNull('property');
+                        ->orWhereNull('property');
                 });
             } else {
                 $query->where('property', $project);
             }
-            
         }
 
         if ($month && $month !== 'All') {
@@ -2179,7 +2176,7 @@ class ConcernController extends Controller
         $query = Concerns::select('communication_type', DB::raw('COUNT(*) as total'))
 
             ->whereYear('created_at', $year);
-            
+
 
         if ($department && $department !== "All") {
             $query->whereRaw("resolve_from::jsonb @> ?", json_encode([['department' => $department]]));
@@ -2234,6 +2231,7 @@ class ConcernController extends Controller
 
     public function getInquiriesByCategory(Request $request)
     {
+        // dd($request->all());
         try {
             $project = $request->property;
             $department = $request->department;
@@ -2261,7 +2259,7 @@ class ConcernController extends Controller
         }
 
         $concerns = $query->groupBy('details_concern')->get();
-
+ 
         return response()->json($concerns);
     }
 

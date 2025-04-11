@@ -230,7 +230,6 @@ export const ContextProvider = ({ children }) => {
                 },
             });
             const result = response.data;
-    
             // Aggregate data into a single "Other Concerns" entry for null or "Other Concerns"
             const aggregatedData = result.reduce((acc, item) => {
                 const name = item.details_concern || "Other Concerns"; // Replace null with "Other Concerns"

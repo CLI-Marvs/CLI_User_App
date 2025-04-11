@@ -84,7 +84,7 @@ const ReportPage = () => {
         setMonthValue,
         monthValue  
     } = useStateContext();
-
+//  console.log("dataCategory", dataCategory);
     const colors = [
         "#348017",
         "#70AD47",

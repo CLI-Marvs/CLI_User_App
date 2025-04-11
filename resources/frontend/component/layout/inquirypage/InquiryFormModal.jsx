@@ -354,12 +354,9 @@ const InquiryFormModal = ({ modalRef }) => {
             className="modal w-[589px] rounded-[10px] shadow-custom5 backdrop:bg-black/50"
             ref={modalRef}
         >
-
             <div className="px-[50px] rounded-lg overflow-hidden">
                 <div className="">
-                    <div
-                        className="pt-1 flex justify-end -mr-[50px]"
-                    >
+                    <div className="pt-1 flex justify-end -mr-[50px]">
                         <button
                             className="flex justify-center w-10 h-10 items-center rounded-full text-custom-bluegreen hover:bg-custombg"
                             onClick={handleCloseModal}
@@ -416,12 +413,13 @@ const InquiryFormModal = ({ modalRef }) => {
                     </div>
                     <div className="flex flex-col gap-2">
                         <div
-                            className={`flex items-center border rounded-[5px] overflow-hidden ${isSubmitted && !formData.fname
-                                ? resetSuccess
-                                    ? "border-custom-bluegreen"
-                                    : "border-red-500"
-                                : "border-custom-bluegreen"
-                                }`}
+                            className={`flex items-center border rounded-[5px] overflow-hidden ${
+                                isSubmitted && !formData.fname
+                                    ? resetSuccess
+                                        ? "border-custom-bluegreen"
+                                        : "border-red-500"
+                                    : "border-custom-bluegreen"
+                            }`}
                         >
                             <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex pl-3 py-1 w-[240px]">
                                 First Name
@@ -444,12 +442,13 @@ const InquiryFormModal = ({ modalRef }) => {
                                 //             : "border-red-500"
                                 //         : "border-custom-bluegreen"
                                 // }`}
-                                className={`flex relative items-center border w-full rounded-[5px] overflow-hidden ${isSubmitted &&
+                                className={`flex relative items-center border w-full rounded-[5px] overflow-hidden ${
+                                    isSubmitted &&
                                     !formData.mname &&
                                     !isMiddleNameChecked
-                                    ? "border-red-500"
-                                    : "border-custom-bluegreen"
-                                    }`}
+                                        ? "border-red-500"
+                                        : "border-custom-bluegreen"
+                                }`}
                             >
                                 <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex w-[240px] pl-3 py-1 tablet:w-[160px] mobile:w-[270px] mobile:text-xs">
                                     Middle Name
@@ -480,12 +479,13 @@ const InquiryFormModal = ({ modalRef }) => {
                         </div>
 
                         <div
-                            className={`flex items-center border  rounded-[5px] overflow-hidden ${isSubmitted && !formData.lname
-                                ? resetSuccess
-                                    ? "border-custom-bluegreen"
-                                    : "border-red-500"
-                                : "border-custom-bluegreen"
-                                }`}
+                            className={`flex items-center border  rounded-[5px] overflow-hidden ${
+                                isSubmitted && !formData.lname
+                                    ? resetSuccess
+                                        ? "border-custom-bluegreen"
+                                        : "border-red-500"
+                                    : "border-custom-bluegreen"
+                            }`}
                         >
                             <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex w-[240px] pl-3 py-1">
                                 Last Name
@@ -501,12 +501,13 @@ const InquiryFormModal = ({ modalRef }) => {
                         </div>
                         <div className="flex items-center gap-[4px]">
                             <div
-                                className={`flex relative items-center border w-full rounded-[5px] overflow-hidden ${isSubmitted &&
+                                className={`flex relative items-center border w-full rounded-[5px] overflow-hidden ${
+                                    isSubmitted &&
                                     !formData.suffix &&
                                     !isSuffixChecked
-                                    ? "border-red-500"
-                                    : "border-custom-bluegreen"
-                                    }`}
+                                        ? "border-red-500"
+                                        : "border-custom-bluegreen"
+                                }`}
                             >
                                 <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex w-[240px] pl-3 py-1 tablet:w-[160px] mobile:w-[270px] mobile:text-xs">
                                     Suffix Name
@@ -536,12 +537,13 @@ const InquiryFormModal = ({ modalRef }) => {
                             </div>
                         </div>
                         <div
-                            className={`flex items-center border  rounded-[5px] overflow-hidden ${isSubmitted && !formData.buyer_email
-                                ? resetSuccess
-                                    ? "border-custom-bluegreen"
-                                    : "border-red-500"
-                                : "border-custom-bluegreen"
-                                }`}
+                            className={`flex items-center border  rounded-[5px] overflow-hidden ${
+                                isSubmitted && !formData.buyer_email
+                                    ? resetSuccess
+                                        ? "border-custom-bluegreen"
+                                        : "border-red-500"
+                                    : "border-custom-bluegreen"
+                            }`}
                         >
                             <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex w-[240px] pl-3 py-1">
                                 Email
@@ -556,17 +558,25 @@ const InquiryFormModal = ({ modalRef }) => {
                             />
                         </div>
                         <div className="flex gap-[6px] items-center">
-                            <input type="checkbox" className="h-[16px] w-[16px] rounded-[2px] border border-gray-400 checked:bg-transparent flex items-center justify-center accent-custom-lightgreen" onChange={handleSendEmailChange} value="checkbox"
-                                checked={isSendEmail} />
-                            <p className="text-sm text-custom-bluegreen font-semibold">Enable the email to be sent.</p>
+                            <input
+                                type="checkbox"
+                                className="h-[16px] w-[16px] rounded-[2px] border border-gray-400 checked:bg-transparent flex items-center justify-center accent-custom-lightgreen"
+                                onChange={handleSendEmailChange}
+                                value="checkbox"
+                                checked={isSendEmail}
+                            />
+                            <p className="text-sm text-custom-bluegreen font-semibold">
+                                Enable the email to be sent.
+                            </p>
                         </div>
                         <div
-                            className={`flex items-center border rounded-[5px] overflow-hidden ${isSubmitted && !formData.mobile_number
-                                ? resetSuccess
-                                    ? "border-custom-bluegreen"
-                                    : "border-red-500"
-                                : "border-custom-bluegreen"
-                                }`}
+                            className={`flex items-center border rounded-[5px] overflow-hidden ${
+                                isSubmitted && !formData.mobile_number
+                                    ? resetSuccess
+                                        ? "border-custom-bluegreen"
+                                        : "border-red-500"
+                                    : "border-custom-bluegreen"
+                            }`}
                         >
                             <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex w-[240px] pl-3 py-1">
                                 Mobile Number
@@ -577,22 +587,23 @@ const InquiryFormModal = ({ modalRef }) => {
                                 name="mobile_number"
                                 type="number"
                                 onInput={(e) =>
-                                (e.target.value = e.target.value.replace(
-                                    /[^0-9]/g,
-                                    ""
-                                ))
+                                    (e.target.value = e.target.value.replace(
+                                        /[^0-9]/g,
+                                        ""
+                                    ))
                                 }
                                 className="w-full px-4 text-sm focus:outline-none mobile:text-xs"
                                 placeholder=""
                             />
                         </div>
                         <div
-                            className={`flex items-center border rounded-[5px] overflow-hidden ${isSubmitted && !formData.property
-                                ? resetSuccess
-                                    ? "border-custom-bluegreen"
-                                    : "border-red-500"
-                                : "border-custom-bluegreen"
-                                }`}
+                            className={`flex items-center border rounded-[5px] overflow-hidden ${
+                                isSubmitted && !formData.property
+                                    ? resetSuccess
+                                        ? "border-custom-bluegreen"
+                                        : "border-red-500"
+                                    : "border-custom-bluegreen"
+                            }`}
                         >
                             <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex items-center w-[250px] tablet:w-[175px] mobile:w-[270px] mobile:text-xs -mr-3 pl-3 py-1">
                                 Property
@@ -624,12 +635,13 @@ const InquiryFormModal = ({ modalRef }) => {
                             </div>
                         </div>
                         <div
-                            className={`flex items-center border rounded-[5px] overflow-hidden  ${isSubmitted && !formData.details_concern
-                                ? resetSuccess
-                                    ? "border-custom-bluegreen"
-                                    : "border-red-500"
-                                : "border-custom-bluegreen"
-                                }  `}
+                            className={`flex items-center border rounded-[5px] overflow-hidden  ${
+                                isSubmitted && !formData.details_concern
+                                    ? resetSuccess
+                                        ? "border-custom-bluegreen"
+                                        : "border-red-500"
+                                    : "border-custom-bluegreen"
+                            }  `}
                         >
                             <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex items-center w-[250px] tablet:w-[175px] mobile:w-[270px] mobile:text-xs -mr-3 pl-3 py-1">
                                 Concern Regarding
@@ -642,35 +654,101 @@ const InquiryFormModal = ({ modalRef }) => {
                                     className="w-full appearance-none text-sm  px-4 py-1  focus:outline-none border-0 mobile:text-xs   "
                                 >
                                     <option value="">(Select)</option>
-                                    <option value="Reservation Documents" className="pr-8">
+                                    <option
+                                        value="Reservation Documents"
+                                        className="pr-8"
+                                    >
                                         Reservation Documents
                                     </option>
-                                    <option value="Payment Issues" className="pr-8">
+                                    <option
+                                        value="Payment Issues"
+                                        className="pr-8"
+                                    >
                                         Payment Issues
                                     </option>
-                                    <option value="SOA/ Buyer's Ledger" className="pr-8">
+                                    <option
+                                        value="SOA/ Buyer's Ledger"
+                                        className="pr-8"
+                                    >
                                         SOA/ Buyer's Ledger
                                     </option>
-                                    <option value="Turn Over Status" className="pr-8">
+                                    <option
+                                        value="Turn Over Status"
+                                        className="pr-8"
+                                    >
                                         Turn Over Status
                                     </option>
-                                    <option value="Unit Status" className="pr-8">
+                                    <option
+                                        value="Unit Status"
+                                        className="pr-8"
+                                    >
                                         Unit Status
                                     </option>
-                                    <option value="Loan Application" className="pr-8">
+                                    <option
+                                        value="Loan Application"
+                                        className="pr-8"
+                                    >
                                         Loan Application
                                     </option>
-                                    <option value="Title and Other Registration Documents" className="pr-8  ">
+                                    <option
+                                        value="Title and Other Registration Documents"
+                                        className="pr-8  "
+                                    >
                                         Title and Other Registration Documents
                                     </option>
 
-                                    <option value="Commissions" className="pr-8">
+                                    <option
+                                        value="Commissions"
+                                        className="pr-8"
+                                    >
                                         Commissions
                                     </option>
                                     <option value="Leasing" className="pr-8">
                                         Leasing
                                     </option>
-                                    <option value="Other Concerns" className="pr-8">
+                                    <option value="Account Payable">
+                                        Accounts Payable
+                                    </option>
+                                    <option
+                                        value="Available Units"
+                                        className="pr-8  "
+                                    >
+                                        Available Units
+                                    </option>
+                                    <option
+                                        value="HR Related Inquiries"
+                                        className="pr-8  "
+                                    >
+                                        HR Related Inquiries
+                                    </option>
+                                    <option
+                                        value="Broker/Contractor Accreditation"
+                                        className="pr-8  "
+                                    >
+                                        Broker/Contractor Accreditation
+                                    </option>
+                                    <option
+                                        value="CLIPM Concerns"
+                                        className="pr-8  "
+                                    >
+                                        CLIPM Concerns
+                                    </option>
+                                    <option
+                                        value="Product Offer"
+                                        className="pr-8  "
+                                    >
+                                        Product Offer
+                                    </option>
+                                    <option value="Lot Offer" className="pr-8  ">
+                                        Lot Offer
+                                    </option>
+                                    <option value="Marketing Activity - Queries" className="pr-8  ">
+                                        Marketing Activity - Queries
+                                    </option>
+                                    <option
+                                        value="Other Concerns"
+                                        className="pr-8"
+                                    >
                                         Other Concerns
                                     </option>
                                 </select>
@@ -678,15 +756,15 @@ const InquiryFormModal = ({ modalRef }) => {
                                     <IoMdArrowDropdown />
                                 </div>
                             </div>
-
                         </div>
                         <div
-                            className={`flex items-center border rounded-[5px] overflow-hidden ${isSubmitted && !formData.type
-                                ? resetSuccess
-                                    ? "border-custom-bluegreen"
-                                    : "border-red-500"
-                                : "border-custom-bluegreen"
-                                }`}
+                            className={`flex items-center border rounded-[5px] overflow-hidden ${
+                                isSubmitted && !formData.type
+                                    ? resetSuccess
+                                        ? "border-custom-bluegreen"
+                                        : "border-red-500"
+                                    : "border-custom-bluegreen"
+                            }`}
                         >
                             <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex items-center w-[250px] tablet:w-[175px] mobile:w-[270px] mobile:text-xs -mr-3 pl-3 py-1">
                                 Type
@@ -705,7 +783,6 @@ const InquiryFormModal = ({ modalRef }) => {
                                     <option value="Suggestion or Recommendation">
                                         Suggestion or Recommendation
                                     </option>
-
                                 </select>
                                 <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3 bg-custom-lightestgreen text-custom-bluegreen pointer-events-none">
                                     <IoMdArrowDropdown />
@@ -713,12 +790,13 @@ const InquiryFormModal = ({ modalRef }) => {
                             </div>
                         </div>
                         <div
-                            className={`flex items-center border rounded-[5px] overflow-hidden ${isSubmitted && !formData.channels
-                                ? resetSuccess
-                                    ? "border-custom-bluegreen"
-                                    : "border-red-500"
-                                : "border-custom-bluegreen"
-                                }`}
+                            className={`flex items-center border rounded-[5px] overflow-hidden ${
+                                isSubmitted && !formData.channels
+                                    ? resetSuccess
+                                        ? "border-custom-bluegreen"
+                                        : "border-red-500"
+                                    : "border-custom-bluegreen"
+                            }`}
                         >
                             <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex items-center w-[250px] tablet:w-[175px] mobile:w-[270px] mobile:text-xs -mr-3 pl-3 py-1">
                                 Channels
@@ -735,10 +813,15 @@ const InquiryFormModal = ({ modalRef }) => {
                                     <option value="Call">Call</option>
                                     <option value="Walk in">Walk-in</option>
                                     <option value="Website">Website</option>
-                                    <option value="Social media">Social Media</option>
-                                    <option value="Branch Tablet">Branch Tablet</option>
-                                    <option value="Internal Endorsement">Internal Endorsement</option>
-
+                                    <option value="Social media">
+                                        Social Media
+                                    </option>
+                                    <option value="Branch Tablet">
+                                        Branch Tablet
+                                    </option>
+                                    <option value="Internal Endorsement">
+                                        Internal Endorsement
+                                    </option>
                                 </select>
                                 <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3 bg-custom-lightestgreen text-custom-bluegreen pointer-events-none">
                                     <IoMdArrowDropdown />
@@ -780,12 +863,13 @@ const InquiryFormModal = ({ modalRef }) => {
                         {formData.user_type === "Others" && (
                             <div className="flex justify-end">
                                 <div
-                                    className={`flex items-center border rounded-[5px] w-[277px] overflow-hidden ${isSubmitted && !formData.other_user_type
-                                        ? resetSuccess
-                                            ? "border-custom-bluegreen"
-                                            : "border-red-500"
-                                        : "border-custom-bluegreen"
-                                        }`}
+                                    className={`flex items-center border rounded-[5px] w-[277px] overflow-hidden ${
+                                        isSubmitted && !formData.other_user_type
+                                            ? resetSuccess
+                                                ? "border-custom-bluegreen"
+                                                : "border-red-500"
+                                            : "border-custom-bluegreen"
+                                    }`}
                                 >
                                     <input
                                         name="other_user_type"
@@ -813,10 +897,10 @@ const InquiryFormModal = ({ modalRef }) => {
                                 className="w-full px-4 text-sm focus:outline-none mobile:text-xs"
                                 placeholder=""
                                 onInput={(e) =>
-                                (e.target.value = e.target.value.replace(
-                                    /[^0-9]/g,
-                                    ""
-                                ))
+                                    (e.target.value = e.target.value.replace(
+                                        /[^0-9]/g,
+                                        ""
+                                    ))
                                 }
                             />
                         </div>
@@ -836,12 +920,13 @@ const InquiryFormModal = ({ modalRef }) => {
                     </div>
                     <div className="border border-b-1 border-[#D9D9D9] my-2"></div>
                     <div
-                        className={`${!isValid
-                            ? resetSuccess
-                                ? "border-custom-bluegreen"
-                                : "border-red-500"
-                            : "border-custom-bluegreen"
-                            } rounded-[5px] bg-custom-lightestgreen border`}
+                        className={`${
+                            !isValid
+                                ? resetSuccess
+                                    ? "border-custom-bluegreen"
+                                    : "border-red-500"
+                                : "border-custom-bluegreen"
+                        } rounded-[5px] bg-custom-lightestgreen border`}
                     >
                         <div className="flex items-center justify-between">
                             <p className="text-custom-bluegreen text-sm bg-custom-lightestgreen pl-3  montserrat-semibold flex-grow mobile:text-xs mobile:w-[170px]">
@@ -931,10 +1016,11 @@ const InquiryFormModal = ({ modalRef }) => {
                                 disabled={loading}
                                 type="submit"
                                 className={`w-[133px] text-sm montserrat-semibold text-white h-[40px] rounded-[10px] gradient-btn2 flex justify-center items-center gap-2 tablet:w-full hover:shadow-custom4
-                                            ${loading
-                                        ? "cursor-not-allowed"
-                                        : ""
-                                    }
+                                            ${
+                                                loading
+                                                    ? "cursor-not-allowed"
+                                                    : ""
+                                            }
                                             `}
                             >
                                 {loading ? (
@@ -950,21 +1036,21 @@ const InquiryFormModal = ({ modalRef }) => {
                         <div className="mt-2">
                             {fileName && fileName.length > 0
                                 ? fileName.map((item, index) => {
-                                    return (
-                                        <p
-                                            key={index}
-                                            className="flex items-center text-sm text-red-900 truncate gap-1"
-                                        >
-                                            {item}{" "}
-                                            <IoMdTrash
-                                                className="hover:text-red-500"
-                                                onClick={() =>
-                                                    handleDelete(item)
-                                                }
-                                            />
-                                        </p>
-                                    );
-                                })
+                                      return (
+                                          <p
+                                              key={index}
+                                              className="flex items-center text-sm text-red-900 truncate gap-1"
+                                          >
+                                              {item}{" "}
+                                              <IoMdTrash
+                                                  className="hover:text-red-500"
+                                                  onClick={() =>
+                                                      handleDelete(item)
+                                                  }
+                                              />
+                                          </p>
+                                      );
+                                  })
                                 : null}
                         </div>
                     </div>

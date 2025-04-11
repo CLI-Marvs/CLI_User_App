@@ -275,14 +275,12 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
         >
             <div className="rounded-[10px]">
                 <div className="absolute right-0">
-
                     <button
                         className="flex justify-center w-10 h-10 items-center rounded-full bg-custom-grayFA text-custom-bluegreen hover:bg-custombg"
                         onClick={handleCloseModal}
                     >
                         ✕
                     </button>
-
                 </div>
                 <div className=" px-[50px] py-[77px] flex flex-col gap-[40px] ">
                     <div className="flex flex-col gap-[10px]">
@@ -387,10 +385,10 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
                                 className="w-full px-4 text-sm focus:outline-none mobile:text-xs no-spinner"
                                 placeholder=""
                                 onInput={(e) =>
-                                (e.target.value = e.target.value.replace(
-                                    /[^0-9]/g,
-                                    ""
-                                ))
+                                    (e.target.value = e.target.value.replace(
+                                        /[^0-9]/g,
+                                        ""
+                                    ))
                                 }
                             />
                         </div>
@@ -446,9 +444,11 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
                                 <select
                                     name="communication_type"
                                     value={
-                                        dataToUpdate.communication_type?.toLowerCase() === "suggestion or recommendation"
+                                        dataToUpdate.communication_type?.toLowerCase() ===
+                                        "suggestion or recommendation"
                                             ? "Suggestion or Recommendation"
-                                            : dataToUpdate.communication_type || ""
+                                            : dataToUpdate.communication_type ||
+                                              ""
                                     }
                                     onChange={handleChange}
                                     className="appearance-none w-full px-4 text-sm py-1 bg-white focus:outline-none border-0 mobile:text-xs"
@@ -484,9 +484,15 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
                                     <option value="Call">Call</option>
                                     <option value="Walk in">Walk-in</option>
                                     <option value="Website">Website</option>
-                                    <option value="Social media">Social media</option>
-                                    <option value="Branch Tablet">Branch Tablet</option>
-                                    <option value="Internal Endorsement">Internal Endorsement</option>
+                                    <option value="Social media">
+                                        Social media
+                                    </option>
+                                    <option value="Branch Tablet">
+                                        Branch Tablet
+                                    </option>
+                                    <option value="Internal Endorsement">
+                                        Internal Endorsement
+                                    </option>
                                 </select>
                                 <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3 bg-[#EDEDED] text-custom-gray81 pointer-events-none">
                                     <IoMdArrowDropdown />
@@ -496,7 +502,6 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
                         <div
                             className={`flex items-center border border-[D6D6D6] rounded-[5px] overflow-hidden`}
                         >
-
                             <span className="text-custom-gray81 text-sm bg-[#EDEDED] flex items-center w-[308px] tablet:w-[175px] mobile:w-[270px] mobile:text-xs -mr-3 pl-3 py-1">
                                 Concern Regarding
                             </span>
@@ -533,6 +538,28 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
                                         Commissions
                                     </option>
                                     <option value="Leasing">Leasing</option>
+                                    <option value="Account Payable">
+                                        Accounts Payable
+                                    </option>
+                                    <option value="Available Units">
+                                        Available Units
+                                    </option>
+                                    <option value="HR Related Inquiries">
+                                        HR Related Inquiries
+                                    </option>
+                                    <option value="Broker/Contractor Accreditation">
+                                        Broker/Contractor Accreditation
+                                    </option>
+                                    <option value="CLIPM Concerns">
+                                        CLIPM Concerns
+                                    </option>
+                                    <option value="Product Offer">
+                                        Product Offer
+                                    </option>
+                                    <option value="Lot Offer">Lot Offer</option>
+                                    <option value="Marketing Activity - Queries">
+                                        Marketing Activity - Queries
+                                    </option>
                                     <option value="Other Concerns">
                                         Other Concerns
                                     </option>
@@ -561,10 +588,10 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
                                 className="w-full px-4 text-sm focus:outline-none mobile:text-xs"
                                 placeholder=""
                                 onInput={(e) =>
-                                (e.target.value = e.target.value.replace(
-                                    /[^0-9]/g,
-                                    ""
-                                ))
+                                    (e.target.value = e.target.value.replace(
+                                        /[^0-9]/g,
+                                        ""
+                                    ))
                                 }
                             />
                         </div>
@@ -642,21 +669,26 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
                              * Disable button if no changes detected
                              * Visually indicate button is non-interactive when no changes exist
                              */}
-                            {user?.department === "Customer Relations - Services" && (
+                            {user?.department ===
+                                "Customer Relations - Services" && (
                                 <button
                                     disabled={!isUserTypeChange && !hasChanges}
                                     className="w-[133px] h-[39px] font-semibold text-sm text-white rounded-[10px] gradient-btn5"
                                     type="button"
                                     onClick={handleShowUpdateAlert}
-
                                     style={{
-                                        opacity: !isUserTypeChange && !hasChanges ? 0.5 : 1,
-                                        cursor: !isUserTypeChange && !hasChanges ? 'not-allowed' : 'pointer',
+                                        opacity:
+                                            !isUserTypeChange && !hasChanges
+                                                ? 0.5
+                                                : 1,
+                                        cursor:
+                                            !isUserTypeChange && !hasChanges
+                                                ? "not-allowed"
+                                                : "pointer",
                                     }}
                                 >
                                     Update
                                 </button>
-
                             )}
                         </div>
                     </div>
@@ -669,9 +701,9 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
                         show={showAlert}
                         onCancel={handleCancel}
                         onConfirm={handleConfirm}
-                    //You can pass onConfirm and onCancel props to customize the text of the buttons. Example below;
-                    // confirmText="Update"
-                    // cancelText="Cancel"
+                        //You can pass onConfirm and onCancel props to customize the text of the buttons. Example below;
+                        // confirmText="Update"
+                        // cancelText="Cancel"
                     />
                 </div>
             </div>

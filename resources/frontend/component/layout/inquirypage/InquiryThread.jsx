@@ -18,7 +18,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 import { AiFillInfoCircle } from "react-icons/ai";
 import { IoIosCheckmarkCircle } from "react-icons/io";
 import { toast } from "react-toastify";
-import { showToast } from "../../../util/toastUtil"
+import { showToast } from "../../../util/toastUtil";
 import Alert from "../mainComponent/Alert";
 import AddInfoModal from "./AddInfoModal";
 import { VALID_FILE_EXTENSIONS } from "../../../constant/data/validFile";
@@ -27,8 +27,8 @@ import ThreadInquiryFormModal from "./ThreadInquiryFormModal";
 import { ALLOWED_EMPLOYEES_CRS } from "../../../constant/data/allowedEmployeesCRS";
 import { ALLOWED_DEPARTMENT } from "../../../constant/data/allowedDepartment";
 
-import Skeleton from 'react-loading-skeleton'
-import 'react-loading-skeleton/dist/skeleton.css'
+import Skeleton from "react-loading-skeleton";
+import "react-loading-skeleton/dist/skeleton.css";
 
 const InquiryThread = () => {
     const [attachedFiles, setAttachedFiles] = useState([]);
@@ -66,7 +66,7 @@ const InquiryThread = () => {
         allEmployees,
         setMessages,
         setIsUserTypeChange,
-        isUserTypeChange
+        isUserTypeChange,
     } = useStateContext();
     const [chatMessage, setChatMessage] = useState("");
     const userLoggedInEmail = user?.employee_email;
@@ -86,7 +86,6 @@ const InquiryThread = () => {
     const handleDateChange = (date) => {
         setStartDate(date);
     };
-
 
     // Function to normalize names
     //const normalizeEmail = (email) => email.trim().toLowerCase();
@@ -125,9 +124,9 @@ const InquiryThread = () => {
         "07": "July",
         "08": "August",
         "09": "September",
-        "10": "October",
-        "11": "November",
-        "12": "December",
+        10: "October",
+        11: "November",
+        12: "December",
     };
 
     /*  const dataConcern = data?.find((item) => item.ticket_id === ticketId) || {}; */
@@ -140,7 +139,6 @@ const InquiryThread = () => {
         const files = Array.from(event.target.files);
         setAttachedFiles((prevFiles) => [...prevFiles, ...files]);
         event.target.value = "";
-
     };
 
     const formatFunc = (name) => {
@@ -153,35 +151,38 @@ const InquiryThread = () => {
         "N/A",
         ...(Array.isArray(propertyNamesList) && propertyNamesList.length > 0
             ? propertyNamesList
-                .filter((item) => !item.toLowerCase().includes("phase"))
-                .map((item) => {
-                    let formattedItem = formatFunc(item);
+                  .filter((item) => !item.toLowerCase().includes("phase"))
+                  .map((item) => {
+                      let formattedItem = formatFunc(item);
 
-                    // Capitalize each word in the string
-                    formattedItem = formattedItem
-                        .split(" ")
-                        .map((word) => {
-                            // Check for specific words that need to be fully capitalized
-                            if (/^(Sjmv|Lpu|Cdo|Dgt)$/i.test(word)) {
-                                return word.toUpperCase();
-                            }
-                            // Capitalize the first letter of all other words
-                            return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
-                        })
-                        .join(" ");
+                      // Capitalize each word in the string
+                      formattedItem = formattedItem
+                          .split(" ")
+                          .map((word) => {
+                              // Check for specific words that need to be fully capitalized
+                              if (/^(Sjmv|Lpu|Cdo|Dgt)$/i.test(word)) {
+                                  return word.toUpperCase();
+                              }
+                              // Capitalize the first letter of all other words
+                              return (
+                                  word.charAt(0).toUpperCase() +
+                                  word.slice(1).toLowerCase()
+                              );
+                          })
+                          .join(" ");
 
-                    // Replace specific names if needed
-                    if (formattedItem === "Casamira South") {
-                        formattedItem = "Casa Mira South";
-                    }
+                      // Replace specific names if needed
+                      if (formattedItem === "Casamira South") {
+                          formattedItem = "Casa Mira South";
+                      }
 
-                    return formattedItem;
-                })
-                .sort((a, b) => {
-                    if (a === "N/A") return -1;
-                    if (b === "N/A") return 1;
-                    return a.localeCompare(b);
-                })
+                      return formattedItem;
+                  })
+                  .sort((a, b) => {
+                      if (a === "N/A") return -1;
+                      if (b === "N/A") return 1;
+                      return a.localeCompare(b);
+                  })
             : []),
     ];
 
@@ -216,7 +217,6 @@ const InquiryThread = () => {
             modalRef2.current.showModal();
         }
     };
-
 
     const handleOpenResolveModal = () => {
         if (resolveModalRef.current) {
@@ -273,12 +273,10 @@ const InquiryThread = () => {
             setHasAttachments(false);
             navigate("/inquirymanagement/inquirylist");
         } catch (error) {
-            console.log(error)
+            console.log(error);
         } finally {
             setIsSearchLoading(false);
-
         }
-
     };
 
     const formatChatMessage = (message) => {
@@ -291,7 +289,6 @@ const InquiryThread = () => {
             ));
         }
     };
-
 
     const submitMessage = async () => {
         setLoading(true);
@@ -314,9 +311,12 @@ const InquiryThread = () => {
 
             // Show toast for invalid extensions if any are found
             if (invalidExtensions.length > 0) {
-                showToast(`.${invalidExtensions.join(
-                    ", ."
-                )} file type(s) are not allowed.`, "warning");
+                showToast(
+                    `.${invalidExtensions.join(
+                        ", ."
+                    )} file type(s) are not allowed.`,
+                    "warning"
+                );
 
                 setLoading(false);
                 return;
@@ -324,7 +324,10 @@ const InquiryThread = () => {
 
             // Show toast for oversized files if any are found
             if (oversizedFiles.length > 0) {
-                showToast("File is too large. Maximum size is 100MB.", "warning");
+                showToast(
+                    "File is too large. Maximum size is 100MB.",
+                    "warning"
+                );
                 setLoading(false);
                 return;
             }
@@ -360,7 +363,6 @@ const InquiryThread = () => {
                     "Content-Type": "multipart/form-data",
                 },
             });
-
 
             setAttachedFiles([]);
             setLoading(false);
@@ -446,8 +448,8 @@ const InquiryThread = () => {
 
     const combineThreadMessages = messages[ticketId]
         ? messages[ticketId]
-            .flat()
-            .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+              .flat()
+              .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
         : [];
     const getLatestMessageFromBuyer = combineThreadMessages.find(
         (item) => item.buyer_email
@@ -639,6 +641,51 @@ const InquiryThread = () => {
                                             <option value="Commissions">
                                                 Commissions
                                             </option>
+                                            <option value="Account Payable">
+                                                Accounts Payable
+                                            </option>
+                                            <option
+                                                value="Available Units"
+                                                className="pr-8  "
+                                            >
+                                                Available Units
+                                            </option>
+                                            <option
+                                                value="HR Related Inquiries"
+                                                className="pr-8  "
+                                            >
+                                                HR Related Inquiries
+                                            </option>
+                                            <option
+                                                value="Broker/Contractor Accreditation"
+                                                className="pr-8  "
+                                            >
+                                                Broker/Contractor Accreditation
+                                            </option>
+                                            <option
+                                                value="CLIPM Concerns"
+                                                className="pr-8  "
+                                            >
+                                                CLIPM Concerns
+                                            </option>
+                                            <option
+                                                value="Product Offer"
+                                                className="pr-8  "
+                                            >
+                                                Product Offer
+                                            </option>
+                                            <option
+                                                value="Lot Offer"
+                                                className="pr-8  "
+                                            >
+                                                Lot Offer
+                                            </option>
+                                            <option
+                                                value="Marketing Activity - Queries"
+                                                className="pr-8  "
+                                            >
+                                                Marketing Activity - Queries
+                                            </option>
                                             <option value="Other Concerns">
                                                 Other Concerns
                                             </option>
@@ -790,23 +837,48 @@ const InquiryThread = () => {
                                                 className="w-full border-b-1 outline-none appearance-none text-sm absolute px-[8px]"
                                                 value={departments}
                                                 onChange={(e) =>
-                                                    setDepartments(e.target.value)
+                                                    setDepartments(
+                                                        e.target.value
+                                                    )
                                                 }
                                             >
                                                 <option value="">
                                                     {" "}
                                                     Select Department
                                                 </option>
-                                                {[...new Set(allEmployees
-                                                    .map(item => item.department)
-                                                    .filter(department => department !== null && department !== undefined && department !== "NULL")
-                                                    )]
-                                                    .sort((a, b) => a.localeCompare(b))
-                                                    .map((department, index) => (
-                                                    <option key={index} value={department}>
-                                                        {department}
-                                                    </option>
-                                                ))}
+                                                {[
+                                                    ...new Set(
+                                                        allEmployees
+                                                            .map(
+                                                                (item) =>
+                                                                    item.department
+                                                            )
+                                                            .filter(
+                                                                (department) =>
+                                                                    department !==
+                                                                        null &&
+                                                                    department !==
+                                                                        undefined &&
+                                                                    department !==
+                                                                        "NULL"
+                                                            )
+                                                    ),
+                                                ]
+                                                    .sort((a, b) =>
+                                                        a.localeCompare(b)
+                                                    )
+                                                    .map(
+                                                        (department, index) => (
+                                                            <option
+                                                                key={index}
+                                                                value={
+                                                                    department
+                                                                }
+                                                            >
+                                                                {department}
+                                                            </option>
+                                                        )
+                                                    )}
                                             </select>
                                         </div>
                                         <span className="absolute inset-y-0 right-0 flex items-center  pl-3 pointer-events-none">
@@ -899,23 +971,36 @@ const InquiryThread = () => {
                                             </label>
                                             <div className="relative w-[146px]">
                                                 <select
-                                                className="w-full border-b-1 outline-none appearance-none text-sm absolute px-[8px]"
-                                                value={selectedYear}
-                                                onChange={(e) =>
-                                                    setSelectedYear(e.target.value)
-                                                }
-                                            >
-                                                <option value="">
-                                                    {" "}
-                                                    Select Year
-                                                </option>
-                                                {fullYear && fullYear.map((item, index) => (
-                                                    <option key={index} value={item.year}>  {item.year}</option>
-                                                ))}
-                                            </select>
-                                            <span className="absolute inset-y-0 right-0 flex items-center  pl-3 pointer-events-none">
-                                                <IoIosArrowDown />
-                                            </span>
+                                                    className="w-full border-b-1 outline-none appearance-none text-sm absolute px-[8px]"
+                                                    value={selectedYear}
+                                                    onChange={(e) =>
+                                                        setSelectedYear(
+                                                            e.target.value
+                                                        )
+                                                    }
+                                                >
+                                                    <option value="">
+                                                        {" "}
+                                                        Select Year
+                                                    </option>
+                                                    {fullYear &&
+                                                        fullYear.map(
+                                                            (item, index) => (
+                                                                <option
+                                                                    key={index}
+                                                                    value={
+                                                                        item.year
+                                                                    }
+                                                                >
+                                                                    {" "}
+                                                                    {item.year}
+                                                                </option>
+                                                            )
+                                                        )}
+                                                </select>
+                                                <span className="absolute inset-y-0 right-0 flex items-center  pl-3 pointer-events-none">
+                                                    <IoIosArrowDown />
+                                                </span>
                                             </div>
                                         </div>
                                         <div className="flex relative">
@@ -926,7 +1011,9 @@ const InquiryThread = () => {
                                             <select
                                                 className="w-[179px] border-b-1 outline-none appearance-none text-sm px-[8px]"
                                                 onChange={(e) =>
-                                                    setSelectedMonth(e.target.value)
+                                                    setSelectedMonth(
+                                                        e.target.value
+                                                    )
                                                 }
                                                 value={selectedMonth}
                                             >
@@ -935,12 +1022,18 @@ const InquiryThread = () => {
                                                     Select Month
                                                 </option>
                                                 {Object.entries(monthNames)
-                                                    .sort(([keyA], [keyB]) => keyA - keyB)
+                                                    .sort(
+                                                        ([keyA], [keyB]) =>
+                                                            keyA - keyB
+                                                    )
                                                     .map(([key, name]) => (
-                                                        <option key={key} value={key}>
+                                                        <option
+                                                            key={key}
+                                                            value={key}
+                                                        >
                                                             {name}
                                                         </option>
-                                                ))}
+                                                    ))}
                                             </select>
                                             <span className="absolute inset-y-0 right-0 flex items-center  pl-3 pointer-events-none">
                                                 <IoIosArrowDown />
@@ -1005,8 +1098,10 @@ const InquiryThread = () => {
                         <div className="p-[10px]">
                             {/* Container for chat input and attached files */}
                             {/* IF userLoggedInDepartment is in  ALLOWED_DEPARTMENTS then render/show the textarea for reply */}
-                            {dataConcern?.status === "unresolved" && ALLOWED_DEPARTMENT.includes(userLoggedInDepartment)
-                                && (
+                            {dataConcern?.status === "unresolved" &&
+                                ALLOWED_DEPARTMENT.includes(
+                                    userLoggedInDepartment
+                                ) && (
                                     <div className="relative">
                                         <div className="gradient-btn2 rounded-[12px] p-[2px] relative ">
                                             <div className="bg-white p-[10px] rounded-[10px]">
@@ -1033,12 +1128,12 @@ const InquiryThread = () => {
                                                                     );
                                                                 const truncatedName =
                                                                     baseName.length >
-                                                                        30
+                                                                    30
                                                                         ? baseName.slice(
-                                                                            0,
-                                                                            30
-                                                                        ) +
-                                                                        "..."
+                                                                              0,
+                                                                              30
+                                                                          ) +
+                                                                          "..."
                                                                         : baseName;
                                                                 return (
                                                                     <div
@@ -1124,11 +1219,12 @@ const InquiryThread = () => {
                                                                 loading
                                                             }
                                                             className={`flex w-[82px] h-[28px] rounded-[5px] text-white text-xs justify-center items-center 
-                                                        ${loading ||
-                                                                    !chatMessage.trim()
-                                                                    ? "bg-gray-400 cursor-not-allowed"
-                                                                    : "gradient-background3 hover:shadow-custom4"
-                                                                } 
+                                                        ${
+                                                            loading ||
+                                                            !chatMessage.trim()
+                                                                ? "bg-gray-400 cursor-not-allowed"
+                                                                : "gradient-background3 hover:shadow-custom4"
+                                                        } 
                                                     `}
                                                         >
                                                             {loading ? (
@@ -1227,64 +1323,64 @@ const InquiryThread = () => {
                                                                 </div>
                                                                 {attachedFiles.length >
                                                                     0 && (
-                                                                        <div className="mb-2 ">
-                                                                            {attachedFiles.map(
-                                                                                (
-                                                                                    file,
-                                                                                    index
-                                                                                ) => {
-                                                                                    const fileName =
-                                                                                        file.name;
-                                                                                    const fileExtension =
-                                                                                        fileName.slice(
-                                                                                            fileName.lastIndexOf(
-                                                                                                "."
-                                                                                            )
-                                                                                        );
-                                                                                    const baseName =
-                                                                                        fileName.slice(
-                                                                                            0,
-                                                                                            fileName.lastIndexOf(
-                                                                                                "."
-                                                                                            )
-                                                                                        );
-                                                                                    const truncatedName =
-                                                                                        baseName.length >
-                                                                                            30
-                                                                                            ? baseName.slice(
-                                                                                                0,
-                                                                                                30
-                                                                                            ) +
-                                                                                            "..."
-                                                                                            : baseName;
-                                                                                    return (
-                                                                                        <div
-                                                                                            key={
-                                                                                                index
-                                                                                            }
-                                                                                            className="flex items-center justify-between mb-2 p-2 border bg-white rounded"
-                                                                                        >
-                                                                                            <span className="text-sm text-gray-700">
-                                                                                                {truncatedName +
-                                                                                                    fileExtension}
-                                                                                            </span>
-                                                                                            <button
-                                                                                                type="button"
-                                                                                                onClick={() =>
-                                                                                                    removeFile(
-                                                                                                        file.name
-                                                                                                    )
-                                                                                                }
-                                                                                                className="text-red-500"
-                                                                                            >
-                                                                                                Remove
-                                                                                            </button>
-                                                                                        </div>
+                                                                    <div className="mb-2 ">
+                                                                        {attachedFiles.map(
+                                                                            (
+                                                                                file,
+                                                                                index
+                                                                            ) => {
+                                                                                const fileName =
+                                                                                    file.name;
+                                                                                const fileExtension =
+                                                                                    fileName.slice(
+                                                                                        fileName.lastIndexOf(
+                                                                                            "."
+                                                                                        )
                                                                                     );
-                                                                                }
-                                                                            )}
-                                                                        </div>
-                                                                    )}
+                                                                                const baseName =
+                                                                                    fileName.slice(
+                                                                                        0,
+                                                                                        fileName.lastIndexOf(
+                                                                                            "."
+                                                                                        )
+                                                                                    );
+                                                                                const truncatedName =
+                                                                                    baseName.length >
+                                                                                    30
+                                                                                        ? baseName.slice(
+                                                                                              0,
+                                                                                              30
+                                                                                          ) +
+                                                                                          "..."
+                                                                                        : baseName;
+                                                                                return (
+                                                                                    <div
+                                                                                        key={
+                                                                                            index
+                                                                                        }
+                                                                                        className="flex items-center justify-between mb-2 p-2 border bg-white rounded"
+                                                                                    >
+                                                                                        <span className="text-sm text-gray-700">
+                                                                                            {truncatedName +
+                                                                                                fileExtension}
+                                                                                        </span>
+                                                                                        <button
+                                                                                            type="button"
+                                                                                            onClick={() =>
+                                                                                                removeFile(
+                                                                                                    file.name
+                                                                                                )
+                                                                                            }
+                                                                                            className="text-red-500"
+                                                                                        >
+                                                                                            Remove
+                                                                                        </button>
+                                                                                    </div>
+                                                                                );
+                                                                            }
+                                                                        )}
+                                                                    </div>
+                                                                )}
                                                             </div>
                                                         </div>
                                                     )}
@@ -1296,16 +1392,21 @@ const InquiryThread = () => {
                                                 Note: This message will be sent
                                                 to{" "}
                                                 <span className="font-semibold">
-                                                    {/* capitalizeWords() */
-                                                        `${dataConcern?.buyer_firstname ||
-                                                        ""
-                                                        } ${dataConcern?.buyer_middlename ||
-                                                        ""
-                                                        } ${dataConcern?.buyer_lastname ||
-                                                        ""
+                                                    {
+                                                        /* capitalizeWords() */
+                                                        `${
+                                                            dataConcern?.buyer_firstname ||
+                                                            ""
+                                                        } ${
+                                                            dataConcern?.buyer_middlename ||
+                                                            ""
+                                                        } ${
+                                                            dataConcern?.buyer_lastname ||
+                                                            ""
                                                         }`
                                                     }{" "}
-                                                    {/* capitalizeWords() */
+                                                    {
+                                                        /* capitalizeWords() */
                                                         dataConcern?.suffix_name
                                                     }
                                                 </span>
@@ -1317,26 +1418,30 @@ const InquiryThread = () => {
                                 )}
 
                             {/*Render if the logged in user department is not CRS or other critical departments*/}
-                            {!ALLOWED_DEPARTMENT.includes(userLoggedInDepartment) && (
-                                    <div className="relative py-2">
-                                        <div className="text-[11px] text-[#B54D4D]">
-                                            <p>
-                                                <span className="font-semibold">
-                                                    Note: Only CRS, Turnovers, Accounts Management, Sales, and Registration & Documentation teams can reply
-                                                    directly to inquiries, use the
-                                                    comment section for internal
-                                                    communication.
-                                                </span>
-                                            </p>
-                                        </div>
+                            {!ALLOWED_DEPARTMENT.includes(
+                                userLoggedInDepartment
+                            ) && (
+                                <div className="relative py-2">
+                                    <div className="text-[11px] text-[#B54D4D]">
+                                        <p>
+                                            <span className="font-semibold">
+                                                Note: Only CRS, Turnovers,
+                                                Accounts Management, Sales, and
+                                                Registration & Documentation
+                                                teams can reply directly to
+                                                inquiries, use the comment
+                                                section for internal
+                                                communication.
+                                            </span>
+                                        </p>
                                     </div>
-                                )}
-
+                                </div>
+                            )}
 
                             <div className="border my-2 border-t-1 border-custom-lightestgreen"></div>
                             <div className="w-full flex justify-end gap-[13px] items-center">
-                  
-                                {(dataConcern?.status === "Resolved" || dataConcern?.status === "Closed") && (
+                                {(dataConcern?.status === "Resolved" ||
+                                    dataConcern?.status === "Closed") && (
                                     <span
                                         className="w-auto font-semibold text-[13px] text-[#1A73E8] underline cursor-pointer"
                                         onClick={handleOpenAddInfoModal}
@@ -1376,21 +1481,17 @@ const InquiryThread = () => {
                                         userLoggedInEmail
                                     ) && (
                                         <div
-                                            onClick={
-                                                handleOpenCloseModal
-                                            }
+                                            onClick={handleOpenCloseModal}
                                             className="flex justify-start w-auto font-semibold text-[13px] text-[#1A73E8] underline cursor-pointer"
                                         >
                                             Mark as closed
                                         </div>
                                     )
                                 )}
-
-
                             </div>
                             <div className="">
                                 <div className="">
-                                    {combineThreadMessages.length > 0 ?
+                                    {combineThreadMessages.length > 0 ? (
                                         combineThreadMessages.map(
                                             (item, index) =>
                                                 item.buyer_email ? (
@@ -1407,17 +1508,30 @@ const InquiryThread = () => {
                                                         key={index}
                                                     />
                                                 )
-                                        ) : (
-                                            <div className="flex flex-col gap-[20px] py-[20px] px-[30px]">
-                                                {[...Array(5)].map((_, idx) => (
-                                                    <div className="flex flex-col gap-[10px]" key={idx}>
-                                                        <Skeleton height={20} width="80%" />
-                                                        <Skeleton height={20} width="80%" />
-                                                        <Skeleton height={50} width="100%" />
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        )}
+                                        )
+                                    ) : (
+                                        <div className="flex flex-col gap-[20px] py-[20px] px-[30px]">
+                                            {[...Array(5)].map((_, idx) => (
+                                                <div
+                                                    className="flex flex-col gap-[10px]"
+                                                    key={idx}
+                                                >
+                                                    <Skeleton
+                                                        height={20}
+                                                        width="80%"
+                                                    />
+                                                    <Skeleton
+                                                        height={20}
+                                                        width="80%"
+                                                    />
+                                                    <Skeleton
+                                                        height={50}
+                                                        width="100%"
+                                                    />
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                             {/* <div className="mt-2 mb-3 relative">

@@ -55,7 +55,7 @@ const InquiryList = () => {
         searchSummary,
         setSearchSummary,
         resultSearchActive,
-        setResultSearchActive
+        setResultSearchActive,
         /*  setHasAttachments,
         hasAttachments */
     } = useStateContext();
@@ -91,9 +91,6 @@ const InquiryList = () => {
     const filterBoxRef = useRef(null);
     const [isOpenSelect, setIsOpenSelect] = useState(false);
 
-   
-
-
     const handleSelect = (option) => {
         onChange(option);
         setIsOpenSelect(false);
@@ -105,7 +102,6 @@ const InquiryList = () => {
         const selectedPage = data.selected;
         setCurrentPage(selectedPage);
     };
-
 
     const handleRefresh = () => {
         setResultSearchActive(false);
@@ -364,7 +360,6 @@ const InquiryList = () => {
         return monthNames[parseInt(monthNumber, 10) - 1]; // Adjust for zero-based index
     };
 
-
     const handleSearch = () => {
         setResultSearchActive(true);
         let summaryParts = []; // Array to hold each part of the summary
@@ -434,9 +429,9 @@ const InquiryList = () => {
         setDepartments("");
     };
 
-   
-    useEffect(() => {
-      /*   console.log("categoryParam", categoryParam);
+    useEffect(
+        () => {
+            /*   console.log("categoryParam", categoryParam);
         console.log("statusParam", statusParam);
         console.log("monthParam", monthParam);
         console.log("yearParam", yearParam);
@@ -444,55 +439,56 @@ const InquiryList = () => {
         console.log("channelsParam", channelsParam);
  */
 
-        if (
-            propertyParam ||
-            statusParam ||
-            monthParam ||
-            yearParam ||
-            departmentParam ||
-            channelsParam ||
-            categoryParam
-        ) {
+            if (
+                propertyParam ||
+                statusParam ||
+                monthParam ||
+                yearParam ||
+                departmentParam ||
+                channelsParam ||
+                categoryParam
+            ) {
+                setResultSearchActive(true);
 
-            setResultSearchActive(true);
+                let summaryParts = []; // Array to hold each part of the summary
 
-            let summaryParts = []; // Array to hold each part of the summary
+                if (categoryParam)
+                    summaryParts.push(`Category: ${categoryParam}`);
+                if (statusParam) {
+                    const displayStatus =
+                        statusParam === "unresolved"
+                            ? "Unresolved"
+                            : statusParam;
+                    summaryParts.push(`Status: ${displayStatus}`);
+                }
+                if (name) summaryParts.push(`Name: ${name}`);
+                if (typeParam) summaryParts.push(`Type: ${typeParam}`);
+                if (email) summaryParts.push(`Email: ${email}`);
+                if (channelsParam) {
+                    // Format 'Walk in' to 'Walk-in'
+                    const formattedChannel =
+                        channelsParam === "Walk in"
+                            ? "Walk-in"
+                            : channelsParam === "Social media"
+                            ? "Social Media"
+                            : channelsParam;
+                    summaryParts.push(`Channel: ${formattedChannel}`);
+                }
+                if (departmentParam)
+                    summaryParts.push(`Department: ${departmentParam}`);
+                if (ticket) summaryParts.push(`Ticket: ${ticket}`);
+                if (startDate)
+                    summaryParts.push(`Start Date: ${formatDate(startDate)}`);
+                if (propertyParam)
+                    summaryParts.push(`Property: ${propertyParam}`);
+                if (yearParam) summaryParts.push(`Year: ${yearParam}`);
+                if (monthParam)
+                    summaryParts.push(`Month: ${formatMonth(monthParam)}`);
+                if (hasAttachments) summaryParts.push(`Attachments: Yes`);
 
-            if (categoryParam)
-                summaryParts.push(`Category: ${categoryParam}`);
-            if (statusParam) {
-                const displayStatus =
-                statusParam === "unresolved" ? "Unresolved" : statusParam;
-                summaryParts.push(`Status: ${displayStatus}`);
-            }
-            if (name) summaryParts.push(`Name: ${name}`);
-            if (typeParam) summaryParts.push(`Type: ${typeParam}`);
-            if (email) summaryParts.push(`Email: ${email}`);
-            if (channelsParam) {
-                // Format 'Walk in' to 'Walk-in'
-                const formattedChannel =
-                    channelsParam === "Walk in"
-                        ? "Walk-in"
-                        : channelsParam === "Social media"
-                        ? "Social Media"
-                        : channelsParam;
-                summaryParts.push(`Channel: ${formattedChannel}`);
-            }
-            if (departmentParam)
-                summaryParts.push(`Department: ${departmentParam}`);
-            if (ticket) summaryParts.push(`Ticket: ${ticket}`);
-            if (startDate)
-                summaryParts.push(`Start Date: ${formatDate(startDate)}`);
-            if (propertyParam)
-                summaryParts.push(`Property: ${propertyParam}`);
-            if (yearParam) summaryParts.push(`Year: ${yearParam}`);
-            if (monthParam)
-                summaryParts.push(`Month: ${formatMonth(monthParam)}`);
-            if (hasAttachments) summaryParts.push(`Attachments: Yes`);
+                setSearchSummary(summaryParts);
 
-            setSearchSummary(summaryParts);
-
-          /*   setSearchFilter({
+                /*   setSearchFilter({
             name,
             category: categoryParam,
             type: typeParam,
@@ -507,8 +503,12 @@ const InquiryList = () => {
             selectedMonth: monthParam,
             selectedYear: yearParam,
         }); */
-        }
-    }, [/* propertyParam, statusParam, departmentParam, monthParam, yearParam */]);
+            }
+        },
+        [
+            /* propertyParam, statusParam, departmentParam, monthParam, yearParam */
+        ]
+    );
 
     useEffect(() => {
         if (isFilterVisible) {
@@ -535,7 +535,6 @@ const InquiryList = () => {
         specificAssigneeCsr,
         currentPage,
     ]);
-
 
     return (
         <>
@@ -662,7 +661,56 @@ const InquiryList = () => {
                                                 <option value="Commissions">
                                                     Commissions
                                                 </option>
-                                                <option value="Other Concerns">
+                                                <option value="Account Payable">
+                                                    Accounts Payable
+                                                </option>
+                                                <option
+                                                    value="Available Units"
+                                                    className="pr-8  "
+                                                >
+                                                    Available Units
+                                                </option>
+                                                <option
+                                                    value="HR Related Inquiries"
+                                                    className="pr-8  "
+                                                >
+                                                    HR Related Inquiries
+                                                </option>
+                                                <option
+                                                    value="Broker/Contractor Accreditation"
+                                                    className="pr-8  "
+                                                >
+                                                    Broker/Contractor
+                                                    Accreditation
+                                                </option>
+                                                <option
+                                                    value="CLIPM Concerns"
+                                                    className="pr-8  "
+                                                >
+                                                    CLIPM Concerns
+                                                </option>
+                                                <option
+                                                    value="Product Offer"
+                                                    className="pr-8  "
+                                                >
+                                                    Product Offer
+                                                </option>
+                                                <option
+                                                    value="Lot Offer"
+                                                    className="pr-8  "
+                                                >
+                                                    Lot Offer
+                                                </option>
+                                                <option
+                                                    value="Marketing Activity - Queries"
+                                                    className="pr-8  "
+                                                >
+                                                    Marketing Activity - Queries
+                                                </option>
+                                                <option
+                                                    value="Other Concerns"
+                                                    className="pr-8"
+                                                >
                                                     Other Concerns
                                                 </option>
                                             </select>
@@ -817,7 +865,7 @@ const InquiryList = () => {
                                         <div className="flex bg-red-900 justify-start w-full relative">
                                             <label
                                                 htmlFor=""
-                                                className="w-full border-b-2" 
+                                                className="w-full border-b-2"
                                             >
                                                 {""}
                                             </label>
@@ -1058,7 +1106,13 @@ const InquiryList = () => {
                         <div className="flex flex-col gap-1 p-2 mt-[15px] bg-white w-max rounded-[8px] shadow-custom7 text-sm">
                             <div className="flex flex-col">
                                 <div className="mb-5">
-                                    <strong>Search {data?.length > 1 ? 'results for' : 'result for'} &nbsp;</strong>
+                                    <strong>
+                                        Search{" "}
+                                        {data?.length > 1
+                                            ? "results for"
+                                            : "result for"}{" "}
+                                        &nbsp;
+                                    </strong>
                                 </div>
                                 <div className="flex flex-col flex-wrap gap-2">
                                     {searchSummary.map((part, index) => {
@@ -1087,7 +1141,13 @@ const InquiryList = () => {
                                     dataCount && dataCount === 0 ? (
                                         <p>No Records Found</p>
                                     ) : (
-                                        <p>{dataCount} {data?.length > 1 ? 'Results' : 'Result'} Found</p>
+                                        <p>
+                                            {dataCount}{" "}
+                                            {data?.length > 1
+                                                ? "Results"
+                                                : "Result"}{" "}
+                                            Found
+                                        </p>
                                     )
                                 ) : (
                                     <p>{selectedOption}</p>
