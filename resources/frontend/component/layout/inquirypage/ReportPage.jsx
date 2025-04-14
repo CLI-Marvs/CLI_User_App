@@ -82,9 +82,9 @@ const ReportPage = () => {
         setYearValue,
         yearValue,
         setMonthValue,
-        monthValue  
+        monthValue,
     } = useStateContext();
-//  console.log("dataCategory", dataCategory);
+    //  console.log("dataCategory", dataCategory);
     const colors = [
         "#348017",
         "#70AD47",
@@ -106,8 +106,56 @@ const ReportPage = () => {
         "#7F7F7F", // Gray
         "#BCBD22", // Olive
         "#17BECF", // Teal
+        "#F39C12", // Yellow (New)
+        "#C0392B", // Dark Red (New)
+        "#8E44AD", // Violet (New)
+        "#2ECC71", // Light Green (New)
+        "#3498DB", // Light Blue (New)
     ];
 
+    // Dynamically assign unique colors to concerns based on the COLORS array
+    const categoryColors = {};
+    let colorIndex = 0;
+
+    const assignColorToCategory = (category) => {
+        if (!categoryColors[category]) {
+            categoryColors[category] = COLORS[colorIndex % COLORS.length];
+            colorIndex++;
+        }
+        return categoryColors[category];
+    };
+
+    // Example usage: Assign colors to all categories dynamically
+    const allCategories = [
+        "Commissions",
+        "Leasing",
+        "Loan Application",
+        "Other Concerns",
+        "Payment Issues",
+        "Reservation Documents",
+        "SOA/ Buyer's Ledger",
+        "Title and Other Registration Documents",
+        "Turn Over Status",
+        "Unit Status",
+        "Account Payable",
+        "Available Units",
+        "HR Related Inquiries",
+        "Broker/Contractor Accreditation",
+        "CLIPM Concerns",
+        "Product Offer",
+        "Lot Offer",
+        "Marketing Activity - Queries",
+        "Other Concerns",
+    ];
+
+    allCategories.forEach((category) => assignColorToCategory(category));
+
+    // Function to get the color for a category
+    const getCategoryColor = (categoryName) => {
+        console.log(`categoryColors[${categoryName}] || "#8884d8"`, categoryColors[categoryName] || "#8884d8");
+        return categoryColors[categoryName] || "#8884d8"; 
+    };
+    
     const navigate = useNavigate();
     const getBarColorPerType = (name) => {
         const colors = {
@@ -152,18 +200,19 @@ const ReportPage = () => {
         );
     };
 
-    const categoryColors = {
-        Commissions: COLORS[0],
-        Leasing: COLORS[1],
-        "Loan Application": COLORS[2],
-        "Other Concerns": COLORS[3],
-        "Payment Issues": COLORS[4],
-        "Reservation Documents": COLORS[5],
-        "SOA/ Buyer's Ledger": COLORS[6],
-        "Title and Other Registration Documents": COLORS[7],
-        "Turn Over Status": COLORS[8],
-        "Unit Status": COLORS[9],
-    };
+    // const categoryColors = {
+    //     Commissions: COLORS[0],
+    //     Leasing: COLORS[1],
+    //     "Loan Application": COLORS[2],
+    //     "Other Concerns": COLORS[3],
+    //     "Payment Issues": COLORS[4],
+    //     "Reservation Documents": COLORS[5],
+    //     "SOA/ Buyer's Ledger": COLORS[6],
+    //     "Title and Other Registration Documents": COLORS[7],
+    //     "Turn Over Status": COLORS[8],
+    //     "Unit Status": COLORS[9],
+    // };
+
     // Function to get a unique color from COLORS if a category is missing from categoryColors
     const getColor = (category, index) => {
         if (categoryColors[category]) return categoryColors[category];
@@ -171,9 +220,9 @@ const ReportPage = () => {
     };
     const SINGLE_COLOR = "#5B9BD5";
 
-    const getCategoryColor = (categoryName) => {
-        return categoryColors[categoryName] || "#8884d8";
-    };
+    // const getCategoryColor = (categoryName) => {
+    //     return categoryColors[categoryName] || "#8884d8";
+    // };
     const CustomTooltip = ({ active, payload }) => {
         if (active && payload && payload.length) {
             const { name } = payload[0].payload;
@@ -393,8 +442,6 @@ const ReportPage = () => {
 
     const currentYear = new Date().getFullYear();
 
-  
-
     const defaultData = [{ name: "No Data" }];
     const dataToDisplay = dataCategory.length > 0 ? dataCategory : defaultData;
     const location = useLocation();
@@ -457,38 +504,38 @@ const ReportPage = () => {
         "N/A",
         ...(Array.isArray(propertyNamesList) && propertyNamesList.length > 0
             ? propertyNamesList
-                .filter((item) => !item.toLowerCase().includes("phase"))
-                .map((item) => {
-                    let formattedItem = formatFunc(item);
+                  .filter((item) => !item.toLowerCase().includes("phase"))
+                  .map((item) => {
+                      let formattedItem = formatFunc(item);
 
-                    // Capitalize each word in the string
-                    formattedItem = formattedItem
-                        .split(" ")
-                        .map((word) => {
-                            // Check for specific words that need to be fully capitalized
-                            if (/^(Sjmv|Lpu|Cdo|Dgt)$/i.test(word)) {
-                                return word.toUpperCase();
-                            }
-                            // Capitalize the first letter of all other words
-                            return (
-                                word.charAt(0).toUpperCase() +
-                                word.slice(1).toLowerCase()
-                            );
-                        })
-                        .join(" ");
+                      // Capitalize each word in the string
+                      formattedItem = formattedItem
+                          .split(" ")
+                          .map((word) => {
+                              // Check for specific words that need to be fully capitalized
+                              if (/^(Sjmv|Lpu|Cdo|Dgt)$/i.test(word)) {
+                                  return word.toUpperCase();
+                              }
+                              // Capitalize the first letter of all other words
+                              return (
+                                  word.charAt(0).toUpperCase() +
+                                  word.slice(1).toLowerCase()
+                              );
+                          })
+                          .join(" ");
 
-                    // Replace specific names if needed
-                    if (formattedItem === "Casamira South") {
-                        formattedItem = "Casa Mira South";
-                    }
+                      // Replace specific names if needed
+                      if (formattedItem === "Casamira South") {
+                          formattedItem = "Casa Mira South";
+                      }
 
-                    return formattedItem;
-                })
-                .sort((a, b) => {
-                    if (a === "N/A") return -1;
-                    if (b === "N/A") return 1;
-                    return a.localeCompare(b);
-                })
+                      return formattedItem;
+                  })
+                  .sort((a, b) => {
+                      if (a === "N/A") return -1;
+                      if (b === "N/A") return 1;
+                      return a.localeCompare(b);
+                  })
             : []),
     ];
 
@@ -499,20 +546,20 @@ const ReportPage = () => {
 
     const allDepartment = allEmployees
         ? [
-            "All",
-            ...Array.from(
-                new Set(
-                    allEmployees
-                        .map((employee) => employee.department)
-                        .filter(
-                            (department) =>
-                                department !== null &&
-                                department !== undefined &&
-                                department !== "PM"
-                        )
-                )
-            ),
-        ]
+              "All",
+              ...Array.from(
+                  new Set(
+                      allEmployees
+                          .map((employee) => employee.department)
+                          .filter(
+                              (department) =>
+                                  department !== null &&
+                                  department !== undefined &&
+                                  department !== "PM"
+                          )
+                  )
+              ),
+          ]
         : ["All"];
 
     const handleInputChange = (e) => {
@@ -616,8 +663,6 @@ const ReportPage = () => {
         0
     );
 
-    
-
     return (
         <div className="h-screen bg-custom-grayFA p-4 flex flex-col gap-[21px]">
             <div className="flex flex-col gap-[10px] bg-[#F2F8FC] rounded-[10px] w-full py-[24px] px-[30px]">
@@ -710,7 +755,7 @@ const ReportPage = () => {
                             >
                                 <option value="All">All</option>
                                 {user?.department ===
-                                    "Customer Relations - Services" ? (
+                                "Customer Relations - Services" ? (
                                     allDepartment
                                         .filter((item) => item !== "All")
                                         .sort()
@@ -749,7 +794,13 @@ const ReportPage = () => {
                                 item.Resolved === 0 &&
                                 item.Unresolved === 0 &&
                                 item.Closed === 0
-                        ) && <p>- (No {dataSet.length > 1 ? 'results' : 'result'} found)</p>}
+                        ) && (
+                            <p>
+                                - (No{" "}
+                                {dataSet.length > 1 ? "results" : "result"}{" "}
+                                found)
+                            </p>
+                        )}
                 </div>
                 <div className="overflow-x-auto mt-[40px]">
                     <ResponsiveContainer width="100%" height={228}>
@@ -978,7 +1029,15 @@ const ReportPage = () => {
                         {communicationTypeData &&
                             communicationTypeData.every(
                                 (item) => item.value === 0
-                            ) && <p>- (No {communicationTypeData.length > 1 ? 'results' : 'result'} found)</p>}
+                            ) && (
+                                <p>
+                                    - (No{" "}
+                                    {communicationTypeData.length > 1
+                                        ? "results"
+                                        : "result"}{" "}
+                                    found)
+                                </p>
+                            )}
                     </div>
 
                     <div className="border border-t-1"></div>
@@ -1084,7 +1143,8 @@ const ReportPage = () => {
                                                             ? monthValue
                                                             : "",
                                                     departments:
-                                                        departmentValue !== "All"
+                                                        departmentValue !==
+                                                        "All"
                                                             ? departmentValue
                                                             : "",
                                                     selectedProperty:
@@ -1140,7 +1200,8 @@ const ReportPage = () => {
                                                             ? monthValue
                                                             : "",
                                                     departments:
-                                                        departmentValue !== "All"
+                                                        departmentValue !==
+                                                        "All"
                                                             ? departmentValue
                                                             : "",
                                                     selectedProperty:
@@ -1196,7 +1257,8 @@ const ReportPage = () => {
                                                             ? monthValue
                                                             : "",
                                                     departments:
-                                                        departmentValue !== "All"
+                                                        departmentValue !==
+                                                        "All"
                                                             ? departmentValue
                                                             : "",
                                                     selectedProperty:
@@ -1252,10 +1314,10 @@ const ReportPage = () => {
                                                             ? monthValue
                                                             : "",
                                                     departments:
-                                                        departmentValue !== "All"
+                                                        departmentValue !==
+                                                        "All"
                                                             ? departmentValue
                                                             : "",
-
                                                 });
                                                 navigate(
                                                     "/inquirymanagement/inquirylist"
@@ -1332,7 +1394,16 @@ const ReportPage = () => {
                         {inquriesPerChannelData &&
                             inquriesPerChannelData.every(
                                 (item) => item.value === 0
-                            ) && <p> - ({inquriesPerChannelData.length > 1 ? 'No results' : 'No result'} found)</p>}
+                            ) && (
+                                <p>
+                                    {" "}
+                                    - (
+                                    {inquriesPerChannelData.length > 1
+                                        ? "No results"
+                                        : "No result"}{" "}
+                                    found)
+                                </p>
+                            )}
                     </div>
                     <div className="border border-t-1"></div>
                     <div className="mt-4"></div>
@@ -1441,7 +1512,7 @@ const ReportPage = () => {
                                                             : "",
                                                     departments:
                                                         departmentValue !==
-                                                            "All"
+                                                        "All"
                                                             ? departmentValue
                                                             : "",
                                                     selectedProperty:
@@ -1498,7 +1569,7 @@ const ReportPage = () => {
                                                             : "",
                                                     departments:
                                                         departmentValue !==
-                                                            "All"
+                                                        "All"
                                                             ? departmentValue
                                                             : "",
                                                     selectedProperty:
@@ -1555,7 +1626,7 @@ const ReportPage = () => {
                                                             : "",
                                                     departments:
                                                         departmentValue !==
-                                                            "All"
+                                                        "All"
                                                             ? departmentValue
                                                             : "",
                                                     selectedProperty:
@@ -1612,7 +1683,7 @@ const ReportPage = () => {
                                                             : "",
                                                     departments:
                                                         departmentValue !==
-                                                            "All"
+                                                        "All"
                                                             ? departmentValue
                                                             : "",
                                                     selectedProperty:
@@ -1669,7 +1740,7 @@ const ReportPage = () => {
                                                             : "",
                                                     departments:
                                                         departmentValue !==
-                                                            "All"
+                                                        "All"
                                                             ? departmentValue
                                                             : "",
                                                     selectedProperty:
@@ -1726,7 +1797,7 @@ const ReportPage = () => {
                                                             : "",
                                                     departments:
                                                         departmentValue !==
-                                                            "All"
+                                                        "All"
                                                             ? departmentValue
                                                             : "",
                                                     selectedProperty:
@@ -1784,7 +1855,7 @@ const ReportPage = () => {
                                                             : "",
                                                     departments:
                                                         departmentValue !==
-                                                            "All"
+                                                        "All"
                                                             ? departmentValue
                                                             : "",
                                                     selectedProperty:
@@ -1833,8 +1904,7 @@ const ReportPage = () => {
                                             onClick={(e) => {
                                                 e.preventDefault();
                                                 setSearchFilter({
-                                                    channels:
-                                                        "No Channel",
+                                                    channels: "No Channel",
                                                     selectedYear: yearValue,
                                                     selectedMonth:
                                                         monthValue !== "All"
@@ -1842,7 +1912,7 @@ const ReportPage = () => {
                                                             : "",
                                                     departments:
                                                         departmentValue !==
-                                                            "All"
+                                                        "All"
                                                             ? departmentValue
                                                             : "",
                                                     selectedProperty:
@@ -1875,7 +1945,15 @@ const ReportPage = () => {
                                         item.resolved === 0 &&
                                         item.unresolved === 0 &&
                                         item.closed === 0
-                                ) && <p>- (No {dataProperty.length > 1 ? 'results' : 'result'} found)</p>}
+                                ) && (
+                                    <p>
+                                        - (No{" "}
+                                        {dataProperty.length > 1
+                                            ? "results"
+                                            : "result"}{" "}
+                                        found)
+                                    </p>
+                                )}
                         </div>
 
                         <div className="border border-t-1"></div>
@@ -1933,10 +2011,14 @@ const ReportPage = () => {
                                                                     yearValue,
                                                                 selectedMonth:
                                                                     monthValue !==
-                                                                        "All"
+                                                                    "All"
                                                                         ? monthValue
                                                                         : "",
-                                                                departments: departmentValue !== "All" ? departmentValue : "" 
+                                                                departments:
+                                                                    departmentValue !==
+                                                                    "All"
+                                                                        ? departmentValue
+                                                                        : "",
                                                             });
                                                             navigate(
                                                                 "/inquirymanagement/inquirylist"
@@ -1970,11 +2052,14 @@ const ReportPage = () => {
                                                                 status: "Resolved",
                                                                 selectedMonth:
                                                                     monthValue !==
-                                                                        "All"
+                                                                    "All"
                                                                         ? monthValue
                                                                         : "",
-                                                                departments: departmentValue !== "All" ? departmentValue : "" 
-                                                                
+                                                                departments:
+                                                                    departmentValue !==
+                                                                    "All"
+                                                                        ? departmentValue
+                                                                        : "",
                                                             });
                                                             navigate(
                                                                 "/inquirymanagement/inquirylist"
@@ -2008,11 +2093,14 @@ const ReportPage = () => {
                                                                     yearValue,
                                                                 selectedMonth:
                                                                     monthValue !==
-                                                                        "All"
+                                                                    "All"
                                                                         ? monthValue
                                                                         : "",
-                                                                departments: departmentValue !== "All" ? departmentValue : "" 
-                                                                
+                                                                departments:
+                                                                    departmentValue !==
+                                                                    "All"
+                                                                        ? departmentValue
+                                                                        : "",
                                                             });
                                                             navigate(
                                                                 "/inquirymanagement/inquirylist"
@@ -2046,7 +2134,7 @@ const ReportPage = () => {
                                                                     yearValue,
                                                                 selectedMonth:
                                                                     monthValue !==
-                                                                        "All"
+                                                                    "All"
                                                                         ? monthValue
                                                                         : "",
                                                                 /* department: departmentValue, */
@@ -2200,7 +2288,15 @@ const ReportPage = () => {
                                         item.resolved === 0 &&
                                         item.unresolved === 0 &&
                                         item.closed === 0
-                                ) && <p>- (No {dataDepartment.length > 1 ? 'results' : 'result'} found)</p>}
+                                ) && (
+                                    <p>
+                                        - (No{" "}
+                                        {dataDepartment.length > 1
+                                            ? "results"
+                                            : "result"}{" "}
+                                        found)
+                                    </p>
+                                )}
                         </div>
                         <div className="border border-t-1"></div>
                         <div className="flex-grow overflow-x-auto px-[10px] mt-[5px] pb-[50px]">
@@ -2256,14 +2352,14 @@ const ReportPage = () => {
                                                             setSearchFilter({
                                                                 departments:
                                                                     item.name !==
-                                                                        "All"
+                                                                    "All"
                                                                         ? item.name
                                                                         : "",
                                                                 selectedYear:
                                                                     yearValue,
                                                                 selectedMonth:
                                                                     monthValue !==
-                                                                        "All"
+                                                                    "All"
                                                                         ? monthValue
                                                                         : "",
                                                                 /* department: departmentValue, */
@@ -2299,7 +2395,7 @@ const ReportPage = () => {
                                                             setSearchFilter({
                                                                 departments:
                                                                     item.name !==
-                                                                        "All"
+                                                                    "All"
                                                                         ? item.name
                                                                         : "",
                                                                 selectedYear:
@@ -2307,7 +2403,7 @@ const ReportPage = () => {
                                                                 status: "Resolved",
                                                                 selectedMonth:
                                                                     monthValue !==
-                                                                        "All"
+                                                                    "All"
                                                                         ? monthValue
                                                                         : "",
                                                                 /* department: departmentValue, */
@@ -2343,7 +2439,7 @@ const ReportPage = () => {
                                                             setSearchFilter({
                                                                 departments:
                                                                     item.name !==
-                                                                        "All"
+                                                                    "All"
                                                                         ? item.name
                                                                         : "",
                                                                 status: "Closed",
@@ -2351,7 +2447,7 @@ const ReportPage = () => {
                                                                     yearValue,
                                                                 selectedMonth:
                                                                     monthValue !==
-                                                                        "All"
+                                                                    "All"
                                                                         ? monthValue
                                                                         : "",
                                                                 /* department: departmentValue, */
@@ -2387,7 +2483,7 @@ const ReportPage = () => {
                                                             setSearchFilter({
                                                                 departments:
                                                                     item.name !==
-                                                                        "All"
+                                                                    "All"
                                                                         ? item.name
                                                                         : "",
                                                                 status: "unresolved",
@@ -2395,7 +2491,7 @@ const ReportPage = () => {
                                                                     yearValue,
                                                                 selectedMonth:
                                                                     monthValue !==
-                                                                        "All"
+                                                                    "All"
                                                                         ? monthValue
                                                                         : "",
                                                                 /* department: departmentValue, */
@@ -2450,7 +2546,15 @@ const ReportPage = () => {
                             {dataCategory &&
                                 dataCategory.every(
                                     (item) => item.value === 0
-                                ) && <p>- (No {dataCategory.length > 1 ? 'results' : 'result'} found)</p>}
+                                ) && (
+                                    <p>
+                                        - (No{" "}
+                                        {dataCategory.length > 1
+                                            ? "results"
+                                            : "result"}{" "}
+                                        found)
+                                    </p>
+                                )}
                         </div>
 
                         <div className="border border-t-1"></div>
@@ -2490,9 +2594,13 @@ const ReportPage = () => {
                                 </PieChart>
                             </div>
                             <div className="flex w-full justify-center">
-                                    <div className="flex w-[150px] py-4 justify-center"> {/* dummy div to align the chart */}
-                                        <p className="font-bold text-[20px]">Total: {totalValueCategory}</p>
-                                    </div>
+                                <div className="flex w-[150px] py-4 justify-center">
+                                    {" "}
+                                    {/* dummy div to align the chart */}
+                                    <p className="font-bold text-[20px]">
+                                        Total: {totalValueCategory}
+                                    </p>
+                                </div>
                             </div>
                             <div className="flex justify-center w-full">
                                 <div className="flex w-[150px]"></div>{" "}
@@ -2528,19 +2636,19 @@ const ReportPage = () => {
                                                                             category.name,
                                                                         departments:
                                                                             departmentValue !==
-                                                                                "All"
+                                                                            "All"
                                                                                 ? departmentValue
                                                                                 : "",
                                                                         selectedYear:
                                                                             yearValue,
                                                                         selectedMonth:
                                                                             monthValue !==
-                                                                                "All"
+                                                                            "All"
                                                                                 ? monthValue
                                                                                 : "",
                                                                         selectedProperty:
                                                                             projectValue !==
-                                                                                "All"
+                                                                            "All"
                                                                                 ? projectValue
                                                                                 : "",
                                                                     }
