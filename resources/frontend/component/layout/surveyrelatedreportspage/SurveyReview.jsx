@@ -45,8 +45,7 @@ const SurveyReview = ({ modalRef, handleCloseModal, surveyData }) => {
                                 >
                                     <div className='mt-[40px]'></div>
                                     <div className='w-[740px] mb-[21.8px]'>
-                                        <p className='text-[36px] font-semibold'>{surveyData?.title}
-                                        </p>
+                                        <p className='text-[36px] montserrat-semibold'>{surveyData?.title}</p>
                                         <div className='text-[18px]'>
                                             {surveyData?.description?.split("\n").map((line, index) => (
                                                 <p key={index}>{line}</p>
