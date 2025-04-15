@@ -83,6 +83,7 @@ const ReportPage = () => {
         yearValue,
         setMonthValue,
         monthValue,
+        categories,
     } = useStateContext();
     //  console.log("dataCategory", dataCategory);
     const colors = [
@@ -118,44 +119,26 @@ const ReportPage = () => {
     let colorIndex = 0;
 
     const assignColorToCategory = (category) => {
+        // Check if the category already has a color assigned
         if (!categoryColors[category]) {
+            // Assign the next available color from the COLORS array
             categoryColors[category] = COLORS[colorIndex % COLORS.length];
             colorIndex++;
         }
         return categoryColors[category];
     };
 
-    // Example usage: Assign colors to all categories dynamically
-    const allCategories = [
-        "Commissions",
-        "Leasing",
-        "Loan Application",
-        "Other Concerns",
-        "Payment Issues",
-        "Reservation Documents",
-        "SOA/ Buyer's Ledger",
-        "Title and Other Registration Documents",
-        "Turn Over Status",
-        "Unit Status",
-        "Account Payable",
-        "Available Units",
-        "HR Related Inquiries",
-        "Broker/Contractor Accreditation",
-        "CLIPM Concerns",
-        "Product Offer",
-        "Lot Offer",
-        "Marketing Activity - Queries",
-        "Other Concerns",
-    ];
-
-    allCategories.forEach((category) => assignColorToCategory(category));
+    if (Array.isArray(categories)) {
+        categories.forEach((category) => assignColorToCategory(category.name));
+    } else {
+        console.error("categories is not an array or is undefined");
+    }
 
     // Function to get the color for a category
     const getCategoryColor = (categoryName) => {
-        console.log(`categoryColors[${categoryName}] || "#8884d8"`, categoryColors[categoryName] || "#8884d8");
-        return categoryColors[categoryName] || "#8884d8"; 
+        return categoryColors[categoryName] || "#8884d8";
     };
-    
+
     const navigate = useNavigate();
     const getBarColorPerType = (name) => {
         const colors = {
@@ -200,29 +183,12 @@ const ReportPage = () => {
         );
     };
 
-    // const categoryColors = {
-    //     Commissions: COLORS[0],
-    //     Leasing: COLORS[1],
-    //     "Loan Application": COLORS[2],
-    //     "Other Concerns": COLORS[3],
-    //     "Payment Issues": COLORS[4],
-    //     "Reservation Documents": COLORS[5],
-    //     "SOA/ Buyer's Ledger": COLORS[6],
-    //     "Title and Other Registration Documents": COLORS[7],
-    //     "Turn Over Status": COLORS[8],
-    //     "Unit Status": COLORS[9],
-    // };
-
     // Function to get a unique color from COLORS if a category is missing from categoryColors
     const getColor = (category, index) => {
         if (categoryColors[category]) return categoryColors[category];
         return COLORS[index % COLORS.length];
     };
-    const SINGLE_COLOR = "#5B9BD5";
 
-    // const getCategoryColor = (categoryName) => {
-    //     return categoryColors[categoryName] || "#8884d8";
-    // };
     const CustomTooltip = ({ active, payload }) => {
         if (active && payload && payload.length) {
             const { name } = payload[0].payload;
