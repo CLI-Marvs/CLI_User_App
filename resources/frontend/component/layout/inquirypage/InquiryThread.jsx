@@ -67,6 +67,7 @@ const InquiryThread = () => {
         setMessages,
         setIsUserTypeChange,
         isUserTypeChange,
+        categories
     } = useStateContext();
     const [chatMessage, setChatMessage] = useState("");
     const userLoggedInEmail = user?.employee_email;
@@ -616,79 +617,12 @@ const InquiryThread = () => {
                                             <option value="">
                                                 Select Category
                                             </option>
-                                            <option value="Reservation Documents">
-                                                Reservation Documents
-                                            </option>
-                                            <option value="Payment Issues">
-                                                Payment Issues
-                                            </option>
-                                            <option value="SOA/ Buyer's Ledger">
-                                                SOA/ Buyer's Ledger
-                                            </option>
-                                            <option value="Turn Over Status">
-                                                Turn Over Status
-                                            </option>
-                                            <option value="Unit Status">
-                                                Unit Status
-                                            </option>
-                                            <option value="Loan Application">
-                                                Loan Application
-                                            </option>
-                                            <option value="Title and Other Registration Documents">
-                                                Title and Other Registration
-                                                Documents
-                                            </option>
-                                            <option value="Commissions">
-                                                Commissions
-                                            </option>
-                                            <option value="Account Payable">
-                                                Accounts Payable
-                                            </option>
-                                            <option
-                                                value="Available Units"
-                                                className="pr-8  "
-                                            >
-                                                Available Units
-                                            </option>
-                                            <option
-                                                value="HR Related Inquiries"
-                                                className="pr-8  "
-                                            >
-                                                HR Related Inquiries
-                                            </option>
-                                            <option
-                                                value="Broker/Contractor Accreditation"
-                                                className="pr-8  "
-                                            >
-                                                Broker/Contractor Accreditation
-                                            </option>
-                                            <option
-                                                value="CLIPM Concerns"
-                                                className="pr-8  "
-                                            >
-                                                CLIPM Concerns
-                                            </option>
-                                            <option
-                                                value="Product Offer"
-                                                className="pr-8  "
-                                            >
-                                                Product Offer
-                                            </option>
-                                            <option
-                                                value="Lot Offer"
-                                                className="pr-8  "
-                                            >
-                                                Lot Offer
-                                            </option>
-                                            <option
-                                                value="Marketing Activity - Queries"
-                                                className="pr-8  "
-                                            >
-                                                Marketing Activity - Queries
-                                            </option>
-                                            <option value="Other Concerns">
-                                                Other Concerns
-                                            </option>
+                                            {categories &&
+                                                categories.map((category) => (
+                                                    <option key={category.id}>
+                                                        {category.name}
+                                                    </option>
+                                                ))}
                                         </select>
                                         <span className="absolute inset-y-0 right-0 flex items-center  pl-3 pointer-events-none">
                                             <IoIosArrowDown />

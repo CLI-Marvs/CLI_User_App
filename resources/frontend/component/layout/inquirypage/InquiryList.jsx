@@ -82,7 +82,7 @@ const InquiryList = () => {
     const [selectedYear, setSelectedYear] = useState("");
     const [selectedMonth, setSelectedMonth] = useState("");
     const [hasAttachments, setHasAttachments] = useState(false);
-    const { propertyNamesList } = useStateContext();
+    const { propertyNamesList, categories } = useStateContext();
     const [assignedToMeActive, setAssignedToMeActive] = useState(false);
     const [startDate, setStartDate] = useState(null);
     const [isFilterVisible, setIsFilterVisible] = useState(false);
@@ -636,83 +636,15 @@ const InquiryList = () => {
                                                 <option value=" ">
                                                     Select Category
                                                 </option>
-                                                <option value="Reservation Documents">
-                                                    Reservation Documents
-                                                </option>
-                                                <option value="Payment Issues">
-                                                    Payment Issues
-                                                </option>
-                                                <option value="SOA/ Buyer's Ledger">
-                                                    SOA/ Buyer's Ledger
-                                                </option>
-                                                <option value="Turn Over Status">
-                                                    Turn Over Status
-                                                </option>
-                                                <option value="Unit Status">
-                                                    Unit Status
-                                                </option>
-                                                <option value="Loan Application">
-                                                    Loan Application
-                                                </option>
-                                                <option value="Title and Other Registration Documents">
-                                                    Title and Other Registration
-                                                    Documents
-                                                </option>
-                                                <option value="Commissions">
-                                                    Commissions
-                                                </option>
-                                                <option value="Account Payable">
-                                                    Accounts Payable
-                                                </option>
-                                                <option
-                                                    value="Available Units"
-                                                    className="pr-8  "
-                                                >
-                                                    Available Units
-                                                </option>
-                                                <option
-                                                    value="HR Related Inquiries"
-                                                    className="pr-8  "
-                                                >
-                                                    HR Related Inquiries
-                                                </option>
-                                                <option
-                                                    value="Broker/Contractor Accreditation"
-                                                    className="pr-8  "
-                                                >
-                                                    Broker/Contractor
-                                                    Accreditation
-                                                </option>
-                                                <option
-                                                    value="CLIPM Concerns"
-                                                    className="pr-8  "
-                                                >
-                                                    CLIPM Concerns
-                                                </option>
-                                                <option
-                                                    value="Product Offer"
-                                                    className="pr-8  "
-                                                >
-                                                    Product Offer
-                                                </option>
-                                                <option
-                                                    value="Lot Offer"
-                                                    className="pr-8  "
-                                                >
-                                                    Lot Offer
-                                                </option>
-                                                <option
-                                                    value="Marketing Activity - Queries"
-                                                    className="pr-8  "
-                                                >
-                                                    Marketing Activity - Queries
-                                                </option>
-                                                <option
-                                                    value="Other Concerns"
-                                                    className="pr-8"
-                                                >
-                                                    Other Concerns
-                                                </option>
+                                                {categories && categories.map(
+                                                    (category) => (
+                                                        <option
+                                                            key={category.id}
+                                                        >
+                                                            {category.name}
+                                                        </option>
+                                                    )
+                                                )}
                                             </select>
                                         </div>
 

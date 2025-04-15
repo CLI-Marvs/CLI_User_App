@@ -4,9 +4,9 @@ import { IoIosSend, IoMdArrowDropdown, IoMdTrash } from "react-icons/io";
 import apiService from "../../servicesApi/apiService";
 import { useStateContext } from "../../../context/contextprovider";
 import CircularProgress from "@mui/material/CircularProgress";
-import { toast, } from "react-toastify";
+import { toast } from "react-toastify";
 import { VALID_FILE_EXTENSIONS } from "../../../constant/data/validFile";
-import { showToast } from "../../../util/toastUtil"
+import { showToast } from "../../../util/toastUtil";
 
 const formDataState = {
     fname: "",
@@ -30,7 +30,7 @@ const InquiryFormModal = ({ modalRef }) => {
     const fileInputRef = useRef();
     const [fileName, setFileName] = useState([]);
     const [message, setMessage] = useState("");
-    const { user, getAllConcerns } = useStateContext();
+    const { user, getAllConcerns, categories } = useStateContext();
     const maxCharacters = 500;
     const [isMiddleNameChecked, setIsMiddleNameChecked] = useState(false);
     const [isSuffixChecked, setIsSuffixChecked] = useState(false);
@@ -42,7 +42,6 @@ const InquiryFormModal = ({ modalRef }) => {
     const [errors, setErrors] = useState({});
     const { propertyNamesList } = useStateContext();
     const [isSendEmail, setIsSendEmail] = useState(false);
-
     const handleFileChange = (event) => {
         const selectedFiles = Array.from(event.target.files);
         setFiles((prevFiles) => {
@@ -76,35 +75,38 @@ const InquiryFormModal = ({ modalRef }) => {
         "N/A",
         ...(Array.isArray(propertyNamesList) && propertyNamesList.length > 0
             ? propertyNamesList
-                .filter((item) => !item.toLowerCase().includes("phase"))
-                .map((item) => {
-                    let formattedItem = formatFunc(item);
+                  .filter((item) => !item.toLowerCase().includes("phase"))
+                  .map((item) => {
+                      let formattedItem = formatFunc(item);
 
-                    // Capitalize each word in the string
-                    formattedItem = formattedItem
-                        .split(" ")
-                        .map((word) => {
-                            // Check for specific words that need to be fully capitalized
-                            if (/^(Sjmv|Lpu|Cdo|Dgt)$/i.test(word)) {
-                                return word.toUpperCase();
-                            }
-                            // Capitalize the first letter of all other words
-                            return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
-                        })
-                        .join(" ");
+                      // Capitalize each word in the string
+                      formattedItem = formattedItem
+                          .split(" ")
+                          .map((word) => {
+                              // Check for specific words that need to be fully capitalized
+                              if (/^(Sjmv|Lpu|Cdo|Dgt)$/i.test(word)) {
+                                  return word.toUpperCase();
+                              }
+                              // Capitalize the first letter of all other words
+                              return (
+                                  word.charAt(0).toUpperCase() +
+                                  word.slice(1).toLowerCase()
+                              );
+                          })
+                          .join(" ");
 
-                    // Replace specific names if needed
-                    if (formattedItem === "Casamira South") {
-                        formattedItem = "Casa Mira South";
-                    }
+                      // Replace specific names if needed
+                      if (formattedItem === "Casamira South") {
+                          formattedItem = "Casa Mira South";
+                      }
 
-                    return formattedItem;
-                })
-                .sort((a, b) => {
-                    if (a === "N/A") return -1;
-                    if (b === "N/A") return 1;
-                    return a.localeCompare(b);
-                })
+                      return formattedItem;
+                  })
+                  .sort((a, b) => {
+                      if (a === "N/A") return -1;
+                      if (b === "N/A") return 1;
+                      return a.localeCompare(b);
+                  })
             : []),
     ];
 
@@ -192,11 +194,11 @@ const InquiryFormModal = ({ modalRef }) => {
         setIsSubmitted(false);
         setIsMiddleNameChecked(false);
         setIsSuffixChecked(false);
-        
+
         if (modalRef.current) {
             modalRef.current.close();
         }
-    }
+    };
 
     const handleChangeValue = (e) => {
         const newValue = e.target.value;
@@ -250,7 +252,10 @@ const InquiryFormModal = ({ modalRef }) => {
                 if (file.size > 100 * 1024 * 1024) {
                     // Check size (100 MB)
                     setLoading(false);
-                    showToast("File is too large. Maximum size is 100MB.", "warning");
+                    showToast(
+                        "File is too large. Maximum size is 100MB.",
+                        "warning"
+                    );
                     allFilesValid = false;
                     return;
                 }
@@ -264,9 +269,12 @@ const InquiryFormModal = ({ modalRef }) => {
 
             // If there are any invalid extensions, show a message
             if (invalidExtensions.length > 0) {
-                showToast(`.${invalidExtensions.join(
-                    ", ."
-                )} file type(s) are not allowed.`, "warning");
+                showToast(
+                    `.${invalidExtensions.join(
+                        ", ."
+                    )} file type(s) are not allowed.`,
+                    "warning"
+                );
                 setLoading(false);
                 return;
             }
@@ -300,7 +308,7 @@ const InquiryFormModal = ({ modalRef }) => {
                 const formattedMessage = message.replace(/\n/g, "<br>");
                 fileData.append("message", formattedMessage);
                 fileData.append("admin_email", user?.employee_email);
-                fileData.append('isSendEmail', isSendEmail);
+                fileData.append("isSendEmail", isSendEmail);
                 fileData.append("admin_id", user?.id);
                 fileData.append("admin_profile_picture", user?.profile_picture);
 
@@ -344,7 +352,7 @@ const InquiryFormModal = ({ modalRef }) => {
                 //setIsValid(false);
                 setResetSuccess(false);
                 setHasErrors(false);
-            };
+            }
         }
     };
 
@@ -654,103 +662,12 @@ const InquiryFormModal = ({ modalRef }) => {
                                     className="w-full appearance-none text-sm  px-4 py-1  focus:outline-none border-0 mobile:text-xs   "
                                 >
                                     <option value="">(Select)</option>
-                                    <option
-                                        value="Reservation Documents"
-                                        className="pr-8"
-                                    >
-                                        Reservation Documents
-                                    </option>
-                                    <option
-                                        value="Payment Issues"
-                                        className="pr-8"
-                                    >
-                                        Payment Issues
-                                    </option>
-                                    <option
-                                        value="SOA/ Buyer's Ledger"
-                                        className="pr-8"
-                                    >
-                                        SOA/ Buyer's Ledger
-                                    </option>
-                                    <option
-                                        value="Turn Over Status"
-                                        className="pr-8"
-                                    >
-                                        Turn Over Status
-                                    </option>
-                                    <option
-                                        value="Unit Status"
-                                        className="pr-8"
-                                    >
-                                        Unit Status
-                                    </option>
-                                    <option
-                                        value="Loan Application"
-                                        className="pr-8"
-                                    >
-                                        Loan Application
-                                    </option>
-                                    <option
-                                        value="Title and Other Registration Documents"
-                                        className="pr-8  "
-                                    >
-                                        Title and Other Registration Documents
-                                    </option>
-
-                                    <option
-                                        value="Commissions"
-                                        className="pr-8"
-                                    >
-                                        Commissions
-                                    </option>
-                                    <option value="Leasing" className="pr-8">
-                                        Leasing
-                                    </option>
-                                    <option value="Account Payable">
-                                        Accounts Payable
-                                    </option>
-                                    <option
-                                        value="Available Units"
-                                        className="pr-8  "
-                                    >
-                                        Available Units
-                                    </option>
-                                    <option
-                                        value="HR Related Inquiries"
-                                        className="pr-8  "
-                                    >
-                                        HR Related Inquiries
-                                    </option>
-                                    <option
-                                        value="Broker/Contractor Accreditation"
-                                        className="pr-8  "
-                                    >
-                                        Broker/Contractor Accreditation
-                                    </option>
-                                    <option
-                                        value="CLIPM Concerns"
-                                        className="pr-8  "
-                                    >
-                                        CLIPM Concerns
-                                    </option>
-                                    <option
-                                        value="Product Offer"
-                                        className="pr-8  "
-                                    >
-                                        Product Offer
-                                    </option>
-                                    <option value="Lot Offer" className="pr-8  ">
-                                        Lot Offer
-                                    </option>
-                                    <option value="Marketing Activity - Queries" className="pr-8  ">
-                                        Marketing Activity - Queries
-                                    </option>
-                                    <option
-                                        value="Other Concerns"
-                                        className="pr-8"
-                                    >
-                                        Other Concerns
-                                    </option>
+                                    {categories &&
+                                        categories.map((category) => (
+                                            <option key={category.id}>
+                                                {category.name}
+                                            </option>
+                                        ))}
                                 </select>
                                 <div className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3 bg-custom-lightestgreen text-custom-bluegreen pointer-events-none">
                                     <IoMdArrowDropdown />

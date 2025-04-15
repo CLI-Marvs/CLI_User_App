@@ -7,7 +7,7 @@ import React, {
 } from "react";
 import apiService from "../component/servicesApi/apiService";
 import debounce from "lodash/debounce";
-import { set } from "lodash";
+import { get, set } from "lodash";
 
 const StateContext = createContext({
     user: null,
@@ -49,7 +49,7 @@ export const ContextProvider = ({ children }) => {
     const [communicationTypeMonth, setCommunicationTypeMonth] = useState("");
     const [specificInquiry, setSpecificInquiry] = useState(null);
     const [dataSet, setDataSet] = useState([]);
-
+    const [categories, setCategories] = useState([]);
     const [department, setDepartment] = useState("All");
     const [project, setProject] = useState("All");
     const [month, setMonth] = useState("All");
@@ -105,8 +105,6 @@ export const ContextProvider = ({ children }) => {
     const [yearValue, setYearValue] = useState(new Date().getFullYear());
     const [monthValue, setMonthValue] = useState("All");
 
-
-
     useEffect(() => {
         if (user && user.department && !isDepartmentInitialized) {
             setDepartment(
@@ -127,7 +125,6 @@ export const ContextProvider = ({ children }) => {
         }
     };
 
-    
     const getAllConcerns = async () => {
         if (token) {
             setLoading(true);
@@ -233,8 +230,10 @@ export const ContextProvider = ({ children }) => {
             // Aggregate data into a single "Other Concerns" entry for null or "Other Concerns"
             const aggregatedData = result.reduce((acc, item) => {
                 const name = item.details_concern || "Other Concerns"; // Replace null with "Other Concerns"
-                const existingIndex = acc.findIndex((entry) => entry.name === name);
-    
+                const existingIndex = acc.findIndex(
+                    (entry) => entry.name === name
+                );
+
                 if (existingIndex > -1) {
                     // If "Other Concerns" already exists, add to its value
                     acc[existingIndex].value += item.total;
@@ -245,13 +244,28 @@ export const ContextProvider = ({ children }) => {
                         value: item.total,
                     });
                 }
-    
+
                 return acc;
             }, []);
-    
+
             setDataCategory(aggregatedData);
         } catch (error) {
             console.log("Error retrieving data", error);
+        }
+    };
+
+    /* Fetch categories or concern regarding (e.g.  'Reservation Documents',
+            'Account / Payment Issues',
+            'Turn Over Status',
+            'Unit Status', etc... */
+    const getCategories = async () => {
+        if (token) {
+            try {
+                const response = await apiService.get("categories");
+                setCategories(response.data);
+            } catch (error) {
+                console.log("Error retrieving data", error);
+            }
         }
     };
 
@@ -311,8 +325,10 @@ export const ContextProvider = ({ children }) => {
             const result = response.data;
             const formattedData = result.reduce((acc, item) => {
                 const propertyName = item.property ? item.property : "N/A";
-                const existingProperty = acc.find((entry) => entry.name === propertyName);
-                if(existingProperty) {
+                const existingProperty = acc.find(
+                    (entry) => entry.name === propertyName
+                );
+                if (existingProperty) {
                     existingProperty.resolved += item.resolved;
                     existingProperty.unresolved += item.unresolved;
                     existingProperty.closed += item.closed;
@@ -326,7 +342,7 @@ export const ContextProvider = ({ children }) => {
                 }
                 return acc;
             }, []);
-    
+
             setDataPropery(formattedData);
         } catch (error) {
             console.log("error retrieving", error);
@@ -343,52 +359,59 @@ export const ContextProvider = ({ children }) => {
                     year: year,
                 },
             });
-    
+
             const result = response.data;
-    
+
             // Initialize an object to accumulate the totals for CRS and other departments
             const departmentTotals = {};
-    
+
             // Process each item in the result
             result.forEach((item) => {
                 // If the department is not CRS, add its counts normally
                 if (item.department !== "Customer Relations - Services") {
-                    departmentTotals[item.department] = departmentTotals[item.department] || {
+                    departmentTotals[item.department] = departmentTotals[
+                        item.department
+                    ] || {
                         resolved: 0,
                         unresolved: 0,
                         closed: 0,
                     };
                     departmentTotals[item.department].resolved += item.resolved;
-                    departmentTotals[item.department].unresolved += item.unresolved;
+                    departmentTotals[item.department].unresolved +=
+                        item.unresolved;
                     departmentTotals[item.department].closed += item.closed;
                 }
-    
+
                 // Add all departments' counts to CRS
-                departmentTotals["Customer Relations - Services"] = departmentTotals["Customer Relations - Services"] || {
-                    resolved: 0,
-                    unresolved: 0,
-                    closed: 0,
-                };
-                departmentTotals["Customer Relations - Services"].resolved += item.resolved;
-                departmentTotals["Customer Relations - Services"].unresolved += item.unresolved;
-                departmentTotals["Customer Relations - Services"].closed += item.closed;
+                departmentTotals["Customer Relations - Services"] =
+                    departmentTotals["Customer Relations - Services"] || {
+                        resolved: 0,
+                        unresolved: 0,
+                        closed: 0,
+                    };
+                departmentTotals["Customer Relations - Services"].resolved +=
+                    item.resolved;
+                departmentTotals["Customer Relations - Services"].unresolved +=
+                    item.unresolved;
+                departmentTotals["Customer Relations - Services"].closed +=
+                    item.closed;
             });
-    
+
             // Prepare formatted data including CRS and other departments
-            const formattedData = Object.keys(departmentTotals).map((department) => ({
-                name: department,
-                resolved: departmentTotals[department].resolved,
-                unresolved: departmentTotals[department].unresolved,
-                closed: departmentTotals[department].closed,
-            }));
-    
+            const formattedData = Object.keys(departmentTotals).map(
+                (department) => ({
+                    name: department,
+                    resolved: departmentTotals[department].resolved,
+                    unresolved: departmentTotals[department].unresolved,
+                    closed: departmentTotals[department].closed,
+                })
+            );
+
             setDataDepartment(formattedData);
         } catch (error) {
             console.log("error retrieving", error);
         }
     };
-    
-    
 
     const getCommunicationTypePerProperty = async () => {
         try {
@@ -407,13 +430,13 @@ export const ContextProvider = ({ children }) => {
             const formattedData = result.reduce((acc, item) => {
                 const name = item.communication_type || "No type";
                 const existing = acc.find((entry) => entry.name === name);
-    
+
                 if (existing) {
                     existing.value += item.total;
                 } else {
                     acc.push({ name, value: item.total });
                 }
-    
+
                 return acc;
             }, []);
 
@@ -678,6 +701,10 @@ export const ContextProvider = ({ children }) => {
             console.log("error", error);
         }
     };
+
+    useEffect(() => {
+        getCategories();
+    }, []);
 
     // useEffect(() => {
     //     getPropertyUnits(towerPhaseId, selectedFloor);
@@ -949,7 +976,8 @@ export const ContextProvider = ({ children }) => {
                 setYearValue,
                 yearValue,
                 setMonthValue,
-                monthValue
+                monthValue,
+                categories,
             }}
         >
             {children}
