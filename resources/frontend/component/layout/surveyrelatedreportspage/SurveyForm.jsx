@@ -1,11 +1,16 @@
 import React, { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { MdKeyboardArrowLeft } from "react-icons/md";
 import { SurveySection } from './surveyComponents/SurveySection';
+import { showToast } from "../../../util/toastUtil";
 import apiService from '../../servicesApi/apiService';
 const SurveyForm = () => {
 
+  const { id } = useParams();
+
   const navigate = useNavigate();
+
+  const [surveyId, setSurveyId] = useState(id || null);
 
   const navigateToSurveyList = () => {
     navigate(-1);
@@ -15,6 +20,7 @@ const SurveyForm = () => {
 
   const initialSurveyData = [
     {
+      surveyLink: generateId(),
       surveyTitle: "",
       status: false,
       data: [
@@ -42,7 +48,25 @@ const SurveyForm = () => {
     },
   ];
 
-  const [surveyData, setSurveyData] = useState(initialSurveyData);
+  const [surveyData, setSurveyData] = useState([]);
+
+
+
+  useEffect(() => {
+    if (surveyId) {
+      apiService
+        .get(`/fetch-survey/${surveyId}`)
+        .then((response) => {
+          setSurveyData(response.data);
+        })
+        .catch((error) => {
+          console.error("Error fetching survey:", error);
+          setSurveyData(initialSurveyData);
+        });
+    } else {
+      setSurveyData(initialSurveyData);
+    }
+  }, [id]);
 
 
   // Update Survey Title
@@ -51,11 +75,12 @@ const SurveyForm = () => {
       prev.map((survey, idx) =>
         idx === 0
           ? {
-              ...survey,
-              data: survey.data.map((item, i) =>
-                i === sectionIndex ? { ...item, title: newTitle } : item
-              ),
-            }
+            ...survey,
+            surveyTitle: newTitle,
+            data: survey.data.map((item, i) =>
+              i === sectionIndex ? { ...item, title: newTitle } : item
+            ),
+          }
           : survey
       )
     );
@@ -67,13 +92,13 @@ const SurveyForm = () => {
       prev.map((survey, idx) =>
         idx === 0
           ? {
-              ...survey,
-              data: survey.data.map((item, i) =>
-                i === sectionIndex
-                  ? { ...item, description: newDescription }
-                  : item
-              ),
-            }
+            ...survey,
+            data: survey.data.map((item, i) =>
+              i === sectionIndex
+                ? { ...item, description: newDescription }
+                : item
+            ),
+          }
           : survey
       )
     );
@@ -93,7 +118,7 @@ const SurveyForm = () => {
                   dataQASet: [
                     ...section.dataQASet,
                     {
-                      id: generateId(), 
+                      id: generateId(),
                       question: "",
                       inputType: "dropdown",
                       option: [{
@@ -140,59 +165,59 @@ const SurveyForm = () => {
       prev.map((survey, surveyIndex) =>
         surveyIndex === 0
           ? {
-              ...survey,
-              data: survey.data.map((section, idx) =>
-                idx === sectionIndex
-                  ? {
-                      ...section,
-                      dataQASet: section.dataQASet.map((question, qIdx) =>
-                        qIdx === questionIndex
-                          ? {
-                              ...question,
-                              option: [
-                                ...question.option,
-                                {
-                                  id: generateId(), 
-                                  text: "",
-                                },
-                              ],
-                            }
-                          : question
-                      ),
-                    }
-                  : section
-              ),
-            }
+            ...survey,
+            data: survey.data.map((section, idx) =>
+              idx === sectionIndex
+                ? {
+                  ...section,
+                  dataQASet: section.dataQASet.map((question, qIdx) =>
+                    qIdx === questionIndex
+                      ? {
+                        ...question,
+                        option: [
+                          ...question.option,
+                          {
+                            id: generateId(),
+                            text: "",
+                          },
+                        ],
+                      }
+                      : question
+                  ),
+                }
+                : section
+            ),
+          }
           : survey
       )
     );
   };
-  
+
 
   const deleteOption = (sectionIndex, questionIndex, optionId) => {
     setSurveyData((prev) =>
       prev.map((survey, surveyIndex) =>
         surveyIndex === 0
           ? {
-              ...survey,
-              data: survey.data.map((section, idx) =>
-                idx === sectionIndex
-                  ? {
-                      ...section,
-                      dataQASet: section.dataQASet.map((question, qIdx) =>
-                        qIdx === questionIndex
-                          ? {
-                              ...question,
-                              option: question.option.filter(
-                                (option) => option.id !== optionId
-                              ),
-                            }
-                          : question
-                      ),
-                    }
-                  : section
-              ),
-            }
+            ...survey,
+            data: survey.data.map((section, idx) =>
+              idx === sectionIndex
+                ? {
+                  ...section,
+                  dataQASet: section.dataQASet.map((question, qIdx) =>
+                    qIdx === questionIndex
+                      ? {
+                        ...question,
+                        option: question.option.filter(
+                          (option) => option.id !== optionId
+                        ),
+                      }
+                      : question
+                  ),
+                }
+                : section
+            ),
+          }
           : survey
       )
     );
@@ -204,52 +229,52 @@ const SurveyForm = () => {
       prev.map((survey, surveyIndex) =>
         surveyIndex === 0
           ? {
-              ...survey,
-              data: survey.data.map((section, idx) =>
-                idx === sectionIndex
-                  ? {
-                      ...section,
-                      dataQASet: section.dataQASet.map((question, qIdx) =>
-                        qIdx === questionIndex
-                          ? { ...question, question: newText } // Update question text
-                          : question
-                      ),
-                    }
-                  : section
-              ),
-            }
+            ...survey,
+            data: survey.data.map((section, idx) =>
+              idx === sectionIndex
+                ? {
+                  ...section,
+                  dataQASet: section.dataQASet.map((question, qIdx) =>
+                    qIdx === questionIndex
+                      ? { ...question, question: newText } // Update question text
+                      : question
+                  ),
+                }
+                : section
+            ),
+          }
           : survey
       )
     );
   };
-  
+
 
   const updateOptionText = (sectionIndex, questionIndex, optionId, newText) => {
     setSurveyData((prev) =>
       prev.map((survey, surveyIndex) =>
         surveyIndex === 0
           ? {
-              ...survey,
-              data: survey.data.map((section, idx) =>
-                idx === sectionIndex
-                  ? {
-                      ...section,
-                      dataQASet: section.dataQASet.map((question, qIdx) =>
-                        qIdx === questionIndex
-                          ? {
-                              ...question,
-                              option: question.option.map((option) =>
-                                option.id === optionId
-                                  ? { ...option, text: newText } // ✅ Update text
-                                  : option
-                              ),
-                            }
-                          : question
-                      ),
-                    }
-                  : section
-              ),
-            }
+            ...survey,
+            data: survey.data.map((section, idx) =>
+              idx === sectionIndex
+                ? {
+                  ...section,
+                  dataQASet: section.dataQASet.map((question, qIdx) =>
+                    qIdx === questionIndex
+                      ? {
+                        ...question,
+                        option: question.option.map((option) =>
+                          option.id === optionId
+                            ? { ...option, text: newText } // ✅ Update text
+                            : option
+                        ),
+                      }
+                      : question
+                  ),
+                }
+                : section
+            ),
+          }
           : survey
       )
     );
@@ -261,20 +286,20 @@ const SurveyForm = () => {
       prev.map((survey, surveyIndex) =>
         surveyIndex === 0
           ? {
-              ...survey,
-              data: survey.data.map((section, idx) =>
-                idx === sectionIndex
-                  ? {
-                      ...section,
-                      dataQASet: section.dataQASet.map((question, qIdx) =>
-                        qIdx === questionIndex
-                          ? { ...question, required: isRequired } 
-                          : question
-                      ),
-                    }
-                  : section
-              ),
-            }
+            ...survey,
+            data: survey.data.map((section, idx) =>
+              idx === sectionIndex
+                ? {
+                  ...section,
+                  dataQASet: section.dataQASet.map((question, qIdx) =>
+                    qIdx === questionIndex
+                      ? { ...question, required: isRequired }
+                      : question
+                  ),
+                }
+                : section
+            ),
+          }
           : survey
       )
     );
@@ -285,13 +310,13 @@ const SurveyForm = () => {
       prev.map((survey, idx) =>
         idx === 0
           ? {
-              ...survey,
-              data: survey.data.map((item, i) =>
-                i === sectionIndex
-                  ? { ...item, consentTitle: newConsentTitle }
-                  : item
-              ),
-            }
+            ...survey,
+            data: survey.data.map((item, i) =>
+              i === sectionIndex
+                ? { ...item, consentTitle: newConsentTitle }
+                : item
+            ),
+          }
           : survey
       )
     );
@@ -302,32 +327,63 @@ const SurveyForm = () => {
       prev.map((survey, idx) =>
         idx === 0
           ? {
-              ...survey,
-              data: survey.data.map((item, i) =>
-                i === sectionIndex
-                  ? { ...item, consentDescription: newConsentDescription }
-                  : item
-              ),
-            }
+            ...survey,
+            data: survey.data.map((item, i) =>
+              i === sectionIndex
+                ? { ...item, consentDescription: newConsentDescription }
+                : item
+            ),
+          }
           : survey
       )
     );
   };
 
-  
-  
-  
-  
-  
 
-  const handleSubmit = async () => {
+
+  const handleSave = async () => {
     try {
-      await apiService.post('/surveys', { surveyData });
-      alert('Survey submitted successfully!');
+      if (surveyId) {
+        await apiService.put(`/surveys/${surveyId}`, { surveyData });
+        showToast("Data updated successfully!", "success");
+      } else {
+        const response = await apiService.post('/surveys', { surveyData });
+        setSurveyId(response.data.survey_id);
+        showToast("Data created successfully!", "success");
+      }
     } catch (error) {
-      console.error('Error saving survey:', error);
+      showToast("Error saving survey!", "error");
     }
   };
+
+
+
+
+  const handlePublish = async () => {
+    try {
+      const updatedSurveyData = surveyData.map((survey, idx) =>
+        idx === 0 ? { ...survey, status: !survey.status } : survey
+      );
+
+      setSurveyData(updatedSurveyData); // Update state
+
+      try {
+        if (surveyId) {
+          await apiService.put(`/surveys/${surveyId}`, { surveyData: updatedSurveyData });
+          showToast("Data updated successfully!", "success");
+        } else {
+          const response = await apiService.post('/surveys', { surveyData: updatedSurveyData });
+          setSurveyId(response.data.survey_id);
+          showToast("Data created successfully!", "success");
+        }
+      } catch (error) {
+        showToast("Error saving survey!", "error");
+      }
+    } catch (error) {
+      showToast("Error saving survey!", "error");
+    }
+  };
+
 
 
   return (
@@ -365,12 +421,19 @@ const SurveyForm = () => {
             className="flex justify-center h-[31px] gap-[14px]"
           >
             <button className='h-[31px] w-[104px] gradient-btn2 p-[1px] rounded-[5px] text-sm hover:shadow-custom'>
-              <div className='bg-white w-full h-full flex justify-center items-center rounded-[4px]'>
+              <div onClick={handleSave} className='bg-white w-full h-full flex justify-center items-center rounded-[4px]'>
                 Save
               </div>
             </button>
-            <button onClick={handleSubmit} className='h-[31px] w-[104px] gradient-btn2 text-white rounded-[5px] text-sm hover:shadow-custom' >
-              Publish
+
+
+            <button
+              onClick={handlePublish}
+              className={`h-[31px] w-[104px] text-white rounded-[5px] text-sm hover:shadow-custom
+                ${surveyData[0]?.status ? "bg-red-500 " : "gradient-btn2"}
+              `}
+            >
+              {surveyData[0]?.status ? "Unpublish " : "Publish"}
             </button>
           </div>
         </div>

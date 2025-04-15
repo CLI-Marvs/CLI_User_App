@@ -134,4 +134,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
     Route::post('/surveys', [SurveyController::class, 'store']);
+    Route::put('/surveys/{id}', [SurveyController::class, 'update']);
+    Route::get('/fetch-surveys', [SurveyController::class, 'fetchSurveys']);
+    Route::get('/fetch-survey/{id}', [SurveyController::class, 'fetchSurvey']);
+    Route::delete('/surveys/{id}', [SurveyController::class, 'delete']);
 });

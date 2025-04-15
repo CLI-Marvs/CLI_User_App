@@ -7,10 +7,14 @@ use Illuminate\Database\Eloquent\Model;
 
 class Survey_list extends Model
 {
-    protected $fillable = ['survey_title', 'status'];
+
+    use HasFactory;
+
+    protected $table = 'surveys_list';
+    protected $fillable = ['survey_title', 'status', 'survey_link'];
 
     public function forms()
     {
-        return $this->hasMany(Survey_forms::class);
+        return $this->hasMany(Survey_forms::class, 'survey_id');
     }
 }

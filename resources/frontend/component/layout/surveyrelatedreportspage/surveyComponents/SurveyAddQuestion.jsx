@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { IoMdRadioButtonOn } from "react-icons/io";
 import { RxCross2 } from "react-icons/rx";
 import { MdContentCopy } from "react-icons/md";
@@ -6,8 +6,35 @@ import { FaRegTrashAlt } from "react-icons/fa";
 import { SurveyRadioOption } from './SurveyRadioOption';
 import { add } from 'lodash';
 
+const adjustHeight = (element) => {
+    element.style.height = "auto"; 
+    element.style.height = `${element.scrollHeight}px`; 
+};
+
 export const SurveyAddQuestion = ({ data, sectionIndex, questionIndex, onDelete, addOption, deleteOption, updateQuestionText, updateOptionText, updateIsRequired }) => {
 
+
+    const questionTextareaRef = useRef(null);
+    const dropdownRef = useRef(null);
+
+    useEffect(() => {
+      if (questionTextareaRef.current) {
+        adjustHeight(questionTextareaRef.current);
+      }
+    }, [data.question]);
+
+    useEffect(() => {
+        function handleClickOutside(event) {
+          if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+            setIsOpen(false);
+          }
+        }
+    
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+          document.removeEventListener("mousedown", handleClickOutside);
+        };
+      }, []);
 
     const [selectedOption, setSelectedOption] = useState("Multiple choice");
     const [isOpen, setIsOpen] = useState(false);
@@ -17,10 +44,7 @@ export const SurveyAddQuestion = ({ data, sectionIndex, questionIndex, onDelete,
         // Add more options here if needed
     ];
 
-    const adjustHeight = (element) => {
-        element.style.height = "auto"; // Reset height
-        element.style.height = `${element.scrollHeight}px`; // Expand to content
-    };
+   
 
     return (
         <div>
@@ -35,10 +59,11 @@ export const SurveyAddQuestion = ({ data, sectionIndex, questionIndex, onDelete,
                             updateQuestionText(sectionIndex, questionIndex, e.target.value);
                             adjustHeight(e.target);
                         }}
+                        ref={questionTextareaRef}
                     />
                     <div className='flex w-full border-b border-custom-grayA5'></div>
                 </div>
-                <div className="relative w-[238px] z-20">
+                <div ref={dropdownRef}  className="relative w-[238px] z-20">
                     {/* Selected Option */}
                     <div
                         className="flex items-center justify-between w-full h-[35px] border-[0.5px] px-[10px] rounded-[6px] cursor-pointer bg-white"

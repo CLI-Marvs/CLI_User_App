@@ -2,6 +2,7 @@ import React, { useEffect } from 'react'
 import { IoCaretBackOutline } from "react-icons/io5";
 import AskCli from '../../../../../public/Images/AskCLI_BGFAQs.webp'
 import AskCliLogo from '../../../../../public/Images/AskCli_Logo3.png'
+import SurveyBg from '../../../../../public/Images/surveyBg.jpg'
 import { use } from 'react';
 const SurveyReview = ({ modalRef, handleCloseModal, surveyData }) => {
 
@@ -12,7 +13,7 @@ const SurveyReview = ({ modalRef, handleCloseModal, surveyData }) => {
             ref={modalRef}
         >
             <div
-                className="absolute left-[47px] top-[42px] "
+                className="absolute left-[47px] top-[32px] "
             >
                 <button
                     className="flex justify-center items-center border-[0.5px] border-[#A5A5A5] w-[75px] h-[42px] rounded-[10px] bg-white text-sm text-[#696969] shadow-custom4 hover:shadow-custom5 gap-[7px]"
@@ -25,14 +26,24 @@ const SurveyReview = ({ modalRef, handleCloseModal, surveyData }) => {
                 <div className="flex w-full max-w-[1165px] justify-center mt-[20px]">
                     <div className="flex flex-col w-full">
                         <p className="mb-[31px] font-bold text-[36px]">Preview</p>
-                        <div className="flex flex-col gap-[40px] w-full max-w-[1165px] overflow-hidden bg-white rounded-[10px]">
+                        <div className="flex flex-col  w-full max-w-[1165px] overflow-hidden bg-white rounded-[10px]">
                             <div className='relative'>
                                 <img src={AskCli} alt="AskCLI" className="w-full h-[259px] object-cover object-top" />
                                 <img src={AskCliLogo} alt="AskCLI Logo"
                                     className="absolute w-[300px] h-[140px] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
                             </div>
-                            <div className="w-full h-auto pb-[21px]">
-                                <div className="flex flex-col items-center">
+                            <div className="w-full h-auto  relative">
+                                <div className="flex flex-col items-center"
+                                     style={{
+                                        backgroundImage: `url(${SurveyBg})`,
+                                        backgroundColor: 'rgba(255, 255, 255, .89)', // white with 60% opacity
+                                        backgroundSize: 'cover',
+                                        backgroundPosition: 'bottom',
+                                        backgroundRepeat: 'no-repeat',
+                                        backgroundBlendMode: 'overlay' // or 'lighten', 'screen', 'multiply'
+                                      }}
+                                >
+                                    <div className='mt-[40px]'></div>
                                     <div className='w-[740px] mb-[21.8px]'>
                                         <p className='text-[36px] font-semibold'>{surveyData?.title}
                                         </p>
@@ -63,7 +74,7 @@ const SurveyReview = ({ modalRef, handleCloseModal, surveyData }) => {
                                                                         type="radio"
                                                                         name={`question-${item.id}`}
                                                                         value={opt.text}
-                                                                        className="w-[17px] h-[16px] appearance-none border-[1px] border-custom-solidgreen bg-white rounded-full flex items-center justify-center relative
+                                                                        className="w-[16px] h-[16px] appearance-none border-[9px] border-custom-solidgreen bg-white rounded-full flex items-center justify-center relative
                                                                                     before:content-[''] before:w-[14px] before:h-[14px] before:bg-white before:rounded-full before:absolute
                                                                                     after:content-[''] after:w-[10px] after:h-[10px] after:bg-custom-solidgreen after:rounded-full after:absolute after:scale-0 checked:after:scale-100 transition-all"
                                                                     />
@@ -103,9 +114,8 @@ const SurveyReview = ({ modalRef, handleCloseModal, surveyData }) => {
                                                 <p className='text-[#EB4444] montserrat-light text-xs'>Required</p>
                                             </div>
                                         </div>
-                                        
                                     </div>
-                                    <div className='w-[740px] h-[40px] flex justify-end my-[21px]'>
+                                    <div className='w-[740px] h-[40px] flex justify-end my-[21px] pb-[62px]'>
                                         <button className='w-[128px] h-[39px] font-semibold text-[17px] montserrat-medium text-white rounded-[6px] bg-[#A5A5A5] '> Submit</button>
                                     </div>
                                 </div>

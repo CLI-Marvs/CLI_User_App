@@ -344,6 +344,10 @@ const App = () => {
                                     element: <SurveyFormView />,
                                 },
                                 {
+                                    path: "surveysettings/surveyform/:id?",
+                                    element: <SurveyFormView />,
+                                },
+                                {
                                     path: "surveysettings/surveyreview",
                                     element: <SurveyReviewView />,
                                 },

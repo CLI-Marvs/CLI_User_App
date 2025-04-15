@@ -5,8 +5,8 @@ export const SurveyRadioOption = ({ option, onDelete, onUpdate, optionIndex }) =
     const textareaRef = useRef(null);
     
     const adjustHeight = (element) => {
-        element.style.height = "auto"; // Reset height to recalculate
-        element.style.height = `${element.scrollHeight}px`; // Set new height
+        element.style.height = "auto"; 
+        element.style.height = `${element.scrollHeight}px`; 
     };
 
     useEffect(() => {
@@ -36,8 +36,8 @@ export const SurveyRadioOption = ({ option, onDelete, onUpdate, optionIndex }) =
                         placeholder="Option"
                         value={option.text}
                         onChange={(e) => {
-                            onUpdate(option.id, e.target.value); // Update the text value
-                            adjustHeight(e.target);   // Adjust height dynamically
+                            onUpdate(option.id, e.target.value); 
+                            adjustHeight(e.target);  
                         }}
                         ref={textareaRef}
                     />

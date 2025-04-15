@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { IoMdAddCircleOutline } from "react-icons/io";
 import { TiEqualsOutline } from "react-icons/ti";
 import { MdOutlineTextFields } from "react-icons/md";
@@ -9,6 +9,10 @@ import { SurveyAddQuestion } from './SurveyAddQuestion';
 import SurveyReview from '../SurveyReview';
 
 
+const adjustHeight = (element) => {
+    element.style.height = "auto"; 
+    element.style.height = `${element.scrollHeight}px`; 
+};
 
 export const SurveySection = (
     {
@@ -29,6 +33,15 @@ export const SurveySection = (
     }) => {
 
     const modalRef = useRef(null);
+    const titleRef = useRef(null);
+    const descriptionRef = useRef(null);
+    const consentRef = useRef(null);
+
+    useEffect(() => {
+    if (titleRef.current) adjustHeight(titleRef.current);
+    if (descriptionRef.current) adjustHeight(descriptionRef.current);
+    if (consentRef.current) adjustHeight(consentRef.current);
+    }, [data.title, data.description, data.consentDescription]);
 
     const handleOpenReview = () => {
         if (modalRef.current) {
@@ -72,6 +85,7 @@ export const SurveySection = (
                             onKeyDown={(e) => {
                                 if (e.key === "Enter") e.preventDefault(); // Prevent Enter key
                             }}
+                            ref={titleRef}
                         />
                     </div>
                     <div>
@@ -86,6 +100,7 @@ export const SurveySection = (
                                 e.target.style.height = `${e.target.scrollHeight}px`; // Expand dynamically
                             }}
                             onChange={(e) => updateDescription(e.target.value, sectionIndex)}
+                            ref={descriptionRef}
                         />
                     </div>
                 </div>
@@ -180,8 +195,9 @@ export const SurveySection = (
                                 value={data.consentDescription}
                                 maxLength={1000}
                                 placeholder="Consent Description"
-                                onInput={handleInput}
+                                onInput={(e) => adjustHeight(e.target)}
                                 onChange={(e) => updateConsentDescription(e.target.value, sectionIndex)}
+                                ref={consentRef}
                             />
                         </div>
                         {/* Required Message */}
