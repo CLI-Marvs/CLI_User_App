@@ -24,6 +24,6 @@ class FeatureRepository
 
         
         // Modified code to exclude 'Sales Management'
-        return $this->model->where('name', '!=', 'Sales Management')->get();
+        return $this->model->whereNotIn('name', ['Sales Management', 'Property Pricing'])->get();
     }
 }
