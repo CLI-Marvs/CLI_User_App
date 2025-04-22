@@ -25,7 +25,6 @@ const GlobalTable = ({ columns, data, loading }) => {
         setIsDragging(false);
     };
 
-    console.log("isDragging", isDragging);
     return (
         <div
             className={`overflow-x-auto px-2 cursor-grab ${isDragging ? "active:cursor-grabbing" : ""}`}

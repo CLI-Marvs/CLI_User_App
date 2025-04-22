@@ -20,6 +20,7 @@ use App\Http\Controllers\PriceBasicDetailController;
 use App\Http\Controllers\EmployeeDepartmentController;
 use App\Http\Controllers\EmployeeFeaturePermissionController;
 use App\Http\Controllers\DepartmentFeaturePermissionController;
+use App\Http\Controllers\MarkupSettignsController;
 use App\Http\Controllers\TransactionController;
 
 Route::get('/user', function (Request $request) {
@@ -102,6 +103,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/get-transaction-bank', [SapController::class, 'getTransactionByBankName']);
     Route::post('/upload-notepad', [SapController::class, 'uploadNotepad']);
 
+
     Route::controller(TransactionController::class)->group(function () {
         Route::get('/customer/inquiries', 'getCustomerInquiries');
         Route::get('/customer/data', 'getCustomerData');
@@ -112,6 +114,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::patch('/transaction-update', 'updateTransactionStatus');
         Route::post('/bank-statements-store', 'storeBankStatements');
     });
+    Route::apiResource('markup-settings', MarkupSettignsController::class);
+
 
     Route::controller(ConcernController::class)->group(function () {
         Route::get('/get-concern', 'getAllConcerns');

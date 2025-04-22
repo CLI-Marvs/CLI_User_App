@@ -52,6 +52,7 @@ import InvoicesView from "@/component/views/pages/transactionViews/InvoicesView"
 import TransactionView from "./views/pages/transactionViews/TransactionView";
 import AutoPostingView from "./views/pages/transactionViews/AutoPostingView";
 import ErrorPage from "@/component/ErrorElement/ErrorPage";
+import MarkupSettingsView from "@/component/views/pages/transactionViews/MarkupSettingsView";
 
 // PrivateRoute component to check authentication and permissions( department and employee )
 const PrivateRoute = ({ requiredPermission, children }) => {
@@ -221,12 +222,14 @@ const App = () => {
                                     ],
                                 },
                                 {
-                                    path: "invoices",
-                                    element: <InvoicesView />,
-                                },
-                                {
-                                    path: "records",
-                                    element: <BankStatementView />,
+                                    path: "settings",
+                                    element: <TransactionLayout />,
+                                    children: [
+                                        {
+                                            path: "markup",
+                                            element: <MarkupSettingsView />,
+                                        },
+                                    ],
                                 },
                             ],
                         },
