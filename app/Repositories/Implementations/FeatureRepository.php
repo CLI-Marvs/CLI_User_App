@@ -19,6 +19,11 @@ class FeatureRepository
      */
     public function getAllFeatures()
     {
-        return $this->model->all();
+        //Original code
+        // return $this->model->all();
+
+        
+        // Modified code to exclude 'Sales Management'
+        return $this->model->where('name', '!=', 'Sales Management')->get();
     }
 }

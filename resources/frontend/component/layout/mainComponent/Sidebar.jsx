@@ -1,6 +1,5 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import { IoIosArrowDown } from "react-icons/io";
-import { GoPlus } from "react-icons/go";
 import {
     Card,
     Typography,
@@ -14,10 +13,7 @@ import {
     AccordionBody,
 } from "@material-tailwind/react";
 import { Link, useLocation } from "react-router-dom";
-import apiService from "../../servicesApi/apiService";
 import { useStateContext } from "../../../context/contextprovider";
-import InquiryFormModal from "../inquirypage/InquiryFormModal";
-import { set } from "lodash";
 import { ALLOWED_EMPLOYEES_CRS } from "../../../constant/data/allowedEmployeesCRS";
 
 const Sidebar = () => {
@@ -28,9 +24,7 @@ const Sidebar = () => {
     const [isSuperAdminOpen, setSuperAdminOpen] = useState(false);
     const [isPropertyPricingOpen, setPropertyPricingOpen] = useState(false);
     const [isInvoiceOpen, setIsInvoiceOpen] = useState(false);
-
     const [activeItemSales, setActiveItemSales] = useState(null);
-
     const userLoggedInEmail = user?.employee_email;
     const [isSalesOpen, setIsSalesOpen] = useState(false);
     const [activeItemTransaction, setActiveItemTransaction] = useState(null);
@@ -231,7 +225,7 @@ const Sidebar = () => {
                             </div>
                         )}
 
-                    <Link to="property-pricing/master-lists">
+                    {/* <Link to="property-pricing/master-lists">
                         <ListItem
                             className={`h-[35px] w-[185px] text-sm pl-[12px] transition-all duration-300 ease-in-out 
                   ${
@@ -258,14 +252,14 @@ const Sidebar = () => {
                                 />
                             </ListItemSuffix>
                         </ListItem>
-                    </Link>
+                    </Link> */}
                     <Link to="/transaction/bank-monitoring/bank-statements">
                         <ListItem
                             className={`h-[35px] w-[210px] text-sm pl-[12px] transition-all duration-300 ease-in-out 
             ${
                 location.pathname.startsWith("/transaction")
                     ? "bg-custom-lightestgreen text-custom-solidgreen font-semibold"
-                    : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
+                    : "hover:font-bold hover:bg-gradient-to-r hover:frofm-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
             }
               ${
                   isInvoiceOpen
@@ -289,7 +283,6 @@ const Sidebar = () => {
                     {isInvoiceOpen &&
                         location.pathname.startsWith("/transaction") && (
                             <div className="px-[12px] py-[20px] w-[210px] min-h-[122px] flex flex-col gap-[5px] bg-custom-lightestgreen border-t rounded-t-none rounded-b-[10px] border-custom-solidgreen transition-all duration-300 ease-in-out">
-
                                 <Link to="/transaction/bank-monitoring/bank-statements">
                                     <ListItem
                                         className={`h-[32px] w-full py-[8px] px-[18px] text-sm rounded-[50px] ${
@@ -345,12 +338,10 @@ const Sidebar = () => {
                                         Settings
                                     </ListItem>
                                 </Link>
-
-                               
                             </div>
                         )}
 
-                    <Link to="/sales/customer">
+                    {/* <Link to="/sales/customer">
                         <ListItem
                             className={`h-[35px] w-[210px] text-sm pl-[12px] transition-all duration-300 ease-in-out 
             ${
@@ -376,7 +367,7 @@ const Sidebar = () => {
                                 />
                             </ListItemSuffix>
                         </ListItem>
-                    </Link>
+                    </Link> */}
 
                     {isSalesOpen && location.pathname.startsWith("/sales") && (
                         <div className="px-[12px] py-[20px] w-[210px] min-h-[122px] flex flex-col gap-[5px] bg-custom-lightestgreen border-t rounded-t-none rounded-b-[10px] border-custom-solidgreen transition-all duration-300 ease-in-out">
@@ -405,12 +396,8 @@ const Sidebar = () => {
                         </p>
                     </div>
                     <div className=" text-sm p-4 h-auto rounded-[10px] text-gray-400 border border-custom-lightestgreen flex flex-col gap-4 cursor-not-allowed mb-2">
-                        {/* <p>Property & Pricing</p> */}
+                        <p>Property & Pricing</p>
                         <p>Broker Management</p>
-                        {/*  <p className="leading-none">
-                            Transaction <br />
-                            Management
-                        </p> */}
                         <p className="leading-none">
                             Document
                             <br /> Management
@@ -419,26 +406,7 @@ const Sidebar = () => {
                             Property
                             <br /> Management
                         </p>
-
-                        {/*  <ListItem className={`h-7 mb-2 pl-5 gap-2 rounded-2xl text-custom-solidgreen hover:bg-custom-lightestgreen hover:font-semibold`} >
-                Property & Pricing
-              </ListItem>
-              <ListItem className={`h-7 mb-2 pl-5 gap-2 rounded-2xl text-custom-solidgreen hover:bg-custom-lightestgreen hover:font-semibold`}>
-                Sales Management
-              </ListItem>
-            
-              <ListItem className={` h-7 mb-2 pl-5 gap-2 rounded-2xl text-custom-solidgreen hover:bg-custom-lightestgreen hover:font-semibold`}>
-                Broker Management
-              </ListItem>~
-              <ListItem className={`h-7 mb-2 pl-5 gap-2 rounded-2xl text-custom-solidgreen hover:bg-custom-lightestgreen hover:font-semibold`}>
-                Transaction Management
-              </ListItem>
-              <ListItem className={`h-7 mb-2 pl-5 gap-2 rounded-2xl text-custom-solidgreen hover:bg-custom-lightestgreen hover:font-semibold`}>
-                Documents Management
-              </ListItem>
-              <ListItem className={`h-7 mb-2 pl-5 gap-2 rounded-2xl text-custom-solidgreen hover:bg-custom-lightestgreen hover:font-semibold`}>
-                Property Management
-              </ListItem> */}
+                        <p className="leading-none">Sales Management</p>
                     </div>
 
                     {/*  <Accordion
