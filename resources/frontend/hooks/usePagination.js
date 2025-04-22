@@ -39,7 +39,8 @@ const usePagination = (fetchData, contextState, contextSetter) => {
 
     return {
         handlePageClick,
-        setFilters
+        setFilters,
+        getData
     };
 };
 

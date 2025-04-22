@@ -5,13 +5,14 @@ import { MdCalendarToday, MdRefresh } from "react-icons/md";
 import moment from "moment";
 import CustomToolTip from "@/component/CustomToolTip";
 
+
 const TransactionSearchBar = ({
     fields,
     searchValues,
     onChangeSearch,
     onSubmit,
     setSearchValues,
-    setFilters
+    setFilters,
 }) => {
     const [openSearch, setOpenSearch] = useState(false);
     const dropdownRef = useRef(null);
@@ -233,11 +234,12 @@ const TransactionSearchBar = ({
             <CustomToolTip text="Clear Filter" position="top z-50">
                 <button
                     className="  hover:bg-custom-grayF1 rounded-full text-custom-bluegreen hover:text-custom-lightblue"
-                     onClick={handleRefreshPage}
+                    onClick={handleRefreshPage}
                 >
                     <MdRefresh className="h-6 w-6 mt-1" />
                 </button>
             </CustomToolTip>
+
         </div>
     );
 };
