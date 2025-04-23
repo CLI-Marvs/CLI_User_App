@@ -11,7 +11,7 @@ const CustomToolTip = ({
 
     return (
         <div
-            className="inline-block overflow-visible z-10 group"
+            className="relative overflow-visible z-10 group"
             onMouseEnter={() => setVisible(true)}
             onMouseLeave={() => setVisible(false)}
         >
