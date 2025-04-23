@@ -7,8 +7,7 @@ import { transaction } from "@/component/servicesApi/apiCalls/transactions";
 import TransactionSearchBar from "@/component/layout/transaction/TransactionSearchBar";
 import Skeletons from "@/component/Skeletons";
 import apiServiceSap from "@/component/servicesApi/apiServiceSap";
-import { useStateContext } from "@/context/contextprovider";
-import { toLowerCaseText } from "@/util/formatToLowerCase";
+import { usePropertyFormatter } from "@/component/layout/transaction/hooks/usePropertyFormatter";
 
 const AutoPostingCom = () => {
     const statuses = ["Cleared", "Posted", "Floating"];
@@ -35,7 +34,7 @@ const AutoPostingCom = () => {
             ? "bg-[#EAF1FA]"
             : "bg-[#ECFCE6]";
 
-    const { propertyNamesList } = useStateContext();
+    const { formattedPropertyNames } = usePropertyFormatter();
     const {
         postingList,
         setPostingList,
@@ -370,8 +369,8 @@ const AutoPostingCom = () => {
             type: "select",
             options: [
                 { label: "Select Project", value: "" },
-                ...propertyNamesList.map((item) => {
-                    return { label: toLowerCaseText(item), value: item };
+                ...formattedPropertyNames.map((item) => {
+                    return { label: item, value: item };
                 }),
             ],
         },
