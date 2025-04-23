@@ -4,13 +4,16 @@ import TransactionTableCell from "./TransactionTableCell";
 import { useTransactionContext } from "@/context/Transaction/TransactionContext";
 import { transaction } from "@/component/servicesApi/apiCalls/transactions";
 import ReactPaginate from "react-paginate";
-import { MdKeyboardArrowLeft, MdKeyboardArrowRight, MdRefresh } from "react-icons/md";
+import {
+    MdKeyboardArrowLeft,
+    MdKeyboardArrowRight,
+    MdRefresh,
+} from "react-icons/md";
 import TransactionSearchBar from "@/component/layout/transaction/TransactionSearchBar";
-import { useStateContext } from "@/context/contextprovider";
-import { toLowerCaseText } from "@/util/formatToLowerCase";
 import Pagination from "@/component/Pagination";
 import usePagination from "@/hooks/usePagination";
 import CustomToolTip from "@/component/CustomToolTip";
+import { usePropertyFormatter } from "@/component/layout/transaction/hooks/usePropertyFormatter";
 
 const TransactionCom = () => {
     const columns = [
@@ -71,7 +74,7 @@ const TransactionCom = () => {
             ),
         },
     ];
-    const { propertyNamesList } = useStateContext();
+    const { formattedPropertyNames } = usePropertyFormatter();
     const [searchValues, setSearchValues] = useState({});
     const { transactions, setTransactions } = useTransactionContext();
     const { handlePageClick, setFilters } = usePagination(
@@ -79,7 +82,6 @@ const TransactionCom = () => {
         transactions,
         setTransactions
     );
-
 
     const fields = [
         { name: "customer_name", label: "Customer Name" },
@@ -101,9 +103,10 @@ const TransactionCom = () => {
             type: "select",
             options: [
                 { label: "Select Project", value: "" },
-                ...propertyNamesList.map((item) => {
-                    return { label: toLowerCaseText(item), value: item };
-                }),
+                ...formattedPropertyNames.map((item) => ({
+                    label: item,
+                    value: item,
+                })),
             ],
         },
         { name: "invoice_number", label: "Invoice Number" },
@@ -139,15 +142,19 @@ const TransactionCom = () => {
     return (
         <>
             <div className="overflow-y-hidden px-3 space-y-2">
-                    <TransactionSearchBar
-                        fields={fields}
-                        searchValues={searchValues}
-                        setSearchValues={setSearchValues}
-                        onChangeSearch={handleSearchValue}
-                        onSubmit={onSubmit}
-                        setFilters={setFilters}
-                    />
-                <GlobalTable columns={columns} data={transactions.data} loading={transactions.loading}  />
+                <TransactionSearchBar
+                    fields={fields}
+                    searchValues={searchValues}
+                    setSearchValues={setSearchValues}
+                    onChangeSearch={handleSearchValue}
+                    onSubmit={onSubmit}
+                    setFilters={setFilters}
+                />
+                <GlobalTable
+                    columns={columns}
+                    data={transactions.data}
+                    loading={transactions.loading}
+                />
                 <div className="flex justify-end mt-4">
                     <div className="flex w-full justify-end mt-3 mb-10">
                         <Pagination
