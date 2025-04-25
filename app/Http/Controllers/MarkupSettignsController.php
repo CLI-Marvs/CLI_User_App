@@ -14,7 +14,7 @@ class MarkupSettignsController extends Controller
     public function index()
     {
         try {
-            $settings = MarkupSettings::paginate(10);
+            $settings = MarkupSettings::orderBy('created_at', 'desc')->paginate(10);
             return response()->json([
                 'data' => $settings,
             ]);
@@ -23,9 +23,6 @@ class MarkupSettignsController extends Controller
         }
     }
        
-
-   
-
     
     public function store(StoreMarkupRequest $request)
     {
@@ -59,9 +56,34 @@ class MarkupSettignsController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(StoreMarkupRequest $request, string $id)
     {
-        //
+        try {
+            $record = MarkupSettings::findOrFail($id);
+    
+            $validatedData = $request->validated();
+    
+            $record->update($validatedData);
+    
+            return response()->json([
+                'success' => true,
+                'data' => $record,
+                'message' => 'Record updated successfully.'
+            ]);
+    
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Record not found.'
+            ], 404);
+    
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred while updating the record.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**

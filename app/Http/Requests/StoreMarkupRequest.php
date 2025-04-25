@@ -23,7 +23,8 @@ class StoreMarkupRequest extends FormRequest
     {
         return [
             'payment_method' => 'required|string',
-            'pti_bank_rate_percent' => 'required|numeric',
+            'pti_bank_rate_percent_local' => 'required|numeric',
+            'pti_bank_rate_percent_international' => 'nullable|numeric',
             'pti_bank_fixed_amount' => 'required|numeric',
             'cli_markup' => 'required|numeric',
         ];

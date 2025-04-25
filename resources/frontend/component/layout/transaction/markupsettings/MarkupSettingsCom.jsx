@@ -15,12 +15,15 @@ import { IoMdAdd } from "react-icons/io";
 
 const MarkupSettingsCom = () => {
     const fields = [
-        { name: "payment_method", label: "Payment Method" },
-        { name: "pti_bank_rate_percent", label: "Bank Rate Percentage" },
+        { name: "pti_bank_rate_percent_local", label: "Local Bank Rate Percentage" },
+        { name: "pti_bank_rate_percent_international", label: "International Bank Rate Percentage" },
         { name: "pti_bank_fixed_amount", label: "Bank Fixed Amount" },
         { name: "cli_markup", label: "CLI Markup" },
+        { name: "payment_method", label: "Payment Method" },
     ];
 
+    const [selectedData, setSelectedData] = useState(null);
+    const [type, setType] = useState("");
     const settingsRef = useRef(null);
     const columns = [
         {
@@ -31,10 +34,17 @@ const MarkupSettingsCom = () => {
             ),
         },
         {
-            header: "Bank Rate Percentage",
-            accessor: "pti_bank_rate_percent",
+            header: "Local Bank Rate Percentage",
+            accessor: "pti_bank_rate_percent_local",
             render: (row) => (
-                <MarkupTableCell type="pti_bank_rate_percent" row={row} />
+                <MarkupTableCell type="pti_bank_rate_percent_local" row={row} />
+            ),
+        },
+        {
+            header: "International Bank Rate Percentage",
+            accessor: "pti_bank_rate_percent_international",
+            render: (row) => (
+                <MarkupTableCell type="pti_bank_rate_percent_international" row={row} />
             ),
         },
         {
@@ -52,12 +62,20 @@ const MarkupSettingsCom = () => {
         {
             header: "Actions",
             accessor: "actions",
-            render: (row) => <MarkupTableCell type="actions" row={row} />,
+            render: (row) => (
+                <MarkupTableCell
+                    type="actions"
+                    row={row}
+                    setSelectedData={setSelectedData}
+                    setType={setType}
+                    settingsRef={settingsRef}
+                />
+            ),
         },
     ];
     const [searchValues, setSearchValues] = useState({});
     const { markupSettings, setMarkupSettings } = useTransactionContext();
-    const { handlePageClick, setFilters } = usePagination(
+    const { handlePageClick, setFilters, getData } = usePagination(
         settings.retrieveSettings,
         markupSettings,
         setMarkupSettings
@@ -76,6 +94,8 @@ const MarkupSettingsCom = () => {
         setSearchValues({});
     };
     const handleOpenModal = () => {
+        setType("store");
+        setSelectedData(null);  
         if (settingsRef.current) {
             settingsRef.current.showModal();
         }
@@ -117,7 +137,7 @@ const MarkupSettingsCom = () => {
                     </div>
                 </div>
             </div>
-            <MarkupSettingModal settingsRef={settingsRef} fields={fields} type="store" />
+            <MarkupSettingModal settingsRef={settingsRef} fields={fields} type={type} refetchData={getData} selectedData={selectedData} />
         </>
     );
 };

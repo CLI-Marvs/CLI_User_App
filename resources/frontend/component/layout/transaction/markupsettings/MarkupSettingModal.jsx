@@ -3,43 +3,60 @@ import { settings } from "@/component/servicesApi/apiCalls/markupSettings/settin
 import { showToast } from "@/util/toastUtil";
 import usePagination from "@/hooks/usePagination";
 import { useTransactionContext } from "@/context/Transaction/TransactionContext";
+import Spinner from "@/util/Spinner";
+import CustomInput from "@/component/Input/CustomInput";
 
 const MarkupSettingModal = ({
     settingsRef,
     fields,
     type,
     selectedData = null,
+    refetchData,
 }) => {
     const [formData, setFormData] = useState({
         payment_method: "",
-        pti_bank_rate_percent: 0,
-        pti_bank_fixed_amount: 0,
-        cli_markup: 0,
+        pti_bank_rate_percent_local: "",
+        pti_bank_rate_percent_international: "",
+        pti_bank_fixed_amount: "",
+        cli_markup: "",
     });
-
-    /* const { markupSettings, setMarkupSettings } = useTransactionContext();
-    const { getData } = usePagination(
-        settings.retrieveSettings,
-        markupSettings,
-        setMarkupSettings
-    ); */
+    const [validationErrors, setValidationErrors] = useState({});
+    const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
         if (type === "update" && selectedData) {
             setFormData(selectedData);
         }
+
+        if (type === "store") {
+            resetFields();
+        }
     }, [type, selectedData]);
 
     const handleCloseModal = () => {
-        console.log("trigger", settingsRef.current);
+        if (type === "store") {
+            resetFields();
+        }
         if (settingsRef.current) {
             settingsRef.current.close();
+            setValidationErrors({});
         }
     };
 
+    const resetFields = () => {
+        setFormData({
+            payment_method: "",
+            pti_bank_rate_percent_local: "",
+            pti_bank_rate_percent_international: "",
+            pti_bank_fixed_amount: "",
+            cli_markup: "",
+        });
+    };
+ 
     const getInputType = (name) => {
         const numericFields = [
-            "pti_bank_rate_percent",
+            "pti_bank_rate_percent_local",
+            "pti_bank_rate_percent_international",
             "pti_bank_fixed_amount",
             "cli_markup",
         ];
@@ -54,22 +71,57 @@ const MarkupSettingModal = ({
         }));
     };
 
+    const validateFields = () => {
+        const errors = {};
+        for (let field of fields) {
+            if(field.name === "pti_bank_rate_percent_international") continue;
+            if (
+                formData[field.name] === "" ||
+                formData[field.name] === null ||
+                formData[field.name] === undefined 
+            ) {
+                errors[field.name] = [`${field.label} is required.`];
+            }
+        }
+        setValidationErrors(errors);
+        return Object.keys(errors).length === 0;
+    };
+
     const handleSave = async () => {
+        let response = null;
+        setIsLoading(true);
+        if (!validateFields()) {
+            setIsLoading(false);
+            return;
+        }
         try {
             if (type === "store") {
-                await settings.storeSettings(formData);
-                showToast('Markup settings saved successfully', 'success');
-                getData();
+                response = await settings.storeSettings(formData);
+                showToast("Markup settings saved successfully", "success");
             } else {
-                await settings.updateSettings(formData);
+                response = await settings.updateSettings(formData);
+                showToast("Markup settings updated successfully", "success");
             }
-            if (settingsRef.current) {
+
+            if (response.data.success && settingsRef.current) {
                 settingsRef.current.close();
+
+                if (type === "store") {
+                    resetFields();
+                }
+                if (typeof refetchData === "function") {
+                    refetchData();
+                }
             }
         } catch (error) {
-            console.error("Error saving markup settings:", error);
+            resetFields();
+            setIsLoading(false);
+        } finally {
+            setIsLoading(false);
+            resetFields();
         }
     };
+
 
     return (
         <dialog
@@ -91,27 +143,42 @@ const MarkupSettingModal = ({
                                 className="flex flex-col space-y-2"
                             >
                                 <label className="text-sm">{item.label}</label>
-                                <input
+                                <CustomInput
                                     type={getInputType(item.name)}
                                     name={item.name}
                                     value={formData[item.name]}
                                     onChange={handleChange}
-                                    className="border border-gray-300 rounded-[5px] p-2"
-                                    step={
-                                        getInputType(item.name) === "number"
-                                            ? "any"
-                                            : undefined
+                                    className={`border border-gray-300 rounded-[5px] p-2 ${
+                                        item.name === "payment_method" &&
+                                        type === "update"
+                                            ? "opacity-50 cursor-not-allowed"
+                                            : ""
+                                    }`}
+                                    disabled={
+                                        `${item.name}` === "payment_method" &&
+                                        type === "update"
+                                            ? true
+                                            : false
                                     }
                                 />
+
+                                {validationErrors[item.name] && (
+                                    <span className="text-red-500 text-xs">
+                                        {validationErrors[item.name][0]}
+                                    </span>
+                                )}
                             </div>
                         ))}
                     </div>
                     <div className="flex justify-end">
-                        <div
-                            className="flex justify-center bg-gradient-to-r from-[#175D5F] to-[#70AD47] rounded-[10px] items-center shadow-md w-[150px] px-3 py-3 h-[40px] space-x-2 cursor-pointer"
-                            onClick={handleSave}
-                        >
-                            <button className="text-white">Save</button>
+                        <div className="flex justify-center bg-gradient-to-r from-[#175D5F] to-[#70AD47] rounded-[10px] items-center shadow-md w-[150px] px-3 py-3 h-[40px] space-x-2 cursor-pointer">
+                            <button
+                                className="flex justify-center bg-gradient-to-r from-[#175D5F] to-[#70AD47] rounded-[10px] items-center shadow-md w-[150px] px-3 py-3 h-[40px] space-x-2 cursor-pointer text-white"
+                                onClick={handleSave}
+                                disabled={isLoading}
+                            >
+                                {isLoading ? <Spinner /> : "Save"}
+                            </button>
                         </div>
                     </div>
                 </div>

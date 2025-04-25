@@ -10,8 +10,9 @@ class MarkupSettings extends Model
 
     protected $fillable = [
         'payment_method',
-        'pti_bank_rate_percent',
+        'pti_bank_rate_percent_local',
         'pti_bank_fixed_amount',
         'cli_markup',
+        'pti_bank_rate_percent_international'
     ];
 }

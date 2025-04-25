@@ -27,7 +27,7 @@ const GlobalTable = ({ columns, data, loading }) => {
 
     return (
         <div
-            className={`overflow-x-auto px-2 cursor-grab ${isDragging ? "active:cursor-grabbing" : ""}`}
+            className={`overflow-x-auto px-2  ${isDragging ? "cursor-grab active:cursor-grabbing" : ""}`}
             ref={tableRef}
             onMouseDown={handleMouseDown}
             onMouseMove={handleMouseMove}

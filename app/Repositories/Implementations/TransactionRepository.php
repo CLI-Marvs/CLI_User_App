@@ -137,6 +137,7 @@ class TransactionRepository
     
         $query = $this->transactionModel
             ->join('property_masters', 'property_masters.id', '=', 'transaction.id')
+            ->join('markup_settings', 'markup_settings.payment_method', '=', 'transaction.payment_option')
             ->leftJoin('invoices', function($join) {
                 $join->on('invoices.contract_number', '=', 'transaction.reference_number')
                      ->where('transaction.status', 'Cleared');
@@ -147,7 +148,11 @@ class TransactionRepository
                 'invoices.company_code',
                 'invoices.invoice_number',
                 'invoices.flow_type',
-                'invoices.id as invoice_id'
+                'invoices.id as invoice_id',
+                'markup_settings.pti_bank_rate_percent_local',
+                'markup_settings.pti_bank_rate_percent_international',
+                'markup_settings.pti_bank_fixed_amount',
+                'markup_settings.cli_markup'
             )
             ->orderBy('transaction.created_at', 'desc')
             ->when(!empty($data['status']), fn($q) => $q->where('transaction.status', $data['status']))

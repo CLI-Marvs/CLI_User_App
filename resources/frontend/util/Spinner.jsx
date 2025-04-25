@@ -4,7 +4,7 @@ import React from 'react'
 const Spinner = () => {
   return (
     <div>
-      <CircularProgress />
+      <CircularProgress className='spinnerSize' />
     </div>
   )
 }
