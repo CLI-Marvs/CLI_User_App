@@ -17,7 +17,7 @@ class PropertyMasterService
     {
         return $this->repository->store($data);
     }
- 
+
     public function getPropertyNames()
     {
         return $this->repository->getPropertyNames();
@@ -27,5 +27,10 @@ class PropertyMasterService
     public function getPropertyNamesWithIds()
     {
         return $this->repository->getPropertyNamesWithIds();
+    }
+
+    public function getAllPropertiesWithFeatures()
+    {
+        return $this->repository->getAllPropertiesWithFeatures();
     }
 }

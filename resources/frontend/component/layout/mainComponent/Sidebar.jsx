@@ -464,27 +464,27 @@ const Sidebar = () => {
           </ListItem> */}
 
                     {ALLOWED_EMPLOYEES_CRS.includes(userLoggedInEmail) && (
-                        <Link to="super-admin/user-rights-and-permissions">
+                        <Link to="/super-admin/user-rights-and-permissions">
                             <ListItem
                                 className={`h-[35px] w-[185px] text-sm pl-[12px] transition-all duration-300 ease-in-out 
-                  ${
-                      activeItem === "super-admin" ||
-                      location.pathname.startsWith("/super-admin")
-                          ? "bg-custom-lightestgreen text-custom-solidgreen font-semibold"
-                          : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
-                  }
-                    ${
-                        isSuperAdminOpen
-                            ? "rounded-[10px] rounded-b-none"
-                            : "rounded-[10px]"
-                    }
-                    `}
+                                ${
+                                    activeItem === "super-admin" ||
+                                    location.pathname.startsWith("/super-admin")
+                                        ? "bg-custom-lightestgreen text-custom-solidgreen font-semibold"
+                                        : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
+                                }
+                                ${
+                                    isSuperAdminOpen
+                                        ? "rounded-[10px] rounded-b-none"
+                                        : "rounded-[10px]"
+                                }
+                                `}
                                 onClick={handleSuperAdminDropdownClick}
                             >
                                 Admin Settings
                                 <ListItemSuffix>
                                     <IoIosArrowDown
-                                        className={`text-custom-solidgreen  transition-transform duration-200 ease-in-out ${
+                                        className={`text-custom-solidgreen transition-transform duration-200 ease-in-out ${
                                             isSuperAdminOpen ? "rotate-180" : ""
                                         }`}
                                     />
@@ -494,23 +494,41 @@ const Sidebar = () => {
                     )}
 
                     {ALLOWED_EMPLOYEES_CRS.includes(userLoggedInEmail) &&
-                        isSuperAdminOpen &&
-                        location.pathname.startsWith("/super-admin") && (
+                        (isSuperAdminOpen ||
+                            location.pathname.startsWith("/super-admin")) && (
                             <div className="px-[12px] py-[20px] w-[185px] min-h-[122px] flex flex-col gap-[5px] bg-custom-lightestgreen border-t rounded-t-none rounded-b-[10px] border-custom-solidgreen transition-all duration-300 ease-in-out">
                                 <Link to="/super-admin/user-rights-and-permissions">
                                     <ListItem
-                                        className={`h-[48px] w-full py-[8px] px-[18px]  text-sm rounded-[25px] ${
+                                        className={`h-[48px] w-full py-[8px] px-[18px] text-sm rounded-[25px] ${
                                             location.pathname.startsWith(
                                                 "/super-admin/user-rights-and-permissions"
                                             )
-                                                ? "bg-white text-custom-solidgreen font-semibold "
-                                                : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
+                                                ? "bg-white text-custom-solidgreen font-semibold"
+                                                : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen"
                                         }`}
                                         onClick={() =>
-                                            handleItemClick("superadmin")
+                                            handleItemClick(
+                                                "user-rights-and-permissions"
+                                            )
                                         }
                                     >
                                         User Rights & Permissions
+                                    </ListItem>
+                                </Link>
+                                <Link to="/super-admin/property-settings">
+                                    <ListItem
+                                        className={`h-[48px] w-full py-[8px] px-[18px] text-sm rounded-[25px] ${
+                                            location.pathname.startsWith(
+                                                "/super-admin/property-settings"
+                                            )
+                                                ? "bg-white text-custom-solidgreen font-semibold"
+                                                : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen"
+                                        }`}
+                                        onClick={() =>
+                                            handleItemClick("property-settings")
+                                        }
+                                    >
+                                        Property Settings
                                     </ListItem>
                                 </Link>
                             </div>

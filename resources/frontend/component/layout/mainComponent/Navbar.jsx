@@ -213,6 +213,9 @@ const Navbar = () => {
             if (value.toLowerCase() === "user-rights-and-permissions") {
                 breadcrumbLabel = "User Rights & Permissions";
             }
+            if (value.toLowerCase() === "property-settings") {
+                breadcrumbLabel = "Property Settings";
+            }
             if (value.toLowerCase() === "inquirylist") {
                 breadcrumbLabel = "Feedback";
             }

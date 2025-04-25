@@ -104,6 +104,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/upload-notepad', [SapController::class, 'uploadNotepad']);
 
 
+
     Route::controller(TransactionController::class)->group(function () {
         Route::get('/customer/inquiries', 'getCustomerInquiries');
         Route::get('/customer/data', 'getCustomerData');
@@ -216,4 +217,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('/update-employee-status', [EmployeeFeaturePermissionController::class, 'updateStatus']);
     Route::patch('/update-employees-feature-permissions', [EmployeeFeaturePermissionController::class, 'updatePermissions']);
     Route::get('/get-user-access-data', [EmployeeFeaturePermissionController::class, 'getUserAccessData']);
+
+
+    /*Property feature setting*/
+    Route::prefix('/property-feature-settings')->group(function () {
+        Route::get('/properties-with-features', [PropertyMasterController::class, 'getAllPropertiesWithFeatures']);
+    });
 });

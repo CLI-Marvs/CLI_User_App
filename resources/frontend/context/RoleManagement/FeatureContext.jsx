@@ -6,10 +6,11 @@ const FeatureContext = createContext();
 export const FeatureProvider = ({ children }) => {
 
     const [features, setFeatures] = useState(null);
+    const [propertySettingsFeatures, setPropertySettingsFeatures] = useState([]);
     const [isFeatureFetching, setIsFeatureFetching] = useState(false);
     const [error, setError] = useState(null);
 
-    // This function does the actual database fetch
+    
     const fetchFeatures = useCallback(async (forceFetch = false) => {
         if (!forceFetch && features) {
             return features; // Return current features if already loaded
@@ -30,14 +31,44 @@ export const FeatureProvider = ({ children }) => {
     }, [features]);
 
 
+    const fetchPropertySettingsFeatures = useCallback(
+        async (forceFetch = false) => {
+            if (
+                !forceFetch &&
+                propertySettingsFeatures && propertySettingsFeatures.length > 0
+            ) {
+                return propertySettingsFeatures;
+            }
+            setIsFeatureFetching(true);
+            try {
+                const response =
+                    await featureService.getPropertySettingsFeatures(); 
+                setPropertySettingsFeatures(response);
+                setError(null);
+                return response;
+            } catch (error) {
+                setError(error.message);
+                console.error(
+                    "Error fetching property settings features:",
+                    error
+                );
+            } finally {
+                setIsFeatureFetching(false);
+            }
+        },
+        [propertySettingsFeatures]
+    );
+
     const value = useMemo(
         () => ({
             features,
+            propertySettingsFeatures,
             isFeatureFetching,
             fetchFeatures,
+            fetchPropertySettingsFeatures,
             error, 
         }),
-        [features, isFeatureFetching, fetchFeatures, error]
+        [features, propertySettingsFeatures, isFeatureFetching, fetchFeatures, fetchPropertySettingsFeatures, error]
     );
 
     return (

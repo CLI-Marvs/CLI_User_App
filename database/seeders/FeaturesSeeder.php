@@ -19,14 +19,17 @@ class FeaturesSeeder extends Seeder
             ['name' => 'Transaction Management'],
             ['name' => 'Property Pricing'],
             ['name' => 'Sales Management'],
+            ['name' => 'Ask CLI'],
+            ['name' => 'Pay CLI'],
+
             //For long run use, just add new feature here
             //Example: ['name' => 'Document management'],
         ];
 
         foreach ($features as $feature) {
             DB::table('features')->updateOrInsert(
-                ['name' => $feature['name']],  
-                ['created_at' => now(), 'updated_at' => now()]  
+                ['name' => $feature['name']],
+                ['created_at' => now(), 'updated_at' => now()]
             );
         }
     }

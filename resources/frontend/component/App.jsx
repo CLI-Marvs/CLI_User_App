@@ -38,6 +38,7 @@ import AdminSettingView from "./views/pages/adminsettingsViews/AdminSettingView"
 import BankStatementView from "./views/pages/transactionViews/BankStatementView";
 import AutoAssignView from "./views/pages/raiseaconcernViews/AutoAssignView";
 import UserRightsAndPermissionsView from "./views/pages/userrightsandpermissionsViews/UserRightsAndPermissionsView";
+import PropertySettingViews from "@/component/views/pages/propertySettingViews/PropertySettingView";
 import FallbackLoader from "./FallbackLoader";
 import PreloadWrapper from "./PreloadWrapper";
 import BannerSettingsView from "./views/pages/bannersettingsViews/BannerSettingsView";
@@ -53,6 +54,7 @@ import TransactionView from "./views/pages/transactionViews/TransactionView";
 import AutoPostingView from "./views/pages/transactionViews/AutoPostingView";
 import ErrorPage from "@/component/ErrorElement/ErrorPage";
 import MarkupSettingsView from "@/component/views/pages/transactionViews/MarkupSettingsView";
+import propertySettingView from "./views/pages/propertySettingViews/propertySettingView";
 
 // PrivateRoute component to check authentication and permissions( department and employee )
 const PrivateRoute = ({ requiredPermission, children }) => {
@@ -330,8 +332,22 @@ const App = () => {
                             element: <AdminSettingView />,
                         },
                         {
-                            path: "super-admin/user-rights-and-permissions",
-                            element: <UserRightsAndPermissionsView />,
+                            path: "super-admin",
+                            // element: (
+                            //     <PrivateRoute requiredPermission="Super Admin">
+                            //         <SuperAdminLayout />
+                            //     </PrivateRoute>
+                            // ),
+                            children: [
+                                {
+                                    path: "user-rights-and-permissions",
+                                    element: <UserRightsAndPermissionsView />,
+                                },
+                                {
+                                    path: "property-settings",
+                                    element: <PropertySettingViews />,
+                                },
+                            ],
                         },
                     ],
                 },

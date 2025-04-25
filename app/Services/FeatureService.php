@@ -14,10 +14,20 @@ class FeatureService
     }
 
     /**
-     *  Retrieve all feature
+     * Get all features and property settings features
      */
-    public function getAllFeatures()
+    public function getFeaturesWithPropertySettings()
     {
-        return $this->repository->getAllFeatures();
+        // Fetch all features
+        $features = $this->repository->getAllFeatures();
+
+        // Fetch property settings features
+        $propertySettingsFeatures = $this->repository->getPropertySettingsFeatures();
+
+        // Combine the data
+        return [
+            'features' => $features,
+            'property_settings_features' => $propertySettingsFeatures
+        ];
     }
 }

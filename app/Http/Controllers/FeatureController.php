@@ -17,10 +17,15 @@ class FeatureController extends Controller
     public function index()
     {
         try {
-            $features = $this->service->getAllFeatures();
+            //Get all feature for 
+            $features = $this->service->getFeaturesWithPropertySettings();
+            // Fetch property settings features
+            // $propertySettingsFeatures = $this->service->getPropertySettingsFeatures();
             return response()->json(
                 [
-                    'data' => $features
+                    'data' => $features['features'],
+                    'property_settings_features' => $features['property_settings_features'],
+                    'message' => 'Features fetched successfully'
                 ],
                 200
             );

@@ -4,7 +4,6 @@ import { employeeDepartmentService } from '@/component/servicesApi/apiCalls/role
 const DepartmentContext = createContext();
 
 export const DepartmentProvider = ({ children }) => {
-
     const [departments, setDepartments] = useState(null);
     const [isDepartmentLoading, setIsDepartmentLoading] = useState(false);
     const [error, setError] = useState(null);

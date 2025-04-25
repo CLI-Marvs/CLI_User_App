@@ -224,4 +224,39 @@ class PropertyMasterRepository
             ->pluck('property_name', 'id')
             ->toArray();
     }
+
+    public function getAllPropertiesWithFeatures()
+    {
+        $properties = $this->model->with('features')->get();
+
+        return $properties->map(function ($property) {
+            $propertyNames = [$property->property_name];
+
+            // Sort the array
+            usort($propertyNames, function ($a, $b) {
+                $isANumeric = preg_match('/^\d/', $a);
+                $isBNumeric = preg_match('/^\d/', $b);
+
+                if ($isANumeric && !$isBNumeric) {
+                    return -1; // $a comes first
+                } elseif (!$isANumeric && $isBNumeric) {
+                    return 1; // $b comes first
+                } else {
+                    return strcasecmp($a, $b); // Alphabetical comparison
+                }
+            });
+            return [
+                'property_name' => $propertyNames[0],
+                'description' => $property->description ?? null,
+                'entity' => $property->entity ?? null,
+                'features' => $property->features->map(function ($feature) {
+                    return [
+                        'id' => $feature->id,
+                        'name' => $feature->name,
+                        'status' => $feature->pivot->status,
+                    ];
+                }),
+            ];
+        });
+    }
 }

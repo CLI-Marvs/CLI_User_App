@@ -2,28 +2,29 @@
 
 namespace App\Models;
 
+use App\Models\Feature;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\PropertyCommercialDetail;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class PropertyMaster extends Model
 {
 
     use HasFactory;
- 
+
     protected $table = 'property_masters';
 
     //Relationships
-    public function propertyCommercialDetail():HasOne
+    public function propertyCommercialDetail(): HasOne
     {
         return $this->hasOne(PropertyCommercialDetail::class, 'property_master_id', 'id');
     }
 
-    public function towerPhases():HasMany
+    public function towerPhases(): HasMany
     {
-        return  $this->hasMany(TowerPhase::class, 'property_masters_id','id');
+        return  $this->hasMany(TowerPhase::class, 'property_masters_id', 'id');
     }
 
     public function units()
@@ -36,6 +37,10 @@ class PropertyMaster extends Model
         return $this->belongsTo(BasicPricing::class);
     }
 
-   
+    public function features()
+    {
+        return $this->belongsToMany(Feature::class, 'property_feature_settings', 'property_id')
+            ->withPivot('status')
+            ->withTimestamps();
+    }
 }
- 

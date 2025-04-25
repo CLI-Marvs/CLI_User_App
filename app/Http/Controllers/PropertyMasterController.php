@@ -80,4 +80,13 @@ class PropertyMasterController extends Controller
         $propertyNames = $this->service->getPropertyNamesWithIds();
         return response()->json($propertyNames);
     }
+
+    public function getAllPropertiesWithFeatures()
+    {
+        $features = $this->service->getAllPropertiesWithFeatures();
+
+        return response()->json([
+            'features' => $features,
+        ]);
+    }
 }

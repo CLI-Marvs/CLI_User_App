@@ -28,4 +28,16 @@ export const propertyMasterService = {
             throw error;
         }
     },
+
+    getPropertiesByFeatures: async () => {
+        try {
+            const response = await apiService.get(
+                `/property-feature-settings/properties-with-features`
+            );
+            return response;
+        } catch (error) {
+            console.error("Error fetching properties by features:", error);
+            throw error;
+        }
+    },
 };
