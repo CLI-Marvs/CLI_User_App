@@ -221,6 +221,10 @@ Route::middleware('auth:sanctum')->group(function () {
 
     /*Property feature setting*/
     Route::prefix('/property-feature-settings')->group(function () {
-        Route::get('/properties-with-features', [PropertyMasterController::class, 'getAllPropertiesWithFeatures']);
+        // Fetch all properties with their features
+        Route::get('/properties', [PropertyMasterController::class, 'getAllPropertiesWithFeatures']);
+
+        
+        Route::put('/properties/{propertyId}/features', [PropertyMasterController::class, 'updatePropertyFeatures']);
     });
 });

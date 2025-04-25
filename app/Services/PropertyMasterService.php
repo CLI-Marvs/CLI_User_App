@@ -33,4 +33,9 @@ class PropertyMasterService
     {
         return $this->repository->getAllPropertiesWithFeatures();
     }
+
+    public function updatePropertyFeature(array $data, $id)
+    {
+        return $this->repository->updatePropertyFeatures($data, $id);
+    }
 }

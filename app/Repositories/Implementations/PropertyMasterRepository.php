@@ -246,6 +246,7 @@ class PropertyMasterRepository
                 }
             });
             return [
+                'id' => $property->id,
                 'property_name' => $propertyNames[0],
                 'description' => $property->description ?? null,
                 'entity' => $property->entity ?? null,
@@ -258,5 +259,21 @@ class PropertyMasterRepository
                 }),
             ];
         });
+    }
+
+    public function updatePropertyFeatures(array $data, int $id)
+    {
+        // Find the property by ID
+        $property = $this->model->findOrFail($id);
+
+        // Update the pivot table for the specific feature
+        $property->features()->updateExistingPivot(
+            $data['featureId'], // Feature ID
+            ['status' => $data['status'] === false ? 'Disabled' : 'Enabled']
+        );
+
+        // Reload the features relationship
+        $property->load('features');
+        return $property;
     }
 }

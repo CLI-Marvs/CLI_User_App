@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import CustomTable from "@/component/layout/propertyandpricingpage/component/CustomTable";
 import { PROPERTY_SETTING_COLUMNS } from "@/constant/data/tableColumns";
 import usePropertyFeature from "@/context/RoleManagement/PropertyFeatureContext";
@@ -6,37 +6,87 @@ import PropertyFeatureRow from "@/component/layout/superadminpage/component/tabl
 import useFeature from "@/context/RoleManagement/FeatureContext";
 import { toLowerCaseText } from "@/util/formatToLowerCase";
 import PropertyFeatureCheckbox from "@/component/layout/superadminpage/component/PropertyFeatureCheckbox";
+import { propertyMasterService } from "@/component/servicesApi/apiCalls/propertyPricing/property/propertyMasterService";
+import { showToast } from "@/util/toastUtil";
+import EditPropertyFeature from "@/component/layout/superadminpage/modals/PropertySettingModal/EditPropertyFeature";
+import { HiPencil } from "react-icons/hi";
 
 const PropertySetting = () => {
+    const editPropertyFeatureRef = useRef(null);
     const { propertyFeatures, fetchPropertyFeatures, isLoading } =
         usePropertyFeature();
     const { propertySettingsFeatures, fetchPropertySettingsFeatures } =
         useFeature();
-    const [propertySettingColumns, setPropertySettingColumns] = useState([]);
+    const [isFirstLoad, setIsFirstLoad] = useState(true);
+    const [selectedProperty, setSelectedProperty] = useState([]);
+
+    //Hooks
     useEffect(() => {
         fetchPropertyFeatures(true);
         fetchPropertySettingsFeatures();
+        setIsFirstLoad(false);
     }, []);
 
-    //Update the property setting columns
-    useEffect(() => {
-        if (PROPERTY_SETTING_COLUMNS && propertySettingsFeatures) {
-            // Extract feature names from propertySettingsFeatures
-            const featureColumns = propertySettingsFeatures.map((item) => ({
-                label: item.name, // Use the feature name as the column label
-                width: "w-[100px]", // Set a default width for the feature columns
-            }));
+    // Derive columns dynamically
+    const propertySettingColumns = [
+        { label: "Property Name", width: "w-[200px]" },
+        { label: "Description", width: "w-[200px]" },
+        { label: "Entity", width: "w-[120px]" },
+        ...(propertySettingsFeatures?.map((item) => ({
+            label: item.name,
+            width: "w-[100px]",
+        })) || []),
+        { label: "Actions", width: "w-[0px]" },
+    ];
 
-            // Append the feature columns to the existing PROPERTY_SETTING_COLUMNS
-            setPropertySettingColumns([
-                ...PROPERTY_SETTING_COLUMNS, // Keep the existing columns
-                ...featureColumns, // Add the dynamically generated feature columns
-            ]);
+    //Event handler
+    const handlePropertyFeatureChange = async (
+        property,
+        featureName,
+        isChecked
+    ) => {
+        try {
+            // Find the feature to update
+            const featureToUpdate = property.features.find(
+                (feature) => feature.name === featureName
+            );
+
+            if (!featureToUpdate) {
+                console.error("Feature not found:", featureName);
+                return;
+            }
+
+            // Prepare the payload for the API call
+            const payload = {
+                propertyId: property.id, // Property ID
+                featureId: featureToUpdate.id, // Feature ID
+                status: isChecked, // New status (true for enabled, false for disabled)
+            };
+
+            // Call the API to update the feature status
+            const response =
+                await propertyMasterService.updatePropertyFeatureSettings(
+                    payload
+                );
+            console.log("response from update:", response);
+            if (response.status === 200) {
+                showToast(response.data.message, "success");
+            }
+            await fetchPropertyFeatures(false); // Refresh the property features after update
+        } catch (error) {
+            console.error("Error updating feature:", error);
         }
-    }, [PROPERTY_SETTING_COLUMNS, propertySettingsFeatures]);
+    };
 
-    const handlePropertyFeatureChange = (item, permission, checked) => {};
-
+    //Open modal
+    const handleOpenModal = (property, action) => {
+        if (action === "edit") {
+            if (action === "edit" && editPropertyFeatureRef.current) {
+                setSelectedProperty(property);
+                editPropertyFeatureRef.current.showModal();
+            }
+        }
+    };
     return (
         <div className="h-screen max-w-full bg-custom-grayFA p-[20px]">
             <button className="montserrat-semibold text-sm px-5 gradient-btn h-[37px] rounded-[10px] text-white hover:shadow-custom4">
@@ -79,7 +129,7 @@ const PropertySetting = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {isLoading ? (
+                        {isLoading && isFirstLoad ? (
                             <tr>
                                 <td
                                     colSpan={propertySettingColumns.length}
@@ -123,7 +173,7 @@ const PropertySetting = () => {
                                             return (
                                                 <td
                                                     key={colIndex}
-                                                    className="px-4 py-2 montserrat-regular text-start"
+                                                    className="px-4 py-2 montserrat-regular text-start "
                                                 >
                                                     {feature ? (
                                                         <PropertyFeatureCheckbox
@@ -141,7 +191,17 @@ const PropertySetting = () => {
                                                             }
                                                         />
                                                     ) : (
-                                                        "N/A"
+                                                        <div>
+                                                            <HiPencil
+                                                                onClick={() =>
+                                                                    handleOpenModal(
+                                                                        property,
+                                                                        "edit"
+                                                                    )
+                                                                }
+                                                                className="w-5 h-5 text-custom-bluegreen cursor-pointer"
+                                                            />
+                                                        </div>
                                                     )}
                                                 </td>
                                             );
@@ -160,6 +220,13 @@ const PropertySetting = () => {
                         )}
                     </tbody>
                 </table>
+            </div>
+
+            <div>
+                <EditPropertyFeature
+                    selectedProperty={selectedProperty}
+                    editPropertyFeatureRef={editPropertyFeatureRef}
+                />
             </div>
         </div>
     );

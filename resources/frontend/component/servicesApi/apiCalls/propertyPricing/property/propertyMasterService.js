@@ -32,11 +32,25 @@ export const propertyMasterService = {
     getPropertiesByFeatures: async () => {
         try {
             const response = await apiService.get(
-                `/property-feature-settings/properties-with-features`
+                `/property-feature-settings/properties`
             );
             return response;
         } catch (error) {
             console.error("Error fetching properties by features:", error);
+            throw error;
+        }
+    },
+
+    updatePropertyFeatureSettings: async (payload) => {
+        try {
+            console.log("Payload in updatePropertyFeatureSettings:", payload);
+            const response = await apiService.put(
+                `/property-feature-settings/properties/${payload.propertyId}/features`,
+                payload
+            );
+            return response;
+        } catch (error) {
+            console.error("Error updating property feature settings:", error);
             throw error;
         }
     },

@@ -1,4 +1,4 @@
-import React from 'react'
+import React from "react";
 
 const PropertyFeatureChecbox = ({ checked, onChange, isDisabled = false }) => {
     return (
@@ -8,9 +8,13 @@ const PropertyFeatureChecbox = ({ checked, onChange, isDisabled = false }) => {
                 isDisabled ? "cursor-not-allowed bg-custom-grayF1 " : ""
             }`}
             checked={checked || false}
-            onChange={onChange}
+            onChange={(e) => {
+                if (!isDisabled) {
+                    onChange(e); 
+                }
+            }}
         />
     );
 };
 
-export default PropertyFeatureChecbox
+export default PropertyFeatureChecbox;

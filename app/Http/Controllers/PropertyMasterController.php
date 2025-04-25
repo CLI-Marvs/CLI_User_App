@@ -9,6 +9,7 @@ use App\Http\Controllers\Controller;
 use App\Services\PropertyMasterService;
 use Dotenv\Exception\ValidationException;
 use App\Http\Requests\StorePropertyMasterRequest;
+use App\Http\Requests\UpdatePropertyFeatureRequest;
 use App\Http\Requests\UpdatePropertyMasterRequest;
 
 class PropertyMasterController extends Controller
@@ -46,21 +47,6 @@ class PropertyMasterController extends Controller
     }
 
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(UpdatePropertyMasterRequest $request, PropertyMaster $propertyMaster)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(PropertyMaster $propertyMaster)
-    {
-        //
-    }
 
     /**
      * Get all property names
@@ -88,5 +74,18 @@ class PropertyMasterController extends Controller
         return response()->json([
             'features' => $features,
         ]);
+    }
+
+
+    public function updatePropertyFeatures(UpdatePropertyFeatureRequest $request, int $id)
+    {
+        $validatedData = $request->validated();
+        dd($validatedData);
+        $property = $this->service->updatePropertyFeature($validatedData, $id);
+        return response()->json([
+            'message' => 'Property features updated successfully.',
+            'property' => $property,
+        ]);
+
     }
 }
