@@ -9,10 +9,12 @@ import PropertyFeatureCheckbox from "@/component/layout/superadminpage/component
 import { propertyMasterService } from "@/component/servicesApi/apiCalls/propertyPricing/property/propertyMasterService";
 import { showToast } from "@/util/toastUtil";
 import EditPropertyFeature from "@/component/layout/superadminpage/modals/PropertySettingModal/EditPropertyFeature";
+import AddPropertyFeature from "@/component/layout/superadminpage/modals/PropertySettingModal/AddPropertyFeature";
 import { HiPencil } from "react-icons/hi";
 
 const PropertySetting = () => {
     const editPropertyFeatureRef = useRef(null);
+    const addPropertyFeatureRef = useRef(null);
     const { propertyFeatures, fetchPropertyFeatures, isLoading } =
         usePropertyFeature();
     const { propertySettingsFeatures, fetchPropertySettingsFeatures } =
@@ -56,11 +58,10 @@ const PropertySetting = () => {
                 return;
             }
 
-            // Prepare the payload for the API call
             const payload = {
-                propertyId: property.id, // Property ID
-                featureId: featureToUpdate.id, // Feature ID
-                status: isChecked, // New status (true for enabled, false for disabled)
+                propertyId: property.id,
+                featureId: featureToUpdate.id,
+                status: isChecked,
             };
 
             // Call the API to update the feature status
@@ -72,7 +73,7 @@ const PropertySetting = () => {
             if (response.status === 200) {
                 showToast(response.data.message, "success");
             }
-            await fetchPropertyFeatures(false); // Refresh the property features after update
+            await fetchPropertyFeatures(false);
         } catch (error) {
             console.error("Error updating feature:", error);
         }
@@ -80,16 +81,24 @@ const PropertySetting = () => {
 
     //Open modal
     const handleOpenModal = (property, action) => {
-        if (action === "edit") {
-            if (action === "edit" && editPropertyFeatureRef.current) {
-                setSelectedProperty(property);
-                editPropertyFeatureRef.current.showModal();
-            }
+        if (action === "edit" && editPropertyFeatureRef.current) {
+            setSelectedProperty(property);
+            editPropertyFeatureRef.current.showModal();
+        } else if (action === "add" && addPropertyFeatureRef.current) {
+            addPropertyFeatureRef.current.showModal();
         }
     };
+
     return (
         <div className="h-screen max-w-full bg-custom-grayFA p-[20px]">
-            <button className="montserrat-semibold text-sm px-5 gradient-btn h-[37px] rounded-[10px] text-white hover:shadow-custom4">
+            <button
+                onClick={() => {
+                    handleOpenModal(
+                        "",
+                        "add"
+                    );
+                }}
+                className="montserrat-semibold text-sm px-5 gradient-btn h-[37px] rounded-[10px] text-white hover:shadow-custom4">
                 <span className="text-[18px] mt-1 mr-2">+</span>
                 Add Property
             </button>
@@ -139,8 +148,8 @@ const PropertySetting = () => {
                                 </td>
                             </tr>
                         ) : propertyFeatures &&
-                          propertyFeatures.features &&
-                          propertyFeatures.features.length > 0 ? (
+                            propertyFeatures.features &&
+                            propertyFeatures.features.length > 0 ? (
                             propertyFeatures.features.map((property, index) => (
                                 <tr
                                     key={index}
@@ -148,10 +157,10 @@ const PropertySetting = () => {
                                 >
                                     {/* Static columns */}
                                     <td className="px-4 py-2 montserrat-regular">
-                                        {/* {toLowerCaseText(
+                                        {toLowerCaseText(
                                             property?.property_name
-                                        )} */}
-                                        {property?.property_name}
+                                        )}
+
                                     </td>
                                     <td className="px-4 py-2 montserrat-regular">
                                         {property.description || "N/A"}
@@ -161,8 +170,8 @@ const PropertySetting = () => {
                                     </td>
 
                                     {/* Dynamic feature columns */}
-                                    {propertySettingColumns
-                                        .slice(3)
+                                    {propertySettingColumns && propertySettingColumns
+                                        .slice(3, -1)
                                         .map((featureColumn, colIndex) => {
                                             const feature =
                                                 property.features.find(
@@ -181,31 +190,27 @@ const PropertySetting = () => {
                                                                 feature.status ===
                                                                 "Enabled"
                                                             }
-                                                            onChange={(e) =>
-                                                                handlePropertyFeatureChange(
-                                                                    property,
-                                                                    feature.name,
-                                                                    e.target
-                                                                        .checked
-                                                                )
-                                                            }
+                                                            isDisabled
                                                         />
                                                     ) : (
                                                         <div>
-                                                            <HiPencil
-                                                                onClick={() =>
-                                                                    handleOpenModal(
-                                                                        property,
-                                                                        "edit"
-                                                                    )
+                                                            <PropertyFeatureCheckbox
+                                                                checked={
+                                                                    false
                                                                 }
-                                                                className="w-5 h-5 text-custom-bluegreen cursor-pointer"
+                                                                isDisabled
                                                             />
                                                         </div>
                                                     )}
                                                 </td>
                                             );
                                         })}
+                                    <td className="px-4 py-2 montserrat-regular text-start">
+                                        <HiPencil
+                                            onClick={() => handleOpenModal(property, "edit")}
+                                            className="w-5 h-5 text-custom-bluegreen cursor-pointer"
+                                        />
+                                    </td>
                                 </tr>
                             ))
                         ) : (
@@ -227,6 +232,9 @@ const PropertySetting = () => {
                     selectedProperty={selectedProperty}
                     editPropertyFeatureRef={editPropertyFeatureRef}
                 />
+            </div>
+            <div>
+                <AddPropertyFeature addPropertyFeatureRef={addPropertyFeatureRef} />
             </div>
         </div>
     );

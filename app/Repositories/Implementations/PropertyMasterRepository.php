@@ -227,27 +227,14 @@ class PropertyMasterRepository
 
     public function getAllPropertiesWithFeatures()
     {
-        $properties = $this->model->with('features')->get();
+        $properties = $this->model->with('features')
+            ->orderBy('property_name', 'asc')
+            ->get();
 
         return $properties->map(function ($property) {
-            $propertyNames = [$property->property_name];
-
-            // Sort the array
-            usort($propertyNames, function ($a, $b) {
-                $isANumeric = preg_match('/^\d/', $a);
-                $isBNumeric = preg_match('/^\d/', $b);
-
-                if ($isANumeric && !$isBNumeric) {
-                    return -1; // $a comes first
-                } elseif (!$isANumeric && $isBNumeric) {
-                    return 1; // $b comes first
-                } else {
-                    return strcasecmp($a, $b); // Alphabetical comparison
-                }
-            });
             return [
                 'id' => $property->id,
-                'property_name' => $propertyNames[0],
+                'property_name' => $property->property_name,
                 'description' => $property->description ?? null,
                 'entity' => $property->entity ?? null,
                 'features' => $property->features->map(function ($feature) {
@@ -266,14 +253,46 @@ class PropertyMasterRepository
         // Find the property by ID
         $property = $this->model->findOrFail($id);
 
-        // Update the pivot table for the specific feature
-        $property->features()->updateExistingPivot(
-            $data['featureId'], // Feature ID
-            ['status' => $data['status'] === false ? 'Disabled' : 'Enabled']
-        );
+        $property->update([
+            'property_name' => $data['propertyName'] ?? null,
+            'description' => $data['description'] ?? null,
+            'entity' => $data['entity'] ?? null,
+        ]);
+
+        // Iterate through the features array and update the pivot table
+        foreach ($data['features'] as $featureData) {
+            $property->features()->updateExistingPivot(
+                $featureData['id'], // Use the 'id' key for the feature ID
+                ['status' => $featureData['status'] === false ? 'Disabled' : 'Enabled'] // Update the 'status'
+            );
+        }
 
         // Reload the features relationship
         $property->load('features');
         return $property;
+    }
+
+    public function storePropertyFeature(array $data)
+    {
+        try {
+            $property = $this->model->create([
+                'property_name' => $data['propertyName'],
+                'description' => $data['description'] ?? null,
+                'entity' => $data['entity'] ?? null,
+                'status' => 'Draft',
+            ]);
+
+            // Attach the features to the property with the specified status
+            foreach ($data['features'] as $feature) {
+                $property->features()->attach($feature['id'], ['status' => 'Enabled']);
+            }
+
+            // Reload the property with features
+            $property->load('features');
+
+            return $property;
+        } catch (\Exception $e) {
+            throw new \Exception('Failed to store property feature: ' . $e->getMessage());
+        }
     }
 }

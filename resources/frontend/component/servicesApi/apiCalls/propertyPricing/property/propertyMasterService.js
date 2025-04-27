@@ -54,4 +54,17 @@ export const propertyMasterService = {
             throw error;
         }
     },
+
+    storePropertyFeatureSettings: async (payload) => {
+        try {
+            const response = await apiService.post(
+                `/property-feature-settings/properties/features`,
+                payload
+            );
+            return response.data;
+        } catch (error) {
+            console.error("Error storing property feature settings:", error);
+            throw error;
+        }
+    },
 };

@@ -19,14 +19,8 @@ class UpdatePropertyFeatureRequest extends BasePropertyRequest
      */
     public function rules(): array
     {
-        return array_merge(parent::rules(), [
+        return array_merge($this->baseRules(), [
             'propertyId' => 'required|integer|exists:property_masters,id',
-            'propertyName' => 'required|string|max:255',
-            'description' => 'nullable|string|max:1000',
-            'entity' => 'required|string|max:255',
-            'features' => 'required|array',
-            'features.*.id' => 'required|integer|exists:features,id',
-            'features.*.status' => 'nullable|boolean',
         ]);
     }
 

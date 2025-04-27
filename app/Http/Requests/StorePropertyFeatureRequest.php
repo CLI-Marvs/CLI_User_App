@@ -4,8 +4,10 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class StorePropertyFeatureRequest extends FormRequest
+class StorePropertyFeatureRequest extends BasePropertyRequest
 {
+
+
     /**
      * Determine if the user is authorized to make this request.
      */
@@ -19,13 +21,7 @@ class StorePropertyFeatureRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
-            'propertyName' => 'required|string|max:255',
-            'description' => 'nullable|string|max:3000',
-            'entity' => 'required|string|max:255',
-            'features' => 'required|array',
-            'features.*' => 'required|integer|exists:features,id',
-        ];
+        return array_merge($this->baseRules());
     }
 
     /**

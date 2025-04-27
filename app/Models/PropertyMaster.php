@@ -15,6 +15,12 @@ class PropertyMaster extends Model
     use HasFactory;
 
     protected $table = 'property_masters';
+    protected $fillable = [
+        'property_name',
+        'description',
+        'entity',
+        'status'
+    ];
 
     //Relationships
     public function propertyCommercialDetail(): HasOne

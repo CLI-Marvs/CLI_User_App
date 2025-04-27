@@ -38,4 +38,9 @@ class PropertyMasterService
     {
         return $this->repository->updatePropertyFeatures($data, $id);
     }
+
+    public function storePropertyFeature(array $data)
+    {
+        return $this->repository->storePropertyFeature($data);
+    }
 }

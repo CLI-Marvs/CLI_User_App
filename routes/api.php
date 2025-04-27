@@ -224,7 +224,9 @@ Route::middleware('auth:sanctum')->group(function () {
         // Fetch all properties with their features
         Route::get('/properties', [PropertyMasterController::class, 'getAllPropertiesWithFeatures']);
 
-        
+        // Update features for a specific property
         Route::put('/properties/{propertyId}/features', [PropertyMasterController::class, 'updatePropertyFeatures']);
+
+        Route::post('/properties/features', [PropertyMasterController::class, 'storePropertyFeatures']);
     });
 });

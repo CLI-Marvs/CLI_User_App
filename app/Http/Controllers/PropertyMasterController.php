@@ -9,8 +9,9 @@ use App\Http\Controllers\Controller;
 use App\Services\PropertyMasterService;
 use Dotenv\Exception\ValidationException;
 use App\Http\Requests\StorePropertyMasterRequest;
-use App\Http\Requests\UpdatePropertyFeatureRequest;
+use App\Http\Requests\StorePropertyFeatureRequest;
 use App\Http\Requests\UpdatePropertyMasterRequest;
+use App\Http\Requests\UpdatePropertyFeatureRequest;
 
 class PropertyMasterController extends Controller
 {
@@ -46,8 +47,6 @@ class PropertyMasterController extends Controller
         }
     }
 
-
-
     /**
      * Get all property names
      */
@@ -80,12 +79,22 @@ class PropertyMasterController extends Controller
     public function updatePropertyFeatures(UpdatePropertyFeatureRequest $request, int $id)
     {
         $validatedData = $request->validated();
-        dd($validatedData);
         $property = $this->service->updatePropertyFeature($validatedData, $id);
         return response()->json([
             'message' => 'Property features updated successfully.',
             'property' => $property,
         ]);
+    }
 
+
+    public function storePropertyFeatures(StorePropertyFeatureRequest $request)
+    {
+        $validatedData = $request->validated();
+        $property = $this->service->storePropertyFeature($validatedData);
+        return response()->json([
+            'message' => 'Property features created successfully.',
+            'data' => $property,
+            'status' => 'success',
+        ], 201);
     }
 }

@@ -4,6 +4,8 @@ import Spinner from "@/util/Spinner";
 import PropertyFeatureCheckbox from "@/component/layout/superadminpage/component/PropertyFeatureCheckbox";
 import { propertyMasterService } from "@/component/servicesApi/apiCalls/propertyPricing/property/propertyMasterService";
 import { showToast } from "@/util/toastUtil";
+import usePropertyFeature from "@/context/RoleManagement/PropertyFeatureContext";
+import useFeature from "@/context/RoleManagement/FeatureContext";
 
 const formInitialState = {
     propertyName: "",
@@ -14,6 +16,10 @@ const formInitialState = {
 const EditPropertyFeature = ({ editPropertyFeatureRef, selectedProperty }) => {
     const [isLoading, setIsLoading] = useState(false);
     const [formData, setFormData] = useState(formInitialState);
+    const { fetchPropertyFeatures } =
+        usePropertyFeature();
+    const { propertySettingsFeatures } =
+        useFeature();
 
     // Initialize form data when `selectedProperty` changes
     useEffect(() => {
@@ -36,15 +42,33 @@ const EditPropertyFeature = ({ editPropertyFeatureRef, selectedProperty }) => {
         }));
     };
 
+
     // Handle checkbox changes for features
-    const handleFeatureChange = (featureId, isChecked) => {
+    const handleFeatureChange = (feature, isChecked) => {
+        const updatedFeatures = formData.features.map((existingFeature) => {
+            if (existingFeature.id === feature.id) {
+                return {
+                    ...existingFeature,
+                    status: isChecked ? "Enabled" : "Disabled"
+                };
+            }
+            return existingFeature;
+        });
+
+        const featureExists = updatedFeatures.some(
+            (existingFeature) => existingFeature.id === feature.id
+        );
+
+        if (!featureExists && isChecked) {
+            updatedFeatures.push({
+                id: feature.id,
+                name: feature.name,
+                status: "Enabled"
+            });
+        }
         setFormData((prev) => ({
             ...prev,
-            features: prev.features.map((feature) =>
-                feature.id === featureId
-                    ? { ...feature, status: isChecked ? "Enabled" : "Disabled" }
-                    : feature
-            ),
+            features: updatedFeatures,
         }));
     };
 
@@ -61,21 +85,18 @@ const EditPropertyFeature = ({ editPropertyFeatureRef, selectedProperty }) => {
                 entity: formData.entity,
                 features: formData.features.map((feature) => ({
                     id: feature.id,
-                    status: feature.status === "Enabled", // Convert "Enabled"/"Disabled" to boolean
+                    status: feature.status === "Enabled",
                 })),
             };
-
-            // // Call the `onSave` function passed as a prop to send the payload to the backend
-            // await onSave(formData);
-            // setIsLoading(false);
-            // handleCloseModal();
             const response =
                 await propertyMasterService.updatePropertyFeatureSettings(
                     payload
                 );
-
+            console.log("res1", response);
             if (response.status === 200) {
                 showToast(response.data.message, "success");
+                await fetchPropertyFeatures(false);
+                handleCloseModal();
             }
         } catch (error) {
             console.error("Error saving property features:", error);
@@ -86,15 +107,14 @@ const EditPropertyFeature = ({ editPropertyFeatureRef, selectedProperty }) => {
     const handleCloseModal = () => {
         if (editPropertyFeatureRef.current) {
             editPropertyFeatureRef.current.close();
+            setIsLoading(false);
             // Reset form data when closing the modal
-            // setFormData((prev) => ({
-            //     ...prev,
-            //     propertyName: "",
-            //     description: "",
-            //     entity: "",
-            //     features: [],
-            // }));
-            //TODO: reset form data if close modal
+            setFormData({
+                propertyName: selectedProperty.property_name || "",
+                description: selectedProperty.description || "",
+                entity: selectedProperty.entity || "",
+                features: selectedProperty.features || [],
+            });
         }
     };
 
@@ -176,38 +196,43 @@ const EditPropertyFeature = ({ editPropertyFeatureRef, selectedProperty }) => {
                                 Features
                             </p>
                         </div>
-                        {formData.features.map((feature, index) => (
-                            <div
-                                key={index}
-                                className="flex gap-x-6 items-center border border-custom-gray81 rounded-md overflow-hidden w-[300px]"
-                            >
-                                <p className="text-custom-bluegreen bg-custom-lightestgreen py-1.5 pl-3 montserrat-semibold text-sm w-[215px]">
-                                    {feature.name || "Feature Name"}
-                                </p>
-                                <PropertyFeatureCheckbox
-                                    checked={feature.status === "Enabled"}
-                                    onChange={(e) =>
-                                        handleFeatureChange(
-                                            feature.id,
-                                            e.target.checked
-                                        )
-                                    }
-                                />
-                            </div>
-                        ))}
+
+                        {propertySettingsFeatures && propertySettingsFeatures.map((feature, index) => {
+                            const isChecked = formData.features.some(
+                                (f) => f.id === feature.id && f.status === "Enabled"
+                            );
+                            return (
+                                <div
+                                    key={index}
+                                    className="flex gap-x-6 items-center border border-custom-gray81 rounded-md overflow-hidden w-[300px]"
+                                >
+                                    <p className="text-custom-bluegreen bg-custom-lightestgreen py-1.5 pl-3 montserrat-semibold text-sm w-[215px]">
+                                        {feature.name || "Feature Name"}
+                                    </p>
+                                    <PropertyFeatureCheckbox
+                                        checked={isChecked}
+                                        onChange={(e) =>
+                                            handleFeatureChange(
+                                                feature,
+                                                e.target.checked
+                                            )
+                                        }
+                                    />
+                                </div>
+                            )
+                        })}
 
                         {/* Save Button */}
                         <div className="flex justify-center mt-10">
                             <button
-                                className={`w-[173px] h-[37px] text-white montserrat-semibold text-sm gradient-btn rounded-[10px] hover:shadow-custom4 ${
-                                    isLoading
-                                        ? "cursor-not-allowed opacity-50"
-                                        : ""
-                                }`}
+                                className={`w-[173px] h-[37px] text-white montserrat-semibold text-sm gradient-btn rounded-[10px] hover:shadow-custom4 ${isLoading
+                                    ? "cursor-not-allowed opacity-50"
+                                    : ""
+                                    }`}
                                 disabled={isLoading}
                             >
                                 {isLoading ? (
-                                    <Spinner className="spinner-size" />
+                                    <Spinner className="spinnerSize" />
                                 ) : (
                                     <>Save</>
                                 )}

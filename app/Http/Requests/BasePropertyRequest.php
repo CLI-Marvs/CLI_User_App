@@ -11,14 +11,15 @@ class BasePropertyRequest extends FormRequest
         return true;
     }
 
-    public function rules(): array
+    public function baseRules(): array
     {
         return [
             'propertyName' => 'required|string|max:255',
             'description' => 'nullable|string|max:1000',
-            'entity' => 'required|string|max:255',
-            'features' => 'required|array',
-            'features.*' => 'required|integer|exists:features,id',
+            'entity' => 'nullable|string|max:255',
+            'features' => 'nullable|array',
+            'features.*.id' => 'nullable|integer|exists:features,id',
+            'features.*.status' => 'nullable|boolean'
         ];
     }
 
