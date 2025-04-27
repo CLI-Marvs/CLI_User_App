@@ -92,7 +92,7 @@ const EditPropertyFeature = ({ editPropertyFeatureRef, selectedProperty }) => {
                 await propertyMasterService.updatePropertyFeatureSettings(
                     payload
                 );
-            console.log("res1", response);
+
             if (response.status === 200) {
                 showToast(response.data.message, "success");
                 await fetchPropertyFeatures(false);
