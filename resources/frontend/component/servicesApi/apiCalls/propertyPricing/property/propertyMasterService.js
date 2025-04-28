@@ -29,11 +29,25 @@ export const propertyMasterService = {
         }
     },
 
-    getPropertiesByFeatures: async () => {
+    getPropertiesByFeatures: async (page = 1, perPage = 10, filters) => {
         try {
-            const response = await apiService.get(
-                `/property-feature-settings/properties`
+            const cleanFilters = Object.fromEntries(
+                Object.entries(filters || {}).filter(
+                    ([, v]) => v != null && v !== ""
+                )
             );
+
+            // Convert filters object into query parameters
+            const queryParams = new URLSearchParams({
+                page,
+                per_page: perPage,
+                ...cleanFilters,
+            }).toString();
+
+            const response = await apiService.get(
+                `/property-feature-settings/properties?${queryParams}`
+            );
+
             return response;
         } catch (error) {
             console.error("Error fetching properties by features:", error);
@@ -57,10 +71,13 @@ export const propertyMasterService = {
 
     storePropertyFeatureSettings: async (payload) => {
         try {
+            console.log("Response from storePropertyFeatureSettings:", payload);
+
             const response = await apiService.post(
                 `/property-feature-settings/properties/features`,
                 payload
             );
+
             return response.data;
         } catch (error) {
             console.error("Error storing property feature settings:", error);

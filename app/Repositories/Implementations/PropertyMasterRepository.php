@@ -225,27 +225,44 @@ class PropertyMasterRepository
             ->toArray();
     }
 
-    public function getAllPropertiesWithFeatures()
+    public function getAllPropertiesWithFeatures(array $validatedData)
     {
+
         $properties = $this->model->with('features')
             ->orderBy('property_name', 'asc')
-            ->get();
+            ->paginate(
+                $validatedData['per_page'],
+                ['*'],
+                'page',
+                $validatedData['page']
+            );
 
-        return $properties->map(function ($property) {
-            return [
-                'id' => $property->id,
-                'property_name' => $property->property_name,
-                'description' => $property->description ?? null,
-                'entity' => $property->entity ?? null,
-                'features' => $property->features->map(function ($feature) {
-                    return [
-                        'id' => $feature->id,
-                        'name' => $feature->name,
-                        'status' => $feature->pivot->status,
-                    ];
-                }),
-            ];
-        });
+        return [
+            'data' =>
+            $properties->getCollection()->map(function ($property) {
+                return [
+                    'id' => $property->id,
+                    'property_name' => $property->property_name,
+                    'description' => $property->description ?? null,
+                    'entity' => $property->entity ?? null,
+                    'features' => $property->features->map(function ($feature) {
+                        return [
+                            'id' => $feature->id,
+                            'name' => $feature->name,
+                            'status' => $feature->pivot->status,
+                        ];
+                    }),
+                ];
+            })->toArray(),
+            'pagination' => [
+                'current_page' => $properties->currentPage(),
+                'last_page' => $properties->lastPage(),
+                'per_page' => $properties->perPage(),
+                'total' => $properties->total(),
+                'next_page_url' => $properties->nextPageUrl(),
+                'prev_page_url' => $properties->previousPageUrl(),
+            ]
+        ];
     }
 
     public function updatePropertyFeatures(array $data, int $id)
@@ -259,12 +276,23 @@ class PropertyMasterRepository
             'entity' => $data['entity'] ?? null,
         ]);
 
+        // Get existing feature IDs for this property
+        $existingFeatureIds = $property->features()->pluck('features.id')->toArray();
+
         // Iterate through the features array and update the pivot table
         foreach ($data['features'] as $featureData) {
-            $property->features()->updateExistingPivot(
-                $featureData['id'], // Use the 'id' key for the feature ID
-                ['status' => $featureData['status'] === false ? 'Disabled' : 'Enabled'] // Update the 'status'
-            );
+            if (in_array($featureData['id'], $existingFeatureIds)) {
+                // Update existing feature
+                $property->features()->updateExistingPivot(
+                    $featureData['id'],
+                    ['status' => $featureData['status'] === false ? 'Disabled' : 'Enabled']
+                );
+            } else {
+                // Attach new feature
+                $property->features()->attach($featureData['id'], [
+                    'status' => $featureData['status'] === false ? 'Disabled' : 'Enabled'
+                ]);
+            }
         }
 
         // Reload the features relationship

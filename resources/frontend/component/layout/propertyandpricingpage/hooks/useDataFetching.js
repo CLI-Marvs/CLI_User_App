@@ -7,7 +7,7 @@ const useDataFetching = ({
     extraParams = {},
     enabled = false,
     pageSize = 10,
-}) => { 
+}) => {
     const [data, setData] = useState([]);
     const [pagination, setPagination] = useState({
         currentPage: 1,
@@ -24,7 +24,6 @@ const useDataFetching = ({
         async (forceFetch = false, silent = false) => {
             const isFilterChanged = !_.isEqual(filters, previousFilters);
 
-            // Return cached data if conditions are met
             if (
                 data.length > 0 &&
                 !forceFetch &&
@@ -87,8 +86,8 @@ const useDataFetching = ({
     };
 
     const refreshData = useCallback(async () => {
-        setHasBeenFetched(false);  
-        return await fetchData(true);  
+        setHasBeenFetched(false);
+        return await fetchData(true);
     }, [fetchData]);
 
     useEffect(() => {
@@ -107,7 +106,7 @@ const useDataFetching = ({
         updatePagination,
         resetToDefaults,
         fetchData,
-        refreshData
+        refreshData,
     };
 };
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect } from "react";
 import CustomInput from "@/component/Input/CustomInput";
 import useFeature from "@/context/RoleManagement/FeatureContext";
 import PropertyFeatureCheckbox from "@/component/layout/superadminpage/component/PropertyFeatureCheckbox";
@@ -6,6 +6,7 @@ import Spinner from "@/util/Spinner";
 import usePropertyFeature from "@/context/RoleManagement/PropertyFeatureContext";
 import { propertyMasterService } from "@/component/servicesApi/apiCalls/propertyPricing/property/propertyMasterService";
 import { showToast } from "@/util/toastUtil";
+import isButtonDisabled from "@/util/isFormButtonDisabled";
 
 const formInitialState = {
     propertyName: "",
@@ -14,16 +15,15 @@ const formInitialState = {
     features: [],
 };
 
-const AddPropertyFeature = ({
-    addPropertyFeatureRef
-}) => {
+const AddPropertyFeature = ({ addPropertyFeatureRef }) => {
     const [formData, setFormData] = useState(formInitialState);
     const [isLoading, setIsLoading] = useState(false);
-    const { propertySettingsFeatures } =
-        useFeature();
-    const { fetchPropertyFeatures } =
-        usePropertyFeature();
-
+    const { propertySettingsFeatures } = useFeature();
+    const { refreshData } = usePropertyFeature();
+    const isPropertyButtonDisabled = isButtonDisabled(
+        formData,
+        Object.keys(formInitialState).filter((key) => key !== "google_map_link")
+    );
 
     //Event handler
     // Handle input changes for text fields
@@ -35,14 +35,13 @@ const AddPropertyFeature = ({
         }));
     };
 
-
     // Handle checkbox changes for features
     const handleFeatureChange = (featureId, isChecked) => {
-        setFormData(prev => ({
+        setFormData((prev) => ({
             ...prev,
             features: isChecked
                 ? [...prev.features, { id: featureId, status: "Enabled" }]
-                : prev.features.filter(f => f.id !== featureId)
+                : prev.features.filter((f) => f.id !== featureId),
         }));
     };
 
@@ -61,15 +60,19 @@ const AddPropertyFeature = ({
                     status: feature.status === "Enabled",
                 })),
             };
-            console.log("Payload:", payload);
+    
             const response =
                 await propertyMasterService.storePropertyFeatureSettings(
                     payload
                 );
 
-            if (response.status === 201 || response.status ==='success') {
-                showToast(response.data.message || 'Property features added successfully.', "success");
-                await fetchPropertyFeatures(false);
+            if (response.status === 201 || response.status === "success") {
+                showToast(
+                    response.data.message ||
+                        "Property features added successfully.",
+                    "success"
+                );
+                await refreshData();
                 handleCloseModal();
             }
         } catch (error) {
@@ -77,7 +80,6 @@ const AddPropertyFeature = ({
             setIsLoading(false);
         }
     };
-
 
     //Handle modal close
     const handleCloseModal = () => {
@@ -166,37 +168,41 @@ const AddPropertyFeature = ({
                                 Features
                             </p>
                         </div>
-                        {propertySettingsFeatures && propertySettingsFeatures.map((feature, index) => {
-                            const isEnabled = formData.features.some(f => f.id === feature.id);
-                            return (
-                                <div
-                                    key={index}
-                                    className="flex gap-x-6 items-center border border-custom-gray81 rounded-md overflow-hidden w-[300px]"
-                                >
-                                    <p className="text-custom-bluegreen bg-custom-lightestgreen py-1.5 pl-3 montserrat-semibold text-sm w-[215px]">
-                                        {feature.name || "Feature Name 1"}
-                                    </p>
-                                    <PropertyFeatureCheckbox
-                                        checked={isEnabled}
-                                        onChange={(e) =>
-                                            handleFeatureChange(
-                                                feature.id,
-                                                e.target.checked
-                                            )
-                                        }
-                                    />
-                                </div>
-                            )
-                        })}
+                        {propertySettingsFeatures &&
+                            propertySettingsFeatures.map((feature, index) => {
+                                const isEnabled = formData.features.some(
+                                    (f) => f.id === feature.id
+                                );
+                                return (
+                                    <div
+                                        key={index}
+                                        className="flex gap-x-6 items-center border border-custom-gray81 rounded-md overflow-hidden w-[300px]"
+                                    >
+                                        <p className="text-custom-bluegreen bg-custom-lightestgreen py-1.5 pl-3 montserrat-semibold text-sm w-[215px]">
+                                            {feature.name || "Feature Name 1"}
+                                        </p>
+                                        <PropertyFeatureCheckbox
+                                            checked={isEnabled}
+                                            onChange={(e) =>
+                                                handleFeatureChange(
+                                                    feature.id,
+                                                    e.target.checked
+                                                )
+                                            }
+                                        />
+                                    </div>
+                                );
+                            })}
 
                         {/* Save Button */}
                         <div className="flex justify-center mt-10">
                             <button
                                 onClick={handleSubmit}
-                                className={`w-[173px] h-[37px] text-white montserrat-semibold text-sm gradient-btn rounded-[10px] hover:shadow-custom4 ${isLoading
-                                    ? "cursor-not-allowed opacity-50"
-                                    : ""
-                                    }`}
+                                className={`w-[173px] h-[37px] text-white montserrat-semibold text-sm gradient-btn rounded-[10px] hover:shadow-custom4 ${
+                                    isLoading
+                                        ? "cursor-not-allowed opacity-50"
+                                        : ""
+                                }`}
                                 disabled={isLoading}
                             >
                                 {isLoading ? (
@@ -210,8 +216,7 @@ const AddPropertyFeature = ({
                 </form>
             </div>
         </dialog>
-    )
-
+    );
 };
 
-export default AddPropertyFeature
+export default AddPropertyFeature;

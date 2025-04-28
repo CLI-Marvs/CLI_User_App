@@ -1,42 +1,41 @@
 import React, { createContext, useContext, useState, useCallback } from "react";
 import { propertyMasterService } from "@/component/servicesApi/apiCalls/propertyPricing/property/propertyMasterService";
+import useDataFetching from "@/component/layout/propertyandpricingpage/hooks/useDataFetching";
 
 const PropertyFeatureContext = createContext();
 
 export const PropertyFeatureProvider = ({ children }) => {
-    const [propertyFeatures, setPropertyFeatures] = useState([]);
-    const [isLoading, setIsLoading] = useState(false);
+    const [isPropertyFeatureActive, setIsPropertyFeatureActive] =
+        useState(false);
 
-    const fetchPropertyFeatures = useCallback(
-        async (forceFetch = false) => {
-            if (
-                propertyFeatures &&
-                propertyFeatures.length > 0 &&
-                !forceFetch
-            ) {
-                return propertyFeatures;
-            }
-
-            setIsLoading(true);
-            try {
-                const response =
-                    await propertyMasterService.getPropertiesByFeatures();
-                setPropertyFeatures(response.data);
-            } catch (error) {
-                console.error("Error fetching property features:", error);
-            } finally {
-                setIsLoading(false);
-            }
-        },
-        [propertyFeatures]
-    );
-
+    const {
+        data: propertyFeatures,
+        isLoading,
+        pagination,
+        filters,
+        updateFilters,
+        updatePagination,
+        resetToDefaults,
+        fetchData,
+        refreshData,
+    } = useDataFetching({
+        fetchFunction: propertyMasterService.getPropertiesByFeatures,
+        defaultFilters: {},
+        enabled: isPropertyFeatureActive,
+    });
 
     const value = {
         propertyFeatures,
-        setIsLoading,
         isLoading,
-        fetchPropertyFeatures,
+        pagination,
+        filters,
+        updateFilters,
+        updatePagination,
+        resetToDefaults,
+        fetchData,
+        refreshData,
+        isPropertyFeatureActive,
+        setIsPropertyFeatureActive,
     };
 
     return (

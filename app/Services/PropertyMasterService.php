@@ -29,9 +29,9 @@ class PropertyMasterService
         return $this->repository->getPropertyNamesWithIds();
     }
 
-    public function getAllPropertiesWithFeatures()
+    public function getAllPropertiesWithFeatures(array $validatedData)
     {
-        return $this->repository->getAllPropertiesWithFeatures();
+        return $this->repository->getAllPropertiesWithFeatures($validatedData);
     }
 
     public function updatePropertyFeature(array $data, $id)

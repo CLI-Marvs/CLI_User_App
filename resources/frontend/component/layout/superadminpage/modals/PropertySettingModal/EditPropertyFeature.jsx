@@ -18,7 +18,7 @@ const formInitialState = {
 const EditPropertyFeature = ({ editPropertyFeatureRef, selectedProperty }) => {
     const [isLoading, setIsLoading] = useState(false);
     const [formData, setFormData] = useState(formInitialState);
-    const { fetchPropertyFeatures } =
+    const { refreshData } =
         usePropertyFeature();
     const { propertySettingsFeatures } =
         useFeature();
@@ -97,7 +97,7 @@ const EditPropertyFeature = ({ editPropertyFeatureRef, selectedProperty }) => {
 
             if (response.status === 200) {
                 showToast(response.data.message, "success");
-                await fetchPropertyFeatures(false);
+                await refreshData();
                 handleCloseModal();
             }
         } catch (error) {

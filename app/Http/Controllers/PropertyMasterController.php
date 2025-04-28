@@ -66,12 +66,18 @@ class PropertyMasterController extends Controller
         return response()->json($propertyNames);
     }
 
-    public function getAllPropertiesWithFeatures()
+    public function getAllPropertiesWithFeatures(Request $request)
     {
-        $features = $this->service->getAllPropertiesWithFeatures();
+        $validatedData = $request->validate([
+            'per_page' => 'nullable|integer|min:1|max:100',
+            'page' => 'nullable|integer|min:1',
+        ]);
+
+        $features = $this->service->getAllPropertiesWithFeatures($validatedData);
 
         return response()->json([
-            'features' => $features,
+            'data' => $features['data'],
+            'pagination' => $features['pagination']
         ]);
     }
 
