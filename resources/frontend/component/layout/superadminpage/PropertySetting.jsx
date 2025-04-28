@@ -190,7 +190,7 @@ const PropertySetting = () => {
                                                                 feature.status ===
                                                                 "Enabled"
                                                             }
-                                                            isDisabled
+                                                            isDisabled={true}
                                                         />
                                                     ) : (
                                                         <div>
