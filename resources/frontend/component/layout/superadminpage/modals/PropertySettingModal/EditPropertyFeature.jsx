@@ -6,6 +6,8 @@ import { propertyMasterService } from "@/component/servicesApi/apiCalls/property
 import { showToast } from "@/util/toastUtil";
 import usePropertyFeature from "@/context/RoleManagement/PropertyFeatureContext";
 import useFeature from "@/context/RoleManagement/FeatureContext";
+import { toLowerCaseText } from "@/util/formatToLowerCase";
+
 
 const formInitialState = {
     propertyName: "",
@@ -146,7 +148,7 @@ const EditPropertyFeature = ({ editPropertyFeatureRef, selectedProperty }) => {
                                 <CustomInput
                                     type="text"
                                     name="propertyName"
-                                    value={formData.propertyName}
+                                    value={toLowerCaseText(formData.propertyName)}
                                     className="w-full px-4 focus:outline-none"
                                     onChange={handleInputChange}
                                 />
@@ -197,38 +199,42 @@ const EditPropertyFeature = ({ editPropertyFeatureRef, selectedProperty }) => {
                             </p>
                         </div>
 
-                        {propertySettingsFeatures && propertySettingsFeatures.map((feature, index) => {
-                            const isChecked = formData.features.some(
-                                (f) => f.id === feature.id && f.status === "Enabled"
-                            );
-                            return (
-                                <div
-                                    key={index}
-                                    className="flex gap-x-6 items-center border border-custom-gray81 rounded-md overflow-hidden w-[300px]"
-                                >
-                                    <p className="text-custom-bluegreen bg-custom-lightestgreen py-1.5 pl-3 montserrat-semibold text-sm w-[215px]">
-                                        {feature.name || "Feature Name"}
-                                    </p>
-                                    <PropertyFeatureCheckbox
-                                        checked={isChecked}
-                                        onChange={(e) =>
-                                            handleFeatureChange(
-                                                feature,
-                                                e.target.checked
-                                            )
-                                        }
-                                    />
-                                </div>
-                            )
-                        })}
+                        {propertySettingsFeatures &&
+                            propertySettingsFeatures.map((feature, index) => {
+                                const isChecked = formData.features.some(
+                                    (f) =>
+                                        f.id === feature.id &&
+                                        f.status === "Enabled"
+                                );
+                                return (
+                                    <div
+                                        key={index}
+                                        className="flex gap-x-6 items-center border border-custom-gray81 rounded-md overflow-hidden w-[300px]"
+                                    >
+                                        <p className="text-custom-bluegreen bg-custom-lightestgreen py-1.5 pl-3 montserrat-semibold text-sm w-[215px]">
+                                            {feature.name || "Feature Name"}
+                                        </p>
+                                        <PropertyFeatureCheckbox
+                                            checked={isChecked}
+                                            onChange={(e) =>
+                                                handleFeatureChange(
+                                                    feature,
+                                                    e.target.checked
+                                                )
+                                            }
+                                        />
+                                    </div>
+                                );
+                            })}
 
                         {/* Save Button */}
                         <div className="flex justify-center mt-10">
                             <button
-                                className={`w-[173px] h-[37px] text-white montserrat-semibold text-sm gradient-btn rounded-[10px] hover:shadow-custom4 ${isLoading
-                                    ? "cursor-not-allowed opacity-50"
-                                    : ""
-                                    }`}
+                                className={`w-[173px] h-[37px] text-white montserrat-semibold text-sm gradient-btn rounded-[10px] hover:shadow-custom4 ${
+                                    isLoading
+                                        ? "cursor-not-allowed opacity-50"
+                                        : ""
+                                }`}
                                 disabled={isLoading}
                             >
                                 {isLoading ? (
