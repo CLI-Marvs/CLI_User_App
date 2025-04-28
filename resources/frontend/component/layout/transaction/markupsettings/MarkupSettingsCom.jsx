@@ -15,8 +15,7 @@ import { IoMdAdd } from "react-icons/io";
 
 const MarkupSettingsCom = () => {
     const fields = [
-        { name: "pti_bank_rate_percent_local", label: "Local Bank Rate Percentage" },
-        { name: "pti_bank_rate_percent_international", label: "International Bank Rate Percentage" },
+        { name: "pti_bank_rate_percent", label: "Bank Rate Percentage" },
         { name: "pti_bank_fixed_amount", label: "Bank Fixed Amount" },
         { name: "cli_markup", label: "CLI Markup" },
         { name: "payment_method", label: "Payment Method" },
@@ -34,17 +33,10 @@ const MarkupSettingsCom = () => {
             ),
         },
         {
-            header: "Local Bank Rate Percentage",
-            accessor: "pti_bank_rate_percent_local",
+            header: "Bank Rate Percentage",
+            accessor: "pti_bank_rate_percent",
             render: (row) => (
-                <MarkupTableCell type="pti_bank_rate_percent_local" row={row} />
-            ),
-        },
-        {
-            header: "International Bank Rate Percentage",
-            accessor: "pti_bank_rate_percent_international",
-            render: (row) => (
-                <MarkupTableCell type="pti_bank_rate_percent_international" row={row} />
+                <MarkupTableCell type="pti_bank_rate_percent" row={row} />
             ),
         },
         {

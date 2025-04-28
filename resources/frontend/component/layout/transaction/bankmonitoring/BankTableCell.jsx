@@ -8,7 +8,7 @@ const BankTableCell = ({ type, row }) => {
             return (
                 <div className="w-[200px]">
                     <span className="montserrat-medium text-[13px]">
-                        {moment(row.transaction_date).format("MMMM DD, YYYY")}
+                        {moment(row.created_at).format("LLL")}
                     </span>
                 </div>
             );

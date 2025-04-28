@@ -302,7 +302,7 @@ const Sidebar = () => {
                                     </ListItem>
                                 </Link>
 
-                                <Link to="/transaction/receivables/invoices">
+                                <Link to="/transaction/receivables/transactions">
                                     <ListItem
                                         className={`h-[32px] w-full py-[8px] px-[18px] text-sm rounded-[50px] ${
                                             location.pathname.startsWith(
@@ -313,7 +313,7 @@ const Sidebar = () => {
                                         }`}
                                         onClick={() =>
                                             handleItemTransactionClick(
-                                                "/transaction/receivables/invoices"
+                                                "/transaction/receivables/transactions"
                                             )
                                         }
                                     >

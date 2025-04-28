@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class StoreMarkupRequest extends FormRequest
+class MarkupDetailsRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,7 +22,11 @@ class StoreMarkupRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'payment_method' => 'required|string',
+            'location' => 'required|string',
+            'markup_setting_id' => 'nullable',
+            'pti_bank_rate_percent' => 'required|numeric',
+            'pti_bank_fixed_amount' => 'required|numeric',
+            'cli_markup' => 'required|numeric',
         ];
     }
 }

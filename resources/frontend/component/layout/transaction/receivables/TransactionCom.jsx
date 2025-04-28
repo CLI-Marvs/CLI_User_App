@@ -84,7 +84,6 @@ const TransactionCom = () => {
     );
 
     const fields = [
-        { name: "customer_name", label: "Customer Name" },
         { name: "email", label: "Email" },
         {
             name: "destination_bank",
@@ -110,7 +109,7 @@ const TransactionCom = () => {
             ],
         },
         { name: "invoice_number", label: "Invoice Number" },
-        { name: "document_number", label: "Document Number" },
+        { name: "transaction_number", label: "Transaction Number" },
         { name: "reference_number", label: "Reference Number" },
         {
             name: "status",
@@ -121,6 +120,9 @@ const TransactionCom = () => {
                 { label: "Cleared", value: "Cleared" },
                 { label: "Posted", value: "Posted" },
                 { label: "Floating", value: "Floating" },
+                { label: "Succeed", value: "Succeed" },
+                { label: "Failed", value: "Failed" },
+
             ],
         },
         { name: "date_range", type: "date_range", label: "Date" },

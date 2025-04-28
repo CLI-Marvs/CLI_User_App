@@ -122,8 +122,8 @@ const TransactionSearchBar = ({
                                                 item.name
                                             )
                                         ) : item.type === "date_range" ? (
-                                            <div className="relative flex border w-max border-[#3A3A3A] rounded-[5px] z-10 mt-3">
-                                                <span className="border-white text-white bg-[#3A3A3A] text-sm flex items-center w-max px-[15px] pl-3 py-1 shrink-0 cursor-default">
+                                            <div className="relative flex border-b w-max rounded-[5px] z-10 mt-3">
+                                                <span className="text-custom-bluegreen text-sm flex items-center w-max px-[15px] pl-3 py-1 shrink-0 cursor-default">
                                                     From
                                                 </span>
                                                 <div className="relative flex items-center bg-white">
@@ -162,7 +162,7 @@ const TransactionSearchBar = ({
                                                     <MdCalendarToday />
                                                 </span>
 
-                                                <span className="text-white bg-[#3A3A3A] text-sm flex items-center w-max px-[15px] pl-3 py-1 shrink-0 cursor-default">
+                                                <span className="text-custom-bluegreen text-sm flex items-center w-max px-[15px] pl-3 py-1 shrink-0 cursor-default">
                                                     To
                                                 </span>
                                                 <div className="relative flex items-center bg-white">
@@ -197,9 +197,8 @@ const TransactionSearchBar = ({
                                                         }
                                                     />
                                                 </div>
-                                                <span className="absolute inset-y-0 right-0 flex items-center text-white pr-3 pl-3 bg-[#3A3A3A] pointer-events-none cursor-pointer">
-                                                    <MdCalendarToday />
-                                                </span>
+                                                <img src={DateLogo} className="absolute inset-y-0 right-0 flex items-center text-white pr-3 pl-3 pointer-events-none cursor-pointer">
+                                                </img>
                                             </div>
                                         ) : (
                                             <input
