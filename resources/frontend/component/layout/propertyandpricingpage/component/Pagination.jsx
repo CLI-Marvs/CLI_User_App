@@ -10,9 +10,9 @@ const Pagination = ({ pageCount, currentPage, onPageChange }) => {
         <div>
             <ReactPaginate
                 previousLabel={
-                    <MdKeyboardArrowLeft className="text-[#404B52]" />
+                    <MdKeyboardArrowLeft className="text-[#404B52]"/>
                 }
-                nextLabel={<MdKeyboardArrowRight className="text-[#404B52]" />}
+                nextLabel={<MdKeyboardArrowRight className="text-[#404B52]"/>}
                 breakLabel={"..."}
                 pageCount={pageCount || 1}
                 marginPagesDisplayed={2}
