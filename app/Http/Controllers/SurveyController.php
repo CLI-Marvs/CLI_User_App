@@ -4,8 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\Survey_forms;
 use App\Models\Survey_list;
+use App\Models\Survey_questions;
+use App\Models\SurveyAnswer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
 
 class SurveyController extends Controller
 {
@@ -59,56 +62,106 @@ class SurveyController extends Controller
 
 
     public function update(Request $request, $id)
-{
-    $surveyData = $request->input('surveyData');
+    {
+        $surveyData = $request->input('surveyData');
+        $existingSurvey = Survey_list::findOrFail($id);
 
-    $existingSurvey = Survey_list::findOrFail($id);
-
-    if (!$existingSurvey->survey_link) {
-        $existingSurvey->survey_link = Str::uuid();
-    }
-
-    // Update survey info
-    $existingSurvey->update([
-        'survey_title' => $surveyData[0]['surveyTitle'] ?? 'Untitled Form',
-        'status' => $surveyData[0]['status'],
-    ]);
-
-    // Delete all existing related forms (and cascade questions/options)
-    foreach ($existingSurvey->forms as $form) {
-        foreach ($form->questions as $question) {
-            $question->options()->delete();
+        if (!$existingSurvey->survey_link) {
+            $existingSurvey->survey_link = Str::uuid();
         }
-        $form->questions()->delete();
-        $form->delete();
-    }
 
-    // Re-insert all forms, questions, and options
-    foreach ($surveyData[0]['data'] as $formData) {
-        $newForm = $existingSurvey->forms()->create([
-            'title' => $formData['title'] ?? 'Untitled Form',
-            'description' => $formData['description'],
-            'consentTitle' => $formData['consentTitle'],
-            'consentDescription' => $formData['consentDescription'],
+        $existingSurvey->update([
+            'survey_title' => $surveyData[0]['surveyTitle'] ?? 'Untitled Form',
+            'status' => $surveyData[0]['status'],
         ]);
 
-        foreach ($formData['dataQASet'] as $questionData) {
-            $newQuestion = $newForm->questions()->create([
-                'question' => $questionData['question'] ?? '',
-                'input_type' => $questionData['inputType'],
-                'required' => $questionData['required'],
-            ]);
+        $newFormIds = [];
 
-            foreach ($questionData['option'] as $optionData) {
-                $newQuestion->options()->create([
-                    'text' => $optionData['text'] ?? '',
+        foreach ($surveyData[0]['data'] as $formData) {
+            // Update or create form
+            if (isset($formData['id']) && is_numeric($formData['id'])) {
+                $form = $existingSurvey->forms()->find($formData['id']);
+                if ($form) {
+                    $form->update([
+                        'title' => $formData['title'] ?? 'Untitled Form',
+                        'description' => $formData['description'],
+                        'consentTitle' => $formData['consentTitle'],
+                        'consentDescription' => $formData['consentDescription'],
+                    ]);
+                } else {
+                    continue;
+                }
+            } else {
+                $form = $existingSurvey->forms()->create([
+                    'title' => $formData['title'] ?? 'Untitled Form',
+                    'description' => $formData['description'],
+                    'consentTitle' => $formData['consentTitle'],
+                    'consentDescription' => $formData['consentDescription'],
                 ]);
             }
-        }
-    }
 
-    return response()->json(['message' => 'Survey updated (replaced) successfully']);
-}
+            $newFormIds[] = $form->id;
+
+            $newQuestionIds = [];
+
+            foreach ($formData['dataQASet'] as $questionData) {
+                // Update or create question
+                if (isset($questionData['id']) && is_numeric($questionData['id'])) {
+                    $question = $form->questions()->find($questionData['id']);
+                    if ($question) {
+                        $question->update([
+                            'question' => $questionData['question'] ?? '',
+                            'input_type' => $questionData['inputType'],
+                            'required' => $questionData['required'],
+                        ]);
+                    } else {
+                        continue;
+                    }
+                } else {
+                    $question = $form->questions()->create([
+                        'question' => $questionData['question'] ?? '',
+                        'input_type' => $questionData['inputType'],
+                        'required' => $questionData['required'],
+                    ]);
+                }
+
+                $newQuestionIds[] = $question->id;
+
+                $newOptionIds = [];
+
+                foreach ($questionData['option'] as $optionData) {
+                    // Update or create option
+                    if (isset($optionData['id']) && is_numeric($optionData['id'])) {
+                        $option = $question->options()->find($optionData['id']);
+                        if ($option) {
+                            $option->update([
+                                'text' => $optionData['text'] ?? '',
+                            ]);
+                        } else {
+                            continue;
+                        }
+                    } else {
+                        $option = $question->options()->create([
+                            'text' => $optionData['text'] ?? '',
+                        ]);
+                    }
+
+                    $newOptionIds[] = $option->id;
+                }
+
+                // Delete options not in newOptionIds
+                $question->options()->whereNotIn('id', $newOptionIds)->delete();
+            }
+
+            // Delete questions not in newQuestionIds
+            $form->questions()->whereNotIn('id', $newQuestionIds)->delete();
+        }
+
+        // Delete forms not in newFormIds
+        $existingSurvey->forms()->whereNotIn('id', $newFormIds)->delete();
+
+        return response()->json(['message' => 'Survey updated successfully']);
+    }
 
 
 
@@ -141,20 +194,25 @@ class SurveyController extends Controller
                             'id' => $form->id,
                             'title' => $form->title ?? 'Untitled Form',
                             'description' => $form->description ?? '',
-                            'dataQASet' => $form->questions->map(function ($question) {
-                                return [
-                                    'id' => $question->id,
-                                    'question' => $question->question ?? '',
-                                    'inputType' => $question->input_type ?? 'dropdown',
-                                    'option' => $question->options->map(function ($option) {
-                                        return [
-                                            'id' => $option->id,
-                                            'text' => $option->text ?? '',
-                                        ];
-                                    })->toArray(),
-                                    'required' => $question->required ?? false,
-                                ];
-                            })->toArray(),
+                            'dataQASet' => $form->questions
+                                ->sortBy('id')
+                                ->values()
+                                ->map(function ($question) {
+                                    return [
+                                        'id' => $question->id,
+                                        'question' => $question->question ?? '',
+                                        'inputType' => $question->input_type ?? 'dropdown',
+                                        'option' => $question->options
+                                            ->sortBy('id')
+                                            ->map(function ($option) {
+                                                return [
+                                                    'id' => $option->id,
+                                                    'text' => $option->text ?? '',
+                                                ];
+                                            })->values()->toArray(),
+                                        'required' => $question->required ?? false,
+                                    ];
+                                })->toArray(),
                             'consentTitle' => $form->consentTitle ?? 'Declaration and Consent',
                             'consentDescription' => $form->consentDescription ??
                                 'I hereby agree and consent to CLI and its authorized personnel collecting, storing, and processing the personal data I have provided in this form. This is for the purpose of proper identification and customer satisfaction reporting.',
@@ -193,5 +251,96 @@ class SurveyController extends Controller
         $survey->delete();
 
         return response()->json(['message' => 'Survey and all related data deleted successfully!']);
+    }
+
+    public function getSurveyStats($survey_list_id)
+    {
+        try {
+
+            $survey = DB::table('surveys_list')
+                ->where('id', $survey_list_id)
+                ->select('survey_title')
+                ->first();
+
+            if (!$survey) {
+                return response()->json(['error' => 'Survey not found'], 404);
+            }
+
+
+            $validOptions = DB::table('survey_options')
+                ->pluck('text', 'id');
+
+            $questions = DB::table('survey_questions')
+                ->join('survey_forms', 'survey_questions.form_id', '=', 'survey_forms.id')
+                ->where('survey_forms.survey_id', $survey_list_id)
+                ->select('survey_questions.id', 'survey_questions.question')
+                ->get();
+
+            $questionsResult = [];
+
+            foreach ($questions as $question) {
+
+                $answers = DB::table('survey_answers')
+                    ->where('survey_list_id', $survey_list_id)
+                    ->where('question_id', $question->id)
+                    ->select('answer_value', 'option_id')
+                    ->get();
+
+                $totalResponses = $answers->count();
+
+                $optionCounts = [];
+
+                foreach ($answers as $answer) {
+                    $decoded = json_decode($answer->answer_value, true);
+
+                    $values = is_array($decoded) ? $decoded : [$decoded];
+
+                    foreach ($values as $v) {
+                        $optionId = $answer->option_id ?? null;
+
+
+                        if ($optionId && isset($validOptions[$optionId])) {
+
+
+                            $updatedValue = $validOptions[$optionId];
+
+                            $optionKey = "{$optionId}";
+
+                            if (!isset($optionCounts[$optionKey])) {
+                                $optionCounts[$optionKey] = [
+                                    'id' => $optionId,
+                                    'value' => $updatedValue,
+                                    'count' => 1
+                                ];
+                            } else {
+                                $optionCounts[$optionKey]['count']++;
+                            }
+                        }
+                    }
+                    ksort($optionCounts, SORT_NUMERIC);
+                }
+
+                $questionsResult[] = [
+                    'question_id' => $question->id,
+                    'question' => $question->question,
+                    'total_responses' => $totalResponses,
+                    'options' => array_values($optionCounts),
+                ];
+            }
+
+            usort($questionsResult, function ($a, $b) {
+                return $a['question_id'] <=> $b['question_id'];
+            });
+
+            // Final output
+            $result = [
+                'survey_title' => $survey->survey_title,
+                'questions' => $questionsResult,
+            ];
+
+            return response()->json($result);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 }

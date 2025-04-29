@@ -47,6 +47,7 @@ import VersionLogsView from './views/pages/raiseaconcernViews/VersionLogsView';
 import SurveyReportsView from './views/pages/surveyrelatedreportsViews/SurveyReportsView';
 import SurveyFormView from './views/pages/surveyrelatedreportsViews/SurveyFormView';
 import SurveyReviewView from './views/pages/surveyrelatedreportsViews/SurveyReviewView';
+import SurveyMainView from './views/pages/surveyrelatedreportsViews/SurveyMainView';
 // PrivateRoute component to check authentication
 const PrivateRoute = () => {
     const authToken = localStorage.getItem("authToken");
@@ -341,11 +342,11 @@ const App = () => {
                                 },
                                 {
                                     path: "surveysettings/surveyform",
-                                    element: <SurveyFormView />,
+                                    element: <SurveyMainView />,
                                 },
                                 {
                                     path: "surveysettings/surveyform/:id?",
-                                    element: <SurveyFormView />,
+                                    element: <SurveyMainView />,
                                 },
                                 {
                                     path: "surveysettings/surveyreview",

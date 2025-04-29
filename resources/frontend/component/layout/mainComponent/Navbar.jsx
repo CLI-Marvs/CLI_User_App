@@ -161,6 +161,23 @@ const Navbar = () => {
                 );
             }
 
+            if (value.toLowerCase() === "surveysettings") {
+                breadcrumbLabel = "Survey Settings";
+            }
+
+            if (value.toLowerCase() === "surveyform") {
+                breadcrumbLabel = "Survey Form";
+                // Non-linkable
+                return (
+                    <span
+                        key={routeTo}
+                        className="text-custom-solidgreen cursor-default"
+                    >
+                        {breadcrumbLabel}
+                    </span>
+                );
+            }
+
             if (value.toLowerCase() === "inquirylist") {
                 breadcrumbLabel = "Feedback";
             }

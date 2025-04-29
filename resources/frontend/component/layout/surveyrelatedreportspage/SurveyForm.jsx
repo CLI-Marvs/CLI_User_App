@@ -4,17 +4,17 @@ import { MdKeyboardArrowLeft } from "react-icons/md";
 import { SurveySection } from './surveyComponents/SurveySection';
 import { showToast } from "../../../util/toastUtil";
 import apiService from '../../servicesApi/apiService';
+import Spinner from '../../../util/Spinner';
+import { CircularProgress } from '@mui/material';
 const SurveyForm = () => {
 
   const { id } = useParams();
 
-  const navigate = useNavigate();
-
   const [surveyId, setSurveyId] = useState(id || null);
+  const [loading1, setLoading1] = useState(false);
+  const [loading2, setLoading2] = useState(false);
 
-  const navigateToSurveyList = () => {
-    navigate(-1);
-  };
+  
 
   const generateId = () => crypto?.randomUUID?.() || Date.now().toString();
 
@@ -343,6 +343,8 @@ const SurveyForm = () => {
 
   const handleSave = async () => {
     try {
+
+      setLoading1(true);
       if (surveyId) {
         await apiService.put(`/surveys/${surveyId}`, { surveyData });
         showToast("Data updated successfully!", "success");
@@ -350,9 +352,12 @@ const SurveyForm = () => {
         const response = await apiService.post('/surveys', { surveyData });
         setSurveyId(response.data.survey_id);
         showToast("Data created successfully!", "success");
+        
       }
     } catch (error) {
       showToast("Error saving survey!", "error");
+    } finally {
+      setLoading1(false);
     }
   };
 
@@ -361,6 +366,8 @@ const SurveyForm = () => {
 
   const handlePublish = async () => {
     try {
+
+      setLoading2(true);
       const updatedSurveyData = surveyData.map((survey, idx) =>
         idx === 0 ? { ...survey, status: !survey.status } : survey
       );
@@ -381,6 +388,8 @@ const SurveyForm = () => {
       }
     } catch (error) {
       showToast("Error saving survey!", "error");
+    } finally {
+      setLoading2(false);
     }
   };
 
@@ -388,10 +397,7 @@ const SurveyForm = () => {
 
   return (
     <div className='h-screen max-w-full bg-custom-grayFA'>
-      <div onClick={navigateToSurveyList} className='flex gap-[2px] items-center cursor-pointer mb-[20px] hover:underline'>
-        <MdKeyboardArrowLeft />
-        <p>Back to list</p>
-      </div>
+      
       <div className='flex flex-col max-w-[687px]'>
         <div className='flex flex-col'>
           {surveyData[0]?.data?.map((item, index) => (
@@ -422,7 +428,7 @@ const SurveyForm = () => {
           >
             <button className='h-[31px] w-[104px] gradient-btn2 p-[1px] rounded-[5px] text-sm hover:shadow-custom'>
               <div onClick={handleSave} className='bg-white w-full h-full flex justify-center items-center rounded-[4px]'>
-                Save
+               {loading1 ? <CircularProgress className="spinnerSize" /> : "Save"}
               </div>
             </button>
 
@@ -433,7 +439,7 @@ const SurveyForm = () => {
                 ${surveyData[0]?.status ? "bg-red-500 " : "gradient-btn2"}
               `}
             >
-              {surveyData[0]?.status ? "Unpublish " : "Publish"}
+              {   loading2 ? <CircularProgress className="spinnerSize" /> : surveyData[0]?.status ? "Unpublish " : "Publish"}
             </button>
           </div>
         </div>
