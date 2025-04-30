@@ -13,6 +13,12 @@ const formInitialState = {
     description: "",
     entity: "",
     features: [],
+    propertyType: "",
+    google_map_link: "",
+    barangay: "",
+    city: "",
+    province: "",
+    country: "",
 };
 
 const AddPropertyFeature = ({ addPropertyFeatureRef }) => {
@@ -59,8 +65,14 @@ const AddPropertyFeature = ({ addPropertyFeatureRef }) => {
                     id: feature.id,
                     status: feature.status === "Enabled",
                 })),
+                type: formData.propertyType,
+                google_map_link: formData.google_map_link,
+                barangay: formData.barangay,
+                city: formData.city,
+                province: formData.province,
+                country: formData.country,
             };
-    
+
             const response =
                 await propertyMasterService.storePropertyFeatureSettings(
                     payload
@@ -69,7 +81,7 @@ const AddPropertyFeature = ({ addPropertyFeatureRef }) => {
             if (response.status === 201 || response.status === "success") {
                 showToast(
                     response.data.message ||
-                        "Property features added successfully.",
+                    "Property features added successfully.",
                     "success"
                 );
                 await refreshData();
@@ -95,7 +107,7 @@ const AddPropertyFeature = ({ addPropertyFeatureRef }) => {
             className="modal w-[550px] rounded-[10px] shadow-custom5 backdrop:bg-black/50"
             ref={addPropertyFeatureRef}
         >
-            <div className="relative p-[20px] mb-5 rounded-lg">
+            <div className="relative p-[20px] mb-5 rounded-lg h-auto">
                 <button
                     className="absolute top-3 right-3 w-10 h-10 items-center rounded-full bg-custombg3 text-custom-bluegreen hover:bg-custombg"
                     onClick={handleCloseModal}
@@ -128,10 +140,10 @@ const AddPropertyFeature = ({ addPropertyFeatureRef }) => {
                         {/* Property Description */}
                         <div className="rounded-[5px] border-custom-gray81 border bg-custombg3">
                             <div className="flex items-center justify-between">
-                                <p className="text-custom-bluegreen bg-custom-lightestgreen py-[10px] lg:py-[12px] text-sm pl-3 montserrat-semibold">
+                                <p className="text-custom-bluegreen bg-custom-lightestgreen py-[11px] lg:py-[12px] text-sm pl-3 montserrat-semibold rounded-tl-md">
                                     Description
                                 </p>
-                                <span className="bg-white text-sm2 text-gray-400 font-normal py-3 border-l pl-2 pr-12">
+                                <span className="bg-white text-sm2 text-gray-400 font-normal py-3 border-l pl-2 pr-12 rounded-tr-[4px]">
                                     {formData.description.length}/300 characters
                                 </span>
                             </div>
@@ -162,23 +174,104 @@ const AddPropertyFeature = ({ addPropertyFeatureRef }) => {
                             />
                         </div>
 
+                        {/* Address */}
+                        <div className="mt-10">
+                            <p className="text-sm font-semibold text-custom-solidgreen">
+                                Address
+                            </p>
+                        </div>
+                        {/*Street/ Barangy */}
+                        <div className="flex items-center border border-custom-gray81 rounded-md overflow-hidden">
+                            <span className="text-custom-bluegreen bg-custom-lightestgreen py-1.5  flex w-3/4 pl-3  montserrat-semibold  text-sm">
+                                Street/Barangay
+                            </span>
+                            <CustomInput
+                                type="text"
+                                name="barangay"
+                                value={formData.barangay || ""}
+                                className="w-full px-4 focus:outline-none"
+                                onChange={handleInputChange}
+                            />
+                        </div>
+
+
+                        {/* City */}
+                        <div className="flex items-center border border-custom-gray81 rounded-md overflow-hidden">
+                            <span className="text-custom-bluegreen bg-custom-lightestgreen py-1.5  flex w-3/4 pl-3  montserrat-semibold text-sm">
+                                City
+                            </span>
+                            <CustomInput
+                                type="text"
+                                name="city"
+                                value={formData.city || ""}
+                                className="w-full px-4 focus:outline-none"
+                                onChange={handleInputChange}
+                            />
+                        </div>
+
+                        {/* Province */}
+                        <div className="flex items-center border border-custom-gray81 rounded-md overflow-hidden">
+                            <span className="text-custom-bluegreen bg-custom-lightestgreen py-1.5  flex w-3/4 pl-3 montserrat-semibold  text-sm">
+                                Province
+                            </span>
+                            <CustomInput
+                                type="text"
+                                name="province"
+                                value={formData.province || ""}
+                                className="w-full px-4 focus:outline-none"
+                                onChange={handleInputChange}
+                            />
+                        </div>
+
+                        {/* Country */}
+                        <div className="flex items-center border border-custom-gray81 rounded-md overflow-hidden">
+                            <span className="text-custom-bluegreen bg-custom-lightestgreen py-1.5  flex w-3/4 pl-3   montserrat-semibold  text-sm">
+                                Country
+                            </span>
+                            <CustomInput
+                                type="text"
+                                name="country"
+                                value={formData.country || ""}
+                                className="w-full px-4 focus:outline-none"
+                                onChange={handleInputChange}
+                            />
+                        </div>
+
+                        {/* Google Map Link */}
+                        <div className="rounded-[5px] border-custom-gray81 border bg-custombg3">
+                            <div className="">
+                                <p className="text-custom-bluegreen bg-custom-lightestgreen py-1.5  pl-3  montserrat-semibold flex-grow mobile:text-xs mobile:w-[170px] w-[215px] rounded-tl-md">
+                                    Google Map Link
+                                </p>
+                            </div>
+                            <div className="flex gap-3 ">
+                                <CustomInput
+                                    type="textarea"
+                                    id="google_map_link"
+                                    name="google_map_link"
+                                    value={formData.google_map_link || ""}
+                                    className={` rounded-b-[5px] border-t w-full pl-2 outline-none`}
+                                    onChange={handleInputChange}
+                                    rows="4"
+                                />
+                            </div>
+                        </div>
+
+
                         {/* Features */}
                         <div className="mt-10">
                             <p className="text-sm font-semibold text-custom-solidgreen">
                                 Features
                             </p>
                         </div>
-                        {propertySettingsFeatures &&
-                            propertySettingsFeatures.map((feature, index) => {
+                        <div className="flex justify-center gap-x-8 items-center">
+                            {propertySettingsFeatures && propertySettingsFeatures.map((feature, index) => {
                                 const isEnabled = formData.features.some(
                                     (f) => f.id === feature.id
                                 );
                                 return (
-                                    <div
-                                        key={index}
-                                        className="flex gap-x-6 items-center border border-custom-gray81 rounded-md overflow-hidden w-[300px]"
-                                    >
-                                        <p className="text-custom-bluegreen bg-custom-lightestgreen py-1.5 pl-3 montserrat-semibold text-sm w-[215px]">
+                                    <div className="flex  gap-x-4">
+                                        <p className="text-custom-bluegreen pl-3 montserrat-semibold text-sm">
                                             {feature.name || "Feature Name 1"}
                                         </p>
                                         <PropertyFeatureCheckbox
@@ -189,21 +282,71 @@ const AddPropertyFeature = ({ addPropertyFeatureRef }) => {
                                                     e.target.checked
                                                 )
                                             }
+                                            className="custom-checkbox-permission"
                                         />
                                     </div>
-                                );
+                                )
                             })}
+
+
+                        </div>
+
+                        {/* Types */}
+                        <div className="mt-10">
+                            <p className="text-sm font-semibold text-custom-solidgreen">
+                                Type
+                            </p>
+                        </div>
+
+                        <div className="flex justify-center gap-x-6 items-center">
+                            <div className="flex  gap-x-4">
+                                <p className="text-custom-bluegreen pl-3 montserrat-semibold text-sm">
+                                    {"Vertical"}
+                                </p>
+                                <PropertyFeatureCheckbox
+                                    type="radio"
+                                    name="propertyType"
+                                    value="Vertical"
+                                    checked={formData?.propertyType === "Vertical"}
+                                    onChange={(e) => handleInputChange({
+                                        target: {
+                                            name: "propertyType",
+                                            value: "Vertical"
+                                        }
+                                    })}
+                                    className="property-feature-radio"
+                                />
+                            </div>
+                            <div className="flex  gap-x-4">
+                                <p className="text-custom-bluegreen pl-3 montserrat-semibold text-sm">
+                                    {"Horizontal"}
+                                </p>
+                                <PropertyFeatureCheckbox
+                                    type="radio"
+                                    name="propertyType"
+                                    value="Horizontal"
+                                    checked={formData?.propertyType === "Horizontal"}
+                                    onChange={(e) => handleInputChange({
+                                        target: {
+                                            name: "propertyType",
+                                            value: "Horizontal"
+                                        }
+                                    })}
+                                    className="property-feature-radio"
+                                />
+                            </div>
+                        </div>
+
 
                         {/* Save Button */}
                         <div className="flex justify-center mt-10">
                             <button
                                 onClick={handleSubmit}
-                                className={`w-[173px] h-[37px] text-white montserrat-semibold text-sm gradient-btn rounded-[10px] hover:shadow-custom4 ${
-                                    isLoading
-                                        ? "cursor-not-allowed opacity-50"
-                                        : ""
-                                }`}
-                                disabled={isLoading}
+                                className={`w-[173px] h-[37px] text-white montserrat-semibold text-sm gradient-btn rounded-[10px] hover:shadow-custom4 ${isLoading || isPropertyButtonDisabled
+                                    ? "cursor-not-allowed opacity-50"
+                                    : ""
+                                    }`}
+                                disabled={isLoading || isPropertyButtonDisabled}
                             >
                                 {isLoading ? (
                                     <Spinner className="spinnerSize" />

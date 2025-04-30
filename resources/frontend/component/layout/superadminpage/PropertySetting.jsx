@@ -6,7 +6,6 @@ import PropertyFeatureRow from "@/component/layout/superadminpage/component/tabl
 import useFeature from "@/context/RoleManagement/FeatureContext";
 import { toLowerCaseText } from "@/util/formatToLowerCase";
 import PropertyFeatureCheckbox from "@/component/layout/superadminpage/component/PropertyFeatureCheckbox";
-import { propertyMasterService } from "@/component/servicesApi/apiCalls/propertyPricing/property/propertyMasterService";
 import { showToast } from "@/util/toastUtil";
 import EditPropertyFeature from "@/component/layout/superadminpage/modals/PropertySettingModal/EditPropertyFeature";
 import AddPropertyFeature from "@/component/layout/superadminpage/modals/PropertySettingModal/AddPropertyFeature";
@@ -183,13 +182,13 @@ const PropertySetting = () => {
                                                                     true
                                                                 }
                                                             />
+
                                                         ) : (
                                                             <div>
                                                                 <PropertyFeatureCheckbox
-                                                                    checked={
-                                                                        false
-                                                                    }
-                                                                    isDisabled
+                                                                    checked={false}
+                                                                    isDisabled={true}
+                                                                    className="custom-checkbox-permission"
                                                                 />
                                                             </div>
                                                         )}
