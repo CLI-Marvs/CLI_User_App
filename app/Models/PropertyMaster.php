@@ -19,7 +19,16 @@ class PropertyMaster extends Model
         'property_name',
         'description',
         'entity',
-        'status'
+        'status',
+        'google_map_link',
+        'type',
+        'barangay',
+        'city',
+        'province',
+        'country',
+        'type',
+        'latitude',
+        'longitude',
     ];
 
     //Relationships

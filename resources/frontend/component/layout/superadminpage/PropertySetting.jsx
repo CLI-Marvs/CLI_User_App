@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import CustomTable from "@/component/layout/propertyandpricingpage/component/CustomTable";
 import { PROPERTY_SETTING_COLUMNS } from "@/constant/data/tableColumns";
 import usePropertyFeature from "@/context/RoleManagement/PropertyFeatureContext";
-import PropertyFeatureRow from "@/component/layout/superadminpage/component/tableRow/PropertyFeatureRow";
+import PropertyFeatureTableRow from "@/component/layout/superadminpage/component/tableRow/PropertyFeatureTableRow";
 import useFeature from "@/context/RoleManagement/FeatureContext";
 import { toLowerCaseText } from "@/util/formatToLowerCase";
 import PropertyFeatureCheckbox from "@/component/layout/superadminpage/component/PropertyFeatureCheckbox";
@@ -11,6 +11,7 @@ import EditPropertyFeature from "@/component/layout/superadminpage/modals/Proper
 import AddPropertyFeature from "@/component/layout/superadminpage/modals/PropertySettingModal/AddPropertyFeature";
 import { HiPencil } from "react-icons/hi";
 import Pagination from "@/component/layout/propertyandpricingpage/component/Pagination";
+import GlobalTable from "@/component/layout/transaction/GlobalTable";
 
 const PropertySetting = () => {
     const editPropertyFeatureRef = useRef(null);
@@ -94,24 +95,18 @@ const PropertySetting = () => {
             <div className="mt-3 mx-1 py-4">
                 {/* <CustomTable
                     className="flex gap-4 items-center h-[49px] montserrat-semibold text-sm text-white bg-custom-lightgreen mb-4 -mx-1 px-4"
-                    columns={PROPERTY_SETTING_COLUMNS}
+                    columns={propertySettingColumns}
                     data={propertyFeatures}
-                    renderRow={(item, index) => (
-                        <tr key={index}>
-                            <td>{item.property_name}</td>
-                            <td>
-                                {item.features.map((feature, featureIndex) => (
-                                    <div key={featureIndex}>
-                                        {feature.name} - {feature.status}
-                                    </div>
-                                ))}
-                            </td>
-                            <td>Static Content 3</td>
-                            <td>Static Content 4</td>
-                        </tr>
+                    isLoading={isLoading && isFirstLoad}
+                    renderRow={(item) => (
+                        <PropertyFeatureTableRow
+                            key={item.property_feature_id}
+                            item={item}
+                            handleOpenModal={handleOpenModal}
+                        />
                     )}
                 /> */}
-                <table className="  w-full border-collapse">
+                <table className="w-full border-collapse">
                     <thead>
                         <tr className="h-[49px] montserrat-semibold text-sm text-white bg-custom-lightgreen">
                             {propertySettingColumns.map((col, index) => (
@@ -221,7 +216,6 @@ const PropertySetting = () => {
                     </tbody>
                 </table>
             </div>
-
             <div className="py-2 flex justify-end mx-1">
                 <Pagination
                     pageCount={pagination?.lastPage || 1}
@@ -229,14 +223,12 @@ const PropertySetting = () => {
                     onPageChange={handlePageChange}
                 />
             </div>
-
             <div>
                 <EditPropertyFeature
                     selectedProperty={selectedProperty}
                     editPropertyFeatureRef={editPropertyFeatureRef}
                 />
             </div>
-
             <div>
                 <AddPropertyFeature
                     addPropertyFeatureRef={addPropertyFeatureRef}

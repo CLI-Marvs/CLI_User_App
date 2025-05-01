@@ -163,6 +163,7 @@ class PropertyMasterRepository
      */
     public function parseGoogleMapLink($googleMapLink)
     {
+    
         try {
             if (empty(trim($googleMapLink))) {
                 return null;
@@ -252,6 +253,15 @@ class PropertyMasterRepository
                             'status' => $feature->pivot->status,
                         ];
                     }),
+                    'status' => $property->status,
+                    'type' => $property->type,
+                    'barangay' => $property->barangay,
+                    'city' => $property->city,
+                    'province' => $property->province,
+                    'country' => $property->country,
+                    'latitude' => $property->latitude,
+                    'longitude' => $property->longitude,
+                    'google_map_link' => $property->google_map_link,
                 ];
             })->toArray(),
             'pagination' => [
@@ -267,6 +277,10 @@ class PropertyMasterRepository
 
     public function updatePropertyFeatures(array $data, int $id)
     {
+        $extractedGoogleMapLink = (!isset($data['google_map_link']) || empty(trim($data['google_map_link'])))
+            ? null
+            : $this->parseGoogleMapLink($data['google_map_link']);
+
         // Find the property by ID
         $property = $this->model->findOrFail($id);
 
@@ -274,6 +288,15 @@ class PropertyMasterRepository
             'property_name' => $data['propertyName'] ?? null,
             'description' => $data['description'] ?? null,
             'entity' => $data['entity'] ?? null,
+            'status' => 'Draft',
+            'type' => $data['type'] ?? null,
+            'barangay' => $data['barangay'] ?? null,
+            'city' => $data['city'] ?? null,
+            'country' => $data['country'] ?? null,
+            'province' => $data['province'] ?? null,
+            'latitude' => $extractedGoogleMapLink['latitude'] ?? null,
+            'longitude' => $extractedGoogleMapLink['longitude'] ?? null,
+            'google_map_link' => $data['google_map_link'] ?? null,
         ]);
 
         // Get existing feature IDs for this property
@@ -303,11 +326,24 @@ class PropertyMasterRepository
     public function storePropertyFeature(array $data)
     {
         try {
+
+            $extractedGoogleMapLink = (!isset($data['google_map_link']) || empty(trim($data['google_map_link'])))
+                ? null
+                : $this->parseGoogleMapLink($data['google_map_link']);
+         
             $property = $this->model->create([
                 'property_name' => $data['propertyName'],
                 'description' => $data['description'] ?? null,
                 'entity' => $data['entity'] ?? null,
                 'status' => 'Draft',
+                'type' => $data['type'] ?? null,
+                'barangay' => $data['barangay'] ?? null,
+                'city' => $data['city'] ?? null,
+                'country' => $data['country'] ?? null,
+                'province' => $data['province'] ?? null,
+                'latitude' => $extractedGoogleMapLink['latitude'] ?? null,
+                'longitude' => $extractedGoogleMapLink['longitude'] ?? null,
+                'google_map_link' => $data['google_map_link'] ?? null,
             ]);
 
             // Attach the features to the property with the specified status

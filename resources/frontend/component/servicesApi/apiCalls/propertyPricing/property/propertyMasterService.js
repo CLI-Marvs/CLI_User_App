@@ -57,7 +57,6 @@ export const propertyMasterService = {
 
     updatePropertyFeatureSettings: async (payload) => {
         try {
-            console.log("Payload in updatePropertyFeatureSettings:", payload);
             const response = await apiService.put(
                 `/property-feature-settings/properties/${payload.propertyId}/features`,
                 payload

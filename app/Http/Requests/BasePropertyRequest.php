@@ -16,7 +16,7 @@ class BasePropertyRequest extends FormRequest
         return [
             'propertyName' => 'required|string|max:255',
             'description' => 'nullable|string|max:1000',
-            'entity' => 'nullable|string|max:255',
+            'entity' => 'required|string|max:255|regex:/^[a-zA-Z0-9 ]+$/',
             'features' => 'nullable|array',
             'features.*.id' => 'nullable|integer|exists:features,id',
             'features.*.status' => 'nullable|boolean',
@@ -70,6 +70,8 @@ class BasePropertyRequest extends FormRequest
             'entity.required' => 'The entity is required.',
             'features.required' => 'At least one feature must be selected.',
             'features.*.exists' => 'The selected feature is invalid.',
+            'barangay' => 'Barangay/Street must not contain special characters.',
+            'entity.regex' => 'Entity must only contain letters, numbers.',
         ];
     }
 }
