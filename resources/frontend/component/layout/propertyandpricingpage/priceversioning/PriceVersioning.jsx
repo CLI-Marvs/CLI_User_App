@@ -187,6 +187,7 @@ const PriceVersioning = () => {
             </div> */}
             <div className="mt-3 overflow-y-hidden">
                 <CustomTable
+                    tableClassName="w-[750px]"
                     className="flex gap-4 items-center h-[49px] montserrat-semibold text-sm text-[#A5A5A5] bg-white rounded-[10px] mb-4 -mx-1 px-4"
                     isLoading={isLoading && isFirstLoad}
                     columns={COLUMNS}

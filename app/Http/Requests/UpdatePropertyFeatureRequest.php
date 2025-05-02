@@ -30,12 +30,6 @@ class UpdatePropertyFeatureRequest extends BasePropertyRequest
      */
     public function messages(): array
     {
-        return [
-            'features.required' => 'The features field is required.',
-            'features.*.id.required' => 'Each feature must have an ID.',
-            'features.*.id.exists' => 'The selected feature is invalid.',
-            'features.*.status.required' => 'Each feature must have a status.',
-            'features.*.status.boolean' => 'The status must be true or false.',
-        ];
+        return array_merge($this->baseMessages());
     }
 }

@@ -63,6 +63,7 @@ const PaymentScheme = () => {
 
             <div className="mt-3  ">
                 <CustomTable
+                    tableClassName="w-20"
                     className="flex gap-[30px] items-center h-[49px] montserrat-semibold text-sm text-[#A5A5A5] bg-white rounded-[10px] mb-4 -mx-1 px-4"
                     isLoading={isLoading && isFirstLoad}
                     columns={COLUMNS}

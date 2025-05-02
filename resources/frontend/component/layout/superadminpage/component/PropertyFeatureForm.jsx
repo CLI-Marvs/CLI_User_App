@@ -33,6 +33,7 @@ const PropertyFeatureForm = ({
     const [isLoading, setIsLoading] = useState(false);
     const { propertySettingsFeatures } = useFeature();
     const { refreshData } = usePropertyFeature();
+    const [error, setError] = useState("");
 
     // Initialize form data based on mode
     useEffect(() => {
@@ -147,7 +148,12 @@ const PropertyFeatureForm = ({
                 handleCloseModal();
             }
         } catch (error) {
-            console.error(`Error ${mode === "edit" ? "updating" : "saving"} property features:`, error);
+            if (error.response && error.response.status === 422) {
+                const errorMessage = error.response.data.message;
+                setError(errorMessage);
+            } else {
+                showToast("An error occurred while processing your request.", "error");
+            }
         } finally {
             setIsLoading(false);
         }
@@ -157,6 +163,7 @@ const PropertyFeatureForm = ({
         if (modalRef.current) {
             modalRef.current.close();
             setFormData(formInitialState);
+            setError("");
             if (onClose) onClose();
         }
     };
@@ -184,6 +191,13 @@ const PropertyFeatureForm = ({
                     {mode === "edit" ? "Edit" : "Add"} Property Feature
                 </p>
             </div>
+            {error && (
+                <div className="w-full flex justify-center items-center h-auto bg-red-100 mb-4 rounded-lg">
+                    <p className="flex text-[#C42E2E] text-center p-1">
+                        {error}
+                    </p>
+                </div>
+            )}
             <form onSubmit={handleSubmit}>
                 <div className="flex flex-col gap-2">
                     {/* Property Name */}
@@ -204,11 +218,11 @@ const PropertyFeatureForm = ({
 
                     {/* Property Description */}
                     <div className="rounded-[5px] border-custom-gray81 border bg-custombg3">
-                        <div className="flex items-center justify-between">
-                            <p className="text-custom-bluegreen bg-custom-lightestgreen py-[11px] lg:py-[12px] text-sm pl-3 montserrat-semibold rounded-tl-md">
+                        <div className="flex items-center ">
+                            <p className="text-custom-bluegreen bg-custom-lightestgreen py-[11px] lg:py-[12px] text-sm pl-3 montserrat-semibold rounded-tl-md w-[70%]">
                                 Description
                             </p>
-                            <span className="bg-white text-sm2 text-gray-400 font-normal py-3 border-l pl-2 pr-12 rounded-tr-[4px]">
+                            <span className="  text-sm2 text-gray-400 font-normal pl-2 pr-12 rounded-tr-[4px] mx-2 w-[30%] h-[42px] flex items-center">
                                 {formData.description.length}/350 characters
                             </span>
                         </div>
@@ -303,25 +317,20 @@ const PropertyFeatureForm = ({
                     </div>
 
                     {/* Google Map Link */}
-                    <div className="rounded-[5px] border-custom-gray81 border bg-custombg3">
-                        <div className="">
-                            <p className="text-custom-bluegreen bg-custom-lightestgreen py-1.5 pl-3 montserrat-semibold flex-grow mobile:text-xs mobile:w-[170px] w-[215px] rounded-tl-md">
-                                Google Map Link
-                            </p>
-                        </div>
-                        <div className="flex gap-3">
-                            <CustomInput
-                                type="textarea"
-                                id="google_map_link"
-                                name="google_map_link"
-                                value={formData.google_map_link || ""}
-                                className="rounded-b-[5px] border-t w-full pl-2 outline-none"
-                                onChange={handleInputChange}
-                                rows="4"
-                            />
-                        </div>
+                    <div className="  border border-custom-gray81 rounded-md overflow-hidden">
+                        <span className="text-custom-bluegreen bg-custom-lightestgreen py-1.5 flex    pl-3 montserrat-semibold text-sm">
+                            Google Map Link
+                        </span>
+                        <CustomInput
+                            type="textarea"
+                            id="google_map_link"
+                            name="google_map_link"
+                            value={formData.google_map_link || ""}
+                            className="w-full px-4 focus:outline-none"
+                            onChange={handleInputChange}
+                            rows="4"
+                        />
                     </div>
-
                     {/* Features */}
                     <div className="mt-10">
                         <p className="text-sm font-semibold text-custom-solidgreen">
@@ -404,8 +413,8 @@ const PropertyFeatureForm = ({
                             type="button"
                             onClick={handleSubmit}
                             className={`w-[173px] h-[37px] text-white montserrat-semibold text-sm gradient-btn rounded-[10px] hover:shadow-custom4 ${isLoading || !isFormValid()
-                                    ? "cursor-not-allowed opacity-50"
-                                    : ""
+                                ? "cursor-not-allowed opacity-50"
+                                : ""
                                 }`}
                             disabled={isLoading || !isFormValid()}
                         >

@@ -1,17 +1,12 @@
 import React, { useEffect, useState, useRef } from "react";
 import CustomTable from "@/component/layout/propertyandpricingpage/component/CustomTable";
-import { PROPERTY_SETTING_COLUMNS } from "@/constant/data/tableColumns";
 import usePropertyFeature from "@/context/RoleManagement/PropertyFeatureContext";
 import PropertyFeatureTableRow from "@/component/layout/superadminpage/component/tableRow/PropertyFeatureTableRow";
 import useFeature from "@/context/RoleManagement/FeatureContext";
-import { toLowerCaseText } from "@/util/formatToLowerCase";
-import PropertyFeatureCheckbox from "@/component/layout/superadminpage/component/PropertyFeatureCheckbox";
-import { showToast } from "@/util/toastUtil";
 import EditPropertyFeature from "@/component/layout/superadminpage/modals/PropertySettingModal/EditPropertyFeature";
 import AddPropertyFeature from "@/component/layout/superadminpage/modals/PropertySettingModal/AddPropertyFeature";
-import { HiPencil } from "react-icons/hi";
 import Pagination from "@/component/layout/propertyandpricingpage/component/Pagination";
-import GlobalTable from "@/component/layout/transaction/GlobalTable";
+import Skeleton from "@/component/Skeletons";
 
 const PropertySetting = () => {
     const editPropertyFeatureRef = useRef(null);
@@ -20,18 +15,14 @@ const PropertySetting = () => {
         propertyFeatures,
         isLoading,
         pagination,
-        filters,
-        updateFilters,
         updatePagination,
-        resetToDefaults,
-        fetchData,
-        refreshData,
         setIsPropertyFeatureActive,
     } = usePropertyFeature();
 
-    const { propertySettingsFeatures, fetchPropertySettingsFeatures } =
+    const { propertySettingsFeatures, fetchPropertySettingsFeatures, isFeatureFetching } =
         useFeature();
     const [isFirstLoad, setIsFirstLoad] = useState(true);
+    const [isFirstFeatureLoad, setIsFirstFeatureLoad] = useState(true);
     const [selectedProperty, setSelectedProperty] = useState([]);
 
     //Hooks
@@ -43,11 +34,22 @@ const PropertySetting = () => {
     }, []);
 
     useEffect(() => {
-        fetchPropertySettingsFeatures();
-        if (propertyFeatures?.length > 0 && isFirstLoad) setIsFirstLoad(false);
+        const initializeComponent = async () => {
+            setIsPropertyFeatureActive(true);
+            await fetchPropertySettingsFeatures();
+            if (propertyFeatures?.length > 0 && isFirstLoad) {
+                setIsFirstLoad(false);
+            }
+        };
+
+        initializeComponent();
+
+        // Cleanup function
+        return () => {
+            setIsPropertyFeatureActive(false);
+        };
     }, [propertyFeatures]);
 
-    // Derive columns dynamically
     const propertySettingColumns = [
         { label: "Property Name", width: "w-[200px]" },
         { label: "Description", width: "w-[200px]" },
@@ -72,9 +74,6 @@ const PropertySetting = () => {
     // Handles pagination: Moves to the next page when clicked
     const handlePageChange = (selectedPage) => {
         if (selectedPage !== pagination.currentPage) {
-            console.log("Selected page:", selectedPage);
-            console.log("pagination.currentPagee:", pagination.currentPage);
-
             updatePagination(selectedPage);
         }
     };
@@ -92,129 +91,37 @@ const PropertySetting = () => {
             </button>
 
             {/* Table */}
+            {/* Table */}
             <div className="mt-3 mx-1 py-4">
-                {/* <CustomTable
-                    className="flex gap-4 items-center h-[49px] montserrat-semibold text-sm text-white bg-custom-lightgreen mb-4 -mx-1 px-4"
-                    columns={propertySettingColumns}
-                    data={propertyFeatures}
-                    isLoading={isLoading && isFirstLoad}
-                    renderRow={(item) => (
-                        <PropertyFeatureTableRow
-                            key={item.property_feature_id}
-                            item={item}
-                            handleOpenModal={handleOpenModal}
-                        />
-                    )}
-                /> */}
-                <table className="w-full border-collapse">
-                    <thead>
-                        <tr className="h-[49px] montserrat-semibold text-sm text-white bg-custom-lightgreen">
-                            {propertySettingColumns.map((col, index) => (
-                                <th
-                                    key={index}
-                                    className={`text-start px-4 py-2 ${col.width}`}
-                                >
-                                    {col.label}
-                                </th>
-                            ))}
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {isLoading && isFirstLoad ? (
-                            <tr>
-                                <td
-                                    colSpan={
-                                        propertySettingColumns &&
-                                        propertySettingColumns.length
-                                    }
-                                    className="text-center py-4"
-                                >
-                                    Loading...
-                                </td>
-                            </tr>
-                        ) : propertyFeatures && propertyFeatures.length > 0 ? (
-                            propertyFeatures.map((property, index) => (
-                                <tr
-                                    key={index}
-                                    className="even:bg-custombg3 h-16"
-                                >
-                                    {/* Static columns */}
-                                    <td className="px-4 py-2 montserrat-regular">
-                                        {toLowerCaseText(
-                                            property?.property_name
-                                        )}
-                                    </td>
-                                    <td className="px-4 py-2 montserrat-regular">
-                                        {property.description || "N/A"}
-                                    </td>
-                                    <td className="px-4 py-2 montserrat-regular">
-                                        {property.entity || "N/A"}
-                                    </td>
-
-                                    {/* Dynamic feature columns */}
-                                    {propertySettingColumns &&
-                                        propertySettingColumns
-                                            .slice(3, -1)
-                                            .map((featureColumn, colIndex) => {
-                                                const feature =
-                                                    property.features.find(
-                                                        (f) =>
-                                                            f.name ===
-                                                            featureColumn.label
-                                                    );
-                                                return (
-                                                    <td
-                                                        key={colIndex}
-                                                        className="px-4 py-2 montserrat-regular text-start "
-                                                    >
-                                                        {feature ? (
-                                                            <PropertyFeatureCheckbox
-                                                                checked={
-                                                                    feature.status ===
-                                                                    "Enabled"
-                                                                }
-                                                                isDisabled={
-                                                                    true
-                                                                }
-                                                            />
-
-                                                        ) : (
-                                                            <div>
-                                                                <PropertyFeatureCheckbox
-                                                                    checked={false}
-                                                                    isDisabled={true}
-                                                                    className="custom-checkbox-permission"
-                                                                />
-                                                            </div>
-                                                        )}
-                                                    </td>
-                                                );
-                                            })}
-                                    <td className="px-4 py-2 montserrat-regular text-start">
-                                        <HiPencil
-                                            onClick={() =>
-                                                handleOpenModal(
-                                                    property,
-                                                    "edit"
-                                                )
-                                            }
-                                            className="w-5 h-5 text-custom-bluegreen cursor-pointer"
-                                        />
-                                    </td>
-                                </tr>
-                            ))
-                        ) : (
-                            <tr>
-                                <td
-                                    colSpan={propertySettingColumns.length}
-                                    className="text-center py-4"
-                                >
-                                    No data available
-                                </td>
-                            </tr>
+                {(isFeatureFetching && isFirstFeatureLoad) ? (
+                    <div className="text-center py-4">
+                        <Skeleton height={140} className="my-1" />
+                        <Skeleton height={140} className="my-1" />
+                        <Skeleton height={140} className="my-1" />
+                    </div>
+                ) : propertySettingsFeatures?.length > 0 && propertyFeatures?.length > 0 ? (
+                    <CustomTable
+                        tableClassName="w-full min-w-[882px]"
+                        className="gap-4 w-full h-[49px] montserrat-semibold text-sm text-white bg-custom-lightgreen mb-4 -mx-1 px-4"
+                        columns={propertySettingColumns}
+                        data={propertyFeatures}
+                        isLoading={isLoading && isFirstLoad}
+                        renderRow={(item) => (
+                            <PropertyFeatureTableRow
+                                key={item.property_feature_id}
+                                item={item}
+                                handleOpenModal={handleOpenModal}
+                                propertySettingColumns={propertySettingColumns}
+                            />
                         )}
-                    </tbody>
-                </table>
+                    />
+                ) : (
+                    <div className="text-center py-4">
+                        <Skeleton height={140} className="my-1" />
+                        <Skeleton height={140} className="my-1" />
+                        <Skeleton height={140} className="my-1" />
+                    </div>
+                )}
             </div>
             <div className="py-2 flex justify-end mx-1">
                 <Pagination

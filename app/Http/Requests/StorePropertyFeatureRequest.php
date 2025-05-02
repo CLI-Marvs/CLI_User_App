@@ -29,11 +29,6 @@ class StorePropertyFeatureRequest extends BasePropertyRequest
      */
     public function messages(): array
     {
-        return [
-            'propertyName.required' => 'The property name is required.',
-            'entity.required' => 'The entity is required.',
-            'features.required' => 'At least one feature must be selected.',
-            'features.*.exists' => 'The selected feature is invalid.',
-        ];
+        return array_merge($this->baseMessages());
     }
 }

@@ -18,6 +18,8 @@ export const PropertyFeatureProvider = ({ children }) => {
         resetToDefaults,
         fetchData,
         refreshData,
+        setError,
+        error
     } = useDataFetching({
         fetchFunction: propertyMasterService.getPropertiesByFeatures,
         defaultFilters: {},
@@ -36,6 +38,8 @@ export const PropertyFeatureProvider = ({ children }) => {
         refreshData,
         isPropertyFeatureActive,
         setIsPropertyFeatureActive,
+        setError,
+        error
     };
 
     return (

@@ -16,9 +16,11 @@ class PropertyMasterRepository
         $this->model = $model;
     }
 
-    /* 
-     Store property data
-    */
+    /**
+     * Stores new property with related data in transaction
+     * @param array $data Property data
+     * @return array Response with success/error status
+     */
     public function store(array $data)
     {
         DB::beginTransaction();
@@ -39,10 +41,9 @@ class PropertyMasterRepository
     }
 
     /**
-     * Find the property master by its ID.
-     *
+     * Retrieves property master by ID
      * @param int $propertyMasterId
-     * @return mixed
+     * @return PropertyMaster|null
      */
     private function findPropertyMaster($propertyMasterId)
     {
@@ -50,11 +51,10 @@ class PropertyMasterRepository
     }
 
     /**
-     * Create a new tower phase for the given property master.
-     *
-     * @param mixed $propertyMaster
-     * @param array $data
-     * @return mixed
+     * Creates price list for tower phase
+     * @param TowerPhase $towerPhase
+     * @param array $data Price list data
+     * @return PriceListMaster
      */
     private function createTowerPhase($propertyMaster, array $data)
     {
@@ -70,11 +70,10 @@ class PropertyMasterRepository
     }
 
     /**
-     * Create a price list master associated with a tower phase.
-     *
-     * @param mixed $towerPhase
-     * @param array $data
-     * @return mixed
+     * Creates commercial details for property
+     * @param PropertyMaster $propertyMaster
+     * @param array $data Commercial data
+     * @param PriceListMaster $priceListMaster
      */
     private function createPriceListMaster($towerPhase, array $data)
     {
@@ -85,12 +84,9 @@ class PropertyMasterRepository
     }
 
     /**
-     * Create commercial details for the property master.
-     *
-     * @param mixed $propertyMaster
-     * @param array $data
-     * @param mixed $priceListMaster
-     * @return void
+     * Builds success response with property details
+     * @param PropertyMaster $propertyMaster
+     * @return array
      */
     private function createCommercialDetails($propertyMaster, array $data, $priceListMaster)
     {
@@ -142,8 +138,7 @@ class PropertyMasterRepository
     }
 
     /**
-     * Build the error response in case of failure.
-     *
+     * Builds error response
      * @param \Exception $exception
      * @return array
      */
@@ -156,14 +151,13 @@ class PropertyMasterRepository
     }
 
     /**
-     * Extracts location data from various formats of Google Maps URLs.
-     *
-     * @param string $googleMapLink Google Maps googleMapLink
-     * @return array|null Location data array or null if parsing failed
+     * Extracts coordinates from Google Maps URL
+     * @param string $googleMapLink
+     * @return array|null ['latitude', 'longitude']
      */
     public function parseGoogleMapLink($googleMapLink)
     {
-    
+
         try {
             if (empty(trim($googleMapLink))) {
                 return null;
@@ -207,7 +201,8 @@ class PropertyMasterRepository
 
 
     /**
-     * Get all property names
+     * Gets list of all property names
+     * @return array
      */
     public function getPropertyNames()
     {
@@ -216,7 +211,8 @@ class PropertyMasterRepository
 
 
     /**
-     * Get all property names with ID
+     * Gets properties names with their IDs
+     * @return array
      */
     public function getPropertyNamesWithIds()
     {
@@ -226,6 +222,11 @@ class PropertyMasterRepository
             ->toArray();
     }
 
+    /**
+     * Gets paginated properties with their features
+     * @param array $validatedData Pagination parameters
+     * @return array
+     */
     public function getAllPropertiesWithFeatures(array $validatedData)
     {
 
@@ -275,6 +276,12 @@ class PropertyMasterRepository
         ];
     }
 
+    /**
+     * Updates property features
+     * @param array $data Updated feature data
+     * @param int $id Property ID
+     * @return PropertyMaster
+     */
     public function updatePropertyFeatures(array $data, int $id)
     {
         $extractedGoogleMapLink = (!isset($data['google_map_link']) || empty(trim($data['google_map_link'])))
@@ -323,6 +330,12 @@ class PropertyMasterRepository
         return $property;
     }
 
+    /**
+     * Creates new property with features
+     * @param array $data Property and feature data
+     * @return PropertyMaster
+     * @throws \Exception
+     */
     public function storePropertyFeature(array $data)
     {
         try {
@@ -330,7 +343,7 @@ class PropertyMasterRepository
             $extractedGoogleMapLink = (!isset($data['google_map_link']) || empty(trim($data['google_map_link'])))
                 ? null
                 : $this->parseGoogleMapLink($data['google_map_link']);
-         
+
             $property = $this->model->create([
                 'property_name' => $data['propertyName'],
                 'description' => $data['description'] ?? null,

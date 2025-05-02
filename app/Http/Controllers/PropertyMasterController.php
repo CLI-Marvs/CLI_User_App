@@ -25,7 +25,11 @@ class PropertyMasterController extends Controller
 
 
     /**
-     * Store a newly created resource in storage.
+     * Store a new property master record
+     * 
+     * @param StorePropertyMasterRequest $request The validated request object
+     * @return \Illuminate\Http\JsonResponse
+     * @throws ValidationException
      */
     public function store(StorePropertyMasterRequest $request)
     {
@@ -49,6 +53,8 @@ class PropertyMasterController extends Controller
 
     /**
      * Get all property names
+     * 
+     * @return \Illuminate\Http\JsonResponse List of property names
      */
     public function getPropertyNames()
     {
@@ -58,7 +64,9 @@ class PropertyMasterController extends Controller
 
 
     /**
-     * Get all property names with ID
+     * Get all property names with their IDs
+     * 
+     * @return \Illuminate\Http\JsonResponse List of property names with IDs
      */
     public function getPropertyNamesWithIds()
     {
@@ -66,6 +74,12 @@ class PropertyMasterController extends Controller
         return response()->json($propertyNames);
     }
 
+    /**
+     * Get all properties with their features with pagination
+     * 
+     * @param Request $request The request object containing pagination parameters
+     * @return \Illuminate\Http\JsonResponse Paginated list of properties with features
+     */
     public function getAllPropertiesWithFeatures(Request $request)
     {
         $validatedData = $request->validate([
@@ -81,7 +95,13 @@ class PropertyMasterController extends Controller
         ]);
     }
 
-
+    /**
+     * Update property features for a specific property
+     * 
+     * @param UpdatePropertyFeatureRequest $request The validated request object
+     * @param int $id The property ID
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function updatePropertyFeatures(UpdatePropertyFeatureRequest $request, int $id)
     {
         $validatedData = $request->validated();
@@ -92,7 +112,12 @@ class PropertyMasterController extends Controller
         ]);
     }
 
-
+    /**
+     * Store new property with features
+     * 
+     * @param StorePropertyFeatureRequest $request The validated request object
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function storePropertyFeatures(StorePropertyFeatureRequest $request)
     {
         $validatedData = $request->validated();
