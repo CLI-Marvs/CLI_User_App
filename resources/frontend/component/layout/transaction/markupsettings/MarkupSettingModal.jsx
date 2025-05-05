@@ -32,7 +32,6 @@ const MarkupSettingModal = ({
     const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
-        console.log("selecteddata", selectedData);
         if (type === "update" && selectedData) {
             setFormData(selectedData);
         }

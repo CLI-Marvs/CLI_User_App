@@ -5,76 +5,6 @@ import { Link } from "react-router-dom";
 import TransactionTooltip from "../TransactionTooltip";
 
 const TransactionTableCell = ({ type, row }) => {
-    console.log("row", row);
-    const renderText = () => {
-        const groupedMethods = {
-            "Visa Debit/Credit": ["Credit/Debit Card"],
-            "E-Wallet": ["GCash", "Paymaya"],
-        };
-
-        const calculateResult = (item) => {
-            const fixed = parseFloat(item?.pti_bank_fixed_amount || 0);
-            const markup = parseFloat(item?.cli_markup || 0);
-            return fixed + markup;
-        };
-
-        const renderGroup = (groupTitle, methods) => {
-            return (
-                <div key={groupTitle}>
-                    <span className="montserrat-semibold">{groupTitle}</span>
-                    <br />
-                    {methods.map((method) => {
-                        /*  const locationType = row?.find((s) => s.payment_method === method); */
-                        const local = row?.markup_details.find(
-                            (setting) => setting.location === "local"
-                        );
-                        const international = row?.markup_details.find(
-                            (setting) => setting.location === "international"
-                        );
-                        if (!local) return null;
-                        const result = calculateResult(local);
-
-                        if (method === "Credit/Debit Card") {
-                            return (
-                                <div key={method}>
-                                    <span>
-                                        Local: {local?.pti_bank_rate_percent}%
-                                        of transaction amount plus Php{" "}
-                                        {result.toFixed(2)}
-                                    </span>
-                                    <br />
-                                    <span>
-                                        International:{" "}
-                                        {international?.pti_bank_rate_percent}%
-                                        of transaction amount plus Php{" "}
-                                        {result.toFixed(2)}
-                                    </span>
-                                    <br />
-                                </div>
-                            );
-                        }
-
-                        return (
-                            <span key={method}>
-                                {method}: {local?.pti_bank_rate_percent}% of
-                                transaction amount or Php {result.toFixed(2)}{" "}
-                                whichever is higher.
-                                <br />
-                            </span>
-                        );
-                    })}
-                </div>
-            );
-        };
-
-        return (
-            <div className="flex flex-col gap-2 text-wrap">
-                {Object.entries(groupedMethods).map(([groupTitle, methods]) =>
-                    renderGroup(groupTitle, methods)
-                )}
-            </div>
-        );
-    };
     switch (type) {
         case "transaction_date":
             return (
@@ -138,9 +68,7 @@ const TransactionTableCell = ({ type, row }) => {
             );
         case "amount":
             return (
-                <div className="flex flex-col montserrat-regular justify-center">
-                    <h3 className="mt-2 font-semibold">Fee Breakdown</h3>
-
+                <div className="flex flex-col montserrat-regular justify-center w-[400px]">
                     <div className="flex flex-col text-[13px] mt-1">
                         <div className="flex justify-between">
                             <span>Payment Amount:</span>
@@ -155,27 +83,97 @@ const TransactionTableCell = ({ type, row }) => {
                             </span>
                         </div>
 
-                        <div className="flex items-center justify-between relative gap-1">
-                            <div className="flex items-center gap-1">
-                                <TransactionTooltip
-                                    content={renderText()}
-                                    position="right"
-                                >
-                                    <div className="bg-gradient-to-r from-[#175D5F] to-[#70AD47] rounded-[15px] h-[14px] w-[14px] flex items-center justify-center text-[10px] text-[#D9D9D9] cursor-pointer">
-                                        i
-                                    </div>
-                                </TransactionTooltip>
-                                <span>Convenience Fee:</span>
+                        <div className="mt-1 text-gray-700 flex flex-col">
+                            <h3 className="font-semibold">
+                                Convenience Fee Breakdown
+                            </h3>
+                            <div className="flex justify-between ml-4">
+                                <span>
+                                    Bank Rate ({row.amount} * (
+                                    {row.pti_bank_rate_percent}% / 100)):
+                                </span>
+                                <span>
+                                    +
+                                    {(
+                                        row.amount *
+                                        (row.pti_bank_rate_percent / 100)
+                                    ).toFixed(2)}
+                                </span>
                             </div>
-                            <span>
-                                {parseFloat(row.convenience_fee).toLocaleString(
-                                    "en-US",
-                                    {
+                            {row.payment_option === "Credit/Debit Card" && (
+                                <div className="flex justify-between ml-4">
+                                    <span>
+                                        CLI Markup({row.cli_markup}) * Paynamics
+                                        Rate ({row.paynamics_rate_percent}% /
+                                        100):
+                                    </span>
+                                    <span>
+                                        +
+                                        {(
+                                            (row.cli_markup *
+                                                row.paynamics_rate_percent) /
+                                            100
+                                        ).toFixed(2)}
+                                    </span>
+                                </div>
+                            )}
+                            <div className="flex justify-between ml-4">
+                                <span>Fixed Amount:</span>
+                                <span>
+                                    +
+                                    {parseFloat(
+                                        row.pti_bank_fixed_amount
+                                    ).toLocaleString("en-US", {
                                         minimumFractionDigits: 2,
                                         maximumFractionDigits: 2,
-                                    }
+                                    })}
+                                </span>
+                            </div>
+                            {row.payment_option !== "Credit/Debit Card" && (
+                                <div className="flex justify-between mb-2 ml-4">
+                                    <span>CLI Markup:</span>
+                                    <span>
+                                        +
+                                        {parseFloat(
+                                            row.cli_markup
+                                        ).toLocaleString("en-US", {
+                                            minimumFractionDigits: 2,
+                                            maximumFractionDigits: 2,
+                                        })}
+                                    </span>
+                                </div>
+                            )}
+
+                            <div className="flex justify-between font-semibold pt-1 border-t">
+                                {row.payment_option === "Credit/Debit Card" ? (
+                                    <span>Total Fee:</span>
+                                ) : (
+                                    <>
+                                        <div className="flex items-center relative gap-1">
+                                            <TransactionTooltip
+                                                content="Convenience fee is based on either the fixed amount plus markup (if the bank rate is lower), or bank rate plus markup (if higher)."
+                                                position="right"
+                                            >
+                                                <div className="bg-gradient-to-r from-[#175D5F] to-[#70AD47] rounded-[15px] h-[14px] w-[14px] flex items-center justify-center text-[10px] text-[#D9D9D9] cursor-pointer">
+                                                    i
+                                                </div>
+                                            </TransactionTooltip>
+                                            <span>Total Fee:</span>
+                                        </div>
+                                    </>
                                 )}
-                            </span>
+
+                                <div className="flex flex-col items-end">
+                                    <span>
+                                        {parseFloat(
+                                            row.convenience_fee
+                                        ).toLocaleString("en-US", {
+                                            minimumFractionDigits: 2,
+                                            maximumFractionDigits: 2,
+                                        })}
+                                    </span>
+                                </div>
+                            </div>
                         </div>
 
                         <div className="flex justify-between font-semibold border-t mt-2 pt-1">

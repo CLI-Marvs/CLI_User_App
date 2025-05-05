@@ -13,10 +13,10 @@ use Illuminate\Support\Facades\Validator;
 class MarkupSettignsController extends Controller
 {
 
-    public function index()
+    public function index(Request $request)
     {
         try {
-            $settings = MarkupSettings::with(['markupDetails' => function ($query) {
+            $query = MarkupSettings::with(['markupDetails' => function ($query) {
                 $query->select(
                     'id',
                     'markup_setting_id',
@@ -25,9 +25,13 @@ class MarkupSettignsController extends Controller
                     'pti_bank_fixed_amount',
                     'cli_markup'
                 );
-            }])
-                ->orderBy('created_at', 'desc')
-                ->paginate(20);
+            }]);
+            
+            if($request->has('payment_method')) {
+                $query->where('payment_method', 'ILIKE', '%' . $request->payment_method . '%');
+            } 
+
+            $settings = $query->orderBy('created_at', 'desc')->paginate(20);
 
             $formatted = $settings->getCollection()->map(function ($setting) {
                 $details = $setting->markupDetails->keyBy('location');

@@ -14,7 +14,11 @@ import CustomToolTip from "@/component/CustomToolTip";
 import { IoMdAdd } from "react-icons/io";
 
 const MarkupSettingsCom = () => {
-    const fields = [
+    const SEARCH_FIELDS = [
+        { name: "payment_method", label: "Payment Method" },
+    ];
+
+    const INPUT_SEARCH = [
         { name: "pti_bank_rate_percent", label: "Bank Rate Percentage" },
         { name: "pti_bank_fixed_amount", label: "Bank Fixed Amount" },
         { name: "cli_markup", label: "CLI Markup" },
@@ -99,7 +103,7 @@ const MarkupSettingsCom = () => {
             <div className="overflow-y-hidden px-3 flex flex-col space-y-2 max-w-auto">
                 <div className="flex items-center ">
                 <TransactionSearchBar
-                    fields={fields}
+                    fields={SEARCH_FIELDS}
                     searchValues={searchValues}
                     setSearchValues={setSearchValues}
                     onChangeSearch={handleSearchValue}
@@ -129,7 +133,7 @@ const MarkupSettingsCom = () => {
                     </div>
                 </div>
             </div>
-            <MarkupSettingModal settingsRef={settingsRef} fields={fields} type={type} refetchData={getData} selectedData={selectedData} />
+            <MarkupSettingModal settingsRef={settingsRef} fields={INPUT_SEARCH} type={type} refetchData={getData} selectedData={selectedData} />
         </>
     );
 };
