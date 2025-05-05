@@ -7,6 +7,7 @@ import Feature from "@/component/layout/superadminpage/component/Feature";
 import { departmentPermissionService } from "@/component/servicesApi/apiCalls/roleManagement";
 import useFeature from "@/context/RoleManagement/FeatureContext";
 import useDepartmentPermission from "@/context/RoleManagement/DepartmentPermissionContext";
+import useDepartment from "@/context/RoleManagement/DepartmentContext";
 
 const AddDepartmentModal = ({ departmentModalRef, employeeDepartments }) => {
     //States
@@ -17,6 +18,7 @@ const AddDepartmentModal = ({ departmentModalRef, employeeDepartments }) => {
         department_id: 0,
         features: [],
     });
+    const { fetchEmployeeDepartments } = useDepartment();
 
     //Event handler
     //Handle the change event of select tag for employee department
@@ -83,6 +85,7 @@ const AddDepartmentModal = ({ departmentModalRef, employeeDepartments }) => {
                 }
             }
             await fetchDepartmentPermissions(true, false);
+            await fetchEmployeeDepartments(true);
         } catch (error) {
             if (error.response) {
                 const errorMessage =

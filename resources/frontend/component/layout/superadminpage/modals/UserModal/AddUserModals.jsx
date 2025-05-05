@@ -15,7 +15,7 @@ const AddUserModals = ({ userModalRef, employeesWithPermissions }) => {
     //States
     const { allEmployees } = useStateContext();
     const { fetchEmployeeWithPermissions } = useEmployeePermission();
-    const { features, fetchFeatures } = useFeature();
+    const { features} = useFeature();
     const [isLoading, setIsLoading] = useState(false);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [search, setSearch] = useState("");
@@ -32,12 +32,7 @@ const AddUserModals = ({ userModalRef, employeesWithPermissions }) => {
         search
     ); // Use the utility function
 
-    //Hooks
-    //Get all feature
-    useEffect(() => {
-        fetchFeatures();
-    }, []);
-
+    
     // useEffect(() => {
     //     let permissionUpdateChannel;
 

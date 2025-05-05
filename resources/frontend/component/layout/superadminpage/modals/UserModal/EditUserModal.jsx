@@ -12,7 +12,7 @@ import Alert from "@/component/Alert";
 const EditUserModal = ({ editEmployeeModalRef, selectedEmployee }) => {
     //States
     const { fetchEmployeeWithPermissions } = useEmployeePermission();
-    const { features, fetchFeatures } = useFeature();
+    const { features} = useFeature();
     const [isLoading, setIsLoading] = useState(false);
     const [showAlert, setShowAlert] = useState(false);
     const [formData, setFormData] = useState({
@@ -30,7 +30,6 @@ const EditUserModal = ({ editEmployeeModalRef, selectedEmployee }) => {
                 features: selectedEmployee.features,
             });
             setSelectedEmployeeOldData(selectedEmployee);
-            fetchFeatures();
         }
     }, [selectedEmployee]);
 

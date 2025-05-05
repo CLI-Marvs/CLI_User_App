@@ -32,6 +32,7 @@ import highlightText from "@/util/hightlightText";
 const UserRightsAndPermissions = () => {
     //States
     const { features, isFeatureFetching, fetchFeatures } = useFeature();
+    const [isInitialLoading, setIsInitialLoading] = useState(false);
     const {
         departmentsWithPermissions,
         fetchDepartmentPermissions,
@@ -101,28 +102,28 @@ const UserRightsAndPermissions = () => {
     }, [searchByDepartmentOrByEmployee, employeesWithPermissions]);
 
     useEffect(() => {
-        if (!features) {
-            fetchFeatures();
-        }
-    }, [features, fetchFeatures]);
+        const fetchAllData = async () => {
+            setIsInitialLoading(true);
+            try {
+                // Fetch data in parallel using Promise.all
+                await Promise.all([
+                    !features && fetchFeatures(),
+                    !departmentsWithPermissions &&
+                        fetchDepartmentPermissions(true, false),
+                    !employeesWithPermissions &&
+                        fetchEmployeeWithPermissions(true, false),
+                    !departments && fetchEmployeeDepartments(),
+                ]);
+            } catch (error) {
+                console.error("Error fetching initial data:", error);
+            } finally {
+                setIsInitialLoading(false);
+            }
+        };
 
-    useEffect(() => {
-        if (
-            !departmentsWithPermissions ||
-            !employeesWithPermissions ||
-            !departments
-        ) {
-            fetchDepartmentPermissions(true);
-            fetchEmployeeWithPermissions(true);
-            fetchEmployeeDepartments();
-        }
-    }, [
-        departmentsWithPermissions,
-        fetchEmployeeWithPermissions,
-        employeesWithPermissions,
-        fetchEmployeeDepartments,
-        departments,
-    ]);
+        fetchAllData();
+    }, []);
+ 
 
     //Event Handler
     //Handle the change event of the search input

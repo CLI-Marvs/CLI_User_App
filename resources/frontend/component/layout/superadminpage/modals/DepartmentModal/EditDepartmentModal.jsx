@@ -14,7 +14,7 @@ const EditDepartmentModal = ({
     selectedDepartment,
 }) => {
     //States
-    const { features, fetchFeatures } = useFeature();
+    const { features } = useFeature();
     const { fetchDepartmentPermissions } = useDepartmentPermission();
     const [isLoading, setIsLoading] = useState(false);
     const [selectedDepartmentOldData, setSelectedDepartmentOldData] =
@@ -34,7 +34,6 @@ const EditDepartmentModal = ({
             });
         }
         setSelectedDepartmentOldData(selectedDepartment);
-        fetchFeatures();
     }, [selectedDepartment]);
 
     //Event handler
