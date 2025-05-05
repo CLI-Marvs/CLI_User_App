@@ -28,67 +28,16 @@ class AuthController extends Controller
         return Socialite::driver("google")->redirect();
     }
 
-    /*   public function callback(Request $request)
-    {
-        $crsUser = ['rosemarie@cebulandmasters.com', 'jdadvincula@cebulandmasters.com', 'mocastillo@cebulandmasters.com'];
-        try {
-            if (!$request->has('code')) {
-                return redirect('/')->with('error', 'Authentication failed. Missing code parameter.');
-            }
-        
-            $googleUser = Socialite::driver("google")->user();
-        
-            $explodeName = explode(' ', $googleUser->getName());
-        
-            if (count($explodeName) > 2) {
-                $firstName = $explodeName[0];
-                $lastName = $explodeName[count($explodeName) - 1];
-                $name = [$firstName, $lastName];
-            } else {
-                $name = $explodeName;
-            }
-        
-            $department = in_array($googleUser->email, $crsUser) ? 'CRS' : null;
-        
-            $user = Employee::updateOrCreate(
-                ['google_id' => $googleUser->id],
-                [
-                    'firstname' => $name[0],
-                    'lastname' => $name[1],
-                    'employee_email' => $googleUser->email,
-                    'email_verify_at' => now(),
-                    'profile_picture' => $googleUser->avatar,
-                    'department' => $department 
-                ]
-            );
-        
-            Auth::login($user);
-        
-            $token = $user->createToken('authToken')->plainTextToken;
-            return redirect(config("app.frontend_url") . "/callback?token=" . $token);
-        
-        } catch (\Exception $e) {
-            return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
-        }
-    } */
-
     public function callback(Request $request)
     {
-
         try {
             $googleUser = Socialite::driver("google")->user();
-            // Log::info('Google callback request', [
-            //     'request' => $request->all(),
-            //     $googleUser
-            // ]);
-            /*   if (!$request->has('code')) {
-                return redirect('/')->with('error', 'Authentication failed. Missing code parameter.');                <?php
-            } */
+
             Log::error('Google OAuth error', ['error' => 'An error occurred during Google OAuth callback.']);
 
             if (!$googleUser->email || strpos($googleUser->email, '@cebulandmasters.com') === false) {
                 ActivityLog::create([
-                    'user_id' => null, // Since the user does not exist in the system
+                    'user_id' => null, 
                     'action' => 'login_failed',
                     'ip_address' => $request->ip(),
                     'device' => $request->header('User-Agent'),
@@ -98,22 +47,9 @@ class AuthController extends Controller
                 return redirect('/?error=' . urlencode('Authentication failed. You need to use your CLI email.'));
             }
 
-
-            $explodeName = explode(' ', $googleUser->getName());
-
-            /* if (count($explodeName) > 1) {
-                $firstName = $explodeName[0];
-                $lastName = $explodeName[count($explodeName) - 1];
-            } else {
-                $firstName = $explodeName[0];
-                $lastName = null;
-            } */
-
             $user = Employee::where('employee_email', $googleUser->email)->first();
 
-
             if (!$user) {
-                // return redirect('/?error=' . urlencode('Email does not exist'));
                 return redirect('/?error=' .
                     urlencode('Email ' . $googleUser->email . ' doest not exist',));
             } else {
@@ -137,15 +73,11 @@ class AuthController extends Controller
                     'updated_at' => now()
                 ]);
             }
-            $userAccessData = $this->permissionService->getUserAccessData($user);
-
+        
             Auth::login($user);
 
             $token = $user->createToken('authToken')->plainTextToken;
-            $userAccessDataEncoded  = urlencode(json_encode($userAccessData));
-
-            // Redirect with token and permissions
-            return redirect(config("app.frontend_url") . "/callback?token=" . $token . "&userAccessData=" . $userAccessDataEncoded);
+            return redirect(config("app.frontend_url") . "/callback?token=" . $token);
         } catch (\Exception $e) {
             return redirect('/')->with('error', 'Authentication failed. Missing code parameter.');
         }
@@ -159,7 +91,7 @@ class AuthController extends Controller
         $ipAddress = $request->header('X-Forwarded-For')
             ? explode(',', $request->header('X-Forwarded-For'))[0]
             : $request->ip();
-            
+
         ActivityLog::create([
             'user_id' => $user->id,
             'action' => 'logout_account',
@@ -171,5 +103,19 @@ class AuthController extends Controller
         $user->currentAccessToken()->delete();
 
         return response()->json(['message' => 'Logged out successfully'], 200);
+    }
+
+    public function getUserAccessData(Request $request)
+    {
+        $user = Auth::user();
+        if (!$user) {
+            return response()->json(['error' => 'Unauthenticated'], 401);
+        }
+    
+        $userAccessData = $this->permissionService->getUserAccessData($user);
+        
+        return response()->json([
+            'userAccessData' => $userAccessData
+        ]);
     }
 }

@@ -4,7 +4,7 @@ import { HiPencil } from "react-icons/hi";
 
 const PropertyFeatureTableRow = ({ item, handleOpenModal, propertySettingColumns }) => {
     return (
-        <tr className="even:bg-custombg3 h-16">
+        <tr className="even:bg-custombg3 h-16" key={item.id}>
             <td className="px-4 py-2 montserrat-regular">
                 {toLowerCaseText(item?.property_name)}
             </td>

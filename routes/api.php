@@ -103,7 +103,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/get-transaction-bank', [SapController::class, 'getTransactionByBankName']);
     Route::post('/upload-notepad', [SapController::class, 'uploadNotepad']);
 
-
+    Route::get('/user-access-data', [AuthController::class, 'getUserAccessData']);
 
     Route::controller(TransactionController::class)->group(function () {
         Route::get('/customer/inquiries', 'getCustomerInquiries');
