@@ -31,6 +31,19 @@ const SurveyReports = () => {
         navigate("/inquirymanagement/settings/surveysettings/surveyform");
     };
 
+    const handleUpdateTitle = async (id, newTitle) => {
+        try {
+            await apiService.put(`/surveys/${id}/update-title`, {
+                surveyTitle: newTitle
+            });
+            showToast("Survey title updated successfully!", "success");
+            fetchSurveys();
+        } catch (error) {
+            showToast("Error updating survey title!", "error");
+            console.error("Error updating survey title:", error);
+        }
+    };
+
     const handleDelete = async (id) => {
             try {
                 await apiService.delete(`/surveys/${id}`);
@@ -52,7 +65,7 @@ const SurveyReports = () => {
                         <div className='size-[50px] gradient-btn2 rounded-full flex justify-center items-center'><IoIosAdd className='text-white size-9' /></div>
                     </div>
                     {[...surveys].reverse().map((survey, index) => (
-                        <SurveyList key={index} data={survey} handleDelete={handleDelete} />
+                        <SurveyList key={index} data={survey} handleDelete={handleDelete} handleUpdateTitle={handleUpdateTitle}  />
                     ))}
                 </div>
             </div>

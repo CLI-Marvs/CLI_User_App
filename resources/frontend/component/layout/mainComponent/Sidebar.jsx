@@ -62,37 +62,49 @@ const Sidebar = () => {
 
 
   useEffect(() => {
-    switch (location.pathname) {
-      case "/superadmin/userrightsandpermissions":
+    switch (true) {
+      case location.pathname === "/superadmin/userrightsandpermissions":
         setInquiryOpen(false);
         setIsInvoiceOpen(false);
         setSuperAdminOpen(true);
         break;
-      case "/transactionmanagement/invoices":
-      case "/transactionmanagement/transactionrecords":
+    
+      case location.pathname === "/transactionmanagement/invoices" ||
+           location.pathname === "/transactionmanagement/transactionrecords":
         setInquiryOpen(false);
         setIsInvoiceOpen(true);
         setSuperAdminOpen(false);
         break;
-      case "/inquirymanagement/inquirylist":
-      case "/inquirymanagement/report":
-      case "/inquirymanagement/settings":
-      case "/inquirymanagement/settings/bannersettings":
-      case "/inquirymanagement/settings/autoassign":
-      case "/inquirymanagement/settings/versionlogs":
-      case "/inquirymanagement/settings/surveysettings":
-      case "/inquirymanagement/settings/surveysettings/surveyform":
-      case "/inquirymanagement/settings/surveysettings/surveyreview":
+    
+      case location.pathname === "/inquirymanagement/inquirylist" ||
+           location.pathname === "/inquirymanagement/report" ||
+           location.pathname === "/inquirymanagement/settings" ||
+           location.pathname === "/inquirymanagement/settings/bannersettings" ||
+           location.pathname === "/inquirymanagement/settings/autoassign" ||
+           location.pathname === "/inquirymanagement/settings/versionlogs" ||
+           location.pathname === "/inquirymanagement/settings/surveysettings" ||
+           location.pathname === "/inquirymanagement/settings/surveysettings/surveyreview":
         setIsInvoiceOpen(false);
         setInquiryOpen(true);
         setSuperAdminOpen(false);
         break;
+    
+
+        
+      // This is the case where :id is dynamic
+      case /^\/inquirymanagement\/settings\/surveysettings\/surveyform\/[\w-]+$/.test(location.pathname):
+        setIsInvoiceOpen(false);
+        setInquiryOpen(true);
+        setSuperAdminOpen(false);
+        break;
+    
       default:
         setInquiryOpen(false);
         setIsInvoiceOpen(false);
         setSuperAdminOpen(false);
         break;
     }
+    
   }, [location.pathname]);
 
   return (
@@ -124,7 +136,7 @@ const Sidebar = () => {
             <ListItem
               className={`h-[35px] w-[185px] text-sm pl-[12px] transition-all duration-300 ease-in-out z-10 
                   ${activeItem === "inquiry" ||
-                  location.pathname.startsWith("/inquirymanagement")
+                  location.pathname.startsWith("/inquirymanagement") 
                   ? "bg-custom-lightestgreen text-custom-solidgreen font-semibold shadow-custom5"
                   : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
                 }

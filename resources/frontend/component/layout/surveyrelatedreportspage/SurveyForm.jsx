@@ -426,8 +426,10 @@ const SurveyForm = () => {
           <div
             className="flex justify-center h-[31px] gap-[14px]"
           >
-            <button className='h-[31px] w-[104px] gradient-btn2 p-[1px] rounded-[5px] text-sm hover:shadow-custom'>
-              <div onClick={handleSave} className='bg-white w-full h-full flex justify-center items-center rounded-[4px]'>
+            <button 
+                onClick={handleSave}
+                className='h-[31px] w-[104px] gradient-btn2 rounded-[5px] text-sm hover:shadow-custom border-[0.5px] border-custom-grayA5'>
+                <div  className='bg-white w-full h-full flex justify-center items-center rounded-[4px]'>
                {loading1 ? <CircularProgress className="spinnerSize" /> : "Save"}
               </div>
             </button>

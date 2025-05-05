@@ -1,5 +1,7 @@
 import React from 'react'
 import {
+    LineChart,
+    Line,
     BarChart,
     Bar,
     XAxis,
@@ -7,8 +9,47 @@ import {
     Tooltip,
     Cell,
     ResponsiveContainer,
+    CartesianGrid,
     LabelList,
 } from 'recharts';
+
+const data = [
+    {
+        name: 'Page A',
+        uv: 40,
+        
+    },
+    {
+        name: 'Page B',
+        uv: 30,
+        
+    },
+    {
+        name: 'Page C',
+        uv: 20,
+       
+    },
+    {
+        name: 'Page D',
+        uv: 27,
+        
+    },
+    {
+        name: 'Page E',
+        uv: 18,
+        
+    },
+    {
+        name: 'Page F',
+        uv: 23,
+       
+    },
+    {
+        name: 'Page G',
+        uv: 34,
+       
+    },
+];
 
 const SummaryBar = ({ question }) => {
 
@@ -95,6 +136,7 @@ const SummaryBar = ({ question }) => {
                         </BarChart>
                     </ResponsiveContainer>
                 </div>
+                
             </div>
         </div>
     );

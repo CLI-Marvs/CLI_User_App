@@ -163,6 +163,20 @@ class SurveyController extends Controller
         return response()->json(['message' => 'Survey updated successfully']);
     }
 
+    public function updateTitle(Request $request, $id)
+    {
+        $surveyTitle = $request->input('surveyTitle');
+
+        $existingSurvey = Survey_list::findOrFail($id);
+
+        $existingSurvey->update([
+            'survey_title' => $surveyTitle ?? 'Untitled Form',
+        ]);
+
+        return response()->json(['message' => 'Survey title updated successfully']);
+    }
+
+
 
 
     public function fetchSurveys()
