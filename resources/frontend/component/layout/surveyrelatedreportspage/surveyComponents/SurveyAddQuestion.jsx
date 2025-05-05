@@ -41,10 +41,7 @@ export const SurveyAddQuestion = ({ data, sectionIndex, questionIndex, onDelete,
 
     const options = [
         { value: "multiple-choice", label: "Multiple choice", icon: <IoMdRadioButtonOn /> },
-        // Add more options here if needed
     ];
-
-   
 
     return (
         <div>
@@ -116,7 +113,6 @@ export const SurveyAddQuestion = ({ data, sectionIndex, questionIndex, onDelete,
                 <div className='border-b-[0.5px] w-full border-custom-grayA5'></div>
                 <div className='w-full h-[25px] flex justify-end items-center px-[20px] gap-[14px]'>
                     <div className='flex gap-[10px]'>
-                        {/* <MdContentCopy className='size-[20px]' /> */}
                         <FaRegTrashAlt
                             className='size-[20px] cursor-pointer text-red-500 hover:text-red-600'
                             onClick={onDelete}
@@ -132,10 +128,10 @@ export const SurveyAddQuestion = ({ data, sectionIndex, questionIndex, onDelete,
                                         id={`toggle-${sectionIndex}-${questionIndex}`}
                                         type="checkbox"
                                         className="sr-only peer"
-                                        checked={data.required} // ✅ Sync with data
+                                        checked={data.required}
                                         onChange={() => {
                                             updateIsRequired(sectionIndex, questionIndex, !data.required);
-                                          }}// ✅ Toggle isRequired
+                                          }}
                                     />
                                     <div className="w-10 h-4 bg-gray-400 rounded-full shadow-inner peer-checked:bg-custom-lightestgreen transition"></div>
                                     <div className="dot absolute w-6 h-6 bg-white border-[1px] rounded-full shadow -left-1 -top-1 transition peer-checked:translate-x-6 peer-checked:bg-custom-solidgreen"></div>
@@ -145,15 +141,6 @@ export const SurveyAddQuestion = ({ data, sectionIndex, questionIndex, onDelete,
                     </div>
                 </div>
             </div>
-            {/* <div className='flex flex-col w-full bg-white rounded-[10px] gap-[15px] p-[15px]'>
-            <div className='flex h-[40px] '>
-              <p>Survey Question #1</p>
-            </div>
-            <div>
-              Multiple choice
-            </div>
-          </div> */}
-
         </div>
     )
 }

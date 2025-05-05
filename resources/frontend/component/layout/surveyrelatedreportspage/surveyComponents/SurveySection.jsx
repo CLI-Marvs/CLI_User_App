@@ -83,7 +83,7 @@ export const SurveySection = (
                             }}
                             onChange={(e) => updateTitle(e.target.value, sectionIndex)}
                             onKeyDown={(e) => {
-                                if (e.key === "Enter") e.preventDefault(); // Prevent Enter key
+                                if (e.key === "Enter") e.preventDefault(); 
                             }}
                             ref={titleRef}
                         />
@@ -96,8 +96,8 @@ export const SurveySection = (
                             maxLength={1000}
                             placeholder="Description"
                             onInput={(e) => {
-                                e.target.style.height = "auto"; // Reset height to min
-                                e.target.style.height = `${e.target.scrollHeight}px`; // Expand dynamically
+                                e.target.style.height = "auto"; 
+                                e.target.style.height = `${e.target.scrollHeight}px`; 
                             }}
                             onChange={(e) => updateDescription(e.target.value, sectionIndex)}
                             ref={descriptionRef}
@@ -115,18 +115,6 @@ export const SurveySection = (
                         <IoEyeOutline className='size-[32px]' />
                         <p className='text-[#3A3A3A] text-[16px]'>Preview</p>
                     </button>
-                    {/*  <button className='w-[151px] h-[56px] border-[0.5px] border-custom-grayA5 rounded-[10px] p-[10px] flex justify-center items-center gap-[7px]'>
-                    <TiEqualsOutline className='size-[32px]' />
-                    <p className='text-[#3A3A3A] text-[16px]'>Add Section</p>
-                </button>
-                <button className='w-[126px] h-[56px] border-[0.5px] border-custom-grayA5 rounded-[10px] p-[10px] flex justify-center items-center gap-[7px]'>
-                    <MdOutlineTextFields className='size-[32px]' />
-                    <p className='text-[#3A3A3A] text-[16px]'>Add Title</p>
-                </button> */}
-
-                    {/* <button className='w-[56px] h-[56px] border-[0.5px] border-custom-grayA5 rounded-[10px] p-[10px] flex justify-center items-center gap-[7px]'>
-                    <FaTrash className='size-[24px]' />
-                </button> */}
                 </div>
 
                 <div
@@ -167,16 +155,6 @@ export const SurveySection = (
                                 onBlur={(e) => {
                                     if (!e.target.value) updateConsent("Declaration and Consent", sectionIndex);
                                 }}
-                                /* onFocus={() => {
-                                    if (data.consentTitle?.trim() === "Declaration and Consent") {
-                                      updateConsent("consentTitle", "", sectionIndex);
-                                    }
-                                  }}
-                                  onBlur={(e) => {
-                                    if (!e.target.value.trim()) {
-                                      updateConsent("consentTitle", "Declaration and Consent", sectionIndex);
-                                    }
-                                  }} */
                                 onKeyDown={(e) => e.key === "Enter" && e.preventDefault()}
                             />
                         </div>
