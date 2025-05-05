@@ -19,17 +19,17 @@ export const settings = {
         try {
             const response = await apiService.post("markup-settings", formData);
 
-            return response?.data;
+            return response;
         } catch (error) {
             console.log("error", error);
         }
     },
 
-    update: async (id, formData) => {
+    updateSettings: async (formData) => {
         try {
-            const response = await apiService.post(`markup-settings/${id}`, formData);
+            const response = await apiService.put(`markup-settings/${formData.id}`, formData);
 
-            return response?.data;
+            return response;
         } catch (error) {
             console.log("error", error);
         }

@@ -18,7 +18,7 @@ import { ALLOWED_EMPLOYEES_CRS } from "../../../constant/data/allowedEmployeesCR
 
 const Sidebar = () => {
     const { unreadCount, getCount, user } = useStateContext();
-    const [activeItem, setActiveItem] = useState(null);
+    const [activeItem, setActiveItem] = useState("notification");
     const location = useLocation();
     const [isInquiryOpen, setInquiryOpen] = useState(false);
     const [isSuperAdminOpen, setSuperAdminOpen] = useState(false);
@@ -120,7 +120,7 @@ const Sidebar = () => {
                     <Link to="/notification">
                         <ListItem
                             className={`flex text-sm items-center w-[185px] h-[36px] pl-[12px] pr-[60px] gap-2 rounded-[10px] ${
-                                activeItem === "notification" ||
+                                activeItem === "notification" &&
                                 location.pathname.startsWith("/notification")
                                     ? "bg-custom-lightestgreen text-custom-solidgreen font-semibold shadow-custom4"
                                     : " hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
@@ -259,7 +259,7 @@ const Sidebar = () => {
             ${
                 location.pathname.startsWith("/transaction")
                     ? "bg-custom-lightestgreen text-custom-solidgreen font-semibold"
-                    : "hover:font-bold hover:bg-gradient-to-r hover:frofm-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
+                    : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
             }
               ${
                   isInvoiceOpen
@@ -302,7 +302,7 @@ const Sidebar = () => {
                                     </ListItem>
                                 </Link>
 
-                                <Link to="/transaction/receivables/invoices">
+                                <Link to="/transaction/receivables/transactions">
                                     <ListItem
                                         className={`h-[32px] w-full py-[8px] px-[18px] text-sm rounded-[50px] ${
                                             location.pathname.startsWith(
@@ -313,7 +313,7 @@ const Sidebar = () => {
                                         }`}
                                         onClick={() =>
                                             handleItemTransactionClick(
-                                                "/transaction/receivables/invoices"
+                                                "/transaction/receivables/transactions"
                                             )
                                         }
                                     >

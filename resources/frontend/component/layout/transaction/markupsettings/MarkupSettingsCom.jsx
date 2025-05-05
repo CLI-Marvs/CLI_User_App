@@ -14,13 +14,19 @@ import CustomToolTip from "@/component/CustomToolTip";
 import { IoMdAdd } from "react-icons/io";
 
 const MarkupSettingsCom = () => {
-    const fields = [
+    const SEARCH_FIELDS = [
         { name: "payment_method", label: "Payment Method" },
+    ];
+
+    const INPUT_SEARCH = [
         { name: "pti_bank_rate_percent", label: "Bank Rate Percentage" },
         { name: "pti_bank_fixed_amount", label: "Bank Fixed Amount" },
         { name: "cli_markup", label: "CLI Markup" },
+        { name: "payment_method", label: "Payment Method" },
     ];
 
+    const [selectedData, setSelectedData] = useState(null);
+    const [type, setType] = useState("");
     const settingsRef = useRef(null);
     const columns = [
         {
@@ -52,12 +58,20 @@ const MarkupSettingsCom = () => {
         {
             header: "Actions",
             accessor: "actions",
-            render: (row) => <MarkupTableCell type="actions" row={row} />,
+            render: (row) => (
+                <MarkupTableCell
+                    type="actions"
+                    row={row}
+                    setSelectedData={setSelectedData}
+                    setType={setType}
+                    settingsRef={settingsRef}
+                />
+            ),
         },
     ];
     const [searchValues, setSearchValues] = useState({});
     const { markupSettings, setMarkupSettings } = useTransactionContext();
-    const { handlePageClick, setFilters } = usePagination(
+    const { handlePageClick, setFilters, getData } = usePagination(
         settings.retrieveSettings,
         markupSettings,
         setMarkupSettings
@@ -76,6 +90,8 @@ const MarkupSettingsCom = () => {
         setSearchValues({});
     };
     const handleOpenModal = () => {
+        setType("store");
+        setSelectedData(null);  
         if (settingsRef.current) {
             settingsRef.current.showModal();
         }
@@ -87,7 +103,7 @@ const MarkupSettingsCom = () => {
             <div className="overflow-y-hidden px-3 flex flex-col space-y-2 max-w-auto">
                 <div className="flex items-center ">
                 <TransactionSearchBar
-                    fields={fields}
+                    fields={SEARCH_FIELDS}
                     searchValues={searchValues}
                     setSearchValues={setSearchValues}
                     onChangeSearch={handleSearchValue}
@@ -117,7 +133,7 @@ const MarkupSettingsCom = () => {
                     </div>
                 </div>
             </div>
-            <MarkupSettingModal settingsRef={settingsRef} fields={fields} type="store" />
+            <MarkupSettingModal settingsRef={settingsRef} fields={INPUT_SEARCH} type={type} refetchData={getData} selectedData={selectedData} />
         </>
     );
 };

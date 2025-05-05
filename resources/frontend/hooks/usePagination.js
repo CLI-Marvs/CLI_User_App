@@ -6,7 +6,6 @@ const usePagination = (fetchData, contextState, contextSetter) => {
     const getData = async () => {
         try {
             const response = await fetchData(currentPage, filters);
-
             contextSetter((prev) => ({
                 ...prev,
                 data: response.data,

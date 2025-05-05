@@ -40,7 +40,7 @@ const CustomInput = ({
         let inputValue = e.target.value;
 
         // Apply number restriction if enabled
-        if (restrictNumbers) {
+        if (type === "number" || restrictNumbers) {
             // Allow only numbers but prevent `e`, `+`, and `-`
             if (!/^\d*\.?\d*$/.test(inputValue)) {
                 return; // Ignore invalid input
@@ -55,7 +55,7 @@ const CustomInput = ({
 
     // Prevent invalid key inputs when restricting numbers
     const handleKeyDown = (e) => {
-        if (restrictNumbers) {
+        if (type === "number" || restrictNumbers) {
             if (["e", "E", "+", "-"].includes(e.key)) {
                 e.preventDefault(); // Block invalid keys
             }

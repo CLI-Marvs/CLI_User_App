@@ -10,8 +10,12 @@ class MarkupSettings extends Model
 
     protected $fillable = [
         'payment_method',
-        'pti_bank_rate_percent',
-        'pti_bank_fixed_amount',
-        'cli_markup',
     ];
+
+
+    public function markupDetails()
+    {
+        return $this->hasMany(MarkupDetails::class, 'markup_setting_id');
+    }
+    
 }

@@ -3,38 +3,70 @@ import { settings } from "@/component/servicesApi/apiCalls/markupSettings/settin
 import { showToast } from "@/util/toastUtil";
 import usePagination from "@/hooks/usePagination";
 import { useTransactionContext } from "@/context/Transaction/TransactionContext";
+import Spinner from "@/util/Spinner";
+import CustomInput from "@/component/Input/CustomInput";
 
 const MarkupSettingModal = ({
     settingsRef,
     fields,
     type,
     selectedData = null,
+    refetchData,
 }) => {
     const [formData, setFormData] = useState({
         payment_method: "",
-        pti_bank_rate_percent: 0,
-        pti_bank_fixed_amount: 0,
-        cli_markup: 0,
+        markup_details: {
+            local: {
+                pti_bank_rate_percent: "",
+                pti_bank_fixed_amount: "",
+                cli_markup: "",
+            },
+            international: {
+                pti_bank_rate_percent: "",
+                pti_bank_fixed_amount: "",
+                cli_markup: "",
+            },
+        },
     });
-
-    /* const { markupSettings, setMarkupSettings } = useTransactionContext();
-    const { getData } = usePagination(
-        settings.retrieveSettings,
-        markupSettings,
-        setMarkupSettings
-    ); */
+    const [validationErrors, setValidationErrors] = useState({});
+    const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
         if (type === "update" && selectedData) {
             setFormData(selectedData);
         }
+
+        if (type === "store") {
+            resetFields();
+        }
     }, [type, selectedData]);
 
     const handleCloseModal = () => {
-        console.log("trigger", settingsRef.current);
+        if (type === "store") {
+            resetFields();
+        }
         if (settingsRef.current) {
             settingsRef.current.close();
+            setValidationErrors({});
         }
+    };
+
+    const resetFields = () => {
+        setFormData({
+            payment_method: "",
+            markup_details: {
+                local: {
+                    pti_bank_rate_percent: "",
+                    pti_bank_fixed_amount: "",
+                    cli_markup: "",
+                },
+                international: {
+                    pti_bank_rate_percent: "",
+                    pti_bank_fixed_amount: "",
+                    cli_markup: "",
+                },
+            },
+        });
     };
 
     const getInputType = (name) => {
@@ -46,28 +78,82 @@ const MarkupSettingModal = ({
         return numericFields.includes(name) ? "number" : "text";
     };
 
-    const handleChange = (e) => {
+    const handleNestedChange = (e, region = null, field = null) => {
         const { name, value } = e.target;
-        setFormData((prev) => ({
-            ...prev,
-            [name]: value,
-        }));
+
+        if (region && field) {
+            setFormData((prev) => ({
+                ...prev,
+                markup_details: {
+                    ...prev.markup_details,
+                    [region]: {
+                        ...prev.markup_details[region],
+                        [field]: value,
+                    },
+                },
+            }));
+        } else {
+            setFormData((prev) => ({
+                ...prev,
+                [name]: value,
+            }));
+        }
     };
 
+    const validateFields = () => {
+        const errors = {};
+    
+        for (let field of fields) {
+            let value;
+    
+            if (field.name === "payment_method") {
+                value = formData.payment_method;
+            } else {
+                value = formData.markup_details.local[field.name];
+            }
+    
+            if (value === "" || value === null || value === undefined) {
+                errors[field.name] = [`${field.label} is required.`];
+            }
+        }
+    
+        setValidationErrors(errors);
+        return Object.keys(errors).length === 0;
+    };
+    
+
     const handleSave = async () => {
+        let response = null;
+        setIsLoading(true);
+        if (!validateFields()) {
+            setIsLoading(false);
+            return;
+        }
         try {
             if (type === "store") {
-                await settings.storeSettings(formData);
-                showToast('Markup settings saved successfully', 'success');
-                getData();
+                response = await settings.storeSettings(formData);
+                showToast("Markup settings saved successfully", "success");
             } else {
-                await settings.updateSettings(formData);
+                response = await settings.updateSettings(formData);
+                showToast("Markup settings updated successfully", "success");
             }
-            if (settingsRef.current) {
+
+            if (response.data.success && settingsRef.current) {
                 settingsRef.current.close();
+
+                if (type === "store") {
+                    resetFields();
+                }
+                if (typeof refetchData === "function") {
+                    refetchData();
+                }
             }
         } catch (error) {
-            console.error("Error saving markup settings:", error);
+            resetFields();
+            setIsLoading(false);
+        } finally {
+            setIsLoading(false);
+            resetFields();
         }
     };
 
@@ -82,36 +168,109 @@ const MarkupSettingModal = ({
             >
                 <span>X</span>
             </div>
-            <div className="bg-custombg3 w-auto h-auto px-5 py-5 rounded-[10px] space-y-5">
+            <div className="bg-custombg3 w-auto h-auto px-5 py-5 rounded-[10px]">
                 <div className="bg-white py-[20px] px-[35px] rounded-[10px]">
-                    <div className="grid grid-cols-2 gap-5 mb-4">
-                        {fields.map((item, index) => (
-                            <div
-                                key={index}
-                                className="flex flex-col space-y-2"
-                            >
-                                <label className="text-sm">{item.label}</label>
-                                <input
-                                    type={getInputType(item.name)}
-                                    name={item.name}
-                                    value={formData[item.name]}
-                                    onChange={handleChange}
-                                    className="border border-gray-300 rounded-[5px] p-2"
-                                    step={
-                                        getInputType(item.name) === "number"
-                                            ? "any"
-                                            : undefined
-                                    }
-                                />
-                            </div>
-                        ))}
+                    {/* Payment Method Field (above the header row) */}
+                    <div className="grid grid-cols-3 items-center gap-4 mb-3">
+                        <span className="font-semibold">Payment Method</span>
+                        <div className="flex flex-col">
+                            <CustomInput
+                                type={getInputType("payment_method")}
+                                name="payment_method"
+                                value={formData["payment_method"]}
+                                onChange={handleNestedChange}
+                                className={`border border-gray-300 rounded-[5px] p-2 w-full ${
+                                    type === "update"
+                                        ? "opacity-50 cursor-not-allowed"
+                                        : ""
+                                }`}
+                                disabled={type === "update"}
+                            />
+                            {validationErrors["payment_method"] && (
+                                <span className="text-red-500 text-xs mt-1">
+                                    {validationErrors["payment_method"][0]}
+                                </span>
+                            )}
+                        </div>
                     </div>
-                    <div className="flex justify-end">
-                        <div
-                            className="flex justify-center bg-gradient-to-r from-[#175D5F] to-[#70AD47] rounded-[10px] items-center shadow-md w-[150px] px-3 py-3 h-[40px] space-x-2 cursor-pointer"
-                            onClick={handleSave}
-                        >
-                            <button className="text-white">Save</button>
+
+                    <div className="grid grid-cols-3 gap-4 mb-2 font-semibold">
+                        <span></span>
+                        <span className="text-center">Local</span>
+                        <span className="text-center">International</span>
+                    </div>
+
+                    <div className="flex flex-col gap-4">
+                        {fields
+                            .filter((item) => item.name !== "payment_method")
+                            .map((item, index) => (
+                                <div
+                                    key={index}
+                                    className="grid grid-cols-3 gap-4 items-start"
+                                >
+                                    {/* Label */}
+                                    <div className="flex items-center h-full font-semibold">
+                                        {item.label}
+                                    </div>
+
+                                    {/* Local Input + Validation */}
+                                    <div className="flex flex-col gap-1">
+                                        <CustomInput
+                                            type={getInputType(item.name)}
+                                            name={item.name}
+                                            value={
+                                                formData.markup_details.local[
+                                                    item.name
+                                                ]
+                                            }
+                                            onChange={(e) =>
+                                                handleNestedChange(
+                                                    e,
+                                                    "local",
+                                                    item.name
+                                                )
+                                            }
+                                            className="border border-gray-300 rounded-[5px] p-2 w-full"
+                                        />
+                                        {validationErrors[item.name] && (
+                                            <span className="text-red-500 text-xs">
+                                                {validationErrors[item.name][0]}
+                                            </span>
+                                        )}
+                                    </div>
+
+                                    {/* International Input */}
+                                    <div className="flex flex-col gap-1">
+                                        <CustomInput
+                                            type={getInputType(item.name)}
+                                            name={item.name}
+                                            value={
+                                                formData.markup_details
+                                                    .international[item.name]
+                                            }
+                                            onChange={(e) =>
+                                                handleNestedChange(
+                                                    e,
+                                                    "international",
+                                                    item.name
+                                                )
+                                            }
+                                            className="border border-gray-300 rounded-[5px] p-2 w-full"
+                                        />
+                                    </div>
+                                </div>
+                            ))}
+                    </div>
+
+                    <div className="flex justify-end mt-5">
+                        <div className="flex justify-center bg-gradient-to-r from-[#175D5F] to-[#70AD47] rounded-[10px] items-center shadow-md w-[150px] px-3 py-3 h-[40px] space-x-2 cursor-pointer">
+                            <button
+                                className="flex justify-center bg-gradient-to-r from-[#175D5F] to-[#70AD47] rounded-[10px] items-center shadow-md w-[150px] px-3 py-3 h-[40px] space-x-2 cursor-pointer text-white"
+                                onClick={handleSave}
+                                disabled={isLoading}
+                            >
+                                {isLoading ? <Spinner /> : "Save"}
+                            </button>
                         </div>
                     </div>
                 </div>
