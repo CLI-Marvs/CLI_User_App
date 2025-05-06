@@ -38,7 +38,7 @@ import AdminSettingView from "./views/pages/adminsettingsViews/AdminSettingView"
 import BankStatementView from "./views/pages/transactionViews/BankStatementView";
 import AutoAssignView from "./views/pages/raiseaconcernViews/AutoAssignView";
 import UserRightsAndPermissionsView from "./views/pages/userrightsandpermissionsViews/UserRightsAndPermissionsView";
-import PropertySettingViews from "@/component/views/pages/propertySettingViews/PropertySettingView";
+import PropertySettingViews from "@/component/views/pages/propertySettingViews/propertySettingView";
 import FallbackLoader from "./FallbackLoader";
 import PreloadWrapper from "./PreloadWrapper";
 import BannerSettingsView from "./views/pages/bannersettingsViews/BannerSettingsView";

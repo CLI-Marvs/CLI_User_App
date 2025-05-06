@@ -100,7 +100,7 @@ const MarkupSettingsCom = () => {
 
     return (
         <>
-            <div className="overflow-y-hidden px-3 flex flex-col space-y-2 max-w-auto">
+            <div className="overflow-y-hidden px-3 flex flex-col space-y-2 w-full">
                 <div className="flex items-center ">
                 <TransactionSearchBar
                     fields={SEARCH_FIELDS}
