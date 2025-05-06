@@ -140,4 +140,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/surveys/{id}', [SurveyController::class, 'delete']);
     Route::get('/survey-summary/{survey_list_id}', [SurveyController::class, 'getSurveyStats']);
     Route::put('/surveys/{id}/update-title', [SurveyController::class, 'updateTitle']);
+    Route::get('/survey-links', [SurveyController::class, 'getSurveyLinks']);
 });

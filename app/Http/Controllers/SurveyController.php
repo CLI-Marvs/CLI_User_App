@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 
+
 class SurveyController extends Controller
 {
     public function store(Request $request)
@@ -353,6 +354,50 @@ class SurveyController extends Controller
             ];
 
             return response()->json($result);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+
+    public function getSurveyLinks()
+    {
+        try {
+            // Fetch all surveys (title and link UUID)
+            $surveys = DB::table('surveys_list')
+                ->select('survey_title', 'survey_link')
+                ->get();
+
+            // Dynamically map app.url → survey base URL
+            $currentAppUrl = config('app.url');
+
+            $map = [
+                'http://localhost:8001'                  => 'http://localhost:8002/survey',
+                'https://admin-dev.cebulandmasters.com'  => 'https://ask-dev.cebulandmasters.com/survey',
+                'https://admin-uat.cebulandmasters.com'  => 'https://ask-uat.cebulandmasters.com/survey',
+                'https://admin.cebulandmasters.com'      => 'https://ask.cebulandmasters.com/survey',
+            ];
+
+            $defaultSurveyBaseUrl = 'https://ask.cebulandmasters.com/survey';
+
+            $baseUrl = $map[$currentAppUrl] ?? $defaultSurveyBaseUrl;
+            $baseUrl = rtrim($baseUrl, '/') . '/';
+
+            $surveyLinks = [
+                [
+                    'surveyName' => 'N/A',
+                    'surveyLink' => 'none',
+                ],
+            ];
+
+            foreach ($surveys as $survey) {
+                $surveyLinks[] = [
+                    'surveyName' => $survey->survey_title,
+                    'surveyLink' => $baseUrl . $survey->survey_link,
+                ];
+            }
+
+            return response()->json($surveyLinks);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
