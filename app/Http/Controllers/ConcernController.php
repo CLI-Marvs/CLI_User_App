@@ -2776,7 +2776,6 @@ class ConcernController extends Controller
                         $messagesRef->buyer_email = $buyer['buyer_email'];
                         $messagesRef->attachment = json_encode($fileLinks);
                         $messagesRef->created_at = Carbon::parse(now())->setTimezone('Asia/Manila');
-                        $messagesRef->buyer_firstname = $existingTicket->buyer_name;
                         $messagesRef->buyer_name = $existingTicket->buyer_name;
                         $messagesRef->save();
                     }
