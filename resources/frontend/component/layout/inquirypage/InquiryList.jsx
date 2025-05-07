@@ -260,44 +260,51 @@ const InquiryList = () => {
             .replace(/\b\w/g, (char) => char.toUpperCase());
     };
 
-    const formattedPropertyNames = [
-        "N/A",
-        ...(Array.isArray(propertyNamesList) && propertyNamesList.length > 0
-            ? propertyNamesList
-                  .filter((item) => !item.toLowerCase().includes("phase"))
-                  .map((item) => {
-                      let formattedItem = formatFunc(item);
+       const formattedPropertyNames = [
+           "N/A",
+           ...(Array.isArray(propertyNamesList) && propertyNamesList.length > 0
+               ? propertyNamesList
+                     .filter((item) => !item.toLowerCase().includes("phase"))
+                     .map((item) => {
+                         // First trim to remove any whitespace or \n
+                         let formattedItem = item.trim();
 
-                      // Capitalize each word in the string
-                      formattedItem = formattedItem
-                          .split(" ")
-                          .map((word) => {
-                              // Check for specific words that need to be fully capitalized
-                              if (/^(Sjmv|Lpu|Cdo|Dgt)$/i.test(word)) {
-                                  return word.toUpperCase();
-                              }
-                              // Capitalize the first letter of all other words
-                              return (
-                                  word.charAt(0).toUpperCase() +
-                                  word.slice(1).toLowerCase()
-                              );
-                          })
-                          .join(" ");
+                         // Apply the formatting function
+                         formattedItem = formatFunc(formattedItem);
 
-                      // Replace specific names if needed
-                      if (formattedItem === "Casamira South") {
-                          formattedItem = "Casa Mira South";
-                      }
+                         // Split and clean each word
+                         formattedItem = formattedItem
+                             .split(" ")
+                             .map((word) => word.trim()) // Trim each word
+                             .filter((word) => word.length > 0) // Remove empty strings
+                             .map((word) => {
+                                 // Check for specific words that need to be fully capitalized
+                                 if (/^(Sjmv|Lpu|Cdo|Dgt)$/i.test(word)) {
+                                     return word.toUpperCase();
+                                 }
+                                 // Capitalize the first letter of all other words
+                                 return (
+                                     word.charAt(0).toUpperCase() +
+                                     word.slice(1).toLowerCase()
+                                 );
+                             })
+                             .join(" ");
 
-                      return formattedItem;
-                  })
-                  .sort((a, b) => {
-                      if (a === "N/A") return -1;
-                      if (b === "N/A") return 1;
-                      return a.localeCompare(b);
-                  })
-            : []),
-    ];
+                         // Replace specific names if needed
+                         if (formattedItem === "Casamira South") {
+                             formattedItem = "Casa Mira South";
+                         }
+
+                         // Final trim to ensure no leftover spaces
+                         return formattedItem.trim();
+                     })
+                     .sort((a, b) => {
+                         if (a === "N/A") return -1;
+                         if (b === "N/A") return 1;
+                         return a.localeCompare(b);
+                     })
+               : []),
+       ];
 
     const monthNames = {
         "01": "January",

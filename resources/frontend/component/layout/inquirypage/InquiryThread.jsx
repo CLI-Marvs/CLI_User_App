@@ -67,7 +67,7 @@ const InquiryThread = () => {
         setMessages,
         setIsUserTypeChange,
         isUserTypeChange,
-        categories
+        categories,
     } = useStateContext();
     const [chatMessage, setChatMessage] = useState("");
     const userLoggedInEmail = user?.employee_email;
@@ -154,11 +154,17 @@ const InquiryThread = () => {
             ? propertyNamesList
                   .filter((item) => !item.toLowerCase().includes("phase"))
                   .map((item) => {
-                      let formattedItem = formatFunc(item);
+                      // First trim to remove any whitespace or \n
+                      let formattedItem = item.trim();
 
-                      // Capitalize each word in the string
+                      // Apply the formatting function
+                      formattedItem = formatFunc(formattedItem);
+
+                      // Split and clean each word
                       formattedItem = formattedItem
                           .split(" ")
+                          .map((word) => word.trim()) // Trim each word
+                          .filter((word) => word.length > 0) // Remove empty strings
                           .map((word) => {
                               // Check for specific words that need to be fully capitalized
                               if (/^(Sjmv|Lpu|Cdo|Dgt)$/i.test(word)) {
@@ -177,7 +183,8 @@ const InquiryThread = () => {
                           formattedItem = "Casa Mira South";
                       }
 
-                      return formattedItem;
+                      // Final trim to ensure no leftover spaces
+                      return formattedItem.trim();
                   })
                   .sort((a, b) => {
                       if (a === "N/A") return -1;
