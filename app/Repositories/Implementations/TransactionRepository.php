@@ -138,22 +138,6 @@ class TransactionRepository
 
         $query = $this->transactionModel
             ->join('property_masters', 'property_masters.id', '=', 'transaction.id')
-            ->join('markup_settings', 'markup_settings.payment_method', '=', 'transaction.payment_option')
-            
-            ->leftJoin('markup_details as md', function($join) {
-                $join->on('md.markup_setting_id', '=', 'markup_settings.id')
-                    ->where('md.location', '=', 'local');
-            })
-
-            ->leftJoin('markup_settings as pms', function ($join) {
-                $join->on('pms.id', '!=', \DB::raw('0'))
-                      ->where('pms.payment_method', 'LIKE', '%Paynamics%');
-            })
-            ->leftJoin('markup_details as pmd', function ($join) {
-                $join->on('pmd.markup_setting_id', '=', 'pms.id')
-                    ->where('pmd.location', '=', 'local');
-            })
-
             ->leftJoin('invoices', function ($join) {
                 $join->on('invoices.contract_number', '=', 'transaction.reference_number')
                     ->where('transaction.status', 'Cleared');
@@ -165,16 +149,6 @@ class TransactionRepository
                 'invoices.invoice_number',
                 'invoices.flow_type',
                 'invoices.id as invoice_id',
-                'md.pti_bank_rate_percent',
-                'md.pti_bank_fixed_amount',
-                'md.cli_markup',
-                'md.location',
-                \DB::raw("CASE 
-                    WHEN transaction.payment_option = 'Credit/Debit Card' 
-                    AND pmd.location = 'local'
-                    THEN pmd.pti_bank_rate_percent 
-                    ELSE NULL 
-                END as paynamics_rate_percent"),
             )
             ->orderBy('transaction.created_at', 'desc')
             ->when(!empty($data['status']), fn($q) => $q->where('transaction.status', $data['status']))
