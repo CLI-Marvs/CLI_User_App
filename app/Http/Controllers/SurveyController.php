@@ -271,7 +271,7 @@ class SurveyController extends Controller
     public function getSurveyStats($survey_list_id)
     {
         try {
-
+            // Get the survey title
             $survey = DB::table('surveys_list')
                 ->where('id', $survey_list_id)
                 ->select('survey_title')
@@ -281,20 +281,46 @@ class SurveyController extends Controller
                 return response()->json(['error' => 'Survey not found'], 404);
             }
 
-
+            // Get valid options for all questions in the survey
             $validOptions = DB::table('survey_options')
-                ->pluck('text', 'id');
+                ->whereIn('question_id', function ($query) use ($survey_list_id) {
+                    // Join survey_questions with survey_forms to get the survey_id
+                    $query->select('survey_questions.id')
+                        ->from('survey_questions')
+                        ->join('survey_forms', 'survey_questions.form_id', '=', 'survey_forms.id')
+                        ->where('survey_forms.survey_id', $survey_list_id);  // Use survey_id from survey_forms
+                })
+                ->pluck('text', 'id')
+                ->toArray(); // Convert to an array for easy access
 
+            // Get the questions for this survey
             $questions = DB::table('survey_questions')
                 ->join('survey_forms', 'survey_questions.form_id', '=', 'survey_forms.id')
-                ->where('survey_forms.survey_id', $survey_list_id)
+                ->where('survey_forms.survey_id', $survey_list_id)  // Join to filter by survey_id
                 ->select('survey_questions.id', 'survey_questions.question')
                 ->get();
 
             $questionsResult = [];
 
+            // Process each question
             foreach ($questions as $question) {
+                // Get options for this specific question
+                $options = DB::table('survey_options')
+                    ->where('question_id', $question->id)
+                    ->pluck('text', 'id')
+                    ->toArray();
 
+                // Initialize option counts with zero responses (for this question's options only)
+                $optionCounts = [];
+                foreach ($options as $optionId => $optionText) {
+                    $optionCounts[$optionId] = [
+                        'id' => $optionId,
+                        'value' => $optionText,
+                        'count' => 0
+                    ];
+                }
+
+                // Get all answers for this question
                 $answers = DB::table('survey_answers')
                     ->where('survey_list_id', $survey_list_id)
                     ->where('question_id', $question->id)
@@ -303,37 +329,21 @@ class SurveyController extends Controller
 
                 $totalResponses = $answers->count();
 
-                $optionCounts = [];
-
+                // Count the selected options
                 foreach ($answers as $answer) {
                     $decoded = json_decode($answer->answer_value, true);
-
                     $values = is_array($decoded) ? $decoded : [$decoded];
 
                     foreach ($values as $v) {
                         $optionId = $answer->option_id ?? null;
 
-
-                        if ($optionId && isset($validOptions[$optionId])) {
-
-
-                            $updatedValue = $validOptions[$optionId];
-
-                            $optionKey = "{$optionId}";
-
-                            if (!isset($optionCounts[$optionKey])) {
-                                $optionCounts[$optionKey] = [
-                                    'id' => $optionId,
-                                    'value' => $updatedValue,
-                                    'count' => 1
-                                ];
-                            } else {
-                                $optionCounts[$optionKey]['count']++;
-                            }
+                        if ($optionId && isset($optionCounts[$optionId])) {
+                            $optionCounts[$optionId]['count']++;
                         }
                     }
-                    ksort($optionCounts, SORT_NUMERIC);
                 }
+
+                ksort($optionCounts, SORT_NUMERIC);
 
                 $questionsResult[] = [
                     'question_id' => $question->id,
@@ -343,6 +353,8 @@ class SurveyController extends Controller
                 ];
             }
 
+
+            // Sort questions by their ID
             usort($questionsResult, function ($a, $b) {
                 return $a['question_id'] <=> $b['question_id'];
             });
@@ -358,6 +370,8 @@ class SurveyController extends Controller
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
+
+
 
 
     public function getSurveyLinks()
