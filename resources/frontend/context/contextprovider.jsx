@@ -109,6 +109,7 @@ export const ContextProvider = ({ children }) => {
     const [endDateValue, setEndDateValue] = useState(null);
     const [startDate, setStartDate] = useState(null);
     const [endDate, setEndDate] = useState(null);
+    const [survey_title, setSurveyTitle] = useState("");
 
     useEffect(() => {
         if (user && user.department && !isDepartmentInitialized) {
@@ -167,20 +168,20 @@ export const ContextProvider = ({ children }) => {
     };
 
     const getBankName = async () => {
-        if (token) {
+        /* if (token) {
             try {
                 const response = await apiService.get("get-transaction-bank");
                 setBankList(response.data);
             } catch (error) {
                 console.log("error retrieving banks", error);
             }
-        }
+        } */
     };
 
     const getTransactions = async () => {
-        try {
+       /*  try {
             const searchParams = new URLSearchParams({
-                /*   search: JSON.stringify(searchFilter), */
+                
                 page: currentPageTransaction + 1,
                 bank_name: bankNames ? bankNames : null,
             }).toString();
@@ -191,7 +192,7 @@ export const ContextProvider = ({ children }) => {
             setTransactionsPageCount(response.data.last_page);
         } catch (error) {
             console.error("Error fetching data: ", error);
-        }
+        } */
     };
 
     const getMatches = async () => {
@@ -691,6 +692,8 @@ export const ContextProvider = ({ children }) => {
             console.log("error", error);
         }
     };
+
+    
 
     // useEffect(() => {
     //     getPropertyUnits(towerPhaseId, selectedFloor);

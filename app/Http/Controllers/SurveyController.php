@@ -402,4 +402,17 @@ class SurveyController extends Controller
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
+
+    public function getSurveyTitle($survey_list_id)
+    {
+        $survey = DB::table('surveys_list')
+            ->where('id', $survey_list_id)
+            ->value('survey_title');
+
+        if (!$survey) {
+            return response()->json(['error' => 'Survey not found'], 404);
+        }
+
+        return response()->json(['survey_title' => $survey], 200);
+    }
 }
