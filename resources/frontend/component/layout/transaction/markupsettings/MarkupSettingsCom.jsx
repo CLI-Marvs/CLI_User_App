@@ -19,9 +19,9 @@ const MarkupSettingsCom = () => {
     ];
 
     const INPUT_SEARCH = [
-        { name: "pti_bank_rate_percent", label: "Bank Rate Percentage" },
-        { name: "pti_bank_fixed_amount", label: "Bank Fixed Amount" },
-        { name: "cli_markup", label: "CLI Markup" },
+        { name: "pti_bank_rate_percent", label: "Percentage Rate" },
+        { name: "pti_bank_fixed_amount", label: "Fix Amount Rate" },
+        { name: "cli_markup", label: "CLI Markup(Fix Amount)" },
         { name: "payment_method", label: "Payment Method" },
     ];
 
@@ -37,21 +37,21 @@ const MarkupSettingsCom = () => {
             ),
         },
         {
-            header: "Bank Rate Percentage",
+            header: "Percentage Rate",
             accessor: "pti_bank_rate_percent",
             render: (row) => (
                 <MarkupTableCell type="pti_bank_rate_percent" row={row} />
             ),
         },
         {
-            header: "Bank Fixed Amount",
+            header: "Fix Amount Rate",
             accessor: "pti_bank_fixed_amount",
             render: (row) => (
                 <MarkupTableCell type="pti_bank_fixed_amount" row={row} />
             ),
         },
         {
-            header: "CLI Markup",
+            header: "CLI Markup(Fix Amount)",
             accessor: "cli_markup",
             render: (row) => <MarkupTableCell type="cli_markup" row={row} />,
         },
@@ -100,7 +100,7 @@ const MarkupSettingsCom = () => {
 
     return (
         <>
-            <div className="overflow-y-hidden px-3 flex flex-col space-y-2 max-w-auto">
+            <div className="overflow-y-hidden px-3 flex flex-col space-y-2 w-full">
                 <div className="flex items-center ">
                 <TransactionSearchBar
                     fields={SEARCH_FIELDS}

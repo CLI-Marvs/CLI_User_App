@@ -134,6 +134,13 @@ const MarkupSettingModal = ({
                 response = await settings.storeSettings(formData);
                 showToast("Markup settings saved successfully", "success");
             } else {
+                if (selectedData && JSON.stringify(formData) === JSON.stringify(selectedData)) {
+                    showToast("No updates were made as no changes were detected.", "info");
+                    setIsLoading(false);
+                    settingsRef.current.close();
+                    return;
+                }
+    
                 response = await settings.updateSettings(formData);
                 showToast("Markup settings updated successfully", "success");
             }
@@ -153,7 +160,6 @@ const MarkupSettingModal = ({
             setIsLoading(false);
         } finally {
             setIsLoading(false);
-            resetFields();
         }
     };
 
@@ -263,7 +269,6 @@ const MarkupSettingModal = ({
                     </div>
 
                     <div className="flex justify-end mt-5">
-                        <div className="flex justify-center bg-gradient-to-r from-[#175D5F] to-[#70AD47] rounded-[10px] items-center shadow-md w-[150px] px-3 py-3 h-[40px] space-x-2 cursor-pointer">
                             <button
                                 className="flex justify-center bg-gradient-to-r from-[#175D5F] to-[#70AD47] rounded-[10px] items-center shadow-md w-[150px] px-3 py-3 h-[40px] space-x-2 cursor-pointer text-white"
                                 onClick={handleSave}
@@ -271,7 +276,6 @@ const MarkupSettingModal = ({
                             >
                                 {isLoading ? <Spinner /> : "Save"}
                             </button>
-                        </div>
                     </div>
                 </div>
             </div>
