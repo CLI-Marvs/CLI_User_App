@@ -72,40 +72,30 @@ const TransactionTableCell = ({ type, row }) => {
                     <div className="flex flex-col text-[13px]">
                         <div className="mt-1 text-gray-700 flex flex-col">
                             <div className="flex justify-between">
-                            <span>Payment Amount:</span>
-                            <span>
-                                Php {parseFloat(row.amount).toLocaleString(
-                                    "en-US",
-                                    {
-                                        minimumFractionDigits: 2,
-                                        maximumFractionDigits: 2,
-                                    }
-                                )}
-                            </span>
-                        </div>
-                        <div className="flex justify-between">
-                                <span>Bank Fee:</span>
+                                <span>Payment Amount:</span>
                                 <span>
-                                Php {row.bank_fee}
+                                    Php{" "}
+                                    {parseFloat(row.amount).toLocaleString(
+                                        "en-US",
+                                        {
+                                            minimumFractionDigits: 2,
+                                            maximumFractionDigits: 2,
+                                        }
+                                    )}
                                 </span>
                             </div>
-                            {row.payment_option === "Credit/Debit Card" && (
-                                 <div className="flex justify-between">
-                                 <span>
-                                     Paynamics Fee:
-                                 </span>
-                                 <span>
-                                     Php {row.paynamics_fee}
-                                 </span>
-                             </div>
-                            )}
-                            
-                                <div className="flex justify-between mb-2">
-                                    <span>CLI Markup:</span>
-                                    <span>
-                                        Php {row.cli_markup}
-                                    </span>
-                                </div>
+                            <div className="flex justify-between">
+                                <span>CLI Markup:</span>
+                                <span>Php {row.cli_markup}</span>
+                            </div>
+                            <div className="flex justify-between">
+                                <span>Bank Fee:</span>
+                                <span>Php {row.bank_fee}</span>
+                            </div>
+                            <div className="flex justify-between">
+                                <span>Paynamics Fee:</span>
+                                <span>Php {row.paynamics_fee}</span>
+                            </div>
                         </div>
 
                         <div className="flex justify-between font-semibold border-t pt-1">
@@ -115,7 +105,7 @@ const TransactionTableCell = ({ type, row }) => {
                                     parseFloat(row.amount) +
                                     parseFloat(row.bank_fee) +
                                     parseFloat(row.paynamics_fee) +
-                                    parseFloat(row.cli_markup) 
+                                    parseFloat(row.cli_markup)
                                 ).toLocaleString("en-US", {
                                     minimumFractionDigits: 2,
                                     maximumFractionDigits: 2,
