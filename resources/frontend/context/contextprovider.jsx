@@ -7,7 +7,7 @@ import React, {
 } from "react";
 import apiService from "../component/servicesApi/apiService";
 import debounce from "lodash/debounce";
-import { set } from "lodash";
+import { get, set } from "lodash";
 
 const StateContext = createContext({
     user: null,
@@ -49,7 +49,7 @@ export const ContextProvider = ({ children }) => {
     const [communicationTypeMonth, setCommunicationTypeMonth] = useState("");
     const [specificInquiry, setSpecificInquiry] = useState(null);
     const [dataSet, setDataSet] = useState([]);
-
+    const [categories, setCategories] = useState([]);
     const [department, setDepartment] = useState("All");
     const [project, setProject] = useState("All");
     const [month, setMonth] = useState("All");
@@ -235,7 +235,6 @@ export const ContextProvider = ({ children }) => {
                 },
             });
             const result = response.data;
-
             // Aggregate data into a single "Other Concerns" entry for null or "Other Concerns"
             const aggregatedData = result.reduce((acc, item) => {
                 const name = item.details_concern || "Other Concerns"; // Replace null with "Other Concerns"
@@ -260,6 +259,21 @@ export const ContextProvider = ({ children }) => {
             setDataCategory(aggregatedData);
         } catch (error) {
             console.log("Error retrieving data", error);
+        }
+    };
+
+    /* Fetch categories or concern regarding (e.g.  'Reservation Documents',
+            'Account / Payment Issues',
+            'Turn Over Status',
+            'Unit Status', etc... */
+    const getCategories = async () => {
+        if (token) {
+            try {
+                const response = await apiService.get("categories");
+                setCategories(response.data);
+            } catch (error) {
+                console.log("Error retrieving data", error);
+            }
         }
     };
 
@@ -693,7 +707,9 @@ export const ContextProvider = ({ children }) => {
         }
     };
 
-    
+    useEffect(() => {
+        getCategories();
+    }, []);
 
     // useEffect(() => {
     //     getPropertyUnits(towerPhaseId, selectedFloor);
@@ -977,8 +993,8 @@ export const ContextProvider = ({ children }) => {
                 startDate,
                 setStartDate,
                 endDate,
-                setEndDate
-
+                setEndDate,
+                categories,
             }}
         >
             {children}

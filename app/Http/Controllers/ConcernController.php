@@ -2405,6 +2405,7 @@ class ConcernController extends Controller
 
     public function getInquiriesByCategory(Request $request)
     {
+        // dd($request->all());
         try {
             $project = $request->property;
             $department = $request->department;
@@ -2449,7 +2450,7 @@ class ConcernController extends Controller
         }
 
         $concerns = $query->groupBy('details_concern')->get();
-
+ 
         return response()->json($concerns);
     }
 
@@ -2776,7 +2777,6 @@ class ConcernController extends Controller
                         $messagesRef->buyer_email = $buyer['buyer_email'];
                         $messagesRef->attachment = json_encode($fileLinks);
                         $messagesRef->created_at = Carbon::parse(now())->setTimezone('Asia/Manila');
-                        $messagesRef->buyer_firstname = $existingTicket->buyer_name;
                         $messagesRef->buyer_name = $existingTicket->buyer_name;
                         $messagesRef->save();
                     }

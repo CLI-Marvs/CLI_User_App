@@ -1,21 +1,22 @@
 <?php
 
-use App\Http\Controllers\AuthController;
+use Illuminate\Http\Request;
 
-use App\Http\Controllers\ConcernController;
-use App\Http\Controllers\DynamicBannerController;
-use App\Http\Controllers\PaymentSchemeController;
-use App\Http\Controllers\PriceBasicDetailController;
-
-use App\Http\Controllers\PriceListMasterController;
-use App\Http\Controllers\PropertyMasterController;
-use App\Http\Controllers\SapController;
-use App\Http\Controllers\SurveyController;
-use App\Http\Controllers\UnitController;
 use App\Models\DynamicBanner;
 use App\Models\PropertyMaster;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\SapController;
+
+use App\Http\Controllers\SurveyController;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\UnitController;
+use App\Http\Controllers\ConcernController;
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\DynamicBannerController;
+use App\Http\Controllers\PaymentSchemeController;
+use App\Http\Controllers\PropertyMasterController;
+use App\Http\Controllers\PriceListMasterController;
+use App\Http\Controllers\PriceBasicDetailController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -88,6 +89,7 @@ Route::get('/get-matches', [SapController::class, 'runAutoPosting']);
 
 
 Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/categories', [CategoryController::class, 'index']);
     Route::get('/get-transaction-bank', [SapController::class, 'getTransactionByBankName']);
     Route::post('/upload-notepad', [SapController::class, 'uploadNotepad']);
     Route::get('/get-concern', [ConcernController::class, 'getAllConcerns']);

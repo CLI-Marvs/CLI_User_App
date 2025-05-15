@@ -93,16 +93,13 @@ const InquiryList = () => {
     const [selectedYear, setSelectedYear] = useState("");
     const [selectedMonth, setSelectedMonth] = useState("");
     const [hasAttachments, setHasAttachments] = useState(false);
-    const { propertyNamesList } = useStateContext();
+    const { propertyNamesList, categories } = useStateContext();
     const [assignedToMeActive, setAssignedToMeActive] = useState(false);
     const [isFilterVisible, setIsFilterVisible] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
     const [lastActivity, setLastActivity] = useState(null);
     const filterBoxRef = useRef(null);
     const [isOpenSelect, setIsOpenSelect] = useState(false);
-
-
-
 
     const handleSelect = (option) => {
         onChange(option);
@@ -115,7 +112,6 @@ const InquiryList = () => {
         const selectedPage = data.selected;
         setCurrentPage(selectedPage);
     };
-
 
     const handleRefresh = () => {
         setResultSearchActive(false);
@@ -375,7 +371,6 @@ const InquiryList = () => {
         return monthNames[parseInt(monthNumber, 10) - 1]; // Adjust for zero-based index
     };
 
-
     const handleSearch = () => {
         setResultSearchActive(true);
         let summaryParts = []; // Array to hold each part of the summary
@@ -464,19 +459,52 @@ const InquiryList = () => {
           console.log("channelsParam", channelsParam);
    */
 
-        if (
-            propertyParam ||
-            statusParam ||
-            monthParam ||
-            yearParam ||
-            departmentParam ||
-            channelsParam ||
-            categoryParam
-        ) {
+            if (
+                propertyParam ||
+                statusParam ||
+                monthParam ||
+                yearParam ||
+                departmentParam ||
+                channelsParam ||
+                categoryParam
+            ) {
+                setResultSearchActive(true);
 
-            setResultSearchActive(true);
+                let summaryParts = []; // Array to hold each part of the summary
 
-            let summaryParts = []; // Array to hold each part of the summary
+                if (categoryParam)
+                    summaryParts.push(`Category: ${categoryParam}`);
+                if (statusParam) {
+                    const displayStatus =
+                        statusParam === "unresolved"
+                            ? "Unresolved"
+                            : statusParam;
+                    summaryParts.push(`Status: ${displayStatus}`);
+                }
+                if (name) summaryParts.push(`Name: ${name}`);
+                if (typeParam) summaryParts.push(`Type: ${typeParam}`);
+                if (email) summaryParts.push(`Email: ${email}`);
+                if (channelsParam) {
+                    // Format 'Walk in' to 'Walk-in'
+                    const formattedChannel =
+                        channelsParam === "Walk in"
+                            ? "Walk-in"
+                            : channelsParam === "Social media"
+                            ? "Social Media"
+                            : channelsParam;
+                    summaryParts.push(`Channel: ${formattedChannel}`);
+                }
+                if (departmentParam)
+                    summaryParts.push(`Department: ${departmentParam}`);
+                if (ticket) summaryParts.push(`Ticket: ${ticket}`);
+                if (startDate)
+                    summaryParts.push(`Start Date: ${formatDate(startDate)}`);
+                if (propertyParam)
+                    summaryParts.push(`Property: ${propertyParam}`);
+                if (yearParam) summaryParts.push(`Year: ${yearParam}`);
+                if (monthParam)
+                    summaryParts.push(`Month: ${formatMonth(monthParam)}`);
+                if (hasAttachments) summaryParts.push(`Attachments: Yes`);
 
             if (categoryParam)
                 summaryParts.push(`Category: ${categoryParam}`);
@@ -562,7 +590,6 @@ const InquiryList = () => {
         specificAssigneeCsr,
         currentPage,
     ]);
-
 
     return (
         <>
@@ -664,34 +691,15 @@ const InquiryList = () => {
                                                 <option value=" ">
                                                     Select Category
                                                 </option>
-                                                <option value="Reservation Documents">
-                                                    Reservation Documents
-                                                </option>
-                                                <option value="Payment Issues">
-                                                    Payment Issues
-                                                </option>
-                                                <option value="SOA/ Buyer's Ledger">
-                                                    SOA/ Buyer's Ledger
-                                                </option>
-                                                <option value="Turn Over Status">
-                                                    Turn Over Status
-                                                </option>
-                                                <option value="Unit Status">
-                                                    Unit Status
-                                                </option>
-                                                <option value="Loan Application">
-                                                    Loan Application
-                                                </option>
-                                                <option value="Title and Other Registration Documents">
-                                                    Title and Other Registration
-                                                    Documents
-                                                </option>
-                                                <option value="Commissions">
-                                                    Commissions
-                                                </option>
-                                                <option value="Other Concerns">
-                                                    Other Concerns
-                                                </option>
+                                                {categories && categories.map(
+                                                    (category) => (
+                                                        <option
+                                                            key={category.id}
+                                                        >
+                                                            {category.name}
+                                                        </option>
+                                                    )
+                                                )}
                                             </select>
                                         </div>
 
@@ -1138,7 +1146,13 @@ const InquiryList = () => {
                         <div className="flex flex-col gap-1 p-2 mt-[15px] bg-white w-max rounded-[8px] shadow-custom7 text-sm">
                             <div className="flex flex-col">
                                 <div className="mb-5">
-                                    <strong>Search {data?.length > 1 ? 'results for' : 'result for'} &nbsp;</strong>
+                                    <strong>
+                                        Search{" "}
+                                        {data?.length > 1
+                                            ? "results for"
+                                            : "result for"}{" "}
+                                        &nbsp;
+                                    </strong>
                                 </div>
                                 <div className="flex flex-col flex-wrap gap-2">
                                     {searchSummary.map((part, index) => {
@@ -1167,7 +1181,13 @@ const InquiryList = () => {
                                     dataCount && dataCount === 0 ? (
                                         <p>No Records Found</p>
                                     ) : (
-                                        <p>{dataCount} {data?.length > 1 ? 'Results' : 'Result'} Found</p>
+                                        <p>
+                                            {dataCount}{" "}
+                                            {data?.length > 1
+                                                ? "Results"
+                                                : "Result"}{" "}
+                                            Found
+                                        </p>
                                     )
                                 ) : (
                                     <p>
