@@ -389,7 +389,7 @@ class SurveyController extends Controller
                 'http://localhost:8001'                  => 'http://localhost:8002/survey',
                 'https://admin-dev.cebulandmasters.com'  => 'https://feedback-dev.cebulandmasters.com/survey',
                 'https://admin-uat.cebulandmasters.com'  => 'https://feedback-uat.cebulandmasters.com/survey',
-                'https://admin.cebulandmasters.com'      => 'https://ask.cebulandmasters.com/survey',
+                'https://admin.cebulandmasters.com'      => 'https://ask.cebulandmasters.com/survey', 
             ];
 
             $defaultSurveyBaseUrl = 'https://ask.cebulandmasters.com/survey';
