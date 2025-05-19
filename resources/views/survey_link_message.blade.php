@@ -148,12 +148,12 @@
         We value your feedback and would appreciate it if you could take a few moments to complete a short survey (5
         minutes)
         about your experience.<br>
-        Your insights help us improve our services and better serve you in the future.
+        Your insights help us improve our services and serve you better in the future.
     </p>
 
     <p style="color:#404B52; font-size: 20px;">
         Please click the link below to access the survey: <br>
-        <a href="{{ $selectedSurveyType['surveyLink']}}={{ $modifiedTicketId }}"
+        <a href="{{ $selectedSurveyType['surveyLink']}}/{{ $modifiedTicketId }}"
             style="  height: 50px; width: 225px;  margin-top: 5px; font-weight: 600; font-size: 18px;"
             class="button">
             Click Here! 👈

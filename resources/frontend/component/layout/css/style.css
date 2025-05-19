@@ -248,3 +248,12 @@ textarea {
 .shrink {
   transform: scale(0.87); /* Adjust the scale factor as needed */
 }
+
+.custom-calendar {
+  z-index: 1000 !important;
+}
+
+input:checked ~ .dot {
+  transform: translateX(100%);
+  background-color: #48bb78;
+}

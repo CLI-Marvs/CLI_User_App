@@ -44,6 +44,10 @@ import PreloadWrapper from "./PreloadWrapper";
 import BannerSettingsView from './views/pages/bannersettingsViews/BannerSettingsView';
 import CrsSettingsSidebar from './layout/mainComponent/sidebars/CrsSettingsSidebar';
 import VersionLogsView from './views/pages/raiseaconcernViews/VersionLogsView';
+import SurveyReportsView from './views/pages/surveyrelatedreportsViews/SurveyReportsView';
+import SurveyFormView from './views/pages/surveyrelatedreportsViews/SurveyFormView';
+import SurveyReviewView from './views/pages/surveyrelatedreportsViews/SurveyReviewView';
+import SurveyMainView from './views/pages/surveyrelatedreportsViews/SurveyMainView';
 // PrivateRoute component to check authentication
 const PrivateRoute = () => {
     const authToken = localStorage.getItem("authToken");
@@ -331,6 +335,22 @@ const App = () => {
                                 {
                                     path: "autoassign",
                                     element: <AutoAssignView />,
+                                },
+                                {
+                                    path: "surveysettings",
+                                    element: <SurveyReportsView />,
+                                },
+                                {
+                                    path: "surveysettings/surveyform",
+                                    element: <SurveyMainView />,
+                                },
+                                {
+                                    path: "surveysettings/surveyform/:id?",
+                                    element: <SurveyMainView />,
+                                },
+                                {
+                                    path: "surveysettings/surveyreview",
+                                    element: <SurveyReviewView />,
                                 },
                                 {
                                     path: "bannersettings",

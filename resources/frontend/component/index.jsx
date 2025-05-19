@@ -5,6 +5,7 @@ import { ContextProvider } from "../context/contextprovider";
 import PriceBasicDetailsFormDataProvider from "../context/PriceBasicDetail/PriceBasicContext";
 import FloorPremiumFormDataProvider from "../context/FloorPremium/FloorPremiumContext";
 import { ToastContainer } from "react-toastify";
+import { SurveyProvider } from "../context/Survey/SurveyContext";
 
 const rootElement = document.getElementById("root");
 
@@ -12,13 +13,15 @@ if (rootElement) {
     ReactDOM.createRoot(rootElement).render(
         <React.StrictMode>
             <ContextProvider>
-                <ToastContainer />
-                <App />
-                {/* <PriceBasicDetailsFormDataProvider>
+                <SurveyProvider>
+                    <ToastContainer />
+                    <App />
+                    {/* <PriceBasicDetailsFormDataProvider>
                     <FloorPremiumFormDataProvider>
                         
                     </FloorPremiumFormDataProvider>
                 </PriceBasicDetailsFormDataProvider> */}
+                </SurveyProvider>
             </ContextProvider>
         </React.StrictMode>
 

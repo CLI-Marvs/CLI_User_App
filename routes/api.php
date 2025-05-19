@@ -7,6 +7,7 @@ use App\Models\PropertyMaster;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SapController;
 
+use App\Http\Controllers\SurveyController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UnitController;
 use App\Http\Controllers\ConcernController;
@@ -92,6 +93,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/get-transaction-bank', [SapController::class, 'getTransactionByBankName']);
     Route::post('/upload-notepad', [SapController::class, 'uploadNotepad']);
     Route::get('/get-concern', [ConcernController::class, 'getAllConcerns']);
+    Route::get('/get-count-all-concerns', [ConcernController::class, 'getCountAllConcerns']);
     Route::post('/add-concern', [ConcernController::class, 'addConcernPublic']);
     Route::post('/add-concern-prev', [ConcernController::class, 'addConcernFromPreviousInquiry']);
     Route::get('/get-message/{ticketId}', [ConcernController::class, 'getMessage']);
@@ -131,4 +133,15 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/get-banner', [DynamicBannerController::class, 'getBanner']);
     Route::delete('/banner/{id}', [DynamicBannerController::class, 'deleteBanner']);
     Route::post('/update-banner', [DynamicBannerController::class, 'updateBanner']);
+
+
+    Route::post('/surveys', [SurveyController::class, 'store']);
+    Route::put('/surveys/{id}', [SurveyController::class, 'update']);
+    Route::get('/fetch-surveys', [SurveyController::class, 'fetchSurveys']);
+    Route::get('/fetch-survey/{id}', [SurveyController::class, 'fetchSurvey']);
+    Route::delete('/surveys/{id}', [SurveyController::class, 'delete']);
+    Route::get('/survey-summary/{survey_list_id}', [SurveyController::class, 'getSurveyStats']);
+    Route::put('/surveys/{id}/update-title', [SurveyController::class, 'updateTitle']);
+    Route::get('/survey-links', [SurveyController::class, 'getSurveyLinks']);
+    Route::get('/survey-title/{survey_list_id}', [SurveyController::class, 'getSurveyTitle']);
 });

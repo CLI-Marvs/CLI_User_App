@@ -282,10 +282,7 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
             setIsUserTypeChange(false);
 
             onupdate({ ...dataToUpdate, dataConcern });
-            await Promise.all([
-                getInquiryLogs(dataConcern.ticket_id),
-                getAllConcerns(),
-            ]);
+            await Promise.all([getInquiryLogs(dataConcern.ticket_id), getAllConcerns(), getNavBarData(dataConcern.ticket_id)]);
         } catch (error) {
             console.log("error", error);
         }

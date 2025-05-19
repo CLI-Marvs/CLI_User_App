@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
+import { useParams } from 'react-router-dom';
 import CLILogo from "../../../../../public/Images/CLILogo.png";
 import Kent from "../../../../../public/Images/kent.png";
 import apiService from "../../servicesApi/apiService";
@@ -14,9 +15,15 @@ import { MdOutlineMail } from "react-icons/md";
 import FeedbackModal from "./FeedbackModal";
 import Skeleton from 'react-loading-skeleton'
 import 'react-loading-skeleton/dist/skeleton.css'
+import { useSurvey } from "../../../context/Survey/SurveyContext";
 
 const Navbar = () => {
+
+    const { id } = useParams();
+
+
     const { data, ticketId, navBarData, loading, user, getNavBarData } = useStateContext();
+    const { survey_title, fetchSurveyTitle, survey_loading } = useSurvey();
     const [isOpen, setIsOpen] = useState(false);
     const location = useLocation();
     const modalRef = useRef(null);
@@ -31,6 +38,13 @@ const Navbar = () => {
         }
     };
 
+    useEffect(() => {
+        if (id) {
+          fetchSurveyTitle(id);
+        }
+      }, [id]);
+
+      
     useEffect(() => {
         if (isOpen) {
             document.addEventListener("mousedown", handleClickOutside);
@@ -71,7 +85,7 @@ const Navbar = () => {
             );
 
             if (value.toLowerCase() === "inquirymanagement") {
-                breadcrumbLabel = "Inquiry Management";
+                breadcrumbLabel = "Customer Relations";
                 // Non-linkable
                 return (
                     <span
@@ -148,8 +162,46 @@ const Navbar = () => {
                 );
             }
 
+            if (value.toLowerCase() === "report") {
+                breadcrumbLabel = "Reports";
+                // Non-linkable
+                return (
+                    <span
+                        key={routeTo}
+                        className="text-custom-solidgreen cursor-default"
+                    >
+                        {breadcrumbLabel}
+                    </span>
+                );
+            }
+
+            if (value.toLowerCase() === "surveysettings") {
+                breadcrumbLabel = "Survey Settings";
+            }
+
+            if (value.toLowerCase() === "surveyform") {
+                breadcrumbLabel = "Survey Form";
+                return (
+                    <span
+                        key={routeTo}
+                        className="text-custom-solidgreen cursor-default"
+                    >
+                        {breadcrumbLabel}
+                    </span>
+                );
+            }
+
+            
+            if (id && value === id) {
+                return (
+                    <span key={routeTo} className="text-custom-solidgreen cursor-default">
+                      {survey_loading ? <Skeleton width={200} /> : (survey_title || id)}
+                    </span>
+                  );
+            }
+
             if (value.toLowerCase() === "inquirylist") {
-                breadcrumbLabel = "Inquiries";
+                breadcrumbLabel = "Feedback";
             }
 
             if (value.toLowerCase() === "transactionrecords") {
@@ -157,7 +209,7 @@ const Navbar = () => {
             }
 
             if (value.toLowerCase() === "thread") {
-                breadcrumbLabel = "Inquiries";
+                breadcrumbLabel = "Feedback";
                 return (
                     <Link
                         key={routeTo}
@@ -169,7 +221,7 @@ const Navbar = () => {
                 );
             }
 
-            
+
 
             if (breadcrumbLabel.startsWith("Ticket#")) {
                 const ticketId = breadcrumbLabel;
@@ -193,12 +245,11 @@ const Navbar = () => {
                         className="text-custom-solidgreen cursor-default"
                     >
                         {/* capitalizeWords()*/
-                            `${concernData?.buyer_firstname || ""} ${
-                                concernData?.buyer_middlename || ""
+                            `${concernData?.buyer_firstname || ""} ${concernData?.buyer_middlename || ""
                             } ${concernData?.buyer_lastname || ""}`
                         }{" "}
                         {/* capitalizeWords()*/concernData?.suffix_name || ""} {""}
-                        {concernData?.details_concern ? (concernData?.details_concern) : ""} {" "} 
+                        {concernData?.details_concern ? (concernData?.details_concern) : ""} {" "}
                         {concernData?.email_subject ? `[Direct Email] (Email Subject: ${concernData?.email_subject})` : ""}
                         {concernData?.property || ""} ({concernData?.ticket_id})
                     </span>
@@ -242,7 +293,7 @@ const Navbar = () => {
         }
     };
 
-   
+
     return (
         <>
             <div className="flex h-[100px] pr-16 w-screen bg-custom-grayFA">

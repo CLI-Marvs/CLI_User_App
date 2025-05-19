@@ -98,12 +98,18 @@ export const ContextProvider = ({ children }) => {
     const [loading, setLoading] = useState(false);
     const [navBarData, setNavBarData] = useState([]);
     const [isUserTypeChange, setIsUserTypeChange] = useState(false);
+    const [countAllConcerns, setCountAllConcerns] = useState({});
     const [searchSummary, setSearchSummary] = useState("");
     const [resultSearchActive, setResultSearchActive] = useState(false);
     const [departmentValue, setDepartmentValue] = useState("All");
     const [projectValue, setProjectValue] = useState("All");
     const [yearValue, setYearValue] = useState(new Date().getFullYear());
     const [monthValue, setMonthValue] = useState("All");
+    const [startDateValue, setStartDateValue] = useState(null);
+    const [endDateValue, setEndDateValue] = useState(null);
+    const [startDate, setStartDate] = useState(null);
+    const [endDate, setEndDate] = useState(null);
+    const [survey_title, setSurveyTitle] = useState("");
 
     useEffect(() => {
         if (user && user.department && !isDepartmentInitialized) {
@@ -162,20 +168,20 @@ export const ContextProvider = ({ children }) => {
     };
 
     const getBankName = async () => {
-        if (token) {
+        /* if (token) {
             try {
                 const response = await apiService.get("get-transaction-bank");
                 setBankList(response.data);
             } catch (error) {
                 console.log("error retrieving banks", error);
             }
-        }
+        } */
     };
 
     const getTransactions = async () => {
-        try {
+       /*  try {
             const searchParams = new URLSearchParams({
-                /*   search: JSON.stringify(searchFilter), */
+                
                 page: currentPageTransaction + 1,
                 bank_name: bankNames ? bankNames : null,
             }).toString();
@@ -186,7 +192,7 @@ export const ContextProvider = ({ children }) => {
             setTransactionsPageCount(response.data.last_page);
         } catch (error) {
             console.error("Error fetching data: ", error);
-        }
+        } */
     };
 
     const getMatches = async () => {
@@ -224,6 +230,8 @@ export const ContextProvider = ({ children }) => {
                     property: project,
                     month: month,
                     year: year,
+                    startDate: startDate,
+                    endDate: endDate,
                 },
             });
             const result = response.data;
@@ -288,6 +296,8 @@ export const ContextProvider = ({ children }) => {
                     property: project,
                     month: month,
                     year: year,
+                    startDate: startDate,
+                    endDate: endDate,
                 },
             });
             const result = response.data;
@@ -300,7 +310,7 @@ export const ContextProvider = ({ children }) => {
             );
 
             const formattedData = filteredResult.map((item) => ({
-                name: item.month.toString().padStart(2, "0"),
+                name: `${item.month.toString().padStart(2, "0")}/${item.year.toString().slice(-2)}`,
                 Resolved: item.resolved,
                 Unresolved: item.unresolved,
                 Closed: item.closed,
@@ -320,6 +330,8 @@ export const ContextProvider = ({ children }) => {
                     property: project,
                     department: department,
                     year: year,
+                    startDate: startDate,
+                    endDate: endDate,
                 },
             });
             const result = response.data;
@@ -357,61 +369,40 @@ export const ContextProvider = ({ children }) => {
                     property: project,
                     department: department,
                     year: year,
-                },
+                    startDate: startDate,
+                    endDate: endDate,
+                },  
             });
-
-            const result = response.data;
-
-            // Initialize an object to accumulate the totals for CRS and other departments
-            const departmentTotals = {};
-
-            // Process each item in the result
-            result.forEach((item) => {
-                // If the department is not CRS, add its counts normally
-                if (item.department !== "Customer Relations - Services") {
-                    departmentTotals[item.department] = departmentTotals[
-                        item.department
-                    ] || {
-                        resolved: 0,
-                        unresolved: 0,
-                        closed: 0,
-                    };
-                    departmentTotals[item.department].resolved += item.resolved;
-                    departmentTotals[item.department].unresolved +=
-                        item.unresolved;
-                    departmentTotals[item.department].closed += item.closed;
-                }
-
-                // Add all departments' counts to CRS
-                departmentTotals["Customer Relations - Services"] =
-                    departmentTotals["Customer Relations - Services"] || {
-                        resolved: 0,
-                        unresolved: 0,
-                        closed: 0,
-                    };
-                departmentTotals["Customer Relations - Services"].resolved +=
-                    item.resolved;
-                departmentTotals["Customer Relations - Services"].unresolved +=
-                    item.unresolved;
-                departmentTotals["Customer Relations - Services"].closed +=
-                    item.closed;
-            });
-
-            // Prepare formatted data including CRS and other departments
-            const formattedData = Object.keys(departmentTotals).map(
-                (department) => ({
-                    name: department,
-                    resolved: departmentTotals[department].resolved,
-                    unresolved: departmentTotals[department].unresolved,
-                    closed: departmentTotals[department].closed,
-                })
-            );
-
-            setDataDepartment(formattedData);
+    
+            const departments = response.data.departments;
+            const unassignedData = response.data.totalUnassigned;
+    
+            const formattedData = departments.map((item) => ({
+                name: item.department,
+                resolved: item.resolved,
+                unresolved: item.unresolved,
+                closed: item.closed,
+            }));
+    
+            let concatData = [...formattedData];
+    
+            // Only push "Unassigned" data if it was requested explicitly
+            if (unassignedData && (department === 'Unassigned' || department === 'All')) {
+                const formattedDataUnassigned = {
+                    name: "Unassigned",
+                    resolved: unassignedData.total_resolved,
+                    unresolved: unassignedData.total_unresolved,
+                    closed: unassignedData.total_closed,
+                };
+                concatData.push(formattedDataUnassigned);
+            }
+    
+            setDataDepartment(concatData);
         } catch (error) {
             console.log("error retrieving", error);
         }
     };
+    
 
     const getCommunicationTypePerProperty = async () => {
         try {
@@ -423,12 +414,14 @@ export const ContextProvider = ({ children }) => {
                         property: project,
                         department: department,
                         year: year,
+                        startDate: startDate,
+                        endDate: endDate,
                     },
                 }
             );
             const result = response.data;
             const formattedData = result.reduce((acc, item) => {
-                const name = item.communication_type || "No type";
+                const name = item.communication_type || "No Type";
                 const existing = acc.find((entry) => entry.name === name);
 
                 if (existing) {
@@ -454,6 +447,8 @@ export const ContextProvider = ({ children }) => {
                     property: project,
                     department: department,
                     year: year,
+                    startDate: startDate,
+                    endDate: endDate,
                 },
             });
             const result = response.data;
@@ -565,6 +560,16 @@ export const ContextProvider = ({ children }) => {
             } catch (error) {
                 console.log("error retrieving", error);
             }
+        }
+    };
+
+
+    const getCountAllConcerns = async () => {
+        try {
+            const response = await apiService.get("get-count-all-concerns");
+            setCountAllConcerns(response.data);
+        } catch (error) {
+            console.log("error retrieving", error);
         }
     };
 
@@ -822,6 +827,7 @@ export const ContextProvider = ({ children }) => {
         inquiriesPerChanelYear,
     ]);
 
+
     return (
         <StateContext.Provider
             value={{
@@ -861,6 +867,9 @@ export const ContextProvider = ({ children }) => {
                 month,
                 fullYear,
                 getFullYear,
+                getCountAllConcerns,
+                setCountAllConcerns,
+                countAllConcerns,
                 dataCategory,
                 fetchCategory,
                 propertyMonth,
@@ -977,6 +986,14 @@ export const ContextProvider = ({ children }) => {
                 yearValue,
                 setMonthValue,
                 monthValue,
+                startDateValue,
+                setStartDateValue,
+                endDateValue,
+                setEndDateValue,
+                startDate,
+                setStartDate,
+                endDate,
+                setEndDate,
                 categories,
             }}
         >
