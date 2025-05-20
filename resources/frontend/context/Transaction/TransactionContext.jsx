@@ -45,6 +45,14 @@ export const TransactionProvider = ({ children }) => {
         loading: true,
     });
 
+     const [cardMarkupDetails, setCardMarkupDetails] = useState({
+        data: [],
+        currentPage: 0,
+        totalPages: 0,
+        filters: {},
+        loading: true,
+    });
+
     return (
         <TransactionContext.Provider
             value={{
@@ -64,6 +72,8 @@ export const TransactionProvider = ({ children }) => {
                 setBankStatementsList,
                 markupSettings,
                 setMarkupSettings,
+                cardMarkupDetails,
+                setCardMarkupDetails
             }}
         >
             {children}

@@ -116,7 +116,12 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/bank-statements-store', 'storeBankStatements');
     });
     Route::apiResource('markup-settings', MarkupSettignsController::class);
+    
+    Route::controller(MarkupSettignsController::class)->group(function () {
+        Route::get('/card/fee', 'retrieveCardMarkupDetails');
+        Route::put('/card/fee/{id}', 'updateCardSettings');
 
+    });
 
     Route::controller(ConcernController::class)->group(function () {
         Route::get('/get-concern', 'getAllConcerns');

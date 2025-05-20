@@ -53,7 +53,7 @@ const GlobalTable = ({ columns, data, loading }) => {
                             {[...Array(skeletonRows)].map((_, rowIndex) => (
                                 <tr key={rowIndex} className="border-r-[1px] border-opacity-10 border-[#B9B7B7] shadow-custom11">
                                     {columns.map((_, colIndex) => (
-                                        <td key={colIndex} className="px-3 py-3 w-[208px] text-xs border-r-[1px] border-opacity-50 border-[#B9B7B7]">
+                                        <td key={colIndex} className="px-3 py-3 text-xs border-r-[1px] border-opacity-50 border-[#B9B7B7]">
                                             <Skeletons height={20} />
                                         </td>
                                     ))}
@@ -65,7 +65,7 @@ const GlobalTable = ({ columns, data, loading }) => {
                             {data.map((row, rowIndex) => (
                                 <tr key={rowIndex} className="border-r-[1px] border-opacity-10 border-[#B9B7B7] shadow-custom11">
                                     {columns.map((col, colIndex) => (
-                                        <td key={colIndex} className="px-3 py-3 w-[208px] text-xs border-r-[1px] border-opacity-50 border-[#B9B7B7]">
+                                        <td key={colIndex} className="px-3 py-3 text-xs border-r-[1px] border-opacity-50 border-[#B9B7B7]">
                                             {col.render ? col.render(row) : row[col.accessor]}
                                         </td>
                                     ))}

@@ -12,11 +12,10 @@ import { settings } from "@/component/servicesApi/apiCalls/markupSettings/settin
 import MarkupSettingModal from "@/component/layout/transaction/markupsettings/MarkupSettingModal";
 import CustomToolTip from "@/component/CustomToolTip";
 import { IoMdAdd } from "react-icons/io";
+import CardMarkupFee from "./CardMarkupFee";
 
 const MarkupSettingsCom = () => {
-    const SEARCH_FIELDS = [
-        { name: "payment_method", label: "Payment Method" },
-    ];
+    const SEARCH_FIELDS = [{ name: "payment_method", label: "Payment Method" }];
 
     const INPUT_SEARCH = [
         { name: "pti_bank_rate_percent", label: "Percentage Rate" },
@@ -91,31 +90,33 @@ const MarkupSettingsCom = () => {
     };
     const handleOpenModal = () => {
         setType("store");
-        setSelectedData(null);  
+        setSelectedData(null);
         if (settingsRef.current) {
             settingsRef.current.showModal();
         }
     };
 
-
     return (
         <>
             <div className="overflow-y-hidden px-3 flex flex-col space-y-2 w-full">
                 <div className="flex items-center ">
-                <TransactionSearchBar
-                    fields={SEARCH_FIELDS}
-                    searchValues={searchValues}
-                    setSearchValues={setSearchValues}
-                    onChangeSearch={handleSearchValue}
-                    onSubmit={onSubmit}
-                    setFilters={setFilters}
-                />
+                    <TransactionSearchBar
+                        fields={SEARCH_FIELDS}
+                        searchValues={searchValues}
+                        setSearchValues={setSearchValues}
+                        onChangeSearch={handleSearchValue}
+                        onSubmit={onSubmit}
+                        setFilters={setFilters}
+                    />
 
-                <CustomToolTip text="Add" position="top z-50">
-                    <button className="flex items-center gap-1 px-3 py-1 bg-custom-lightgreen text-white rounded hover:bg-custom-lightgreen" onClick={handleOpenModal}>
-                        <IoMdAdd size={18} />
-                    </button>
-                </CustomToolTip>
+                    <CustomToolTip text="Add" position="top z-50">
+                        <button
+                            className="flex items-center gap-1 px-3 py-1 bg-custom-lightgreen text-white rounded hover:bg-custom-lightgreen"
+                            onClick={handleOpenModal}
+                        >
+                            <IoMdAdd size={18} />
+                        </button>
+                    </CustomToolTip>
                 </div>
 
                 <GlobalTable
@@ -123,6 +124,7 @@ const MarkupSettingsCom = () => {
                     data={markupSettings.data}
                     loading={markupSettings.loading}
                 />
+
                 <div className="flex justify-end mt-4">
                     <div className="flex w-full justify-end mt-3 mb-10">
                         <Pagination
@@ -132,8 +134,17 @@ const MarkupSettingsCom = () => {
                         />
                     </div>
                 </div>
+                <CardMarkupFee/>
+
             </div>
-            <MarkupSettingModal settingsRef={settingsRef} fields={INPUT_SEARCH} type={type} refetchData={getData} selectedData={selectedData} />
+            <MarkupSettingModal
+                settingsRef={settingsRef}
+                fields={INPUT_SEARCH}
+                type={type}
+                refetchData={getData}
+                selectedData={selectedData}
+            />
+
         </>
     );
 };

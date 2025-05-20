@@ -33,6 +33,31 @@ export const settings = {
         } catch (error) {
             console.log("error", error);
         }
-    }
+    },
+
+     retrieveCardMarkupDetails: async (currentPage, filter = {}) => {
+        try {
+            const params = { page: currentPage + 1, ...filter };
+
+            const response = await apiService.get("card/fee", {
+                params,
+            });
+
+            return response?.data.data;
+        } catch (error) {
+            console.log("error", error);
+        }
+    },
+
+     updateCardSettings: async (formData) => {
+        try {
+            const response = await apiService.put(`card/fee/${formData.id}`, formData);
+
+            return response;
+        } catch (error) {
+            console.log("error", error);
+        }
+    },
+
 
 };

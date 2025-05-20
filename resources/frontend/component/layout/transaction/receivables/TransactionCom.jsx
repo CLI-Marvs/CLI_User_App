@@ -25,7 +25,7 @@ const TransactionCom = () => {
             ),
         },
         {
-            header: "Transactions",
+            header: "Trace IDs",
             accessor: "transaction",
             render: (row) => (
                 <TransactionTableCell type="transaction" row={row} />
@@ -41,13 +41,6 @@ const TransactionCom = () => {
             header: "Amount",
             accessor: "amount",
             render: (row) => <TransactionTableCell type="amount" row={row} />,
-        },
-        {
-            header: "Payment Method",
-            accessor: "payment_method",
-            render: (row) => (
-                <TransactionTableCell type="payment_method" row={row} />
-            ),
         },
         {
             header: "Status",
