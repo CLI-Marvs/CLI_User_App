@@ -23,7 +23,7 @@ class SurveyAnswer extends Model
     ];
 
     protected $casts = [
-        'answer_value' => 'array', 
+        'answer_value' => 'array',
         'submitted_at' => 'datetime',
     ];
 
@@ -41,5 +41,10 @@ class SurveyAnswer extends Model
     public function question()
     {
         return $this->belongsTo(Survey_questions::class, 'question_id');
+    }
+
+    public function experienceRating()
+    {
+        return $this->belongsTo(ExperienceRating::class, 'experience_rating_id');
     }
 }

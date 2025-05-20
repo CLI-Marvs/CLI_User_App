@@ -144,4 +144,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/surveys/{id}/update-title', [SurveyController::class, 'updateTitle']);
     Route::get('/survey-links', [SurveyController::class, 'getSurveyLinks']);
     Route::get('/survey-title/{survey_list_id}', [SurveyController::class, 'getSurveyTitle']);
+    Route::get('/experience-ratings/count', [SurveyController::class, 'countRatings']);
 });

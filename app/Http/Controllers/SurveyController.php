@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ExperienceRating;
 use App\Models\Survey_forms;
 use App\Models\Survey_list;
 use App\Models\Survey_questions;
@@ -371,8 +372,18 @@ class SurveyController extends Controller
         }
     }
 
+    public function countRatings()
+    {
+        $ratings = ExperienceRating::select('rating', DB::raw('count(*) as total'))
+            ->groupBy('rating')
+            ->orderBy('rating')
+            ->get();
 
-
+        return response()->json([
+            'message' => 'Rating counts fetched successfully.',
+            'data' => $ratings,
+        ]);
+    }
 
     public function getSurveyLinks()
     {
