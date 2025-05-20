@@ -417,10 +417,10 @@ class SurveyController extends Controller
         }
     }
 
-    public function getSurveyTitle($survey_list_id)
+    public function getSurveyTitle()
     {
         $survey = DB::table('surveys_list')
-            ->where('id', $survey_list_id)
+            ->where('status', "true")
             ->value('survey_title');
 
         if (!$survey) {

@@ -121,6 +121,21 @@
         .button-border {
             border-color: #3D3D3D;
         }
+
+        .emoji-button {
+            display: inline-block;
+            height: 50px;
+            width: 50px;
+            margin: 6px;
+            /* 12px total gap between elements */
+            font-weight: 600;
+            font-size: 28px;
+            /* bigger emoji */
+            text-align: center;
+            line-height: 50px;
+            /* center vertically */
+            text-decoration: none;
+        }
     </style>
 </head>
 
@@ -133,14 +148,14 @@
             src="https://storage.googleapis.com/super-app-storage/concerns/67935544b1cf0.jpg?GoogleAccessId=799945112092-compute%40developer.gserviceaccount.com&Expires=2053241671&Signature=J3R4fy9hxL91OnTkgfd8nTLsPcIvps1tZukmBvhGVfbZEjROqw9vuoDHEBcMuBLB901B%2BCOoDRVpkc8IIzRnmVWnLT21Xw6yo3vwPAGZZ4l%2B3qYcCwZ4dF4XRT%2F%2FQhFUkTHdKZdGYFiMxHY1Lu%2B%2BaikTiNg34ObJuqYhHUD3jsQ3VP64JcKGee9QZWM3MEovqnCJ89jhne7PW2VNK6OrFTtew0tutZsLwXYsBtBoFrIMT3n2AsGhiy8SUYYFhVNozcwdQ3qugaGHHiX5ki%2FIsW4Wmj6qXLvJ6KPtM%2F4fobHDzyCuxrOG2R7wiWGC2Aiq%2BIESG1oJtogLsRXyPrJhjQ%3D%3D"
             title="clisignature" />
     </div>
-   
+
     <p style="color:#404B52; font-size: 20px;">Dear {{ ucwords($buyer_name) }},</p>
     <p style="color:#404B52; font-size: 20px;">
         Thank you for reaching out to us. We're glad we could assist you with your concern, and we hope everything has
         been @if ($status === 'resolve')
-        resolved
+            resolved
         @else
-        closed
+            closed
         @endif
         to your satisfaction.
     </p>
@@ -152,14 +167,16 @@
     </p>
 
     <p style="color:#404B52; font-size: 20px;">
-        Please click the link below to access the survey: <br>
-        <a href="{{ $selectedSurveyType['surveyLink']}}/{{ $modifiedTicketId }}"
-            style="  height: 50px; width: 225px;  margin-top: 5px; font-weight: 600; font-size: 18px;"
-            class="button">
-            Click Here! 👈
-        </a>
-        
+        Please rate your experience with us: <br>
+
+        <a href="{{ $selectedSurveyType['surveyLink'] }}/{{ $modifiedTicketId }}/1" class="emoji-button">😠</a>
+        <a href="{{ $selectedSurveyType['surveyLink'] }}/{{ $modifiedTicketId }}/2" class="emoji-button">😒</a>
+        <a href="{{ $selectedSurveyType['surveyLink'] }}/{{ $modifiedTicketId }}/3" class="emoji-button">😐</a>
+        <a href="{{ $selectedSurveyType['surveyLink'] }}/{{ $modifiedTicketId }}/4" class="emoji-button">😊</a>
+        <a href="{{ $selectedSurveyType['surveyLink'] }}/{{ $modifiedTicketId }}/5" class="emoji-button">😃</a>
     </p>
+
+
 
     <p style="color:#404B52; font-weight:500; font-size: 20px;">
         Thank you for your time and for being a valued customer. If you need any further assistance, feel free to reach

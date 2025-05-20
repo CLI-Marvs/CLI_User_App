@@ -2251,6 +2251,8 @@ class ConcernController extends Controller
 
 
     /**
+     * 
+     * git status
      * Get Inquiries per channel data
      */
     public function getInquiriesPerChannel(Request $request)
