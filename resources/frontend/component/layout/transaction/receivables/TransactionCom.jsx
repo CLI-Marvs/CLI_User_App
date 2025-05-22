@@ -3,16 +3,9 @@ import GlobalTable from "../GlobalTable";
 import TransactionTableCell from "./TransactionTableCell";
 import { useTransactionContext } from "@/context/Transaction/TransactionContext";
 import { transaction } from "@/component/servicesApi/apiCalls/transactions";
-import ReactPaginate from "react-paginate";
-import {
-    MdKeyboardArrowLeft,
-    MdKeyboardArrowRight,
-    MdRefresh,
-} from "react-icons/md";
 import TransactionSearchBar from "@/component/layout/transaction/TransactionSearchBar";
 import Pagination from "@/component/Pagination";
 import usePagination from "@/hooks/usePagination";
-import CustomToolTip from "@/component/CustomToolTip";
 import { usePropertyFormatter } from "@/component/layout/transaction/hooks/usePropertyFormatter";
 
 const TransactionCom = () => {
@@ -69,12 +62,25 @@ const TransactionCom = () => {
     ];
     const { formattedPropertyNames } = usePropertyFormatter();
     const [searchValues, setSearchValues] = useState({});
-    const { transactions, setTransactions } = useTransactionContext();
+    const { transactions, setTransactions, banks, setBanks } = useTransactionContext();
     const { handlePageClick, setFilters } = usePagination(
         transaction.transactionList,
         transactions,
         setTransactions
     );
+
+    const retrieveBanks = async () => {
+        try {
+            const response = await transaction.retrieveBanks();
+            setBanks(response);
+        } catch (error) {
+            console.log("error", error);
+        }
+    };
+    
+    useEffect(() => {
+        retrieveBanks();
+    }, []);
 
     const fields = [
         { name: "email", label: "Email" },
@@ -83,10 +89,11 @@ const TransactionCom = () => {
             label: "Bank",
             type: "select",
             options: [
-                { label: "Select Bank", value: "" },
-                { label: "BDO", value: "BDO" },
-                { label: "BPI", value: "BPI" },
-                { label: "LANDBANK", value: "LANDBANK" },
+               { label: "Select Banks", value: "" },
+                ...banks.map((item) => ({
+                    label: item,
+                    value: item,
+                })),
             ],
         },
         {
@@ -133,7 +140,7 @@ const TransactionCom = () => {
         setFilters(searchValues);
         setSearchValues({});
     };
-
+    
     return (
         <>
             <div className="overflow-y-hidden px-3 space-y-2 w-full">
