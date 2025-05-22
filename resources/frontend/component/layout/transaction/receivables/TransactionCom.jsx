@@ -18,14 +18,6 @@ const TransactionCom = () => {
             ),
         },
         {
-            header: "Trace IDs",
-            accessor: "transaction",
-            render: (row) => (
-                <TransactionTableCell type="transaction" row={row} />
-            ),
-        },
-
-        {
             header: "Details",
             accessor: "details",
             render: (row) => <TransactionTableCell type="details" row={row} />,
@@ -35,11 +27,19 @@ const TransactionCom = () => {
             accessor: "amount",
             render: (row) => <TransactionTableCell type="amount" row={row} />,
         },
+
         {
             header: "Status",
             accessor: "transaction_status",
             render: (row) => (
                 <TransactionTableCell type="transaction_status" row={row} />
+            ),
+        },
+        {
+            header: "Trace IDs",
+            accessor: "transaction",
+            render: (row) => (
+                <TransactionTableCell type="transaction" row={row} />
             ),
         },
         {
@@ -62,7 +62,8 @@ const TransactionCom = () => {
     ];
     const { formattedPropertyNames } = usePropertyFormatter();
     const [searchValues, setSearchValues] = useState({});
-    const { transactions, setTransactions, banks, setBanks } = useTransactionContext();
+    const { transactions, setTransactions, banks, setBanks } =
+        useTransactionContext();
     const { handlePageClick, setFilters } = usePagination(
         transaction.transactionList,
         transactions,
@@ -77,7 +78,7 @@ const TransactionCom = () => {
             console.log("error", error);
         }
     };
-    
+
     useEffect(() => {
         retrieveBanks();
     }, []);
@@ -89,7 +90,7 @@ const TransactionCom = () => {
             label: "Bank",
             type: "select",
             options: [
-               { label: "Select Banks", value: "" },
+                { label: "Select Banks", value: "" },
                 ...banks.map((item) => ({
                     label: item,
                     value: item,
@@ -122,7 +123,6 @@ const TransactionCom = () => {
                 { label: "Floating", value: "Floating" },
                 { label: "Succeed", value: "Succeed" },
                 { label: "Failed", value: "Failed" },
-
             ],
         },
         { name: "date_range", type: "date_range", label: "Date" },
@@ -140,7 +140,7 @@ const TransactionCom = () => {
         setFilters(searchValues);
         setSearchValues({});
     };
-    
+
     return (
         <>
             <div className="overflow-y-hidden px-3 space-y-2 w-full">
