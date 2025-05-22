@@ -48,6 +48,8 @@ import SurveyReportsView from './views/pages/surveyrelatedreportsViews/SurveyRep
 import SurveyFormView from './views/pages/surveyrelatedreportsViews/SurveyFormView';
 import SurveyReviewView from './views/pages/surveyrelatedreportsViews/SurveyReviewView';
 import SurveyMainView from './views/pages/surveyrelatedreportsViews/SurveyMainView';
+import SurveyMainReportView from './views/pages/surveyrelatedreportsViews/SurveyMainReportView';
+import SurveySummaryView from './views/pages/surveyrelatedreportsViews/SurveySummaryView';
 // PrivateRoute component to check authentication
 const PrivateRoute = () => {
     const authToken = localStorage.getItem("authToken");
@@ -75,9 +77,9 @@ const App = () => {
         return (
             <div className="bg-white relative max-h-screen flex flex-col h-screen">
                 <Navbar />
-                <div className="flex flex-1 overflow-hidden">
+                <div className="relative flex flex-1 overflow-hidden z-50">
                     <Sidebar />
-                    <div className="flex-1 overflow-y-auto bg-custom-grayFA ">
+                    <div className="flex-1 overflow-y-auto bg-custom-grayFA z-10">
                         <Outlet />
                     </div>
                 </div>
@@ -103,7 +105,7 @@ const App = () => {
         return (
             <>
                 <div className="flex bg-white relative h-full">
-                    <div className="fixed h-full z-50">
+                    <div className="fixed h-full z-20">
                         <CrsSettingsSidebar />
                     </div>
                     <div className="relative flex-1 ml-[230px] z-10">
@@ -321,8 +323,16 @@ const App = () => {
                             element: <InquiryThreadView />,
                         },
                         {
-                            path: "inquirymanagement/report",
+                            path: "inquirymanagement/report/inquiries",
                             element: <ReportViews />,
+                        },
+                        {
+                            path: "inquirymanagement/report/survey",
+                            element: <SurveyMainReportView />,
+                        },
+                        {
+                            path: "inquirymanagement/report/survey/:id?",
+                            element: <SurveySummaryView />,
                         },
                         {
                             path: "inquirymanagement/autoassign",

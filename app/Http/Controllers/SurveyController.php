@@ -372,17 +372,23 @@ class SurveyController extends Controller
         }
     }
 
-    public function countRatings()
+    public function countRatings($id)
     {
-        $ratings = ExperienceRating::select('rating', DB::raw('count(*) as total'))
+        $surveyList = Survey_list::find($id);
+
+        if (!$surveyList) {
+            return response()->json(['error' => 'Survey list not found'], 404);
+        }
+
+
+        $surveyLink = $surveyList->survey_link;
+
+        $ratings = ExperienceRating::select('rating', DB::raw('COUNT(*) as total'))
+            ->where('survey_link', $surveyLink)
             ->groupBy('rating')
-            ->orderBy('rating')
             ->get();
 
-        return response()->json([
-            'message' => 'Rating counts fetched successfully.',
-            'data' => $ratings,
-        ]);
+        return response()->json(['data' => $ratings]);
     }
 
     public function getSurveyLinks()
@@ -400,7 +406,7 @@ class SurveyController extends Controller
                 'http://localhost:8001'                  => 'http://localhost:8002/survey',
                 'https://admin-dev.cebulandmasters.com'  => 'https://feedback-dev.cebulandmasters.com/survey',
                 'https://admin-uat.cebulandmasters.com'  => 'https://feedback-uat.cebulandmasters.com/survey',
-                'https://admin.cebulandmasters.com'      => 'https://ask.cebulandmasters.com/survey', 
+                'https://admin.cebulandmasters.com'      => 'https://ask.cebulandmasters.com/survey',
             ];
 
             $defaultSurveyBaseUrl = 'https://ask.cebulandmasters.com/survey';
@@ -440,4 +446,52 @@ class SurveyController extends Controller
 
         return response()->json(['survey_title' => $survey], 200);
     }
+
+    public function getSurveysWithRatingCounts()
+    {
+        $surveys = Survey_list::select('id', 'survey_title', 'survey_link')
+            ->get()
+            ->map(function ($survey) {
+                $respondentsCount = ExperienceRating::where('survey_link', $survey->survey_link)->count();
+
+                return [
+                    'id' => $survey->id,
+                    'survey_title' => $survey->survey_title,
+                    'respondents_count' => $respondentsCount,
+                ];
+            });
+
+        return response()->json([
+            'data' => $surveys
+        ]);
+    }
+
+    public function getSurveysWithRatingBreakdown()
+{
+    $surveys = Survey_list::select('id', 'survey_title', 'survey_link')->get();
+
+    $result = $surveys->map(function ($survey) {
+        // Fetch counts of each rating (1-5) for this survey_link
+        $ratingCounts = ExperienceRating::where('survey_link', $survey->survey_link)
+            ->select('rating', DB::raw('COUNT(*) as total'))
+            ->groupBy('rating')
+            ->pluck('total', 'rating'); // [rating => count]
+
+        // Ensure all ratings from 1 to 5 are included, default to 0 if missing
+        $fullRatingCounts = [];
+        for ($i = 1; $i <= 5; $i++) {
+            $fullRatingCounts[$i] = $ratingCounts->get($i, 0);
+        }
+
+        return [
+            'id' => $survey->id,
+            'survey_title' => $survey->survey_title,
+            'ratings' => $fullRatingCounts, // e.g., [1 => 3, 2 => 0, 3 => 5, 4 => 2, 5 => 8]
+        ];
+    });
+
+    return response()->json([
+        'data' => $result
+    ]);
+}
 }

@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import { IoIosArrowDown } from "react-icons/io";
+import { MdChevronRight } from "react-icons/md";
 import { GoPlus } from "react-icons/go";
 import {
   Card,
@@ -19,6 +20,11 @@ import { useStateContext } from "../../../context/contextprovider";
 import InquiryFormModal from "../inquirypage/InquiryFormModal";
 import { set } from "lodash";
 const Sidebar = () => {
+
+  const reportsButtonRef = useRef(null);
+  const reportsMenuRef = useRef(null);
+
+
   const { unreadCount, getCount } = useStateContext();
   const [activeItem, setActiveItem] = useState(null);
   const location = useLocation();
@@ -27,6 +33,7 @@ const Sidebar = () => {
   const [isInvoiceOpen, setIsInvoiceOpen] = useState(false);
 
   const [activeItemTransaction, setActiveItemTransaction] = useState(null);
+  const [showReportsSubmenu, setShowReportsSubmenu] = useState(false);
 
   useEffect(() => {
     if (!location.pathname.startsWith("/inquirymanagement/thread")) {
@@ -39,6 +46,28 @@ const Sidebar = () => {
   useEffect(() => {
     getCount();
   }, [location]);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        reportsMenuRef.current &&
+        !reportsMenuRef.current.contains(event.target) &&
+        reportsButtonRef.current &&
+        !reportsButtonRef.current.contains(event.target)
+      ) {
+        setShowReportsSubmenu(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+
+
+  const handleReportsClick = () => {
+    setShowReportsSubmenu(prev => !prev);
+  };
 
 
   const handleInquiryDropdownClick = () => {
@@ -68,43 +97,48 @@ const Sidebar = () => {
         setIsInvoiceOpen(false);
         setSuperAdminOpen(true);
         break;
-    
+
       case location.pathname === "/transactionmanagement/invoices" ||
-           location.pathname === "/transactionmanagement/transactionrecords":
+        location.pathname === "/transactionmanagement/transactionrecords":
         setInquiryOpen(false);
         setIsInvoiceOpen(true);
         setSuperAdminOpen(false);
         break;
-    
+
       case location.pathname === "/inquirymanagement/inquirylist" ||
-           location.pathname === "/inquirymanagement/report" ||
-           location.pathname === "/inquirymanagement/settings" ||
-           location.pathname === "/inquirymanagement/settings/bannersettings" ||
-           location.pathname === "/inquirymanagement/settings/autoassign" ||
-           location.pathname === "/inquirymanagement/settings/versionlogs" ||
-           location.pathname === "/inquirymanagement/settings/surveysettings" ||
-           location.pathname === "/inquirymanagement/settings/surveysettings/surveyreview":
+        location.pathname === "/inquirymanagement/report/inquiries" ||
+        location.pathname === "/inquirymanagement/report/survey" ||
+        location.pathname === "/inquirymanagement/settings" ||
+        location.pathname === "/inquirymanagement/settings/bannersettings" ||
+        location.pathname === "/inquirymanagement/settings/autoassign" ||
+        location.pathname === "/inquirymanagement/settings/versionlogs" ||
+        location.pathname === "/inquirymanagement/settings/surveysettings" ||
+        location.pathname === "/inquirymanagement/settings/surveysettings/surveyreview":
         setIsInvoiceOpen(false);
         setInquiryOpen(true);
         setSuperAdminOpen(false);
         break;
-    
 
-        
+
+
       // This is the case where :id is dynamic
       case /^\/inquirymanagement\/settings\/surveysettings\/surveyform\/[\w-]+$/.test(location.pathname):
         setIsInvoiceOpen(false);
         setInquiryOpen(true);
         setSuperAdminOpen(false);
         break;
-    
+
+      case /^\/inquirymanagement\/report\/survey\/[\w-]+$/.test(location.pathname):
+        // your logic here
+        break;
+
       default:
         setInquiryOpen(false);
         setIsInvoiceOpen(false);
         setSuperAdminOpen(false);
         break;
     }
-    
+
   }, [location.pathname]);
 
   return (
@@ -136,7 +170,7 @@ const Sidebar = () => {
             <ListItem
               className={`h-[35px] w-[185px] text-sm pl-[12px] transition-all duration-300 ease-in-out z-10 
                   ${activeItem === "inquiry" ||
-                  location.pathname.startsWith("/inquirymanagement") 
+                  location.pathname.startsWith("/inquirymanagement")
                   ? "bg-custom-lightestgreen text-custom-solidgreen font-semibold shadow-custom5"
                   : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
                 }
@@ -179,21 +213,48 @@ const Sidebar = () => {
                     Feedback
                   </ListItem>
                 </Link>
-                <Link to="/inquirymanagement/report">
-                  <ListItem
-                    className={`h-[32px] w-full py-[8px] px-[18px] text-sm rounded-[50px] ${location.pathname.startsWith(
-                      "/inquirymanagement/report"
-                    )
-                      ? "bg-white text-custom-solidgreen font-semibold"
-                      : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
-                      }`}
-                    onClick={() =>
-                      handleItemClick("/reports")
-                    }
-                  >
-                    Reports
-                  </ListItem>
-                </Link>
+                <div className="relative">
+                  {/* Reports Toggle Button */}
+                  <div ref={reportsButtonRef}>
+                    <ListItem
+                      className={`flex justify-between h-[32px] w-full py-[8px] pl-[18px] text-sm rounded-[50px] 
+                          ${location.pathname.startsWith("/inquirymanagement/report")
+                          ? "bg-white text-custom-solidgreen font-semibold"
+                          : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen"
+                        }`}
+                      onClick={handleReportsClick}
+                    >
+                      <div>
+                        Reports
+                      </div>
+                      <div className="text-custom-solidgreen group-hover:text-custom-solidgreen">
+                        <MdChevronRight />
+                      </div>
+                    </ListItem>
+                  </div>
+
+                  {/* Floating submenu */}
+                  {showReportsSubmenu && (
+                    <div
+                      ref={reportsMenuRef}
+                      className="absolute left-full top-0 ml-2 z-50 bg-white shadow-lg border rounded-md w-48 py-2">
+                      <Link to="/inquirymanagement/report/inquiries" onClick={() => setShowReportsSubmenu(false)}>
+                        <div
+                          className={`px-4 py-2 text-sm hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen`}
+                        >
+                          Inquiries
+                        </div>
+                      </Link>
+                      <Link to="/inquirymanagement/report/survey" onClick={() => setShowReportsSubmenu(false)}>
+                        <div
+                          className={`px-4 py-2 text-sm hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen `}
+                        >
+                          Survey
+                        </div>
+                      </Link>
+                    </div>
+                  )}
+                </div>
                 <Link to="/inquirymanagement/settings/bannersettings">
                   <ListItem
                     className={`h-[32px] w-full py-[8px] px-[18px] text-sm rounded-[50px]  ${location.pathname.startsWith(
@@ -245,8 +306,8 @@ const Sidebar = () => {
                     className={`h-[48px] w-full py-[8px] px-[18px]  text-sm rounded-[10px] ${location.pathname.startsWith(
                       "/superadmin/userrightsandpermissions"
                     )
-                        ? "bg-white text-custom-solidgreen font-semibold "
-                        : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
+                      ? "bg-white text-custom-solidgreen font-semibold "
+                      : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
                       }`}
                     onClick={() =>
                       handleItemClick(

@@ -8,9 +8,9 @@ const SurveyMain = () => {
 
     const navigate = useNavigate();
 
-    const { id } = useParams();
+   /*  const { id } = useParams();
 
-    const [activeTab, setActiveTab] = useState('question');
+    const [activeTab, setActiveTab] = useState('question'); */
 
     const navigateToSurveyList = () => {
         navigate(-1);
@@ -23,7 +23,7 @@ const SurveyMain = () => {
                 <div onClick={navigateToSurveyList} className='flex justify-center rounded-[10px] w-[32.96px] h-[32.96px] bg-custom-lightgreen text-white items-center cursor-pointer shrink-0 hover:shadow-custom3'>
                     <BiSolidLeftArrow className='size-[13px]' />
                 </div>
-                <div className='flex gap-[12px]'>
+               {/*  <div className='flex gap-[12px]'>
                     <button
                         onClick={() => setActiveTab('question')}
                         className={`w-[99px] h-[42px] rounded-[10px] p-[10px] flex justify-center items-center shadow-custom4 border-[0.5px] border-custom-grayA5
@@ -46,10 +46,10 @@ const SurveyMain = () => {
                         `}>
                         Summary
                     </button>
-                </div>
+                </div> */}
             </div>
             <div>
-                {activeTab === 'question' ? <SurveyForm /> : <SurveySummary />}
+                <SurveyForm />
             </div>
         </div>
     )

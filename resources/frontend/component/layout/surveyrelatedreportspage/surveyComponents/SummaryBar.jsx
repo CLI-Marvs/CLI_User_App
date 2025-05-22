@@ -1,7 +1,5 @@
 import React from 'react'
 import {
-    LineChart,
-    Line,
     BarChart,
     Bar,
     XAxis,
@@ -9,9 +7,8 @@ import {
     Tooltip,
     Cell,
     ResponsiveContainer,
-    CartesianGrid,
     LabelList,
-} from 'recharts';
+  } from 'recharts';
 
 const data = [
     {
