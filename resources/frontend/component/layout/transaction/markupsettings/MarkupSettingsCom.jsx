@@ -12,11 +12,11 @@ import { settings } from "@/component/servicesApi/apiCalls/markupSettings/settin
 import MarkupSettingModal from "@/component/layout/transaction/markupsettings/MarkupSettingModal";
 import CustomToolTip from "@/component/CustomToolTip";
 import { IoMdAdd } from "react-icons/io";
+import { useStateContext } from "@/context/contextprovider";
 
 const MarkupSettingsCom = () => {
-    const SEARCH_FIELDS = [
-        { name: "payment_method", label: "Payment Method" },
-    ];
+    const { canWrite } = useStateContext();
+    const SEARCH_FIELDS = [{ name: "payment_method", label: "Payment Method" }];
 
     const INPUT_SEARCH = [
         { name: "pti_bank_rate_percent", label: "Bank Rate Percentage" },
@@ -55,19 +55,23 @@ const MarkupSettingsCom = () => {
             accessor: "cli_markup",
             render: (row) => <MarkupTableCell type="cli_markup" row={row} />,
         },
-        {
-            header: "Actions",
-            accessor: "actions",
-            render: (row) => (
-                <MarkupTableCell
-                    type="actions"
-                    row={row}
-                    setSelectedData={setSelectedData}
-                    setType={setType}
-                    settingsRef={settingsRef}
-                />
-            ),
-        },
+        ...(canWrite("Transaction Management")
+            ? [
+                  {
+                      header: "Actions",
+                      accessor: "actions",
+                      render: (row) => (
+                          <MarkupTableCell
+                              type="actions"
+                              row={row}
+                              setSelectedData={setSelectedData}
+                              setType={setType}
+                              settingsRef={settingsRef}
+                          />
+                      ),
+                  },
+              ]
+            : []),
     ];
     const [searchValues, setSearchValues] = useState({});
     const { markupSettings, setMarkupSettings } = useTransactionContext();
@@ -91,31 +95,35 @@ const MarkupSettingsCom = () => {
     };
     const handleOpenModal = () => {
         setType("store");
-        setSelectedData(null);  
+        setSelectedData(null);
         if (settingsRef.current) {
             settingsRef.current.showModal();
         }
     };
 
-
     return (
         <>
             <div className="overflow-y-hidden px-3 flex flex-col space-y-2 max-w-auto">
                 <div className="flex items-center ">
-                <TransactionSearchBar
-                    fields={SEARCH_FIELDS}
-                    searchValues={searchValues}
-                    setSearchValues={setSearchValues}
-                    onChangeSearch={handleSearchValue}
-                    onSubmit={onSubmit}
-                    setFilters={setFilters}
-                />
+                    <TransactionSearchBar
+                        fields={SEARCH_FIELDS}
+                        searchValues={searchValues}
+                        setSearchValues={setSearchValues}
+                        onChangeSearch={handleSearchValue}
+                        onSubmit={onSubmit}
+                        setFilters={setFilters}
+                    />
 
-                <CustomToolTip text="Add" position="top z-50">
-                    <button className="flex items-center gap-1 px-3 py-1 bg-custom-lightgreen text-white rounded hover:bg-custom-lightgreen" onClick={handleOpenModal}>
-                        <IoMdAdd size={18} />
-                    </button>
-                </CustomToolTip>
+                    <CustomToolTip text="Add" position="top z-50">
+                        {canWrite("Transaction Management") && (
+                            <button
+                                className="flex items-center gap-1 px-3 py-1 bg-custom-lightgreen text-white rounded hover:bg-custom-lightgreen"
+                                onClick={handleOpenModal}
+                            >
+                                <IoMdAdd size={18} />
+                            </button>
+                        )}
+                    </CustomToolTip>
                 </div>
 
                 <GlobalTable
@@ -133,7 +141,13 @@ const MarkupSettingsCom = () => {
                     </div>
                 </div>
             </div>
-            <MarkupSettingModal settingsRef={settingsRef} fields={INPUT_SEARCH} type={type} refetchData={getData} selectedData={selectedData} />
+            <MarkupSettingModal
+                settingsRef={settingsRef}
+                fields={INPUT_SEARCH}
+                type={type}
+                refetchData={getData}
+                selectedData={selectedData}
+            />
         </>
     );
 };

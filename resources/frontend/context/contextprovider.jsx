@@ -165,9 +165,21 @@ export const ContextProvider = ({ children }) => {
         }
     }, [userAccessData]);
 
-    // Check if the user has permission
+    // Check if the user has permission to read
     const hasPermission = (permissionName) => {
         return permissions[permissionName]?.can_read || false;
+    };
+
+    //Check if the user has permission to write
+    const canWrite = (permissionName) => {
+        const inquiryPermissions =
+            userAccessData?.employeePermissions?.find(
+                (perm) => perm.name === permissionName
+            ) ||
+            userAccessData?.departmentPermissions?.find(
+                (perm) => perm.name === permissionName
+            );
+        return inquiryPermissions?.pivot?.can_write || false;
     };
 
     const getAllConcerns = async () => {
@@ -1080,6 +1092,7 @@ export const ContextProvider = ({ children }) => {
                 assignedToMeActive,
                 setSpecificAssigneeCsr,
                 specificAssigneeCsr,
+                canWrite,
             }}
         >
             {children}

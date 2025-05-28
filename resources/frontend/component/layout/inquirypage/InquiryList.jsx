@@ -73,6 +73,7 @@ const InquiryList = () => {
         /*  setHasAttachments,
         hasAttachments */
         userAccessData,
+        canWrite,
     } = useStateContext();
 
     const propertyParam = searchFilter?.selectedProperty;
@@ -106,20 +107,10 @@ const InquiryList = () => {
     const [lastActivity, setLastActivity] = useState(null);
     const filterBoxRef = useRef(null);
     const [isOpenSelect, setIsOpenSelect] = useState(false);
-    const [canWrite, setCanWrite] = useState(false);
 
-    useEffect(() => {
-        if (userAccessData) {
-            const inquiryPermissions =
-                userAccessData?.employeePermissions?.find(
-                    (perm) => perm.name === "Inquiry Management"
-                ) ||
-                userAccessData?.departmentPermissions?.find(
-                    (perm) => perm.name === "Inquiry Management"
-                );
-            setCanWrite(inquiryPermissions?.pivot?.can_write);
-        }
-    }, [userAccessData]);
+    const canAddInquiry =
+        canWrite("Inquiry Management") ||
+        user?.department === "Customer Relations - Services";
 
     const handleSelect = (option) => {
         onChange(option);
@@ -633,17 +624,15 @@ const InquiryList = () => {
                             </div>
                         )}
                         <div className="flex items-center">
-                            {!canWrite ||
-                                (user?.department ===
-                                    "Customer Relations - Services" && (
-                                    <button
-                                        onClick={handleOpenModal}
-                                        className="h-[38px] w-[121px] gradient-btn5 text-white text-xs rounded-[10px]"
-                                    >
-                                        <span className="text-[18px]">+</span>{" "}
-                                        Add Inquiry
-                                    </button>
-                                ))}
+                            {canAddInquiry && (
+                                <button
+                                    onClick={handleOpenModal}
+                                    className="h-[38px] w-[121px] gradient-btn5 text-white text-xs rounded-[10px]"
+                                >
+                                    <span className="text-[18px]">+</span> Add
+                                    Inquiry
+                                </button>
+                            )}
                         </div>
                         {isFilterVisible && (
                             <div

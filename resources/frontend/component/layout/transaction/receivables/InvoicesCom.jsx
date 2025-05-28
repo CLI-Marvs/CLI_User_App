@@ -21,6 +21,7 @@ import { transaction } from "@/component/servicesApi/apiCalls/transactions";
 import Pagination from "@/component/Pagination";
 
 const InvoicesCom = () => {
+    const { canWrite } = useStateContext();
     const fields = [
         { name: "customer_name", label: "Name" },
         { name: "contract_number", label: "Contract Number" },
@@ -71,9 +72,7 @@ const InvoicesCom = () => {
         {
             header: "SOA",
             accessor: "soa_link",
-            render: (row) => (
-                <InvoicesTableCell type="soa_link" row={row} />
-            ),
+            render: (row) => <InvoicesTableCell type="soa_link" row={row} />,
         },
     ];
     const [searchValues, setSearchValues] = useState({});
@@ -127,14 +126,14 @@ const InvoicesCom = () => {
     return (
         <>
             <div className="overflow-y-hidden px-3 flex flex-col space-y-2">
-                    <TransactionSearchBar
-                        fields={fields}
-                        searchValues={searchValues}
-                        setSearchValues={setSearchValues}
-                        onChangeSearch={handleSearchValue}
-                        onSubmit={onSubmit}
-                        setFilters={setFilters}
-                    />
+                <TransactionSearchBar
+                    fields={fields}
+                    searchValues={searchValues}
+                    setSearchValues={setSearchValues}
+                    onChangeSearch={handleSearchValue}
+                    onSubmit={onSubmit}
+                    setFilters={setFilters}
+                />
                 <div className="flex gap-[15px] flex-wrap mb-[16px] px-2">
                     <div className="relative flex border w-max border-custom-lightgreen rounded-[5px] shrink-0 z-10">
                         <span className="border-white text-white bg-custom-lightgreen text-sm flex items-center w-max px-[15px] pl-3 py-1 shrink-0 cursor-default">
@@ -163,13 +162,19 @@ const InvoicesCom = () => {
                             <MdCalendarToday />
                         </span>
                     </div>
-                    <div className="flex items-center justify-center">
-                        <button className="px-4 w-[153px] h-[37px] text-white font-semibold rounded-md bg-gradient-to-r from-[#348017] to-[#175D5F] hover:opacity-90 transition duration-300">
-                            Sap Sync
-                        </button>
-                    </div>
+                    {canWrite("Transaction Management") && (
+                        <div className="flex items-center justify-center ">
+                            <button className="px-4 w-[153px] h-[37px] text-white font-semibold rounded-md bg-gradient-to-r from-[#348017] to-[#175D5F] hover:opacity-90 transition duration-300">
+                                Sap Sync
+                            </button>
+                        </div>
+                    )}
                 </div>
-                <GlobalTable columns={columns} data={invoices.data} loading={invoices.loading}/>
+                <GlobalTable
+                    columns={columns}
+                    data={invoices.data}
+                    loading={invoices.loading}
+                />
                 <div className="flex justify-end mt-4">
                     <div className="flex w-full justify-end mt-3 mb-10">
                         <Pagination

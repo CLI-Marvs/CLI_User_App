@@ -10,7 +10,7 @@ const BannerSettings = () => {
     // ref initialization
     const fileInputRef = useRef(null);
     //useStateContext for getting data from context provider
-    const { getBannerData, bannerLists,userAccessData } = useStateContext();
+    const { getBannerData, bannerLists,canWrite } = useStateContext();
 
     //state initialization
     const [isEdit, setIsEdit] = useState(false);
@@ -19,24 +19,14 @@ const BannerSettings = () => {
     const [file, setFile] = useState(null);
     const [link, setLink] = useState("");
     const [indexFlag, setIndexFlag] = useState(null);
-    const [canWrite, setCanWrite] = useState(false);
+ 
 
 
     //useEffect initialization for getting data from context
     useEffect(() => {
         getBannerData();
     }, []);
-    useEffect(() => {
-        if (userAccessData) {
-            const inquiryPermissions = userAccessData?.employeePermissions?.find(
-                (perm) => perm.name === 'Inquiry Management'
-            ) || userAccessData?.departmentPermissions?.find(
-                (perm) => perm.name === 'Inquiry Management'
-                );
-            console.log("36", inquiryPermissions?.pivot?.can_write)
-            setCanWrite(inquiryPermissions?.pivot?.can_write);
-        }
-    }, [userAccessData]);
+
 
     //useState initialization for file upload
     const [fileName, setFileName] = useState('No file selected');
@@ -173,7 +163,7 @@ const BannerSettings = () => {
                     ))}
                 </div>
                 <div className='w-full border-t-[1px] border-custom-grayA5'></div>
-                {canWrite && (
+                {canWrite("Inquiry Management") && (
                     <div className='flex flex-col gap-[10px] w-full bg-[#EBEBEB] p-[20px] rounded-[10px]'>
                         <div className='flex w-full rounded-[10px] relative bg-white overflow-hidden'>
                             <div className='flex w-[108px] justify-center items-center px-[15px] py-[6px] text-white bg-[#273B4A] rounded-l-[10px]'>
