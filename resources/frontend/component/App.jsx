@@ -48,8 +48,6 @@ import SurveyReportsView from './views/pages/surveyrelatedreportsViews/SurveyRep
 import SurveyFormView from './views/pages/surveyrelatedreportsViews/SurveyFormView';
 import SurveyReviewView from './views/pages/surveyrelatedreportsViews/SurveyReviewView';
 import SurveyMainView from './views/pages/surveyrelatedreportsViews/SurveyMainView';
-import SurveyMainReportView from './views/pages/surveyrelatedreportsViews/SurveyMainReportView';
-import SurveySummaryView from './views/pages/surveyrelatedreportsViews/SurveySummaryView';
 // PrivateRoute component to check authentication
 const PrivateRoute = () => {
     const authToken = localStorage.getItem("authToken");
@@ -77,28 +75,15 @@ const App = () => {
         return (
             <div className="bg-white relative max-h-screen flex flex-col h-screen">
                 <Navbar />
-                <div className="relative flex flex-1 overflow-hidden z-50">
+                <div className="flex flex-1 overflow-hidden z-30">
                     <Sidebar />
-                    <div className="flex-1 overflow-y-auto bg-custom-grayFA z-10">
+                    <div className="flex-1 overflow-y-auto bg-custom-grayFA z-20">
                         <Outlet />
                     </div>
                 </div>
             </div>
         );
 
-        /*  return (
-            <>
-                <div className="bg-white relative max-h-screen flex flex-col">
-                    <Navbar/>
-                    <div className="flex flex-1 overflow-hidden">
-                        <Sidebar/>
-                        <div className="flex-1 overflow-y-auto ">
-                            <Outlet />
-                        </div>
-                    </div>
-                </div>
-            </>
-        ); */
     };
 
     const SecondLayout = () => {
@@ -323,16 +308,8 @@ const App = () => {
                             element: <InquiryThreadView />,
                         },
                         {
-                            path: "inquirymanagement/report/inquiries",
+                            path: "inquirymanagement/report",
                             element: <ReportViews />,
-                        },
-                        {
-                            path: "inquirymanagement/report/survey",
-                            element: <SurveyMainReportView />,
-                        },
-                        {
-                            path: "inquirymanagement/report/survey/:id?",
-                            element: <SurveySummaryView />,
                         },
                         {
                             path: "inquirymanagement/autoassign",
