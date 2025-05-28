@@ -3,6 +3,9 @@ import { IoMdRadioButtonOn } from "react-icons/io";
 import { RxCross2 } from "react-icons/rx";
 import { MdContentCopy } from "react-icons/md";
 import { FaRegTrashAlt } from "react-icons/fa";
+import { IoIosCheckboxOutline } from "react-icons/io";
+import { MdOutlineShortText } from "react-icons/md";
+import { GrTextAlignFull } from "react-icons/gr";
 import { SurveyRadioOption } from './SurveyRadioOption';
 import { add } from 'lodash';
 
@@ -41,6 +44,9 @@ export const SurveyAddQuestion = ({ data, sectionIndex, questionIndex, onDelete,
 
     const options = [
         { value: "multiple-choice", label: "Multiple choice", icon: <IoMdRadioButtonOn /> },
+        { value: "checkboxes", label: "Checkboxes", icon: <IoIosCheckboxOutline /> },
+        { value: "short-answer", label: "Short answer", icon: <MdOutlineShortText />},
+        { value: "paragraph", label: "Paragraph", icon: <GrTextAlignFull /> },
     ];
 
     return (
