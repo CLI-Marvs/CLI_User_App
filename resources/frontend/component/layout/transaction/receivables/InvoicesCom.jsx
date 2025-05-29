@@ -125,18 +125,18 @@ const InvoicesCom = () => {
 
     return (
         <>
-            <div className="overflow-y-hidden px-3 flex flex-col space-y-2">
-                <TransactionSearchBar
-                    fields={fields}
-                    searchValues={searchValues}
-                    setSearchValues={setSearchValues}
-                    onChangeSearch={handleSearchValue}
-                    onSubmit={onSubmit}
-                    setFilters={setFilters}
-                />
+            <div className="overflow-y-hidden px-3 flex flex-col space-y-2 w-full">
+                    <TransactionSearchBar
+                        fields={fields}
+                        searchValues={searchValues}
+                        setSearchValues={setSearchValues}
+                        onChangeSearch={handleSearchValue}
+                        onSubmit={onSubmit}
+                        setFilters={setFilters}
+                    />
                 <div className="flex gap-[15px] flex-wrap mb-[16px] px-2">
-                    <div className="relative flex border w-max border-custom-lightgreen rounded-[5px] shrink-0 z-10">
-                        <span className="border-white text-white bg-custom-lightgreen text-sm flex items-center w-max px-[15px] pl-3 py-1 shrink-0 cursor-default">
+                    <div className="relative flex border w-max border-custom-lightgreen rounded-[5px] shrink-0 z-10 rounded-l-[3px]">
+                        <span className="border-white text-white bg-custom-lightgreen text-sm flex items-center w-max px-[15px] pl-3 py-1 shrink-0 cursor-default rounded-l-[1px]">
                             From
                         </span>
                         <div className="relative flex items-center bg-white">
@@ -145,20 +145,17 @@ const InvoicesCom = () => {
                                 calendarClassName="custom-calendar"
                             />
                         </div>
-                        <span className="absolute inset-y-0 right-0 flex items-center text-white pr-3 pl-3 bg-custom-lightgreen pointer-events-none">
-                            <MdCalendarToday />
-                        </span>
+                       
                         <span className="text-white bg-custom-lightgreen text-sm flex items-center w-max px-[15px] pl-3 py-1 shrink-0 cursor-default">
                             To
                         </span>
-                        <div className="relative flex items-center bg-white">
+                        <div className="relative flex items-center bg-white rounded-r-[3px]">
                             <DatePicker
-                                /*   selected={endDateValue} */
                                 className="outline-none w-[156px] h-full text-sm px-2 cursor-pointer"
                                 calendarClassName="custom-calendar"
                             />
                         </div>
-                        <span className="absolute inset-y-0 right-0 flex items-center text-white pr-3 pl-3 bg-custom-lightgreen pointer-events-none cursor-pointer">
+                        <span className="absolute inset-y-0 right-0 flex items-center text-white pr-3 pl-3 bg-custom-lightgreen pointer-events-none cursor-pointer rounded-r-[1px]">
                             <MdCalendarToday />
                         </span>
                     </div>

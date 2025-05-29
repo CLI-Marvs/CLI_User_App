@@ -17,5 +17,9 @@ class MarkupSettings extends Model
     {
         return $this->hasMany(MarkupDetails::class, 'markup_setting_id');
     }
-    
+
+    public function cardMarkupDetails()
+    {
+        return $this->hasMany(CardMarkupDetails::class, 'markup_setting_id');
+    }
 }

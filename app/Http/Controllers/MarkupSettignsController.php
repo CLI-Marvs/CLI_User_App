@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\CardMarkupRequest;
 use App\Http\Requests\MarkupDetailsRequest;
 use App\Http\Requests\StoreMarkupRequest;
+use App\Models\CardMarkupDetails;
 use App\Models\MarkupDetails;
 use App\Models\MarkupSettings;
 use Illuminate\Http\Request;
@@ -25,13 +27,13 @@ class MarkupSettignsController extends Controller
                     'pti_bank_fixed_amount',
                     'cli_markup'
                 );
-            }]);
-            
-            if($request->has('payment_method')) {
-                $query->where('payment_method', 'ILIKE', '%' . $request->payment_method . '%');
-            } 
+            }])->whereHas('markupDetails');
 
-            $settings = $query->orderBy('created_at', 'desc')->paginate(20);
+            if ($request->has('payment_method')) {
+                $query->where('payment_method', 'ILIKE', '%' . $request->payment_method . '%');
+            }
+
+            $settings = $query->orderBy('created_at', 'desc')->paginate(10);
 
             $formatted = $settings->getCollection()->map(function ($setting) {
                 $details = $setting->markupDetails->keyBy('location');
@@ -106,7 +108,7 @@ class MarkupSettignsController extends Controller
     {
         //
     }
-  
+
     public function update(StoreMarkupRequest $request, string $id)
     {
         DB::beginTransaction();
@@ -153,12 +155,55 @@ class MarkupSettignsController extends Controller
         }
     }
 
-
     /**
      * Remove the specified resource from storage.
      */
     public function destroy(string $id)
     {
         //
+    }
+
+    public function retrieveCardMarkupDetails()
+    {
+        $markupDetails = MarkupSettings::select('card_markup_details.*', 'markup_settings.payment_method')
+            ->leftJoin('card_markup_details', 'markup_settings.id', '=', 'card_markup_details.markup_setting_id')
+            ->where('markup_settings.payment_method', '=', 'Credit/Debit Card')
+            ->paginate(10);
+        return response()->json([
+            'data' => $markupDetails,
+        ]);
+    }
+
+
+    public function updateCardSettings(CardMarkupRequest $request, string $id)
+    {
+        try {
+            DB::beginTransaction();
+
+            $record = CardMarkupDetails::findOrFail($id);
+
+            $validatedData = $request->validated();
+
+            $record->update([
+                'mdr' => $validatedData['mdr'],
+                'cli_rate' => $validatedData['cli_rate'],
+                'withholding_tax' => $validatedData['withholding_tax'],
+                'gateway_rate' => $validatedData['gateway_rate'],
+            ]);
+
+            DB::commit();
+            return response()->json([
+                'success' => true,
+                'message' => 'Record updated successfully.'
+            ]);
+        } catch (\Throwable $e) {
+            DB::rollBack();
+
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred while saving the record.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 }

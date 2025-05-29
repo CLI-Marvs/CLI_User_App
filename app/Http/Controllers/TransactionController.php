@@ -218,42 +218,6 @@ class TransactionController extends Controller
             ], 500);
         }
     }
-    
-
-    /* public function postBpiBank(Request $request) {
-        $username = config('services.paynamics.username');
-        $password = config('services.paynamics.password');
-
-        $credentials = base64_encode("{$username}:{$password}");
-        
-        try {
-            $response = Http::withHeaders([
-                'Authorization' => 'Basic ' . $credentials,
-                'Accept' => 'application/json',
-                'Content-Type' => 'application/json',
-            ])
-            ->timeout(60) // Increase timeout to 60 seconds
-            ->post($this->endpoint, $request->all());
-            // Check if the request was successful
-            if ($response->successful()) {
-                return $response->json();
-            } elseif ($response->clientError()) {
-                return response()->json(['error' => 'Client error: ' . $response->body()], 400);
-            } elseif ($response->serverError()) {
-                return response()->json(['error' => 'Server error: ' . $response->body()], 500);
-            }
-        } catch (\Illuminate\Http\Client\RequestException $e) {
-            Log::error('API Request Failed: ' . $e->getMessage(), [
-                'response' => $e->response ? $e->response->body() : null,
-            ]);
-        
-            return response()->json([
-                'error' => 'An unexpected error occurred.',
-                'message' => $e->getMessage(),
-            ], 500);
-        }
-    } */
-
 
     public function storeBankStatements(Request $request)
     {
@@ -266,6 +230,26 @@ class TransactionController extends Controller
                 'data' => $response
             ]);
             //code...
+        } catch (\Throwable $e) {
+            return response()->json([
+                'message' => 'Error occurred.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+
+    public function retrieveBanks() 
+    {
+        try {
+            $data = BankTransaction::distinct()
+                                   ->pluck('destination_bank')
+                                   ->values();
+            //code...
+            return response()->json([
+                'response_message' => 'Data retrieved successfully',
+                'data' => $data
+            ]);
         } catch (\Throwable $e) {
             return response()->json([
                 'message' => 'Error occurred.',

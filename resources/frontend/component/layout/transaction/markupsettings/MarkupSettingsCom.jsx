@@ -13,15 +13,16 @@ import MarkupSettingModal from "@/component/layout/transaction/markupsettings/Ma
 import CustomToolTip from "@/component/CustomToolTip";
 import { IoMdAdd } from "react-icons/io";
 import { useStateContext } from "@/context/contextprovider";
+import CardMarkupFee from "./CardMarkupFee";
 
 const MarkupSettingsCom = () => {
     const { canWrite } = useStateContext();
     const SEARCH_FIELDS = [{ name: "payment_method", label: "Payment Method" }];
 
     const INPUT_SEARCH = [
-        { name: "pti_bank_rate_percent", label: "Bank Rate Percentage" },
-        { name: "pti_bank_fixed_amount", label: "Bank Fixed Amount" },
-        { name: "cli_markup", label: "CLI Markup" },
+        { name: "pti_bank_rate_percent", label: "Percentage Rate" },
+        { name: "pti_bank_fixed_amount", label: "Fix Amount Rate" },
+        { name: "cli_markup", label: "CLI Markup(Fix Amount)" },
         { name: "payment_method", label: "Payment Method" },
     ];
 
@@ -37,21 +38,21 @@ const MarkupSettingsCom = () => {
             ),
         },
         {
-            header: "Bank Rate Percentage",
+            header: "Percentage Rate",
             accessor: "pti_bank_rate_percent",
             render: (row) => (
                 <MarkupTableCell type="pti_bank_rate_percent" row={row} />
             ),
         },
         {
-            header: "Bank Fixed Amount",
+            header: "Fix Amount Rate",
             accessor: "pti_bank_fixed_amount",
             render: (row) => (
                 <MarkupTableCell type="pti_bank_fixed_amount" row={row} />
             ),
         },
         {
-            header: "CLI Markup",
+            header: "CLI Markup(Fix Amount)",
             accessor: "cli_markup",
             render: (row) => <MarkupTableCell type="cli_markup" row={row} />,
         },
@@ -103,7 +104,7 @@ const MarkupSettingsCom = () => {
 
     return (
         <>
-            <div className="overflow-y-hidden px-3 flex flex-col space-y-2 max-w-auto">
+            <div className="overflow-y-hidden px-3 flex flex-col space-y-2 w-full">
                 <div className="flex items-center ">
                     <TransactionSearchBar
                         fields={SEARCH_FIELDS}
@@ -131,6 +132,7 @@ const MarkupSettingsCom = () => {
                     data={markupSettings.data}
                     loading={markupSettings.loading}
                 />
+
                 <div className="flex justify-end mt-4">
                     <div className="flex w-full justify-end mt-3 mb-10">
                         <Pagination
@@ -140,6 +142,8 @@ const MarkupSettingsCom = () => {
                         />
                     </div>
                 </div>
+                <CardMarkupFee/>
+
             </div>
             <MarkupSettingModal
                 settingsRef={settingsRef}
