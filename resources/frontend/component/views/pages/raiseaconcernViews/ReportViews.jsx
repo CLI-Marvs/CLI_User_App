@@ -3,9 +3,7 @@ import ReportPage from '../../../layout/inquirypage/ReportPage'
 
 const ReportViews = () => {
   return (
-    <div>
-        <ReportPage/>
-    </div>
+    <ReportPage/>
   )
 }
 

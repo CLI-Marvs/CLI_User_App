@@ -83,6 +83,8 @@ const Sidebar = () => {
             case "/transaction/receivables/transactions":
             case "/transaction/receivables/posting":
             case "/transaction/settings/markup":
+            case "/transaction/receivables/reports":
+
                 setInquiryOpen(false);
                 setIsInvoiceOpen(true);
                 setSuperAdminOpen(false);
@@ -308,7 +310,7 @@ const Sidebar = () => {
                                             location.pathname.startsWith(
                                                 "/transaction/receivables"
                                             )
-                                                ? "bg-white text-custom-solidgreen font-semibold"
+                                                ? "bg-white text-custom-solidgreen font-semibold py-3"
                                                 : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
                                         }`}
                                         onClick={() =>
@@ -317,7 +319,7 @@ const Sidebar = () => {
                                             )
                                         }
                                     >
-                                        Receivables/Incoming
+                                        Online Platform Dashboard
                                     </ListItem>
                                 </Link>
                                 <Link to="/transaction/settings/markup">

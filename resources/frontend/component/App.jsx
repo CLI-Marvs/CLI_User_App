@@ -54,6 +54,7 @@ import TransactionView from "./views/pages/transactionViews/TransactionView";
 import AutoPostingView from "./views/pages/transactionViews/AutoPostingView";
 import ErrorPage from "@/component/ErrorElement/ErrorPage";
 import MarkupSettingsView from "@/component/views/pages/transactionViews/MarkupSettingsView";
+import ReportsView from "./views/pages/transactionViews/ReportsView";
 
 
 // PrivateRoute component to check authentication and permissions( department and employee )
@@ -131,7 +132,7 @@ const App = () => {
     const TransactionLayout = () => {
         return (
             <>
-                <div className="flex bg-white relative overflow-x-hidden min-h-screen">
+                <div className="flex relative overflow-x-hidden min-h-screen bg-custom-grayFA">
                     <TransactionSidebar />
                     <Outlet />
                 </div>
@@ -220,6 +221,10 @@ const App = () => {
                                         {
                                             path: "posting",
                                             element: <AutoPostingView />,
+                                        },
+                                        {
+                                            path: "reports",
+                                            element: <ReportsView />,
                                         },
                                     ],
                                 },

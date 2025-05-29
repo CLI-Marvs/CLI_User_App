@@ -9,6 +9,7 @@ const TransactionSidebar = () => {
             { name: "Transactions", path: "/transaction/receivables/transactions" },
             { name: "Invoices", path: "/transaction/receivables/invoices" },
             { name: "Auto Posting", path: "/transaction/receivables/posting" },
+            { name: "Reports", path: "/transaction/receivables/reports" },
         ],
         "/transaction/bank-monitoring": [
             { name: "Bank Statements", path: "/transaction/bank-monitoring/bank-statements" },
