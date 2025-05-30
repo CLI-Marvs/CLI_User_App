@@ -67,7 +67,11 @@ export default {
                 custom11:
                     "0px 2px 3px rgba(0, 0, 0, 0.10), 0px 3px 3px rgba(0, 0, 0, 0.20)",
                 custom12: "0px 3px 3px rgba(0, 0, 0, 0.20)",
-                custom13: "inset 3px 3px 3px rgba(0, 0, 0, 0.10), inset -3px 3px 3px rgba(0, 0, 0, 0.10), inset 0px 6px 3px rgba(0, 0, 0, 0.10)"
+                custom13:
+                    "inset 3px 3px 3px rgba(0, 0, 0, 0.10), inset -3px 3px 3px rgba(0, 0, 0, 0.10), inset 0px 6px 3px rgba(0, 0, 0, 0.10)",
+                card: "0px 14px 24px rgba(0, 0, 0, 0.06)",
+                card2: ` 0px 10px 24px rgba(0, 0, 0, 0.06),    
+     0px 0px 24px rgba(0, 0, 0, 0.06)`,
             },
             width: {
                 "3/5": "60%",

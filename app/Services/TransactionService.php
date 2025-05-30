@@ -103,4 +103,10 @@ class TransactionService
     {
         return $this->repository->storeBankStatements($data);
     }
+
+    public function transactionReports(array $data)
+    {
+        return $this->repository->transactionReports($data);
+    }
+
 }

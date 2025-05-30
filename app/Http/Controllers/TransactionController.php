@@ -258,4 +258,22 @@ class TransactionController extends Controller
         }
     }
     
+
+    public function transactionReports(Request $request)
+    {
+        try {
+            $data = $request->all();
+            $response = $this->transactionService->transactionReports($data);
+
+            return response()->json([
+                'response_message' => 'Data retrieved successfully',
+                'data' => $response
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'message' => 'Error occurred.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 }

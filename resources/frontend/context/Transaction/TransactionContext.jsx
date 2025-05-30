@@ -76,7 +76,7 @@ export const TransactionProvider = ({ children }) => {
                 cardMarkupDetails,
                 setCardMarkupDetails,
                 banks,
-                setBanks
+                setBanks,
             }}
         >
             {children}

@@ -64,4 +64,16 @@ export const transaction = {
         }
     },
 
+    transactionReports: async (filter = {}) => {
+        try {
+            const params = { ...filter };
+            const response = await apiService.get("transaction-reports", {
+                params,
+            });
+            return response?.data.data;
+        } catch (error) {
+            console.log("error", error);
+        }
+    },
+
 };

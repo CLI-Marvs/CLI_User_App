@@ -115,6 +115,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::patch('/transaction-update', 'updateTransactionStatus');
         Route::post('/bank-statements-store', 'storeBankStatements');
         Route::get('/retrieve-banks', 'retrieveBanks');
+        Route::get('/transaction-reports', 'transactionReports');
     });
     Route::apiResource('markup-settings', MarkupSettignsController::class);
     

@@ -163,10 +163,53 @@ class TransactionRepository
             ->when($endDate && !$startDate, fn($q) => $q->whereDate('transaction.transaction_date', $endDate))
             ->paginate(20);
 
-
         return $query;
     }
 
+    public function transactionReports(array $data)
+    {
+        $startDate = $data['start_date'] ?? null;
+        $endDate = $data['end_date'] ?? null;
+        $paymentMethod = $data['payment_option'] ?? null;
+
+        $baseQuery = $this->transactionModel
+            ->selectRaw('SUM(amount + convenience_fee) as running_total')
+            ->where('status', 'Succeed')
+            ->when($startDate && $endDate, fn($q) => $q->whereBetween('transaction_date', [$startDate, $endDate]));
+       
+
+        if ($paymentMethod === 'Credit/Debit Card') {
+            $query = (clone $baseQuery)->where('payment_option', $paymentMethod);
+            $runningTotal = $query->selectRaw('SUM(amount + convenience_fee) as running_total')->value('running_total');
+         
+            return [
+                'total_bill' => $query->sum('amount'),
+                'total_withholding_tax' => $query->sum('withholding_tax'),
+                'total_bank_recon_amount' => $query->sum('bank_recon_amount'),
+                'total_mdr_amount' => $query->sum('mdr'),
+                'total_gtw' => $query->sum('gateway_fee'),
+                'total_net_posting' => $query->sum('net_posting_amount'),
+                'running_total' => $runningTotal ?? 0,
+            ];
+        }
+        $results = [];
+        $ewalletsRunningTotal = 0;
+        $ewalletsOptions = ['GCash', 'Paymaya'];
+        foreach ($ewalletsOptions as $ewalletOption) {
+            $query = (clone $baseQuery)->where('payment_option', $ewalletOption);
+            $runningTotal = $query->selectRaw('SUM(amount + convenience_fee) as running_total')->value('running_total');
+
+            $results[$ewalletOption] = [
+                "total_bill" => $query->sum('amount'),
+                "total_pnf" => $query->sum('paynamics_fee'),
+                'running_total' => $runningTotal ?? 0,
+            ];
+            $ewalletsRunningTotal += $runningTotal ?? 0;
+        };
+        $results['running_total'] = $ewalletsRunningTotal;
+        
+        return $results;
+    }
 
     public function retrieveInvoices(array $data)
     {
