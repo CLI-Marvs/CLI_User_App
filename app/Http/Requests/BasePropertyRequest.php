@@ -17,7 +17,7 @@ class BasePropertyRequest extends FormRequest
             'propertyName' => 'required|string|max:255',
             'description' => 'nullable|string|max:1000',
             'entity' => [
-                'required',
+                'nullable',
                 'string',
                 'max:255',
                 'regex:/^(?=.*[A-Z])(?=.*\d)[A-Z\d]+$/'
@@ -25,7 +25,7 @@ class BasePropertyRequest extends FormRequest
             'features' => 'nullable|array',
             'features.*.id' => 'nullable|integer|exists:features,id',
             'features.*.status' => 'nullable|boolean',
-            'type' => 'string|required',
+            'type' => 'nullable|string',
             'description' => [
                 'nullable',
                 'string',

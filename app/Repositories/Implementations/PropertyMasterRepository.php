@@ -224,20 +224,37 @@ class PropertyMasterRepository
 
     /**
      * Gets paginated properties with their features
+     * 
      * @param array $validatedData Pagination parameters
      * @return array
      */
     public function getAllPropertiesWithFeatures(array $validatedData)
     {
-
-        $properties = $this->model->with('features')
-            ->orderBy('property_name', 'asc')
+        $query = $this->filterPropertySetting($validatedData)->with('features');
+        $properties = $query->orderBy('property_name', 'asc')
             ->paginate(
                 $validatedData['per_page'],
                 ['*'],
                 'page',
                 $validatedData['page']
             );
+
+        // If no properties found, return error
+        if ($properties->isEmpty()) {
+            return [
+                'error' => true,
+                'message' => 'No property found.',
+                'data' => [],
+                'pagination' => [
+                    'current_page' => $properties->currentPage(),
+                    'last_page' => $properties->lastPage(),
+                    'per_page' => $properties->perPage(),
+                    'total' => $properties->total(),
+                    'next_page_url' => $properties->nextPageUrl(),
+                    'prev_page_url' => $properties->previousPageUrl(),
+                ]
+            ];
+        }
 
         return [
             'data' =>
@@ -277,7 +294,25 @@ class PropertyMasterRepository
     }
 
     /**
+     * Filters properties based on validated data
+     * 
+     * @param array $validatedData Filter parameters
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    protected function filterPropertySetting($validatedData)
+    {
+        return $this->model
+            ->when(isset($validatedData['property_name']), function ($query) use ($validatedData) {
+                return $query->whereRaw('LOWER(property_name) LIKE ?', ['%' . strtolower($validatedData['property_name']) . '%']);
+            })
+            ->when(isset($validatedData['entity']), function ($query) use ($validatedData) {
+                return $query->whereRaw('LOWER(entity) LIKE ?', ['%' . strtolower($validatedData['entity']) . '%']);
+            });
+    }
+
+    /**
      * Updates property features
+     * 
      * @param array $data Updated feature data
      * @param int $id Property ID
      * @return PropertyMaster
@@ -332,6 +367,7 @@ class PropertyMasterRepository
 
     /**
      * Creates new property with features
+     * 
      * @param array $data Property and feature data
      * @return PropertyMaster
      * @throws \Exception

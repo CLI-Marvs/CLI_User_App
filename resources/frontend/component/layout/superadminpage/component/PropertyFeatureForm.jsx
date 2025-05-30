@@ -202,7 +202,8 @@ const PropertyFeatureForm = ({
                         key !== "city" &&
                         key !== "province" &&
                         key !== "country" &&
-                        key !== "description"
+                        key !== "description" &&
+                        key !== "entity"
                 )
             );
             return !isPropertyButtonDisabled;

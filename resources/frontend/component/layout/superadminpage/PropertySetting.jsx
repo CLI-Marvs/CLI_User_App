@@ -7,6 +7,7 @@ import EditPropertyFeature from "@/component/layout/superadminpage/modals/Proper
 import AddPropertyFeature from "@/component/layout/superadminpage/modals/PropertySettingModal/AddPropertyFeature";
 import Pagination from "@/component/layout/propertyandpricingpage/component/Pagination";
 import Skeleton from "@/component/Skeletons";
+import TransactionSearchBar from "@/component/layout/transaction/TransactionSearchBar";
 
 const PropertySetting = () => {
     const editPropertyFeatureRef = useRef(null);
@@ -17,13 +18,23 @@ const PropertySetting = () => {
         pagination,
         updatePagination,
         setIsPropertyFeatureActive,
+        setFilters,
+        updateFilters,
+        error,
     } = usePropertyFeature();
-
-    const { propertySettingsFeatures, fetchPropertySettingsFeatures, isFeatureFetching } =
-        useFeature();
+    const [searchValues, setSearchValues] = useState({});
+    const {
+        propertySettingsFeatures,
+        fetchPropertySettingsFeatures,
+        isFeatureFetching,
+    } = useFeature();
     const [isFirstLoad, setIsFirstLoad] = useState(true);
     const [isFirstFeatureLoad, setIsFirstFeatureLoad] = useState(true);
     const [selectedProperty, setSelectedProperty] = useState([]);
+    const fields = [
+        { name: "property_name", label: "Property Name" },
+        { name: "entity", label: "Entity" },
+    ];
 
     //Hooks
     useEffect(() => {
@@ -78,30 +89,75 @@ const PropertySetting = () => {
         }
     };
 
+    //Handle input search
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setSearchValues((prev) => ({
+            ...prev,
+            [name]: value,
+        }));
+    };
+
+    // Handles search submit: updates filters with current search values
+    const handleSearchSubmit = () => {
+        // Only submit if at least one search value is not empty
+        const hasValue = Object.values(searchValues).some(
+            (v) => v && v.toString().trim() !== ""
+        );
+        if (!hasValue) return;
+
+        setFilters(searchValues);
+        updateFilters(searchValues);
+    };
+
+    // Handles filter reset: clears search values and resets filters
+    const handleResetFilters = () => {
+        setSearchValues({});
+        setFilters({});
+        updateFilters({});
+    };
+
     return (
         <div className="h-screen max-w-full bg-custom-grayFA p-[20px]">
-            <button
-                onClick={() => {
-                    handleOpenModal("", "add");
-                }}
-                className="montserrat-semibold text-sm px-5 gradient-btn h-[37px] rounded-[10px] text-white hover:shadow-custom4"
-            >
-                <span className="text-[18px] mt-1 mr-2">+</span>
-                Add Property
-            </button>
+            <div className="py-2 px-0">
+                {" "}
+                <TransactionSearchBar
+                    fields={fields}
+                    searchValues={searchValues}
+                    setSearchValues={setSearchValues}
+                    onChangeSearch={handleInputChange}
+                    onSubmit={handleSearchSubmit}
+                    setFilters={handleResetFilters}
+                />
+            </div>
+            <div className="px-2">
+                <button
+                    onClick={() => {
+                        handleOpenModal("", "add");
+                    }}
+                    className="montserrat-semibold text-sm px-6 gradient-btn h-[37px] rounded-[10px] text-white hover:shadow-custom4"
+                >
+                    <span className="text-[18px] mt-1 mr-2">+</span>
+                    Add Property
+                </button>
+            </div>
 
             {/* Table */}
-            {/* Table */}
             <div className="mt-3 mx-1 py-4">
-                {(isFeatureFetching && isFirstFeatureLoad) ? (
+                {isFeatureFetching && isFirstFeatureLoad ? (
                     <div className="text-center py-4">
                         <Skeleton height={140} className="my-1" />
                         <Skeleton height={140} className="my-1" />
                         <Skeleton height={140} className="my-1" />
                     </div>
-                ) : propertySettingsFeatures?.length > 0 && propertyFeatures?.length > 0 ? (
+                ) : error === "No properties found." ? (
+                    <div className="text-center py-4 text-custom-bluegreen">
+                        No data available
+                    </div>
+                ) : propertySettingsFeatures?.length > 0 &&
+                  propertyFeatures?.length > 0 ? (
                     <CustomTable
-                        tableClassName="w-full min-w-[882px]"
+                        tableClassName="w-full min-w-[882px] px-2"
                         className="gap-4 w-full h-[49px] montserrat-semibold text-sm text-white bg-custom-lightgreen mb-4 -mx-1 px-4"
                         columns={propertySettingColumns}
                         data={propertyFeatures}
@@ -124,11 +180,13 @@ const PropertySetting = () => {
                 )}
             </div>
             <div className="py-2 flex justify-end mx-1">
-                <Pagination
-                    pageCount={pagination?.lastPage || 1}
-                    currentPage={pagination?.currentPage || 1}
-                    onPageChange={handlePageChange}
-                />
+                {!error && (
+                    <Pagination
+                        pageCount={pagination?.lastPage || 1}
+                        currentPage={pagination?.currentPage || 1}
+                        onPageChange={handlePageChange}
+                    />
+                )}
             </div>
             <div>
                 <EditPropertyFeature

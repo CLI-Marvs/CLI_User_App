@@ -23,7 +23,6 @@ class PropertyMasterService
         return $this->repository->getPropertyNames();
     }
 
-
     public function getPropertyNamesWithIds()
     {
         return $this->repository->getPropertyNamesWithIds();

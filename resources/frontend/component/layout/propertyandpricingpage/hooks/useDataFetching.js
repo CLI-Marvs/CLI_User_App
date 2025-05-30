@@ -57,8 +57,11 @@ const useDataFetching = ({
                 setHasBeenFetched(true);
                 setError(null);
             } catch (error) {
-                setError(error.message);
-                console.error("Error fetching data:", error);
+                const backendMessage =
+                    error.response?.data?.message ||
+                    error.response?.data?.error ||
+                    error.message;
+                setError(backendMessage);
             } finally {
                 if (!silent) {
                     setIsLoading(false);
@@ -107,6 +110,7 @@ const useDataFetching = ({
         resetToDefaults,
         fetchData,
         refreshData,
+        setFilters,
     };
 };
 

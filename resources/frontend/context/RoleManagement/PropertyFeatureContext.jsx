@@ -1,8 +1,14 @@
-import React, { createContext, useContext, useState, useCallback } from "react";
+import React, { createContext, useContext, useState } from "react";
 import { propertyMasterService } from "@/component/servicesApi/apiCalls/propertyPricing/property/propertyMasterService";
 import useDataFetching from "@/component/layout/propertyandpricingpage/hooks/useDataFetching";
 
 const PropertyFeatureContext = createContext();
+
+export const defaultFilters = {
+    propertyName: "",
+    entity: "",
+    feature: "",
+};
 
 export const PropertyFeatureProvider = ({ children }) => {
     const [isPropertyFeatureActive, setIsPropertyFeatureActive] =
@@ -19,10 +25,11 @@ export const PropertyFeatureProvider = ({ children }) => {
         fetchData,
         refreshData,
         setError,
-        error
+        error,
+        setFilters,
     } = useDataFetching({
         fetchFunction: propertyMasterService.getPropertiesByFeatures,
-        defaultFilters: {},
+        defaultFilters,
         enabled: isPropertyFeatureActive,
     });
 
@@ -31,6 +38,7 @@ export const PropertyFeatureProvider = ({ children }) => {
         isLoading,
         pagination,
         filters,
+        setFilters,
         updateFilters,
         updatePagination,
         resetToDefaults,

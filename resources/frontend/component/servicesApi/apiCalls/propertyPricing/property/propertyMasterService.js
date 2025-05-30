@@ -43,14 +43,12 @@ export const propertyMasterService = {
                 per_page: perPage,
                 ...cleanFilters,
             }).toString();
-
             const response = await apiService.get(
                 `/property-feature-settings/properties?${queryParams}`
             );
 
             return response;
         } catch (error) {
-            console.error("Error fetching properties by features:", error);
             throw error;
         }
     },

@@ -85,10 +85,24 @@ class PropertyMasterController extends Controller
         $validatedData = $request->validate([
             'per_page' => 'nullable|integer|min:1|max:100',
             'page' => 'nullable|integer|min:1',
+            'property_name' => 'nullable|string|max:255',
+            'entity' => 'nullable|string|max:255',
+            'feature' => 'nullable|string|max:255',
         ]);
 
         $features = $this->service->getAllPropertiesWithFeatures($validatedData);
-
+        if (!$features['data']) {
+            return response()->json([
+                'message' => 'No properties found.',
+                'data' => [],
+                'pagination' => [
+                    'total' => 0,
+                    'per_page' => $validatedData['per_page'] ?? 10,
+                    'current_page' => $validatedData['page'] ?? 1,
+                    'last_page' => 0,
+                ],
+            ], 404);
+        }
         return response()->json([
             'data' => $features['data'],
             'pagination' => $features['pagination']
