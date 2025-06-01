@@ -29,6 +29,8 @@ export const SurveySection = (
         updateDescription,
         updateConsent,
         updateConsentDescription,
+        updateInputType,
+        resetOption,
 
     }) => {
 
@@ -133,6 +135,8 @@ export const SurveySection = (
                             updateQuestionText={updateQuestionText}
                             updateOptionText={updateOptionText}
                             updateIsRequired={updateIsRequired}
+                            updateInputType={updateInputType}
+                            resetOption={resetOption}
                         />
                     ))}
                 </div>

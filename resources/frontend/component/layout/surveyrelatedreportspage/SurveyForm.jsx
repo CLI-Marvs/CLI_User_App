@@ -31,7 +31,7 @@ const SurveyForm = () => {
             {
               id: generateId(),
               question: "",
-              inputType: "dropdown",
+              inputType: "multiple-choice",
               option: [
                 {
                   id: generateId(),
@@ -49,6 +49,11 @@ const SurveyForm = () => {
   ];
 
   const [surveyData, setSurveyData] = useState([]);
+
+
+  useEffect(() => {
+    console.log(surveyData);
+  }, [surveyData]);
 
 
 
@@ -120,7 +125,7 @@ const SurveyForm = () => {
                     {
                       id: generateId(),
                       question: "",
-                      inputType: "dropdown",
+                      inputType: "multiple-choice",
                       option: [{
                         id: generateId(),
                         text: "",
@@ -193,6 +198,33 @@ const SurveyForm = () => {
     );
   };
 
+  const resetOption = (sectionIndex, questionIndex) => {
+    setSurveyData((prev) =>
+      prev.map((survey, surveyIndex) =>
+        surveyIndex === 0
+          ? {
+              ...survey,
+              data: survey.data.map((section, idx) =>
+                idx === sectionIndex
+                  ? {
+                      ...section,
+                      dataQASet: section.dataQASet.map((question, qIdx) =>
+                        qIdx === questionIndex
+                          ? {
+                              ...question,
+                              option: [],
+                            }
+                          : question
+                      ),
+                    }
+                  : section
+              ),
+            }
+          : survey
+      )
+    );
+  };
+
 
   const deleteOption = (sectionIndex, questionIndex, optionId) => {
     setSurveyData((prev) =>
@@ -248,6 +280,30 @@ const SurveyForm = () => {
     );
   };
 
+  const updateInputType = (sectionIndex, questionIndex, newInputType) => {
+    setSurveyData((prev) =>
+      prev.map((survey, surveyIndex) =>
+        surveyIndex === 0
+          ? {
+              ...survey,
+              data: survey.data.map((section, idx) =>
+                idx === sectionIndex
+                  ? {
+                      ...section,
+                      dataQASet: section.dataQASet.map((question, qIdx) =>
+                        qIdx === questionIndex
+                          ? { ...question, inputType: newInputType }
+                          : question
+                      ),
+                    }
+                  : section
+              ),
+            }
+          : survey
+      )
+    );
+  };
+
 
   const updateOptionText = (sectionIndex, questionIndex, optionId, newText) => {
     setSurveyData((prev) =>
@@ -265,7 +321,7 @@ const SurveyForm = () => {
                         ...question,
                         option: question.option.map((option) =>
                           option.id === optionId
-                            ? { ...option, text: newText } // ✅ Update text
+                            ? { ...option, text: newText } 
                             : option
                         ),
                       }
@@ -416,6 +472,8 @@ const SurveyForm = () => {
               updateDescription={updateDescription}
               updateConsent={updateConsentTitle}
               updateConsentDescription={updateConsentDescription}
+              updateInputType={updateInputType}
+              resetOption={resetOption}
             />
           ))}
         </div>
